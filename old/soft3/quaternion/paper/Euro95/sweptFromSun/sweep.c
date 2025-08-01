@@ -1,0 +1,462 @@
+/*
+        File: sweep.c
+        Author: J.K. Johnstone
+        Last Modified: Nov. 19, 1994
+        Purpose: Creation of tensor product Bezier surface representing 
+		 the sweep of a rational Bezier curve 
+		 interpolating a finite number of known curve instances
+		 (instance = position + orientation + scale).
+*/
+
+#include <device.h>
+#include <gl/gl.h>
+#include <gl/sphere.h>
+#include <math.h>
+#include <stdio.h>
+
+#include "/usr/people/jj/cbin/vec.h"
+#include "/usr/people/jj/cbin/bez.h"
+#include "/usr/people/jj/cbin/bezsurf.h"
+#include "/usr/people/jj/cbin/fit.h"
+#include "/usr/people/jj/cbin/display.h"
+#include "/usr/people/jj/cbin/lights.h"
+#include "/usr/people/jj/cbin/materials.h"
+#include "/usr/people/jj/cbin/misc.h"
+#include "/usr/people/jj/cbin/quaternion.h"
+#include "/usr/people/jj/cbin/drw.h"
+#include "sweep.h"
+
+#include "/usr/people/jj/cbin/bez.c"
+#include "/usr/people/jj/cbin/bezsurf.c"
+#include "/usr/people/jj/cbin/fit.c"
+#include "/usr/people/jj/cbin/display.c"
+#include "/usr/people/jj/cbin/quaternion.c"
+#include "/usr/people/jj/cbin/drw.c"
+#include "/usr/people/jj/cbin/vec.c"
+#include "/usr/people/jj/cbin/misc.c"
+
+int     xmax,ymax;      /* screen dimensions */
+int     zmax;           /* z-buffer size */
+float 	rotx,roty,rotz;
+int	rot_bool=0;	/* start rotating? */
+
+main()
+{
+	FILE 		*fp;
+	bez_3d		sweepcurve; /* poly Bezier curve sweeping out the surface */
+				    /* with first control point at the origin */
+	double 		display_sweepcurve[3][MAXDISPLAYPTS];
+	int		sweepcurve_num;
+
+	unsigned int	m;	    /* # of curve instances to be interpolated */
+	V3d		pos[MAXINST];	/* positions of curve */
+	bspl_3d		directrixBspl;	/* position curve */
+	bez_3d		directrixBez;
+	double		display_dirbez[3][MAXDISPLAYPTS];
+	int		dirbez_num;
+	bez_3d		poscurve_de;	/* degree-elevated position curve */
+					/* (to degree 12) */
+	bez_3d		poscurve4,poscurve5,poscurve6,poscurve7,
+			poscurve8,poscurve9,poscurve10,poscurve11;
+	ratbez_4d	ori;	/* sextic rational Bezier orientation curve */
+				/* computed by ../animation/sphereDrawing.c */
+	double		sca[MAXINST];	/* scales */
+	tp_ratbez	surf;		/* tensor product rational Bezier */
+					/* swept surface */
+	double 		display_surf[3][MAXISOCURVES][MAXDISPLAYPTS];
+	int		surf_pt_num, iso_num;
+	
+	int 		n,col;
+	double		foo;
+	double 		sum_x[MAXSPLINEPTS],sum_y[MAXSPLINEPTS],
+			sum_z[MAXSPLINEPTS],w_k;
+	double		qi1,qi2,qi3,qi4,qi5,qj1,qj2,qj3,qj4,qj5;
+	double 		M[3][3];		/* matrix */
+	double 		offset[3],vec[3];
+
+        long            sweep_wid;
+        Boolean         exitflag;       /* window */
+        short           attached = 0;
+        short           value;
+        int             dev;
+        int             i,j,k,s,I,J;
+
+	/*****************************************************/
+	/* 		   sweep curve	 		     */
+	/*****************************************************/
+
+	fp = fopen("curve.input","r");
+	input_bez3d(&sweepcurve,fp);
+	fclose(fp);
+	if (!(sweepcurve.x1[0] == 0 && sweepcurve.x2[0] == 0 && sweepcurve.x3[0] == 0))
+		printf("First control point of the sweep curve does not lie at origin, as it must!\n");
+	printf("Sweep curve.\n");
+	print_bez_3d(&sweepcurve);
+	printf("\n");
+	prepare_draw_bez_in_3d(&sweepcurve,display_sweepcurve,&sweepcurve_num);
+
+	/*****************************************************/
+	/* 		   position curve 		     */
+	/*****************************************************/
+
+	/* m (reference point) positions of curve */
+	fp = fopen("pos.input","r");
+	inputV3d(&m,pos,fp);
+	fclose(fp);
+
+	/* fit directrix (position) curve */
+	fitCubicBspl_3d(m,pos,&directrixBspl); 
+	/* put in Bezier form for tensor product Bezier representation */
+	bspl_to_bezier_3d(&directrixBspl,&directrixBez); 
+	/* elevate to degree 12 = degree of orientation curve */
+	/* Note: make more elegant later, by one big degree elevation */
+	degree_elevate_bez3d(&directrixBez,&poscurve4);
+	degree_elevate_bez3d(&poscurve4,&poscurve5);
+	degree_elevate_bez3d(&poscurve5,&poscurve6);
+	degree_elevate_bez3d(&poscurve6,&poscurve7);
+	degree_elevate_bez3d(&poscurve7,&poscurve8);
+	degree_elevate_bez3d(&poscurve8,&poscurve9);
+	degree_elevate_bez3d(&poscurve9,&poscurve10);
+	degree_elevate_bez3d(&poscurve10,&poscurve11);
+	degree_elevate_bez3d(&poscurve11,&poscurve_de);
+	printf("Degree-elevated position curve.\n");
+	print_bez_3d (&poscurve_de);
+	printf("\n");
+	prepare_draw_bez_in_3d(&poscurve_de,display_dirbez,&dirbez_num);
+
+	/*****************************************************/
+	/* 		   orientation curve 		     */
+	/*****************************************************/
+
+	/* already computed by ../animation/sphereDrawing.c */
+	fp = fopen("sphereratbez.input","r");
+	input_ratbez4d(&ori,fp);
+	fclose(fp);
+	printf("\nOrientation curve.\n");
+	print_ratbez(&ori);
+
+	/* make knot sequences the same */
+	for (i=0;i<=poscurve_de.L;i++) {
+		poscurve_de.knots[i] = ori.knots[i];
+	}
+
+	/*****************************************************/
+	/* 		   scale curve 			     */
+	/*****************************************************/
+
+	/* m scales of curve */
+	/*	fp = fopen("scale.input","r");
+	*	for (i=0;i<m;i++) {
+	*		fscanf(fp,"%lf",sca+i);
+	*	}
+	*	fclose(fp);
+	*/
+
+	/*****************************************************/
+	/* 		tensor product surface		     */
+	/*****************************************************/
+
+	/* old version, where only position, not orientation, changes */
+/*	for (i=0;i<=sweepcurve.d * sweepcurve.L;i++) { 
+*/		/* ith column of mesh */
+/*		for (j=0;j<=directrixBez.d * directrixBez.L;j++) {
+*			surf.x1[i][j] = sweepcurve.x1[i] + directrixBez.x1[j];
+*			surf.x2[i][j] = sweepcurve.x2[i] + directrixBez.x2[j];
+*			surf.x3[i][j] = sweepcurve.x3[i] + directrixBez.x3[j];
+*			surf.weights[i][j] = 1; */ /* sweepcurve.weights[i]; */
+/*		}
+*	}
+*/
+
+	/* The tensor product surface is generated by sweeping */
+	/* the sweep curve along the position curve.  	       */
+	/* The control points of the ith column of the mesh are */
+	/* the control points of the curve generated by        */
+	/* the sweep of the ith control point of the sweep curve, */
+	/* or P(t) + O(t)b_i (see paper) */
+
+	/* row = sweep curve */
+	surf.d_u = sweepcurve.d;
+	surf.L_u = sweepcurve.L;
+	for (i=0;i<=sweepcurve.L;i++) {
+		surf.knots_u[i] = sweepcurve.knots[i];
+	}
+	/* column = position curve */
+	surf.d_v = 12;
+	surf.L_v = poscurve_de.L;
+	for (i=0;i<=poscurve_de.L;i++) {
+		surf.knots_v[i] = poscurve_de.knots[i];
+	}
+
+	/* compute control points of column curves */
+	n = sweepcurve.d * sweepcurve.L; /* cols 0,...,n */
+	for (s=0;s<poscurve_de.L;s++) {	/* sth Bezier seg of deg 12 pos curve */
+	   for (k=0;k<=12;k++) { 	/* kth control point of segment */
+		/* weight */
+		/* \sum_{0 \leq i \leq 6, 0 \leq j \leq 6, i+j=k} */
+		w_k = 0;
+		for (i=0;i<=6;i++) {
+		   j=k-i;
+	  	   if (j<=6 && j>=0) {
+			w_k += ((((double) choose(6,i))
+				 *((double) choose(6,j))
+				 /((double) choose(12,k)))
+				* ori.weights[6*s+i]*ori.weights[6*s+j]); 
+		   }
+		}
+		for (col=0;col<=n;col++) {
+			surf.weights[col][12*s+k] = w_k; 
+		}
+
+		/* (x,y,z) coordinates */
+		/* \sum_{0 \leq i \leq 6, 0 \leq j \leq 6, i+j=k} */
+		for (col=0;col<=n;col++) {
+			sum_x[col] = sum_y[col] = sum_z[col] = 0.;
+		}
+		for (i=0;i<=6;i++) {
+		   j=k-i;
+	  	   if (j<=6 && j>=0) {
+			/* matrix M_{ij} */
+			qi5 = ori.weights[6*s+i];
+			qj5 = ori.weights[6*s+j];
+			qi1 = ori.x1[6*s+i] * qi5; /* we want the homogeneous coord q1 */
+				   /* control point of ori is (q1/q5,q2/q5,...,q4/q5) */
+				   /* and weight is q5 */
+			qj1 = ori.x1[6*s+j] * qj5;
+			qi2 = ori.x2[6*s+i] * qi5; qj2 = ori.x2[6*s+j] * qj5;
+			qi3 = ori.x3[6*s+i] * qi5; qj3 = ori.x3[6*s+j] * qj5;
+			qi4 = ori.x4[6*s+i] * qi5; qj4 = ori.x4[6*s+j] * qj5;
+/*			def3x3matrix(M, */
+				/* first row */
+/*				qi5*qj5 - 2*(qi3*qj3 + qi4*qj4),
+*				2*(qi2*qj3 + qi1*qj4),
+*				2*(qi2*qj4 - qi1*qj3), */
+				/* second row */
+/*				2*(qi2*qj3 - qi1*qj4), 
+*				qi5*qj5 - 2*(qi2*qj2 + qi4*qj4),
+*				2*(qi3*qj4 + qi1*qj2), */
+				/* third row */
+/*				2*(qi2*qj4 + qi1*qj3),
+*				2*(qi3*qj4 - qi1*qj2),
+*				qi5*qj5 - 2*(qi2*qj2 + qi3*qj3)); */
+			/* reverse direction of rotation */
+			/* Works! Now, which is wrong? This, or the key frames? */
+			def3x3matrix(M,
+				/* first row */
+				qi5*qj5 - 2*(qi3*qj3 + qi4*qj4),
+				2*(qi2*qj3 - qi1*qj4),
+				2*(qi2*qj4 + qi1*qj3),
+				/* second row */
+				2*(qi2*qj3 + qi1*qj4),
+				qi5*qj5 - 2*(qi2*qj2 + qi4*qj4),
+				2*(qi3*qj4 - qi1*qj2),
+				/* third row */
+				2*(qi2*qj4 - qi1*qj3),
+				2*(qi3*qj4 + qi1*qj2),
+				qi5*qj5 - 2*(qi2*qj2 + qi3*qj3));
+			for (col=0;col<=n;col++) {
+				offset[0] = sweepcurve.x1[col];
+				offset[1] = sweepcurve.x2[col];
+				offset[2] = sweepcurve.x3[col];
+				matrixXvect(M,offset,vec);
+				foo = ((double) choose(6,i))
+					 *((double) choose(6,j))
+					 /((double) choose(12,k));
+				sum_x[col] += (foo * vec[0] / w_k);
+				sum_y[col] += (foo * vec[1] / w_k);
+				sum_z[col] += (foo * vec[2] / w_k);
+			}
+		   }
+		}
+		for (col=0; col<=n; col++) {
+			surf.x1[col][12*s+k] = poscurve_de.x1[12*s+k] 
+					       + sum_x[col]; 
+				/* kth control point on sth segment */
+			surf.x2[col][12*s+k] = poscurve_de.x2[12*s+k]
+					       + sum_y[col]; 
+			surf.x3[col][12*s+k] = poscurve_de.x3[12*s+k]
+					       + sum_z[col];
+		}
+	   } /* for k */
+	} /* for s */
+	/****************************************************************/
+
+	output_tp_ratbez(&surf);
+	prepare_draw_surf_tpratbez (&surf,display_surf,&surf_pt_num,&iso_num);
+
+	sweep_wid = initialize_3d_window("Rational interpolating swept surface",
+					 25,625,200);
+        winset(sweep_wid);
+	rotx = 0; roty = 0; rotz = 0;
+        exitflag=FALSE;
+        while (exitflag == FALSE) {
+		viz_sweep(&sweepcurve,display_sweepcurve,sweepcurve_num,
+			  m,pos,&poscurve_de,
+			  display_dirbez,dirbez_num,
+			  &ori,
+			  display_surf,surf_pt_num,iso_num,&surf);
+                while ((exitflag == FALSE) && (qtest() || !attached)) {
+                        dev = qread(&value);
+                        if (((dev == ESCKEY) && (value == 0)))
+                                exitflag = TRUE;
+			else if (dev == LEFTMOUSE)
+				rot_bool = 1;
+                        else if (dev == WINFREEZE || dev == WINTHAW || dev == REDRAWICONIC) {
+                                frontbuffer(TRUE);
+                                pushmatrix();
+                                reshapeviewport();
+				viz_sweep(&sweepcurve,display_sweepcurve,sweepcurve_num,
+					  m,pos,&poscurve_de,
+					  display_dirbez,dirbez_num,
+					  &ori,
+		 			  display_surf,surf_pt_num,iso_num,&surf);
+                                popmatrix();
+                                frontbuffer(FALSE);
+                        }
+                        else if (dev == REDRAW)
+                                reshapeviewport();
+                        else if (dev == INPUTCHANGE)
+                                attached = value;
+                }
+        }
+}
+
+void viz_sweep    (const bez_3d	*sweepcurve,
+		   double	display_sweepcurve[3][MAXDISPLAYPTS],
+		   const int	sweepcurve_num,
+		   const int	m,
+		   const V3d	pos[MAXINST],
+		   const bez_3d *poscurve_de,
+		   double	display_dirbez[3][MAXDISPLAYPTS],
+                   const int	dirbez_num,
+		   const ratbez_4d *ori,
+		   double	display_surf[3][MAXISOCURVES][MAXDISPLAYPTS],
+		   const int	surf_pt_num,
+		   const int	iso_num,
+		   tp_ratbez 	*surf)
+{
+	/* draw sweep curve, position curve, and swept surface */
+
+        extern int xmax,ymax,zmax;
+	extern float rotx,roty,rotz;
+	Qion keyq[MAXINST];	/* orientations of keyframes (given curves) */
+	int n=7; /* number of intermediate frames between keyframes */
+	int frame;
+        Qion   q;               /* orientation of this frame */
+        V3d    pt;              /* position of this frame */
+        double delta_q;         /* increment in t between frames for quaternions */
+        double t_q;             /* parameter value for this frame for quaternion */
+	int i,j;
+	double v[3];
+	int DRAWTP;
+
+	czclear(0xFFFF55,zmax);
+	/* czclear(0xFFFFFF,zmax); */
+        perspective(1400, (float)xmax/(float)ymax, 0.00001, 20.0);
+        pushmatrix();
+        ortho(-14*xmax/ymax,14*xmax/ymax,-14,14,-14,14);
+	translate(-9,-9,-9);
+	rotate(rotx,'x');
+	rotate(roty,'y');
+	rotate(rotz,'z');
+
+	/* sweep curve */
+	RGBcolor(255,0,0);
+	draw_curve_in_3d (display_sweepcurve, sweepcurve_num);
+
+	/* position curve */
+	RGBcolor(255,0,0);
+	draw_curve_in_3d (display_dirbez, dirbez_num);
+
+	/* tensor product surface */
+	DRAWTP=1;
+	if (DRAWTP==1){
+	RGBcolor(255,100,255);
+	for (i=0;i<iso_num-1;i++) { 
+		/* mesh between each ith and (i+1)th isoparametric curves */
+/*		bgntmesh();   */
+		bgnline();  
+		for (j=0;j<surf_pt_num;j++) {
+			/* jth point on ith isoparametric curve */
+			v[0] = display_surf[0][i][j];
+			v[1] = display_surf[1][i][j];
+			v[2] = display_surf[2][i][j];
+			v3d(v);
+			/* jth point on (i+1)th isoparametric curve */
+			v[0] = display_surf[0][i+1][j];
+			v[1] = display_surf[1][i+1][j];
+			v[2] = display_surf[2][i+1][j];
+			v3d(v);
+		}
+/*		endtmesh(); */
+		endline();  
+	}
+	}
+
+	RGBcolor(0,0,255);
+	draw_control_mesh_tpratbez(surf); 
+
+	/*****************************************************************/
+	/* 		animation 					 */
+	/*****************************************************************/
+
+	/* draw keyframes */
+	RGBcolor(0,0,0);
+	for (i=0;i<m;i++) {
+		keyq[i][0] = 1;
+		keyq[i][1] = ori->x1[6*i];	/* keyframes at joints of ori curve */
+		keyq[i][2] = ori->x2[6*i];
+		keyq[i][3] = ori->x3[6*i];
+		keyq[i][4] = ori->x4[6*i];
+		draw_oriented_curve (display_sweepcurve,sweepcurve_num,
+				     keyq[i],pos[i]); 
+	}
+
+	/* between each pair of keyframes */
+	for (i=0;i<m-1;i++) {
+
+		/* generating intermediate frames between keyframe i and i+1,
+			associated with knots i and i+1 on the Bezier curves */
+		/* draw intermediate frames */	
+	        RGBcolor(255,100,0);
+		/* instead of frame from 0 to n-1, do from 1 to n-2
+		   so that keyframes are not covered */
+		for (frame=1;frame<n-1;frame++) {
+			/* quaternion */
+			delta_q = (ori->knots[i+1] - 
+				   ori->knots[i]) / (n-1);
+			t_q = ori->knots[i] + frame*delta_q;
+	
+			point_on_ratbez_4dh (ori, t_q, q);
+		
+			/* position */
+			point_on_bez_3d (poscurve_de, t_q, pt);
+	
+/*			printf("Drawing object at position (%.2f,%.2f,%.2f) and quaternion (%.2f,%.2f,%.2f,%.2f,%.2f)\n",
+*				pt[0],pt[1],pt[2],
+*				q[0],q[1],q[2],q[3],q[4]);
+*	
+*			printf("frame = %i \t t_q = %.2f \t t_p = %.2f \n",frame,t_q,t_p);
+*/
+			draw_oriented_curve (display_sweepcurve,sweepcurve_num,
+					     q,pt);  
+		}
+	}
+/***********************************************************/
+
+/* animation version */
+/*	frame++; 
+*	if (frame > (n-1)) 
+*		frame = 0;
+*/
+
+	if (rot_bool == 1) {
+		rotx += 20;
+		roty += 20;
+		rotz += 20;
+	}
+
+        popmatrix();
+        swapbuffers();
+}
+

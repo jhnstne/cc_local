@@ -1,0 +1,211 @@
+.TH userdata 3
+.SH NAME
+
+The userdata package is a package intended to ease the placement of
+geometry on a mesh.  The internal data field is never accessed
+directly.  Instead, a procedural interface is provided.  Additional
+data may be added by the user of the package as noted below.
+
+In the following list of routines, the first argument is always listed as 
+.I Vertex*.
+However, any of Vertex*, Edge*, Face*, or Mesh* may be used (though only
+some of these types will make sense for some of the routines).
+.nf
+.PP
+.B void AddGeometry(w,m)
+.B Space w;
+.B Mesh* m;
+.fi
+The 
+.B AddGeoemtry()
+routine takes a mesh and extracts geometry from the Lnode's at
+the vertices of the mesh.
+The mesh interal geometry data flags will be set if
+every vertex in the mesh has that geometry.
+The 
+.I Space
+parameter should be the 3 dimensional space where you want the mesh
+to be created.
+The external Lnode format should be of the form:
+
+(Point . (pos [x,y,z]) (norm . [dx,dy,dz]))
+
+These are interpreted
+as the position and normal of the vertex, and are converted to
+an internal format, stored in the field, 'internalData'.
+It is not mandatory for either \'pos\' or \'norm\' to appear.
+If absent, then the position (or normal) of the interal data
+structure will not be set.
+.PP
+.nf
+.B Mesh* MeshUDParse(fp, world)
+.B FILE* fp;
+.B Space world;
+.fi
+This routine reads the mesh and converts the external format to
+the internal format as it is reading.  The resulting internal
+data is as if AddGeoemtry() was called.  The advantage to using
+this routine (as opposed to calling MeshParse() and then AddGeometry())
+is that it requires less memory.
+.PP
+.nf
+.B void ConvertGeometryToExternal(m)
+.B Mesh* m;
+.fi
+ConvertGeometryToExternal()
+converts the standard geoemtry fields stored in the internal data
+structure into the external format.  If the user wishes to associated
+other external data, then this needs to be explicitly added to the
+Lnode externalData.
+.PP
+.nf
+.B Mesh* WriteUDMesh(m, fp)
+.B Mesh* m;
+.B FILE* fp;
+.fi
+Write mesh m to file descriptor fp.  As the mesh is written, the
+internal data will be converted to external format.  
+ConvertGeometryToExternal doesn't need to be called if this form
+of writing the mesh is used.
+.PP
+.nf
+.B BOOLEAN GetUDPoint(v,p)
+.B Vertex* v;
+.B Point* p;
+.fi
+Get the point stored in
+.B v.
+If there is no point in 
+.B v,
+then return FALSE (otherwise, return TRUE).
+.nf
+.PP
+.B Point ReturnUDPoint(v)
+.B Vertex* v;
+.fi
+Return the point in 
+.B v.
+This should only be done if it is known that the point exists.
+.nf
+.PP
+.B BOOLEAN SetUDPoint(v,p)
+.B Vertex* v;
+.B Point p;
+.fi
+Store the point
+.B p
+in
+.B v,
+allocating space as needed.  If memory can't be allocated,
+return FALSE (otherwise, return TRUE).
+.nf
+.PP
+.B BOOLEAN GetUDNormal(v,n)
+.B Vertex* v;
+.B Normal* n;
+.fi
+Get the normal stored in
+.B v.
+If there is no normal in 
+.B v,
+then return FALSE (otherwise, return TRUE).
+.nf
+.PP
+.B Normal ReturnUDNormal(v)
+.B Vertex* v;
+.fi
+Return the normal in 
+.B v.
+This should only be done if it is known that the normal exists.
+.nf
+.PP
+.B SetUDNormal(v,n)
+.B Vertex* v;
+.B Normal n;
+.fi
+Store the normal
+.B n
+in
+.B v,
+allocating space as needed. If memory can't be allocated,
+return FALSE (otherwise, return TRUE).
+.nf
+.PP
+int ReturnUDGeoFlags(v)
+.B Vertex* v;
+.fi
+Return the geometry flags of 
+.B v.
+Note that 0 is returned if no memory has been allocated for
+.B v.
+.nf
+.PP
+.B void SetUDGeoFlags(v,f)
+.B Vertex* v;
+.B int f;
+.fi
+Set the geometry flags in
+.B d
+to
+.B f,
+allocating memory as needed.  If memory can't be allocated,
+return FALSE (otherwise, return TRUE).
+
+The geometry flags may have the
+values NO_GEOMETRY, G_POSITION, G_NORMAL, or G_POSITION | G_NORMAL.
+Two additional flags, G_RESERVED1 and G_RESERVED2 are reserved for
+internal use.
+
+.nf
+.PP
+.B int SetUDFlags(v, f)
+.B Vertex* v;
+.B short f;
+.fi
+Set the flags f of the vertex v.
+
+.nf
+.PP
+.B int ClearUDFlags(v, f)
+.B Vertex* v;
+.B short f;
+.fi
+Clear the flags f of the vertex v.
+
+.nf
+.PP
+.B int ReturnUDFlags(v, f)
+.B Vertex* v;
+.B short f;
+.fi
+Return the flags of f that are set.
+
+The user of the package may desire to change the internal data structures.  
+If the only changes are additional fields, then the fields should be
+added after the ones already in the structure.  
+If the point, normal, or geometry flags fields are changed (say, to
+be more memory efficient), then the user should provide the above
+set of functions.  If this is done, then procedures such as AddGeometry()
+will continue to work and not need to be rewritten.
+
+There are three routines provided for converting the internal format
+of one vertex/edge/face to the external format.  These routines are
+intended to be passed to WriteItoEMesh() (see mesh 3).  The routines
+are
+.nf
+.PP
+.B UDItoEV(v)
+.B Vertex* v;
+.PP
+.B UDItoEE(e)
+.B Edge* e;
+.PP
+.B UDItoEF(F)
+.B Face* f;
+.fi
+
+.SH SEE ALSO
+mesh(3)
+
+.SH DATE
+November 14, 1991

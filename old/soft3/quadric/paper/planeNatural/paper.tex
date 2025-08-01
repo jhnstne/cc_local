@@ -1,0 +1,935 @@
+\documentstyle [12pt]{article}
+
+\newif\ifFull
+%\Fullfalse
+\Fulltrue
+
+\def\thefootnote{\fnsymbol{footnote}}
+
+\title{
+     Computing the Intersection of a Plane \\
+     and a Natural Quadric\footnotemark[1]}
+
+\author{John K. Johnstone\ \ \ \ Ching-Kuang Shene\\ \\
+          Department of Computer Science\\
+          The Johns Hopkins University \\
+          Baltimore, Maryland 21218  USA}
+
+\date{\ }
+
+\newtheorem{example}{Example}[section]
+\newtheorem{property}{Property}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{corollary}{Corollary}[section]
+
+\newcommand{\DoubleSpace}{\edef\baselinestretch{1.4}\Large\normalsize}
+\newcommand{\QED}{\ \ \ \rule{2mm}{3mm}\\}
+\newcommand{\arrow}[1]{\vec{\bf #1}}
+
+\DoubleSpace
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\topmargin}{0pt}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+
+
+\begin{document}
+\maketitle
+\footnotetext[1]{This work was supported by 
+          National Science Foundation grant IRI--8910366.}
+
+\def\thefootnote{\arabic{footnote}}
+\setcounter{footnote}{0}
+
+% --------------------------------------------------------------------
+%                            INTRODUCTION
+% --------------------------------------------------------------------
+
+\section{Introduction}
+
+Solid models are commonly composed of planes and quadric surfaces,
+and their construction requires the intersection of these surfaces
+\cite{HOF89,MANT88}.
+Rather than using all quadrics, 
+many solid modelers restrict to the use of spheres, cylinders,
+and cones (the {\em natural quadrics}).
+Therefore, the intersection of planes and natural quadrics is a very important
+operation.
+
+Plane sections are also a basic tool in descriptive geometry, drafting,
+and computer-aided design \cite{adams:1988}.
+A sequence of parallel sections is an aid in the visualization of a surface.
+% It is also used to generate a cutter contour path for numerically-controlled
+% (NC) machining \cite{chang:1989}.
+
+Despite its importance, there is a surprising lack of literature 
+on the computation of plane sections of natural quadrics, 
+undoubtedly largely because the commercial solid modeler 
+has little motivation to publish.
+% e.g., conversation with voelcker and his student
+Note that one should not be content with
+more general methods of intersection for this
+problem (e.g., the use of elimination), since they are overly complicated.
+In this paper, we propose to fill this gap in the literature,
+and provide new insight into this important problem.
+
+During our recent work on the intersection of quadric surfaces 
+\cite{shene:1991}, 
+a method arose for the intersection of planes and natural quadrics.
+The method is simple and offers new ideas on plane sections.
+With no added computation, it also delivers all parallel plane sections,
+parameterized by the position of the plane.
+An algorithm for intersecting a plane and natural quadric that is quite
+similar has recently been developed by Miller and Goldman \cite{MiGo91}.
+
+The main thrust of the paper is the computation of the focal length
+of the intersection conic.
+We show how this computation can be performed,
+using a restriction to a plane (different from the given plane).
+We should note that, since our aim is to show the concept,
+we have not optimized any of the formulae in this paper for implementation.
+
+In the following section, 
+we show how to describe a conic by its axes and center (or vertex).
+In Section~\ref{section:determining-axes}, 
+we show how to identify the major and minor axes of the intersection conic.
+Section~\ref{section:cone} 
+presents the computation of plane sections of a cone,
+while the less interesting cases of sphere and cylinder are discussed
+in Section~\ref{section:simple}.
+In Section~\ref{ss:focal},
+we give the general method of computing the focal length,
+using the theory of Dandelin spheres, incircles, and excircles.
+Section~\ref{section:ellipse} 
+deals with elliptic and hyperbolic conic sections,
+Section~\ref{section:parabola} with the parabola,
+and Section~\ref{section:vertex-on-plane} 
+with linear intersections (arising when the plane contains 
+the vertex of the cone).
+
+
+% --------------------------------------------------------------------
+%                      DESCRIPTION OF A CONIC
+% --------------------------------------------------------------------
+
+\section{The Description of a Conic}
+
+A central conic (i.e., an ellipse or hyperbola) 
+is uniquely determined by the directions of
+its major and minor axes, the lengths of its semi--major and semi--minor 
+axes, and its center.
+A parabola is uniquely determined by its major axis, 
+directrix, vertex, and focal length.
+Note that the ellipse has the equation $(m\cos\phi\arrow{m}+n\sin\phi\arrow{n}
+)+\arrow{C}$ and the hyperbola has the equation 
+$(m\cosh\phi\arrow{m}+n\sinh\phi\arrow{n})+\arrow{C}$,
+where $\arrow{m},\arrow{n},\arrow{C}$ and $\phi$ are the major
+axis direction, the minor axis direction, the center and a parameter.
+For a parabola, if the direction of its major axis is from the vertex to the
+focus, the equation is $\left(\frac{t^2}{4f}\arrow{m}+t\arrow{n}\right)+
+\arrow{C}$, where $\arrow{m},\arrow{n},\arrow{C},f$ and $t$ are the major
+axis direction, the directrix direction, the vertex, the focal length,
+and a parameter.
+
+In this paper, the length of the semi--minor axis, $n$, is computed 
+in terms of the length of the semi--major axis, $m$, and the focal length, $f$.
+For an ellipse, since $f=\sqrt{m^2-n^2}$, 
+the semi--minor axis length is $n=\sqrt{m^2-f^2}$;  
+for a hyperbola, the focal length is
+$f=\sqrt{m^2+n^2}$ and thus $n=\sqrt{f^2-m^2}$ \cite{salmon:1954}.  % page 177
+
+{\bf Notation:}
+A plane through
+$\arrow{B}$ and perpendicular to $\arrow{O}$ (its orientation) is denoted by
+${\cal P}(\arrow{B},\arrow{O})$, the sphere with center $\arrow{C}$ and radius
+$r$ by ${\cal S}(\arrow{C},r)$, the cylinder with axis $\arrow{V}+t\arrow{A}$
+and radius $r$ by ${\cal Z}(\arrow{V},\arrow{A},r)$, and the right cone
+with vertex $\arrow{V}$, axis $\arrow{V}+t\arrow{A}$ and cone angle $\alpha$
+by ${\cal C}(\arrow{V},\arrow{A},\alpha)$.  Note that vectors $\arrow{m},
+\arrow{n}, \arrow{O}$ and $\arrow{A}$ give directions, not positions, while
+$\arrow{B},\arrow{V}$ and $\arrow{C}$ give positions.
+We assume that all vectors giving directions are of unit length.
+Usually, position vector $\arrow{X}$ is also denoted by $X$ in discussing the
+geometric point $X$.
+
+     $\stackrel{\longleftrightarrow}{AB}, \stackrel{\longrightarrow}{AB},
+\overline{AB}$ and $|\overline{AB}|$ are the line, the half ray, the segment,
+and the length of the segment determined by two distinct points $A$ and $B$.
+
+% --------------------------------------------------------------------
+%             DIRECTIONS OF THE MAJOR AND MINOR AXES
+% --------------------------------------------------------------------
+
+\section{Directions of the Major and Minor Axes}
+\label{section:determining-axes}
+
+A result in Shene and Johnstone~\cite{shene:1991} 
+yields a simple way to determine the direction of the 
+major and minor axis of the intersection conic.  
+
+\begin{lemma}
+\label{lemma:perpendicular-axis}
+    Let ${\cal P}$ be a plane intersecting a cone/cylinder in a conic 
+$C$.  Then the plane ${\cal E}$ determined by the major axis of $C$ and the 
+axis of the natural quadric is perpendicular to ${\cal P}$
+(Figure~\ref{fig:perpendicular-stuff}).
+\end{lemma}
+
+\begin{figure}
+\vspace{4cm}
+\caption{Relation of plane ${\cal P}$ and plane ${\cal E}$}
+\label{fig:perpendicular-stuff}
+\end{figure}
+
+\begin{corollary}
+\label{lemma:major-minor-axes}
+    Let ${\cal P}(\arrow{B},\arrow{O})$ be a plane 
+and ${\cal Q}$ be a cone or cylinder with axis $\arrow{Q}+t\arrow{A}$,
+$\arrow{A}\neq\pm\arrow{O}$.
+The directions of the minor
+and major axes of the intersection conic are $\arrow{A}\times\arrow{O}$ and 
+$\arrow{O}\times(\arrow{A}\times\arrow{O})$, respectively.  
+\end{corollary}
+{\bf Proof:}
+The minor axis is perpendicular to the major axis and thus perpendicular
+to ${\cal E}$ of Lemma~\ref{lemma:perpendicular-axis}.
+Thus, it is perpendicular to the axis $\arrow{A}$ of the natural quadric.
+Since the minor axis of the conic $C$ lies in ${\cal P}$,
+it is perpendicular to $\arrow{O}$.
+\QED
+
+Note that the cross products in Corollary~\ref{lemma:major-minor-axes} are 
+well defined, because the case $\arrow{A}=\pm\arrow{O}$ is easy to handle
+(Lemma~\ref{lemma:parallel-1}).
+The plane ${\cal E}$ of Lemma~\ref{lemma:perpendicular-axis} is important.
+Since it contains the cone's axis and the conic's major axis,
+we call it the {\bf axial plane}.
+The axial plane is trivially computed, since its normal is the minor axis 
+$\arrow{A}\times\arrow{O}$ (the axial plane contains $\arrow{A}$
+and is perpendicular to ${\cal P}$).
+All computations of the intersection conic will be performed in this plane.
+That is, we can compute the major axis and its length, the focal length,
+and the center or vertex, all while restricting to the axial plane,
+since the axial plane contains the major axis and (thus) the foci and center.
+
+% --------------------------------------------------------------------
+%               Choosing the sign of the direction
+% --------------------------------------------------------------------
+
+\subsection{Choosing the sign of the direction}
+\label{section:sign}
+
+There are two choices for the directions of the major and minor axes:
+$\pm \arrow{A}\times\arrow{O}$ and
+$\pm \arrow{O}\times(\arrow{A}\times\arrow{O})$.
+The choice is important because we will use the angle between the 
+cone/cylinder axis and the plane's normal 
+(called $\theta$ below) in calculations, 
+and this angle is affected by the choice of direction.
+We make the choice as follows.
+
+     Assuming it exists, let $\arrow{T}$ be the intersection of ${\cal P}$,
+the given plane, and the axis of the natural quadric: 
+$\arrow{T}={\cal P}\cap (\arrow{V}+t\arrow{A})$ for some suitable $t$.  
+Define $\arrow{a}$ as follows:
+\[ \arrow{a} = \left\{
+                    \begin{array}{lll}
+                         \arrow{A} & & \mbox{if $t\geq 0$,} \\
+                         -\arrow{A} & & \mbox{if $t< 0$.}
+                    \end{array} \right. \]
+We will use $\arrow{a}$ instead of $\arrow{A}$ in all of our calculations.
+
+     Consider the orientation vector $\arrow{O}$ of plane ${\cal P}$.
+The inner product $\arrow{a}\cdot\arrow{O}$ gives the cosine of the smaller
+angle $\phi$ between $\arrow{a}$ and $\arrow{O}$.  $\phi$ is an acute angle
+if and only if $\arrow{a}\cdot\arrow{O}>0$.  Let
+\[ \arrow{o} = \left\{
+                    \begin{array}{lll}
+                     \arrow{O} & & \mbox{if $\arrow{a}\cdot\arrow{O}\geq 0$,}\\
+                     -\arrow{O} & & \mbox{if $\arrow{a}\cdot\arrow{O}< 0$.}
+                    \end{array} \right. \]
+We will use $\arrow{o}$ instead of $\arrow{O}$ in all of our calculations.
+Note that $\arrow{a}$ always points toward the plane ${\cal P}$ and 
+the angle $\theta$ between $\arrow{a}$ and $\arrow{o}$ is always
+an acute angle with $\cos\theta=\arrow{a}\cdot\arrow{o}\geq 0$.
+
+     In what follows, unit length vectors $\arrow{m}$ and $\arrow{n}$ denote
+the directions of the major and the minor axes.  That is, if they exist, 
+we have the following
+\[     \arrow{m} = \frac{\arrow{o}\times(\arrow{a}\times\arrow{o})}
+                        {|\arrow{o}\times(\arrow{a}\times\arrow{o})|}
+     \ \ \ \ \mbox{and}\ \ \ \  
+     \arrow{n} = \frac{\arrow{a}\times\arrow{o}}
+                        {|\arrow{a}\times\arrow{o}|}.   \]
+Otherwise, $\arrow{m}$ and $\arrow{n}$ will be defined explicitly.
+
+
+% --------------------------------------------------------------------
+%                              CONES
+% --------------------------------------------------------------------
+
+\section{Plane/Cone Intersection}
+\label{section:cone}
+
+\subsection{How to compute the focal length}
+\label{ss:focal}
+
+Consider the intersection of a plane with a right cone, which
+is the most difficult case.
+In the last century, Dandelin~\cite{dandelin:1822} discovered that if a 
+sphere is inscribed in the cone and tangent to the plane, the tangent point 
+on the plane is one of the foci of the intersection conic 
+(Figure~\ref{dandelin-sphere}).\footnote{The foci--directrix--eccentricity 
+     relation was found by Morton~\cite{morton:1830} a few years later.
+     For other properties derived from the Dandelin
+     sphere and a proof of Dandelin's theorem in English,
+     the reader is referred to
+     Drew~\cite{drew:1875}, Hilbert and Cohn--Vossen~\cite{hilbert:1983}
+     and Macaulay~\cite{macaulay:1895}.}
+This sphere is called a {\em Dandelin} (or {\em focal}) sphere. 
+We will use it to compute the focal length of the intersection.
+\begin{figure}
+\vspace{3.25in}
+\caption{The Dandelin Sphere}
+\label{dandelin-sphere}
+\end{figure}
+
+Let plane ${\cal P}$ intersect cone ${\cal C}$ in a central conic.  
+(The parabola is treated separately in Section~\ref{section:parabola}.)
+There will be one Dandelin sphere tangent to ${\cal P}$ at each focus point.  
+Consider the axial plane, as shown in Figure~\ref{fig:tangent-points}.
+It intersects ${\cal C}$ in a pair of intersecting lines, ${\cal P}$ in a 
+line, and the two Dandelin spheres in two circles.  
+Therefore we have a triangle and two circles tangent to all three sides.
+Let $M$ be the midpoint of $\overline{RS}$ in Figure~\ref{fig:tangent-points}.
+If the intersection conic is an ellipse, the focal length is 
+$|\overline{MF_1}|=|\overline{MF_2}|$ (Figure~\ref{fig:tangent-points}(a)).
+If it is a hyperbola, the focal length is $|\overline{MF_3}|=|\overline{MF_4}|$
+(Figure~\ref{fig:tangent-points}(b)).
+
+     From the following classical result, we derive a simple way to compute
+the focal lengths $|\overline{MF_1}|$ and $|\overline{MF_3}|$.
+(For a proof of the following lemma, 
+see Court~\cite{court:1925},  Davis~\cite{davis:1949} or
+Johnson~\cite{johnson:1929}.)
+
+\begin{lemma}
+\label{lemma:tangent-points}
+     Given a triangle $\bigtriangleup VRS$, let the incircle and the excircle
+in $\angle RVS$ be tangent to $\overline{RS}$ at $F_1$ and $F_2$ respectively
+(Figure~\ref{fig:tangent-points}).  Then 
+$2|\overline{SF_1}|=|\overline{RS}|+(|\overline{VS}|-|\overline{VR}|)$ and
+$2|\overline{SF_2}|=|\overline{RS}|+(|\overline{VR}|-|\overline{VS}|)$.  
+Similarly, if the excircle in $\angle VRS$ is tangent to 
+$\stackrel{\longleftrightarrow}{RS}$ at $F_3$, then
+$2|\overline{SF_3}|=(|\overline{VR}|+|\overline{VS}|)-|\overline{RS}|$.
+\end{lemma}
+\begin{figure}
+\vspace{6cm}
+\caption{Tangent Points of Incircle and Excircles: (a) Ellipse (b) Hyperbola}
+\label{fig:tangent-points}
+\end{figure}
+
+The following corollary shows that either focus can be chosen.
+
+\begin{corollary}
+$|\overline{SF_1}|=|\overline{RF_2}|$; and, if $F_4$ is the tangent point of
+the excircle in $\angle VSR$ on $\stackrel{\longleftrightarrow}{RS}$,
+$|\overline{SF_3}|=|\overline{RF_4}|$.
+\end{corollary}
+{\bf Proof:} Simple. \QED
+
+We now have a way of computing the focal length $|\overline{MF_1}|$ or
+$|\overline{MF_3}|$.
+
+\begin{lemma}
+\label{lemma:focal-length}
+     Let $F_1,F_2,F_3$ and $F_4$ be as in Lemma~\ref{lemma:tangent-points} 
+and let $M$ be the midpoint of $\overline{RS}$.
+Then $|\overline{MF_1}|=|\overline{MF_2}|
+=\frac{1}{2}|\ |\overline{VR}|-|\overline{VS}|\ |$ and
+$|\overline{MF_3}|=|\overline{MF_4}|
+=\frac{1}{2}(|\overline{VR}|+|\overline{VS}|)$.
+\end{lemma}
+{\bf Proof:} From Lemma~\ref{lemma:tangent-points}, 
+$|\overline{SF_1}|=
+\frac{1}{2}(|\overline{RS}|+(|\overline{VS}|-|\overline{VR}|))$.
+
+If $|\overline{VR}|\geq|\overline{VS}|$, the order of $F_1$ and $F_2$ on
+$\overline{RS}$ is $R,F_2,F_1,S$, that is, 
+$|\overline{MF_1}|\leq|\overline{MS}|=\frac{1}{2}|\overline{RS}|$.
+Therefore, $|\overline{MF_1}|=\frac{1}{2}|\overline{RS}|-
+|\overline{SF_1}|=\frac{1}{2}(|\overline{VR}|-|\overline{VS}|)$.
+
+     If $|\overline{VR}|<|\overline{VS}|$, the order becomes $R,F_1,F_2,S$
+and we have $|\overline{MF_1}|=|\overline{SF_1}|-|\overline{MS}|=
+|\overline{SF_1}|-\frac{1}{2}|\overline{RS}|=\frac{1}{2}(|\overline{VS}|-
+|\overline{VR}|)$.  
+This proves the first identity.  The second can be proven the same way.  \QED
+
+Based on the following lemma, we will distinguish three cases.
+
+\begin{lemma}
+\label{lemma:classification}
+Let ${\cal P}(\arrow{B},\arrow{O})$ be a plane and 
+let ${\cal C}(\arrow{V}, \arrow{A},\alpha)$ be a right cone, 
+$V \not \in P$.\footnote{$V \not \in P$ guarantees that the 
+     intersection is a conic.
+     The simple case $V\in{\cal P}$ will be discussed in 
+     Section~\ref{section:vertex-on-plane}.}
+Recall that $\theta$
+is the acute angle between $\arrow{a}$ and $\arrow{o}$ and 
+$\cos\theta=\arrow{a}\cdot\arrow{o}\geq 0$.
+
+     The intersection of ${\cal P}$ and ${\cal C}$
+is an ellipse, a parabola, or a hyperbola if,
+respectively, $\cos\theta>\sin\alpha\ (\alpha+\theta<\frac{\pi}{2})$, 
+$\cos\theta=\sin\alpha\ (\alpha+\theta=\frac{\pi}{2})$, or 
+$\cos\theta<\sin\alpha\ (\alpha+\theta>\frac{\pi}{2})$.
+\end{lemma}
+{\bf Proof:}  Note that $\theta$ is an acute angle. 
+In order to have a parabolic intersection, 
+$\alpha+\theta=\frac{\pi}{2}$ must hold.  This is equivalent to
+$\sin\alpha=\cos\theta$.
+$\alpha+\theta<\frac{\pi}{2}$ (resp., $\alpha+\theta>\frac{\pi}{2}$)
+implies the intersection curve is an ellipse (resp., a hyperbola).
+If $\alpha+\theta<\frac{\pi}{2}$,
+we can assume $\alpha+\theta+\epsilon=\frac{\pi}{2}$ for some suitable
+$0<\epsilon<\frac{\pi}{2}$.  Then $\sin\alpha=\cos(\theta+\epsilon)<\cos\theta$
+because $\cos\theta$ is a decreasing function in $[0,\pi]$.  Therefore 
+the curve is an ellipse if and only if $\sin\alpha<\cos\theta$.  The proof for
+the other case is the same.  \QED
+
+% ********************************************************************
+%                        ELLIPSE & HYPERBOLA
+% ********************************************************************
+
+\subsection{Ellipse ($\cos\theta>\sin\alpha$) and 
+          Hyperbola ($\cos\theta<\sin\alpha$)}
+\label{section:ellipse}
+
+     Assuming $\cos\theta\neq 0$ and $\cos\theta\neq 1$, the cone's axis
+always intersects the given plane at some point $\arrow{T}$ and the vector
+$\arrow{m}$, which is the normalized vector of 
+$\arrow{o}\times(\arrow{a}\times\arrow{o})$, is well defined and gives the 
+direction of the major axis.
+Let $d=|\overline{VT}|$, the distance from $\arrow{V}$
+to $\arrow{T}$.
+
+     Using this construction, we shall prove the following main theorem of this
+section.
+
+\begin{theorem}
+\label{theorem:cone-ellipse}
+     Let ${\cal P}(\arrow{B},\arrow{O})$ be a plane and 
+${\cal C}(\arrow{V},\arrow{A},\alpha)$ a cone, such that
+$\cos\theta \neq \sin\alpha$, $\cos\theta\neq 0$, $\cos\theta\neq 1$, 
+and $\arrow{V}\not\in{\cal P}$.  
+Let $\arrow{T}={\cal P} \cap (\arrow{V}+t\arrow{A})$ and
+$d = |\overline{VT}|$.
+
+     If $\cos\theta > \sin\alpha$, ${\cal P}\cap{\cal C}$ is an ellipse, 
+otherwise it is a hyperbola.  Let $\sigma$ be the sign of 
+$\cos\theta - \sin\alpha$.  That is, $\sigma=1$ if it is an ellipse; otherwise
+$\sigma=-1$.  The characteristics of the intersection are:
+\begin{enumerate}
+     \item Semi--major axis length : 
+     $m=\sigma\frac{d\sin\alpha}{2}\left[ \frac{1}{\cos(\alpha+\theta)}+
+           \frac{1}{\cos(\alpha-\theta)}\right]$;
+     \item Semi--minor axis length : $n=\sqrt{\sigma(m^2-f^2)}$, 
+     where $f$ is the focal length \\
+     $f = \sigma\frac{d\cos\theta}{2}\left[ \frac{1}{\cos(\alpha+\theta)}-
+             \frac{1}{\cos(\alpha-\theta)}\right]$;
+     \item Center: $\arrow{C}=\arrow{V}+d\left[\arrow{a}+
+             \frac{\sin\alpha}{2}\left( \frac{1}{\cos(\alpha+\theta)}-
+             \frac{1}{\cos(\alpha-\theta)}\right) \arrow{m}\right]$.
+\end{enumerate}
+The directions of the major and minor axes are given in 
+Corollary~\ref{lemma:major-minor-axes}.
+\end{theorem}
+{\bf Proof:}  Let the line $\arrow{T}+t\arrow{m}$, which is the intersection of
+the given plane and the axial plane, intersect the cone, along the direction 
+of $\arrow{m}$, first at $\arrow{R}$ and then at $\arrow{S}$ 
+(Figure~\ref{fig:ellipse}(a)).  
+\ifFull
+Consider the ellipse case.
+\else
+We shall only give the proof for the ellipse,
+since the proof for the hyperbola is analogous (see \cite{JS91}).
+\fi
+In $\bigtriangleup VRT$, we have 
+$\angle VRT=\frac{\pi}{2}-(\alpha-\theta)$,
+$\angle VTR=\frac{\pi}{2}-\theta$.  The law of sines gives
+\[ \frac{d}{\sin\left[\frac{\pi}{2}-(\alpha-\theta)\right]} =
+   \frac{|\overline{VR}|}{\sin\left(\frac{\pi}{2}-\theta\right)} =
+   \frac{|\overline{RT}|}{\sin\alpha}. \]
+Hence we have
+\[ |\overline{VR}|=d\frac{\cos\theta}{\cos(\alpha-\theta)}\ \ \ \ \mbox{and}
+     \ \ \ \ |\overline{RT}|=d\frac{\sin\alpha}{\cos(\alpha-\theta)}. \]
+Similarly, for $\bigtriangleup VST$, we have
+\[ |\overline{VS}|=d\frac{\cos\theta}{\cos(\alpha+\theta)}\ \ \ \ \mbox{and}
+     \ \ \ \ |\overline{ST}|=d\frac{\sin\alpha}{\cos(\alpha+\theta)}. \]
+The semi--major axis length is
+\[ m=\frac{1}{2}|\overline{RS}|
+  =\frac{1}{2}(|\overline{RT}| + |\overline{ST}|)
+  =\frac{d\sin\alpha}{2}\left[ \frac{1}{\cos(\alpha+\theta)}+
+                    \frac{1}{\cos(\alpha-\theta)}\right].  \]
+Recall that $\arrow{a}$ lies in the right angle between $\arrow{o}$ and 
+$\arrow{m}$ (Figure~\ref{fig:ellipse}(a)).  Since $\arrow{o}$ points to the 
+left of $\arrow{a}$, $\angle VTS>\angle VTR$ and 
+hence $|\overline{VS}|>|\overline{VR}|$.  
+Therefore the focal length (Lemma~\ref{lemma:focal-length}) is
+\[ f= \frac{1}{2}(|\overline{VS}| - |\overline{VR}|)
+  = \frac{d\cos\theta}{2}\left[ \frac{1}{\cos(\alpha+\theta)}-
+                                 \frac{1}{\cos(\alpha-\theta)}\right]. \]
+
+\begin{figure}
+\vspace{7cm}
+\caption{Computing One of the Foci: (a) Ellipse  (b) Hyperbola}
+\label{fig:ellipse}
+\end{figure}
+
+     The center $\arrow{C}$ is the midpoint of $\overline{RS}$.  In order not
+to calculate $\arrow{R}$ and $\arrow{S}$, we will determine $\arrow{C}$
+using its relative position to $\arrow{T}$.  We will prove $\arrow{C}$ lies in
+the segment $\overline{TS}$ and compute 
+$|\overline{CT}|=|\arrow{C}-\arrow{T}|$.  Then $\arrow{C}$ is located 
+along the direction $\arrow{m}$ with
+positive distance $|\overline{CT}|$ from $\arrow{T}$.  
+Since $\arrow{a}$ is the angle bisector of $\angle RVS$ and
+$|\overline{VS}|>|\overline{VR}|$, we have
+$\frac{|\overline{VR}|}{|\overline{VS}|}=
+\frac{|\overline{TR}|}{|\overline{TS}|}$ and 
+therefore $|\overline{TS}|>|\overline{TR}|$.  Since
+\[     |\overline{TC}| = |\overline{RC}|-|\overline{RT}| 
+                     = m-|\overline{RT}| 
+                     = \frac{d\sin\alpha}{2}\left[
+                         \frac{1}{\cos(\alpha+\theta)}-
+                         \frac{1}{\cos(\alpha-\theta)}\right],   \]
+the center $\arrow{C}$ is
+\[  \arrow{C}=\arrow{T}+|\overline{TC}|\arrow{m}=\arrow{V}+d\arrow{a}+
+          \frac{d\sin\alpha}{2}\left[ \frac{1}{\cos(\alpha+\theta)}-
+             \frac{1}{\cos(\alpha-\theta)}\right] \arrow{m}. \]
+This establishes the ellipse case.
+\ifFull
+
+The computation for the hyperbola is entirely analogous to that for the
+ellipse.  Let the Dandelin sphere  be 
+tangent to 
+$\arrow{T}+t\arrow{m}$ at $\arrow{F}$ (Figure~\ref{fig:ellipse}(b)). 
+We are going to compute $|\overline{SF}|$.  
+From $\bigtriangleup RVT$, using the law of sines, we have
+\[ \frac{d}{\sin\left(\alpha+\theta-\frac{\pi}{2}\right)}=
+     \frac{|\overline{VR}|}{\sin\left(\frac{\pi}{2}-\theta\right)} = 
+     \frac{|\overline{RT}|}{\sin(\pi-\alpha)}. \]
+Hence we have
+\[ |\overline{RT}|=-d\frac{\sin\alpha}{\cos(\alpha+\theta)}\ \ \ \ \mbox{and}
+     \ \ \ \ |\overline{RV}|=-d\frac{\cos\theta}{\cos(\alpha+\theta)}. \]
+Similarly, from $\bigtriangleup SVT$, we get
+\[ |\overline{ST}|=d\frac{\sin\alpha}{\cos(\alpha-\theta)}\ \ \ \ \mbox{and}
+     \ \ \ \ |\overline{SV}|=d\frac{\cos\theta}{\cos(\alpha-\theta)}. \]
+The semi--major axis length is
+\[    m=\frac{1}{2}|\overline{RS}|=\frac{1}{2}(|\overline{RT}|-|\overline{ST}|)
+     =-\frac{d\sin\alpha}{2}\left[
+                    \frac{1}{\cos(\alpha+\theta)} +
+                    \frac{1}{\cos(\alpha-\theta)} \right],  \]
+while the focal length (Lemma~\ref{lemma:focal-length}) is
+\[     f=-\frac{d\cos\theta}{2}\left[
+                    \frac{1}{\cos(\alpha+\theta)} -
+                    \frac{1}{\cos(\alpha-\theta)} \right]. \]
+The center $\arrow{C}$ is the midpoint of $\overline{RS}$.  
+Since $|\overline{CT}|=|\overline{CS}|+|\overline{ST}|=m+|\overline{ST}|$,
+we have
+\[ |\overline{CT}|=-\frac{d\sin\alpha}{2}\left[
+        \frac{1}{\cos(\alpha+\theta)}-\frac{1}{\cos(\alpha-\theta)}\right]. \]
+Therefore, the center is
+\[  \arrow{C} = \arrow{V}+d\arrow{a}-|\overline{CT}|\arrow{m} 
+              = \arrow{V}+d\arrow{a}+\frac{d\sin\alpha}{2}\left[
+        \frac{1}{\cos(\alpha+\theta)}-\frac{1}{\cos(\alpha-\theta)}\right]
+          \arrow{m}.   \]
+\fi
+\QED
+
+     Note that, if the orientation of ${\cal P}$ is fixed, $m, n, f$ and 
+$\arrow{C}$ are linear functions of $d$.  Hence  $d\geq 0$ serves as a 
+parameter parameterizing all parallel planar sections.
+
+     $\cos \theta = 0$ is a special case for the hyperbola.  In this case, the
+given plane does not intersect the cone's axis and thus $\arrow{T}$ is not
+well defined.  However, this simplifies the computation a lot.
+
+\begin{theorem}
+\label{theorem:cone-hy-special}
+     For a given plane ${\cal P}(\arrow{B},\arrow{O})$ and a given cone
+${\cal C}(\arrow{V},\arrow{A},\alpha)$.  If $\cos\theta= 0$ and 
+$V\not\in{\cal P}$, the line $\arrow{V}+t\arrow{O}$ intersects ${\cal P}$ at
+$\arrow{V}+d\arrow{O}$ and thus $|d|$ is the distance from $\arrow{V}$ to
+${\cal P}$.  The intersection conic
+is a hyperbola with the following characteristics:
+\begin{enumerate}
+     \item Major axis direction : $\arrow{A}$;
+     \item Semi--major axis length : $m=\frac{|d|}{\tan\alpha}$;
+     \item Minor axis direction : $\arrow{A}\times\arrow{O}$;
+     \item Semi--minor axis length : $n=|d|$;
+     \item Center               : $\arrow{V}+d\arrow{O}$.
+\end{enumerate}
+\end{theorem}
+{\bf Proof:} Let $\arrow{C}$ be $\arrow{V}+d\arrow{O}$, the intersection
+point of $\arrow{V}+t\arrow{O}$ and the given plane ${\cal P}$.
+     Let the line, which is the intersection of plane ${\cal P}$ and the 
+axial plane,
+intersect the 
+cone at $\arrow{R}$ and $\arrow{S}$.  
+Let the Dandelin sphere be tangent to ${\cal P}$ at 
+$\arrow{F}$ as shown in Figure~\ref{fig:hy-special}.  Also let the center of
+the Dandelin sphere be $\arrow{D}$.  
+Note that $\arrow{C}$ is the midpoint of $\overline{RS}$, the focal length is
+$f=|\overline{CF}|$, and the radius of the Dandelin sphere is
+$|\overline{FD}|=|\overline{CV}|=|d|$.  Since $CVDF$ is a rectangle, we have
+$f=|\overline{CF}|=|\overline{VD}|$.  Using $\bigtriangleup VDG$,
+$f=|\overline{VD}|=\frac{|d|}{\sin\alpha}$.  Using $\bigtriangleup VCS$,
+the semi--major axis length is $m=|\overline{CS}|=\frac{|d|}{\tan\alpha}$.
+Therefore the semi--minor axis length is $n=\sqrt{f^2-m^2}=|d|$.
+\QED
+
+\begin{figure}
+\vspace{5.5cm}
+\caption{Computing One of the Foci of the Intersection Hyperbola--Special Case}
+\label{fig:hy-special}
+\end{figure}
+
+     Again, the intersection hyperbola is parameterized linearly by $d$.
+The final special case is $\cos\theta=1$ (i.e., ${\cal P}$ is
+perpendicular to $\arrow{A}$).
+
+\begin{lemma}
+\label{lemma:parallel-1}
+     Let ${\cal P}(\arrow{B},\arrow{O})$ be a plane that is perpendicular to
+the axis of the cone ${\cal C}(\arrow{V},\arrow{A},\alpha)$.
+That is, $\arrow{A} = \pm\arrow{O}$.  Let $\arrow{V}+t\arrow{A}$ intersect
+${\cal P}$ at $\arrow{C}=\arrow{V}+d\arrow{A}$ (i.e., $|d| = |\overline{VC}|$).
+The intersection is a circle with center $\arrow{C}$ and radius
+$|d| \tan \alpha$.
+\end{lemma}
+{\bf Proof:} Simple. \QED
+
+\clearpage
+
+% ********************************************************************
+%                            PARABOLA
+% ********************************************************************
+
+\subsection{Parabola ($\cos\theta=\sin\alpha$)}
+\label{section:parabola}
+
+\begin{theorem}
+\label{theorem:parabola}
+Let ${\cal P}(\arrow{B},\arrow{O})$ be a plane and
+${\cal C}(\arrow{V},\arrow{A},\alpha)$ be a cone, such that
+$\cos\theta=\sin\alpha$ and $\arrow{V}\not\in{\cal P}$.
+Let $\arrow{V}+t\arrow{A}$ intersect
+${\cal P}$ at $\arrow{T}=\arrow{V}+d\arrow{A}$ (i.e., $d = |\overline{VT}|$).
+Then the intersection is a parabola with the following characteristics:
+\begin{enumerate}
+     \item Major axis direction: $\arrow{m}$;
+     \item Directrix direction: $\arrow{n}$;
+     \item Focal length: $f=\frac{d}{2}\frac{(1-\cos^2\alpha)}{\cos\alpha}$;
+     \item Vertex: 
+          $\arrow{R}=\arrow{V}+d\left[
+          \arrow{a}-\frac{1}{2\cos\alpha}\right]\arrow{m}$.
+\end{enumerate}
+\end{theorem}     
+{\bf Proof:}
+Let the parabola's major axis intersect the cone at 
+$\arrow{R}$ (Figure~\ref{fig:parabola}).  
+The unique Dandelin sphere ${\cal S}(\arrow{D},r)$
+is tangent to ${\cal P}$ at the focus $\arrow{F}$ of the parabola.
+Let $d=|\overline{VT}|$.  Note that $|\overline{VD}|=\frac{d}{2}$,
+and $r=|\overline{VD}|\sin\alpha=\frac{d}{2}\sin\alpha$.  
+Thus, the focal length is 
+$f=|\overline{RF}|=r\tan\alpha=\frac{d}{2}\frac{\sin^2\alpha}{\cos\alpha}$.
+To compute the vertex of the parabola, $\arrow{R}$, 
+note that $|\overline{RV}|=\frac{d}{2\cos\alpha}$.
+Because $\angle RVD=\angle RTD=\alpha$, $|\overline{RT}|=|\overline{RV}|$ and 
+$\arrow{R}=\arrow{T}-|\overline{RT}|\arrow{m}=
+\arrow{T}-\frac{d}{2\cos\alpha}\arrow{m}$.
+\QED
+
+\begin{figure}
+\vspace{5.5cm}
+\caption{Computing the Focus of the Intersection Parabola}
+\label{fig:parabola}
+\end{figure}
+
+The intersection parabola is again parameterized linearly by $d$.
+
+% ********************************************************************
+%                      VERTEX ON THE PLANE
+% ********************************************************************
+
+\subsection{Vertex on Plane}
+\label{section:vertex-on-plane}
+
+  The only remaining case of plane/cone intersection is $\arrow{V}\in{\cal P}$.
+Depending on the position of the plane, we have a single point, a tangent line
+or two intersecting lines.  Intuitively, as a plane
+moves parallel toward the cone vertex, the intersection ellipse, parabola
+and hyperbola reduces to a point, a line and two intersecting lines.  
+Using this fact, for $\arrow{V}\in{\cal P}$, we have a point, a line or two 
+intersecting lines if and only if $\cos\theta>\sin\alpha$, 
+$\cos\theta=\sin\alpha$ and $\cos\theta<\sin\alpha$.   
+If $\cos\theta<\sin\alpha$, the intersection point is $\arrow{V}$.
+If $\cos\theta=\sin\alpha$, the line is  $\arrow{V}+t\arrow{m}$ 
+(Figure~\ref{fig:parabola}).  
+
+     The case of $\cos\theta<\sin\alpha$ is more complicated and requires 
+further elaboration.  Suppose ${\cal P}$ passes through the cone's vertex 
+$\arrow{V}$.  Construct an arbitrary plane ${\cal P}^\prime$ not through 
+$\arrow{V}$ and parallel to ${\cal P}$.  ${\cal P}^\prime$ intersects the 
+cone in a hyperbola with semi--major axis length $m$ and semi--minor axis 
+length $n$ (Figure~\ref{fig:vtx-on-plane}).
+The asymptotes of this hyperbola are
+$\arrow{C}+t(\arrow{m}\pm\frac{n}{m}\arrow{n})$, where $\arrow{m},\arrow{n}$
+and $\arrow{C}$ are the directions of the major and the minor axes and the 
+center.  By a theorem from classical conic section theory,
+the asymptotes are parallel to the intersection lines made by plane
+${\cal P}$ (see, for example, Drew~\cite[page 119]{drew:1875}).
+Therefore the intersection lines have equation
+$\arrow{V}+t(\arrow{m}\pm\frac{n}{m}\arrow{n})$.
+Our remaining job is to determine the value of $\frac{n}{m}$.
+
+\begin{figure}
+\vspace{4cm}
+\caption{Determine the Direction of the Two Intersection Lines}
+\label{fig:vtx-on-plane}
+\end{figure}
+
+     Suppose $\cos\theta\neq 0$.  Then using Theorem~\ref{theorem:cone-ellipse}
+to compute the semi--major axis length
+$m$ and the focal length $f$, we have:
+\[   \frac{n}{m} = \sqrt{\frac{f^2}{m^2}-1}=
+     \sqrt{\left(\frac{\sin\theta}{\cos\alpha}\right)^2-1}.  \]
+If $\cos\theta=0$, the intersection lines lie on the plane
+containing the cone's axis and hence the equation is
+$\arrow{V}+t(\arrow{a}\pm\tan\alpha\arrow{n})$.
+
+\begin{theorem}
+\label{theorem:cone-line}
+The intersection of the plane ${\cal P}(\arrow{B},\arrow{O})$ and the cone
+${\cal C}(\arrow{V},\arrow{A},\alpha)$, where \\$\arrow{V}\in{\cal P}$,
+is one of the following:
+\begin{enumerate}
+     \item $\cos\theta>\sin\alpha$ : the point $\arrow{V}$;
+     \item $\cos\theta=\sin\alpha$ : the line $\arrow{V}+t\arrow{m}$ ;
+     \item $0<\cos\theta<\sin\alpha$ : the two intersecting lines 
+          $\arrow{V}+t(\arrow{m}\pm\frac{n}{m}\arrow{n})$,
+  where $\frac{n}{m} = \sqrt{\left(\frac{\sin\theta}{\cos\alpha}\right)^2-1}$;
+     \item $\cos\theta=0$ : the two intersecting lines 
+          $\arrow{V}+t(\arrow{a}\pm\tan\alpha\arrow{n})$.
+\end{enumerate}
+\end{theorem}
+     
+
+% --------------------------------------------------------------------
+%                     REMAINING SIMPLE CASES
+% --------------------------------------------------------------------
+
+\section{The Sphere and Cylinder}
+\label{section:simple}
+
+Plane sections of the sphere and cylinder are straightforward to compute.
+
+\begin{lemma}
+\label{lemma:sphere}
+     Let ${\cal P}(\arrow{B},\arrow{O})$ be a plane and 
+${\cal S}(\arrow{C},r)$ be a sphere.  Let the line $\arrow{C}+t\arrow{O}$
+intersect ${\cal P}$ at $\arrow{C}+d\arrow{O}$.
+If $|d| < r$, the intersection is a circle with radius $\sqrt{r^2-d^2}$ 
+and center $\arrow{C}+d\arrow{O}$.
+Otherwise, the intersection is empty or a point.
+\end{lemma}
+{\bf Proof:} Simple (Figure~\ref{fig:sphere}). \QED
+
+\begin{figure}
+\vspace{3.5cm}
+\caption{Plane--sphere intersection}
+\label{fig:sphere}
+\end{figure}
+
+
+\begin{theorem}
+\label{theorem:cylinder}
+Let ${\cal P}(\arrow{B},\arrow{O})$ be a plane and 
+${\cal Z}(\arrow{V},\arrow{A},r)$ be a cylinder whose axis $\arrow{A}$ is
+not parallel or perpendicular to the plane (i.e., $0 < \cos \theta < 1$).
+The intersection is an ellipse with
+\begin{enumerate}
+     \item Semi--major axis length    : $\frac{r}{\cos\theta}$;
+     \item Semi--minor axis length    : $r$;
+     \item Center                     : 
+               $\arrow{C} = {\cal P}\cap (\arrow{V}+t\arrow{A})$.
+\end{enumerate}
+The directions of its major and minor axes are given by 
+Corollary~\ref{lemma:major-minor-axes}.
+\end{theorem}
+{\bf Proof:} The center must clearly lie on the axis, by symmetry.
+The minor axis, through $\arrow{C}$ and normal to the axial plane 
+(Figure~\ref{fig:cylinder}), must have height $r$.
+From Figure~\ref{fig:cylinder}, it is clear that the major axis $\overline{RC}$
+is of length $\frac{r}{\cos\theta}$.
+\QED
+
+\begin{figure}
+\vspace{5cm}
+\caption{Plane--cylinder intersection}
+\label{fig:cylinder}
+\end{figure}
+
+\begin{lemma}
+     Let ${\cal P}(\arrow{B},\arrow{O})$ be a plane 
+and ${\cal Z}(\arrow{V},\arrow{A},r)$ be a cylinder whose axis is parallel
+to the plane.
+Let $\arrow{V}+t\arrow{O}$ intersect ${\cal P}$ at 
+$\arrow{T}=\arrow{V}+d\arrow{O}$.
+If $|d| \leq r$, the intersection is the lines
+$\arrow{T} \pm \sqrt{r^2-d^2}(\arrow{A}\times\arrow{O})+t\arrow{A}$.
+Otherwise, it is empty.
+
+Let ${\cal P}(\arrow{B},\arrow{O})$ and ${\cal Z}(\arrow{V},\arrow{A},r)$
+be a cylinder whose axis is perpendicular to the plane (i.e., 
+$\arrow{A} = \pm\arrow{O}$).  Let the axis $\arrow{V}+t\arrow{A}$ intersect
+${\cal P}$ at $\arrow{C}$.  The intersection is a circle with center 
+$\arrow{C}$ and radius $r$.
+\end{lemma}
+{\bf Proof:} Simple (Figure~\ref{fig:cylinder-line}). \QED
+
+\begin{figure}
+\vspace{4.5cm}
+\caption{Plane--cylinder intersection, parallel to axis}
+\label{fig:cylinder-line}
+\end{figure}
+
+% --------------------------------------------------------------------
+%                           CONCLUSION
+% --------------------------------------------------------------------
+
+\section{Conclusion}
+\label{section:conclusion}
+
+     Although computing the intersection of a plane and a natural quadric is
+a simple task and is a widely used operation in computer-aided geometric
+design, very little literature is
+available.  Using the Dandelin sphere technique, we have successfully
+developed a simple method to compute the intersection conic.
+Moreover, except for the plane--sphere case,
+the resulting equation of the intersection conic is linearly parameterized
+by a parameter with simple meaning.  Hence by varying this parameter, our
+algorithm delivers all parallel plane sections immediately.
+We are presently investigating whether the techniques of this paper 
+can be generalized to revolutionary quadrics, or even general quadrics.
+
+
+% --------------------------------------------------------------------
+%                           REFERENCES
+% --------------------------------------------------------------------
+
+\begin{thebibliography}{999}
+
+\bibitem{adams:1988}
+     James Alan Adams and Leon M. Billow,
+     {\em Descriptive Geometry and Geometric Modeling : A Basis for Design},
+     Holt, Rinehart and Winston, New York, 1988.
+
+% \bibitem{chang:1989}
+%      Chao--Hwa Chang and Michel A. Melkanoff,
+%      {\em NC Machine Programming and Software Design},
+%      Prentice--Hall, Englewood Cliffs, New Jersey, 1989.
+
+\bibitem{court:1925}
+     Nathan Altshiller--Court,
+     {\em College Geometry},
+     Johnson Publishing Co., Richmond, Virginia, 1925.
+
+\bibitem{dandelin:1822}
+     G. P. Dandelin,
+     M\'{e}moire sur quelques propri\'{e}t\'{e}s remarquables de la Focal
+     Parabolique,
+     {\em Nouveaux M\'{e}moires de l'Acad\'{e}mie Royale des Sciences et
+     Belles--lettres de Bruxelles},
+     Vol. 2 (1822), pp. 171--202.
+
+\bibitem{davis:1949}
+     David R. Davis,
+     {\em Modern College Geometry},
+     Addison--Wesley, 1949.
+
+\bibitem{drew:1875}
+     William H. Drew,
+     {\em A Geometrical Treatise on Conic Sections},
+     fifth edition,
+     Macmillan and Co., 1875.
+
+\bibitem{hilbert:1983}
+     D. Hilbert and S. Cohn--Vossen,
+     {\em Geometry and the Imagination},
+     translated by P. Nememyi,
+     Chelsea, New York, 1983.
+
+\bibitem{HOF89}
+     Christoph M. Hoffmann,
+     {\em Geometric and Solid Modeling},
+     Morgan Kaufmann, San Mateo, California, 1989.
+
+\bibitem{johnson:1929}
+     Roger A. Johnson,
+     {\em Modern Geometry},
+     Houghton Mifflin Co., New York, 1929.
+
+\bibitem{JS91}
+     John K. Johnstone and C.-K. Shene,
+     {\em Computing the intersection of a plane and a natural quadric},
+     Technical Report 91-04, Dept. of Computer Science, Johns Hopkins 
+     University, April 1991 (revised June 1991).
+
+\bibitem{macaulay:1895}
+     Francis S. Macaulay,
+     {\em Geometrical Conics},
+     Cambridge University Press, London, 1895.
+
+\bibitem{MANT88}
+     M. {M\"{a}ntyl\"{a}},
+     {\em An Introduction to Solid Modeling},
+     Computer Science Press, Rockville, Maryland, 1988.
+
+\bibitem{MiGo91}
+     James R. Miller and Ronald N. Goldman,
+     Using Tangent Balls to Find Plane Sections of Natural Quadrics,
+     {\em IEEE Computer Graphics and Applications}, 
+     Vol. 12, No. 2, March, 1992, pp. 68--82.
+
+\bibitem{morton:1830}
+     Pierce Morton,
+     On the Focus of a Conic Section,
+     {\em Transactions of the Cambridge Philosophical Society},
+     Vol. 3 (1827--1830), pp. 185--191.
+
+\bibitem{salmon:1954}
+     George Salmon,
+     {\em A Treatise on Conic Sections},
+     sixth edition,
+     reprinted by Chelsea, New York, 1954.
+
+\bibitem{shene:1991}
+     Ching-Kuang Shene and John K. Johnstone,
+     On the Planar Intersection of Natural Quadrics,
+     {\em ACM Symposium on Solid Modeling Foundations and
+     CAD/CAM Applications}, 
+     June, 1991, pp. 233--242.
+
+\end{thebibliography}
+
+\end{document}

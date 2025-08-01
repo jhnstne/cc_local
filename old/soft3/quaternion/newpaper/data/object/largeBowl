@@ -1,0 +1,8 @@
+[ FILE: largeBowl
+  A scene consisting solely of the large bowl, 
+  for compatibility with quaternionSpline.cpp 
+  (which accepts an arbitrary style object in scene format).
+]
+{
+REVOSURF ../data/object/largebowl.pts .5 0 0 0
+}

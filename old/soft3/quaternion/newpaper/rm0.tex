@@ -1,0 +1,1298 @@
+\documentclass[12pt]{article}
+\usepackage{times}
+\usepackage[pdftex]{graphicx}
+\usepackage{amssymb}
+\input{header-consecutive}
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{0in}
+\setlength{\textheight}{8.6in}
+\setlength{\textwidth}{6.875in}
+\setlength{\columnsep}{5mm}
+\markright{\hfill \today \hfill}
+\pagestyle{myheadings}
+
+% -----------------------------------------------------------------------------
+\title{A characterization of rational maps to the sphere\\[5pt]
+       {\small UAB Technical Report}} % \\January-February 2005}}
+\author{John K. Johnstone\thanks{Supported in part by the National 
+        Science Foundation under grant CCR0203586.}}
+        % Johnstone and Williams
+\begin{document}
+\maketitle
+
+% ask Ian Knowles for a suggestion of a mathematical journal
+
+\begin{abstract}
+A characterization of rational maps from Euclidean space 
+to the hypersphere \Sn{n-1} in $n$-space
+is developed, including a formula that generates all of these maps.
+This normal form explains the presence of point singularities in these maps.
+A characterization of arbitrary Pythagorean tuples is also developed,
+generalizing earlier characterizations of Pythagorean triples and quadruples.
+% The definition of a rational quaternion spline reduces to the discovery
+% of a rational map to the 3-sphere \Sn{3} \cite{jjjimbo95a}.
+\end{abstract}
+
+\noindent
+Keywords: sphere, rational map, pole, Pythagorean tuple, 
+          Euler's Four Squares Theorem.
+
+\section{Introduction}
+
+A study of maps to the sphere, the subject of this paper,
+allows computation in Euclidean space to be translated to the sphere.
+This is useful since computation on the sphere is common.
+% Much computation is carried out on the sphere,
+% throughout mathematics and computer science 
+For example, in our research, 
+maps to the sphere arise in the design of quaternion splines,
+which are modeled on the 3-sphere in 4-space.
+(Quaternion splines are used for orientation control in motion design.)
+A map to the 3-sphere reduces the problem of curve design on the 3-sphere
+to the simpler problem of curve design in Euclidean space.
+Basically, the curve is designed in Euclidean space 
+and then mapped to the sphere \cite{rq1}.
+%
+In general, a better understanding of the sphere, including maps to the sphere, 
+is beneficial because of the sphere's centrality to mathematics.
+
+In this paper, we concentrate on rational maps to the sphere.
+We develop a characterization of rational maps from Euclidean space
+to the hypersphere in arbitrary dimensions, $f : \mathbb{R}^m \rightarrow \Sn{n}$.
+Rational maps to the hypersphere are well understood in 2-space and 3-space,
+but they are not well understood in 4-space or in higher dimensions.
+The restriction to rationality defines the main challenge.
+It is motivated by the many advantages of rational over nonrational constructs,
+such as efficiency, conciseness, representational ability, and 
+compatibility with rational numerical techniques.
+For example, in our work, a rational map allows the design of rational Bezier
+quaternion splines.
+
+Our tool for building a normal form for rational maps to the sphere
+is the Pythagorean tuple, and along the way we develop a complete characterization
+of the Pythagorean tuple as well, extending previous characterizations of
+Pythagorean triples and quadruples.
+%
+The development of a normal form for rational maps to the sphere also
+explains the necessary presence of point singularities (or poles) in these maps,
+which is a fundamental issue in working with them.
+% One of the most fundamental [burning] questions is: why do rational maps to the
+% sphere always have poles?
+ 
+The rest of the paper unfolds as follows.
+% The rest of the paper is structured as follows.
+Section~\ref{sec:prev} reviews previous work on maps to the sphere.
+Section~\ref{sec:ratpy} establishes the equivalence of rational maps 
+to the sphere and Pythagorean tuples.
+Section~\ref{sec:prevpyth} reviews previous work on Pythagorean triples 
+and quadruples, and introduces Euler's Four Squares Theorem, a tool
+for the construction of more general tuples.
+Section~\ref{sec:normpyth} establishes a normal form for general Pythagorean 
+tuples, including a better characterization of Pythagorean quadruples.
+Section~\ref{sec:char} provides the advertised normal form for rational maps 
+to the sphere.
+It also applies the normal form to the construction of
+important rational maps, some old and some new.  
+% It also shows how to generate known Pythagorean tuples from the normal form.
+Section~\ref{sec:pole} discusses the inevitability of poles
+and Section~\ref{sec:conclude} ends the paper with conclusions.
+We end this introduction with two formal definitions,
+of the sphere and the rational map.
+
+% in other papers:
+% an analysis of the inverse maps % from the sphere to Euclidean space 
+% (which are typically not rational), 
+% [We could include the image of a rational Bezier curve under these maps, 
+% if more is needed.  But I think that this is more natural in the paper on quaternion 
+% splines, which also addresses avoidance of the poles, divide and conquer, and hence
+% derivatives. Delay discussion of stereographic projection to this second paper too,
+% since only its inverse is a map to the sphere and we heavily use s.p. in building'
+% rational quaternion splines]
+%
+
+\begin{defn2}
+\Sn{n}\ is the unit sphere in $(n+1)$-space $x_1^2 + \ldots + x_{n+1}^2 - 1 = 0$,
+a manifold of dimension $n$.
+\end{defn2}
+
+\begin{defn2}
+A map $(x_1,\ldots,x_n) \mapsto (f_1 (x_1,\ldots,x_n),\ldots,f_m (x_1,\ldots,x_n))$
+is {\bf rational} if 
+the $f_i$ are all rational polynomials in $x_1,\ldots,x_n$, $i=1,\ldots,m$.
+A {\bf rational polynomial} is a quotient of polynomials.
+\end{defn2}
+
+% -----------------------------------------------------------------------------
+
+\section{Previous work on maps to the sphere}
+\label{sec:prev}
+
+Cartographers have long wrestled with the problem of mapping the spherical earth
+to a flat page.
+As a result, there are many maps from the 2-sphere to the plane in the literature,
+whose inverses are maps from a Euclidean space to the 2-sphere.
+The many famous examples, such as the Mercator projection, the mapping of Sanson,
+the mapping of Bonne, and the Lambert projection \cite{kreyszig59},
+illustrate the challenge of developing rational maps.
+None of these classical maps are rational since, in the design 
+of cartographic maps, 
+properties such as conformality (preservation of angles between 
+intersecting curves) and equiareality (preservation of area) are more important 
+than rationality.
+% (the ability to express the map in terms of quotients of polynomials).
+For example, the Mercator projection maps the point
+$(\cos u \cos v,\ \cos u \sin v,\ \sin u)$ on the 2-sphere 
+to the point $(v,\ \log \tan (\frac{u}{2} + \frac{\pi}{4}))$ on the plane.
+
+A rare rational map that proves the exception to these famous nonrational maps
+is the even more classical map of stereographic projection
+(used at least since Hipparch in 160 B.C.). %  \cite{kreyszig59}
+This is a rational map from the sphere to the plane
+whose inverse is also rational. 
+Stereographic projection is the map from 
+$\Sn{n} - (0,\ldots,0,1)$ to $x_{n+1}=0$ defined by:
+\[ (x_1,\ldots,x_{n+1}) \mapsto \frac{1}{1-x_{n+1}} (x_1,\ldots,x_n,0) \]
+% The projector line $tp + (1-t)q$ through $p = (x_1,\ldots,x_{n+1})$ 
+% and $q = (0,\ldots,0,1)$ intersects $x_{n+1}=0$ 
+% when $tx_{n+1} + (1-t) = 0$ or $t = \frac{1}{1-x_{n+1}}$.
+in which a point of \Sn{n}\ is perspectively projected from 
+the north pole of \Sn{n}\ to $x_{n+1}=0$.  % \cite{thorpe79}. % or kreyszig59
+Its inverse from
+$x_{n+1}=0$ to $\Sn{n} - (0,\ldots,0,1)$ is defined by:
+\begin{equation}
+\label{eq:spinverse}
+(x_1,\ldots,x_n,0) \mapsto
+	\frac{1}{x_1^2 + \cdots + x_n^2 + 1} 
+	(2x_1, \ldots, 2x_n, x_1^2 + \cdots + x_n^2 - 1).
+\end{equation}
+% see thorpe79, p. 125
+(To establish this result, note that the projector line through $(r,0)$ 
+and $q = (0,\ldots,0,1)$, $t(r,0) + (1-t)q$
+intersects \Sn{n} at $t=0$ and $t=\frac{2}{\|r\|^2 + 1}$.)
+
+Another source of maps to the sphere is parameterizations of the sphere.
+After all, a parameterization of an $n$-manifold is a map of $n$-space
+to the manifold.
+The classical rational parameterization of \Sn{2}, constructed using the
+spherical product of a semi-circle and a circle \cite{barr81},
+% $(a(u),b(u)) \times (c_1(v_1,...,v_{n-1}),\ldots,c_n(v_1,\ldots,v_{n-1}) 
+% = (a c_1, \ldots, a c_{n-1}, b c_n)$.
+% The spherical product is a general scheme for sweeping one curve along another,
+% while modulating its size.
+is the following rational map of 2-space to the sphere:
+\begin{equation}
+\label{eq:s2param}
+S(u,v) = (\frac{1-u^2}{1+u^2}(\frac{1-v^2}{1+v^2}),\  
+          \frac{1-u^2}{1+u^2}(\frac{2v}{1+v^2}),\  \frac{2u}{1+u^2}),\ 
+u \in [-1,1],\ v \in (-\infty,+\infty)
+\end{equation}
+The restriction of $u$ to $[-1,1]$
+can be removed without problem, thereby making this a true map of all of Euclidean
+space to the sphere: the map then double covers the sphere.
+This paramerization of the sphere can be generalized to arbitrary dimensions, using
+repeated spherical products.
+% Rational parameterizations are of interest for the development of rational Bezier or
+% NURBS representations of the sphere.
+
+% -----------------------------------------------------------------------------
+
+\section{A Reduction to Pythagorean Tuples}
+\label{sec:ratpy}
+
+A key observation in the characterization of rational maps to the sphere is their
+equivalence to Pythagorean tuples.
+A Pythagorean tuple satisfies a sum of squares relationship,
+generalizing the sum of squares relationship between the sides of a right triangle
+in the Pythagorean Theorem.
+
+\begin{defn2}
+A {\bf Pythagorean $n+1$-tuple over $K$} % n+1-tuple is clear from context
+is a tuple $(f_1,\ldots,f_{n+1}) \in K^{n+1}$
+where $f_1^2 + \ldots + f_n^2 = f_{n+1}^2$.
+\end{defn2}
+
+% n --> m
+Consider a rational map to the sphere $f: \mathbb{R}^m \rightarrow \Sn{n-1}$:
+\[
+	f(x_1,\ldots,x_m) =
+	(\frac{f_1(x_1,\ldots,x_m)}{f_{n+1}(x_1,\ldots,x_m)}, \ldots,
+	 \frac{f_n(x_1,\ldots,x_m)}{f_{n+1}(x_1,\ldots,x_m)})
+\]
+where $f_1,\ldots,f_{n+1}$ are polynomials.
+Since $f$ maps to the unit sphere at the origin:
+\begin{eqnarray}
+       (\frac{f_1}{f_{n+1}})^2 + \cdots + (\frac{f_n}{f_{n+1}})^2 & = & 1 \\
+	f_1^2 + \cdots + f_n^2 & = & f_{n+1}^2.
+\end{eqnarray}
+That is, the components of the rational map define a Pythagorean $(n+1)$-tuple
+over the ring of polynomials $\mathbb{R}[x_1,\ldots,x_m]$.
+Therefore, rational maps to \Sn{n-1} can be identified with Pythagorean $(n+1)$-tuples.
+
+\begin{lemma}
+\label{lem:ratpy}
+The rational map $f: \mathbb{R}^m \rightarrow \mathbb{R}^n$ defined by 
+$f = (\frac{f_1}{f_{n+1}},\ldots,\frac{f_n}{f_{n+1}})$ (where $f_1,\ldots,f_{n+1}$
+are polynomials) is a rational map 
+to the sphere \Sn{n-1} if and only if
+the $n+1$-tuple $(f_1,\ldots,f_{n+1})$ of polynomials is Pythagorean.
+\end{lemma}
+
+\Comment{
+\begin{defn2}
+$\mathbb{R}[x_1,\ldots,x_n]$ is the ring of polynomials in the $n$ variables
+$x_1,\ldots,x_n$ with real coefficients.
+\end{defn2}
+}
+
+% This reduces the study of rational maps from $\mathbb{R}^{n}$ to \Sn{m-1}\ 
+% to the study of Pythagorean $(m+1)$-tuples over polynomials $\mathbb{R}[x_1,\ldots,x_n]$.
+
+% \begin{lemma}
+% \label{lem:iffpyth}
+% A rational map $f: \mathbb{R}^n \rightarrow \mathbb{R}^m$ defined by 
+% $f(x_1,\ldots,x_n) = (\frac{f_1(x_1,\ldots,x_n)}{f_{m+1}(x_1,\ldots,x_n)}, \ldots,
+%	 \frac{f_m(x_1,\ldots,x_n)}{f_{m+1}(x_1,\ldots,x_n)})$,
+% where $f_1,\ldots,f_{m+1} \in \mathbb{R}[x_1,\ldots,x_n]$, is a rational map from $\mathbb{R}^n$
+% to the sphere \Sn{m-1}\ if and only if $(f_1,\ldots,f_{m+1})$ is a Pythagorean
+% $(m+1)$-tuple over polynomials $\mathbb{R}[x_1,\ldots,x_n]$.
+% \end{lemma}
+
+% notice that m+1-tuples map to m-1-sphere
+
+Pythagorean tuples and sums of squares have been heavily studied in number theory.
+An examination of this literature will lead us to a characterization of rational maps
+to the sphere.
+We begin with a review of Pythagorean triples and Pythagorean quadruples,
+which are well known.
+We then consider Euler's fundamental work on the sum of four squares,
+which can be related to Pythagorean quintuples.
+This leads to a characterization of Pythagorean quintuples, then general 
+Pythagorean tuples, and finally to rational maps to \Sn{3}
+% Although this work does not yield a full characterization of Pythagorean quintuples,
+% it is sufficient to characterize rational maps to \Sn{3}.
+and rational maps to \Sn{n}.
+% by generalizing the technique for Pythagorean quintuples, 
+% using Ammei's generalization of Euler's result.
+Special attention is given to Pythagorean quintuples and the associated
+maps to \Sn{3}, since they define the first step of generalization past
+the known territory of Pythagorean quadruples.
+(They also have particular import for our research with quaternion splines
+on the 3-sphere.)
+
+% Since there is flexibility in which Euclidean space is involved, we consider a general
+% Euclidean space.
+
+% -----------------------------------------------------------------------------
+
+\section{Previous Work on Pythagorean Tuples}
+\label{sec:prevpyth}
+
+\subsection{Pythagorean triples}
+
+It is a classical result for $K = \mathbb{Z}$ (the field of integers),
+generalized to $K = \mathbb{P}$ (the ring of polynomials) 
+by Kubota \cite{kubota72},
+that a triple over K is Pythagorean if and only if
+it is of the form 
+\[
+\alpha(a_1^2 - a_2^2, 2a_1a_2, a_1^2 + a_2^2)
+\]
+for some $a_1,a_2,\alpha \in K$.
+  % p. 89, Ebbinghaus, Numbers
+(Whenever we give a normal form for a Pythagorean $(n+1)$-tuple,
+it is understood that the first $n$ elements are free to undergo
+a permutation.)
+Farouki and Sakkalis \cite{farouki90} use
+Kubota's result to define Pythagorean hodograph curves
+with attractive arc length and offset properties,
+whose hodographs are components of a Pythagorean triple
+of polynomials.
+  % which among other things have polynomial arc length (in the curve parameter).
+To illustrate the association between Pythagorean triples and rational maps to \Sn{1},
+note that the standard rational parameterization for \Sn{1} 
+may be developed from the normal form for Pythagorean triples 
+using $(a_1,a_2,\alpha) = (1,t,1)$:
+$(\frac{1-t^2}{1+t^2}, \frac{2t}{1+t^2})$.
+
+\subsection{Pythagorean quadruples}
+
+A quadruple over $K$ is Pythagorean if and only if it is of the form
+\begin{equation}
+\label{eq:quad}
+\alpha (a_1^2+a_2^2-a_3^2-a_4^2,\ 2a_1a_3+2a_2a_4,\ 2a_1a_4-2a_2a_3,
+\ a_1^2+a_2^2+a_3^2+a_4^2)
+\end{equation}
+for some $a_1,a_2,a_3,a_4,\alpha \in K$.
+This normal form for Pythagorean quadruples was established 
+for $K = \mathbb{Z}$ by Catalan \cite{catalan85}.
+It was generalized to $K = \mathbb{R}[x_1]$, 
+$\mathbb{R}[x_1,x_2]$ and 
+$\mathbb{R}[x_1,x_2,x_3]/\hspace{-.05in}<\hspace{-.05in}
+x_1+x_2+x_3-1
+\hspace{-.05in}>$ 
+by Dietz et. al. \cite{dietz93}, who used the rational map to \Sn{2}\ 
+resulting from the choice $(a_1,a_2,a_3,a_4) = (x_1,x_2,x_3,1)$.
+% (with a permutation (1,2,3) to (3,2,1)) 
+The standard rational parameterization (\ref{eq:s2param}) of \Sn{2} mentioned
+in Section~\ref{sec:prev}
+may be developed from the normal form (\ref{eq:quad})
+using $(a_1,a_2,a_3,a_4,\alpha) = (1,uv,u,v,1)$.
+% and a permutation.
+% $\frac{1}{1+u^2+v^2+u^2v^2}(1-u^2-v^2+u^2v^2, 2v - 2u^2v,2u+2uv^2)$.
+
+\subsection{The sum of four squares}
+
+There is an extensive study of the sum of four squares in the 
+number theory literature, which can be related to Pythagorean quintuples
+since these are of the form $f_1^2 + f_2^2 + f_3^2 + f_4^2 = f_5^2$.
+Moreover, this development can be generalized to arbitrary Pythagorean tuples.
+
+The study of four squares in the eighteenth century
+was driven by the elusive search for a proof that
+every positive integer is the sum of the squares of four integers.
+This famous result was apparently known to Diophantus in the third century,
+since he assumes it implicitly in his writings \cite{dickson52}, % p. 275
+and Fermat % (in characteristic fashion!) 
+claimed that he had a proof.
+% \footnote{"I can
+% 	not give the proof here, which depends upon numerous and abstruse
+%	mysteries of numbers; for I intend to devote an entire book
+%	to this subject" \cite[p. 6]{dickson52}.}
+However, the first published proof was by Lagrange in 1770 \cite{herstein75}, % p. 375
+over a century later,
+during which time many mathematicians worked on the problem.
+One of the mathematicians who was intensely interested in this problem was Euler, 
+and he established the following important result in 1748 \cite{weil84}.   
+        % p. 226 of Weil
+        % p. 209 of Ebbing, p. 373 of Herstein herstein75
+	% p. 210, Ebbinghaus for any commutative ring and Gauss' proof
+	% another bulky version in \cite[p. 277]{dickson52}.
+
+\begin{theorem}[Euler's Four Squares Theorem]
+\label{thm:euler}
+\[
+\begin{array}{ll}
+& (a_1^2 + a_2^2 + a_3^2 + a_4^2) 
+(\hat{a}^2_1 + \hat{a}^2_2 + \hat{a}^2_3 + \hat{a}^2_4) = \\
+& (a_1 \hat{a}_1 + a_2\hat{a}_2 + a_3\hat{a}_3 + a_4\hat{a}_4)^2 +
+  (a_1 \hat{a}_2 - a_2\hat{a}_1 - a_3\hat{a}_4 + a_4\hat{a}_3)^2 + \\
+& (a_1\hat{a}_3 + a_2\hat{a}_4 - a_3\hat{a}_1 - a_4\hat{a}_2)^2 +
+  (a_1\hat{a}_4 - a_2\hat{a}_3 + a_3\hat{a}_2 - a_4\hat{a}_1)^2
+\end{array}
+\]
+for any integers $a_1,a_2,a_3,a_4,\hat{a}_1,\hat{a}_2,\hat{a}_3,\hat{a}_4$.
+%(but it can easily be generalized to polynomials, or any elements of a commutative ring).
+% \footnote{The original statement was for integers, but it easily generalizes.}
+% see p. 210 of Ebbinghaus
+\end{theorem}
+%
+\Comment{
+% version in Herstein (called Lagrange's identity) and Ebbinghaus
+% the version directly attributed to Euler in Dickson and Weil is cleaner, so we use it
+USING THE DICKSON FORM:
+% another version of Euler's 4-squares theorem
+\begin{lemma}[Euler's Four Squares Theorem \cite{herstein75}]
+\label{lem:euler}
+% p. 373 of Herstein
+\[
+\begin{array}{ll}
+& (a_1^2 + a_2^2 + a_3^2 + a_4^2) 
+(\hat{a}^2_1 + \hat{a}^2_2 + \hat{a}^2_3 + \hat{a}^2_4) = \\
+& (a_1 \hat{a}_1 - a_2\hat{a}_2 - a_3\hat{a}_3 - a_4\hat{a}_4)^2 +
+   (a_1\hat{a}_2 + a_2\hat{a}_1 + a_3\hat{a}_4 - a_4\hat{a}_3)^2 + \\
+& (a_1\hat{a}_3 - a_2\hat{a}_4 + a_3\hat{a}_1 + a_4\hat{a}_2)^2 +
+   (a_1\hat{a}_4 + a_2\hat{a}_3 - a_3\hat{a}_2 + a_4\hat{a}_1)^2
+\end{array}
+\]
+where $a_1,a_2,a_3,a_4,\hat{a}_1,\hat{a}_2,\hat{a}_3,\hat{a}_4$ are elements of a
+commutative ring.
+% \footnote{The original statement was for integers, but it easily generalizes.}
+% see p. 210 of Ebbinghaus
+\end{lemma}
+
+\begin{corollary}
+\label{lem:suff4}
+$(a_1^2 + a_2^2 + a_3^2 - a_4^2,\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,\ 
+ a_1^2 + a_2^2 + a_3^2 + a_4^2)$
+is a Pythagorean quintuple for any polynomials $a_1,a_2,a_3,a_4$.
+\end{corollary}
+\prf
+Let $(\hat{a}_1,\hat{a}_2,\hat{a}_3,\hat{a}_4) = (a_1,-a_2,-a_3,a_4)$. 
+\QED
+}
+%
+This result, which is also called Lagrange's identity \cite{herstein75}, % p. 373
+establishes that the product of two sums of four squares is another sum of four squares,
+reducing the problem of showing that every integer is the sum of four squares to 
+the simpler problem of showing that every prime is the sum of four squares.
+  % since every integer may be expressed as the product of primes.
+
+However, for our purposes, 
+Euler's Four Squares Theorem is a Pythagorean quintuple generator.
+
+\begin{corollary}
+\label{cor:euler}
+\begin{equation}
+\label{eq:aida}
+(a_1^2 + a_2^2 + a_3^2 - a_4^2)^2 + (2a_1a_4)^2 + (2a_2a_4)^2 + (2a_3a_4)^2
+= (a_1^2 + a_2^2 + a_3^2 + a_4^2)^2
+\end{equation}
+for any integers $a_1,a_2,a_3,a_4$.
+  % where $a_1,a_2,a_3,a_4$ are elements of any commutative ring.
+\end{corollary}
+\prf
+(\ref{eq:aida}) is generated by substituting 
+$(\hat{a}_1,\hat{a}_2,\hat{a}_3,\hat{a}_4) = (a_1,a_2,a_3,-a_4)$.
+This is the next obvious choice after 
+$(\hat{a}_1,\hat{a}_2,\hat{a}_3,\hat{a}_4) = (a_1,a_2,a_3,a_4)$,
+which yields a tautology.
+% This proves the result for integers.
+% The Four Squares Theorem may easily be generalized to polynomials, 
+% or any elements of a commutative ring (see Definition~\ref{defn:commring} below), 
+% such as the rationals and rational polynomials.
+% It can be further generalized to rational numbers or rational polynomials
+% by placing these numbers or polynomials over a least common multiple,
+% which then factors out.
+\QED
+
+Ammei \cite{dickson52} % p. 318 (circa 1817)
+generalized Corollary~\ref{cor:euler} as follows,
+which we can use as a general Pythagorean tuple generator.
+
+\begin{lemma}[Ammei]	% c. 1817
+\label{lem:ammei}
+\begin{equation}
+\label{eq:ammei}
+(a_1^2 + \cdots + a_{n-1}^2 - a_n^2)^2 + (2a_1a_n)^2 + \ldots + (2a_{n-1}a_n)^2 
+= (a_1^2 + \cdots + a_n^2)^2
+\end{equation}
+where $n \geq 2$, $a_1,\ldots,a_n \in K$ and $K$ is any commutative ring, 
+\end{lemma}
+
+% A {\bf commutative ring} is a ring in which multiplication is commutative. % obvious
+Examples of commutative rings are the integers $\mathbb{Z}$, 
+rational numbers $\mathbb{Q}$, real numbers $\mathbb{R}$, polynomials $\mathbb{P}$
+(over the integers, rationals, or reals),
+and rational polynomials $\mathbb{QP}$ (over the integers, rationals, or reals).
+
+\Comment{
+    \section{A Characterization of Rational Maps of $\mathbb{R}^4$ to \Sn{3}}
+
+    Euler's Four Squares Theorem may be used to develop
+    a weak\footnote{It is weak in the sense of its relaxed restriction on $\alpha$,
+    as discussed below.} 
+    normal form for Pythagorean quintuples.
+
+    % VERSION FOR DICKSON FORM OF 4-SQUARE THEOREM  
+    We get the following formula by letting 
+    $(\hat{a}_1,\hat{a}_2,\hat{a}_3,\hat{a}_4) = (a_1,-a_2,-a_3,a_4)$
+    in the Four Squares Theorem:
+    % \label{lem:corEuler4square}
+    \begin{equation}
+    \label{eq:aida}
+    (a_1^2 + a_2^2 + a_3^2 - a_4^2)^2 + (2a_1a_4)^2 + (2a_2a_4)^2 + (2a_3a_4)^2
+    = (a_1^2 + a_2^2 + a_3^2 + a_4^2)^2
+    \end{equation}
+    % where $a_1,a_2,a_3,a_4$ are elements of any commutative ring.
+}
+
+% This exhausts the related previous work on Pythagorean tuples.
+
+% -------------------------------------------------------------------------------
+
+\section{A normal form for Pythagorean tuples}
+\label{sec:normpyth}
+
+We are not aware of any specific study of Pythagorean quintuples.
+However, Corollary~\ref{cor:euler} leads to a normal form for Pythagorean 
+quintuples.
+
+\begin{lemma}
+\label{lem:quint}
+A quintuple over K is Pythagorean if and only it is of the form
+\begin{equation}
+\label{eq:pythquint}
+	\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+		\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+		\ a_1^2 + a_2^2 + a_3^2 + a_4^2)
+\end{equation}
+for some $a_1,a_2,a_3,a_4 \in K$, $\alpha\neq 0 \in K$, 
+where $K = \mathbb{Q}, \mathbb{R}$ or $\mathbb{QP}$.\footnote{We need a
+  commutative ring closed under quotient (so $\mathbb{Z}$ and $\mathbb{P}$ 
+  do not work) because we introduce quotients in the proof.}
+\end{lemma}
+\prf
+(If:)
+Suppose that $Q = \alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+		\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+		\ a_1^2 + a_2^2 + a_3^2 + a_4^2)$ is a quintuple over $K$.
+By Corollary~\ref{cor:euler}, $\frac{1}{\alpha} Q$ is a Pythagorean quintuple.
+But any nonzero multiple of a Pythagorean tuple is also a Pythagorean tuple,
+so $Q$ is a Pythagorean quintuple.
+
+(Only if:) 
+Let $Q = (p_1,p_2,p_3,p_4,p_5)$ be a Pythagorean quintuple over $K$.
+% and let $f(a_1,a_2,a_3,a_4,\alpha)$ be a shorthand for the normal form
+% $\frac{1}{\alpha} (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+%		 \ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+%		 \ a_1^2 + a_2^2 + a_3^2 + a_4^2)$.
+
+If $p_1 = p_5$, then $p_1^2 + \ldots p_4^2 = p_5^2$ 
+implies $p_2^2 + p_3^2 + p_4^2 = 0$ or $p_2=p_3=p_4=0$
+and $Q = (p_1,0,0,0,p_1)$.\footnote{Care must be taken 
+  to choose $K$ so that $p_2^2 + p_3^2 + p_4^2 = 0$ has no nontrivial solutions.
+  For example, if $K = \mathbb{C}$, $(p_2,p_3,p_4)=(i,1,0)$ 
+  would be a nontrivial solution.}
+The substitution $(a_1,a_2,a_3,a_4,\alpha) = (p_1,0,0,0,\frac{1}{p_1})$ into the
+normal form yields $Q$.
+
+If $p_1 \neq p_5$, then the substitution 
+$(a_1,a_2,a_3,a_4,\alpha) = 
+ (\frac{p_2}{2(p_5-p_1)},
+  \frac{p_3}{2(p_5-p_1)},
+  \frac{p_4}{2(p_5-p_1)},
+  \frac{1}{2}, 2(p_5-p_1))$ into the normal form yields $Q$.
+To see this, note that
+\begin{eqnarray*}
+  \alpha(a_1^2 + a_2^2 + a_3^2 - a_4^2)
+& = & 2(p_5-p_1) \frac{p_2^2 + p_3^2 + p_4^2 - (p_5 - p_1)^2}{(2(p_5-p_1))^2} \\
+& = & \frac{(p_5^2 - p_1^2) - (p_5 - p_1)^2}{2(p_5 - p_1)} \\
+& = & \frac{-2p_1^2 + 2p_1p_5}{2(p_5 - p_1)} = p_1
+\end{eqnarray*}
+where we use the Pythagorean property $p_1^2 + p_2^2 + p_3^2 + p_4^2 = p_5^2$
+in the second equation.
+Secondly, note that
+\[
+\alpha (2a_i a_4) = 2(p_5-p_1)\frac{p_{i+1}}{p_5-p_1}\frac{1}{2}
+= p_{i+1}
+\]
+for $i=1,2,3$.
+Finally, note that 
+\begin{eqnarray*}
+\alpha(a_1^2 + a_2^2 + a_3^2 + a_4^2)
+& = & \frac{p_2^2 + p_3^2 + p_4^2 + (p_5 - p_1)^2}{2(p_5-p_1)} 
+= \frac{(p_1^2 + p_2^2 + p_3^2 + p_4^2) + p_5^2 -2p_1p_5}{2(p_5-p_1)} \\
+& = & \frac{2p_5^2 - 2p_1p_5}{2(p_5-p_1)} 
+= p_5
+\end{eqnarray*}
+\QED
+
+\Comment{
+\noindent The following lemma establishes a weaker version of the necessary condition
+associated with Corollary~\ref{lem:suff4}.
+This in turn leads to the desired necessary and sufficient condition for rational maps
+of $\mathbb{R}^4$ to \Sn{3}.
+
+\begin{lemma}
+\label{thm:necessary4}
+A quintuple of polynomials is Pythagorean only if it can be expressed in the form
+\begin{equation}
+\label{eq:pyth}
+	\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+		\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+		\ a_1^2 + a_2^2 + a_3^2 + a_4^2)
+\end{equation}
+for some polynomials $a_1,a_2,a_3,a_4,\frac{1}{\alpha}$.
+\end{lemma}
+\prf
+Let $(p_1,p_2,p_3,p_4,p_5)$ be a Pythagorean quintuple of polynomials.
+If $p_1 = p_5$, let\\
+$(a_1,a_2,a_3,a_4,\alpha) = (p_1,0,0,0,\frac{1}{p_1})$.
+Thus, we may assume without loss of generality that $p_1 \neq p_5$.
+Let $(a_1,a_2,a_3,a_4,\alpha) = (p_2,p_3,p_4,p_5-p_1,\frac{1}{2(p_5 - p_1)})$.
+Then $a_1,a_2,a_3,a_4,\alpha$ generate the Pythagorean quintuple
+$(p_1,\ldots,p_5)$ as in (\ref{eq:pyth}).
+In particular,
+\[
+\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2)
+= \frac{p_2^2 + p_3^2 + p_4^2 - (p_5 - p_1)^2}{2(p_5-p_1)}
+\]
+and applying $p_1^2 + p_2^2 + p_3^2 + p_4^2 = p_5^2$,
+\[
+\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2) = \frac{-2p_1^2 + 2p_1p_5}{2(p_5 - p_1)} = p_1.
+\]
+Also, 
+\[
+\alpha (2a_i a_4) = \frac{2p_{i+1}(p_5 - p_1)}{2(p_5 - p_1)} = p_{i+1}
+\]
+for $i=1,2,3$.
+Finally, 
+\[
+\alpha(a_1^2 + a_2^2 + a_3^2 + a_4^2) 
+= \frac{p_2^2 + p_3^2 + p_4^2 + (p_5 - p_1)^2}{2(p_5-p_1)} = p_5
+\]
+Thus, $(p_1,p_2,p_3,p_4,p_5) = \alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+		\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+		\ a_1^2 + a_2^2 + a_3^2 + a_4^2)$.
+\QED
+} % of \Comment
+
+\Comment{
+  OTHER VERSION:
+  This formula is very close to a normal form for Pythagorean quintuples.
+
+  \begin{theorem}
+    \label{thm:necessary4}
+    A quintuple over K is a Pythagorean quintuple if and only it is of the form
+    \begin{equation}
+      \label{eq:pythquint}
+      \frac{1}{\alpha} (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+      \ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+      \ a_1^2 + a_2^2 + a_3^2 + a_4^2)
+    \end{equation}
+    for some $a_1,a_2,a_3,a_4,\alpha\neq 0 \in K$, 
+    where $K$ is the ring of integers
+    or polynomials over $\mathbb{R}[x_1,x_2,\ldots,x_n]$.
+    % NB: proof not valid for comm. ring, since comm. ring may not have unit elt 1, 
+    % which is needed immediately
+  \end{theorem}
+  \prf
+  (If:)
+   Suppose that $Q = \frac{1}{\alpha} (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+		\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+		\ a_1^2 + a_2^2 + a_3^2 + a_4^2)$ is a quintuple over $K$.
+   By Corollary~\ref{cor:euler}, $\alpha Q$ is a Pythagorean quintuple.
+   But any nonzero multiple of a Pythagorean tuple is also a Pythagorean tuple,
+   so $Q$ is also a Pythagorean quintuple.
+
+   (Only if:) 
+   Let $Q = (p_1,p_2,p_3,p_4,p_5)$ be a Pythagorean quintuple over $K$.
+   % and let $f(a_1,a_2,a_3,a_4,\alpha)$ be a shorthand for the normal form
+   % $\frac{1}{\alpha} (a_1^2 + a_2^2 + a_3^2 - a_4^2,  
+   %		 \ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+   %		 \ a_1^2 + a_2^2 + a_3^2 + a_4^2)$.
+   If $p_1 = p_5$, then $Q = (p_1,0,0,0,p_1)$
+   and the substitution $(a_1,a_2,a_3,a_4,\alpha) = (p_1,0,0,0,p_1)$ into the
+   normal form yields $Q$.
+   If $p_1 \neq p_5$, then the substitution 
+   $(a_1,a_2,a_3,a_4,\alpha) = (p_2,p_3,p_4,p_5 - p_1, 2(p_5 - p_1))$ into the normal
+   form yields $Q$.
+   To see this, note that
+   \[
+   \frac{a_1^2 + a_2^2 + a_3^2 - a_4^2}{\alpha}
+   = \frac{p_2^2 + p_3^2 + p_4^2 - (p_5 - p_1)^2}{2(p_5-p_1)}
+   = \frac{(p_5^2 - p_1^2) - (p_5 - p_1)^2}{2(p_5 - p_1)}
+   = \frac{-2p_1^2 + 2p_1p_5}{2(p_5 - p_1)} 
+   = p_1
+   \]
+   where we use the Pythagorean property in the second equation.
+   Secondly, note that
+   \[
+   \frac{2a_i a_4}{\alpha} = \frac{2p_{i+1}(p_5 - p_1)}{2(p_5 - p_1)} = p_{i+1}
+   \]
+   for $i=1,2,3$.
+   Finally, note that 
+   \[
+   \frac{a_1^2 + a_2^2 + a_3^2 + a_4^2}{\alpha}
+   = \frac{p_2^2 + p_3^2 + p_4^2 + (p_5 - p_1)^2}{2(p_5-p_1)} 
+   = \frac{(p_1^2 + p_2^2 + p_3^2 + p_4^2) + p_5^2 -2p_1p_5}{2(p_5-p_1)} 
+   = \frac{2p_5^2 - 2p_1p_5}{2(p_5-p_1)} 
+   = p_5
+   \]
+   \QED
+
+   Unfortunately, 
+   (\ref{eq:pythquint}) is not a sufficient condition for Pythagorean quintuples
+   over $\mathbb{R}[x_1,x_2,\ldots,x_n]$, since
+   a quintuple in the form (\ref{eq:pythquint}) is not necessarily
+   even a quintuple over $\mathbb{R}[x_1,x_2,x_3,x_4]$.
+   For example, $(a_1,a_2,a_3,a_4,\alpha) = (1,1,1,1,x_1)$ yields the
+   quintuple $(\frac{2}{x_1}, \frac{2}{x_1}, \frac{2}{x_1}, \frac{2}{x_1}, \frac{4}{x_1})$,
+   which is not ---.
+   However, it successfully yields a characterization
+   of the rational maps of $\mathbb{R}^4$ to \Sn{3}.\footnote{The weaker restriction on $\alpha$
+     suffices because of the cancellation of $\alpha$ as we translate from Pythagorean
+     tuples to rational maps, as illustrated in the proof.}
+
+   It suffices to establish a weaker version,
+   with a relaxed restriction on $\alpha$,
+   since our goal is not a characterization of Pythagorean tuples {\em per se},
+   but a characterization of rational maps to the sphere.
+} % \Comment
+
+\noindent This result generalizes, using Ammei's Lemma~\ref{lem:ammei}.
+
+\begin{theorem}
+\label{thm:general}
+An $n+1$-tuple over K, $n \geq 2$, is Pythagorean if and only if 
+it is of the form 
+\begin{equation}
+\label{eq:pyth2}
+	\alpha (a_1^2 + \ldots + a_{n-1}^2 - a_n^2,
+		\ 2a_1a_n,\ldots,\ 2a_{n-1}a_n,
+		\ a_1^2 + \ldots + a_n^2)
+\end{equation}
+for some $a_1,\ldots,a_n \in K$, $\alpha \neq 0 \in K$,
+where $K = \mathbb{Q}, \mathbb{R}$ or $\mathbb{QP}$.
+\end{theorem}
+\prf
+The proof is completely analogous to the proof of Lemma~\ref{lem:quint},
+replacing quintuple by $n+1$-tuple and 5 by $n+1$.
+\QED
+
+Theorem~\ref{thm:general} provides a stronger characterization of
+Pythagorean quadruples.
+Since Theorem~\ref{thm:general} applies for all $n \geq 2$,
+it characterizes Pythagorean triples, quadruples, and quintuples
+that have already been considered.
+It agrees with our previous characterizations for $n=2,4$ (Pythagorean triples
+and quintuples),
+but it yields another characterization for $n=3$, as can be seen 
+by comparing with (\ref{eq:quad}).
+This is not a contradiction: any Pythagorean quadruple
+may be expressed either in the form of (\ref{eq:quad})
+or in the form of Theorem~\ref{thm:general} with $n=3$:
+\[
+\alpha (a_1^2 + a_{2}^2 - a_3^2, \ 2a_1a_3,\ 2a_2a_3, \ a_1^2 + a_2^2 + a_3^2)
+\]
+%
+It turns out that if we set 
+$(a_1,a_2,a_3,a_4) = (\hat{a}_2, \hat{a}_1, 0, \hat{a}_3)$
+in the characterization (\ref{eq:quad}),
+the characterization of Theorem~\ref{thm:general} for $n=3$ is produced.
+Thus, the characterization of Theorem~\ref{thm:general} is actually stronger than
+(\ref{eq:quad}): not only can a Pythagorean quadruple
+be put in the form of (\ref{eq:quad}), it can be put in the form
+of (\ref{eq:quad}) with $a_3=0$.
+
+\section{A Characterization of Rational Maps to the Sphere}
+\label{sec:char}
+
+Through the identification of Pythagorean $n+1$-tuples and rational maps 
+to the sphere \Sn{n-1} (Lemma~\ref{lem:ratpy}),
+Theorem~\ref{thm:general} leads to the sought-after 
+characterization of rational maps to \Sn{n-1}.
+This is the main result of this paper.
+ 
+\Comment{
+\prf
+(Only if): Consider a rational map
+of $\mathbb{R}^m$ to \Sn{3}, $f(x_1,\ldots,x_m) \mapsto 
+(\frac{f_1}{f_5},\frac{f_2}{f_5},\frac{f_3}{f_5},\frac{f_4}{f_5})$,
+where $f_1,\ldots,f_5 \in \mathbb{R}[x_1,\ldots,x_m]$.
+Then $(f_1,\ldots,f_5)$ is a Pythagorean quintuple by Lemma~\ref{lem:ratpy} and 
+can be expressed as some permutation of
+$\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+2a_1a_4,2a_2a_4,2a_3a_4,$ $a_1^2 + a_2^2 + a_3^2 + a_4^2)$
+for some rational polynomials $a_1,a_2,a_3,a_4,\alpha \neq 0$.
+% Thus, $(x_{\pi(1)},x_{\pi(2)},x_{\pi(3)},x_{\pi(4)}) \mapsto$
+% \[
+%	(\frac{\alpha(a_1^2 + a_2^2 + a_3^2 - a_4^2)}{\alpha(a_1^2 + a_2^2 + a_3^2 + a_4^2)},
+%	 \frac{\alpha(2a_1a_4)}{\alpha(a_1^2 + a_2^2 + a_3^2 + a_4^2)},
+%	 \frac{\alpha(2a_2a_4)}{\alpha(a_1^2 + a_2^2 + a_3^2 + a_4^2)},
+%	 \frac{\alpha(2a_3a_4)}{\alpha(a_1^2 + a_2^2 + a_3^2 + a_4^2)})
+% \]
+% \[
+% = 	(\frac{a_1^2 + a_2^2 + a_3^2 - a_4^2}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+%	 \frac{2a_1a_4}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+%	 \frac{2a_2a_4}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+%	 \frac{2a_3a_4}{a_1^2 + a_2^2 + a_3^2 + a_4^2})
+% \]
+% Notice that it is legal to cancel the $\alpha$, since
+% $\alpha = \frac{1}{\beta}$ for some $\beta \in \mathbb{R}[x_1,x_2,x_3,x_4]$
+% which implies that $\alpha$ is never zero.\\
+% (If): Consider a map of the form (\ref{eq:re4s3}).
+% This is a rational map of $\mathbb{R}^4$ to \Sn{3}\ by (\ref{eq:suff4})
+% and Lemma~\ref{lem:iffpyth}.
+\QED
+}
+
+\begin{theorem}
+\label{thm:ratmap}
+The map $f: \mathbb{R}^m \rightarrow \Sn{n-1}$ is rational if and only if
+it is of the following form (up to coordinate permutation):
+\begin{equation}
+\label{eq:remsn-1}
+f(x_1,\ldots,x_m) = 
+(\frac{a_1^2 + \cdots + a_{n-1}^2 - a_n^2}{a_1^2 + \cdots + a_n^2},
+	 \frac{2a_1a_n}{a_1^2 + \cdots + a_n^2},
+	 \ldots, 
+	 \frac{2a_{n-1}a_n}{a_1^2 + \cdots + a_n^2})
+\end{equation}
+where $a_1,\ldots,a_n \in \mathbb{QP}$ (rational polynomials over the
+integers, rationals or reals).
+\end{theorem}
+\prf
+Consider a rational map
+of $\mathbb{R}^m$ to \Sn{n-1}, $(x_1,\ldots,x_m) \mapsto 
+(\frac{f_1}{f_{n+1}},\ldots,\frac{f_n}{f_{n+1}})$,
+where $f_1,\ldots,f_{n+1}$ are polynomials over $x_1,\ldots,x_m$.
+Then $(f_1,\ldots,f_{n+1})$ is a Pythagorean $n+1$-tuple 
+over $\mathbb{QP}$ (Lemma~\ref{lem:ratpy})
+so it can be expressed in the normal form
+$(f_1,\ldots,f_{n+1}) = \alpha (a_1^2 + \ldots + a_{n-1}^2 - a_n^2,
+2a_1a_n,\ldots,2a_{n-1}a_n,a_1^2 + \ldots + a_n^2)$
+for some $a_1,\ldots,a_n \in \mathbb{QP}$, $\alpha \neq 0 \in \mathbb{QP}$
+by Theorem~\ref{thm:general}.
+Thus, the map is of the form (\ref{eq:remsn-1}), since the leading $\alpha$
+cancels when expressed in 
+$(\frac{f_1}{f_{n+1}},\ldots,\frac{f_n}{f_{n+1}})$.
+Notice that it is legal to cancel the $\alpha$, since $\alpha \neq 0$.
+
+Now consider a map of the form (\ref{eq:remsn-1}).
+This is a rational map of $\mathbb{R}^m$ to \Sn{n-1}\ by Lemma~\ref{lem:ratpy} 
+and Theorem~\ref{thm:general}.
+\QED
+
+\Comment{
+This provides a sufficient condition for Pythagorean $(n+1)$-tuples.
+We can again establish a necessary condition with a weaker restriction on
+$\alpha$.
+
+\begin{theorem}
+\label{thm:necessaryn}
+Let $n \geq 2$ and $D$ be the integers or the polynomials 
+over $\mathbb{R}[x_1,\ldots,x_n]$.
+A Pythagorean $(n+1)$-tuple over $D$ can be expressed in the form
+\begin{equation}
+\label{eq:pyth2}
+	\alpha (a_1^2 + \ldots + a_{n-1}^2 - a_n^2,
+		\ 2a_1a_n,\ldots,\ 2a_{n-1}a_n,
+		\ a_1^2 + \ldots + a_n^2)
+\end{equation}
+for some $a_1,\ldots,a_n,\frac{1}{\alpha} \in D$.
+\end{theorem}
+\prf
+This proof is analogous to that of Theorem~\ref{thm:necessary4}.
+Let $(p_1,\ldots,p_{n+1})$ be a Pythagorean $(n+1)$-tuple over $D$.
+If $p_1 = p_{n+1}$, let 
+$(a_1,\ldots,a_n,\alpha) = (p_1,0,\ldots,0,\frac{1}{p_1})$.
+Assume without loss of generality that $p_1 \neq p_{n+1}$.
+Let 
+\[
+(a_1,\ldots,a_n,\alpha) = (p_2,\ldots,p_n,p_{n+1}-p_1,
+	\frac{1}{2(p_{n+1}-p_1)})
+\]
+Then $a_1,\ldots,a_n,\alpha$ generate the Pythagorean $(n+1)$-tuple
+$(p_1,\ldots,p_{n+1})$ as in (\ref{eq:pyth2}).
+In particular,
+\[
+\alpha (a_1^2 + \ldots + a_{n-1}^2 - a_n^2)
+= \frac{p_2^2 + \cdots + p_n^2 - (p_{n+1}-p_1)^2}{2(p_{n+1}-p_1)}
+\]
+and applying $p_1^2 + \ldots + p_n^2 = p_{n+1}^2$,
+\[
+= \frac{-2p_1^2 + 2p_1p_{n+1}}{2(p_{n+1} - p_1)}
+= p_1
+\]
+And
+\[
+\alpha (2a_i a_n) 
+= \frac{2p_{i+1}(p_{n+1}-p_1)}{2(p_{n+1}-p_1)}
+= p_{i+1}
+\]
+for $i=1,\ldots,n-1$.
+Finally, 
+\[ 
+\alpha (a_1^2 + \ldots + a_n^2)
+= \frac{p_2^2 + \cdots + p_n^2 + (p_{n+1}-p_1)^2}{2(p_{n+1}-p_1)}
+= p_{n+1}.
+\]
+\QED
+
+This leads to our most general result: 
+a full characterization of the rational maps of $\mathbb{R}^n$ to \Sn{n-1}.
+
+\begin{theorem}
+\label{thm:nn}
+A map is a rational map of $\mathbb{R}^n$ to \Sn{n-1}, $n \geq 2$, if and only if
+it is of the form:
+\[
+	(x_{\pi(1)},\ldots,x_{\pi(n)}) \mapsto 
+	(\frac{a_1^2 + \cdots + a_{n-1}^2 - a_n^2}{a_1^2 + \cdots + a_n^2},
+	 \frac{2a_1a_n}{a_1^2 + \cdots + a_n^2},
+	 \ldots,
+	 \frac{2a_{n-1}a_n}{a_1^2 + \cdots + a_n^2})
+\]
+where $a_1,\ldots,a_n \in \mathbb{R}[x_1,\ldots,x_n]$
+and $\pi: \{1,\ldots,n\} \rightarrow \{1,\ldots,n\}$ is a permutation.
+\end{theorem}
+\prf
+Identical to Theorem~\ref{thm:map4}'s proof.
+\QED
+}
+
+\Comment{
+We now have a characterization of all rational maps from $\mathbb{R}^n$ to \Sn{n-1}.
+The related findings on Pythagorean $(n+1)$-tuples are reviewed 
+in Table~\ref{tab:pyth}.
+The second column of this table gives the normal form for Pythagorean
+$(n+1)$-tuples for various $n$.
+The third column indicates when this normal form was shown to be a sufficient 
+condition for an $(n+1)$-tuple to be a Pythagorean $(n+1)$-tuple 
+over the integers.
+The fourth column indicates when this normal form was shown to be a necessary 
+condition for an $(n+1)$-tuple to be a Pythagorean $(n+1)$-tuple 
+over the integers.
+The fifth column indicates when this normal form was shown to be a necessary
+condition for an $(n+1)$-tuple to be a Pythagorean $(n+1)$-tuple 
+over polynomial rings.
+The results from this paper are not full proofs (and are thus marked
+by stars), since $\frac{1}{\alpha} \in D$, not $\alpha \in D$.
+
+\begin{table}[h]
+\label{tab:pyth}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+$n$ & normal form for Pythagorean $(n+1)$-tuples & suff {\cal Z} & nec {\cal Z} & 
+\footnotesize{nec $\mathbb{R}[x_1,\ldots,x_n]$} \\
+\hline
+$2$ & \tiny{$\alpha(a_1^2 - a_2^2, 2a_1a_2, a_1^2 + a_2^2)$} &
+\footnotesize{classical} & 
+\footnotesize{classical} & 
+\footnotesize{Kubota 1972} \\ 
+\hline
+$3$ & \tiny{$\alpha (a_1^2+a_2^2-a_3^2-a_4^2, 2(a_1a_3+a_2a_4), 
+    2(a_1a_4-a_2a_3), a_1^2+a_2^2+a_3^2+a_4^2)$} &
+\footnotesize{Euler 1748} & 
+\footnotesize{Catalan 1885} & 
+\footnotesize{Dietz 1993} \\ 
+\hline
+$4$ & \tiny{$\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+		2a_1a_4, 2a_2a_4, 2a_3a_4,
+		a_1^2 + a_2^2 + a_3^2 + a_4^2)$} &
+\footnotesize{Euler 1748} & 
+\footnotesize{$^*$Johnstone 1998} & 
+\footnotesize{$^*$Johnstone 1998} \\
+\hline
+$n$ & \tiny{$\alpha (a_1^2 + \ldots + a_{n-1}^2 - a_n^2,
+	2a_1a_n, \ldots, 2a_{n-1}a_n,
+	a_1^2 + \ldots + a_n^2)$} & 
+\footnotesize{Ammei 1817} & 
+\footnotesize{$^*$Johnstone 1998} & 
+\footnotesize{$^*$Johnstone 1998} \\ \hline
+\end{tabular}
+\end{table}
+}
+
+% -----------------------------------------------------------------------------
+
+% \section{Generating rational maps to the sphere}
+% \label{sec:generation}
+
+Consider applying this normal form to generate rational maps to the sphere.
+The natural choice of polynomials $(a_1,\ldots,a_n) = (x_1,\ldots,x_n)$ 
+in this normal form yields a map from
+$n$-space to \Sn{n-1}, which we call {\em Euler's map to the sphere}:
+\begin{equation}
+\label{eq:euler}
+  M(x_1,\ldots,x_n) = \frac{1}{x_1^2 + \cdots + x_n^2} 
+  (x_1^2 + \cdots + x_{n-1}^2 - x_n^2, 2x_1x_n, \ldots, 2x_{n-1}x_n)
+\end{equation}
+%
+%
+The inverse of the stereographic projection map (see (\ref{eq:spinverse})),
+expressed as a map from $n$-space to \Sn{n},
+is achieved by the assignment 
+$(a_1,\ldots,a_n) = (x_1,\ldots,x_{n-1},1)$ and a permutation.
+%
+% \[
+% f(x_1,\ldots,x_n) = \frac{1}{x_1^2 + \cdots + x_{n-1}^2 + 1}
+%    (2x_1, \ldots, 2x_{n-1}, x_1^2 + \cdots + x_{n-1}^2 - 1)
+% \]
+%
+The standard rational parameterization (\ref{eq:s2param}) of the 2-sphere \Sn{2}
+is achieved by the assignment 
+\begin{equation}
+\label{eq:ratsphereass}
+(a_1,a_2,a_3) = (\frac{2v(1-u^2)}{4u^2+4v^2},
+                  \frac{2u(1+v^2)}{4u^2+4v^2},
+                  \frac{1}{2}).
+\end{equation}
+% \alpha = 4u^2+4v^2
+This illustrates that some maps require sophisticated choices for the 
+polynomials in the normal form.
+These difficult choices % for substitution into the normal form 
+may be developed using the proof of Lemma~\ref{lem:quint} and its generalization,
+as follows.
+
+\begin{lemma}
+Given a Pythagorean $(n+1)$-tuple $(p_1,\ldots,p_{n+1})$,
+the assignment to the normal form of Theorem~\ref{thm:general} that realizes 
+this tuple is $(a_1,\ldots,a_n,\alpha) = (p_1,0,\ldots,0,\frac{1}{p_1})$ 
+if $p_1 = p_{n+1}$ and
+$(a_1,\ldots,a_n,\alpha) = 
+    (\frac{p_2}{2(p_{n+1}-p_1)},\ldots,
+     \frac{p_n}{2(p_{n+1}-p_1)},
+     \frac{1}{2},
+                2(p_{n+1}-p_1) )$
+if $p_1 \neq p_{n+1}$.
+\end{lemma}
+\prf
+See the proof of Lemma~\ref{lem:quint}.
+\QED
+
+{\bf The fact that $a_n \not\equiv 0$ in this lemma makes it particularly
+important to resolve the pole issue for $a_n \not\equiv 0$.}
+
+The assignment (\ref{eq:ratsphereass}) is easily found from this lemma,
+after observing that the Pythagorean tuple associated with
+the rational parameterization of the sphere is
+$(p_1,p_2,p_3,p_4) = (1-u^2-v^2+u^2v^2,\ 2v(1-u^2),\ 2u(1+v^2),\ 1+u^2+v^2+u^2v^2)$.
+Notice that the parameter range of the sphere parameterization is not indicated
+by the normal form, so the map will be many-to-one.
+Examination of the assignment of parameter intervals to the normal form is a topic
+for future study.
+
+% \section{Inverse maps}
+% Development of general inverse will be very difficult.
+% See comment in section on development of inverse of M.
+% Practically, we should do it for specific maps only.
+% It suffices to establish the poles, which can be done without the inverse maps.
+
+% -----------------------------------------------------------------------------
+
+\section{The Inevitability of Poles}
+\label{sec:pole}
+
+The normal form for rational maps to the sphere clarifies why the inverse
+of a rational map to the sphere always has a pole.
+Consider a rational map from $\mathbb{R}^m$ to \Sn{n}.
+We expect a manifold of dimension $m-n$ to map to each point of the sphere,
+simply by a counting argument.
+For example, with a map from $\mathbb{R}^n$ to \Sn{n-1} like 
+the Euler map (\ref{eq:euler}),
+the preimage of a 
+typical point of the sphere is a line.
+However, for some anomalous points of the sphere (poles), 
+the dimension of the preimages
+is larger than expected, resulting in a poorly defined inverse at this point.
+For example, with the Euler map,
+the entire hyperplane $x_n=0$ maps to $(1,0,\ldots,0)$:
+the preimage of $(1,0,\ldots,0)$ is a hyperplane of dimension $n-1$ 
+rather than a line of dimension one.
+
+This is not a vagary of the Euler map: it is a general property of
+rational maps to the sphere.
+Considering the normal form (\ref{eq:remsn-1}) for rational maps to the sphere,
+the entire hypersurface $a_n(x_1,\ldots,x_m)=0$ will map to the same point,
+$(1,0,\ldots,0)$.
+This is a manifold of dimension $m-1$ rather than the expected manifold 
+of dimension $m-n+1$.
+The points satisfying $a_n = 0$ lead to poles in the inverse map 
+associated with a rational map to the sphere.
+
+{\bf start here}
+
+What if $a_n \not\equiv 0$?
+Poles %, or points of the sphere that have more preimages than they should,
+are present even in maps built from the normal form 
+with constant polynomial $a_n \equiv k \neq 0$.
+For example, the normal form for the rational parameterization (\ref{eq:s2param})
+of \Sn{2} has $a_n = \frac{1}{2}$ (see Section~\ref{sec:char}).
+Yet this map has a pole at $(0,0,1)$.
+(This is the part of the parameterization associated with the circle of radius 0 
+in the sweeping of a circle using the spherical product;
+or, in common parlance, the degenerate line of latitude.
+There is another pole at the other end of the sphere.)
+$(0,0,1)$ is a pole because the entire line $u=1$ maps to $(0,0,1)$,
+a manifold of dimension one rather than the expected manifold of dimension zero 
+for this map of $\mathbb{R}^2$ to \Sn{2}.
+{\bf But this is not a proof.  How could we predict a pole there?}
+...
+{\bf What if we work in projective space and homogenize $a_n$ (to the other $a_i$)
+  and then set it to 0?}
+
+Another example is the inverse of
+stereographic projection, which has $a_n \equiv 1$ in the normal form.
+If we include points at infinity, this map has a pole at $(0,0,1)$:
+the entire line $w=0$ in projective space maps to $(0,0,1)$.
+{\bf How could we predict a pole there?}
+
+The accumulation of preimages at certain points is not surprising.
+% It is an artifact of wrapping a Euclidean space about the sphere.
+It is well known that mappings of the sphere to Euclidean space have these poles,
+which have long been the bane of cartographers as they map the spherical earth to
+the flat page.
+But now we have an explanation in terms of the normal form (\ref{eq:remsn-1}).
+
+\Comment{
+\section{Visualization}
+\label{sec:viz}
+
+The rational maps to the sphere generated by our characterization may be compared
+using a visualization technique that measures how they spread Euclidean space
+across the sphere.
+This is most easily done for \Sn{2}, so we will concentrate the visualization there.
+However, the visualization of higher dimensions \cite{brown mathematician}
+could be used to consider other rational maps.
+
+There are two techniques.
+In the first, we sample some region of Euclidean m-space uniformly 
+and visualize the number of samples that are mapped to each area of \Sn{n}
+(the more samples, the lighter).
+Recall that typically many points of Euclidean space will map to a given point of 
+the sphere (Section~\ref{sec:pole}).
+This technique is particularly useful if it is known how an application restricts 
+the domain,
+which may be used to choose the region of Euclidean space that is considered.
+We do this for 3-space and 2-space (the hyperplane $z=0$ in 3-space).
+Some applications are only interested in mapping the n-sphere back to itself: 
+the domain is restricted to \Sn{n}.
+(For example, the application of these maps to quaternion splines is sometimes
+restricted to maps of \Sn{3} to \Sn{3}.)
+In the second visualization, we sample \Sn{n} and visualize the distance that 
+each sample moves.
+This is a local measure of the map, but still evocative of distinctions between
+the maps.
+
+RESURRECT MAP TEXTURES AND IMPORT PROSE, IMAGES AND SOFTWARE.
+
+The maps that we consider are the following classical products of the characterization:
+1) Euler spherical map
+2) inverse of stereographic projection
+3) standard rational parameterization of sphere
+4) fancier one
+5) Dietz map?
+}
+
+% -----------------------------------------------------------------------------
+
+\section{Conclusions}
+\label{sec:conclude}
+
+We have developed a complete characterization of rational maps to the sphere,
+a clarification of the poles of their inverse maps,
+and a full characterization of Pythagorean tuples, 
+extending past the known Pythagorean
+triple and quadruple characterizations, as well as improving the Pythagorean
+quadruple characterization.
+The main results are Theorem~\ref{thm:general} and Theorem~\ref{thm:ratmap}.
+
+An essential observation in the characterization of rational maps to the sphere 
+is the equivalence between rational maps to the sphere and Pythagorean tuples.
+
+Pythagorean quintuples are not as well understood as Pythagorean triples
+and quadruples, and our study leads to some new characterizations.
+% (Theorems~\ref{thm:necessary4} and \ref{thm:map4}).
+
+\begin{rmk}
+Euler's Four Squares Theorem also anticipates the normal form
+for Pythagorean quadruples (Section~\ref{sec:prevwork}):
+\begin{equation}
+\label{eq:euler1}
+(a_1^2 + a_2^2 + a_3^2 + a_4^2)^2 = 
+(a_1^2 + a_2^2 - a_3^2 - a_4^2)^2 + (2a_1a_3+2a_2a_4)^2 + (2a_1a_4-2a_2a_3)^2
+\end{equation}
+using $(a_1,a_2,a_3,a_4) = (\hat{a}_1,-\hat{a}_2,\hat{a}_3,\hat{a}_4)$ in 
+Theorem~\ref{thm:euler}.
+\end{rmk}
+
+Euler's Four Squares Theorem anticipates the quaternion ({\bf elaborate})...,
+which is the subject of the natural follow-on to this paper, 
+to the application of rational maps in the design of quaternion splines
+for motion control.
+
+\begin{rmk}
+Euler's Four Squares Theorem anticipates
+the quaternion (a century in advance of its invention by Hamilton),
+in the sense that it encodes the product formula for quaternions,
+perhaps the most defining characteristic of the quaternion:
+% (compare Lemma~\ref{lem:euler}):
+\[
+\begin{array}{ll}
+& (a_1 + a_2 i + a_3 j + a_4 k) 
+(\hat{a}_1 + \hat{a}_2 i + \hat{a}_3 j + \hat{a}_4 k) = \\
+& (a_1 \hat{a}_1 - a_2\hat{a}_2 - a_3\hat{a}_3 - a_4\hat{a}_4) +
+   (a_1\hat{a}_2 + a_2\hat{a}_1 + a_3\hat{a}_4 - a_4\hat{a}_3) i + \\
+&  (a_1\hat{a}_3 - a_2\hat{a}_4 + a_3\hat{a}_1 + a_4\hat{a}_2) j +
+   (a_1\hat{a}_4 + a_2\hat{a}_3 - a_3\hat{a}_2 + a_4\hat{a}_1) k
+\end{array}
+\]
+Thus, it is quite natural to use Euler's Four Squares Theorem
+to characterize Pythagorean tuples (through generalization) and rational maps, 
+which are then used to build quaternion splines.
+\end{rmk}
+
+\bibliographystyle{plain}
+\begin{thebibliography}{99}
+
+\bibitem{barr81}
+Barr, A. (1981) Superquadrics and Angle-Preserving Transformations.
+IEEE Computer Graphics and Applications.
+
+\bibitem{barr92}
+Barr, A. and B. Currin and S. Gabriel and J. Hughes (1992)
+Smooth Interpolation of Orientations with Angular Velocity Constraints
+using Quaternions.
+SIGGRAPH '92, 313--320.
+
+\bibitem{catalan85}
+Catalan, E. (1885) Bull. Acad. Roy. Belgique 3(9), p. 531.
+Referenced in Dickson, L.E. (1952) History of the Theory of Numbers: Volume II,
+Diophantine Analysis.  Chelsea (New York), p. 269.
+
+\bibitem{dickson52}
+Dickson, L.E. (1952) History of the Theory of Numbers: Volume II,
+Diophantine Analysis.  Chelsea (New York).
+
+\bibitem{dietz93}
+Dietz, R. and J. Hoschek and B. Juttler (1993)
+An algebraic approach to curves and surfaces on the sphere and
+on other quadrics.
+Computer Aided Geometric Design 10, 211-229.
+
+% Ebbinghaus, H.-D. et. al., Numbers, Springer-Verlag (New York), 1990.
+
+\bibitem{euler48}
+Fuss, P., editor (1843) Corresp. Math. et Phys.,
+`Correspondance entre Leonhard Euler et C. Goldbach 1729-1763',
+St. Petersburg, Vol. 1, p. 452.  
+Referenced in Dickson, L.E. (1952) History of the Theory of Numbers: Volume II,
+Diophantine Analysis.  Chelsea (New York), p. 277.
+% see p. 209, Ebbinghaus, Numbers
+
+\bibitem{farouki90}
+Farouki, R. and T. Sakkalis (1990)
+Pythagorean Hodographs.
+IBM J. Res. Develop. 34, 736--752.
+
+\bibitem{herstein75}
+Herstein, I. (1975) Topics in Algebra.
+2nd edition, John Wiley (New York).
+
+\bibitem{kreyszig59}
+Kreyszig, E. (1959) Differential Geometry.
+Dover (New York).
+
+\bibitem{kubota72}
+Kubota, K. (1972) Pythagorean triples in unique factorization domains.
+American Mathematical Monthly 79, 503--505.
+
+\bibitem{weil84}
+Weil, A. (1984) Number Theory.
+Birkh\"auser (Boston).
+
+\end{thebibliography}
+
+In technical report version, we could add my proof of Kubota's result, 
+as in Appendix of characterization.ps.
+
+\end{document}
+
+% See 'A Characterization of Rational Maps of Rn to $S^{n-1}$ for Riemannian Modeling'
+% and its file characterization.tex in 1-char.  (print it out, and the short version)
+
+% ----------------------
+
+% The sphere has long been a Platonic ideal for shape.
+% Indeed, all of the Platonic solids
+% aspire to the sphere, with differing levels of success.
+%
+% In our research, the issue that drew us to the sphere was quaternion splines
+% (a tool for orientation control in animation and motion design),
+% which are modeled on the 3-sphere in 4-space.
+
+% In the classic 'Flatland',
+% Edwin Abbott Abbott (sic!) related the ominous appearance of The Sphere in the
+% cosy confines of two-space.
+% This was Abbott's way of introducing the concept of higher dimensions.
+
+% Elie Cartan: The Theory of Spinors
+
+% The first component $a_1^2 + a_2^2 + a_3^2 - a_4^2$ of the Pythagorean quintuple 
+% is a non-positive definite fundamental form (p. 3) and the last component is
+% the fundamental form of 4-space (p. 3).
+% One of the components of the Pythagorean quadruple generator (Remark 13) is also 
+% a fundamental form for a pseudo-Euclidean space.

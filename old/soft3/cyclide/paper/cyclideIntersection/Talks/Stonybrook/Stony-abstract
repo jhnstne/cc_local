@@ -1,0 +1,31 @@
+Title: A New Intersection Algorithm using Circle Decomposition
+
+The present vocabulary of a solid modeler is canonically the plane,
+(some subset of) the quadrics, and the torus.
+The class of cyclides is also becoming important.
+Quadrics and cyclides lie in the more general class of ringed surfaces:
+surfaces that can be swept out by a circle.
+This class also contains the important class of revolute surfaces.
+We will present a method for the exact intersection of any ringed surface with
+any quadric or cyclide.
+This algorithm shows that it is feasible to expand the 
+vocabulary of solid modeling primitives to include all ringed surfaces.
+(In solid modeling, surface intersection is crucial to the design of solids
+and their subsequent analysis.)
+
+Our intersection algorithm is exact: 
+that is, the intersection is computed symbolically rather than numerically.
+The theme of exact intersection is to reduce to degree 4 computations.
+We do this by concentrating on the decomposition of a surface into simpler
+components (whereas previous algorithmic development has centered around 
+the degree of an algebraic surface).
+Two keys to our algorithm are circle decomposition and inversion.
+We will develop the circle decomposition of a cyclide 
+(i.e., its description as a union of circles).
+and results on the inverse of any circle.
+
+
+
+
+
+

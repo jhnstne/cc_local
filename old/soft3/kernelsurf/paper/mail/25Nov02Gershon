@@ -1,0 +1,35 @@
+From gershon@cs.Technion.AC.IL  Mon Nov 25 07:58:07 2002
+Date: Mon, 25 Nov 2002 15:58:41 +0200 (IST)
+From: Gershon Elber <gershon@cs.Technion.AC.IL>
+To: jj@cis.uab.edu
+Subject: Re: Kernel from convex hull
+Cc: gershon@cs.Technion.AC.IL, mskim@cse.snu.ac.kr
+
+Shalom John
+
+>> Here is a draft of a section on the construction of kernels from convex hulls,
+>> using their dual relationship.
+>> You might already have a (better) proof of Lemma 1.3, 
+>> since this is based on an observation you made, Gershon,
+>> in your Dagstuhl talk.  If so, please discard mine.
+
+I read about a half of your document last night and I really liked what I
+read.  As myung Soo told you we are all starting to wrap everything up and
+write it up.  I do have few minor comments to the document:
+
+* In section 1.1 you state that "some tangent planes will inevitably
+  map to infinity", only to state in the end of the papragraph that if
+  the origin is located at the kernel no plane will be mapped to
+  infinity.  This should be clarified a bit.
+
+* Lemma 1.3 and its proof are certainly in line of what I had in mind.
+
+* In Section 1.3 one also have the case of unitangency only, for convex
+  egg-like objects.  I am also not sure what do you mean by
+  "symmetrical cases" as two disjoint convex egg-like surfaces will
+  only generate bitangencies.
+
+Thats all for now,
+
+Gershon
+

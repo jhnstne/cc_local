@@ -1,0 +1,264 @@
+
+
+
+C Library Functions                                   userdata(3)
+
+
+
+NNNNAAAAMMMMEEEE
+     The userdata package is  a  package  intended  to  ease  the
+     placement of geometry on a mesh.  The internal data field is
+     never accessed directly.  Instead, a procedural interface is
+     provided.   Additional  data may be added by the user of the
+     package as noted below.
+
+     In the following list of routines,  the  first  argument  is
+     always  listed  as  _V_e_r_t_e_x*. However, any of Vertex*, Edge*,
+     Face*, or Mesh* may be used (though only some of these types
+     will make sense for some of the routines).
+
+     vvvvooooiiiidddd AAAAddddddddGGGGeeeeoooommmmeeeettttrrrryyyy((((wwww,,,,mmmm))))
+     SSSSppppaaaacccceeee wwww;;;;
+     MMMMeeeesssshhhh**** mmmm;;;;
+     The AAAAddddddddGGGGeeeeooooeeeemmmmttttrrrryyyy(((()))) routine takes a mesh and extracts geometry
+     from  the  Lnode's  at  the  vertices of the mesh.  The mesh
+     interal geometry data flags will be set if every  vertex  in
+     the  mesh  has that geometry.  The _S_p_a_c_e parameter should be
+     the 3 dimensional space  where  you  want  the  mesh  to  be
+     created.  The external Lnode format should be of the form:
+
+     (Point . (pos [x,y,z]) (norm . [dx,dy,dz]))
+
+     These are interpreted as the position and normal of the ver-
+     tex,  and are converted to an internal format, stored in the
+     field, 'internalData'.  It is not mandatory for either 'pos'
+     or  'norm' to appear.  If absent, then the position (or nor-
+     mal) of the interal data structure will not be set.
+
+     MMMMeeeesssshhhh**** MMMMeeeesssshhhhUUUUDDDDPPPPaaaarrrrsssseeee((((ffffpppp,,,, wwwwoooorrrrlllldddd))))
+     FFFFIIIILLLLEEEE**** ffffpppp;;;;
+     SSSSppppaaaacccceeee wwwwoooorrrrlllldddd;;;;
+     This routine reads the mesh and converts the external format
+     to  the  internal  format  as  it is reading.  The resulting
+     internal data is as if AddGeoemtry() was called.  The advan-
+     tage  to  using  this  routine  (as opposed to calling Mesh-
+     Parse() and then AddGeometry()) is  that  it  requires  less
+     memory.
+
+     vvvvooooiiiidddd CCCCoooonnnnvvvveeeerrrrttttGGGGeeeeoooommmmeeeettttrrrryyyyTTTTooooEEEExxxxtttteeeerrrrnnnnaaaallll((((mmmm))))
+     MMMMeeeesssshhhh**** mmmm;;;;
+     ConvertGeometryToExternal() converts the  standard  geoemtry
+     fields stored in the internal data structure into the exter-
+     nal format.  If the user wishes to associated other external
+     data,  then  this  needs to be explicitly added to the Lnode
+     externalData.
+
+     MMMMeeeesssshhhh**** WWWWrrrriiiitttteeeeUUUUDDDDMMMMeeeesssshhhh((((mmmm,,,, ffffpppp))))
+     MMMMeeeesssshhhh**** mmmm;;;;
+     FFFFIIIILLLLEEEE**** ffffpppp;;;;
+     Write mesh m to file descriptor fp.  As the mesh is written,
+
+
+
+SunOS 5.6                 Last change:                          1
+
+
+
+
+
+
+C Library Functions                                   userdata(3)
+
+
+
+     the internal data will be converted to external format. Con-
+     vertGeometryToExternal doesn't need to  be  called  if  this
+     form of writing the mesh is used.
+
+     BBBBOOOOOOOOLLLLEEEEAAAANNNN GGGGeeeettttUUUUDDDDPPPPooooiiiinnnntttt((((vvvv,,,,pppp))))
+     VVVVeeeerrrrtttteeeexxxx**** vvvv;;;;
+     PPPPooooiiiinnnntttt**** pppp;;;;
+     Get the point stored in vvvv.... If there is no point in  vvvv,,,,  then
+     return FALSE (otherwise, return TRUE).
+
+     PPPPooooiiiinnnntttt RRRReeeettttuuuurrrrnnnnUUUUDDDDPPPPooooiiiinnnntttt((((vvvv))))
+     VVVVeeeerrrrtttteeeexxxx**** vvvv;;;;
+     Return the point in vvvv.... This should only be  done  if  it  is
+     known that the point exists.
+
+     BBBBOOOOOOOOLLLLEEEEAAAANNNN SSSSeeeettttUUUUDDDDPPPPooooiiiinnnntttt((((vvvv,,,,pppp))))
+     VVVVeeeerrrrtttteeeexxxx**** vvvv;;;;
+     PPPPooooiiiinnnntttt pppp;;;;
+     Store the point pppp in vvvv,,,,  allocating  space  as  needed.   If
+     memory  can't  be allocated, return FALSE (otherwise, return
+     TRUE).
+
+     BBBBOOOOOOOOLLLLEEEEAAAANNNN GGGGeeeettttUUUUDDDDNNNNoooorrrrmmmmaaaallll((((vvvv,,,,nnnn))))
+     VVVVeeeerrrrtttteeeexxxx**** vvvv;;;;
+     NNNNoooorrrrmmmmaaaallll**** nnnn;;;;
+     Get the normal stored in vvvv.... If there is no normal in vvvv,,,, then
+     return FALSE (otherwise, return TRUE).
+
+     NNNNoooorrrrmmmmaaaallll RRRReeeettttuuuurrrrnnnnUUUUDDDDNNNNoooorrrrmmmmaaaallll((((vvvv))))
+     VVVVeeeerrrrtttteeeexxxx**** vvvv;;;;
+     Return the normal in vvvv.... This should only be done  if  it  is
+     known that the normal exists.
+
+     SSSSeeeettttUUUUDDDDNNNNoooorrrrmmmmaaaallll((((vvvv,,,,nnnn))))
+     VVVVeeeerrrrtttteeeexxxx**** vvvv;;;;
+     NNNNoooorrrrmmmmaaaallll nnnn;;;;
+     Store the normal nnnn in vvvv,,,,  allocating  space  as  needed.  If
+     memory  can't  be allocated, return FALSE (otherwise, return
+     TRUE).
+
+     int ReturnUDGeoFlags(v)
+     VVVVeeeerrrrtttteeeexxxx**** vvvv;;;;
+     Return the geometry flags of vvvv.... Note that 0 is  returned  if
+     no memory has been allocated for vvvv....
+
+     vvvvooooiiiidddd SSSSeeeettttUUUUDDDDGGGGeeeeooooFFFFllllaaaaggggssss((((vvvv,,,,ffff))))
+     VVVVeeeerrrrtttteeeexxxx**** vvvv;;;;
+     iiiinnnntttt ffff;;;;
+     Set the geometry flags in  dddd  to  ffff,,,,  allocating  memory  as
+     needed.   If memory can't be allocated, return FALSE (other-
+     wise, return TRUE).
+
+
+
+
+SunOS 5.6                 Last change:                          2
+
+
+
+
+
+
+C Library Functions                                   userdata(3)
+
+
+
+     The  geometry  flags  may  have  the   values   NO_GEOMETRY,
+     G_POSITION,  G_NORMAL,  or G_POSITION | G_NORMAL.  Two addi-
+     tional flags, G_RESERVED1 and G_RESERVED2 are  reserved  for
+     internal use.
+
+
+     iiiinnnntttt SSSSeeeettttUUUUDDDDFFFFllllaaaaggggssss((((vvvv,,,, ffff))))
+     VVVVeeeerrrrtttteeeexxxx**** vvvv;;;;
+     sssshhhhoooorrrrtttt ffff;;;;
+     Set the flags f of the vertex v.
+
+
+     iiiinnnntttt CCCClllleeeeaaaarrrrUUUUDDDDFFFFllllaaaaggggssss((((vvvv,,,, ffff))))
+     VVVVeeeerrrrtttteeeexxxx**** vvvv;;;;
+     sssshhhhoooorrrrtttt ffff;;;;
+     Clear the flags f of the vertex v.
+
+
+     iiiinnnntttt RRRReeeettttuuuurrrrnnnnUUUUDDDDFFFFllllaaaaggggssss((((vvvv,,,, ffff))))
+     VVVVeeeerrrrtttteeeexxxx**** vvvv;;;;
+     sssshhhhoooorrrrtttt ffff;;;;
+     Return the flags of f that are set.
+
+     The user of the package may desire to  change  the  internal
+     data  structures. If the only changes are additional fields,
+     then the fields should be added after the  ones  already  in
+     the  structure.  If  the  point,  normal,  or geometry flags
+     fields are changed (say, to be more memory efficient),  then
+     the user should provide the above set of functions.  If this
+     is done, then procedures such as AddGeometry() will continue
+     to work and not need to be rewritten.
+
+     There are three routines provided for converting the  inter-
+     nal  format  of one vertex/edge/face to the external format.
+     These routines are intended to be passed to  WriteItoEMesh()
+     (see mesh 3).  The routines are
+
+     UUUUDDDDIIIIttttooooEEEEVVVV((((vvvv))))
+     VVVVeeeerrrrtttteeeexxxx**** vvvv;;;;
+
+     UUUUDDDDIIIIttttooooEEEEEEEE((((eeee))))
+     EEEEddddggggeeee**** eeee;;;;
+
+     UUUUDDDDIIIIttttooooEEEEFFFF((((FFFF))))
+     FFFFaaaacccceeee**** ffff;;;;
+
+
+SSSSEEEEEEEE AAAALLLLSSSSOOOO
+     mesh(3)
+
+
+
+
+
+
+SunOS 5.6                 Last change:                          3
+
+
+
+
+
+
+C Library Functions                                   userdata(3)
+
+
+
+DDDDAAAATTTTEEEE
+     November 14, 1991
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SunOS 5.6                 Last change:                          4
+
+
+

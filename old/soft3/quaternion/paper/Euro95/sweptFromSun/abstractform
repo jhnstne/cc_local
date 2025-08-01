@@ -1,0 +1,319 @@
+     Attached are the requested abstracts.
+     
+     Lillian Hunt
+     SIAM Program Coordinator
+     hunt@siam.org
+
+______________________________ Reply Separator _________________________________
+Subject: LaTeX macros
+Author:  jj@redmont1.cis.uab.edu (John Johnstone) at INTERNET
+Date:    5/4/95 2:01 PM
+
+
+Would you please send me the LaTeX macro for the submission
+of an extended abstract and a short abstract to the
+Fourth SIAM Conference on Geometric Design?
+
+Thank you very much.
+
+John K. Johnstone
+johnstone@cis.uab.edu
+
+
+Please answer the following:
+
+1.  Name of conference
+
+2.  Type of Presentation
+      Contributed:  Lecture form    
+                    Poster form     
+      Minisymposium:    
+
+3.  Equipment for Visual Support
+      Lecture Form/Minisymposium:
+            Overhead Projector    
+            2" x 2" Slide Projector (35mm)    
+      Poster Form:
+            Easel     Poster Board    
+            Other (specify)           
+
+More sophisticated equipment can be provided, but you may be
+required to pay the rental fee.  For details, indicate your 
+requirements below:
+
+
+4.  If you are a speaker in a minisymposium, who is the organizer?
+
+5.  What is the minisymposium title?
+
+6.  If more than one author, who will present the paper?
+
+7.  Please include at least 3 keywords but no more that 5 in order of importance below.
+                
+        
+% This is a macro file for creating a SIAM Conference abstract in
+% LaTeX.
+%
+% If you have any questions regarding these macros contact:
+%           Lillian Hunt
+%           SIAM
+%           3600 University City Center Center
+%           Philadelphia, PA 19104-2688
+%           USA
+%           (215) 382-9800      
+%           e-mail:meetings@siam.org
+
+
+\hsize=25.5pc
+\vsize=50pc
+\textheight 50pc
+\textwidth 25.5pc
+\parskip 0pt
+\parindent 0pt
+\pagestyle{empty}
+
+\def\title#1{\bf{#1}\vspace{8pt}}
+\def\abstract#1{\rm {#1}\vspace{8pt}}
+\def\author#1{\rm {#1}\vspace{2in.}}
+
+\eject
+
+% end of style file
+
+% This is ltexconf.tex. Use this file as an example file for doing an SIAM
+% Conference abstract in LaTeX.
+   
+
+\documentstyle[ltexconf]{report} 
+\begin{document}
+ 
+\title{Numerical Analysis of a 1-Dimensional
+Immersed-Boundary\\ Method}
+ 
+\abstract{We present the numerical analysis of a simplified,
+one-dimensional version  
+of Peskin's immersed boundary method, which has been used to
+solve 
+the two- and three-dimensional Navier-Stokes equations in the 
+presence of immersed boundaries. We consider the heat
+equation  
+ in a finite domain with a moving source term.  
+We denote the solution as $u(x,t)$ and the location of the
+source 
+ term as $X(t)$.  The source term is a moving delta function  
+whose strength is a function of u at the location of the
+delta function. 
+The p.d.e. is coupled to an ordinary differential equation
+whose  
+solution gives the location of the source term. 
+ The o.d.e. is $X'(t) = u(X(t),t)$, which can be interpreted as 
+saying the source term moves at the local velocity.}   
+
+\author{\underbar{Richard P. Beyer, Jr.}\\
+University of Washington, Seattle, WA\\
+\\
+Randall J. LeVeque\\
+University of Washington\\
+Seattle, WA}
+
+\eject 
+
+\end{document}
+
+% end of example file.
+
+
+
+Please furnish complete addresses all co-authors.
+
+PLEASE INDICATE WHAT CONFERENCE ABSTRACT IS FOR.
+
+% Dear SIAM Conference Contributor,
+%
+% Enclosed is a LaTeX macro (l-extabs.sty) for creating your extended 
+% abstract. Also enclosed is an example file (l-extabs.tex) that can be 
+% run to get sample output. To get the sample output, separate the files 
+% as indicated below.
+%
+%%%%%%%%%%%%%%%%%%%%%SEPARATE HERE%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% This is l-extabs.sty
+%
+%
+% This is a macro file for creating an extended abstract in
+% LaTex.
+%
+% If you have any questions regarding these macros contact:
+%           Lillian Hunt
+%           SIAM
+%           3600 University City Center Center
+%           Philadelphia, PA 19104-2688
+%           USA
+%           (215) 382-9800      
+%           e-mail:meetings@siam.org
+
+
+
+\hsize=39.5pc
+\vsize=54pc
+\textheight 54pc
+\textwidth 39.5pc
+\hoffset -.875in
+\voffset -.875in
+\parskip 0pt
+\parindent 18pt
+\pagestyle{empty}
+
+\def\title#1{\begin{center}\bf{#1}\end{center}\vspace{6pt}}
+\def\abstract#1{\rm {#1}\vspace{6pt}}
+\def\author#1{\vspace{6pt}\noindent\rm {#1}\vfill\eject}
+
+% End of macro file.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SEPARATE HERE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% This is l-extabs.tex. Use this file as an example file for doing an extended
+% abstract in LaTeX.
+   
+\documentstyle[l-extabs]{report} 
+\begin{document}
+ 
+\title{Submitting an Extended Abstract to a SIAM\\
+Conference}
+ 
+We present the numerical analysis of a simplified,
+one-dimensional version  
+of Peskin's immersed boundary method, which has been used to
+solve 
+the two- and three-dimensional Navier-Stokes equations in the 
+presence of immersed boundaries. We consider the heat
+equation  
+ in a finite domain with a moving source term.  
+We denote the solution as $u(x,t)$ and the location of the
+source 
+ term as $X(t)$.  The source term is a moving delta function  
+whose strength is a function of u at the location of the
+delta function. 
+The p.d.e. is coupled to an ordinary differential equation
+whose  
+solution gives the location of the source term. 
+ The o.d.e. is $X'(t) = u(X(t),t)$, which can be interpreted as 
+saying the source term moves at the local velocity.   
+The accuracy the numerical method of solution depends on how
+the  
+delta function is discretized when the delta function is not
+at 
+a grid point and on how the solution, u, is represented 
+ at locations between grid points. We present results showing 
+the effect of different choices of spreading the source to
+the grid and 
+of restricting the solution to the source location. 
+The problem we analyze is also similar to the Stefan problem
+and 
+the immersed-boundary method has features in common with
+particle-in-cell 
+ methods.
+
+Vector quantization is the mapping of continuous or high resolution 
+discrete vectors such as sampled images into relatively low resolution 
+finite reproduction sets.  The primary purpose of vector quantization 
+is signal compression, the mapping of a signal into an 
+efficient digital representation for communication, storage, or 
+as an input to digital signal processing. Compression can mean 
+faster communication, lower storage requirements, and faster and simpler 
+reconstruction or sythesis.  In addition, it can reduce subsequent 
+signal processing complexity 
+by suitable choices of digital representations, possibly by 
+incorporating portions of the signal processing into the 
+codebook generation.
+
+A general design goal of compression is to optimally trade off 
+bit rate for quality using codes of modest or moderate complexity. 
+One approach to this goal is to combine clustering techniques for 
+quality and tree-structured methods for low complexity implementation 
+with useful code structures. In this survey some of the basic 
+vector quantizer design techniques are sketched along with their 
+incorporation of other signal processing such as enhancement and 
+classification. The ideas will be demonstrated using medical images. 
+
+Given a matrix whose entries contain parameters that vary within
+intervals, we wish to determine whether its eigenvalues have negative
+real parts for all values of the parameters.  More specifically, we
+seek a bound on the interval widths such that stability is guaranteed
+for all values of the parameters within those bounds.  Existing
+methods for solving this problem are computationally expensive,
+requiring $O(n^6)$ time and $O(n^4)$ storage, and the bounds they produce
+are fairly conservative.  This talk will present an algorithm that
+gives improved bounds and is less expensive computationally $(O(n^4)$
+time, $O(n^2)$ storage).  The algorithm is based on solving Lyapunov
+equations.
+
+In this talk we will discuss some recent work on a geometric  
+formulation of certain constrained variational problems in mechanics. The  
+constraints are of the nonholonomic variety and the formulation is  
+based on the theory of connections in principal bundles. We show that if the 
+constraints satisfy suitable symmetry hypotheses, then there is a family of  
+splittings of the Lagrangian phase space that yield reductions. Special 
+choices  
+of splittings correspond to known mechanical connections, and one can for  
+instance, obtain the Lagrangian reduction results of Marsden and Scheurle. 
+Thus  
+the techniques of reduction apply to the constrained problems as well, 
+sometimes  
+leading to integrable cases. Again, we note the prior work of Koiller that  
+handles linear-in-velocity constraints in this way. We then identify optimal 
+control problems that fit nicely into this category of mechanical problems  
+and investigate explicit solvability of the optimal control problems. We  
+shall also indicate some motivating examples from satellite re-orientation,  
+robotic motion planning with constraints, and the technology of vibratory  
+motors. 
+
+The relationships between $H_\infty$ robust control,
+stochastic risk--sensitive
+optimal control and differential game problems  have
+attracted considerable interest.
+The reason for this interest stems from their importance in obtaining
+robust controllers. In this talk we discuss
+a finite horizon nonlinear stochastic risk--sensitive
+optimal control
+problem and show that it is equivalent to a {\it stochastic} differential
+game. Risk--sensitivity and  small noise parameters are introduced,
+and the limits are analysed  as these parameters
+tend to zero.
+First order expansions are
+presented which show that the risk--sensitive controller consists of a standard
+deterministic controller plus terms due to stochastic and game theoretic
+methods of controller  design.
+
+A simple rational interpolation
+ method is given for estimating a frequency
+response matrix. The method is based on a generalization of
+the resolvent identity and avoids the potential inaccuracies
+introduced by the subtraction of nearly equal values in the
+calculation of the difference terms. When coupled with
+a pole cancellation method, the resulting interpolation
+algorithm is accurate and efficient. Somewhat surprisingly,
+the error in this procedure has the form
+of a modified response matrix, which means that the interpolation
+algorithm can be used to approximate both the response matrix
+and the error. Numerical tests show that this approach is
+very efficient, especially when coupled with the well-known
+Hessenberg preprocessing method.
+
+\author{\underbar{Trini Flores}\\
+Conference Department\\
+Society for Industrial and Applied Mathematics
+Philadelphia, PA 19104-2688\\
+Lillian Hunt\\
+Conference Department\\
+Society for Industrial and Applied Mathematics
+Philadelphia, PA 19104-2688}
+
+\end{document}
+
+% end of example file.
+
+
+

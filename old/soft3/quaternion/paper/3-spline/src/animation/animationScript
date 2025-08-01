@@ -1,0 +1,4 @@
+orientationPlan -l -b ~/software/projectSmooth/3d/surfbuild/data/scene/teapot
+animation -l -b data/teapot 
+	        data/pos.in-evenspeed 
+	        data/quaternion.in1

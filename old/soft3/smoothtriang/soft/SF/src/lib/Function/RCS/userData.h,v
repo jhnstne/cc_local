@@ -1,0 +1,75 @@
+head	1.1;
+access;
+symbols;
+locks
+	smann:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	96.08.14.11.51.37;	author smann;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+ * Copyright (c) 1990, Graphics and AI Laboratory, University of Washington
+ * Copying, use and development for non-commercial purposes permitted.
+ *                  All rights for commercial use reserved.
+ */
+
+/*
+ *----------------------------------------------------------------------
+ *  File:  userData.h
+ *----------------------------------------------------------------------
+ */
+
+
+#define NO_GEOMETRY 0
+#define G_POSITION 1
+#define G_NORMAL 2
+#define G_RESERVED1 4
+#define G_RESERVED2 8
+
+typedef struct  userData {
+  int geometryFlags;
+  Space s;
+  double x,y,z;
+  double nx,ny,nz;
+  SFF sff;
+} Data;
+
+typedef struct userVData {
+  void* ptr;
+  Point p;
+  Normal n;
+  int geometryFlags;
+} VData;
+
+typedef struct userEData {
+  void* ptr;
+} EData;
+
+typedef struct userFData {
+  void* ptr;
+} FData;
+
+#define ReturnUDGeoFlags(d) ( (d)->internalData == NULL ? \
+			     0 : (d)->internalData->geometryFlags )
+
+Point ReturnUDPoint();
+Normal ReturnUDNormal();
+Data* UDMalloc();
+VData* UVDMalloc();
+EData* UEMalloc();
+FData* UFMalloc();
+@

@@ -1,0 +1,89 @@
+From jimbo@scr.siemens.com Mon Aug  2 13:01:08 1999
+X-SCR-Return-Path: <jimbo@exchange.scr.siemens.com>   (as seen by scr.siemens.com)
+From: "Williams, James" <jimbo@scr.siemens.com>
+To: "'jj@cis.uab.edu'" <jj@cis.uab.edu>
+Subject: RE: Back from trip!
+Date: Mon, 2 Aug 1999 13:59:44 -0400
+MIME-Version: 1.0
+
+Hi John,
+
+I've downloaded the paper and have read it once. Now I am going
+through section by section and trying to resolve some of my questions.
+
+I am currently looking at section 5 and this is what I am thinking about:
+
+	We know that minimizing length of the hull in R^4 is not exactly
+what we want
+	to do to minimize projected length of the curve. I think by choosing
+the first
+	inverse image point (q1) on S^3, q2 will be forced to be chosen
+closer to the
+	origin than q1 and so on by the closest point restriction. 
+	
+	My worry can be illustrated by the example of spokes on a bicycle
+wheel.
+	Imagine q1 is on the rim and q2 must be on the adjacent spoke --
+since the
+	closest point on a line to a given point is connected with the given
+point via
+	a segment perpendicular to the line, q2 must be closer to the hub
+than q2 and
+	successive points (q3...qn) spiral inwards towards the hub in what
+is probably
+	a perfect nautilus-like spiral. This can be verified by running the
+interpolation
+	code and checking if successice points are each closer to the
+origin.
+
+	One brute-force solution would be to just treat this as a blind
+optimization problem
+	where the objective function is length of the quaternion curve and
+each point contributes 
+	a single parameter. The objective function could also be replaced
+with Barr's objective
+	function and we would get a rational solution which minimizes Barr's
+criterion. The drawback
+	is that the optimization becomes expensive as the number of
+parameters grows. 
+
+	I think that perhaps choosing q1..qn to be on S^3 might produce a
+result similar to the
+	given choice method. Maybe these options should be state, but not
+explored in this
+	paper. I think it would be worth trying to optimize this choice with
+a canned minimization 
+	routine (Powells method is good) vs. Barr's covariant acceleration
+criterion. Do you have
+	a masters student / undergrad who might be interested in this as a
+project? It would
+	be interesting to know if Barr's criterion is unimodal (doubtful)
+wrt. the choice of
+	inverse image.
+
+	I will continue reading...
+
+Regards,
+Jim
+
+
+
+
+
+From jimbo@scr.siemens.com Mon Aug  2 13:38:36 1999
+X-SCR-Return-Path: <jimbo@exchange.scr.siemens.com>   (as seen by scr.siemens.com)
+From: "Williams, James" <jimbo@scr.siemens.com>
+To: "'jj@cis.uab.edu'" <jj@cis.uab.edu>
+Subject: RE: Back from trip!
+Date: Mon, 2 Aug 1999 14:37:13 -0400
+MIME-Version: 1.0
+
+
+
+If your interested, I have the multivariate optimization code 
+sitting around. I use it in a registration package. It is just
+from the Numerical Recipes CD, but quite effective. 
+
+Jim
+
+

@@ -1,0 +1,264 @@
+
+
+
+C Library Functions                                      patch(3)
+
+
+
+NNNNAAAAMMMMEEEE
+     patch
+
+
+SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
+     Interface module for triangular Bezier surface patches.
+
+
+SSSSYYYYNNNNTTTTAAAAXXXX
+     ####iiiinnnncccclllluuuuddddeeee ppppaaaattttcccchhhh....hhhh
+
+
+DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN::::
+     PPPPaaaattttcccchhhh PPPPaaaattttcccchhhhCCCCrrrreeeeaaaatttteeee(((( ddddeeeeggggrrrreeeeeeee,,,, rrrraaaannnnggggeeee,,,, nnnnoooorrrrmmmmaaaallllddddiiiimmmm))))
+     iiiinnnntttt ddddeeeeggggrrrreeeeeeee;;;;
+     SSSSppppaaaacccceeee rrrraaaannnnggggeeee;;;;
+     iiiinnnntttt nnnnoooorrrrmmmmaaaallllddddiiiimmmm;;;;
+
+     Return a new triangular Bezier patch of  the  given  degree.
+     If  normals  are associated with the patch, normaldim should
+     be 3, otherwise it should be 0.
+
+
+     vvvvooooiiiidddd PPPPaaaattttcccchhhhFFFFrrrreeeeeeee((((ppppaaaattttcccchhhh))))
+     PPPPaaaattttcccchhhh;;;;
+
+     Free the storage associated with a patch.
+
+
+     vvvvooooiiiidddd PPPPaaaattttcccchhhhEEEEvvvvaaaallllWWWWiiiitttthhhhNNNNoooorrrrmmmmaaaallll(((( ppppaaaattttcccchhhh,,,, ppppooooiiiinnnntttt,,,, nnnnoooorrrrmmmmaaaallll,,,, rrrr,,,, ssss,,,, tttt))))
+     PPPPaaaattttcccchhhh ppppaaaattttcccchhhh;;;;
+     PPPPooooiiiinnnntttt ****ppppooooiiiinnnntttt;;;;
+     NNNNoooorrrrmmmmaaaallll ****nnnnoooorrrrmmmmaaaallll;;;;
+     SSSSccccaaaallllaaaarrrr rrrr,,,, ssss,,,, tttt;;;;
+
+     Evaluate the patch at the point  whose  barycentric  coordi-
+     nates  are  (r,  s, t) Also computed is the normal vector to
+     the surface at the point.
+
+
+     PPPPooooiiiinnnntttt PPPPaaaattttcccchhhhEEEEvvvvaaaallll(((( ppppaaaattttcccchhhh,,,, rrrr,,,, ssss,,,, tttt))))
+     PPPPaaaattttcccchhhh ppppaaaattttcccchhhh;;;;
+     SSSSccccaaaallllaaaarrrr rrrr,,,, ssss,,,, tttt;;;;
+
+     Evaluate the patch at the point  whose  barycentric  coordi-
+     nates are (r, s, t).
+
+     vvvvooooiiiidddd PPPPaaaattttcccchhhhSSSSeeeettttPPPPooooiiiinnnntttt(((( ppppaaaattttcccchhhh,,,, pppptttt,,,, iiii1111,,,, iiii2222,,,, iiii3333))))
+     PPPPaaaattttcccchhhh ****ppppaaaattttcccchhhh;;;;
+     PPPPooooiiiinnnntttt pppptttt;;;;
+     iiiinnnntttt iiii1111,,,, iiii2222,,,, iiii3333;;;;
+
+
+
+
+SunOS 5.6                 Last change:                          1
+
+
+
+
+
+
+C Library Functions                                      patch(3)
+
+
+
+     Set the vertex whose multi-index is (i1,i2,i3) to pt.
+
+     vvvvooooiiiidddd PPPPaaaattttcccchhhhSSSSeeeettttNNNNoooorrrrmmmmaaaallll(((( ppppaaaattttcccchhhh,,,, nnnnoooorrrrmmmmaaaallll,,,, iiii1111,,,, iiii2222,,,, iiii3333))))
+     PPPPaaaattttcccchhhh ****ppppaaaattttcccchhhh;;;;
+     NNNNoooorrrrmmmmaaaallll nnnnoooorrrrmmmmaaaallll;;;;
+     iiiinnnntttt iiii1111,,,, iiii2222,,,, iiii3333;;;;
+
+     Set the normal of the vertex whose multi-index is (i1,i2,i3)
+     to normal.
+
+     PPPPooooiiiinnnntttt PPPPaaaattttcccchhhhGGGGeeeettttPPPPooooiiiinnnntttt(((( pppp,,,, iiii1111,,,, iiii2222,,,, iiii3333))))
+     PPPPaaaattttcccchhhh pppp;;;;
+     iiiinnnntttt iiii1111,,,, iiii2222,,,, iiii3333;;;;
+
+     Return the position of the control point  whose  multi-index
+     is (i1,i2,i3).
+
+     PPPPooooiiiinnnntttt PPPPaaaattttcccchhhhSSSSaaaaffffeeeeGGGGeeeettttPPPPooooiiiinnnntttt(((( pppp,,,, iiii1111,,,, iiii2222,,,, iiii3333))))
+     PPPPaaaattttcccchhhh pppp;;;;
+     iiiinnnntttt iiii1111,,,, iiii2222,,,, iiii3333;;;;
+
+     If the index is valid, return the position  of  the  control
+     point  whose  multi-index  is (i1,i2,i3).  Otherwise, return
+     the origin of the standard frame.  Useful for  certain  sums
+     that look at invalid points but give them a weight of zero.
+
+
+     NNNNoooorrrrmmmmaaaallll PPPPaaaattttcccchhhhGGGGeeeettttNNNNoooorrrrmmmmaaaallll(((( pppp,,,, iiii1111,,,, iiii2222,,,, iiii3333))))
+     PPPPaaaattttcccchhhh pppp;;;;
+     iiiinnnntttt iiii1111,,,, iiii2222,,,, iiii3333;;;;
+
+     Return the normal of the control point whose multi-index is (i1,i2,i3);
+
+     VVVVEEEERRRRTTTTEEEEXXXX PPPPaaaattttcccchhhhGGGGeeeettttVVVVeeeerrrrtttteeeexxxx(((( pppp,,,, iiii1111,,,, iiii2222,,,, iiii3333))))
+     PPPPaaaattttcccchhhh pppp;;;;
+     iiiinnnntttt iiii1111,,,, iiii2222,,,, iiii3333;;;;
+
+     Return the vertex (a point and a normal)  whose  multi-index
+     is (i1,i2,i3).
+
+
+     iiiinnnntttt PPPPaaaattttcccchhhhRRRReeeeaaaadddd(((( ffffpppp,,,, ppppaaaattttcccchhhh,,,, rrrraaaannnnggggeeee))))
+     FFFFIIIILLLLEEEE ****ffffpppp;;;;
+     PPPPaaaattttcccchhhh ****ppppaaaattttcccchhhh;;;;
+     SSSSppppaaaacccceeee rrrraaaannnnggggeeee;;;;
+
+     Read a patch from the file fp.  One is returned on  success,
+     zero  on failure.  The coordinates read in are assumed to be
+     coordinates relative to the  standard  frame  of  the  range
+     space.
+
+     iiiinnnntttt ppppGGGGeeeettttPPPPaaaattttcccchhhh((((ddddssss,,,, ppppaaaattttcccchhhh,,,, rrrraaaannnnggggeeee))))
+
+
+
+SunOS 5.6                 Last change:                          2
+
+
+
+
+
+
+C Library Functions                                      patch(3)
+
+
+
+     LLLLnnnnooooddddeeee******** ddddssss;;;;
+     PPPPaaaattttcccchhhh**** ppppaaaattttcccchhhh;;;;
+     SSSSppppaaaacccceeee rrrraaaannnnggggeeee;;;;
+
+     Read a patch from a dstruct.
+
+
+     vvvvooooiiiidddd PPPPaaaattttcccchhhhWWWWrrrriiiitttteeee(((( ffffpppp,,,, ppppaaaattttcccchhhh))))
+     FFFFIIIILLLLEEEE ****ffffpppp;;;;
+     PPPPaaaattttcccchhhh ppppaaaattttcccchhhh;;;;
+
+     Write the patch out on the named stream.
+
+
+     PPPPaaaattttcccchhhh PPPPaaaattttcccchhhhSSSSpppplllliiiitttt(((( pppp,,,, pppprrrr,,,, ppppssss,,,, pppptttt,,,, rrrr,,,, ssss,,,, tttt))))
+     PPPPaaaattttcccchhhh pppp;;;;
+     PPPPaaaattttcccchhhh ****pppprrrr,,,, ****ppppssss,,,, ****pppptttt;;;;
+     SSSSccccaaaallllaaaarrrr rrrr,,,, ssss,,,, tttt;;;;
+
+     Split (subdivide) the patch at the point  whose  barycentric
+     coordinates are (r,s,t).  The subpatches are pr, ps, and pt.
+
+
+     PPPPaaaattttcccchhhh PPPPaaaattttcccchhhhDDDDeeeeggggrrrreeeeeeeeRRRRaaaaiiiisssseeee((((pppp))))
+     PPPPaaaattttcccchhhh     pppp;;;;
+
+     Returns a patch resulting from degree-raising  p.   The  new
+     patch will have the same dimension of normals as p, but they
+     are not set.
+
+     SSSSccccaaaallllaaaarrrr KKKKGGGGaaaauuuussssssss((((pppp,,,, rrrr,,,, ssss,,,, tttt))))
+     PPPPaaaattttcccchhhh pppp;;;;
+     SSSSccccaaaallllaaaarrrr rrrr,,,,ssss,,,,tttt;;;;
+
+     Return the Gaussian curvature of patch p at r,s,t.
+
+     SSSSccccaaaallllaaaarrrr KKKKMMMMeeeeaaaannnn((((pppp,,,, rrrr,,,, ssss,,,, tttt))))
+     PPPPaaaattttcccchhhh pppp;;;;
+     SSSSccccaaaallllaaaarrrr rrrr,,,,ssss,,,,tttt;;;;
+
+     Return the mean curvature of patch p at r,s,t.
+
+     VVVVeeeeccccttttoooorrrr PPPPaaaattttcccchhhhDDDDeeeerrrriiiivvvvEEEEvvvvaaaallll((((pppp,,,, rrrr,,,,ssss,,,,tttt,,,, VVVVrrrr,,,,VVVVssss,,,,VVVVtttt))))
+     PPPPaaaattttcccchhhh pppp;;;;
+     SSSSccccaaaallllaaaarrrr rrrr,,,,ssss,,,,tttt;;;;
+     SSSSccccaaaallllaaaarrrr VVVVrrrr,,,, VVVVssss,,,, VVVVtttt;;;;
+
+     Return the first derivative of patch p at r,s,t in direction
+     Vr,Vs,Vt.
+
+     VVVVeeeeccccttttoooorrrr PPPPaaaattttcccchhhhDDDDeeeerrrriiiivvvv2222EEEEvvvvaaaallll((((pppp,,,, rrrr,,,,ssss,,,,tttt,,,, VVVVrrrr,,,,VVVVssss,,,,VVVVtttt,,,, WWWWrrrr,,,,WWWWssss,,,,WWWWtttt))))
+     PPPPaaaattttcccchhhh pppp;;;;
+
+
+
+SunOS 5.6                 Last change:                          3
+
+
+
+
+
+
+C Library Functions                                      patch(3)
+
+
+
+     SSSSccccaaaallllaaaarrrr rrrr,,,,ssss,,,,tttt;;;;
+     SSSSccccaaaallllaaaarrrr VVVVrrrr,,,, VVVVssss,,,, VVVVtttt;;;;
+     SSSSccccaaaallllaaaarrrr WWWWrrrr,,,, WWWWssss,,,, WWWWtttt;;;;
+
+     Return the second derivative of patch p at r,s,t  in  direc-
+     tions Vr,Vs,Vt and Ws,Wr,Wt.
+
+     SSSSccccaaaallllaaaarrrr PPPPaaaattttcccchhhhCCCCuuuurrrrvvvvaaaattttuuuurrrreeee((((pppp,,,, rrrr,,,,ssss,,,,tttt,,,, VVVVrrrr,,,,VVVVssss,,,,VVVVtttt))))
+     PPPPaaaattttcccchhhh pppp;;;;
+     SSSSccccaaaallllaaaarrrr rrrr,,,,ssss,,,,tttt;;;;
+     SSSSccccaaaallllaaaarrrr VVVVrrrr,,,,VVVVssss,,,,VVVVtttt;;;;
+
+     Return the curvature of the patch in direction Vr,Vs,Vt.
+
+     SSSSccccaaaallllaaaarrrr PPPPaaaattttcccchhhhNNNNoooorrrrmmmmaaaallllCCCCuuuurrrrvvvvaaaattttuuuurrrreeee((((pppp,,,, rrrr,,,,ssss,,,,tttt,,,, VVVVrrrr,,,,VVVVssss,,,,VVVVtttt))))
+     PPPPaaaattttcccchhhh pppp;;;;
+     SSSSccccaaaallllaaaarrrr rrrr,,,,ssss,,,,tttt;;;;
+     SSSSccccaaaallllaaaarrrr VVVVrrrr,,,,VVVVssss,,,,VVVVtttt;;;;
+
+     Return the normal section curvature of a patch.
+
+     SSSSFFFFFFFF PPPPaaaattttcccchhhhEEEEvvvvaaaallllSSSSFFFFFFFF((((pppp,,,, rrrr,,,,ssss,,,,tttt))))
+     PPPPaaaattttcccchhhh pppp;;;;
+     SSSSccccaaaallllaaaarrrr rrrr,,,,ssss,,,,tttt;;;;
+
+     Return the SFF of patch p at r,s,t.
+
+
+     SSSSFFFFFFFF PPPPaaaattttcccchhhhEEEEvvvvaaaallllSSSSFFFFFFFF((((ppppaaaattttcccchhhh,,,, rrrr,,,, ssss,,,, tttt))))
+     PPPPaaaattttcccchhhh ppppaaaattttcccchhhh;;;;
+     SSSSccccaaaallllaaaarrrr rrrr,,,,ssss,,,,tttt;;;;
+
+     Return the Second Fundamental Form at a point on a patch.
+
+
+DDDDAAAATTTTEEEE
+     January 5, 1992
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SunOS 5.6                 Last change:                          4
+
+
+

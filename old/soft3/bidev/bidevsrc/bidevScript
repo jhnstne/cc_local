@@ -1,0 +1,6 @@
+bidev 	 -d 3  data/surfpair/2ProtoPear.pts3
+bidev -m       -e .1   -s    data/surfpair/PairBasicPatch.cpt3     > outPairBasicPatch
+bidev -m -d 20 -E .005 -S -D data/surfpair/PairBasicPatch.tangsurf > outPairBasicPatch
+bidev    -d 10 -e .1 data/surfpair/TwoBasicPatch.cpt3  > outTwoBasicPatch
+bidev -M       -e .1   -s    data/surfpair/UtahHandleSpoutUnified.cpt3 > outHandleSpout
+bidev -m -d 20 -E .005 -S -D data/surfpair/UtahHandleSpoutUnified.tangsurf > outHS

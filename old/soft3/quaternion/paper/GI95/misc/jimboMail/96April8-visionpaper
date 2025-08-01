@@ -1,0 +1,52 @@
+From jimbo@blaze.cs.jhu.edu Mon Apr  8 10:07 CDT 1996
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from cerulean.cis.uab.edu by cis.uab.edu (5.x/SMI-SVR4)
+	id AA10991; Mon, 8 Apr 1996 10:07:12 -0500
+Received: from cis.uab.edu by cerulean.cis.uab.edu via SMTP (940816.SGI.8.6.9/940406.SGI)
+	for <jj@cerulean> id JAA09029; Mon, 8 Apr 1996 09:55:04 -0700
+Received: from blaze.cs.jhu.edu by cis.uab.edu (5.x/SMI-SVR4)
+	id AA10988; Mon, 8 Apr 1996 10:07:10 -0500
+Received: from mail-client
+           by blaze.cs.jhu.edu with SMTP; Mon, 8 Apr 1996 15:07:08 GMT
+Received: by mail-client (4.1) id AA27933; Mon, 8 Apr 96 11:07:07 EDT
+Message-Id: <9604081507.AA10988@cis.uab.edu>
+From: jimbo@blaze.cs.jhu.edu (Jim Williams)
+Sender: jimbo@blaze.cs.jhu.edu
+Subject: Re: Quaternion paper
+To: jj@cerulean.cis.uab.edu (John K. Johnstone)
+Date: Mon, 8 Apr 1996 11:07:06 -0400 (EDT)
+Cc: jimbo@blaze.cs.jhu.edu (Jimbo)
+In-Reply-To: <9604080933.ZM8968@cerulean.cis.uab.edu> from "John K. Johnstone" at Apr 8, 96 09:33:02 am
+X-Mailer: ELM [version 2.4 PL13]
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Length: 828
+Status: ORr
+
+> 
+> Jim,
+> Just a formal reminder to both of us (as much to me as to you)
+> that we need to start writing up that quaternion paper.
+> There may be a patch of blue sky on the horizon (that is, time)
+> for me to clean it up over the next couple of months.
+> I'm sure you've been as busy as I have recently.
+> Preparing for a workshop on surface reconstruction at the end
+> of May is the main culprit in my case.
+> 
+> Best regards,
+> John
+> 
+
+John,
+
+My schedule starts opening up in early May.  I am going to Cambridge
+for ECCV this Thursday and returning on the 21'st. I am also considering
+putting together another application of the same quaternion math targeted
+for the Vision community that we could submit to CVPR.
+
+What do you think of Graphical Models & Image Processing as a poosible
+venue for the quaternion paper?
+
+Jim
+

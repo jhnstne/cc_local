@@ -1,0 +1,99 @@
+From jj Tue Aug 23 09:44:06 1994
+Return-Path: <jj>
+Received: by cis.uab.edu (4.1/SMI-4.1)
+	id AA10743; Tue, 23 Aug 94 09:44:06 CDT
+Date: Tue, 23 Aug 94 09:44:06 CDT
+From: jj (John Johnstone)
+Message-Id: <9408231444.AA10743@cis.uab.edu>
+To: jj
+Cc: Cc:
+Status: OR
+
+(Message inbox:6428)
+Return-Path: jimbo
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from mail-client (peregrine.cs.jhu.edu)
+           by blaze.cs.jhu.edu; Mon, 22 Aug 94 16:59:49 EDT
+From: jimbo@blaze.cs.jhu.edu (James P. Williams)
+Sender: jimbo@blaze.cs.jhu.edu
+Received: by mail-client (4.1) id AA08137; Mon, 22 Aug 94 16:59:48 EDT
+Subject: article requests (fwd)
+To: jj (Dr. John Johnstone)
+Date: Mon, 22 Aug 1994 16:59:48 -0400 (EDT)
+X-Mailer: ELM [version 2.4 PL13]
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Content-Length: 1522      
+
+These are a couple of articles I have requested from ILL, you
+might want to look at them if you have them on your shelf.
+
+Jim
+
+
+
+
+Forwarded message:
+> From jimbo Mon Aug 22 14:23:56 1994
+> From: jimbo@blaze.cs.jhu.edu (James P. Williams)
+> Sender: jimbo@blaze.cs.jhu.edu
+> Date: Mon, 22 Aug 94 14:23:50 EDT
+> To: ILL_EXP@JHUVM.hcf
+> Subject: article requests
+> Cc: jimbo
+> 
+> 
+> I would like to get copies of the following two articles:
+> /////////////////////////////////////////////////
+> Quaternion Splines for Animating Orientation
+>   
+>   BibTeX Key:     duff-1985-quaternion
+>           
+>   BibTeX Type:    InProceedings
+>           
+>   Author(s):      Duff T.
+>           
+>   In Book:        Proceedings of the USENIX Association Second Computer Graphics
+>           Workshop
+>           
+>   Pages:  54-62
+>           
+>   Year:   1985
+>           
+>   Keywords:       I35 splines (mathematics), I37 animation orientation
+>           
+> ////////////////////////////////////////////////
+> Spline Interpolation in Curved Space
+>   
+>   BibTeX Key:     gabriel-1985-spline
+>           
+>   BibTeX Type:    InCollection
+>           
+>   Author(s):      Gabriel S. A., Kajiya J. T.
+>           
+>   Year:   1985
+>           
+>   Month:  July
+>           
+>   In Book:        SIGGRAPH '85 State of the Art in Image Synthesis seminar notes
+>           
+>   Keywords:       quaternion
+>           
+> ///////////////////////////////////////////////
+> Jim Williams
+> Department of Computer Science
+> Homewood Campus
+> 
+
+
+
+redmont1% mail jimbo@blaze.cs.jhu.edu
+Subject: 
+Those articles look interesting, especially the Duff.
+Since they are 1985, same year as Shoemake and before
+the followup optimization article, I suspect that they
+are relatively primitive, but I'd be interested in seeing
+a copy if they look worthwhile. 
+jj
+

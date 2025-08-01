@@ -1,0 +1,54 @@
+From jimbo@blaze.cs.jhu.edu Wed Aug 31 10:15 CDT 1994
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from blaze.cs.jhu.edu by cis.uab.edu (5.0/SMI-SVR4)
+	id AA05466; Wed, 31 Aug 1994 10:15:48 +0600
+Received: from mail-client (peregrine.cs.jhu.edu)
+           by blaze.cs.jhu.edu; Wed, 31 Aug 94 11:16:58 EDT
+Received: by mail-client (4.1) id AA13717; Wed, 31 Aug 94 11:16:57 EDT
+Message-Id: <9408311515.AA05466@cis.uab.edu>
+From: jimbo@blaze.cs.jhu.edu (James P. Williams)
+Sender: jimbo@blaze.cs.jhu.edu
+Subject: On the topic of cusps...
+To: jj@cis.uab.edu (John Johnstone)
+Date: Wed, 31 Aug 1994 11:16:57 -0400 (EDT)
+In-Reply-To: <9408241448.AA19757@cis.uab.edu> from "John Johnstone" at Aug 24, 94 09:48:40 am
+X-Mailer: ELM [version 2.4 PL13]
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Length: 982
+Status: OR
+
+Definitions:
+
+let F(t) = [w,A,B,C,D] -- our projective curve
+let f(t) = [A,B,C,D]   -- F(t) minus homog. coordinate
+let S(t) = [A/w,B/w,C/w,D/w] -- homogenized 4-sphere curve
+
+{A,B,C,D,w are all parametric in t}
+
+---------------------------------------
+
+As to cusps on our 4-sphere curves, S(t).  When we divide through
+by the homogeneous parameter w = p^2 + q^2 + r^2 + s^2 we are
+compressing all lines through the origin to opposed pairs of points
+on the 4-sphere.
+
+
+If the tangent vector of f(t) -- f'(t) at t=ti is parallel to the 
+projecting line l(s) = s * f(ti) we can have a cusp.  More formally
+
+IF [f'(ti) / ||f'(ti)||] = +/- [f(ti) / ||f(ti)||] then a cusp may exist
+
+
+do you concur?
+
+
+
+Also, I am sending you the Maple programs to do this interpolation 
+polynomially, this program still uses power basis polynomial interpolation,
+but it does work.   I know you do not have Maple, but this program is
+text-only, so you can experiment with it via rlogin if you want.
+
+Jim
+

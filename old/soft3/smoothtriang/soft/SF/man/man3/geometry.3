@@ -1,0 +1,400 @@
+.TH GEOMETRY 3
+.SH NAME
+geometry \- A library of routines for affine and euclidean geometry
+.SH SYNTAX
+.B #\include "geometry.h"
+.SH DESCRIPTION
+.I Geometry
+is an implementation of the geometric abstract data type described in
+[DeRose '89].  The reader is referred to that document for a thorough
+discussion of the philosophy of the ADT as well as several examples of
+its use.
+.SH TYPES
+The data types supported by this package are: AffineMap, Frame, Normal,
+Point, Scalar, and Space.
+Below is an alphabetic description of each of the routines exported by
+the package.  There is a fairly loose convention for the naming of these
+routines: the first several letters (A, F, N, P, V, or S) indicate either
+the types of the arguments expected or the type of the return value. 
+Here, A stands for AffineMap, F stands for Frame, N for Normal, P for Point,
+V for Vector, and S for Space or Scalar.
+
+.SH ROUTINES
+.LP
+.nf
+.B AffineMap AACompose( T1, T2)
+.B AffineMap T1, T2;
+.fi
+.PP
+Return the composition transform defined by T2(T1(.)).
+An error is signaled if the range of T1 is not equal to
+the domain of T2.
+.LP
+.nf
+.B "AffineMap ACreate( f, oprime, v0prime, v1prime [, v2prime])"
+.B Frame f;
+.B Point oprime;
+.B Vector v0prime, v1prime, v2prime;
+.fi
+.PP
+This is the lowest level affine transformation creation routine.
+Returned is the affine transformation that carries the origin of frame f
+onto the point oprime, the first basis vector of f onto the vector
+v0prime, the second basis vector of f onto the vector v1prime, (and
+if f belongs to a 3-space) the third basis vector of f onto the
+vector v2prime.  The domain of the transformation is set to be the
+space in which f belongs, the range is the space in which the primed
+objects belong.
+An error is signaled if the primed objects do not belong to a common
+space.  Notice that the dimensions of the two spaces can differ.
+.LP
+.nf
+.B AffineMap ACreateF( f1, f2)
+.B Frame f1, f2;
+.fi
+.PP
+This routine is only appropriate for creating affine transformations between
+spaces of a common dimension.  Returned is the affine transformation that
+carries the frame f1 onto the frame f2.  An error is signaled if f1 and f2
+belong to spaces of unequal dimension.
+.LP
+.nf
+.B AffineMap AIdentity( S)
+.B Space S;
+.fi
+.PP
+Return the identity transformation from space S onto itself.
+.LP
+.nf
+.B "Frame FCreate( name, origin, v0, v1 [, v2])"
+.B char *name;
+.B Point origin;
+.B Vector v0, v1, v2;
+.fi
+.PP
+Return a new coordinate frame.  Name is a character string that is
+associated with the frame, primarily for debugging purposes.  The
+next three or four arguments specify the origin of the frame and
+a basis of vectors.  If the origin and vectors belong to an affine
+2-space, then only the vectors v0 and v1 are required; otherwise
+all three vectors are expected.  The order of the vectors is important,
+especially for use with the coordinate specification and extraction
+routines (see, eg, PCoords below).
+.LP
+.nf
+.B "Point FOrg( f)"
+.B Frame f;
+.fi
+.PP
+Return the origin of the frame f.
+.LP
+.nf
+.B "Vector FV( f, i)"
+.B Frame f;
+.B int i;
+.fi
+.PP
+Return the i-th direction vector of frame f (numbered starting at 0).
+.LP
+.nf
+.B Space SpaceOf( obj)
+.fi
+.PP
+Return the space that the geometric object obj ``lives in''.  Here
+obj can be either a point, a vector, a normal, or a frame.  This routine
+is currently implemented as a macro.
+.LP
+.nf
+.B "Normal NCreate( f, c0, c1 [,c2])"
+.B Frame f;
+.B Scalar c0, c1, c2;
+.fi
+.PP
+Return a normal vector whose coordinates relative to f are
+(c0 c1 [c2]).  The coordinate c2 is needed only if f belongs
+to a 3-space.  This routine has the same affect as creating
+a primal vector whose coordinates are (c0 c1 [c2]), then
+dualizing it (using VDual) to create the corresponding normal.
+.LP
+.nf
+.B "void NCoords( norm, f, c0, c1 [, c2])"
+.B Normal norm;
+.B Frame f;
+.B Scalar *c0, *c1, *c2;
+.fi
+.PP
+Set the scalars pointed to by c0, c1 (and c2 if norm belongs to
+a 3-space) to the coordinates of norm relative to the frame f.
+The effect is to dualize norm to obtain a vector V, then to extract
+the coordinates of V relative to the frame f.
+.LP
+.nf
+.B Vector NDual( norm)
+.B Normal norm;
+.fi
+.PP
+Convert norm into a primal vector as described in [DeRose '89].
+.LP
+.nf
+.B Scalar NVApply( norm, vec)
+.B Normal norm;
+.B Vector vec;
+.fi
+.PP
+Apply the linear functional represented by norm to the vector vec.
+The effect is equivalent to dualizing norm to obtain a vector nv,
+then forming the dot product <nv,vec>.
+.LP
+.nf
+.B Point PAxform( p, T)
+.B Point p;
+.B AffineMap T;
+.fi
+.PP
+Return the image of p under the affine map T.
+.LP
+.nf
+.B "Point PCreate( f, c0, c1 [, c2])"
+.B Frame f;
+.B Scalar c0, c1, c2;
+.fi
+.PP
+Return a point whose coordinates relative to f are
+(c0 c1 [c2]).  The coordinate c2 is needed only if f belongs
+to a 3-space.
+.LP
+.nf
+.B "void PCoords( p, f, c0, c1 [, c2])"
+.B Point p;
+.B Frame f;
+.B Scalar *c0, *c1, *c2;
+.fi
+.PP
+Set the scalars pointed to by c0, c1 (and c2 if norm belongs to
+a 3-space) to the coordinates of point p relative to the frame f.
+.LP
+.nf
+.B Point PPac( p1, p2, a1)
+.B Point p1, p2;
+.B Scalar a1;
+.fi
+.PP
+Return the point given by the affine combination a1*p1 + (1-a1)*p2.
+.LP
+.nf
+.B "Point PPac3( p1, p2, p3, a1, a2, a3)"
+.B Point p1, p2, p3;
+.B Scalar a1, a2, a3;
+.fi
+.PP
+Return the point given by the affine combination a1*p1 + a2*p2 + a3*p3.
+.LP
+.nf
+.B Point PPacN( n, p, a)
+.B int n;
+.B Point p[];
+.B Scalar a[];
+.fi
+.PP
+Perform an affine combination of n points.
+Return the point a[0] * p[0] + ... + a[n-1] * p[n-1], where the a's
+are assumed to sum to one.
+.LP
+.nf
+.B Vector PPvcN( n, p, a)
+.B int n;
+.B Point p[];
+.B Scalar a[];
+.fi
+.PP
+Perform a "vector combination", that is, a combination where the
+coefficients sum to zero.
+Return the vector a[0] * p[0] + ... + a[n-1] * p[n-1], where the a's
+are assumed to sum to zero.  
+.LP
+.nf
+.B Vector PPDiff( p1, p2)
+.B Point p1, p2;
+.fi
+.PP
+Return the vector given by p1 - p2, that is, the vector from p2 to p1.
+An error is signaled if p1 and p2 belong to different spaces.
+.LP
+.nf
+.B Scalar PPDist( p1, p2)
+.B Point p1, p2;
+.fi
+.PP
+Return the distance between the points p1 and p2.
+An error is signaled if p1 and p2 belong to different spaces.
+.LP
+.nf
+.B Normal PPPNormal( p1, p2, p3)
+.B Point p1, p2, p3;
+.fi
+.PP
+Return an outward pointing normal vector to the triangle spanned by
+the points p1, p2 and p3.  The outward pointing direction is defined
+by the right-hand rule.
+.LP
+.nf
+.B Point PPrr( p1, p2, r1, r2)
+.B Point p1, p2;
+.B Scalar r1, r2;
+.fi
+.PP
+Return the point that breaks the line segment p1p2 into relative ratio
+r1 to r2.  The ratios r1 and r2 do not have to sum to unity.  For instance,
+PPrr( p1, p2, 1, 2) returns the point one third of the way from p1 to p2.
+.LP
+.nf
+.B Point PVAdd( p, v)
+.B Point p;
+.B Vector v;
+.fi
+.PP
+Return the point obtained by adding vector v to point p.
+An error is signaled if p and v belong to different spaces.
+.LP
+.nf
+.B Space SCreate( name, dim)
+.B char *name;
+.B int dim;
+.fi
+.PP
+Return a new euclidean space.  Name is a character string used primarily
+for debugging purposes; dim is one of TWOSPACE or THREESPACE, denoting
+that the new space is to be a euclidean 2-space or 3-space, respectively.
+As described in [DeRose '89], the returned space S comes with a
+pre-defined Cartesian frame denoted by StdFrame(S).
+.LP
+.nf
+.B Frame StdFrame( S)
+.B Space S;
+.fi
+.PP
+Return the pre-defined Cartesian frame for the space S.  This routine
+is currently implemented as a macro.
+.LP
+.nf
+.B Vector SVMult( s, v)
+.B Scalar s;
+.B Vector v;
+.fi
+.PP
+
+Return the vector given by s*v; that is, perform multiplication of a
+scalar and a vector.
+.LP
+.nf
+.B Vector VAxform( v, T)
+.B Vector p;
+.B AffineMap T;
+.fi
+.PP
+Return the image of v under the affine map T.
+.LP
+.nf
+.B "void VCoords( v, f, c0, c1 [, c2])"
+.B Vector v;
+.B Frame f;
+.B Scalar *c0, *c1, *c2;
+.fi
+.PP
+Set the scalars pointed to by c0, c1 (and c2 if norm belongs to
+a 3-space) to the coordinates of vector v relative to the frame f.
+.LP
+.nf
+.B "Vector VCreate( f, c0, c1 [, c2])"
+.B Frame f;
+.B Scalar c0, c1, c2;
+.fi
+.PP
+Return a vector whose coordinates relative to f are
+(c0 c1 [c2]).  The coordinate c2 is needed only if f belongs
+to a 3-space.
+.LP
+.nf
+.B Normal VDual( v)
+.B Vector v;
+.fi
+.PP
+Return the normal vector (ie, linear functional) dual to v.
+.LP
+.nf
+.B Scalar VMag( v)
+.B Vector v;
+.fi
+.PP
+Return the magnitude of vector v.
+.LP
+.nf
+.B Vector VNormalize( v)
+.B Vector v;
+.fi
+.PP
+Return the unit vector in the direction of vector v.
+.LP
+.nf
+.B Vector VVAdd( v1, v2)
+.B Vector v1, v2;
+.fi
+.PP
+Return the vector sum of vectors v1 and v2.  An error is signaled
+if v1 and v2 belong to different spaces.
+.LP
+.nf
+.B Vector VVDiff( v1, v2)
+.B Vector v1, v2;
+.fi
+.PP
+Return the vector difference of vectors v1 and v2; that is, the vector
+given by v1 - v2 is returned.  An error is signaled
+if v1 and v2 belong to different spaces.
+.LP
+.nf
+.B Vector VVCross( v1, v2)
+.B Vector v1, v2;
+.fi
+.PP
+Return the cross product of v1 and v2; that is, the vector v1 x v2 is
+returned.
+An error is signaled if v1 and v2 belong to different spaces.
+.LP
+.nf
+.B Scalar VVDot( v1, v2)
+.B Vector v1, v2;
+.fi
+.PP
+Return the dot product of v1 and v2.
+An error is signaled if v1 and v2 belong to different spaces.
+.LP
+.nf
+.B Vector VVlcN( n, v, a)
+.B int n;
+.B Vector v[];
+.B Scalar a[];
+.fi
+.PP
+Perform a linear combination.  Return the vector a[0]*v[0]+...+a[n-1]*v[n-1].
+.LP
+.nf
+.B Vector VVProj(v,w)
+.B Vector v, w;
+.fi
+.PP
+Return the projection of vector v onto vector w.
+.LP
+.nf
+.B Vector VZero(S)
+.B Space S;
+.fi
+.PP
+Return the zero vector in space S.
+.SH BUGS
+.SH AUTHORS
+Tony DeRose
+.SH SEE ALSO
+[DeRose '89] T. DeRose, "Coordinate-Free Geometric Programming",
+Technical Report 89-09-16, Department of Computer Science and Engineering,
+FR-35, Seattle, WA 98195 (September 1989).

@@ -1,0 +1,330 @@
+
+
+
+C Library Functions                                       mesh(3)
+
+
+
+NNNNAAAAMMMMEEEE
+     MeshParse,  WriteMesh,  WriteItoEMesh,  BoundaryEdge,  Boun-
+     daryVertex,  BoundaryFace,  ForeachMeshFace, ForeachMeshVer-
+     tex,  ForeachMeshEdge,  ForeachFaceVertex,  ForeachFaceEdge,
+     ForeachVertexFace,  ForeachVertexEdge,  ForeachVertexVertex,
+     EndForeach,  GetEdgeVertices,  GetVertexEdge,  GetEdgeFaces,
+     SetInternalData,ReturnInternalData,SetName,ReturnName - mesh
+     operations
+
+SSSSYYYYNNNNTTTTAAAAXXXX
+     ####iiiinnnncccclllluuuuddddeeee ggggeeeeoooommmmeeeettttrrrryyyy....hhhh
+     ####iiiinnnncccclllluuuuddddeeee uuuusssseeeerrrrDDDDaaaattttaaaa....hhhh
+     ####iiiinnnncccclllluuuuddddeeee <<<<mmmmeeeesssshhhh....hhhh>>>>
+
+     MMMMeeeesssshhhh**** MMMMeeeesssshhhhPPPPaaaarrrrsssseeee((((ffffpppp))))
+     FFFFIIIILLLLEEEE**** ffffpppp;;;;
+
+     vvvvooooiiiidddd WWWWrrrriiiitttteeeeMMMMeeeesssshhhh((((mmmm,,,,ffffpppp))))
+     MMMMeeeesssshhhh**** mmmm;;;;
+     FFFFIIIILLLLEEEE**** ffffpppp;;;;
+
+     vvvvooooiiiidddd WWWWrrrriiiitttteeeeIIIIttttooooEEEEMMMMeeeesssshhhh((((mmmm,,,, ffffpppp,,,, iiiittttooooeeeeVVVV,,,, iiiittttooooeeeeEEEE,,,, iiiittttooooeeeeFFFF))))
+     MMMMeeeesssshhhh**** mmmm;;;;
+     FFFFIIIILLLLEEEE**** ffffpppp;;;;
+     vvvvooooiiiidddd**** ((((****iiiittttooooeeeeVVVV))))(((())));;;;
+     vvvvooooiiiidddd**** ((((****iiiittttooooeeeeEEEE))))(((())));;;;
+     vvvvooooiiiidddd**** ((((****iiiittttooooeeeeFFFF))))(((())));;;;
+
+     vvvvooooiiiidddd CCCClllleeeeaaaarrrrMMMMeeeesssshhhhEEEExxxxtttteeeerrrrnnnnaaaallllDDDDaaaattttaaaa((((mmmm))))
+     MMMMeeeesssshhhh**** mmmm;;;;
+
+     BBBBOOOOOOOOLLLLEEEEAAAANNNN BBBBoooouuuunnnnddddaaaarrrryyyyEEEEddddggggeeee((((eeee))))
+     EEEEddddggggeeee**** eeee;;;;
+
+     BBBBOOOOOOOOLLLLEEEEAAAANNNN BBBBoooouuuunnnnddddaaaarrrryyyyVVVVeeeerrrrtttteeeexxxx((((vvvv))))
+     VVVVeeeerrrrtttteeeexxxx**** vvvv;;;;
+
+     BBBBOOOOOOOOLLLLEEEEAAAANNNN BBBBoooouuuunnnnddddaaaarrrryyyyFFFFaaaacccceeee((((ffff))))
+     FFFFaaaacccceeee**** ffff;;;;
+
+     VVVVeeeerrrrtttteeeexxxx**** VVVVeeeerrrrtttteeeexxxxPPPPaaaatttthhhh((((vvvv1111,,,,vvvv2222,,,,pppp))))
+     VVVVeeeerrrrtttteeeexxxx**** vvvv1111;;;;
+     VVVVeeeerrrrtttteeeexxxx**** vvvv2222;;;;
+     cccchhhhaaaarrrr**** pppp;;;;
+
+     FFFFoooorrrreeeeaaaacccchhhhMMMMeeeesssshhhhFFFFaaaacccceeee((((mmmm,,,,ffff))))
+     MMMMeeeesssshhhh**** mmmm;;;;
+     FFFFaaaacccceeee**** ffff;;;;
+
+     FFFFoooorrrreeeeaaaacccchhhhMMMMeeeesssshhhhVVVVeeeerrrrtttteeeexxxx((((mmmm,,,,vvvv))))
+     MMMMeeeesssshhhh**** mmmm;;;;
+     VVVVeeeerrrrtttteeeexxxx**** vvvv;;;;
+
+
+
+SunOS 5.6                 Last change:                          1
+
+
+
+
+
+
+C Library Functions                                       mesh(3)
+
+
+
+     FFFFoooorrrreeeeaaaacccchhhhMMMMeeeesssshhhhEEEEddddggggeeee((((mmmm,,,,eeee))))
+     MMMMeeeesssshhhh**** mmmm;;;;
+     EEEEddddggggeeee**** eeee;;;;
+
+     FFFFoooorrrreeeeaaaacccchhhhFFFFaaaacccceeeeVVVVeeeerrrrtttteeeexxxx((((ffff,,,,vvvv))))
+     FFFFaaaacccceeee**** ffff;;;;
+     VVVVeeeerrrrtttteeeexxxx**** vvvv;;;;
+
+     FFFFoooorrrreeeeaaaacccchhhhFFFFaaaacccceeeeEEEEddddggggeeee((((ffff,,,,eeee))))
+     FFFFaaaacccceeee**** ffff;;;;
+     EEEEddddggggeeee**** eeee;;;;
+
+     FFFFoooorrrreeeeaaaacccchhhhFFFFaaaacccceeeeFFFFaaaacccceeee((((ffff1111,,,,ffff2222))))
+     FFFFaaaacccceeee**** ffff1111;;;;
+     FFFFaaaacccceeee**** ffff2222;;;;
+
+     FFFFoooorrrreeeeaaaacccchhhhVVVVeeeerrrrtttteeeexxxxFFFFaaaacccceeee((((vvvv,,,,ffff))))
+     VVVVeeeerrrrtttteeeexxxx**** mmmm;;;;
+     FFFFaaaacccceeee**** ffff;;;;
+
+     FFFFoooorrrreeeeaaaacccchhhhVVVVeeeerrrrtttteeeexxxxEEEEddddggggeeee((((vvvv,,,,eeee))))
+     VVVVeeeerrrrtttteeeexxxx**** mmmm;;;;
+     EEEEddddggggeeee**** ffff;;;;
+
+     FFFFoooorrrreeeeaaaacccchhhhVVVVeeeerrrrtttteeeexxxxVVVVeeeerrrrtttteeeexxxx((((vvvv1111,,,,vvvv2222))))
+     VVVVeeeerrrrtttteeeexxxx**** vvvv1111;;;;
+     VVVVeeeerrrrtttteeeexxxx**** vvvv2222;;;;
+
+     vvvvooooiiiidddd GGGGeeeettttVVVVeeeerrrrtttteeeexxxxEEEEddddggggeeee((((vvvv1111,,,,vvvv2222,,,,eeee))))
+     VVVVeeeerrrrtttteeeexxxx**** vvvv1111;;;;
+     VVVVeeeerrrrtttteeeexxxx**** vvvv2222;;;;
+     EEEEddddggggeeee******** eeee;;;;
+
+     GGGGeeeettttEEEEddddggggeeeeVVVVeeeerrrrttttiiiicccceeeessss((((eeee,,,,vvvv1111,,,,vvvv2222))))
+     EEEEddddggggeeee**** eeee;;;;
+     VVVVeeeerrrrtttteeeexxxx******** vvvv1111;;;;
+     VVVVeeeerrrrtttteeeexxxx******** vvvv2222;;;;
+
+     GGGGeeeettttEEEEddddggggeeeeFFFFaaaacccceeeessss((((eeee,,,,ffff1111,,,,ffff2222))))
+     EEEEddddggggeeee**** eeee;;;;
+     FFFFaaaacccceeee******** ffff1111;;;;
+     FFFFaaaacccceeee******** ffff2222;;;;
+
+     GGGGeeeettttFFFFaaaacccceeeeEEEEddddggggeeee((((ffff1111,,,,ffff2222,,,,eeee))))
+     FFFFaaaacccceeee**** ffff1111;;;;
+     FFFFaaaacccceeee**** ffff2222;;;;
+     EEEEddddggggeeee******** eeee;;;;
+
+     GGGGeeeettttVVVVeeeerrrrtttteeeexxxxFFFFaaaacccceeeeEEEEddddggggeeee((((vvvv,,,, ffff,,,, eeee))))
+     VVVVeeeerrrrtttteeeexxxx**** vvvv;;;;
+     FFFFaaaacccceeee**** ffff;;;;
+     EEEEddddggggeeee******** eeee;;;;
+
+
+
+SunOS 5.6                 Last change:                          2
+
+
+
+
+
+
+C Library Functions                                       mesh(3)
+
+
+
+     SSSSeeeettttIIIInnnntttteeeerrrrnnnnaaaallllDDDDaaaattttaaaa((((vvvv,,,, dddd))))
+     VVVVeeeerrrrtttteeeexxxx**** vvvv;;;;
+     vvvvooooiiiidddd**** dddd;;;;
+
+     vvvvooooiiiidddd**** RRRReeeettttuuuurrrrnnnnIIIInnnntttteeeerrrrnnnnaaaallllDDDDaaaattttaaaa((((vvvv))))
+     VVVVeeeerrrrtttteeeexxxx**** vvvv;;;;
+
+     SSSSeeeettttNNNNaaaammmmeeee((((vvvv,,,, nnnn))))
+     VVVVeeeerrrrtttteeeexxxx**** vvvv;;;;
+     cccchhhhaaaarrrr**** nnnn;;;;
+
+     RRRReeeettttuuuurrrrnnnnNNNNaaaammmmeeee((((vvvv,,,, nnnn))))
+     VVVVeeeerrrrtttteeeexxxx**** vvvv;;;;
+     cccchhhhaaaarrrr**** nnnn;;;;
+
+DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
+     Mesh is a library to manipulate topological data structures.
+     Currently,  meshes  can  be read in, traversed, and written.
+     The mesh package does NOT handle any geometry.   A  separate
+     package  is  provided to allow certain geometric operations.
+     See userdata(3).
+
+     The mesh library also doesn't allow for the modification  of
+     meshes.   This is handled in the library operators(3).  Note
+     that some of the iterators below will have problems  if  the
+     mesh is modified in the middle of an iteration.
+
+
+     The MMMMeeeesssshhhhPPPPaaaarrrrsssseeee(((()))) routine reads in a mesh  from  a  file,  and
+     returns a pointer to a mesh structure.  Note that this "rou-
+     tine" is really a macro.
+
+     Each time  MeshParse()  (or  another  from  its  family)  is
+     called,  the  next mesh in the file is read.  Note that each
+     point and faces may only occur in one mesh.   Any  point  or
+     face  not  used  in  a mesh will remain defined for the next
+     mesh that is read.
+
+     See also MeshUDParse (userdata 3).
+
+     The WWWWrrrriiiitttteeeeMMMMeeeesssshhhh(((()))) routine writes a mesh  to  the  given  file.
+     Note  that  if  the internal data fields have been modified,
+     then a call to ConvertGeometryToExternal() should be made to
+     flush  them  to  the  dstructs.   A  more  memory  efficient
+     approach is to call WWWWrrrriiiitttteeeeIIIIttttooooEEEEMMMMeeeesssshhhh(((()))).... The routine takes three
+     procedures  that convert the internal format to the external
+     format while writing, free the external space  after  is  is
+     printed.  See userdata 3 for a default set of iiiittttooooeeee routines.
+
+     CCCClllleeeeaaaarrrrMMMMeeeesssshhhhEEEExxxxtttteeeerrrrnnnnaaaallllDDDDaaaattttaaaa(((()))) clears the external data fields of a
+     mesh.
+
+
+
+
+SunOS 5.6                 Last change:                          3
+
+
+
+
+
+
+C Library Functions                                       mesh(3)
+
+
+
+     The routines  BBBBoooouuuunnnnddddaaaarrrryyyyEEEEddddggggeeee(((()))),,,,  BBBBoooouuuunnnnddddaaaarrrryyyyVVVVeeeerrrrtttteeeexxxx(((()))),,,,  and  BBBBoooouuuunnnn----
+     ddddaaaarrrryyyyFFFFaaaacccceeee(((())))  return TRUE if the parameter is an object of the
+     appropriate type that lies on the boundary of the  mesh.   A
+     face  is  said to lie on the boundary if any of its edges or
+     vertices lie on the boundary.
+
+     The routine VVVVeeeerrrrtttteeeexxxxPPPPaaaatttthhhh(((()))) walks a path through the mesh.  The
+     path starts at _v_1. It next moves to _v_2. This gives us a ver-
+     tex and an edge (the edge from _v_1 to _v_2 ).  Our path will be
+     a string of integers, separated by spaces.  From _v_2, we will
+     label the edges in a counter clockwise fashion,  giving  the
+     label 0 to the edge from _v_1 to _v_2. At each successive vertex
+     in the path, the edge the vertex was entered  from  will  be
+     labeled  0.   By specifing negative numbers, one may move in
+     the clockwise direction.  If a number  is  larger  than  the
+     number  of  vertices  in  the  path, then the count "wraps".
+     Boundaries are skipped over.  If _v_2 is not adjacent to _v_1, a
+     NULL pointer is returned.  Otherwise, the last vertex in the
+     path is returned.
+
+     The   "routines"   FFFFoooorrrreeeeaaaacccchhhhMMMMeeeesssshhhhFFFFaaaacccceeee(((()))),,,,   FFFFoooorrrreeeeaaaacccchhhhMMMMeeeesssshhhhVVVVeeeerrrrtttteeeexxxx(((()))),,,,
+     FFFFoooorrrreeeeaaaacccchhhhMMMMeeeesssshhhhEEEEddddggggeeee(((()))),,,, FFFFoooorrrreeeeaaaacccchhhhVVVVeeeerrrrtttteeeexxxxFFFFaaaacccceeee(((()))),,,, FFFFoooorrrreeeeaaaacccchhhhVVVVeeeerrrrtttteeeexxxxFFFFaaaacccceeee(((()))),,,,
+     FFFFoooorrrreeeeaaaacccchhhhFFFFaaaacccceeeeVVVVeeeerrrrtttteeeexxxx(((()))),,,,  FFFFoooorrrreeeeaaaacccchhhhFFFFaaaacccceeeeEEEEddddggggeeee(((()))),,,,  FFFFoooorrrreeeeaaaacccchhhhFFFFaaaacccceeeeFFFFaaaacccceeee(((()))),,,,
+     and  FFFFoooorrrreeeeaaaacccchhhhVVVVeeeerrrrtttteeeexxxxVVVVeeeerrrrtttteeeexxxx(((())))  are  macros that allow iteration
+     over various parts of the mesh.  The type  of  iteration  is
+     determined  by  the name: the first part is what is iterated
+     around, while the second part is what is iterated over.  For
+     example,  FFFFoooorrrreeeeaaaacccchhhhMMMMeeeesssshhhhVVVVeeeerrrrtttteeeexxxx(((())))  will  give each vertex in the
+     mesh. Each loop  is  terminated  by  the  macro  EEEEnnnnddddFFFFoooorrrreeeeaaaacccchhhh....
+     Iterators  which  iterator around an object in the mesh will
+     iterate in counter-clockwise order.  The current object will
+     be  stored in the second parameter to the FFFFoooorrrreeeeaaaacccchhhh.... The first
+     object in the iteration  is  arbitrary,  unless  the  object
+     iterated  around  is  on  the  boundary.   In this case, the
+     iteration will start at one part of the boundary and end  at
+     the  other  part.  A local variable, iiiitttteeeerrrr,,,, is used as a loop
+     control variable.
+
+     The routine GGGGeeeettttEEEEddddggggeeeeVVVVeeeerrrrttttiiiicccceeeessss(((())))  gets  both  of  the  vertices
+     associated  with an edge.  The routine GGGGeeeettttVVVVeeeerrrrtttteeeexxxxEEEEddddggggeeee(((()))) finds
+     the directed edge associated with two vertices.  If the edge
+     doesn't   exist,   the   edge   pointer   is  set  to  NULL.
+     GGGGeeeettttEEEEddddggggeeeeFFFFaaaacccceeeessss(((()))) gets the two faces neighboring an  edge.   If
+     the  edge  is  a boundary edge, then the second face will be
+     set to NULL.  GGGGeeeettttFFFFaaaacccceeeeEEEEddddggggeeee(((()))) finds the edge between  the  two
+     faces.   If  the edge doesn't exist, the edge pointer is set
+     to NULL.  GGGGeeeettttVVVVeeeerrrrtttteeeexxxxFFFFaaaacccceeeeEEEEddddggggeeee(((())))  finds  the  edge  bounding  f
+     leaving  v in a counter clockwise direction.  If v is not on
+     f, then the edge pointer will be set to NULL.
+
+     NOTE: If you forget an  EndForeach,  you  will  get  strange
+     error messages.  Most commonly, you'll get a syntax error at
+
+
+
+SunOS 5.6                 Last change:                          4
+
+
+
+
+
+
+C Library Functions                                       mesh(3)
+
+
+
+     the start of the next procedure or at the end of the file.
+
+     NOTE: ForeachVertexEdge returns all the edges pointing to  a
+     particular  vertex.  This means that, for boundary vertices,
+     the boundary half edge directed away from  the  vertex  will
+     not be included in the iteration.
+
+
+EEEEXXXXAAAAMMMMPPPPLLLLEEEE
+     The following code reads in a mesh, and prints out the names
+     of  all  the  faces  followed by the ring of vertices around
+     each face.
+
+          m   =    MeshParse(stdin);         ForeachMeshFace(m,f)
+               printf("face         %s:         ",ReturnName(f));
+               ForeachFaceVertex(f,v)                printf("  %s
+     ",ReturnName(v));                                 EndForeach
+               printf("\n");      EndForeach
+
+
+NNNNOOOOTTTTEEEESSSS
+     This is an early version, and is subject to change.
+
+     Send bugs/requests to smann@june.
+
+
+SSSSEEEEEEEE AAAALLLLSSSSOOOO
+     userdata(3), operators(3)
+
+
+DDDDAAAATTTTEEEE
+     November 10, 1991
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SunOS 5.6                 Last change:                          5
+
+
+

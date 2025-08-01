@@ -1,0 +1,369 @@
+% header directly from /rb/jj/Research/.cyclide/paper.tex
+
+\documentstyle[12pt]{article} 
+
+\newif\ifFull
+\Fullfalse
+
+\makeatletter
+\def\@maketitle{\newpage
+ \null
+ %\vskip 2em                   % Vertical space above title.
+ \begin{center}
+       {\Large\bf \@title \par}  % Title set in \Large size. 
+       \vskip .5em               % Vertical space after title.
+       {\lineskip .5em           %  each author set in a tabular environment
+        \begin{tabular}[t]{c}\@author 
+        \end{tabular}\par}                   
+  \end{center}
+ \par
+ \vskip .5em}                 % Vertical space after author
+\makeatother
+
+% non-indented paragraphs with xtra space
+% set the indentation to 0, and increase the paragraph spacing:
+\parskip=8pt plus1pt                             
+\parindent=0pt
+% default values are 
+% \parskip=0pt plus1pt
+% \parindent=20pt
+% for plain tex.
+
+\newenvironment{summary}[1]{\if@twocolumn
+\section*{#1} \else
+\begin{center}
+{\bf #1\vspace{-.5em}\vspace{0pt}} 
+\end{center}
+\quotation
+\fi}{\if@twocolumn\else\endquotation\fi}
+
+\renewenvironment{abstract}{\begin{summary}{Abstract}}{\end{summary}}
+
+\newcommand{\SingleSpace}{\edef\baselinestretch{0.9}\Large\normalsize}
+\newcommand{\DoubleSpace}{\edef\baselinestretch{1.4}\Large\normalsize}
+\newcommand{\Comment}[1]{\relax}  % makes a "comment" (not expanded)
+\newcommand{\Heading}[1]{\par\noindent{\bf#1}\nobreak}
+\newcommand{\Tail}[1]{\nobreak\par\noindent{\bf#1}}
+\newcommand{\QED}{\vrule height 1.4ex width 1.0ex depth -.1ex\ } % square box
+\newcommand{\arc}[1]{\mbox{$\stackrel{\frown}{#1}$}}
+\newcommand{\lyne}[1]{\mbox{$\stackrel{\leftrightarrow}{#1}$}}
+\newcommand{\ray}[1]{\mbox{$\vec{#1}$}}          
+\newcommand{\seg}[1]{\mbox{$\overline{#1}$}}
+\newcommand{\tab}{\hspace*{.2in}}
+\newcommand{\se}{\mbox{$_{\epsilon}$}}  % subscript epsilon
+\newcommand{\ie}{\mbox{i.e.}}
+\newcommand{\eg}{\mbox{e.\ g.\ }}
+\newcommand{\figg}[3]{\begin{figure}[htbp]\vspace{#3}\caption{#2}\label{#1}\end{figure}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\prf}{\noindent{{\bf Proof} :\ }}
+
+\newtheorem{rmk}{Remark}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{conjecture}{Conjecture}[section]
+\newtheorem{claim}{Claim}[section]
+\newtheorem{notation}{Notation}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[section]
+\newtheorem{defn2}{Definition}
+
+\ifFull                                          
+\SingleSpace
+\else
+\DoubleSpace
+\fi
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\topmargin}{0pt}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+
+\input{clock}
+
+\setlength{\headsep}{.2in}
+\setclock              
+
+\title{Drawing on the sphere
+        \thanks{This work supported by National Science Foundation grant
+        ---.}}                           
+\author{John K. Johnstone\thanks{Dept. of Computer and Information 
+	Sciences,
+	The University of Alabama at Birmingham,
+	125 Campbell Hall, 1300 University Boulevard,
+	Birmingham, Alabama  35294-1170 USA, johnstone@cis.uab.edu.}
+	\and James P. Williams\thanks{Dept. of Computer Science,
+	The Johns Hopkins University, Baltimore, Maryland 21218 USA.}}
+\date{Version: \today \clock}
+
+\begin{document}
+
+% HEADER ON EACH PAGE
+% \markright{\fbox{{\bf Drawing}} \hrulefill 
+%          \fbox{{\bf Johnstone, \today}} \hrulefill}
+% \pagestyle{myheadings}
+
+\maketitle
+
+% *********************************************************************
+
+\begin{abstract}                                 
+This is a paper on animation and swept surface modeling.
+\end{abstract}
+
+\Comment{
+The orientation of a sweeping object can be represented by
+a curve on the 4-dimensional quaternion sphere.
+
+We can define the orientation by manipulating orientation curves
+directly (e.g., by moving control points) or by specifying orientations
+for the orientation curve to interpolate.
+The problem with the former is that general orientation curves are
+not rational, so we must define a means of defining rational orientation
+curves directly.
+We therefore use the second method.
+
+(Could we manipulate the orientation curve on the 4-sphere directly
+by moving control points and automatically moving neighbouring
+control points to maintain the curve as the image of some space curve
+under M?)
+
+Example of sweeping object in solid modeling context for which we would
+want to define the orientation.
+(Animation has the natural key-frame example, which may or may not
+transfer to solid modeling applications.)
+
+This work can be interpreted as the development of methods for
+the interpolation of orientations rather than the classical
+interpolation of points.
+Many desirable criteria for point interpolation translate over
+to orientation interpolation, such as continuity conditions.
+(Challenge: point interpolation is the domain of CAGD, not
+solid modeling.  However, swept surfaces are certainly solids.
+May want point location and Boolean operations on these swept
+solids too.)
+
+We will certainly want translation mechanisms from the quaternion curve
+back to at least parametric representations and preferably implicit
+representations of the swept surface, which indeed could be the main topic
+of the paper.
+
+
+-------------------------------
+
+The modeling of a sweep requires the representation of the position
+of the object and the orientation of the object at all times.
+For simple sweeps such as the ruled surface (the sweep of a line),
+the orientation can be represented simply by a vector
+(the direction of the line at that time).
+[The position is represented by a curve c(t) and the orientation can be
+represented either by an explicit vector v(t) at each point c(t)
+or, as is commonly done (and called lofting), by a second curve d(t) that 
+implicitly defines a vector d(t)-c(t) for c(t).]
+However, the orientation of an object generally requires a more complex
+representation: by a rotation matrix, a set of Euler angles, or a quaternion.
+If the object is planar and rotationally symmetric (i.e., a circle),
+its orientation can again be represented by a single vector, the normal
+of its plane.
+
+Representation of (single) orientation:
+	line		vector
+	circle		unit vector (plane's normal; 
+				     unit so that rotation matrix is rational)
+			actually vector of rational length is enough
+	plane curve	vector (plane's normal) + angle of rotation = quaternion
+				     i.e., non-rotationally plane curves = plane curves - circle)
+	space curve	?
+	rigid solid	Euler angles; (?) vector and angle of rotation about this vector = quaternion
+
+Thus, full representation of orientation across sweep:
+
+	line		space curve (either representing endpoint of vector from
+				origin or from point c(t))
+	circle		3-d spherical curve
+			actually, hodograph of Pythagorean hodograph curve is enough
+	plane curve	4-d quaternion curve
+
+
+Ruled surface previous work (e.g., my previous work)
+Ringed surface/canal surface previous work (e.g, Farouki and Sakkalis)
+}
+
+% *********************************************************************
+
+\section{Conventions}
+
+The homogeneous coordinate will always be listed first
+(in some sources the homogeneous coordinate is last).
+Thus, $(x_0,x_1,x_2,x_3,x_4)$ in projective space is equivalent to
+$(x_1/x_0,x_2/x_0,x_3/x_0,x_4/x_0)$ in affine space.
+
+\section{Problem definition}
+
+The problem is, given n positions of a solid, to define
+a path for the solid that interpolates the n positions,
+for use in animation and swept surface modeling.
+(Each position of the solid is specified by a position for a reference
+vertex and an orientation.
+Each orientation can be initially specified in any established way: 
+by a rotation matrix, a set of Euler angles, or a quaternion.
+It will be converted to a quaternion.)
+
+\section{Algorithm}
+
+\begin{rmk}
+Explain why we do not interpolate arbitrary quaternions (which could
+be done using traditional interpolation) but instead must interpolate
+unit quaternions on the sphere,
+in terms of the fact that the distance metric for quaternions on the sphere
+is the same as the metric for orientation (see Misner), so that we can predict 
+the speed of orientation and control it: smooth movement on the sphere
+equates to smooth animation of the object.  Does this apply to swept
+surface modeling too?
+
+Also, one can directly read off the vector about which to rotate and the 
+amount of rotation only from a unit quaternion.
+\end{rmk}
+
+We assume the input is a set of $n$ orientations of the solid, as unit
+quaternions $p_1,\ldots,p_n$.
+A preliminary translation (e.g., rotation matrix to unit quaternion)
+may be necessary.
+
+\begin{enumerate}
+\item
+	(Translate orientations to unit quaternions.)
+\item
+	Map the points $p_i$ by $M^{-1}$.
+	This maps them off of the sphere into 4-space.
+\item
+	Design a curve $C$ to interpolate the $M^{-1}(p_i)$ in 4-space.
+\item
+	Map $C$ back to the sphere using $M$, Bezier segment by Bezier segment.
+\end{enumerate}
+
+\section{A map onto the 4-sphere}
+
+We want a map from 4-space onto the unit 4-sphere $S^4$.
+A formula from number theory yields a solution
+\cite{Dickson52}[p. 318].\footnote{This is a special case of
+	Euler's famous formula, as well as a special case of a formula of Aida.}
+
+\begin{lemma}[Aida,Euler]
+\begin{equation}
+\label{eqn:aida}
+(a^2 + b^2 + c^2 - d^2)^2 + (2ad)^2 + (2bd)^2 + (2cd)^2 = 
+(a^2 + b^2 + c^2 + d^2)^2
+\end{equation}
+\end{lemma}
+\prf
+\QED
+
+% This is a special form of Euler's formula \cite{Dickson52}[p. 277],
+% $(a^2 + b^2 + c^2 + d^2)(p^2 + q^2 + r^2 + s^2) = 
+%  (ap+bq+cr+ds)^2 + 
+%  (aq-bp \pm cs \mp dr)^2 + 
+%  (ar \mp bs - cp \pm dq)^2 + 
+%  (as \pm br \mp cq - dp)^2$.
+% Simply let $p=-a, q=b, r=c, s=d$.
+
+\begin{corollary}
+The map $M:P^4 \rightarrow S^4 \subset P^4$:
+\begin{equation}
+\label{eq:M}
+	M(1,a,b,c,d) = (a^2+b^2+c^2+d^2,a^2+b^2+c^2-d^2,2ad,2bd,2cd)
+\end{equation}
+\begin{equation}
+	M(1,x_1,x_2,x_3,x_4) = (x_1^2+x_2^2+x_3^2+x_4^2,x_1^2+x_2^2+x_3^2-x_4^2,
+				2x_1x_4,2x_2x_4,2x_3x_4)
+\end{equation}
+sends any point in projective 4-space onto the unit 4-sphere in projective
+4-space.
+That is, $\| M(1,a,b,c,d) \| = 1$.
+\end{corollary}
+\prf
+\QED
+
+\begin{rmk}
+To get a map from 4-space to the unit 4-sphere,
+we are looking for any result from number theory 
+of the form $A^2+B^2+C^2+D^2=E^2$
+(that is, the sum of four squares equal to another square)
+where A,B,C,D, and E are functions of at most four variables
+and at least one is a function of exactly four variables.
+Then a point in 4-space can be
+mapped to (E,A,B,C,D) and $\|(E,A,B,C,D)\| = 1$.
+
+(\ref{eqn:aida}) is the only one we have been able to find.
+\end{rmk}
+
+\begin{rmk}
+In 3-space, mapping to the unit sphere is more elegant because
+there is a necessary and sufficient condition for --- (see Dietz-Hoschek).
+The above formula is `not a necessary and sufficient condition'
+and we are not aware of one that is.
+(Note: every sum of three squares is a sum of four squares:
+see Dickson, p. 300.)
+\end{rmk}
+
+\section{$M^{-1}$: from the sphere to 4-space}
+
+\begin{lemma}
+\begin{equation}
+\label{eq:invM}
+M^{-1}(x_0,x_1,x_2,x_3,x_4) = (\pm 2 \sqrt{\frac{x_0 - x_1}{2}}, x_2,x_3,x_4,
+								x_0-x_1)
+\end{equation}
+where $(x_0,x_1,x_2,x_3,x_4)$ lies on the unit 4-sphere
+({\em i.e.}, $M^{-1}:S^4 \rightarrow P^4$).
+\end{lemma}
+\prf
+See Aug 16 message to jimbo.
+\QED
+
+\section{Image of cubic Bezier segment under M}
+
+\begin{lemma}
+The image of a cubic Bezier segment (defined by the four control points 
+$b_i = (1,b_{i1},b_{i2},b_{i3},b_{i4}) \in P^4$) under the map M 
+(see (\ref{eq:M})) is a
+Bezier segment of degree 6 defined by the following seven control points:
+\begin{equation}
+c_k = \sum_{i,j \geq 0, i+j=k} 
+        \choose{3}{i}{} * \choose{3}{j}{} / \choose{6}{k}{}
+                (b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} + b_{i4} b_{j4},
+                 b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} - b_{i4} b_{j4},
+                 2b_{i1} b_{j4},
+                 2b_{i2} b_{j4},
+                 2b_{i3} b_{j4})
+\end{equation}
+\end{lemma}
+\prf
+\QED
+
+\section{Implementation}
+
+\begin{itemize}
+\item
+	$M$ and $M^{-1}$ are implemented in Maple by jimbo,
+	but must be implemented in GL.
+\item
+	Rotation matrix to quaternion and quaternion to rotation matrix,
+	using Shoemake (or perhaps direct definition of the orientation
+	in terms of quaternions is sufficient).
+\item
+	Cubic Bezier interpolation: using Farin's tridiagonal technique
+	(possibly verbatim using C code on disk: need IBM PC to read it).
+\item
+	mapping of cubic Bezier segments to sextic Bezier segments
+	under M
+\item
+	definition of cube (or other candidate for solid)
+\end{itemize}
+
+\bibliographystyle{alpha}
+\bibliography{/rb/jj/bib/modeling}
+
+\end{document}

@@ -1,0 +1,67 @@
+\section{Appendix}
+\label{app}
+
+The following lemma is a corollary of Lemma~\ref{lem:sqrtp}.
+
+\begin{lemma}
+\label{limpt}
+The limiting point of two non-intersecting circles $C_1(c_1,r_1,o)$ and
+$C_2(c_2,r_2,o)$, $r_1 \leq r_2$, is
+\[
+\begin{array}{ll}
+	c_1 - (d - \sqrt{d^2 - r_1^2})  \frac{c_2 - c_1}{\|c_2 - c_1\|} &
+		\mbox{if $C_1$ lies inside $C_2$} \\
+	c_1 + (d - \sqrt{d^2 - r_1^2})\frac{c_2 - c_1}{\|c_2 - c_1\|} &
+		\mbox{if $C_1$ and $C_2$ are disjoint}
+\end{array} 
+\]
+where 
+\[
+d = \left\{ \begin{array}{ll}
+	\frac{r_2^2 - r_1^2 - \|c_2 - c_1\|^2}{2\|c_2 - c_1\|} &
+		\mbox{if $C_1$ lies inside $C_2$} \\
+	\frac{r_1^2 - r_2^2 + \|c_2 - c_1\|^2}{2\|c_2 - c_1\|} &
+		\mbox{if $C_1$ and $C_2$ are disjoint}
+\end{array} \right.
+\]
+\end{lemma}
+\Heading{Proof:}
+Let $A$ be the radical axis of $C_1$ and $C_2$,
+let $p$ be the power of the radical axis with respect to $C_1$ and $C_2$,
+and let $d$ be the distance from $A$ to $c_1$.
+By Lemma~\ref{lem:sqrtp},
+the limiting point is on the line between $c_1$ and $c_2$ at a distance
+$d - \sqrt{p}$ from $c_1$.
+
+Suppose $C_1$ lies inside $C_2$.
+Since the limiting point and $c_2$ are on opposite sides of $c_1$,
+the limiting point is $c_1 -(d - \sqrt{p})\frac{c_2 - c_1}{\|c_2 - c_1\|}$
+or, using Definition~\ref{defn:power},
+$c_1 - (d - \sqrt{d^2 - r_1^2})\frac{c_2 - c_1}{\|c_2 - c_1\|}$.
+Since the power of $A$ with respect to both circles is equal,
+we have
+\be
+\label{eq:d}
+	d^2 - r_1^2 = (d + \|c_2 - c_1\|)^2 - r_2^2
+\ee
+or $d = \frac{r_2^2 - r_1^2 - \|c_2 - c_1\|^2}{2\|c_2 - c_1\|}$.
+
+If $C_1$ and $C_2$ are disjoint,
+the development is the same, except for sign changes because $c_1$ and
+$c_2$ now lie on opposite sides of the radical axis, rather than the same side.
+Thus, the limiting point is 
+$c_1 + (d - \sqrt{d^2 - r_1^2})\frac{c_2 - c_1}{\|c_2 - c_1\|}$.
+Moreover, (\ref{eq:d}) is replaced by
+\be
+	d^2 - r_1^2 = (\|c_2 - c_1\| - d)^2 - r_2^2
+\ee
+yielding $d = \frac{r_1^2 - r_2^2 + \|c_2 - c_1\|^2}{2\|c_2 - c_1\|}$.
+\QED
+
+\begin{example}
+Consider the ring cyclide (\ref{eqcy}), $c < \mu < a$.
+Using the formula for the limiting point and Theorem~\ref{cor:coi},
+the proper center of inversion to map this cyclide to a torus is 
+$(\frac{\mu a - b \sqrt{\mu^2 - c^2}}{c},0,0)$.
+\end{example}
+

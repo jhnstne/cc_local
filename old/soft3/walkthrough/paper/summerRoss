@@ -1,0 +1,60 @@
+	The summer began with research into voronoi diagrams and emptiest point.  I studied algorithms for the 2d planar case of the voronoi diagram initially and then looked into the 2d spherical case and the 3d case.  I then tried to apply those algorithms to the 3d spherical case.  For the time being, I stopped theorizing about voronoi diagrams to work on actual code.
+	To become familiar with openGL and the existing software that Dr. Johnstone had written, I wrote a few simple programs.  The first program moved an object along a given bezier curve and oriented it using a quaternion spline.  The next program was more related to the eventual collision detection work that I would do.  It tracked the four corners of the near clipping plane as the camera was moved and oriented by a bezier and quaternion spline.  The important thing in this program was to be able to track the coordinates in global coordinates rather than local coordinates.  The final program that I wrote investigate ways to constrain the viewing window so that it would fit through the hallways of a given scene.  The most simple procedure that I found was to just use the glFrustum function.  Assuming you can calculate the length and width of the smallest corridor, glFrustum simply provides all the control required.
+	At this point, I started work on collision detection.  The first issue was to find bezier curves that correspond to the paths of the four corners of the near clipping plane.  I used my previous work in tracking the near clipping plane to place markers where the curves should go.  The procedure for constructing the rational bezier curves followed by the four corners is described in "A rational model of the surface swept by a curve" (Johnstone and Williams, Eurographics '95).  The quaternion spline is turned into a spline that interpolates rotation matrices.  The translation from quaternion to rotation matrix is described in the paper.  When each control point of the quaternion has been translated to a rotation matrix, the new control matrices are multiplied by the vector from the center of the near clipping plane to one of the corners.  Now, the curve interpolates the vector from the center of the plane to the corner.  By adding these vectors to the control points of the original position bezier, the curve for the path of the corner is constructed.  One issue that arises when trying to implement this algorithm is that the position and orientation curves may not mesh properly.  Even though both curves are constructed from the same keyframe data, the quaternion spline does not like duplicate orientations.  If two consecutive keyframes had different position but the same orientation, the duplicate orientation would be discarded.  As a result, the position and orientation curves would not have the same number of control points.  To fix this, I marked when a duplicate orientation occured.  After the spline was constructed, I went back to the places where duplicate orientations were and added extra control points.  All four curves were constructed and then they were tested against the data that I had gathered previously to ensure correctness.
+	The next step was to construct the ruled surface.  This fairly simple step allowed me to visualize where intersections of the scene with the camera's path occured.  The ruled surface was made by triangluating between the two curves.  At the moment, the curves are sampled linearly to produce the triangles.  I investigated a sampling based on the curvature of the curves, however the two curves to be lofted between can have greatly differint continuities, making curvature-based sampling difficult.  For the moment I am sticking to the constant sampling, but reexamining options for more efficient sampling is still an open question.
+	Now I had a triangluar representation of the swept surface of the near clipping plane and a triangular representation of the scene.  To find collissions, I had to intersect the surface and the scene.  Of course, with thousands of scene triangle and hundreds, more with finer sampling, surface triangles, intersecting every surface triangle with every scene triangle was horribly inefficient.  To limit the number of intersection operations required, I built an octree.  Triangles are inserted into the root of the tree until a certain threshold number of triangles have been inserted.  The node is divided into 8 octants and triangles are sent into these octants depending on their position.  If any part of a triangle lies in an octant, the triangle is sent to that octant.  As a result, some triangles become duplicated.  Once all of the scene triangles have been input, the surface triangles are added.  They are added in the same manner than scene triangles are with the exception that no subdivision takes place for surface triangles.  Finally, all of the surface triangles in each cell are intersected with all scene triangles in the same cell.  Despite the duplication, intersection using the octree is much faster.  An alternate approach to the octree clips the triangles to determine which octant parts go to.  Although this is desirable in many cases, in this case it is inefficient.  Splitting a triangle usually produces a triangle and a quadrilateral.  During intersection, the quadrilateral is split into two triangles, resulting in 3 total intersections.  Sending a copy of the triangle to both cells requires only 2 intersections.  If a triangle is cut by multiple planes, this problem compounds itself.  For all triangle-triangle intersectios, we use Thomas Moller's algorithm as presented in "A Fast Triangle-Triangle Intersection Test."  This concluded the collision detection portion of the research.
+	After finding the intersections,the next step was to actually correct the motion.
+
+
+************  On the parameter problem I had
+
+-Position curve is built by fitting a curve to keyframes.
+-Knot sequence is determined by centripetal parameterization.
+
+-Orientation curve is built from the same keyframes
+-Knot sequence is determined by a sort of centripetal parametrization too.
+	-spherical distance used rather than distance
+
+-Corner curves are built by manipulating the control points of the pos and ori curves.
+-Knot sequence is irrelevant
+	-Curve is not built by fitting through data points
+	-I assinged the same knots as the position curve (knot sequence shouldn't matter I think)
+
+When an intersection interval is found, it is found in the corner curve's parameter.  I need to find the position and orientation at the center of this interval.  Because I arbitrarily chose the knots for the corner curves to be the same as the position curve, this is easy for the position curve.  The parameter value for the orientation curve is less obvious.
+
+I intend to use the fact that the curves have an equal number of segments to solve the problem.  If I know that the parameter of the corner curve is in the nth segment of the position curve, then it also is in the nth segment of the orientation curve.  Then I can use linear interpolation between the endpoints of the nth parameter interval to find the corresponding orientation curve parameter.
+
+***********  On finding the depth of the corner
+
+Given:
+-Position curve, P
+-Orientation curve, Q
+-A parameter interval over which the intersection takes place.
+
+Algorithm:
+-For sufficiently short intervals (Not sure exactly how short):
+	-Take the midpoint of the parameter interval - t_mid
+	-calculate the frustrum corners at that midpoint parameter (Based on Q and P)
+	-Find which vertices are "inside" the scene
+		-Examine which edges have intersections and imply which verts are inside
+		 (if left edge and bottom edge have an intersection, bottom left vert is inside)
+	-Find the distance between inside vertices and the tris that intersect the frustum
+		-Alternative:  Find the distance between the vertex and the point of intersection on the frustum
+		-Eventually, this alternative was used
+	-Find the maximum such distance
+	-Average the vectors from the center of the frustum to the corners that are not "inside" -V
+	-Normalize this vector and multiply it by the distance found previously
+	-Add a little distance (undecided amount) to get it out of the wall sufficiently
+	-Place a new keyframe at P(t_mid) + V with orientation Q(t_mid)
+-For larger intervals
+	-Sample along the interval at some constant value
+	-Perform the same technique above at each sample value
+	-Alternative: Perform the same technique as for smaller intervals and iterate until the path is collission-free
+
+************
+
+
+
+
+	
+	

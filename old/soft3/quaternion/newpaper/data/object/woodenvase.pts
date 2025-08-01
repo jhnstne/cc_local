@@ -1,0 +1,18 @@
+[ FILE: woodenvase.pts
+  Source: shadow input of our wooden vase from the Horlicks, 4/17/03
+]
+{
+0	0
+.1	0.01
+.2	0.02
+.4	.3
+.7	.9
+.82	1.3
+.87	1.7
+.7	2.3
+.3	2.75
+.1	3
+.12	3.331
+.1	3.332
+0	3.333
+}

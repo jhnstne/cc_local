@@ -1,0 +1,251 @@
+From camille@cpsc.ucalgary.ca Wed Jan 25 21:08 CST 1995
+Return-Path: <camille@cpsc.ucalgary.ca>
+Received: from fsa.cpsc.ucalgary.ca by cis.uab.edu (5.0/SMI-SVR4)
+	id AA29754; Wed, 25 Jan 1995 21:08:05 -0600
+Received: from fsc.cpsc.ucalgary.ca (fsc.cpsc.ucalgary.ca [136.159.2.3])
+	by fsa.cpsc.ucalgary.ca (1.8) id <UAA26955@fsa.cpsc.ucalgary.ca>;
+	Wed, 25 Jan 1995 20:05:22 -0700
+Received: by fsc.cpsc.ucalgary.ca (1.2; from camille@localhost)
+	id <UAA23063@fsc.cpsc.ucalgary.ca>; Wed, 25 Jan 1995 20:06:05 -0700
+From: camille@cpsc.ucalgary.ca (Camille Sinanan)
+Date: Wed, 25 Jan 1995 20:06:05 -0700
+Message-Id: <199501260306.UAA23063@fsc.cpsc.ucalgary.ca>
+To: johnstone@cis.uab.edu
+Subject: GI reviews
+Content-Type: text
+Content-Length: 8546
+Status: OR
+
+>                Graphics Interface '95 Summary Form
+>
+>Paper Title: Rational control of orientation for animation
+>Paper Authors: Johnstone and Williams
+>Paper Number (including the trailing letter):
+>
+>
+>1. Is the overall contribution of this paper to computer graphics
+>   and/or HCI significant?
+>
+>   1-------2-------3-------4-------5-------6-------[7]-------8-------9
+>  no            slightly       stimulating     important        seminal
+>
+>The paper presents a method for using rational Bezier curves on the
+>quaternion sphere for keyframe interpolation.  The method proposed seems
+>to have some clear advantages over previous methods.
+>
+>2. Can an experienced practitioner duplicate this work from the text and the
+>   references?
+>
+>   1-------2-------3-------4-------5-------6-------[7]-------8-------9
+>  no             almost       with great        with some    straightforward
+>               impossible       effort           effort
+>
+>
+>3. Is the paper well written?
+>
+>   1-------2-------3-------4-------5-------6-------7-------[8]-------9
+>  no             poor          acceptable        good          excellent
+>
+>
+>4. Has previous work been adequately cited? Answer yes or no: yes.
+>
+>5. Should we accept this paper for GI '95?
+>
+>   1-------2-------3-------4-------5-------6-------7-------8-------[9]
+>  no            doubtful        possibly       probably           yes
+>
+>
+>6. Why?  Please explain your final recommendation, particularly if there is
+>   disagreement among the reviewers.
+>
+> This paper should clearly be accepted.  It is a technically sound
+> well written paper.  Both reviewers are experts in the area (which I
+> am not) and they have given it a stamp of approval. I would not dream
+> of contradicting them.
+>
+>
+>7. Should we recommend this paper for publication in the Computer Graphics
+>   Forum?
+>
+>   1-------2-------3-------4-------5-------[6]-------7-------8-------9
+>  no            doubtful        possibly       probably           yes
+>
+>
+>I have to defer to the members at the committee meeting on this one.
+>
+>Judging by the reviewers comments, this is one of the best papers I
+>am lead reviewer on. However, it is sufficiently far from my area
+>of expertise that I cannot give an independent assessment.  The paper
+>should certainly be considered.
+
+
+
+
+
+
+>
+>                Graphics Interface '95 Review Form
+>
+>Paper Title: Rational control of orientation for animation
+>Paper Authors: J. K. Johnstone and J. P. Williams
+>Paper Number (including the trailing letter): 28 B
+>
+>
+>0. Briefly summarize the paper and what its authors present as its main
+>   contributions to computer graphics and/or human-computer interaction.
+>
+>        Method for constructing rational Bezier curves (of degree 6)
+>        on the quaternion sphere
+>
+>1.  Is the overall contribution of this paper to computer graphics
+>    and/or HCI significant?
+>
+>   1-------2-------3-------4-------5-------6-------7-------8-------9
+>  no            slightly       stimulating     important        seminal
+>
+>        #7 (important)
+>
+>2. Can an experienced practitioner duplicate this work from the
+>   text and the references?
+>
+>   1-------2-------3-------4-------5-------6-------7-------8-------9
+>  no              almost       with great       with some    straightforward
+>               impossible       effort           effort
+>
+>        #7 (with some effort)
+>
+>3. Is the paper well written?
+>
+>   1-------2-------3-------4-------5-------6-------7-------8-------9
+>  no              poor         acceptable        good          excellent
+>
+>        #7 (good)
+>
+>4. Has previous work been adequately cited?
+>   Answer yes or no (if no, mention missing citations below): yes
+>
+>5. Should we accept this paper for GI '95?
+>
+>   1-------2-------3-------4-------5-------6-------7-------8-------9
+>  no            doubtful        possibly       probably           yes
+>
+>        #7 (probably)
+>
+>   Why?  Please explain in detail; your answer will be forwarded to the
+>authors.
+>
+>        The paper presents some interesting new ideas but there are
+>        some technical details that require further clarification
+>        (see comments below)
+>
+>
+>6. Please offer here any additional comments for the author or primary
+>reviewer.
+>
+>        The paper presents some interesting new ideas but there are
+>        some technical details that require further clarification:
+>
+>        (1) What is M(0,0,0,0) where (0,0,0,0) is the origin in \RR^4?
+>            Formula (2) yields M(0,0,0,0,1) = (0,0,0,0,0) which is not
+>            an element of projective space
+>
+>        (2) Suppose the above remark (1) is correct: How can you avoid
+>            that C(t) goes through the origin in \RR^4?
+>
+>        (3) Let e be the identity quaternion. What do you actually take
+>            as M^{-1}(e) in your implementation? Lemma 6.1 defines
+>            M^{-1}(e) as a hyperplane, but in order to construct C(t)
+>            you need a single point. Which point do you choose?
+>
+>        (4) Two antipodal unit quaternions define the same rotation
+>            (SO(3) = S^3/{+-1}). How does this effect your method?
+>
+>            Specifically: Let q1,...,qn be a set of orientations. How
+>            does the curve D_{bez}(t)[q1,...,qn] differ from the curve
+>            D_{bez}(t)[-q1,...,-qn] (all intermediate orientations
+>            represented by -qi)? How about D_{bez}(t)[-q1,q2,...,qn]
+>            (only q1 replaced by its antipodal)?
+>
+>        Two final remarks:
+>
+>        p. 5, Nr. 5: "...yielding a rational Bezier spline D_{bez}(t)..."
+>
+>        p. 8, l. 3: "k \in \RR"
+>
+
+>
+>
+>
+
+>                Graphics Interface '95 Review Form
+>
+>Paper Title: Rational control of orientation for animation
+>Paper Authors: John K. Johnstone, James P. Williams
+>Paper Number: 28D
+>
+>0. Briefly summarize the paper and what its authors present as its main
+>   contributions to computer graphics and/or human-computer interaction.
+>
+>   Orientation can be expressed in 1-1 correspondance with the points on
+>   the unit sphere of quaternions.  Given n orientations (e.g. for a camera
+>   in an animation sequence), these can be viewed as n points on the unit
+>   quaternion sphere, and a smooth animation hitting these n orientations
+>   presents the problem of finding a smooth, parametric curve on the unit
+>   quaternion sphere.  This paper finds such a curve as a rational Bezier
+>   curve.  The advantage of considering rational curves is presented as being
+>   the fact that one can map the n sphere points into homogeneous space,
+>   interpolate without any normalization constraint on the curve (much
+>   simpler than previous interpolation methods), and then project the resulting
+>   curve back to the sphere (i.e. rationalize it by dividing by the homogeneous
+>   coordinate).  Evidence is presented that the resulting curve on the sphere
+>   yields good orientation motion.
+>
+>1.  Is the overall contribution of this paper to computer graphics
+>    and/or HCI significant?
+>
+>   1-------2-------3-------4-------5-------6-------7-------[8]-------9
+>  no            slightly       stimulating     important        seminal
+>
+>
+>2. Can an experienced practitioner duplicate this work from the
+>   text and the references?
+>
+>   1-------2-------3-------4-------5-------6-------7-------[8]-------9
+>  no              almost       with great       with some    straightforward
+>               impossible       effort           effort
+>
+>
+>3. Is the paper well written?
+>
+>   1-------2-------3-------4-------5-------6-------7-------8-------[9]
+>  no              poor         acceptable        good          excellent
+>
+>
+>4. Has previous work been adequately cited?
+>   Answer yes or no (if no, mention missing citations below): Yes
+>
+>5. Should we accept this paper for GI '95?
+>
+>   1-------2-------3-------4-------5-------6-------7-------8-------[9]
+>  no            doubtful        possibly       probably           yes
+>
+>   Why?  Please explain in detail; your answer will be forwarded to the
+>authors.
+>
+>   The paper lays out all details and includes proofs.  Interpolation in
+>   homogeneous space is evidently simpler than the corresponding task,
+>   with norm constraints, in the sphere.  The results look good (although
+>   it would have been much preferable to have the video with the submission
+>   to make sure).  This represents a useful improvement to an already proven
+>   animation tool.
+>
+>6. Please offer here any additional comments for the author or primary
+>reviewer.
+>
+>   Video!
+>
+>
+
+
+
+

@@ -1,0 +1,125 @@
+<HTML>
+<HEAD>
+    <TITLE>jgt: Pseudocode -- A Practical Formulation of the Exponential Map for Rotations </TITLE>
+    <META NAME="Generator" CONTENT="Microsoft Word 97">
+</HEAD>
+<BODY BGCOLOR="#FFF9F6">
+
+<H2 ALIGN=CENTER><a href="index.html">A Practical Formulation of the Exponential Map for Rotations</a></H2>
+<H2 ALIGN=CENTER><I>Pseudocode for Jacobian Calculation</I></H2>
+
+<P>The code and functionality pertaining to the exponential map is
+typically a very small (but important!) part of much larger systems.  It is
+beyond the scope of this paper to provide any kind of meaningful working
+system for example purposes.  But to help give a feel for where computing
+<IMG SRC="Image4.gif"> fits into the overall scheme of things, this page
+contains pseudocode for computing the Jacobian contribution of a node in a
+transformation hierarchy, with respect to all of the end effectors below it
+in the hierarchy. The pseudocode routine
+<tt>Node_Jacobian_Contribution()</tt> makes the following assumptions:</P>
+
+<UL> <LI>The function that maps an end effector <I>ee</I> from its local
+coordinate system (<I>i.e.</I> in a finger's frame of reference) to world
+coordinates is of the form <P ALIGN="CENTER"><IMG SRC="Image5.gif"></P>
+where <I>ee</I> is a column 3-vector, <IMG SRC="Image6.gif"> is the root
+translation of the entire hierarchy (in the form of a 4x4 matrix), and <IMG
+SRC="Image7.gif"> represent the <I>i</I><SUP>th</SUP> joint between the
+root and the end effector: <IMG SRC="Image8.gif"> is the constant
+translation that positions the base of a limb in its parent’s frame, and
+<IMG SRC="Image9.gif"> is the joint's current rotation, a function of
+exponential map parameters.
+</LI>
+
+<P>
+<LI>
+<tt>Node_Jacobian_Contribution()</tt> only works for a hypothetical joint
+type that has a fixed center of rotation and a free, unconstrained three
+DOF rotation.  Thus it will not work for the root of the hierarchy, since
+the root also has translational degrees of freedom.</LI>
+
+<P>
+<LI>
+The type <tt>Jacobian </tt>is essentially an <I>m</I> by <I>n</I>
+matrix, where <I>m</I> is (3 * number of end effectors), and <I>n</I> is
+the number of degrees-of-freedom in the system.  Upon exit of
+<tt>Node_Jacobian_Contribution,</tt> <I>jac</I> will have the entries
+pertaining to node <I>i</I>'s degrees of freedom filled in.</LI>
+
+<P>
+<LI>The type <tt>TransformStack</tt> is an object-oriented stack supporting
+the same types of operations as the OpenGL stack used to traverse
+hierarchies.  Upon entry to <tt>Node_Jacobian_Contribution</tt>,
+<I>stack</I> should contain the combined transformation of all nodes above
+<I>i</I> in the hierarchy.  It will be restored to this state upon
+exit.</LI>
+
+<P>
+<LI><I>nodeTrans</I> is the structural translation for the node (<IMG SRC="Image8.gif">) as a 3-vector.</LI>
+
+<P>
+<LI><I>nodeOrient</I> is the vector representing the current state of the
+joint, <I>i.e.</I> its DOFs.  It has parameter class <B>inout</B> because
+the act of computing its derivatives may cause it to be dynamically
+reparameterized.  Therefore its value upon exit may differ from its value
+on entry, and this must be propagated into the global state vector (if your
+system gathers all DOFs into a global state vector).</LI>
+
+<P>
+<LI><I>startDOF</I> is the column index in <I>jac</I> of node <I>i</I>'s
+first degree-of-freedom; it is generally the same as <I>nodeOrient</I>'s
+position in the global state vector.</LI>
+
+<P>
+<LI><I>effectors</I> is a list of all of the end effectors below node
+<I>i</I>  in the hierarchy.  Each element has a member <I>jacIndex</I> that
+gives the first of three consecutive rows in the jacobian that correspond
+to the end effector.  Each element has a member <I>coords</I> that is a
+3-vector containing the <I>i_local</I> position of the end effector.
+&quot;i_local&quot; means the original end effector <I>ee</I> transformed
+by the combined transformation <IMG SRC="Image10.gif" WIDTH=98 HEIGHT=22>,
+<I>i.e.</I> the transformation from the originating frame of the end
+effector up to (but not including) node <I>i</I> in the hierarchy.</LI>
+</UL>
+
+<hr>
+<pre>
+<B>void</B> Node_Jacobian_Contribution(<B>inout</B> Jacobian jac, <B>inout</B> TransformStack stack,
+                                <B>in</B> <B>double</B> nodeTrans[3], <B>inout</B> <B>double</B> nodeOrient[3],
+                                <B>in int</B> startDOF, <B>in </B>EffectorList effectors)
+{
+    <B>int</B>              i,j;
+    EffectorList     currEff;
+    <B>double</B>           dRdv[4][4];
+    <B>double</B>           column[3];
+ 
+    stack.Push();   
+    stack.Translate(nodeTrans);  <I>/* put the constant translation on the stack */ </I>    
+
+    <B>for</B> j = 0 <B>to</B> 2 <B>do</B> {
+        stack.Push();
+        Partial_R_Partial_EM3(nodeOrient, j, dRdv);   <I>/* provided function */</I>
+        stack.Concat_Matrix(dRdv);
+
+        <I>/* In the terminology used above, the partial derivative of the position of
+         * the end effector with respect to the j<sup>th</sup> rotational parameter of node
+         * i is:
+         *    (d F)/(d nodeOrient_j) = 
+         *      T_0 R_0 ... T_i (d R_i)/(d nodeOrient_j) ... T_n R_n  ee =
+         *      stack.Current * i_local(ee)
+         *
+         *  which is what we compute below */</I>
+        <B>for</B> currEff = each element of effectors <B>do</B> {
+            stack.Vector_Transform(currEff.coords, column);
+            <B>for</B> i = 0 <B>to</B> 2 <B>do</B>
+                jac[currEff.jacIndex+i][startDOF+j] = column[i];
+        }
+        stack.Pop();
+    }
+    stack.Pop();
+}
+</pre>
+<hr>
+<a href="index.html">Return to A Practical Formulation of the
+Exponential Map for Rotations</a>
+</body>
+</HTML>

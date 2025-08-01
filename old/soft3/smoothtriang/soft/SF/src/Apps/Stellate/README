@@ -1,0 +1,4 @@
+There are two versions of the stellate program.  stellate (stellate.c)
+is an example of how NOT to modify meshes: it explicitly writes out
+the mesh itself.  Stellate (stellate2.c) is shows how to modify a
+mesh using one of the operators (CenterSplitFace).

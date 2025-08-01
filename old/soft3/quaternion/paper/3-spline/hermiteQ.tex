@@ -1,0 +1,2196 @@
+\documentclass[12pt]{article} 
+\usepackage{times}
+\usepackage[pdftex]{graphicx}
+\input{header-consecutive}
+
+\newif\ifTalk
+\Talkfalse
+\newif\ifJournal
+\Journalfalse
+\newif\ifFuture		% issues useful in future papers
+\Futurefalse
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{0in}
+\setlength{\textheight}{8.6in}
+\setlength{\textwidth}{6.875in}
+\setlength{\columnsep}{5mm}
+\markright{Orientation control (\today) \hfill}
+\pagestyle{myheadings}
+
+% -----------------------------------------------------------------------------
+\title{Controlling orientation during a motion:\\ 
+       an approach using rational quaternion splines}
+%       a discussion of orientation control with rational quaternion splines}
+% Getting oriented
+%:\\A rational approach to orientation control for animation 
+%       and motion planning}
+% Rational orientation planning I:  free motion
+% Rational orientation planning II: motion among obstacles
+% Rational orientation planning III: 
+\author{J.K. Johnstone}
+% \thanks{This work was supported by the National Science Foundation under grant CCR-0203586.}\\
+% Computer and Information Sciences\\
+% University of Alabama at Birmingham\\
+% University Station, Birmingham, AL 35294.}
+
+\begin{document}
+\maketitle
+
+% -----------------------------------------------------------------------------
+
+\begin{abstract}
+Eventual goal: orientation obstacles.
+But first we need to clarify quaternion spline theory, which define the
+orientation obstacles.
+\end{abstract}
+
+\section{Introduction}
+
+This paper studies the design of quaternion splines for controlling the orientation
+of a rigid object.
+The impact of this subject in computer graphics is felt predominantly 
+in computer animation (from character animation \cite{catmull, elaborations on sig78}
+to the editing of motion capture \cite{gleicher} to camera control).
+Orientation control is also of interest in robot motion (from spacecraft docking 
+\cite{junkins?} to motion planning AI for game design \cite{game design book}).
+
+The problem of orientation control addressed in this paper is a classical 
+interpolation problem posed in the context of orientations.
+%
+\begin{defn2}
+{\bf Orientation control} is the specification of an object's orientation along
+an entire path when only a small finite collection of orientations are given.
+% {\bf Orientation planning} is orientation control in the presence of obstacles.
+\end{defn2}
+%
+Since the best representation for the orientation of a rigid object in computer animation
+is the unit quaternion,
+and a unit quaternion can be identified with a point on $S^3$ (the unit sphere 
+in 4-space), orientation control can be identified with the design of a curve on $S^3$
+that interpolates a sequence of points on $S^3$ (the unit quaternions representing
+the given orientations of the rigid object), which is called a quaternion spline.
+
+A challenging aspect of the problem of quaternion spline design is
+the design of a rational quaternion spline.
+A rational quaternion spline may have benefits in efficiency
+(rational polynomials are the most efficient representation in graphics)
+and compatibility (due to their efficiency and elegance, rational polynomials are
+the dominant representation for models).
+The design of a rational quaternion spline is challenging because 
+of the spline's nonlinear constraint to the sphere $S^3$.
+We explore the ramifications of a reductionist solution:
+reducing the interpolation of quaternions on $S^3$ to the interpolation of
+points in $\Re^4$ through the intermediary of a rational map from $\Re^4$ to $S^3$.
+
+The main challenges of this approach are threefold: the development of a rational map from
+$\Re^4$ to $S^3$; coping with the inevitable poles of this map;
+and derivative control.
+New solutions to all of these problems are proposed in this paper:
+namely, the use of inverse stereographic projection as a rational map from 
+$\Re^4$ to $S^3$; a divide-and-conquer approach to perturbation away from the pole,
+using principal component analysis; 
+% affine-invariant through the use of an opening normalization so that all 
+% rotation-equivalent datasets start from the same position.
+and the ability to control arbitrary derivatives of the quaternion spline.
+To realize the rotation of data points necessary for pole avoidance,
+we also propose some techniques for rotation in higher dimensions.
+
+\section{Algorithm}
+
+Preprocessing: get a good source of orientations.
+Even the flythrough isn't quite enough.
+A purely theoretical paper is another possibility for now.
+Bracketted items are refinement stages.
+
+\begin{itemize}
+\item Encode object orientations as quaternions. (Can use GUI and/or translation.)
+\item {[Normalize quaternion dataset (nonlinear maps are commonly not affine-invariant).]}
+\item {[Decompose into subsets (perhaps on the fly).]}
+\item {[Perturb subset away from pole (poles are common to maps involving the sphere).]}
+\item Map subset away from sphere.
+      For subsets after first subset, map end derivatives too to guarantee continuity.
+      For last subset if closed curve is wanted, map end derivatives of first subset too.
+\item Interpolate freely.
+\item Map curve back to sphere. (As Bezier curve, if you want.)
+\item {[Undo perturbation and normalization.]}
+\item Decode quaternion spline into smooth changes in object orientation.
+\end{itemize}
+
+Publish this software (with C1 continuity at the moment) and this paper.
+
+\section{Related literature}
+
+Previous work on quaternion splines (Shoemake, Barr); rational quaternion splines (JJ);
+curve design on $S^2$ (Juttler); double quaternions (Wagner, Pottmann).
+
+\section{Representation of orientation}
+
+The unit quaternion is the preferred representation for orientation in animation.
+Other popular representations, namely the rotation matrix, Euler angles and 
+spinor matrices, are appropriate in other contexts, such as the graphics pipeline, 
+robot arm control, atomic orientation in high-energy physics(?) or relativity theory,
+but the quaternion dominates in computer animation.
+This section defines all of these representations, with an emphasis on the quaternion,
+and analyzes their strengths and weaknesses.
+
+\section{Rational maps to the sphere}
+
+\subsection{The poles of rational spherical maps}
+
+Stereographic projection clearly has a pole at the point of projection, (1,0,0,0).
+
+\section{Perturbation away from the pole}
+
+To apply our method, whose first step is to map the point data away from $S^3$, 
+the point data should not lie near the map's pole.
+This motivates a perturbation phase before the actual algorithm begins,
+which is described in this section.
+
+We observe that perturbation is simple with pointsets that span a small
+region of the sphere, since they can be rotated far away from the pole.
+Pole avoidance, or perturbation, 
+is equivalent to finding an empty region of the sphere (a region containing
+no points) since the pole can then be rotated to the middle of this empty region.
+This empty region must be large enough that no point lies near its center.
+It is certainly more difficult to find an empty region for larger datasets, and
+may even be impossible in theory (although in practice, a huge dataset is required
+for $S^3$ to have no sufficiently large empty region).
+One approach is to compute the Voronoi diagram of the point set and choose
+one of the Voronoi vertices, but this requires quite a bit of work
+and no algorithm has presently been developed for Voronoi diagrams 
+of points on $S^3$.\footnote{An algorithm for points on $S^2$ is available from 
+  Renka(?).  Note that $S^3$ is a 3-manifold, complicating matters.}
+However, empty regions are easy to find among small point sets.
+
+This suggests a divide-and-conquer strategy in which the dataset is partitioned
+into small sets, and a quaternion spline is built for each small set.
+% assumes a maximal distance between consecutive samples
+The two central issues in a partitioning strategy are
+the implementation of partitioning, and the perturbation of each subset
+away from the pole.
+Two related issues are derivative control, allowing the subcurves to be spliced 
+together smoothly (which will be covered in the next section);
+and normalization, in which the method is made affine-invariant despite the
+non-affine-invariance of each perturbation.
+% Since this perturbation is not affine-invariant, we must also normalize
+% the entire dataset at the beginning, to achieve affine-invariance for the
+% entire process.
+
+INTERESTING PROBLEM: EMPTY REGIONS ON S3 USING VORONOI DIAGRAMS.
+EXPLORE 3D VORONOI DIAGRAMS FOR HINTS.
+
+The approach for each subcurve is:
+\begin{itemize}
+\item Find a pointset that spans no more than x degrees.
+\item Compute best-fitting hyperplane of this pointset, and use its normal as the 
+      empty point.
+\item Rotate pole to the empty point.
+\end{itemize}
+
+The quadratic maps off the sphere that we are considering are not invariant
+under rotation.
+Therefore, the overall approach will not be affine-invariant unless we normalize first.
+This normalization is done as follows:
+
+\begin{itemize}
+\item START HERE
+\end{itemize}
+
+The weaponry of rotation is intriguing, since we are working in a higher dimension.
+
+\section{Derivative control}
+
+To control derivatives of the quaternion spline as well, 
+we need to map these derivatives under stereographic projection,
+then design a curve freely that interpolates them using classical techniques.
+
+Consider a curve $C(t) = (x_1(t),x_2(t),x_3(t),x_4(t))$ on $S^3$
+and its stereographic projection 
+\[
+SP(C(t)) = \frac{1}{1-x_4(t)} (x_1(t),x_2(t),x_3(t),0)
+\]
+The first derivative of this curve is, of course,
+$C'(t) = (x'_1(t),x'_2(t),x'_3(t),x'_4(t))$,
+which is interpreted geometrically as the curve's tangent.
+The first derivative of $SP(C(t))$, the stereographic projection of the curve, is 
+\begin{eqnarray*}
+(SP(C(t))' & = & SP'(C(t)) \cdot C'(t) \\
+           & = & (\frac{x'_1(1-x_4) + x_1x'_4}{(1-x_4)^2},\ 
+                  \frac{x'_2(1-x_4) + x_2x'_4}{(1-x_4)^2},\  
+                  \frac{x'_3(1-x_4) + x_3x'_4}{(1-x_4)^2}, 0) 
+		  \cdot (x'_1, x'_2, x'_3, x'_4) \\
+           & = & (\frac{x^{'2}_1(1-x_4) + x_1x'_1x'_4}{(1-x_4)^2},\ 
+                  \frac{x^{'2}_2(1-x_4) + x_2x'_2x'_4}{(1-x_4)^2},\  
+                  \frac{x^{'2}_3(1-x_4) + x_3x'_3x'_4}{(1-x_4)^2}, 0)
+\end{eqnarray*}
+%
+This allows us to control the derivatives of the quaternion spline as well
+as the points, as follows.
+Suppose that we want to design a quaternion spline $C(t)$ through the points
+$\{p_i\}_{i=0}^n$ with opening tangent $t$.\footnote{If as much tangent 
+  data is provided as point data, as in Hermite data,
+  then this point set is just two points.
+  However, there often will be far fewer tangents than points, such as in the typical case
+  when only point data is provided as constraints to the quaternion spline,
+  but derivative data is introduced indirectly in the implementation of 
+  a divide-and-conquer strategy, as discussed below.}
+Assume without loss of generality that $C(0) = p_0$.
+Under our approach,
+designing $C(t)$ with $C'(0) = t$ is equivalent to 
+designing $SP(C(t))$ with 
+\[
+(SP(C(t)))'(0) = (\frac{t^{2}_1(1-p_{04}) + p_{01}t_1t_4}{(1-p_{04})^2},\ 
+                  \frac{t^{2}_2(1-p_{04}) + p_{02}t_2t_4}{(1-p_{04})^2},\  
+                  \frac{t^{2}_3(1-p_{04}) + p_{03}t_3t_4}{(1-p_{04})^2}, 0)
+\]
+Interpolating to a closing tangent is done analogously.
+Interpolating to other derivatives can be achieved simply by using higher derivatives
+of $SP(C(t))$.
+For example, 
+\[
+(SP(C(t)))'' = use maple
+\]
+
+\section{Software}
+
+There are four spaces to visualize: object space, object view (move the mesh in a crowded
+room, Ocam's razor suggests mesh is moving, not every object in room;
+perhaps use teapot; how are positions set?  how are positions and orientations melded?);
+object space, camera view (move the camera in a crowded room; same Ocam assumption; easier
+to understand quality of orientation change from this viewpoint perhaps); 
+quaternion space (S3);
+and 4-space (for free image of quaternion spline).
+quaternionSpline.cpp should handle each of these.
+
+A parade route scenario.
+Could watch same flythrough from two different perspectives:
+1) flying along with camera
+2) watching camera fly along from a static viewpoint above (like Harry Potter scene where
+they step into the past and observe themselves)
+
+Build an environment with the ability to set the camera viewpoint (from which to watch
+the teapot flying by on the parade route);
+set keyframe positions and orientations; adjust keyframe positions and orientations;
+add keyframe positions and orientations; enter the motion path at a certain keyframe
+(not always at beginning).
+
+This environment could also provide a good testbed for motion planning, and visibility
+analysis.
+
+- {\bf first build a simple quaternion spline testbed like Graphics Interface},
+  to perfect the quaternion spline code:
+  two windows, one for quaternion space and other for object space;
+  build-in the position curve and the object (teapot);
+  visualize keyframes, denser frames sampled off quaternion spline, and moving animation.
+  This is also a more exportable version of the software (for web release).
+START HERE FOR SOFTWARE, BUT GET WORKING PUBLICATION FIRST.
+
+{\bf the following is a good environment to build in 671}
+
+- then build a flythrough testbed for orientation testing, especially incorporation
+  into motion planning, orientation planning, and game design context?
+
+- Build a path and a quaternion spline through the scene.  Don't tie it to the camera
+  or to an object yet.
+- path construction mode:
+  To build the two splines: render a scene as context; build a GUI to move through this
+  scene naturally (follow Maya lead, as well as PS2 games); 
+  allow positions and orientations to be captured at any time and
+  inserted as keyframes (by default, the next keyframe is added, but we should be able to
+  *cycle through the keyframes* and choose a position on the timeline, even replacing
+  a keyframe should be possible; use Maya as inspiration);
+- flythrough mode:
+  fly along the path with camera or fly along with object watching from some predetermined
+  viewpoint (editable by simply a keystroke from present keyframe in path construction 
+  mode); allow toggling between these modes; allow backwards and forwards motion.
+- scene input: input file should be a data format (ug,off,wrl,obj,...) and a data file;
+  program then inputs this file in the appropriate way.
+
+- motion planning context: input far fewer keyframes and build motion using
+  a motion planning algorithm rather than interpolation (requires better extraction
+  of scene model than triangles);
+  orientation planning context: simply build quaternion spline differently
+
+\clearpage
+
+\section{Abstract}
+The efficient and effortless design of smooth, natural motions is important
+in animation and general motion planning.
+We address the design of interpolating rational quaternion splines and 
+obstacle-avoiding rational quaternion splines.
+
+A point on Sn encodes a sum of squares; on S3 and in projective space,
+a point encodes a square that is the sum of 4 squares.
+
+We may be able to get away with one spline, using the argument that an empty point
+must exist for all but the most egregiously large datasets, at least if an elegant
+empty point generator is used.  The main challenge then is closed curves, where
+the end derivatives must somehow be controlled.  And the new C++ code must be debugged.
+
+% We must find the dependency between the equations defining the present
+% tangent restriction.
+
+Building Hermite quaternion splines, or
+robust and continuous quaternion splines.
+
+Strategy:
+\begin{itemize}
+\item Rotate quaternion dataset into normal form (Section~\ref{sec:normalform}).
+\item Split points into subsets (for manageable pole avoidance).
+\item For each subset
+\begin{itemize}
+\item Find a rotation away from pole, and rotate.
+\item Map points to 4-space.\footnote{Using your favourite map (Euler or stereographic projection are the obvious choices).}
+\item Map data derivatives to 4-space.
+\item Interpolate points and derivatives.
+\item Map curve (defined by control points) back to S3.
+\end{itemize}
+\end{itemize}
+Alternatively:
+\begin{itemize}
+\item Normalize and split points into subsets.
+\item For each subset
+\begin{itemize}
+\item Find a rotation and rotate.
+\item Map (rotated) points to 4-space.
+\item Map (rotated) end-derivatives of previous curve.
+      (Note that, for the last segment of a closed curve, there are end-derivatives
+       to match on the previous and the next curve.)
+\item Interpolate points and end-derivatives.
+\item Map curve.
+\end{itemize}
+\end{itemize}
+
+\section{Dictionary}
+
+\section{Fundamentals for orientation obstacles (see ~/walkthrough/programs preface}
+
+\hspace{.2in} What is an orientation?
+
+What is a unit quaternion, and its relation to Euler's rotation?
+
+What is a point on $S^3$, and its relation to 4-squares theorem?
+
+What is $S^3$ and its relation to $S^2$.
+
+What is a bad orientation (for a teapot and a camera)?
+
+How does a locus of orientations map to the quaternion sphere?
+
+What is the locus of orientations rotating around an axis?
+
+Simple example of mapping a constraint to $S^3$: stay within n degrees of vertical.
+
+Simple example of a path on $S^3$ avoiding this obstacle.
+
+General challenge: building obstacle-avoiding splines on a surface.
+
+General challenge: constructing bitangents of curves on $S^3$.
+
+[Can we express a ruled surface by a generatrix for position and a quaternion spline
+for orientation?]
+
+\clearpage
+
+\section{Software issues}
+
+Let $f$ be a map from Euclidean space $\Re^n$ to the sphere $S^3$,
+and $f^{-1}$ its inverse map from the sphere to free space.
+These maps may be used to transform the construction of a quaternion spline on $S^3$
+to the construction of a spline in $Re^n$.
+$f^{-1}$ tends to have a pole when $f$ is rational.
+The quaternions are moved away from this pole, then mapped to free space,
+interpolated in free space, and finally mapped back to the sphere and 
+returned to their original position.
+Derivative information may be mapped to free space too, if desired.
+To streamline the motion away from the pole, the quaternions may be split
+up into several subsets, each of which is interpolated separately.
+To preserve continuity, derivative information is maintained across the boundary 
+between two subcurves during this construction.
+There are different choices for the spherical map $f$.
+For each choice of $f$, an understanding must be developed 
+of how curves (Bezier curves) are mapped by $f$.
+
+{\bf Challenges.}
+\begin{itemize}
+\item  What are the maps to a sphere? from a sphere?
+\item  {\bf Quaternion datasets.}  {\bf Models.} {\bf Keyframes.}
+\item  {\bf Flythroughs.}
+\item  {\bf Combining positions and orientations.}
+\item 
+How to put a dataset in normal form, for affine invariant application of 
+affine {\em variant} maps.
+\item
+{\bf Why the inverse of rational maps to the sphere must have a pole.}
+\item
+A review of rational maps to the sphere. 
+\item
+How to perturb a pointset away from a pole.
+\item
+How to rotate in higher dimensions.
+(Ironically, the definition of rotation of an object in 3-space,
+using a quaternion spline, requires an understanding of rotation in higher dimensions,
+especially in 4-space.)
+\item
+{\bf Implement and see if it can be applied to the construction of orientation obstacles.}
+\item
+How to build bitangents on S3, and then visibility graphs.
+\item
+How to build bisectors on S3. 
+\item
+How to to build cell decomposition of free space among obstacles on S3.
+\end{itemize}
+
+{\bf Student projects.}
+Mapping a Bezier curve back to the sphere using inverse stereographic projection.
+
+{\bf We need to capture motion data, for good quaternion datasets.}
+This could come from Maya animations (keyframes in Learning Maya scripts):
+can we extract this data?
+It could also come from a real motion, using some gadget to record orientation.
+We need to think of good free motions to record, like a tea tray or a camera.
+We might be able to record camera motions in a movie to extract good motions,
+both for data and for emulation.
+In short, we need quaternion-recording gadgets in Maya, games, movies and real motion.
+What could you attach to a tray to record its orientation?
+Probably a robot arm is the closest, since it can spit out its position and orientation
+intermittently.
+After all, we want a natural motion that doesn't have to stop every second to laboriously
+measure its orientation.  
+At the least, we want to record the motion and then play it back for analysis.
+
+The derivatives are provided indirectly from the previous curve.
+If we map higher derivatives, a higher degree Bezier curve will be necessary:
+there are only two degrees of freedom in a cubic Bezier curve.
+This in turn will require a result about mapping this higher degree Bezier curve
+back to the sphere.
+How do Dietz et. al. handle the poles?
+
+What curves should be used to interpolate in free space?
+Consider $C^2$ continuity of 2 Bezier curves, as an example.
+To match the 1st and 2nd derivatives at the opening of a curve, two dof are required.
+An interpolating cubic curve interpolating a set of data points has two extra degrees of freedom.\footnote{One of degree $n$ has $n-1$ extra degrees of freedom (dof).}
+These are typically used to set the tangent at both ends, or the curvature at both ends
+(natural spline), but they can be used instead to set both derivatives at one end.
+So a cubic Bezier spline has enough dof to preserve $C^2$ continuity 
+as each new curve is added, piece by piece.
+However, there are no extra degrees of freedom to wrap around to form a closed curve,
+since then the last piece must match 2 derivatives at both ends,
+which requires 4 dof.
+However, a cubic Bezier spline would suffice for the construction
+of a $C^1$ continuous closed curve.
+In short, a quadratic curve is enough for an open $C^1$ continuous spline in free space
+built out of several pieces, or a closed $C^1$ continuous spline in free space
+built out of one piece, but a cubic curve is required for a closed $C^1$ continuous spline
+in free space built out of several pieces.
+Similarly, a cubic curve is enough for a an open $C^2$ continuous spline in free space
+built out of several pieces, or a closed $C^2$ continuous spline in free space
+built out of one piece, but a quintic curve is required for a closed $C^2$ continuous 
+spline in free space built out of several pieces.
+All of these degrees are doubled when the curve is mapped to the sphere to become
+a quaternion spline.
+For example, a closed $C^1$ continuous quaternion spline made out of several pieces
+is of degree 6, while $C^2$ continuity requires a degree 10 quaternion spline.
+This shows how the quaternion spline's degree increases with desired continuity.
+There is no limit to the possible continuity, at the expense of degree.
+The use of several pieces, with its associated improvement of robustness, comes
+at the expense of degree.
+For example, the quaternion spline can be of degree 6 (rather than 10) if it
+is made out of one piece.
+
+What is the optimal rotation?
+
+\clearpage
+
+{\bf Exposure sheet}
+
+Maps to the sphere.
+\[
+	M(x_1,x_2,x_3,x_4) =
+	\frac{1}{x_1^2 + x_2^2 + x_3^2 + x_4^2}
+	(x_1^2 + x_2^2 + x_3^2 - x_4^2, 2x_1x_4, 2x_2x_4, 2x_3x_4)
+\]
+\[
+SP^{-1}(x_1,x_2,x_3) = \frac{1}{x_1^2 + x_2^2 + x_3^2 + 1} 
+                       (2x_1, 2x_2, 2x_3, x_1^2+x_2^2+x_3^2 - 1)
+\]
+
+Maps away from the sphere.
+\[
+M^{-1}|_{S3}(x_1,x_2,x_3,x_4) = \frac{1}{\sqrt{2(1-x_1)}}(x_2,x_3,x_4,1-x_1)
+\]
+\[
+SP(x_1,x_2,x_3,x_4) = \frac{1}{1-x_4} (x_1,x_2,x_3)
+\]
+
+\clearpage
+
+\tableofcontents
+
+\clearpage
+
+\section{Spherical introduction}
+
+In the classic 'Flatland',
+Edwin Abbott Abbott (sic!) related the ominous appearance of The Sphere in the
+cosy confines of two-space.
+This was Abbott's way to introduce the concept of higher dimensions.
+We will discuss the sphere one dimension higher, the 3-sphere in 4-space.
+Cartographers have long wrestled with the problem of mapping the spherical earth
+to a flat page.
+The sphere has long been a Platonic ideal for shape.
+Indeed, all of the Platonic solids\footnote{The Platonic solids are the tetrahedron,
+  cube, octahedron, dodecahedron and icosahedron.}
+aspire to the sphere, with differing levels of success.\footnote{Geodesation can
+  help them to achieve this aspiration.}
+We are interested in maps to and from the sphere, 
+for reasons both mundane (their application to the design of quaternion splines)
+and aesthetic.
+One of the most burning questions is: why must they always have poles?
+
+A surface's parameterization may be interpreted as a map to the surface,
+since it maps some parameter space to the surface.
+For example, the parameterization of a 2-manifold S is a map from $\Re^2$ to S.
+The inverse of this parameterization yields a map from the surface.
+
+\subsection{Sphere}
+
+In the case of the sphere, the classical parameterization is
+\[
+   () x () = 
+\]
+which can be viewed as a spherical product of a circle and half-circle \cite{barr}.
+Unfortunately, this map is not rational.
+A rational parameterization is 
+\[
+   () x () = 
+\]
+Both of these parameterizations have poles, since the circle shrinks to a point
+at the endpoint of the half-circle.
+This is reflected in the earth's lines of latitude: the 90th line of latitude at the
+North (or South) Pole is degenerate.
+Other choices of map to the sphere, such as the Euler map or 
+stereographic projection, suffer from poles, as one maps away from the sphere.
+This suggests that poles may be an inherent property of maps from the sphere,
+certainly of rational maps.
+But are they?
+
+\section{Introduction}
+
+In animating a game or film, the motion of many objects and cameras must be controlled.
+Our goal is to give the animator the capacity to effortlessly design 
+a natural motion that respects 
+certain constraints inherent to the moving object or camera.
+   % must have its own source of control or someone manipulating it
+Consider some examples.
+In the motion of a teapot full of Earl Grey from kitchen to table,
+tea should not be spilled.
+In the motion of an airplane,
+banking should be smooth and the cockpit should not turn upside down.
+In the flight of a virtual camera through an architectural model or the scene of a game,
+the camera should avoid excessive, jerky movements and 
+should respect the vertigo of the observer, not turning upside down
+or rocking too far from horizontal.
+% or a SkyCam flying above a Monday Night football game:
+When the camera is to be physically held, the motion
+should also respect the cameraman's, or camera dolly's, degrees of freedom.
+In the animation of a baseball throw by an articulated character in a computer game,
+the elbow and shoulder joints should respect anatomical constraints.
+  % surveillance robot;
+  % not an approximation of the path of a tumbling thrown shoe:
+  % thrown object is not appropriate, since it follows physical laws & isn't free-flying.
+
+The above examples present three challenges for motion design: % free-flying motion
+a smooth change of position, a smooth change of orientation, 
+and the avoidance of certain illegal orientations intrinsic to the moving object.
+Note that we are not considering extrinsic obstacles in the design 
+of the motion, either positional or orientational.
+For example, we are not considering the design of a motion for the teapot that avoids
+the table or a bounding dog, or that respects the orientational constraints 
+imposed by placing the pot on the middle shelf of a china cabinet.
+However, we do want to respect the orientational constraints of the waiter's hand 
+carrying the teapot, since it is considered 'part of the teapot'.
+In short, we are presently concentrating on the motion of the object through free space,
+free of obstacles.
+This decision to emphasize motion in free space can be 
+rationalized by the presence of the animator in the design loop:
+the animator will guarantee that extrinsic obstacles are avoided.
+Although a fully automatic solution would be wonderful,
+it is understood that the animator will be tuning the motion:
+we offer a tool that simplifies this task by eliminating many faulty motions.
+
+The first of the three challenges, smooth control of position, is well understood:
+it is well solved by the classical solution of interpolating polynomial B-splines 
+in 3-space.
+The second challenge, smooth control of orientation, is reasonably well understood 
+but has some need for refinement: {\bf a solution that generates rational quaternion splines
+with controllable endpoint derivatives (rational Hermite quaternion splines) 
+is still open.}
+A new solution, building upon our earlier work on rational quaternion splines, 
+is proposed in this paper.
+The earlier method generated smooth quaternion splines, 
+but did not have fully controllable derivatives.
+The third challenge, the avoidance of illegal orientations, is not well understood at all.
+Fortunately, it can appeal to related and well-studied problems in motion planning 
+for inspiration.
+The problem reduces to the design of obstacle-avoiding quaternion splines on the
+quaternion sphere $S^3$.
+
+Constraints on position have long been studied in the motion planning literature.
+
+Constraints on orientation could be modelled physically (e.g., a CFD simulation to
+identify when tea pours out of the pot when it is moved violently), 
+but this adds extra expense and even then does not itself design a motion.
+
+An application is the automated construction of animation curves
+in modelers like Maya.
+
+The motion design should be efficient and elegant.
+
+\clearpage
+
+\section{Building a better quaternion spline}
+
+Orientation is controlled by quaternion splines.
+Rational orientation control demands rational quaternion splines, 
+and smooth orientation control demands high derivative continuity of these splines.
+We would like to provide the user with the power to explicitly define derivatives
+at data orientations, explicitly controlling torque and other spin parameters.
+This control over endpoint derivatives of a quaternion spline is also necessary
+if the quaternion spline is built up in parts, which is useful for large data sets.
+It fits well into the divide-and-conquer design philosophy suggested by 
+one of the challenges of rational quaternion spline design: avoiding poles of the
+underlying rational map to and from the sphere.
+The best way to avoid a pole is to move away from it, and it is simpler to find a way
+to move a small set of quaternions far away from the pole.
+Therefore, we want to build a rational quaternion spline with full ability to
+interpolate not only points but arbitrary derivatives.
+
+The old method: use Euler map, perturb entire set away from pole at once 
+                using random or unguaranteed best-fitting plane perturbation? 
+		(SEE CODE TO VERIFY THIS).\\
+The new method: use stereographic projection, decompose into subsets, perturb each subset
+                away from the pole individually using best-fitting plane heuristic 
+		(see options in original paper),
+		control derivatives
+
+\section{The problem}
+
+\begin{defn2}
+A {\bf quaternion spline} is a curve on $S^3$ that interpolates a set of quaternions.
+\end{defn2}
+
+\noindent In order of increasing difficulty,
+the paper addresses the following variants of the quaternion spline problem.
+
+\begin{itemize}
+\item 
+Given a set of quaternions $\{P_i\}_{i=0}^n \subset S^3$,
+build an open or closed $C^1$-continuous quaternion spline through this set.
+(By interpolating all of the points at once, we should get $C^2$ continuity,
+that is maximal continuity [or is $C^5$ continuity maximal?].)
+
+\item 
+Given a set of quaternions $\{P_i\}_{i=0}^n \subset S^3$
+and two end tangents $T_0$ and $T_1$
+such that the tangent $T_0$ lies in the tangent plane of $S^3$ at $P_0$
+and $T_1$ lies in the tangent plane of $S^3$ at $P_n$,
+build an open or closed $C^1$-continuous quaternion spline $C(t)$, $t \in [0,1]$ 
+through this set such that $C'(0) = T_0$ and $C'(1) = T_1$.
+
+\item 
+Given a set of quaternions $\{P_i\}_{i=0}^n \subset S^3$
+and a set of tangents $\{T_i\}_{i=0}^n$
+such that the tangent $T_i$ lies in the tangent plane of $S^3$ at $P_i$,
+build an open or closed $C^1$-continuous quaternion spline through this set
+that honours the set of tangents (i.e., if $C(t_i) = P_i$, then $C'(t_i) = T_i$).
+\end{itemize}
+%
+and the most general statement of the problem, which encompasses the above problems:
+%
+\begin{itemize}
+\item
+Given 
+\begin{enumerate}
+\item a set of quaternions $\{P_i\}_{i=0}^n \subset S^3$, and
+\item a set of tangents $\{T_i\}_{i=0}^m$ ($m\leq n$) 
+      at some or all of these quaternions, such that
+\begin{enumerate}
+\item
+$T_i$ is a tangent at $P_{f(i)}$, 
+where $f: \{1,\ldots,m\} \rightarrow \{1,\ldots,n\}$ is a one-to-one map, and
+\item
+the tangent $T_i$ at $P_{f(i)}$ lies in the tangent plane of $S^3$ at $P_f(i)$
+\end{enumerate}
+\end{enumerate}
+build an open or closed $C^1$-continuous quaternion spline $C(t)$, $t \in [0,1]$ 
+through this set that honours the set of tangents (i.e., the first derivative of $C(t)$
+at $P_{f(i)}$ is $T_i$).
+\end{itemize}
+%
+All of these problems can be reduced to the following subproblem.
+%
+\begin{itemize}
+\item Given a set of quaternions $\{P_i\}_{i=0}^n \subset S^3$ 
+of bounded size (where the bounds are defined below) 
+and two end tangents $T_0$ and $T_1$
+such that the tangent $T_0$ lies in the tangent plane of $S^3$ at $P_0$
+and $T_1$ lies in the tangent plane of $S^3$ at $P_n$,
+build an open $C^1$-continuous quaternion spline $C(t)$, $t \in [0,1]$ 
+through this set such that $C'(0) = T_0$ and $C'(1) = T_1$.
+\end{itemize}
+{\bf Explain how each problem reduces to the subproblem.}
+
+\clearpage
+
+\section{Related literature}
+
+Shoemake (SIGGRAPH, arcball); Barr (SIGGRAPH and followup);
+Kim (exponential maps); Ravani (Lie algebra);
+Pottmann and Wagner (dual quaternion splines);
+Dietz and Hoschek (curves on S2, do they map from S2 to R3 or S2 to R2?);
+animation literature;  Maya's animation.
+
+with Xiao: smooth visibility graphs
+
+with someone: Voronoi diagrams on $S^3$
+
+\clearpage
+
+\section{The approach}
+
+\noindent 
+The approach taken in this paper is to replace curve design [point interpolation] 
+on a surface by curve design [point interpolation] in free (Euclidean) space.
+[The paper employs the following algorithmic technique to solve this subproblem,
+motivated by the fact that quaternion spline design is difficult because it is
+curve design constrained to remain on a surface.]
+Curve design in Euclidean space has an excellent classical solution.
+The reduction of constrained curve design to free curve design
+is realized by a map between $S^3$ and $R^n$.
+%
+\begin{itemize}
+\item Let $f$ be a rational map of $\Re^n$ to $S^3$.
+\item Map the quaternions Q (and derivatives T at Q) by $f^{-1}$, 
+      to $f^{-1}(Q)$ and $f^{-1}(T)$.
+\item Build a cubic interpolating spline $C(t)$ 
+      through $f^{-1}(Q)$ and $f^{-1}(T)$.
+      This is the traditional interpolation algorithm in Euclidean $n$-space.
+      [The classical solution has two extra degrees of freedom, 
+      which are used to set the tangents.]
+\item Map the spline under $f$, yielding a rational spline $f(C(t))$.
+\end{itemize}
+
+Since this approach relies on the simplicity of curve design in Euclidean space,
+the quaternions must be mapped to points in some Euclidean space.
+However, any Euclidean space will do: 3-space and 4-space are the two natural candidates.
+% Consider the rational map of $Re^n$ to $S^3$.
+It is possible to find one-to-one maps of a 3-manifold to a 3-manifold.
+However, any map of a 4-manifold to a 3-manifold will be many-to-one,
+simply because of the change in dimension.
+Thus, the preimage of a typical point on the 3-manifold will be a curve,
+not a point.
+
+Applying this observation to our problem,
+if a map between $S^3$ and 4-space is used, there will be ambiguity
+in mapping the quaternions to 4-space, because the mapping is many-to-one.
+We will see that this indirectly manifests itself in difficulties with 
+derivative interpolation in the Hermite version of the problem.
+A map between $S^3$ and 3-space has no such difficulties.
+
+%
+Because of inherent(?) poles of rational maps to the sphere, two additional steps
+are needed:
+\begin{enumerate}
+\item Let $f$ be a rational map of $\Re^4$ to $S^3$.
+\item Rotate the quaternions Q and end tangents T away from the pole.
+\item Map the rotated $\hat{Q}$ and $\hat{T}$ to $f^{-1}(\hat{Q})$ and $f^{-1}(\hat{T})$.
+\item Build a cubic interpolating Bezier curve $C(t)$ 
+      through $f^{-1}(\hat{Q})$ and $f^{-1}(\hat{T})$.
+\item Map $C(t)$ under $f$, yielding a rational Bezier curve $f(C(t))$.
+\item Rotate $C(t)$ back, undoing the original rotation of $Q$ and $T$.
+\end{enumerate}
+
+
+Our previous work solved only the open quaternion spline problem,
+did not allow a divide-and-conquer approach,
+and had unresolved difficulties with poles of the map.
+None of the approaches for coping with the pole were satisfactory,
+not being implemented (emptiest point), not always working (BFP),
+or being unrepeatable (random point).
+The implementation of the earlier ideas has also been streamlined
+with more efficient formulae.
+
+\clearpage
+
+A desirable property of any interpolating curve is the ability to connect
+two segments smoothly.  
+Equivalently, we wish to introduce the power to interpolate derivatives at endpoints.
+By interpolating tangent directions at one endpoint, open $G^1$-continuous curves
+can be built up segment by segment.
+By interpolating tangent directions at both endpoints, closed $G^1$-continuous curves
+can be built up segment by segment.
+By interpolating tangents at one (resp., both) endpoints, 
+open (resp., closed) $C^1$-continuous curves can be built.
+By interpolating up to $i$th derivatives at one (resp., both) endpoints,
+open (resp., closed) $C^i$-continuous curves can be built.
+We begin by showing how to build $C^1$-continuous curves.
+This is necessary to build a quaternion spline up by parts, which is in turn necessary
+to guarantee the success of certain perturbation strategies.
+
+Suppose that we have a desired beginning tangent $T_0$ 
+at the beginning endpoint of an $S^3$ curve. 
+    % but are willing to relax this constraint to a beginning tangent 
+    % along the direction defined by $T_0$.
+How is a quaternion spline designed with this opening tangent?
+Let the space curve be defined by the control points $\{b_i\}$,
+the $S^3$ curve by the control points $\{B_i\}$ and the weights $\{w_i\}$,
+and the quaternion spline by the input quaternions $\{P_i\}$.
+   % First recall some basic facts about end tangents.
+   % The tangent at the beginning endpoint of a Bezier curve (e.g., the space curve) 
+   % is defined by the first two control points and the degree.
+   % The tangent at the beginning endpoint of a rational Bezier curve (e.g., the $S^3$ curve)
+   % is defined by the first two control points and weights, and the degree:
+   % the beginning tangent on the $S^3$ curve is $6(w_1/w_0)(B_1 - B_0)$.
+In designing an interpolating cubic B-spline curve, 
+there are two extra degrees of freedom.
+These are often equated with the positions of the second and penultimate control points,
+$b_1$ and $b_{n-1}$ (or equivalently, the end tangents).
+This power to set $b_1$ will be used to interpolate the tangent direction.
+
+     % Back to our specific problem.
+We have developed formulae for translating the control points $\{b_i\}$ of the space
+curve to the control points $\{\breve{b}_i\}$ and weights $\{w_i\}$ of the $S^3$ curve.
+Notice that $\breve{b}_i$ and $w_i$ are defined in terms of $\{b_j\}_{j=1}^i$.
+In particular, $\breve{b}_1$ and $w_1$ are defined in terms of $b_0$ and $b_1$.
+Since $\breve{b}_1$ defines the opening tangent on one curve, 
+and $b_1$ the opening tangent on the other,
+this formula relates the tangents on both curves and allows the constraint on the
+opening tangent of the $S^3$ curve to be translated to a constraint on the opening
+tangent of the space curve.
+This is where we want the constraint,
+so that the space curve can be designed with the right tangent.
+
+NOTE: we don't want zero weights, so don't want $b_0$ = origin (so $b_0 \cdot b_0 = 0$)
+and don't want $b_0 \cdot b_1 = 0$ (i.e., b0 and b1 collinear).
+These are coordinate dependent!!
+(By multiplying by them, they may disappear in a legal way.)
+
+Add a section elaborating on Theorem~\ref{thm:imagecurve} below 
+(once the details of how we map and perturb are clear):
+we shall guarantee that these weights are not zero.
+In particular, we shall place the control points $b_i$ of the space curve
+near $S^3$ ($b_{3i}$ shall lie on $S^3$) so that $b_i \cdot b_i$ is nonzero 
+and close to 1.
+Other constraints on the relationship between the angles of $b_i$ and $b_j$ can be 
+deduced or forced to preserve the positivity of these weights.
+
+\clearpage
+
+\section{Preamble to 'Rational maps to the sphere' for Orientation control paper}
+
+A key component of the proposed solution is a rational map to the sphere
+and its companion map off of the sphere.
+The latter map, from $S^3$ to some Euclidean $n$-space, frees the quaternions from
+their surface constraint, while the former map reimposes this constraint.
+Since the map from the sphere is applied to a finite pointset, while the map
+to the sphere is applied to a polynomial curve, rationality is only necessary for the
+map to the sphere, to preserve rationality of the curve, yielding a rational
+quaternion spline.
+If the user is willing to settle for nonrational curves,
+a nonrational map could be used,
+but rational Bezier curves offer many advantages, including simplicity,
+efficiency, and pleasant properties such as the variation-diminishing and convex-hull
+properties.
+
+A map between $S^3$ and $\Re^3$ is more appropriate than a map between $S^3$ and $\Re^4$
+for the inverse map.
+The inverse will be unique, while in the latter case the map from $S^3$ to $\Re^4$ is
+inherently one-to-many, since we are moving from a 3-manifold to a 4-manifold.
+
+\section{Rational maps to the sphere}
+% $S^3$ maps, to and fro
+
+[Note: The only published paper is GI and Eurographics.
+We have moved beyond these papers by at least the 30\% guideline.
+This material is valid for a journal publication, but regardless we want a resolution
+of this issue in a technical report.
+Additional material: stereographic projection, image of rational Bezier,
+generalized construction, visualization.]
+
+In this paper, we consider rational maps to the 3-sphere and their inverses.
+Since the inverse maps often (always?) have poles, we explore this issue as well.
+Derivatives are computed when the maps are applied to a parametric curve on 
+the 3-sphere.
+[It is hard to motivate the interest in this derivative result, so this should
+be delayed to another paper.]
+The image of a Bezier curve under these maps, expressed as a rational Bezier curve,
+is computed, which allows any Bezier curve to be projected onto the sphere.
+(Can we compute the image of a rational Bezier curve too? This would be additional.)
+We discuss the generalization to construction of maps to other surfaces.
+
+\clearpage
+
+\subsection{Previous work}
+
+Mathematicians have long been interested in maps from the sphere to Euclidean space,
+because of problems in cartography,
+and there are many well-known examples \cite{kreyszig59}.
+However, since properties such as conformality (preservation of angles between 
+intersecting curves) and equiareality (preservation of area) were more important than
+rationality (the ability to express the map in terms of quotients of polynomials)
+in the design of these cartographic maps, most of these maps
+are not rational (e.g., the Mercator projection, Lambert projection,
+mapping of Sanson, and mapping of Bonne \cite{kreyszig59}).
+A rational map to the sphere is important in the design of curves on the
+sphere, since it generates rational curves.
+
+\clearpage
+
+\subsection{Stereographic projection}
+\label{sec:stereo}
+
+The most well-known map involving the sphere is stereographic projection.
+It has been used at least since Hipparch in 160 B.C. \cite{kreyszig59}. % p. 205
+% probably discovered by Hipparch too
+Stereographic projection maps from \Sn{n}\ to the hyperplane $x_{n+1}=0$ in $(n+1)$-space.
+A point of \Sn{n}\ is perspectively projected from 
+the north pole of \Sn{n}\ to $x_{n+1}=0$  % \cite{thorpe79}. % or kreyszig59
+(Figure~\ref{fig:stereo}).
+% Note that there is a variant of stereographic projection where
+% the projection plane $z=0$ is replaced by the tangent plane opposite the pole
+% $z=-1$ \cite{kreyszig59}.
+The image of the north pole $(0,\ldots,0,1)$ is undefined.\footnote{It is well defined
+  in projective space, where the pole maps to the line at infinity of the hyperplane.}
+Stereographic projection is a map away from the sphere, 
+but its inverse is a rational map to the sphere.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[scale=.25]{img/fig:stereo.jpg}
+\end{center}
+\caption{Stereographic projection in 3-space}
+\label{fig:stereo}
+\end{figure}
+
+\begin{lemma}
+Stereographic projection 
+$f_{SP}: \Sn{n} - (0,\ldots,0,1) \rightarrow x_{n+1}=0 \subset \Re^{n+1}$ 
+from the sphere
+and its inverse $f_{SP}^{-1}: x_{n+1}=0 \rightarrow \Sn{n} - (0,\ldots,0,1)$ 
+to the sphere
+are defined by:
+\begin{eqnarray*}
+f_{SP}(x_1,\ldots,x_{n+1}) & = & \frac{1}{1-x_{n+1}} (x_1,\ldots,x_n,0) \\
+f_{SP}^{-1}(x_1,\ldots,x_n,0) & = &
+	\frac{1}{x_1^2 + \cdots + x_n^2 + 1} 
+	(2x_1, \ldots, 2x_n, x_1^2 + \cdots + x_n^2 - 1)
+\end{eqnarray*}	% see thorpe79, p. 125
+\end{lemma}
+\vspace{.1in}
+\prf
+The projector line $(1-t)p + tq$ through $p = (0,\ldots,0,1)$ and 
+$q = (x_1,\ldots,x_{n+1})$ intersects $x_{n+1}=0$ 
+when $1-t + tx_{n+1} = 0$ or $t = \frac{1}{1-x_{n+1}}$.
+This defines the forward map.
+Since stereographic projection is one-to-one and onto,
+it has an inverse that is also one-to-one.
+The projector line $(1-t)p + t(r,0)$ through $p = (0,\ldots,0,1)$ and $(r,0)$
+intersects \Sn{n} when $\|(1-t)(0,\ldots,0,1) + t(r,0)\|_2^2 = 1$,
+or $(1-t)^2 + t^2\|r\|_2^2 = 1$, or $t^2(\|r\|^2 + 1) = 2t$, or 
+$t=0$ and $t=\frac{2}{\|r\|^2 + 1}$.
+The second root yields the inverse point.
+\QED
+
+Some other properties of the stereographic projection are interesting, although
+more relevant to cartography than to our study.
+It is a conformal map and, like any conformal map of \Sn{2}\ to the plane,
+it maps loxodromes (curves of constant direction on the sphere) to straight lines.
+It is the only conformal map from $S^2$ to a plane that preserves
+circles (circles are mapped to circles or straight lines).
+
+\clearpage
+
+\begin{lemma}
+Let $C(t) = (x_1(t),x_2(t),x_3(t),x_4(t))$ be a parametric curve that lies on $S^3$.
+The first derivative of the stereographic projection of the curve $C(t)$ is 
+\[
+(\frac{x^{'2}_1(1-x_4) + x_1x'_1x'_4}{(1-x_4)^2},\ 
+                \frac{x^{'2}_2(1-x_4) + x_2x'_2x'_4}{(1-x_4)^2},\  
+                  \frac{x^{'2}_3(1-x_4) + x_3x'_3x'_4}{(1-x_4)^2}, 0)
+\]
+\end{lemma}
+\prf
+\begin{eqnarray*}
+(f_{SP}(C(t))' & = & f_{SP}'(C(t)) \cdot C'(t) \\
+           & = & (\frac{x'_1(1-x_4) + x_1x'_4}{(1-x_4)^2},\ 
+                  \frac{x'_2(1-x_4) + x_2x'_4}{(1-x_4)^2},\  
+                  \frac{x'_3(1-x_4) + x_3x'_4}{(1-x_4)^2}, 0) 
+		  \cdot (x'_1, x'_2, x'_3, x'_4) \\
+           & = & (\frac{x^{'2}_1(1-x_4) + x_1x'_1x'_4}{(1-x_4)^2},\ 
+                  \frac{x^{'2}_2(1-x_4) + x_2x'_2x'_4}{(1-x_4)^2},\  
+                  \frac{x^{'2}_3(1-x_4) + x_3x'_3x'_4}{(1-x_4)^2}, 0)
+\end{eqnarray*}
+\QED
+
+Higher derivatives are found simply by repeating this process.
+
+Since $x_{n+1}=0$ is an embedding of $n$-space in $\Re^{n+1}$,
+stereographic projection and its inverse may be interpreted as maps between 
+$\Sn{n}$ and $\Re^n$.
+
+DEFINE BEZIER CURVE, BERNSTEIN POLYNOMIALS, PROJECTIVE SPACE.
+REVIEW RATIONAL BEZIER CURVE AND BEZIER CURVE IN PROJECTIVE SPACE.
+
+HOW ABOUT ARBITRARY BEZIER CURVE?
+
+\begin{theorem}
+\label{thm:imagecurve}
+The image under inverse stereographic projection 
+of a cubic Bezier curve with control points $b_i = (b_{i1},\ldots,b_{i4})$
+is a sextic rational Bezier curve 
+with control points $\breve{b}_i = $ 
+and weights $w_i = $.
+This maps an arbitrary cubic curve to a curve on \Sn{3}.
+\end{theorem}
+\prf
+Let $c(t) = \sum_{i=0}^3 b_i B_i^3(t)$ be the cubic Bezier curve.
+Since the image of $c(t)$ is a rational Bezier curve,
+it is easier to work in projective space.
+% When $c(t)$ is expressed in projective space, it becomes
+% \[
+% \sum_{i=0}^3 (b_{i1},b_{i2},b_{i3},b_{i4}, 1) B_i^3(t)
+% \]
+Inverse perspective projection becomes
+\[
+f_{SP}(x_1,x_2,x_3,x_4,1) = ---
+\]
+\QED
+
+% image under stereographic projection
+\Comment{
+\prf
+Let $c(t) = \sum_{i=0}^3 b_i B_i^3(t)$ be the cubic Bezier curve.
+Since the image of $c(t)$ is a rational Bezier curve,
+it is easier to work in projective space.
+% When $c(t)$ is expressed in projective space, it becomes
+% \[
+% \sum_{i=0}^3 (b_{i1},b_{i2},b_{i3},b_{i4}, 1) B_i^3(t)
+% \]
+Perspective projection becomes
+\[
+f_{SP}(x_1,x_2,x_3,x_4,1) = (x_1,x_2,x_3,0,1-x_4)
+\]
+% Let the image curve in projective space be $f_{SP}(c(t)) = (f_1(t),\ldots,f_5(t))$.
+Note that 
+\[
+1 - \sum_{i=0}^3 b_{i4} B_i^3(t) = \sum_{i=0}^3 B_i^3(t) - \sum_{i=0}^3 b_{i4} B_i^3(t)
+= \sum_{i=0}^3 (1-b_{i4})B_i^3(t)
+\]
+using the partition of unity property of Bernstein polynomials.
+Therefore, 
+\[
+f_{SP}(c(t)) = \sum_{i=0}^3 (b_{i1}, b_{i2}, b_{i3}, 0, 1-b_{i4}) B_i^3(t)
+\]
+This is a cubic rational Bezier curve with weights $w_i = 1-b_{i4}$
+and control points $\frac{1}{w_i} (b_{i1}, b_{i2}, b_{i3}, 0)$.
+\QED
+}
+
+[Be careful using stereographic projection, since the conclusions of comp.tex are that
+stereographic projection leads to an inferior quaternion spline.
+Doesn't this imply that we have implemented the map of a Bezier curve under
+stereographic projection too?]
+
+CREATE BIB FILE.
+
+\clearpage
+
+\subsection{Development of Euler's map}
+
+Develop from first principles using 4 squares theorem.
+See ratqspline.tex and characterization.tex(?).
+Show that all maps to sphere are versions of 4 squares (but then what about stereographic
+projection?).
+
+\clearpage
+
+\subsection{Euler's map}
+
+\begin{defn2}
+The Euler map $M: \Re^4 - \{0\} \rightarrow \Sn{3}$ to the sphere is defined by:
+\begin{equation}
+\label{eqM}
+	M(x_1,x_2,x_3,x_4) =
+	\frac{1}{x_1^2 + x_2^2 + x_3^2 + x_4^2}
+	(x_1^2 + x_2^2 + x_3^2 - x_4^2, 2x_1x_4, 2x_2x_4, 2x_3x_4)
+\end{equation}
+%
+If we let 
+${\cal M}(p,q): = (p_1q_1 + p_2q_2 + p_3q_3 - p_4q_4, 2p_1q_4, 2p_2q_4, 2p_3q_4)$,
+the Euler map may be re-expressed as:
+\begin{equation}
+\label{eq:calM}
+M(P) = \frac{{\cal M}(P,P)}{P \cdot P}
+\end{equation}
+which is valuable in Theorem~\ref{thm:imagecurve} on the image of a Bezier curve
+under the Euler map.
+\end{defn2}
+
+The Euler map has both bilinear and quadratic characteristics.
+In Euclidean space, every coordinate of ${\cal M}$ is a bilinear map,
+while in projective space, every coordinate of $M$ is a quadratic form.
+
+Since the Euler map transforms a 4-space into a 3-manifold, losing a dimension,
+the inverse of a point is a 1-manifold.
+
+\begin{lemma}
+\label{lem:inverse}
+The inverse Euler map $M^{-1}: \Sn{3} - (1,0,0,0) \rightarrow \Re^4$ from the sphere
+is defined by:
+\begin{equation}
+M^{-1}(x_1,x_2,x_3,x_4) = (1-t)(0,0,0,0) + t(x_2,x_3,x_4,1-x_1), t \neq 0
+\end{equation}
+In other words, the image of a point is a line through the origin.
+The map has a special behaviour at the pole $(1,0,0,0)$:
+\begin{equation}
+M^{-1}(1,0,0,0) = \mbox{ the hyperplane $x_4=0$ without the origin}
+\end{equation}
+\end{lemma}
+\prf
+\QED
+
+It is often desirable for the inverse of a point to be a unique point.
+In this case, it is possible to choose a particular point on the inverse line.
+A natural choice is to choose the point on \Sn{3}, since every inverse line must intersect
+\Sn{3} and the choice of \Sn{3} adds a certain symmetry.
+This leads to the following restricted inverse map.
+
+\begin{lemma}
+The restricted inverse Euler map $M^{-1}_{S3}: S^3 - \{(1,0,0,0)\} \rightarrow S^3$,
+defined by $M^{-1}_{S3}(P) = M^{-1}(P) \cap S^3$, has the form
+\begin{equation}
+(x_1,x_2,x_3,x_4) \mapsto \frac{1}{\sqrt{2-2x_1}}(x_2,x_3,x_4,1-x_1)
+\end{equation}
+\end{lemma}
+\prf
+An intersection of the inverse line with $S^3$
+is the point $\frac{(x_2,x_3,x_4,1-x_1)}{\|x_2,x_3,x_4,1-x_1\|_2}$.
+\[
+\|(x_2,x_3,x_4,1-x_1)\|_2^2 = x_2^2 + x_3^2 + x_4^2 + (1-x_1)^2
+= x_1^2 + x_2^2 + x_3^2 + x_4^2 + 1 - 2x_1
+\]
+Since $(x_1,x_2,x_3,x_4) \in S^3$,
+\[
+\|(x_2,x_3,x_4,1-x_1)\|_2^2 = 2 - 2x_1
+\]
+\QED
+
+% It is a map from $S^3$ to $S^3$.
+% This is not a rational map, but it need not be.
+
+\begin{lemma}
+Let $C(t) = (x_1(t),x_2(t),x_3(t),x_4(t))$ be a parametric curve that lies on \Sn{3}.
+The restricted inverse Euler map of $C(t)$ is another curve on \Sn{3}.
+The first derivative of this curve $M^{-1}|_{S3}(C(t))$ is:
+\[
+(\frac{x'_2}{(2-2x_1)^{1/2}} + \frac{x'_1x_2}{(2-2x_1)^{3/2}}, 
+ \frac{x'_3}{(2-2x_1)^{1/2}} + \frac{x'_1x_3}{(2-2x_1)^{3/2}},
+ \frac{x'_4}{(2-2x_1)^{1/2}} + \frac{x'_1x_4}{(2-2x_1)^{3/2}},
+ \frac{-x'_1}{2\sqrt{2-2x_1}})
+\]
+\end{lemma}
+\prf
+\begin{eqnarray*}
+(M^{-1}(C(t))' & = & (M^{-1})'(C(t)) \cdot C'(t)
+\end{eqnarray*}
+Consider the first coordinate of $(M^{-1})'(C(t))$.
+The second and third coordinates are computed analogously.
+Recall that the restricted inverse of the Euler map is
+\[
+M^{-1}|_{S3}(C(t)) = \frac{(x_2,x_3,x_4,1-x_1)}{\sqrt{2-2x_1}}
+\]
+If we let $g(t) = (2-2x_1(t))^{\frac{1}{2}}$, then
+\[
+g'(t) = \frac{-x'_1}{\sqrt{2-2x_1}}
+\]
+and it is clear that the first coordinate of $(M^{-1})'(C(t))$ is:
+\[
+\frac{x'_2 \sqrt{2-2x_1} + \frac{x'_1 x_2}{\sqrt{2-2x_1}}}{2-2x_1}
+= \frac{x'_2}{(2-2x_1)^{1/2}} + \frac{x'_1x_2}{(2-2x_1)^{3/2}}
+% = \frac{x'_2(2-2x_1) + x'_1x_2}{(2-2x_1)^{3/2}}
+% = \frac{x'_1x_2 - 2x_1x'_2 + 2x'_2}{(2-2x_1)^{3/2}}
+\]
+The fourth coordinate of $M^{-1}(C(t))$ is 
+$\frac{1-x_1}{\sqrt{2-2x_1}} = (\frac{1-x_1}{2})^{1/2}$
+and its derivative is:
+\[
+\frac{1}{2} (\frac{1-x_1}{2})^{-1/2}(\frac{-x'_1}{2})
+= \frac{-x'_1}{2\sqrt{2-2x_1}}
+\]
+This yields the stated derivative.
+% Collecting, the derivative of the inverse Euler map is:
+% \[
+% \frac{1}{\sqrt{2-2x_1}} 
+% (\frac{x'_1x_2 - 2x_1x'_2 + 2x'_2}{2-2x_1},
+%  \frac{x'_1x_3 - 2x_1x'_3 + 2x'_3}{2-2x_1},
+%  \frac{x'_1x_4 - 2x_1x'_4 + 2x'_4}{2-2x_1},
+% -\frac{x'_1}{2})
+% \]
+\QED
+
+Higher derivatives are found simply by repeating this process. 
+DO SO IN MAPLE.
+
+\clearpage
+
+\begin{theorem}
+\label{thm:imagecurve}
+The image of the cubic Bezier curve $\sum_{i=0}^3 b_i B_i^3(t)$ under M 
+is the sextic rational Bezier curve $\frac{\sum_{i=0}^6 w_i \breve{b}_i B_i^6(t)}
+                                          {\sum_{i=0}^6 w_i B_i^6(t)}$ 
+with control points:
+\begin{eqnarray}
+\breve{b}_0 & = & \frac{{\cal M}(b_0,b_0)}{b_0 \cdot b_0} \nonumber \\
+\breve{b}_1 & = & \frac{{\cal M}(b_0,b_1) + {\cal M}(b_1,b_0)}{2b_0\cdot b_1} \nonumber \\
+\breve{b}_2 & = & \frac{{\cal M}(b_0,b_2) + 3{\cal M}(b_1,b_1) + {\cal M}(b_2,b_0)}{2b_0 \cdot b_2 + 3b_1 \cdot b_1} \nonumber \\
+\breve{b}_3 & = & \frac{{\cal M}(b_0,b_3) + 9{\cal M}(b_1,b_2) + 9{\cal M}(b_2,b_1) + {\cal M}(b_3,b_0)}{2b_0 \cdot b_3 + 18 b_1 \cdot b_2} \nonumber \\
+\breve{b}_4 & = & \frac{{\cal M}(b_1,b_3) + 3{\cal M}(b_2,b_2) + {\cal M}(b_3,b_1)}{2b_1 \cdot b_3 + 3 b_2 \cdot b_2} \nonumber \\
+\breve{b}_5 & = & \frac{{\cal M}(b_2,b_3) + {\cal M}(b_3,b_2)}{2b_2 \cdot b_3} \nonumber \\
+\breve{b}_6 & = & \frac{{\cal M}(b_3,b_3)}{b_3 \cdot b_3} \nonumber
+\end{eqnarray}
+and weights:
+\begin{eqnarray}
+w_0 & = & b_0 \cdot b_0 \nonumber \\
+w_1 & = & b_0 \cdot b_1 \nonumber \\
+w_2 & = & \frac{2b_0 \cdot b_2 + 3b_1 \cdot b_1}{5} \nonumber \\
+w_3 & = & \frac{b_0 \cdot b_3 + 9b_1 \cdot b_2}{10} \nonumber \\
+w_4 & = & \frac{2b_3 \cdot b_1 + 3b_2 \cdot b_2}{5} \nonumber \\
+w_5 & = & b_3 \cdot b_2 \nonumber \\
+w_6 & = & b_3 \cdot b_3 \nonumber
+\end{eqnarray}
+Notice that ${\cal M}$ is the bilinear map of (\ref{eq:calM}).
+\end{theorem}
+\prf See the appendix.
+\QED
+
+\clearpage
+
+\subsection{Appendix: proof of Euler map's image of a Bezier curve}
+\label{sec:appendix}
+
+\subsubsection{Bezier derivatives}
+
+If $b(t)$ is a rational Bezier curve of degree $n$ 
+with control points $\{b_i\}_{i=0}^n$ and 
+weights $\{w_i\}_{i=0}^n$ defined over $t \in [0,1]$, then 
+\begin{eqnarray}
+\label{eqn:firstderiv}
+b'(0) & = & n \frac{w_1}{w_0} (b_1 - b_0) \\
+\label{eqn:secondderiv}
+b''(0) & = & \frac{n-1}{n} \frac{w_0 w_2}{w_1^2} 
+             \frac{\triangle b_0 \times \triangle b_1}{\| \triangle b_0\|^3}
+\end{eqnarray}
+where $\triangle b_i = b_{i+1} - b_i$.
+See Farin \cite{farin02} and Hoschek/Lasser \cite{hoschekLasser0?}. 
+% p. 244 of HL has conditions for curvature continuity
+Notice the relationship of second derivative to curvature $\kappa$:
+\[
+    \kappa = \|b''\|
+\]
+if $b$ is arc-length parameterized, and in general,
+\[
+    \kappa = \frac{\| b' \times b'' \|}{\| b' \|^3}
+\]
+$C^2$ continuity guarantees curvature continuity.
+See Farin \cite{farin02} or a differential geometry text.
+% the formula for curvature of a rational Bezier curve is 
+% k = \frac{n-1}{n} \frac{w_0 w_2}{w_1^2} 
+%     \frac{\mbox{dist}(b_0,\lyne{b_1 - b_0}}{\mbox{dist}(b_0,b_1)^2}
+
+The product rule of Bernstein polynomials \cite{farin02} states:
+\[
+B_i^m(t) B_j^n(t) = \frac{\choice{m}{i} \choice{n}{j}}{\choice{m+n}{i+j}} B_{i+j}^{m+n}(t)
+\]
+
+\clearpage
+
+\subsubsection{Proof of Theorem~\ref{thm:imagecurve}}
+
+\prf
+Let $c(t)$ be the cubic Bezier curve.
+Since the image of $c(t)$ is a rational Bezier curve, it is easier 
+to work in projective space.
+In projective space, the map $M$ becomes
+\[
+	 (x_1,x_2,x_3,x_4,x_5) \rightarrow
+	 (x_1^2 + x_2^2 + x_3^2 - x_4^2,\ 
+	 2x_1 x_4,\ 2x_2 x_4,\ 2x_3 x_4,\ 
+	 x_1^2 + x_2^2 + x_3^2 + x_4^2).
+\]
+Let the image curve be expressed in projective space: 
+$M(c(t)) = (m_1(t),m_2(t),m_3(t),m_4(t),m_5(t))$.
+Each coordinate $m_i(t)$ may be simplified using the product rule 
+of Bernstein polynomials \cite{farin02};
+consider $m_5(t)$ as an example.
+\begin{eqnarray}
+m_5(t) & = & [\sum_{i=0}^3 B_i^3(t) b_{i1}]^2 + 
+	\ldots + [\sum_{i=0}^3 B_i^3(t) b_{i4}]^2 \nonumber \\
+     & = &  \sum_{i=0}^3 \sum_{j=0}^3 
+	\frac{\choice{3}{i} \choice{3}{j}}{\choice{6}{i+j}}
+       B^6_{i+j}(t) (b_{i1} b_{j1} + \ldots + b_{i4} b_{j4}) \nonumber
+\end{eqnarray}
+Letting $k=i+j$, 
+\[ m_5(t) = \sum_{k=0}^6 B_k^6(t) 
+	\sum_{\begin{array}{c}  \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}} 
+	\frac{\scriptchoice{3}{i} \scriptchoice{3}{j}}{\scriptchoice{6}{k}}
+	(b_{i1} b_{j1} + \ldots + b_{i4} b_{j4}) \]
+The other coordinates can be computed analogously to yield:
+\[ M(c(t)) = 
+   \sum_{k=0}^6 B_k^6(t)
+	\sum_{\begin{array}{c}  \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}} 
+	\frac{\choice{3}{i} \choice{3}{j}}{\choice{6}{k}}
+	\left( \begin{array}{c}
+            b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} - b_{i4} b_{j4} \\
+            2b_{i1} b_{j4} \\
+            2b_{i2} b_{j4} \\
+            2b_{i3} b_{j4} \\
+            b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} + b_{i4} b_{j4}
+	\end{array} \right) \]
+This is a sextic rational Bezier curve with weights 
+\begin{eqnarray}
+\label{eq:weights}
+w_k & = & \sum_{\begin{array}{c} \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}}
+        \frac{\choice{3}{i} \choice{3}{j}}{\choice{6}{k}}
+	\ (b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} + b_{i4} b_{j4}) \nonumber \\
+& = & \sum_{\begin{array}{c} \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}}
+        \frac{\choice{3}{i} \choice{3}{j}}{\choice{6}{k}}
+	\ b_i \cdot b_j
+\end{eqnarray}
+and control points 
+\begin{eqnarray}
+\label{eq:control-pts}
+\breve{b}_k & = & \frac{1}{w_k} 
+      \sum_{\begin{array}{c} \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}} 
+        \frac{\choice{3}{i} \choice{3}{j}}{\choice{6}{k}}
+	\left( \begin{array}{c}
+            b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} - b_{i4} b_{j4} \\
+            2b_{i1} b_{j4} \\
+            2b_{i2} b_{j4} \\
+            2b_{i3} b_{j4} 
+	\end{array} \right) \nonumber \\
+& = & \frac{1}{w_k} 
+      \sum_{\begin{array}{c} \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}} 
+        \frac{\choice{3}{i} \choice{3}{j}}{\choice{6}{k}}
+{\cal M}(b_i, b_j)
+\end{eqnarray}
+for $k = 0, \ldots, 6$.
+
+By evaluating (\ref{eq:weights}), $w_0$ through $w_3$ can be simplified to
+\begin{eqnarray}
+(w_0,w_1,w_2,w_3) & = & 
+% (b_0 \cdot b_0, 
+% \frac{3b_0 \cdot b_1 + 3b_1 \cdot b_0}{6}, 
+% \frac{3b_0 \cdot b_2 + 9b_1 \cdot b_1 + 3b_2 \cdot b_0}{15}, 
+% \frac{b_0 \cdot b_3 + 9b_1 \cdot b_2 + 9b_2 \cdot b_1 + b3 \cdot b_0}{20}) \nonumber \\
+% & = &
+(b_0 \cdot b_0, b_0 \cdot b_1, \frac{2b_0 \cdot b_2 + 3b_1 \cdot b_1}{5}, 
+\frac{b_0 \cdot b_3 + 9b_1 \cdot b_2}{10}) \nonumber 
+\end{eqnarray}
+
+Similarly, by evaluating (\ref{eq:control-pts}), $\breve{b}_0$ through $\breve{b}_3$ 
+can be simplified to 
+\begin{eqnarray}
+\breve{b}_0 & = & % \frac{{\cal M}(b_0,b_0)}{w_0} =
+                    \frac{{\cal M}(b_0,b_0)}{b_0 \cdot b_0} \nonumber \\
+\breve{b}_1 & = & % \frac{{\cal M}(b_0,b_1) + {\cal M}(b_1,b_0)}{2w_1} =
+                    \frac{{\cal M}(b_0,b_1) + {\cal M}(b_1,b_0)}{2b_0\cdot b_1} \nonumber \\
+\breve{b}_2 & = & % \frac{{\cal M}(b_0,b_2) + 3{\cal M}(b_1,b_1) + {\cal M}(b_2,b_0)}{5w_2} = 
+                    \frac{{\cal M}(b_0,b_2) + 3{\cal M}(b_1,b_1) + {\cal M}(b_2,b_0)}
+	                 {2b_0 \cdot b_2 + 3b_1 \cdot b_1} \nonumber \\
+\breve{b}_3 & = & % \frac{{\cal M}(b_0,b_3) + 9{\cal M}(b_1,b_2) + 9{\cal M}(b_2,b_1) + {\cal M}(b_3,b_0)}{20w_3} =
+                    \frac{{\cal M}(b_0,b_3) + 9{\cal M}(b_1,b_2) + 9{\cal M}(b_2,b_1) + {\cal M}(b_3,b_0)}{2b_0 \cdot b_3 + 18b_1 \cdot b_2} \nonumber
+\end{eqnarray}
+
+$\breve{b}_4$ through $\breve{b}_6$ and $w_4$ through $w_6$ can then be determined 
+through the symmetry of Bezier curves: 
+since the geometry of the cubic Bezier curve does not change 
+under reversal of the control points, neither does the algebra of its image.
+The leverage of symmetry also generates more efficient formulae.\footnote{For example,
+  $w_6$ and $\breve{b}_6$ are both expressed originally as sums of 7 terms.
+  Using symmetry, they are now expressed by one term.}
+\begin{eqnarray}
+w_4 & = & \frac{2b_3 \cdot b_1 + 3b_2 \cdot b_2}{5} \nonumber \\
+w_5 & = & b_3 \cdot b_2 \nonumber \\
+w_6 & = & b_3 \cdot b_3 \nonumber \\
+\breve{b}_4 & = & \frac{{\cal M}(b_3,b_1) + 3{\cal M}(b_2,b_2) + {\cal M}(b_1,b_3)}
+	                 {2b_3 \cdot b_1 + 3b_2 \cdot b_2} \nonumber \\
+\breve{b}_5 & = & \frac{{\cal M}(b_3,b_2) + {\cal M}(b_2,b_3)}{2b_3\cdot b_2} \nonumber \\
+\breve{b}_6 & = & \frac{{\cal M}(b_3,b_3)}{b_3 \cdot b_3} \nonumber
+\end{eqnarray}
+\QED
+
+\clearpage
+
+\section{Poles}
+
+The special behaviour of $M^{-1}$ at the pole $(1,0,0,0)$
+is not unusual with maps from the sphere.
+Consider the classical problem in cartography: how to portray the earth
+on a 2-dimensional page.
+A conformal map from $S^3$ to $\Re^2$ is desired.
+Also consider the latitude/longitude parameterization of the sphere, with its two poles.
+A parameterization is a map between the surface and $\Re^2$.
+
+\clearpage
+
+\subsection{Postamble to rational maps to the sphere}
+
+The inverse image $M^{-1}(P)$ is a line or plane.
+By perturbing the data away from the pole (Section~\ref{sec:perturb}), 
+we may assume that $P \neq (1,0,0,0)$ and $M^{-1}(P)$ is a line.
+Therefore, the interpolation of $\{M^{-1}(P_i)\}$ is the design of a curve through a
+collection of lines.
+Rather than directly attacking this non-traditional problem (see the future problems in
+Section~\ref{sec:future}), we will reduce it to a traditional point
+interpolation problem by choosing a point on each line.
+Which point should be chosen on each line?
+One solution is to always choose $M^{-1}(P)$ on $S^3$.
+This solution (seems to?) promote short curves, a good thing, 
+and avoids collapse into the origin, a bad thing.
+Note that this is a well-defined choice, since $M^{-1}(P)$ is a line through the origin.
+Another advantage of this choice is that it yields a simple inverse.
+
+\clearpage
+
+\section{Mapping derivatives (outside Rational maps to the sphere)}
+
+$C^i$ continuity of the quaternion spline demands an understanding of derivatives.
+The mapping of derivatives may be analyzed at the map level 
+(rather than at the Bezier control polygon level, which is too complex and low-level).
+We need to understand how first and ith derivatives of a curve on S3 map under 
+the spherical maps (Euler and stereographic projection).
+This may appear backward, since we do not yet know the curve on \Sn{3}.
+However, we are alright since we do know the data point $C(0)$ at the beginning
+of the curve, and its derivatives there.
+
+If we interpret the maps away from the sphere as applied to a parameterized point
+$(x_1(t),x_2(t),x_3(t),x_4(t))$, we can evaluate this map's derivative with respect
+to the point's parameter.
+
+For purposes of tangent continuity, 
+we need to look at the first derivative of both curves.
+
+\subsection{Mapping derivatives to Euclidean space, too}
+\label{sec:derivative}
+
+[From 3-spline/paper/old/splinePreChanges.tex]
+
+As hinted in Section~\ref{sec:eucdesign}, 
+we would like to design curves that interpolate not only point data,
+but derivative data as well.
+Beyond the direct application to situations where derivative information
+is known (e.g., pick up the ball on the table at this position while
+moving tangent to the table), 
+derivative interpolation also allows us to design several curves 
+independently yet guarantee that they join smoothly.
+The key element in derivative interpolation is the mapping of derivatives
+to Euclidean space.
+The subsequent design of a rational curve in Euclidean space
+interpolating the derivatives as well as the points
+is well understood: using either Hermite curves or, if the only derivatives
+are end tangents, using the same classical cubic B-spline interpolation that
+we have used for points.
+In this section, we show how tangents on the surface can be mapped
+to tangents in Euclidean space.
+
+Let $C$ be the curve in Euclidean space and $M(C)$ the curve on the surface.
+We assume, without loss of generality, that the polynomial curve $C$
+and the rational curve $M(C)$ are both represented as Bezier curves.
+We shall only present the interpolation of end tangents,
+since this is the most common case, and intermediate tangents can be
+reduced to this case by subdivision.
+Suppose that $M(C)$ must be designed to interpolate the points 
+$\{p_i\}_{i=1,\ldots,n}$ and the tangent $T$ at $p_1$.
+(Interpolation of a tangent at $p_n$ is analogous.)
+We begin with a sketch of the method.
+Since the beginning tangent of a Bezier curve is defined by its first 
+two control points, the constraint on the beginning tangent of $M(C)$ can be
+translated into a constraint on the first two control points of $M(C)$.
+This constraint can then be translated back into a constraint
+on the first two control points of $C$, using Theorem~\ref{sextic}'s
+relationship between the control points of $C$ 
+and the control points and weights of $M(C)$.
+Moreover, the first control point of $C$ is already known:
+it is the image of the first data point, $M^{-1}(p_1) \cap \Sn{3}$,
+since Bezier curves are endpoint-interpolating.
+Therefore, the tangent constraint on \Sn{3}\ can be translated
+into a constraint on the second control point in Euclidean space.
+We now proceed with the details.
+% The following theorem provides the details of how to build the tangent
+% in Euclidean space (technically, the second control point) that
+% will correspond to the tangent $T$ in Riemannian space.
+
+Let $b_0 = (b_{01}, b_{02}, b_{03}, b_{04})$ and 
+$b_1 = (b_{11}, b_{12}, b_{13}, b_{14})$ be 
+the first two control points of $C$,
+$c_0$ and $c_1$ the first two control points of $M(C)$,
+and $w_0$ and $w_1$ the weights of the first two control points of $M(C)$.
+The desired tangent is $T$ on the global curve on \Sn{3},
+but $\delta_i T$ on the local Bezier curve component of knot length $\delta_i$
+of the subcurve on \Sn{3}.
+% local tangent = (knot interval \delta) * global tangent (see p. 105, Farin, 3rd)
+We are trying to solve for $b_1$ in Euclidean space.
+By the theory of rational Bezier curves \cite{farin97},
+\[
+	\delta_i T = 6 \frac{w_1}{w_0} (c_1 - c_0)
+\]
+Applying Theorem~\ref{sextic}, 
+\[
+	\delta_i T = 6 \frac{w_1}{w_0} \frac{1}{w_1} \frac{3}{6}
+	\left(
+	\begin{array}{c}
+	2(b_{01}b_{11} + b_{02}b_{12} + b_{03}b_{13} - b_{04}b_{14})\\
+	2(b_{01}b_{14} + b_{11}b_{04})\\
+	2(b_{02}b_{14} + b_{12}b_{04})\\
+	2(b_{03}b_{14} + b_{13}b_{04})
+	\end{array} \right)
+	- 6 \frac{w_1}{w_0} \frac{1}{w_0}
+	\left(
+	\begin{array}{c}
+	b_{01}^2 + b_{02}^2 + b_{03}^2 - b_{04}^2\\
+	2b_{01}b_{04}\\
+	2b_{02}b_{04}\\
+	2b_{03}b_{04}
+	\end{array} \right).
+\]
+We claim that $b_0$ and $w_0$ are known.
+$b_0 = M^{-1}(p_1) \cap \Sn{3}$, since the first Bezier control point agrees
+with the first point of the curve.
+Using (\ref{eq:weights}) of Theorem~\ref{sextic},
+$w_0 = b_{01}^2 + b_{02}^2 + b_{03}^2 + b_{04}^2$ 
+(so $w_0=1$ since $b_0 \in \Sn{3}$)
+and
+\[
+  w_1 = b_{01}b_{11} + b_{02}b_{12} + b_{03}b_{13} + b_{04}b_{14}
+\]
+This simplifies the relationship between the tangent $T$ and $b_1$:
+\[
+	\delta_i T = 6 \left( \begin{array}{c}
+	(b_{01}b_{11} + b_{02}b_{12} + b_{03}b_{13} - b_{04}b_{14})
+	- \hat{b} 
+	  (b_{01}b_{11} + b_{02}b_{12} + b_{03}b_{13} + b_{04}b_{14}) \\
+	(b_{01}b_{14} + b_{11}b_{04})
+	- 2b_{01}b_{04} 
+	  (b_{01}b_{11} + b_{02}b_{12} + b_{03}b_{13} + b_{04}b_{14}) \\
+	(b_{02}b_{14} + b_{12}b_{04})
+	- 2b_{02}b_{04}
+	  (b_{01}b_{11} + b_{02}b_{12} + b_{03}b_{13} + b_{04}b_{14}) \\
+	(b_{03}b_{14} + b_{13}b_{04})
+	- 2b_{03}b_{04}
+	  (b_{01}b_{11} + b_{02}b_{12} + b_{03}b_{13} + b_{04}b_{14}) \\
+	\end{array} \right)
+\]
+where $\hat{b} = b_{01}^2 + b_{02}^2 + b_{03}^2 - b_{04}^2$.
+Finally, this can be expressed as a linear system:
+\[
+6 \left( \begin{array}{cccc}
+b_{01}(1-\hat{b}) & b_{02}(1-\hat{b}) & b_{03}(1-\hat{b}) & b_{04}(-1-\hat{b}) \\
+b_{04}(1-2b_{01}^2) & -2b_{01}b_{02}b_{04} & -2b_{01}b_{03}b_{04} & b_{01}(1-2b_{04}^2) \\
+-2b_{01}b_{02}b_{04} & b_{04} (1-2b_{02}^2) & -2b_{02}b_{03}b_{04} & b_{02}(1-2b_{04}^2) \\
+-2b_{01}b_{03}b_{04} & -2b_{02}b_{03}b_{04} & b_{04}(1-2b_{03}^2) & b_{03}(1-2b_{04}^2)
+\end{array} \right)
+\left( \begin{array}{c} b_{11} \\ b_{12} \\ b_{13} \\ b_{14} \end{array} \right)
+= \delta_i T.
+\]
+%
+Notice that all components of the matrix are known.
+This system can be solved for the second control point $b_1 = (b_{11},b_{12},b_{13},b_{14})$
+using traditional methods for the solution of systems of linear
+equations.
+We use LU-decomposition with partial pivoting \cite{golubvanloan89}.
+The following theorem formalizes this result.
+
+\begin{theorem}
+Let $C$ be a cubic Bezier curve in Euclidean space 
+on the knot interval of length $\delta_i$,
+whose first control
+point is $b_0 = (b_{01}, b_{02}, b_{03}, b_{04})$.
+If the second control point of $C$ is the solution $x$ to the linear system
+\[
+6 \left( \begin{array}{cccc}
+b_{01}(1-\hat{b}) & b_{02}(1-\hat{b}) & b_{03}(1-\hat{b}) & b_{04}(-1-\hat{b}) \\
+b_{04}(1-2b_{01}^2) & -2b_{01}b_{02}b_{04} & -2b_{01}b_{03}b_{04} & b_{01}(1-2b_{04}^2) \\
+-2b_{01}b_{02}b_{04} & b_{04} (1-2b_{02}^2) & -2b_{02}b_{03}b_{04} & b_{02}(1-2b_{04}^2) \\
+-2b_{01}b_{03}b_{04} & -2b_{02}b_{03}b_{04} & b_{04}(1-2b_{03}^2) & b_{03}(1-2b_{04}^2)
+\end{array} \right)
+x
+= \delta_i T
+\]
+where $\hat{b} = b_{01}^2 + b_{02}^2 + b_{03}^2 - b_{04}^2$,
+then the image $M(C)$ on \Sn{3}\ has the beginning tangent $\delta_i T$.
+\end{theorem}
+% NOTE: incorporate knot lengths into the computation of the
+% desired tangent vector $T$ when using in code, since
+% code will involve splines rather than individual Bezier curves.
+
+% \begin{rmk}
+% Comment on why we cannot use derivative of $M_I$ to map the
+% tangent to Euclidean space.
+% Basically, $C(t) \neq M_I(M(C(t))$, see comment after commented-out lemma below.
+% Give example of difference between tangent computed this way
+% and tangent computed our correct way.
+% \end{rmk}
+
+[This lemma is necessary, even though we know the tangent $T$ of the curve
+in Euclidean space for the previous subcurve, because $T$ is a tangent of
+the curve in Euclidean space associated with a {\em rotated} version
+of the previous subcurve on \Sn{3}, and we need the tangent associated
+with a {\em different} rotated version of the present subcurve.
+Unfortunately, $M^{-1}$ is not affinely invariant 
+(tangent ($M^{-1}$(rotation of C(t))) is not the rotation of 
+tangent($M^{-1}$(C(t))).]
+
+\Comment{
+\begin{lemma}
+\label{lem:invtang}
+Consider the design of a curve on \Sn{3}\ interpolating the data points 
+$\{p_i\}_{i=1,\ldots,n}$ using step (2A).
+Assume that none of the data points lies near the pole.
+If we want the curve on \Sn{3}\ to have the first derivative 
+$(T_1,T_2,T_3,T_4)$ at the data point $p_i = (P_1,P_2,P_3,P_4)$, 
+the curve in Euclidean space should 
+be designed with the tangent 
+\[
+ \frac{1}{(2-2P_1)^{3/2}} (T_2 (2-2P_1) + P_2 T_1,\ \ 
+ 	   		 T_3 (2-2P_1) + P_3 T_1,\ \ 
+			 T_4 (2-2P_1) + P_4 T_1,\ \ 
+			 T_1 (2-2P_1) + (1-P_1) T_1)
+\]
+at the point ${\cal M}^I(p_i)$.
+\end{lemma}
+\prf
+Let $D(t) = \{(x_1(t), x_2(t), x_3(t), x_4(t)): t \in I\}$ 
+be any curve on \Sn{3} with $D(t_0) = p_i$ and
+$D'(t_0) = (T_1,T_2,T_3,T_4)$ for some $t_0 \in I$.
+Let $E(t) = \{{\cal M}^I(D(t)): t \in I\}$ be the image of $D(t)$
+under ${\cal M}^I$.
+\[
+	E(t) = \frac{(x_2(t),x_3(t),x_4(t),1-x_1(t))}{\sqrt{2-2x_1(t)}}.
+\]
+If we let $y(t) = \sqrt{2-2x_1(t)}$,
+$E(t) = (\frac{x_2}{y}, \frac{x_3}{y}, \frac{x_4}{y}, \frac{1-x_1}{y})$.
+(Every variable implicitly depends on the parameter $t$, but we shall now omit this dependence
+for clarity.)
+By straightforward differentiation,
+\[
+ E'(t) = (\frac{x'_2 y - x_2 y'}{y^2}, 
+	  \frac{x'_3 y - x_3 y'}{y^2}, 
+	  \frac{x'_4 y - x_4 y'}{y^2}, 
+	  \frac{-x'_1 y - (1-x_1) y'}{y^2}).
+\]
+To compute $y'$, notice that $y^2 = 2-2x_1$ and, differentiating,
+$2yy' = -2x'_1$.
+Thus, $y' = \frac{-x'_1}{y}$.
+We can now express
+\[
+ E'(t) = (\frac{x'_2 y^2 + x_2 x'_1}{y^3},
+ 	  \frac{x'_3 y^2 + x_3 x'_1}{y^3},
+ 	  \frac{x'_4 y^2 + x_4 x'_1}{y^3},
+ 	  \frac{x'_1 y^2 + (1-x_1) x'_1}{y^3}).
+\]
+Since $p_i$ is far from the pole, $y(t) \neq 0$ in a neighbourhood of $t_0$.
+Thus,
+\[
+ E'(t_0)= (\frac{T_2 (2-2P_1) + P_2 T_1}{(2-2P_1)^{3/2}},
+ 	   \frac{T_3 (2-2P_1) + P_3 T_1}{(2-2P_1)^{3/2}},
+ 	   \frac{T_4 (2-2P_1) + P_4 T_1}{(2-2P_1)^{3/2}},
+	   \frac{T_1 (2-2P_1) + (1-P_1) T_1}{(2-2P_1)^{3/2}}).
+\]
+A curve designed with tangent $E'(t_0)$ in Euclidean space
+will map to a curve with tangent $(T_1,T_2,T_3,T_4)$ on \Sn{3}.
+\QED
+
+Notice that the curve $E(t)$ of the proof is not equivalent to 
+the curve $C(t)$ that will be designed in Euclidean space.
+In particular, $E(t)$ lies on \Sn{3} since ${\cal M}^I$ maps to \Sn{3},
+whereas $C(t)$ is not constrained to \Sn{3}, so it will only
+lie on \Sn{3}\ at the data points $\{ {\cal M}^I(p_i) \}_{i=1,\ldots,n}$, 
+in general.
+However, the tangent behaviour of $C(t)$ and $E(t)$ at the inverse data points 
+$\{ {\cal M}^I(p_i)\}_{i=1,\ldots,n}$ {\bf is} the same.
+APPARENTLY NOT!
+}
+
+\subsubsection{}
+
+[From 3-spline/oldpaper/S3paper.tex]
+
+The technique below does not work, since $M^{-1}(M(C(t))) \neq C(t)$, 
+since $M^{-1}$ is not 1-1.
+We instead need to understand how the tangent line maps under $M^{-1}$,
+where $M^{-1}$ is defined over all of 3-space, not just S3.
+This will probably generate a ruled surface (each point maps to a line).
+It is not clear how to extract a tangent from this ruled surface.
+
+\title{On the relationship between Euler's 4-squares theorem, 
+	stereographic projection, and rational curves on $S^3$}
+
+We want the facility to set the end tangents of curves on the 3-sphere,
+so that curves can be smoothly spliced together.
+This allows a divide-and-conquer approach to curve fitting.
+
+\begin{lemma}
+Let $P=C(\hat{t})=(p1,p2,p3,p4)$ be a point of the S3-curve $C(t)$ 
+with tangent $C'(\hat{t}) = (t1,t2,t3,t4)$.
+Under the map $M^{-1}$, tangents are mapped as:
+	$C'(t)  \rightarrow (M^{-1}(C(t)))'$ \\
+	$(x_1,x_2,x_3,x_4) + s(x'_1,x'_2,x'_3,x'_4) \mapsto 
+	 M^{-1}(x_1,x_2,x_3,x_4) 
+      + s(\frac{x'_2 \alpha - x_2 \alpha'}{\alpha^2},
+	  \frac{x'_3 \alpha - x_3 \alpha'}{\alpha^2},
+	  \frac{x'_4 \alpha - x_4 \alpha'}{\alpha^2},
+	  \frac{-x'_1 \alpha - (1-x_1)\alpha'}{\alpha^2})$
+where $\alpha = \sqrt{2 - 2x_1}, \alpha' = -\frac{x'_1}{\alpha}$.
+\end{lemma}
+\prf
+Simple differentiation of $M^{-1}(C(t))$.
+\QED
+
+Thus, if we want a spherical curve to have a prescribed end tangent,
+we can set the desired endtangent of the endpoint in image space
+using this lemma and fit the image curve to this tangent.
+
+see page FOO1
+
+If we are setting the tangent on the spherical curve independently, 
+notice that the tangent vector $C'(t_0)$ must be orthogonal to the vector $C(t_0)$
+since the tangent at any point of $C(t)$ must lie in the sphere's tangent plane
+at this point.)
+
+
+\clearpage
+
+\subsubsection{Mapping the tangent restriction from $S^3$ to the space curve:
+         difficulties with the Euler map}
+
+By combining the formula for the second control point $\breve{b}_1$ of the 
+quaternion curve from Theorem~\ref{thm:imagecurve} 
+with the tangent formula (\ref{eqn:firstderiv}) for a rational
+Bezier curve, $\breve{b}_1$ can be eliminated and a linear system set up.
+This system relates the known first control points $b_0$ and $\breve{b}_0$
+of the space and quaternion curves with the unknown second control point $b_1$,
+and is exactly what is necessary to control the tangent in 4-space so that its image
+is the desired tangent $T_0$.
+Consider the formula:
+\begin{equation}
+\label{eq:b1}
+\breve{b}_1 = \frac{{\cal M}(b_0,b_1) + {\cal M}(b_1,b_0)}{2b_0 \cdot b_1}
+\end{equation}
+    % We can use this formula to solve for $b_1$, as follows.
+    % First observe that 
+and the formula for the opening tangent of a rational Bezier curve: 
+\[
+T_0 = 6 \frac{w_1}{w_0}(\breve{b}_1 - \breve{b}_0)
+            = 6\frac{b_0 \cdot b_1}{b_0 \cdot b_0} (\breve{b}_1 - \breve{b}_0)
+\]
+Rearranging, we have:
+\begin{equation}
+\label{eq:b1-2}
+        \breve{b}_1 = \frac{b_0 \cdot b_0}{6b_0 \cdot b_1} T_0 + \breve{b}_0
+\end{equation}
+Equating (\ref{eq:b1}) and (\ref{eq:b1-2}),
+\[
+\frac{{\cal M}(b_0,b_1) + {\cal M}(b_1,b_0)}{2b_0 \cdot b_1} = 
+\frac{b_0 \cdot b_0}{6b_0 \cdot b_1} T_0 + \breve{b}_0
+\]
+Multiplying by $b_0 \cdot b_1$ and setting $\alpha := \frac{b_0 \cdot b_0}{6}$:
+\begin{equation}
+\frac{{\cal M}(b_0,b_1) + {\cal M}(b_1,b_0)}{2} - (b_0 \cdot b_1) \breve{b}_0 =
+\alpha T_0
+\end{equation}
+This encodes a linear system of equations:
+\begin{eqnarray}
+b_{01}b_{11} + b_{02}b_{12} + b_{03}b_{13} - b_{04}b_{14} -
+(b_{01}b_{11} + b_{02}b_{12} + b_{03}b_{13} + b_{04}b_{14}) \breve{b}_{01}
+& = & \alpha T_{01} \nonumber \\
+b_{01}b_{14} + b_{11}b_{04} - 
+(b_{01}b_{11} + b_{02}b_{12} + b_{03}b_{13} + b_{04}b_{14}) \breve{b}_{02}
+& = & \alpha T_{02} \nonumber \\
+b_{02}b_{14} + b_{12}b_{04} - 
+(b_{01}b_{11} + b_{02}b_{12} + b_{03}b_{13} + b_{04}b_{14}) \breve{b}_{03}
+& = & \alpha T_{03} \nonumber \\
+b_{03}b_{14} + b_{13}b_{04} - 
+(b_{01}b_{11} + b_{02}b_{12} + b_{03}b_{13} + b_{04}b_{14}) \breve{b}_{04}
+& = & \alpha T_{04} \nonumber
+\end{eqnarray}
+or, solving for $b_1$, the second control point of the space curve:
+\begin{equation}
+\label{eq:linearsystem}
+\left(
+\begin{array}{cccc}
+b_{01} (1-\breve{b}_{01})     & b_{02} (1-\breve{b}_{01}) & b_{03} (1-\breve{b}_{01}) & b_{04} (-1-\breve{b}_{01}) \\
+b_{04} - b_{01}\breve{b}_{02} & -b_{02}\breve{b}_{02}     & -b_{03}\breve{b}_{02}     & b_{01} - b_{04}\breve{b}_{02} \\
+-b_{01}\breve{b}_{03}         & b_{04} -b_{02}\breve{b}_{03} & -b_{03}\breve{b}_{03}  & b_{02} - b_{04}\breve{b}_{03} \\
+-b_{01}\breve{b}_{04}         & -b_{02}\breve{b}_{04}     & b_{04}-b_{03}\breve{b}_{04} & b_{03} - b_{04}\breve{b}_{04}
+\end{array}
+\right)
+\left(
+\begin{array}{c}
+b_{11} \\
+b_{12} \\
+b_{13} \\
+b_{14}
+\end{array}
+\right)
+= 
+\frac{b_0 \cdot b_0}{6}
+\left(
+\begin{array}{c}
+T_{01} \\
+T_{02} \\
+T_{03} \\
+T_{04}
+\end{array}
+\right)
+\end{equation}
+Note that $b_0$ and $\breve{b}_0$ are known by the endpoint interpolation property:
+$\breve{b}_0 = P_0$ and
+\begin{equation}
+b_0 = M^{-1}(P_0) = M^{-1}(b_0) 
+     = \frac{1}{\sqrt{2-2\breve{b}_{01}}}(\breve{b}_{02},\breve{b}_{03},\breve{b}_{04},1-\breve{b}_{01})
+\end{equation}
+Substituting for $b_0$ yields:
+\[
+A = \frac{1}{\alpha_2}
+\left(
+\begin{array}{rrrr}
+\breve{b}_{02} - \breve{b}_{02}\breve{b}_{01} & \breve{b}_{03} -\breve{b}_{03}\breve{b}_{01} & \breve{b}_{04} - \breve{b}_{04}\breve{b}_{01} & \breve{b}_{01}^2 - 1 \\
+1 - \breve{b}_{01} - \breve{b}_{02}^2 & -\breve{b}_{03}\breve{b}_{02}     & -\breve{b}_{04}\breve{b}_{02}     & \breve{b}_{01}\breve{b}_{02} \\
+-\breve{b}_{02}\breve{b}_{03} & 1-\breve{b}_{01} - \breve{b}_{03}^2 & -\breve{b}_{04}\breve{b}_{03}  & \breve{b}_{01}\breve{b}_{03} \\
+-\breve{b}_{02}\breve{b}_{04}         & -\breve{b}_{03}\breve{b}_{04}     & 1-\breve{b}_{01} - \breve{b}_{04}^2 & \breve{b}_{01}\breve{b}_{04}
+\end{array}
+\right)
+\]
+where $\alpha_2 := \sqrt{2-2\breve{b}_{01}} \neq 0$,
+so that the linear system is:
+\[
+Ab_1 = \alpha T_0
+\]
+Unfortunately, this matrix is singular:
+det(A) = $\frac{1}{\alpha_2}(\breve{b}_{01} - 1)^3 
+(\breve{b}_{01}^2 + \breve{b}_{02}^2 + \breve{b}_{03}^2 + \breve{b}_{04}^2 - 1) = 0$,
+since $\breve{b}_0 \in S^3$.
+START HERE.
+THIS UNSOLVABLE LINEAR SYSTEM IS THE CRUX OF THE PROBLEM.
+STEREOGRAPHIC PROJECTION MAY YIELD A SOLVABLE SOLUTION.
+This system may be solved for $b_1$ if the matrix A is nonsingular
+(and we must also take care that $b_0 \cdot b_1 \neq 0$ due to the above manipulation).
+We may assume that $\breve{b}_0 \neq (1,0,0,0)$, because of our later perturbation
+of the data points away from the pole.
+Consequently, we may also assume that $b_0$ does not lie in the hyperplane $x_4=0$
+(Lemma~\ref{lem:inverse}).
+START HERE
+Consider the determinant of A:
+\[
+\]
+In the design of the space curve in 4-space,
+$b_1$ is a free parameter.
+By setting it to the solution of (\ref{eq:linearsystem}),
+the image curve on $S^3$ will have the desired end tangent $T_0$.
+
+Is this matrix nonsingular?
+
+The same approach may be used to constrain the closing tangent of the $S^3$ curve.
+Rather than using the formulae (\ref{eq:control-pts}), 
+which defines the penultimate control point $b_{5}$ in terms of 
+all of the control points $\{b_i\}$,
+we leverage the symmetry of Bezier curves.
+If $C(t)$ is a degree $n$ Bezier curve with control points $\{c_i\}$ and 
+another degree $n$ Bezier curve $D(t)$ is defined by the control points $d_i = c_{n-i}$,
+then $D(t) = C(1-t)$: the two curves have the same shape, only the time parameter 
+is reversed.
+Using this symmetry, an end tangent constraint $T_1$ on the quaternion spline
+can be translated to a constraint on the penultimate control point $b_{2}$ 
+of the space curve, using the above approach.
+
+To recap, the following algorithm designs a Hermite quaternion spline:
+---
+
+The quaternion interpolation problem is translated into a Hermite quaternion spline
+as follows.
+We allow the end tangents to be specified.  If they are not given, 
+we can fill them in ourselves.
+If a closed quaternion spline is desired, only one end tangent is specified, of course.
+(Split quaternions into subsets; perturb first subset using BFP approach;
+interpolate first subset, using first prescribed tangent as opening tangent;
+perturb ith subset using BFP approach;
+interpolate ith subset, using endtangent of previous curve as opening tangent;
+...
+perturb last subset using BFP approach;
+interpolate last subset, using endtangent of previous curve as opening tangent
+and prescribed end tangent of entire curve as closing tangent.)
+---
+
+WHAT ABOUT $C^2$ CONTINUITY BETWEEN SEGMENTS?
+
+Consider the ramp up to $C^2$ continuity.
+$C^1$-continuity required the use of formulae for $\breve{b}_1$, $w_1$ and the first derivative 
+of a rational Bezier curve.
+$C^2$-continuity requires the use of formulae for $\breve{b}_2$, $w_2$ and the second derivative 
+of a rational Bezier curve.
+WE NEED TO FIND THE FORMULA FOR 2nd DERIVATIVE OF RATIONAL BEZIER CURVE AT ENDPOINT.
+
+%  This can be used to solved for $B_1$, if it were not for $w_1$.
+%  We cannot predict the weight $w_1$, since this circularly involves 
+%  knowledge of $b_1$ that we are trying to find.
+%  Therefore, we cannot use this formula to set the position of $B_1$ to exactly match $T_0$.
+% However, any $B_1$ that satisfies $T_0 = k(B_1 - B_0)$ will match the tangent direction.
+% If the $S^3$ curve were polynomial, we would have $T_0 = 6(B_1-B_0)$,
+% so it is natural to set 
+%                           $B_1 = B_0 + \frac{T_0}{6}$:
+% this will nicely match $T_0$ in length as well as direction whenever the weights of the
+% quaternion spline are relatively equal, which is commonly the case 
+% (SHOW EXPERIMENTAL EVIDENCE).
+
+\clearpage
+
+\section{Rotating away from the pole}
+
+\subsection{Perturbing, isn't it?}
+
+Perturbing a pointset away from the pole.
+Want to map away from the pole because both spherical maps are undefined at a pole
+((1,0,0,0) for inverse Euler map, (0,0,0,1) for stereographic projection)
+and sensitive in its environment (say within d degrees).
+The best-fitting plane (BFP) approach is to find the best-fitting plane of the quaternion
+pointset and rotate the pole to the unit normal of this plane.
+This approach is not valid if there are outliers, since they may be mapped directly
+to the pole.
+However, the BFP approach is robust for local point sets (point sets 
+that do not span 90-d degrees).
+Therefore, by splitting a pointset into local pointsets, we can apply the BFP approach.
+This requires the ability to build a smooth quaternion spline segment by segment, which
+requires the ability to interpolate derivative information at boundaries.
+
+Subset must be small enough to guarantee perturbation by BFP is valid;
+In particular, a subset must not span more than about 60 degrees, which guarantees
+30 degree clearance from the pole.
+Notice that every orientation has 2 reps on $S^3$, so a 90 degree shift on $S^3$
+is equivalent to a 180 degree change of orientation, and rotations in 3-space are halved
+as they map to $S^3$: WE NEED TO DETERMINE THE CONVERSION CONSTANT BETWEEN THE METRICS.
+
+------------
+
+{\bf PAPER: rational sphere parameterizations inherently have poles} (reference?);
+this may be connected to the presence of poles in 
+both the rational Euler map and SP; also the presence of poles in Euler angles,
+as evidenced by translation to rotation matrix, and gimbal lock.
+
+Move this writeup to a new file 'Rational quaternion splines with Hermite control'.
+% Hermite interpolation and more elegant affine invariance
+
+\subsection{Divide and conquer: perturbing one subset at a time}
+
+We could gather points while their angular distance from the first point is less
+than k (in our case, 60) degrees.
+This would make for larger pointsets in most cases.
+(It would be nice to find a natural pointset of quaternions, perhaps from keyframes
+of a real animation or from motion capture libraries, in order to determine a
+natural spread of a quaternion dataset.)
+NEED A NONTRIVIAL DATASET.
+
+\subsection{Affine invariance?}
+\label{sec:normalform}
+
+We need to normalize at the beginning so that all rotated variants of the same dataset
+begin at the same place.
+(The creation of quaternion spline is not itself invariant under rotation of the
+quaternions.)
+This can be accomplished by imposing a normal form on quaternion datasets
+before building quaternion splines.
+In particular, rotate the first quaternion to point X, the second quaternion to plane Y,
+and the third quaternion to hyperplane Z.
+
+{\bf PAPER: normalizing datasets before applying maps that are not affine invariant.}
+
+\clearpage
+
+\subsection{Rotation in higher dimensions}
+
+START HERE.
+THIS SHOULD BE A SEPARATE TECHNICAL REPORT TOO (OR ACM SOUTHEAST PAPER).
+A REVIEW OF ROTATION: SO(3), SO(n), Givens, Jacobi, cross product, generalized cross product, determinants
+
+\subsubsection{Generalizations of the cross product}
+
+The cross product of two 3-vectors is a 3-vector orthogonal to both.
+We want a cross product of n-1 n-vectors that generates an n-vector
+orthogonal to all.
+This is a necessary tool for the construction of certain rotation matrices.
+Although the cross product of 3-vectors A = (a1,a2,a3) and B = (b1,b2,b3) 
+may be defined as (a2b3-a3b2, a3b1-a1b3, a1b2-a2b1), it is more fruitful for the 
+purposes of generalization to define it in terms of a determinant:
+\[
+A \times B = 
+\left|
+\begin{array}{ccc}
+e1 & e2 & e3 \\
+a1 & a2 & a3 \\
+b1 & b2 & b3
+\end{array}
+\right|
+\]
+This leads immediately to a generalized cross product of $n-1$ n-vectors
+\[
+cross (A1,\ldots,A_{n-1}) = 
+\left|
+\begin{array}{ccc}
+e_1 & \ldots & e_n \\
+a_{1,1} & \ldots & a_{1,n} \\
+\vdots \\
+a_{n-1,1} & \ldots & a_{n-1,n} 
+\end{array}
+\right|
+\]
+If we build the nxn real matrix A with arbitrary 1st row 
+and ith row = $A_{i-1}$ for $i=2,\ldots,n$, then
+$cross (A1, \ldots,A_{n-1}) =
+(subdet(A,1,1), -subdet(A,1,2), \ldots, (-1)^{1+n} subdet(A,1,n))$,
+where subdet(A,i,j) is the minor of A with the ith row and jth column removed.
+
+\subsubsection{Rotating a vector to a coordinate axis}
+
+This generalized cross product may be used to construct rotation matrices
+that rotate an arbitrary vector in n-space to a coordinate axis.
+Since rotation matrices are orthogonal, they can be built from rows that
+are mutually orthogonal.
+Under the operation of a rotation matrix, 
+the rows of the rotation matrix are mapped to the coordinate axes.\footnote{This
+   is a direct product of the Kronecker-delta behaviour of the dot product of the rows,
+   reflecting orthonormality.}
+Using this fact, a matrix that rotates the arbitrary unit vector $v \in \Re^n$ 
+(where $v$ is not any coordinate axis, since we can deal with these n cases easily)
+to the coordinate axis $e_i$ is the matrix with ith row $v$ and other rows
+$R_1 = cross (v,e_1,\ldots,e_{n-2}), R_2 = cross(v,R_1,e_2,\ldots,e_{n-2}, 
+R_3 = cross (v,R_1,R_2, e_3, \ldots, e_{n-2}), \ldots, 
+R_{n-1} = cross (v,R_1,\ldots,R_{n-2})$,
+where we start with v and coordinate axes, and then replace a coordinate axis
+by a row as soon as it is computed.
+%          need n-1 other rows (other than v)
+%	  each of these rows needs n-1 vectors to build a generalized cross product
+%	      - one of these vectors is always v
+%	      - the last vector is the cross product of v and the other n-2 vectors
+%	      - one of the vectors can always be e_i
+%	  row1 = v
+%	  row2 = v x e_1 x ... x e_{n-2}
+%	  row3 = v x row2 x e_2 x ... x e_{n-2}
+%	  ...
+%	  rown = v x row2 x ... x row_{n-1}
+
+    In building a rotation matrix that rotates a vector to a coordinate axis,
+    coordinate axes are used to build the rows of the matrix, through the
+    generalized cross product.  We can use any coordinate axes (actually,
+    any vector not equal to v, but the coordinate axes are the only natural choice).  
+    Therefore, we choose the coordinate axes to make the algorithm robust.
+    The generalized cross product of three vectors
+    a,b,c is less robust if these vectors are close to linearly dependent,
+    or equivalently if the underlying matrix is close to singular. (ELABORATE ABOVE
+    IN CROSS PRODUCT SECTION.)
+    Therefore, we want to use the furthest coordinate axes from v.
+    This has the added benefit that it guarantees that the chosen coordinate axes
+    do not agree with v (since at most one coordinate axis can be equivalent to v,
+    and it would certainly not be one of the two closest), which avoids
+    a preprocessing step of checking for this degenerate case when the
+    cross product would be undefined.
+    (See Vec4::rotToCoord.)
+
+START HERE (compare to qspline.c/'PerturbInput')
+
+We can flip things to change the sign of the determinant, if necessary, to guarantee determinant = 1.  (WHY IS SIGN = 1 IMPORTANT FOR SO(3)?)
+
+This leads to a generalization of SO(3), the group of rotation matrices in 3-space.
+Notice that Givens (or Jacobi) rotations \cite{golubvanLoan} are also generalizations
+of rotation matrices, but are restricted to rotations about the coordinate axes;
+we want a generalization of rotations about arbitrary vectors.
+The defining 
+
+\clearpage
+
+\section{Future directions}
+\label{sec:future}
+
+Open questions.
+\begin{enumerate}
+\item exact relationship of torque to quaternion spline derivatives
+\end{enumerate}
+
+The open problems suggested by this paper include:
+
+\begin{itemize}
+\item An algorithm to find the emptiest point, or the largest empty circle, on $S^3$.
+      That is, given a point sample on $S^3$, what is the point furthest from this point
+      sample?  This is a classical problem in the plane, where optimal(?) 
+      solutions have long been known.  It has also been studied on $S^2$ by Renka.
+      The $S^3$ problem is particularly interesting, since it combines a search on
+      a surface with a search in a 3-dimensional space.
+\item Interpolation of a set of lines, rather than points.
+      This would be the natural construction of the space curve.
+      We presented one solution to this problem through our choice of a point on each line,
+      reducing the problem to point interpolation.
+      However, the choice of point on each line did not consider the entire line set,
+      at most considering one neighbouring line.
+      It would be interesting to develop a more global solution.
+\end{itemize}
+
+Elaborations of this work include the following (see Introduction).
+\begin{enumerate}
+\item
+Consider extrinsic obstacles in the design 
+of the motion, either positional or orientational.
+For example, consider the design of a motion for the teapot that avoids
+the table or a bounding dog, or that respects the orientational constraints 
+imposed by placing the pot on the middle shelf of a china cabinet.
+Equivalently, give the animator the capacity to effortlessly design 
+a natural motion that respects 
+certain constraints inherent {\em in the environment}.
+This becomes motion planning with full degrees of freedom, both positional and
+orientational.
+Even this 'motion planning' problem for position is interesting, 
+since we desire smooth paths, not piecewise linear paths.
+(This becomes obstacle-avoiding interpolation.  Pottmann proposes a weak solution
+in SIGGRAPH04.  A better solution is needed.)
+\item
+Addition of constraints like limited G's on the airplane, or acceleration bounds
+on the teapot.
+\item
+Add {\em time-varying} constraints created by other obstacles.
+\end{enumerate}
+
+\bibliographystyle{plain}
+\bibliography{modeling} % merge Euro95/swept-paper (this has more) and GI95/animation-paper
+                        % and move all to ~/software (where it should be CVS'ed)
+                        % also merge with 2d-filestructure bib files
+                        % once all merged, can decompose into quaternion/visibility/... bibfiles
+                        % for now, I am adding to the Euro95 edition
+                        % add 2-most/comp.tex bibliography too
+\end{document}

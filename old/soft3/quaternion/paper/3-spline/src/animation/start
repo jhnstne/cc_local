@@ -1,0 +1,2 @@
+emacs -geometry 91x72+0+0 animation.cpp ../../../../GIcodeOnNavy/animation.c &
+

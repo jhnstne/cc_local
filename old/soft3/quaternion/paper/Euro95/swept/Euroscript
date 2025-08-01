@@ -1,0 +1,78 @@
+#! /bin/csh -f
+# File: swept/Euroscript
+# Author: John K. Johnstone
+# Last Modified: August 23 1995
+# Purpose: video script for Eurographics '95 (Maastricht) talk
+
+# could generate and iconify several commands at once and then interactively
+# pull them onto the screen
+
+echo John K. Johnstone 
+echo Department of Computer and Information Sciences
+echo University of Alabama at Birmingham
+echo A rational model of the surface swept by a curve
+
+echo Pause of empty screen for 3 seconds
+
+cd /ca/jj/swept
+
+echo Several swept surfaces
+echo Show off Coke bottle, surface of revolution, rotate
+echo 15 seconds
+cp POS.coke POS.input; cp curve.circle curve.input
+sweep -s -i -k > sweep.out &
+set Pause = ($<)
+#echo Mesh: increase window size to maximal
+# sweep -m > sweep.out &
+# set Pause = ($<)
+
+echo Show off canoe, design, scaling
+echo 15 seconds, 10 static + 5 rotating
+cp POS.canoe POS.input; cp curve.canoe curve.input
+sweep -s -i -k > sweep.out &
+set Pause = ($<)
+# echo Mesh: increase window size to maximal
+# sweep -m > sweep.out &
+# set Pause = ($<)
+
+echo Show off robot, interference detection
+echo 15 seconds, 10 static and 5 rotating
+cp POS.snake POS.input; cp curve.robot curve.input
+sweep -s -i -k > sweep.out &
+set Pause = ($<)
+# echo Mesh: increase window size to maximal
+# sweep -m > sweep.out &
+# set Pause = ($<)
+
+######################################
+
+echo Rational orientation curve
+cd ../animation-old
+cp pos.in-evenspeed pos.input
+cp quaternion.in5 quaternion.input
+echo Quaternions
+animation-for-Euro &		# keyframes 
+set Pause = ($<)
+echo Inverse images under M
+animation-for-Euro -I &		# inverse images under M
+set Pause = ($<)
+echo Free interpolation in 4-space
+animation-for-Euro -S &		# space curve
+set Pause = ($<)
+echo Map back to sphere
+animation-for-Euro -m -S & 	# space curve maps to spherical curve
+set Pause = ($<)
+echo Rational Bezier curve on quaternion sphere
+animation-for-Euro -m &		# spherical curve
+echo STOP HERE
+set Pause = ($<)
+
+######################################
+
+echo Mechanism: 2. creating control mesh: NO NEED
+
+echo Control mesh itself
+cp POS.snake POS.input
+cp curve.robot curve.input
+sweep -m > sweep.out
+

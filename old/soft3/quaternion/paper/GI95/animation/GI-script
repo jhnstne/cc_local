@@ -1,0 +1,124 @@
+#! /bin/csh -f
+# File: animation/Script
+# Author: John K. Johnstone
+# Last Modified: 2 May 1995
+# Purpose: script for Graphics Interface '95 video
+
+cd ~/animation;
+
+####  PLAIN EXAMPLE
+
+cp obj.cube object.input
+cp pos.in-evenspeed pos.input
+cp quaternion.in1 quaternion.input
+
+echo Plain example: input
+animation
+set Pause = ($<)
+
+echo Plain example: output
+animation -m -i
+set Pause = ($<)
+
+echo Plain example: animation
+animation -a
+set Pause = ($<)
+
+#### GOOD EXAMPLE
+
+cp obj.littlemapleleaf object.input;
+cp pos.in2 pos.input;
+cp quaternion.in2 quaternion.input;
+
+echo Good example: input
+animation
+set Pause = ($<)
+
+echo Good example: animation
+animation -a
+set Pause = ($<)
+
+#### BEST EXAMPLE (USED IN GI FIGURES)
+
+cp pos.in-evenspeed pos.input;
+cp quaternion.in5 quaternion.input;
+
+echo Best example: input
+animation
+set Pause = ($<)
+
+echo Best example: animation
+animation -a
+set Pause = ($<)
+
+#### COMPLICATED EXAMPLE (TO SHOW IT WORKS)
+
+cp pos.in3 pos.input
+cp quaternion.in3 quaternion.input
+
+echo Complicated example: input
+animation
+set Pause = ($<)
+
+echo Complicated example: animation
+animation -a
+set Pause = ($<)
+
+#### WORKINGS OF ALGORITHM
+
+cp pos.in-evenspeed pos.input
+cp quaternion.in5 quaternion.input
+
+echo Inner workings of algorithm.
+echo Input.
+animation
+set Pause = ($<)
+
+echo Inverse images.
+animation -I
+set Pause = ($<)
+
+echo Free interpolation in space.
+animation -s -S
+set Pause = ($<)
+
+echo Map back to curve.
+animation -S -m
+set Pause = ($<)
+
+echo Final output.
+animation -a
+set Pause = ($<)
+
+#### EXAMPLES OF ANOMALIES
+#### SPINNING ALL DURING LAST SEGMENT
+
+echo Control polygon is not on sphere.
+animation-twisted -m
+set Pause = ($<)
+
+echo Antipodal choice: good
+cp pos.in-evenspeed pos.input
+cp quaternion.in1 quaternion.input
+animation -a
+set Pause = ($<)
+
+echo Antipodal choice: bad
+animation-antipodal -a
+set Pause = ($<)
+
+###### GRAND FINALE
+
+echo Finale 1
+cp pos.in-leaf pos.input
+cp quaternion.in-leaf quaternion.input
+animation -A
+set Pause = ($<)
+
+echo Finale 2
+cp obj.hockey object.input
+cp pos.in-hockey2 pos.input
+cp quaternion.in-hockey2 quaternion.input
+animation -A
+set Pause = ($<)
+

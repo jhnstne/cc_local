@@ -1,0 +1,272 @@
+\documentstyle{article} 
+
+\newif\ifFull
+\Fullfalse
+
+\makeatletter
+\def\@maketitle{\newpage
+ \null
+ \vskip 2em                   % Vertical space above title.
+ \begin{center}
+       {\Large\bf \@title \par}  % Title set in \Large size. 
+       \vskip .5em               % Vertical space after title.
+       {\lineskip .5em           %  each author set in a tabular environment
+        \begin{tabular}[t]{c}\@author 
+        \end{tabular}\par}                   
+  \end{center}
+ \par
+ \vskip .5em}                 % Vertical space after author
+\makeatother
+
+% default values are 
+% \parskip=0pt plus1pt
+% \parindent=20pt
+\parskip=.2in
+\parindent=0pt
+
+\newcommand{\SingleSpace}{\edef\baselinestretch{0.9}\Large\normalsize}
+\newcommand{\DoubleSpace}{\edef\baselinestretch{1.4}\Large\normalsize}
+\newcommand{\Comment}[1]{\relax}  % makes a "comment" (not expanded)
+\newcommand{\Heading}[1]{\par\noindent{\bf#1}\nobreak}
+\newcommand{\Tail}[1]{\nobreak\par\noindent{\bf#1}}
+\newcommand{\QED}{\vrule height 1.4ex width 1.0ex depth -.1ex\ } % square box
+\newcommand{\arc}[1]{\mbox{$\stackrel{\frown}{#1}$}}
+\newcommand{\lyne}[1]{\mbox{$\stackrel{\leftrightarrow}{#1}$}}
+\newcommand{\ray}[1]{\mbox{$\vec{#1}$}}          
+\newcommand{\seg}[1]{\mbox{$\overline{#1}$}}
+\newcommand{\tab}{\hspace*{.2in}}
+\newcommand{\se}{\mbox{$_{\epsilon}$}}  % subscript epsilon
+\newcommand{\ie}{\mbox{i.e.}}
+\newcommand{\eg}{\mbox{e.\ g.\ }}
+\newcommand{\figg}[3]{\begin{figure}[htbp]\vspace{#3}\caption{#2}\label{#1}\end{figure}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\prf}{\noindent{{\bf Proof}:\ \ \ }}
+\newcommand{\choice}[2]{\mbox{\footnotesize{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}      
+\newcommand{\scriptchoice}[2]{\mbox{\scriptsize{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}
+\newcommand{\tinychoice}[2]{\mbox{\tiny{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}
+\newcommand{\ddt}{\frac{\partial}{\partial t}}
+
+\newtheorem{rmk}{Remark}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{conjecture}{Conjecture}[section]
+\newtheorem{claim}{Claim}[section]
+\newtheorem{notation}{Notation}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[section]
+\newtheorem{defn2}{Definition}
+
+% \font\timesr10
+% \newfont{\timesroman}{timesr10}
+% \timesroman
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{-.25in}	% technically should be 0pt for 1in
+\setlength{\headsep}{0pt}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+\setlength{\columnsep}{5mm}		% width of gutter between columns
+
+\title{Rational tangent-following frames}
+\author{John K. Johnstone\\
+	Department of Computer and Information Sciences\\
+	The University of Alabama at Birmingham\\
+	Birmingham, Alabama, USA 35294\\
+	johnstone@cis.uab.edu\\
+	205-934-2213
+	\and 
+	James P. Williams\\
+	Department of Computer Science\\
+	The Johns Hopkins University\\
+	Baltimore, Maryland, USA 21218\\
+	jimbo@cs.jhu.edu\\
+	410-516-7784}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\end{abstract}
+
+\section{Introduction}
+
+The moving trihedron or Frenet frame at the point $r(u_0)$ is the frame
+defined by the tangent, principal normal and binormal vectors at $r(u_0)$
+\cite{kreyszig}.   % p. 36
+The principal normal and binormal vectors are undefined
+at points where the curvature is 0 (equivalently, $r''(u)=0$),
+since the principal normal and binormal are defined in terms of the
+osculating plane, the plane spanned by $r'(u)$ and $r''(u)$.
+Therefore, the Frenet frame breaks down on linear components of the spine
+and at inflection points.
+Moreover, the Frenet frame cannot be easily patched at the inflection point
+(by taking limits) since the binormal flips 180 degrees at this point.
+{\em Problems with positive torsion: see Tang}.
+{\em Problems with instability: see O'Donnell, page with Figure 5)}.
+{\em Check our method on 1) linear components 2) inflection points
+3) twists and 4) torsion}.
+{\em Implement EGC to compare.}
+
+\section{}
+
+A quaternion can be interpreted algebraically as a 4-tuple,
+or geometrically as a point on the quaternion sphere $S^3$.
+Algebraically, quaternion multiplication \cite{hamilton69} is
+\begin{equation}
+\label{eq:qmult-alg}
+	qr = (q_1 r_1 - (q_2,q_3,q_4) \cdot (r_2,r_3,r_4),
+	      q_1 (r_2,r_3,r_4) + r_1 (q_2,q_3,q_4) + 
+	      (q_2,q_3,q_4) \times (r_2,r_3,r_4))
+% Shoemake, p. 246
+\end{equation}
+where $q=(q_1,q_2,q_3,q_4)$ and $r=(r_1,r_2,r_3,r_4)$.
+The following lemma shows that, geometrically, quaternion multiplication
+is a form of rotation on the quaternion sphere.
+
+\begin{lemma}
+\label{lem:multisrotation}
+Quaternion multiplication is equivalent to rotation
+on the quaternion sphere.
+In particular, quaternion multiplication by a constant quaternion $q$
+\[
+  P(r) = qr
+\]
+where $qr$ is the quaternion multiplication of (\ref{eq:qmult-alg}),
+is equivalent to constant rotation of a point on the quaternion sphere
+\[
+  P(r) = M_q r
+\]
+where $M_q$ is the rotation matrix
+\begin{equation}
+M_q = 
+	\left( \begin{array}{cccc}
+	q_1 & -q_2 & -q_3 & -q_4 \\
+	q_2 & q_1  & -q_4 & q_3  \\
+	q_3 & q_4  & q_1  & -q_2 \\
+	q_4 & -q_3 & q_2  & q_1
+	\end{array} \right)
+\end{equation}
+and $q = (q_1,q_2,q_3,q_4)$.
+\end{lemma}
+\prf
+\[
+M_q r = 
+	\left( \begin{array}{cccc}
+	q_1 & -q_2 & -q_3 & -q_4 \\
+	q_2 & q_1  & -q_4 & q_3  \\
+	q_3 & q_4  & q_1  & -q_2 \\
+	q_4 & -q_3 & q_2  & q_1
+	\end{array} \right)
+	\left( \begin{array}{c} r_1 \\ r_2 \\ r_3 \\ r_4 \end{array} \right)
+      = \left( \begin{array}{c}
+	q_1 r_1 - q_2 r_2 - q_3 r_3 - q_4 r_4 \\
+	q_1 r_2 + q_2 r_1 + q_3 r_4 - q_4 r_3 \\
+	q_1 r_3 + q_3 r_1 + q_4 r_2 - q_2 r_4 \\
+	q_1 r_4 + q_4 r_1 + q_2 r_3 - q_3 r_2
+	\end{array} \right)
+      = qr
+\]
+using (\ref{eq:qmult-alg}).
+$M_q$ is a rotation matrix in 4-space, since its rows and columns are all unit
+vectors and all rows are mutually orthogonal, as are all columns.
+\QED
+
+\begin{rmk}
+$M_q$ is not the rotation matrix equivalent to the quaternion $q$.
+\end{rmk}
+
+\section{}
+
+A frame can be represented by a point on the quaternion sphere.
+
+\begin{theorem}
+Let $r_(u_0)$ be a point of a curve $r(u)$.
+The set of all tangent-following frames at $r(u_0)$
+can be represented by a great circle on the quaternion sphere.
+(In general, the set of all frames with a fixed coordinate axis pointing
+along a fixed vector can be represented by a great circle on the quaternion sphere.)
+\end{theorem}
+\prf
+There are many tangent-following frames at a point $r(u_0)$ of a curve $r(u)$,
+because there is a degree of freedom in rotating the world $x$-axis
+into the tangent $r'(u_0)$.
+In particular, after any specific rotation $M$ of the world $x$-axis
+to the tangent, the entire frame can rotate by an arbitrary amount
+about this tangent.
+This degree of freedom can be captured as a quaternion $q_1(\theta)$,
+as follows.
+For easier calculation, we place the degree of freedom at the beginning,
+by first rotating an arbitrary amount about the $x$-axis,
+followed by the rotation $M$ of the $x$-axis to the tangent.
+As a quaternion, a rotation by the angle $\theta$ about the $x$-axis 
+is $q_1(\theta) = (\cos \frac{\theta}{2}, \sin \frac{\theta}{2} (1,0,0))$,
+$\theta \in [0,2\pi)$.
+The rotation $M$ to the tangent can be calculated exactly (see Remark~\ref{}
+following this proof), but for the purposes of this proof it is sufficient
+that it is a fixed quaternion $q_2$.
+Thus, a tangent-following frame at $r(u_0)$ can be represented
+by the quaternion $q_2 q_1(\theta)$ for some $\theta \in [0,2\pi)$.
+$q_1(\theta)$, $\theta \in [0,2\pi)$, is clearly a great circle
+on the quaternion sphere.
+By Lemma~\ref{lem:multisrotation}, 
+$q_2 q_1(\theta)$ is a rotation of this great circle.
+Thus, the set of all tangent-following frames at a fixed point $r(u_0)$
+can be represented by the set of quaternions on a great circle
+of the quaternion sphere.
+\QED
+
+In order to find the specific great circle $q_2 q_1(\theta)$ associated
+with the tangent-following frames at $r(u_0)$,
+we need to find $q_2$, the quaternion that rotates the $x$-axis into $r'(u_0)$.
+Since the $i^{th}$ column of a rotation matrix is the image of the $i^{th}$
+coordinate axis under the rotation \cite{foleyVanDam},
+a rotation matrix that sends the world $x$-axis into $r'(u)$ is
+%
+\begin{equation}
+M = ([r'(u)]_{\mbox{unit}} [r'(u) \times A]_{\mbox{unit}} 
+	[r'(u) \times (r'(u) \times A)]_{\mbox{unit}} )
+\end{equation}
+%
+where $V_{\mbox{unit}}$ is the unit vector $\frac{V}{\|V\|}$
+and
+\[
+	A = \left\{ \begin{array}{ll}
+		(1,0,0)	& \mbox{if} r'(u) \neq (1,0,0) \\
+		(0,1,0) & \mbox{otherwise}
+		\end{array} \right.
+\]
+Thus, one choice for $q_2$ is the quaternion associated with this matrix:
+%
+\begin{equation}
+	q_2 = f_{\mbox{matrix} \rightarrow \mbox{quaternion}} 
+	(([r'(u)]_{\mbox{unit}} [r'(u) \times A]_{\mbox{unit}} 
+	 [r'(u) \times (r'(u) \times A)]_{\mbox{unit}} ))
+\end{equation}
+%
+An algorithm for translating from quaternion to rotation matrix is available
+in [Shoemake? \cite{} (but need to reverse the signs! get a better reference
+such as Kane Spacecraft Dynamics)].
+This circle is well defined by two of its non-antipodal points,
+such as $q_2 q_1(0) = q_2 (1,0,0,0)$ and $q_2 q_1(\frac{\pi}{2})
+= q_2 (0,1,0,0)$;
+and indeed we never need to calculate more than these two points.
+
+\section{}
+
+Given a point $P$ on $S^3$ and a great circle $C$ on $S^3$ that does not contain
+$P$ (Figure~\ref{}), the point $Q \in C$ closest to $P$ can be computed
+as follows.
+
+\bibliographystyle{plain}
+\begin{thebibliography}{99}
+
+\bibitem{hamilton69}
+Hamilton, W. (1969)
+Elements of Quaternions.
+Chelsea (New York).
+
+\end{thebibliography}
+
+\end{document}

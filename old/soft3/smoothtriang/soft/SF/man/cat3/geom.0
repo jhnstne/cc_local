@@ -1,0 +1,132 @@
+
+
+
+C Library Functions                                       geom(3)
+
+
+
+NNNNAAAAMMMMEEEE
+     geom
+
+
+SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
+     Miscellaneous geometry routines.
+
+
+SSSSYYYYNNNNTTTTAAAAXXXX
+     ####iiiinnnncccclllluuuuddddeeee ggggeeeeoooommmm....hhhh
+
+
+DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN::::
+     SSSSccccaaaallllaaaarrrr GGGGaaaauuuussssssssiiiiaaaannnnCCCCuuuurrrrvvvvaaaattttuuuurrrreeee((((dddd2222uuuu,,,, dddd2222uuuuvvvv,,,, dddd2222vvvv,,,, dddduuuu,,,, ddddvvvv,,,,
+     VVVVeeeeccccttttoooorrrr dddd2222uuuu,,,, dddd2222uuuuvvvv,,,, dddd2222vvvv,,,, dddduuuu,,,, ddddvvvv,,,,
+
+     Compute the Gaussian curvature based on the given derivative
+     information.
+
+     PPPPooooiiiinnnntttt LLLLiiiinnnneeeeIIIInnnntttteeeerrrrsssseeeeccccttttPPPPllllaaaannnneeee((((pppp1111,,,,vvvv1111,,,, pppp2222,,,,nnnn2222))))
+     PPPPooooiiiinnnntttt pppp1111;;;;
+     VVVVeeeeccccttttoooorrrr vvvv1111;;;;
+     PPPPooooiiiinnnntttt pppp2222;;;;
+     NNNNoooorrrrmmmmaaaallll nnnn2222;;;;
+
+     Return the point of intersection between the line determined
+     by  p1  and  v1  with the plane determined by p2 and n2.  No
+     error checking is done (ie, if n2  is  perpendicular  to  v1
+     then a divide by zero will result).
+
+     BBBBOOOOOOOOLLLLEEEEAAAANNNN LLLLiiiinnnneeeeIIIInnnntttteeeerrrrsssseeeeccccttttLLLLiiiinnnneeee((((pppp1111,,,,vvvv1111,,,, pppp2222,,,,vvvv2222,,,, pppprrrr))))
+     PPPPooooiiiinnnntttt pppp1111;;;;
+     VVVVeeeeccccttttoooorrrr vvvv1111;;;;
+     PPPPooooiiiinnnntttt pppp2222;;;;
+     VVVVeeeeccccttttoooorrrr vvvv2222;;;;
+     PPPPooooiiiinnnntttt**** pppprrrr;;;;
+
+     Find the intersection of two  three  space  lines.   If  the
+     intersection  exists,  return  non-zero  and  set *pr to the
+     intersection.  Otherwise, return 0.
+
+     PPPPooooiiiinnnntttt CCCCoooonnnnssssttttrrrruuuuccccttttQQQQuuuuaaaaddddrrrraaaattttiiiicccc
+     PPPPaaaattttcccchhhh**** pppp;;;;
+
+     Return the "quadratic precision"  point  of  a  cubic  patch
+     (see,  Farin  1983).   p should point to a cubic patch where
+     all the boundary points have been determined.  The quadratic
+     precision  point  will be returned, but will NOT be set in p
+     (this point would be the center point of p).
+
+     PPPPooooiiiinnnntttt pppprrrroooojjjjPPPPooooiiiinnnnttttOOOOnnnnPPPPllllaaaannnneeee((((pppp1111,,,, pppp2222,,,,nnnn2222))))
+     PPPPooooiiiinnnntttt pppp1111;;;;
+
+
+
+SunOS 5.6                 Last change:                          1
+
+
+
+
+
+
+C Library Functions                                       geom(3)
+
+
+
+     PPPPooooiiiinnnntttt pppp2222;;;;
+     NNNNoooorrrrmmmmaaaallll nnnn2222;;;;
+
+     Project the point p1 onto the plane determined by p2 and n2.
+
+
+
+DDDDAAAATTTTEEEE
+     January 3, 1992
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SunOS 5.6                 Last change:                          2
+
+
+

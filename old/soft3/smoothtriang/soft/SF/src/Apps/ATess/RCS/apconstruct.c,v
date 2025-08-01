@@ -1,0 +1,2963 @@
+head	1.7;
+access;
+symbols;
+locks
+	saggarwa:1.7; strict;
+comment	@ * @;
+
+
+1.7
+date	99.10.25.22.34.40;	author saggarwa;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	99.01.13.04.20.41;	author saggarwa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	98.12.22.02.06.29;	author saggarwa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	98.12.15.21.59.24;	author saggarwa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	98.12.12.04.01.57;	author saggarwa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	98.12.05.02.44.29;	author saggarwa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	98.11.30.00.34.07;	author saggarwa;	state Exp;
+branches;
+next	;
+
+
+desc
+@Functions for generating the simplicial hull and fitting an A-patterms of a control scalar net.  Setting of free parameters done in here.
+@
+
+
+1.7
+log
+@handed in.
+@
+text
+@/**********************************************************************/
+/* Module: apconstruct.c                                              */
+/* $Date: 1999/01/13 04:20:41 $                                       */
+/* $Revision: 1.6 $                                                   */
+/* $Source: /p/SurfaceFitting/SF/src/Apps/ATess/RCS/apconstruct.c,v $ */
+/**********************************************************************/
+/*
+** Purpose:.
+*/
+
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+#include "geometry.h"
+#include "vertex.h"
+#include "dstruct.h"
+#include "getset.h"
+#include "material.h"
+#include "libgeo.h"
+#include "mesh.h"
+#include "userData.h"
+#include "usage.h"
+#include "apconstruct.h"
+#include "aputil.h"
+#include "apatch.h"
+
+#define EPS 1.0e-8
+
+extern int ApatchDeg;
+extern double LenN1FP, LenN2FP, LenN3FP;
+extern double SimplexFP;
+extern double FaceTopScalarFP;
+extern int FPSelectionMethod;
+static double eps = EPS;
+
+/* Function Prototypes */
+int TypeOfFace(Face* tface);
+void ConstructSingleFaceApatchSimplex(Apatch* apatch, Face* tface,
+				      int faceType, Space wspace);
+void ConstructZeroConvexFaceApatch(Apatch* apatch, Face* tface,
+				   int aboveOrBelow, Space wspace);
+void ConstructFaceApatchPairSimplex(ApatchPair* apPair, Face* tface,
+				    Space wspace);
+void FitSingleCubicFaceApatch(Apatch* apatch, Face* apFace, int faceType,
+			      Space wspace);
+void GenerateCFAPScalarsFromNormals(Apatch* apatch);
+void SetCFAPFirstFreeScalarByFarinDegElevation(Apatch* apatch);
+void SetCFAPRemainingFreeScalarsByAvg(Apatch* apatch, int sset[3]);
+void SetCFAPRemainingFreeScalarsBySimpleInterpolation(Apatch* apatch,
+						      int sset[3]);
+void SetCFAPRemainingFreeScalarsByQuadPrecisionInterpolation(Apatch* apatch,
+							     int sset[3]);
+void GenerateCFAPScalarsFromConvexConvexFaceDependency(Apatch* fap1,
+						       Apatch* fap2,
+						       int sset[3]);
+void ConstructConvexConvexEdgeApatchSimplex(Apatch* eap1, Apatch* eap2, 
+					    Apatch* f1ap, Apatch* f2ap,
+					    Edge* tedge, Face* f1, Face* f2,
+					    int f1type, int f2type, 
+					    Space wspace);
+void FitConvexConvexCubicEdgeApatches(Apatch* eap1, Apatch* eap2,
+				      Apatch* f1ap, Apatch* f2ap,
+				      Face* f1, Face* f2, 
+				      int f1type, int f2type, Space wspace);
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void ConstructFaceApatches(Face* apFace, Space wspace)
+{
+   int faceType;
+
+   faceType = TypeOfFace(apFace);
+   /* fprintf(stderr, "type of face:%d, %s\n", faceType,ReturnName(apFace)); */
+   if (faceType == ZERO_CONVEX) {
+      Apatch apatch;
+      ConstructZeroConvexFaceApatch(&apatch, apFace, 0, wspace);
+      if (ApatchDeg == 0)
+         OutputS3dFaceApatchSimplex(stdout, apatch);
+      else
+         WriteSingleApatch(apatch);
+      FreeApatch(apatch);
+   }
+   else if (faceType == NON_CONVEX) {
+#if 0
+      ApatchPair apPair;
+      ConstructFaceApatchPairSimplex(&apPair, apFace, wspace);
+      if (ApatchDeg == 0) {
+         OutputS3dFaceApatchPairSimplex(stdout, apPair);
+      }
+      else {
+         FitCubicFaceApatchPair(&apPair);
+         WriteApatchPair(apPair);
+      }
+      FreeApatchPair(apPair);
+#endif
+   }
+   else {
+      Apatch apatch;
+      ConstructSingleFaceApatchSimplex(&apatch, apFace, faceType, wspace);
+      if (ApatchDeg == 0) {
+         OutputS3dFaceApatchSimplex(stdout, apatch);
+      }
+      else {
+         FitSingleCubicFaceApatch(&apatch, apFace, faceType, wspace);
+         WriteSingleApatch(apatch);
+      }
+      FreeApatch(apatch);
+   }
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void ConstructEdgeApatches(Edge* tedge, Space wspace)
+{
+   Face* f1;
+   Face* f2;
+   int f1type, f2type;
+
+   GetEdgeFaces(tedge, &f1, &f2);
+   f1type = TypeOfFace(f1);
+   f2type = TypeOfFace(f2);
+
+   if (f1type != NON_CONVEX && f2type != NON_CONVEX) {
+      Apatch f1ap, f2ap;
+      if ((f1type != POS_CONVEX && f2type != POS_CONVEX) ||
+          (f1type != NEG_CONVEX && f2type != NEG_CONVEX)) {
+         Apatch eap1, eap2;
+         ConstructConvexConvexEdgeApatchSimplex(&eap1, &eap2, &f1ap, &f2ap,
+						tedge, f1, f2, f1type, f2type,
+						wspace);
+         if (ApatchDeg == 0) {
+            OutputS3dEdgeApatchSimplex(stdout, eap1);
+            OutputS3dEdgeApatchSimplex(stdout, eap2);
+         }
+         else {
+            FitConvexConvexCubicEdgeApatches(&eap1, &eap2, &f1ap, &f2ap,
+					     f1, f2, f1type, f2type, wspace);
+            WriteSingleApatch(eap1);
+            WriteSingleApatch(eap2);
+         }
+         FreeApatch(eap1);
+         FreeApatch(eap2);
+         FreeApatch(f1ap);
+         FreeApatch(f2ap);
+      }
+   }
+
+#if 0
+   if (f1type == NON_CONVEX && f2type == NON_CONVEX) {
+      /* Both adjacent faces are non-convex. */
+      Apatch eap1, eap2, eap3, eap4;
+      ApatchPair f1app, f2app;
+      ConstructNonconvexNonconvexEdgeApatchSimplex(&eap1, &eap2, &eap3, &eap4,
+						   &f1app, &f2app, tedge);
+      if (ApatchDeg == 0) {
+         OutputS3dEdgeApatchSimplex(stdout, eap1);
+         OutputS3dEdgeApatchSimplex(stdout, eap2);
+         OutputS3dEdgeApatchSimplex(stdout, eap3);
+         OutputS3dEdgeApatchSimplex(stdout, eap4);
+      }
+      else {
+         FitNonconvexNonconvexCubicEdgeApatches(&eap1, &eap2, &eap3, &eap4,
+						&f1app, &f2app);
+         WriteSingleApatch(eap1);
+         WriteSingleApatch(eap2);
+         WriteSingleApatch(eap3);
+         WriteSingleApatch(eap4);
+      }
+      FreeApatch(eap1);
+      FreeApatch(eap2);
+      FreeApatch(eap3);
+      FreeApatch(eap4);
+      FreeApatchPair(f1app);
+      FreeApatchPair(f2app);
+   }
+   else if (f1type != NON_CONVEX && f2type != NON_CONVEX) {
+      Apatch f1ap, f2ap;
+      /* Both adjacent faces are convex. */
+      if (f1type == ZERO_CONVEX && f2type == ZERO_CONVEX) {
+	 /* Both adjacent faces are zero-convex.            */
+	 /* In this case the surface is defined directly by */
+	 /* the edge's adjacent faces of the triangulation. */
+         /* No edge tetrahedra need to be constructed.      */
+      }
+      else if ((f1type != POS_CONVEX && f2type != POS_CONVEX) ||
+               (f1type != NEG_CONVEX && f2type != NEG_CONVEX)) {
+         /* Both adjacent faces are non-positive or non-negative convex. */
+         Apatch eap1, eap2;
+         ConstructConvexConvexEdgeApatchSimplex(&eap1, &eap2, &f1ap, &f2ap,
+						tedge, f1, f2, f1type, f2type,
+						wspace);
+         if (ApatchDeg == 0) {
+            OutputS3dEdgeApatchSimplex(stdout, eap1);
+            OutputS3dEdgeApatchSimplex(stdout, eap2);
+         }
+         else {
+            FitConvexConvexCubicEdgeApatches(&eap1, &eap2, &f1ap, &f2ap,
+					     f1, f2, f1type, f2type, wspace);
+            WriteSingleApatch(eap1);
+            WriteSingleApatch(eap2);
+         }
+         FreeApatch(eap1);
+         FreeApatch(eap2);
+      }
+      else {
+         /* One adjacent face is positive convex, and one negative convex. */
+         Apatch eap1, eap2, fap3;
+         ConstructPosConvexNegConvexEdgeApatchSimplex(&eap1, &eap2, &fap3,
+						      &f1ap, &f2ap, tedge,
+						      f1type, f2type);
+	 /*
+         if (ApatchDeg == 0) {
+            OutputS3dEdgeApatchSimplex(stdout, eap1);
+            OutputS3dEdgeApatchSimplex(stdout, eap2);
+            OutputS3dFaceApatchSimplex(stdout, fap3);
+         }
+         else {
+            FitPosConvexNegConvexCubicEdgeApatches(&eap1, &eap2, &fap3,
+						   &f1ap, &f2ap);
+            WriteSingleApatch(eap1);
+            WriteSingleApatch(eap2);
+            WriteSingleApatch(fap3);
+         }
+	 */
+         FreeApatch(eap1);
+         FreeApatch(eap2);
+         FreeApatch(fap3);
+      }
+      FreeApatch(f1ap);
+      FreeApatch(f2ap);
+   }
+   else {
+      /* One adjacent face is convex and the other is non-convex. */
+      Apatch eap1, eap2;
+      Apatch fap;
+      ApatchPair fapPair;
+      ConstructConvexNonconvexEdgeApatchSimplex(&eap1, &eap2, &fap, &fapPair,
+						tedge, f1type, f2type);
+      if (ApatchDeg == 0) {
+         OutputS3dEdgeApatchSimplex(stdout, eap1);
+         OutputS3dEdgeApatchSimplex(stdout, eap2);
+      }
+      else {
+         FitConvexNonconvexCubicEdgeApatches(&eap1, &eap2, &fap, &fapPair);
+         WriteSingleApatch(eap1);
+         WriteSingleApatch(eap2);
+      }
+      FreeApatch(eap1);
+      FreeApatch(eap2);
+      FreeApatch(fap);
+      FreeApatchPair(fapPair);
+   }
+#endif
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+int TypeOfFace(Face* tface)
+{
+   Vertex* thisVertex;
+   VERTEX faceV[3];
+   Scalar n0dotp01, n1dotp10, n1dotp12, n2dotp21, n2dotp20, n0dotp02;
+   int i;
+
+   i = 0;
+   ForeachFaceVertex(tface, thisVertex) {
+      faceV[i].position = ReturnUDPoint(thisVertex);
+      faceV[i++].normal = ReturnUDNormal(thisVertex);
+   } EndForeach;
+   if (i != 3) {
+      fprintf(stderr, "Non-triangular face found, exiting.\n");
+      exit(1);
+   }
+
+   n0dotp01 = NVApply(faceV[0].normal,
+	       PPDiff(faceV[1].position, faceV[0].position));
+   n1dotp10 = NVApply(faceV[1].normal,
+	       PPDiff(faceV[0].position, faceV[1].position));
+   n1dotp12 = NVApply(faceV[1].normal,
+	       PPDiff(faceV[2].position, faceV[1].position));
+   n2dotp21 = NVApply(faceV[2].normal,
+	       PPDiff(faceV[1].position, faceV[2].position));
+   n2dotp20 = NVApply(faceV[2].normal,
+	       PPDiff(faceV[0].position, faceV[2].position));
+   n0dotp02 = NVApply(faceV[0].normal,
+	       PPDiff(faceV[2].position, faceV[0].position));
+
+   if ((n0dotp01 == 0) && (n1dotp10 == 0) && (n1dotp12 == 0) &&
+       (n2dotp21 == 0) && (n2dotp20 == 0) && (n0dotp02 == 0))
+      return ZERO_CONVEX;
+   else if ((n0dotp01 <= 0) && (n1dotp10 <= 0) && (n1dotp12 <= 0) &&
+	    (n2dotp21 <= 0) && (n2dotp20 <= 0) && (n0dotp02 <= 0))
+      return POS_CONVEX;
+   else if ((n0dotp01 >= 0) && (n1dotp10 >= 0) && (n1dotp12 >= 0) &&
+	    (n2dotp21 >= 0) && (n2dotp20 >= 0) && (n0dotp02 >= 0))
+      return NEG_CONVEX;
+   else
+      return NON_CONVEX;
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void ConstructSingleFaceApatchSimplex(Apatch* apatch, Face* tface,
+				      int faceType, Space wspace)
+{
+   Frame f;
+   Scalar vnx, vny, vnz, vpx, vpy, vpz, cpx, cpy, cpz;
+   Point tmpPt, centroid;
+   Normal faceNorm;
+   VERTEX tetra[4];
+   double d, t[3];
+   Vertex* thisVertex;
+   int i;
+
+   if (faceType == ZERO_CONVEX) {
+      ConstructZeroConvexFaceApatch(apatch, tface, 0, wspace);
+      return;
+   }
+
+   i = 1;
+   ForeachFaceVertex(tface, thisVertex) {
+      tetra[i].position = ReturnUDPoint(thisVertex);
+      tetra[i++].normal = ReturnUDNormal(thisVertex);
+   } EndForeach;
+
+   f = StdFrame(wspace);
+   tmpPt = PPrr(tetra[1].position, tetra[2].position, 1, 1);
+   centroid = PPrr(tetra[3].position, tmpPt, 2, 1);
+   if (faceType == POS_CONVEX) {
+      faceNorm = PPPNormal(tetra[1].position, 
+                  tetra[2].position, tetra[3].position);
+      faceNorm = VDual(VNormalize(NDual(faceNorm)));
+   }
+   else if (faceType == NEG_CONVEX) {
+      faceNorm = PPPNormal(tetra[1].position, 
+                  tetra[3].position, tetra[2].position);
+      faceNorm = VDual(VNormalize(NDual(faceNorm)));
+   }
+   else {
+      fprintf(stderr, "An Apatch-Pair must be constructed for face %s.\n", ReturnName(tface));
+      exit(1);
+   }
+
+   /* Get the intersection of the line through the centroid with each	*/
+   /* of the vertex tangent planes.  Choose the farthest intersection	*/
+   /* point in the direction of the faceNorm so that all tangent planes	*/
+   /* are contained within the formed tetrahedron.			*/
+   for (i = 1; i < 4; i++) {
+      NCoords(tetra[i].normal, f, &vnx, &vny, &vnz);
+      PCoords(tetra[i].position, f, &vpx, &vpy, &vpz);
+      PCoords(centroid, f, &cpx, &cpy, &cpz);
+      d = -1 * (vnx * vpx + vny * vpy + vnz * vpz);
+      t[i-1] = -(vnx * cpx + vny * cpy + vnz * cpz + d) /
+		(double)(NVApply(tetra[i].normal, NDual(faceNorm)));
+   }
+
+   if ((t[0] >= t[1]) && (t[0] >= t[2]))
+      i = 0;
+   else if ((t[1] >= t[0]) && (t[1] >= t[2]))
+      i = 1;
+   else
+      i = 2;
+
+   tetra[0].position = PVAdd(centroid,
+			     SVMult((SimplexFP * t[i]), NDual(faceNorm)));
+   *apatch = CreateApatch(ApatchDeg, tetra, wspace, FACE_COLOR);
+}
+
+/* -------------------------------------------------------------------- *
+ * Construct a tetrahedral simplex over a zero convex face necessary    *
+ * for tessellation purposes.                                           *
+ *                                                                      *
+ * aboveOrBelow : integer taking values 0 or 1.                         *
+ *                0 implies that the tetrahedral simplex is constructed *
+ *                on the same side of the face as the normals point,    *
+ *                and 1 indicates it is constructed on the other side.  *
+ * -------------------------------------------------------------------- */
+void ConstructZeroConvexFaceApatch(Apatch* apatch, Face* tface,
+				   int aboveOrBelow, Space wspace)
+{
+   Point tmpPt, centroid;
+   Normal faceNorm;
+   VERTEX tetra[4];
+   Vertex* thisVertex;
+   int v1index, i;
+
+   i = 1;
+   ForeachFaceVertex(tface, thisVertex) {
+      tetra[i].position = ReturnUDPoint(thisVertex);
+      tetra[i++].normal = ReturnUDNormal(thisVertex);
+   } EndForeach;
+
+   tmpPt = PPrr(tetra[1].position, tetra[2].position, 1, 1);
+   centroid = PPrr(tetra[3].position, tmpPt, 2, 1);
+   if (aboveOrBelow == 0) {
+      faceNorm = PPPNormal(tetra[1].position,
+			   tetra[2].position, tetra[3].position);
+   }
+   else {
+      faceNorm = PPPNormal(tetra[1].position, 
+			   tetra[3].position, tetra[2].position);
+   }
+
+   faceNorm = VDual(VNormalize(NDual(faceNorm)));
+   tetra[0].position = PVAdd(centroid,
+			     SVMult(SimplexFP, NDual(faceNorm)));
+   *apatch = CreateApatch(ApatchDeg, tetra, wspace, FACE_COLOR);
+   v1index = CPIndexDim3(ApatchDeg, 0, ApatchDeg, 0, 0);
+   for (i = 0; i < v1index; i++)
+      apatch->net[i] = 1;
+   for (i = v1index; i < apatch->netSize; i++)
+      apatch->net[i] = 0;
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void ConstructFaceApatchPairSimplex(ApatchPair* apPair, Face* tface,
+				    Space wspace)
+{
+   Frame f;
+   Scalar vnx, vny, vnz, vpx, vpy, vpz, cpx, cpy, cpz;
+   Point tmpPt, centroid, top, bottom;
+   Normal faceNorm;
+   VERTEX tetra[4];
+   double d, t[3], max, min;
+   Vertex* thisVertex;
+   int i;
+
+   i = 1;
+   ForeachFaceVertex(tface, thisVertex) {
+      tetra[i].position = ReturnUDPoint(thisVertex);
+      tetra[i++].normal = ReturnUDNormal(thisVertex);
+   } EndForeach;
+
+   f = StdFrame(wspace);
+   tmpPt = PPrr(tetra[1].position, tetra[2].position, 1, 1);
+   centroid = PPrr(tetra[3].position, tmpPt, 2, 1);
+   faceNorm = PPPNormal(tetra[1].position, tetra[2].position,
+			tetra[3].position);
+   faceNorm = VDual(VNormalize(NDual(faceNorm)));
+
+   /* Get the intersection of the line through the centroid with each	*/
+   /* of the vertex tangent planes.  Choose the farthest intersection	*/
+   /* points, one in the direction of the faceNorm defining the top 	*/
+   /* tetrahedron vertex, and the other in the opposite direction for 	*/
+   /* the bottom tetrahedron.  This ensures that all the tangent planes	*/
+   /* are contained within the pair of tetrahedra formed.		*/
+   for (i = 1; i < 4; i++) {
+      NCoords(tetra[i].normal, f, &vnx, &vny, &vnz);
+      PCoords(tetra[i].position, f, &vpx, &vpy, &vpz);
+      PCoords(centroid, f, &cpx, &cpy, &cpz);
+      d = -1 * (vnx * vpx + vny * vpy + vnz * vpz);
+      t[i-1] = -(vnx * cpx + vny * cpy + vnz * cpz + d) /
+		(double)(NVApply(tetra[i].normal, NDual(faceNorm)));
+   }
+
+/*
+fprintf(stderr, "t[0] %f, t[1] %f, t[2] %f\n", t[0],t[1],t[2]);
+NCoords(faceNorm, f, &vnx, &vny, &vnz);
+fprintf(stderr, "face norm: %lg %lg %lg\n", vnx, vny, vnz);
+fprintf(stderr, "centroid: %lg %lg %lg\n", cpx, cpy, cpz);
+*/
+
+   if (t[0] >= t[1]) {
+      if (t[0] >= t[2]) {
+         max = t[0];
+         if (t[1] <= t[2])
+            min = t[1];
+         else
+            min = t[2];
+      }
+      else {
+         max = t[2];
+         min = t[1];
+      }
+   }
+   else {
+      if (t[1] >= t[2]) {
+         max = t[1];
+         if (t[0] <= t[2])
+            min = t[0];
+         else
+            min = t[2];
+      }
+      else {
+         max = t[2];
+         min = t[0];
+      }
+   }
+
+   tetra[0].position = PVAdd(centroid, 
+			     SVMult((SimplexFP * max), NDual(faceNorm)));
+/*
+PCoords(tetra[0].position, f, &vpx, &vpy, &vpz);
+fprintf(stderr, "top: %lg %lg %lg\n", vpx, vpy, vpz);
+*/
+   apPair->ap1 = CreateApatch(ApatchDeg, tetra, wspace, FACE_COLOR);
+
+   tetra[0].position = PVAdd(centroid, 
+			     SVMult((SimplexFP * min), NDual(faceNorm)));
+   apPair->ap2 = CreateApatch(ApatchDeg, tetra, wspace, FACE_COLOR);
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void FitSingleCubicFaceApatch(Apatch* apatch, Face* apFace, int faceType,
+			      Space wspace)
+{
+   Face* adjFace;
+   int adjFType;
+   int i;
+   int sset[3]; /* indicates if the apatch scalars 1011, 1101, and 1110      */
+                /* respectively are free parameters or set by the adjacent   */
+                /* face continuity conditions. A value of zero indicates     */
+                /* the scalar is free.                                       */
+
+   GenerateCFAPScalarsFromNormals(apatch);
+   SetCFAPFirstFreeScalarByFarinDegElevation(apatch);
+   for (i = 0; i < 3; i++)
+      sset[i] = 0;
+
+   ForeachFaceFace(apFace, adjFace) {
+      adjFType = TypeOfFace(adjFace);
+      if (adjFType == NON_CONVEX) {
+         ApatchPair adjapp;
+         FreeApatchPair(adjapp);
+      }
+      else {
+         Apatch adjap;
+         if (adjFType == ZERO_CONVEX) {
+            if (faceType == POS_CONVEX)
+               ConstructZeroConvexFaceApatch(&adjap, adjFace, 0, wspace);
+            else
+               ConstructZeroConvexFaceApatch(&adjap, adjFace, 1, wspace);
+         }
+         else {
+            ConstructSingleFaceApatchSimplex(&adjap, adjFace, adjFType,wspace);
+            GenerateCFAPScalarsFromNormals(&adjap);
+            SetCFAPFirstFreeScalarByFarinDegElevation(&adjap);
+         }
+         if ((faceType == POS_CONVEX && adjFType == NEG_CONVEX) ||
+	     (faceType == NEG_CONVEX && adjFType == POS_CONVEX)) {
+         }
+         else {
+	    GenerateCFAPScalarsFromConvexConvexFaceDependency(apatch, &adjap,
+							      sset);
+         }
+         FreeApatch(adjap);
+      }
+   } EndForeach;
+
+#if 1
+   if (FPSelectionMethod == 0)
+      SetCFAPRemainingFreeScalarsByAvg(apatch, sset);
+   else if (FPSelectionMethod == 1)
+      SetCFAPRemainingFreeScalarsBySimpleInterpolation(apatch, sset);
+   else
+      SetCFAPRemainingFreeScalarsByQuadPrecisionInterpolation(apatch, sset);
+#endif
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void GenerateCFAPScalarsFromNormals(Apatch* apatch)
+{
+   Vector e[3];
+   Scalar a[3], b[3], c[3], d[3];
+   double mA[3][3], mX[3], mB[3];
+   Scalar n1[3], n2[3], n3[3];
+   Frame onframe;
+   int i, i0, i1, i2, i3;
+
+   onframe = StdFrame(apatch->wspace);
+   for (i = 0; i < 3; i++) {
+      e[i] = FV(onframe, i);
+      VCoords(e[i], apatch->apFrame, &a[i], &b[i], &c[i]);
+      d[i] = 0 - a[i] - b[i] - c[i];
+   }
+
+   NCoords(apatch->tetrahedron[1].normal, onframe,
+	   &n1[0], &n1[1], &n1[2]);
+   NCoords(apatch->tetrahedron[2].normal, onframe,
+	   &n2[0], &n2[1], &n2[2]);
+   NCoords(apatch->tetrahedron[3].normal, onframe,
+	   &n3[0], &n3[1], &n3[2]);
+
+   /* Solving the 3-by-3 system of eqs:  mA*mX = mB.			*/
+   /* At vertex 1: f1200, f0210, and f0201 will be obtained.		*/
+/* fprintf(stderr, "Solving matrix: \n"); */
+   for (i = 0; i < 3; i++) {
+      mA[i][0] = a[i];
+      mA[i][1] = c[i];
+      mA[i][2] = d[i];
+      mB[i] = LenN1FP * n1[i];
+/* fprintf(stderr,"%lg %lg %lg %lg\n", mA[i][0], mA[i][1], mA[i][2], mB[i]); */
+   }
+   GaussianSolve3x3(mA, mB, mX);
+/* fprintf(stderr, "Result: %lg %lg %lg \n", mX[0], mX[1], mX[2]); */
+   i0 = CPIndexDim3(ApatchDeg, 1, 2, 0, 0);
+   i1 = CPIndexDim3(ApatchDeg, 0, 3, 0, 0);
+   i2 = CPIndexDim3(ApatchDeg, 0, 2, 1, 0);
+   i3 = CPIndexDim3(ApatchDeg, 0, 2, 0, 1);
+   apatch->net[i0] = mX[0];
+   apatch->net[i1] = 0;
+   apatch->net[i2] = mX[1];
+   apatch->net[i3] = mX[2];
+
+   /* At vertex 2: f1020, f0120, and f0021 will be obtained.		*/
+/* fprintf(stderr, "Solving matrix: \n"); */
+   for (i = 0; i < 3; i++) {
+      mA[i][0] = a[i];
+      mA[i][1] = b[i];
+      mA[i][2] = d[i];
+      mB[i] = LenN2FP * n2[i];
+/* fprintf(stderr,"%lg %lg %lg %lg\n", mA[i][0], mA[i][1], mA[i][2], mB[i]); */
+   }
+   GaussianSolve3x3(mA, mB, mX);
+/* fprintf(stderr, "Result: %lg %lg %lg \n", mX[0], mX[1], mX[2]); */
+   i0 = CPIndexDim3(ApatchDeg, 1, 0, 2, 0);
+   i1 = CPIndexDim3(ApatchDeg, 0, 1, 2, 0);
+   i2 = CPIndexDim3(ApatchDeg, 0, 0, 3, 0);
+   i3 = CPIndexDim3(ApatchDeg, 0, 0, 2, 1);
+   apatch->net[i0] = mX[0];
+   apatch->net[i1] = mX[1];
+   apatch->net[i2] = 0;
+   apatch->net[i3] = mX[2];
+
+   /* At vertex 3: f1002, f0102, and f0012 will be obtained.		*/
+/* fprintf(stderr, "Solving matrix: \n");*/
+   for (i = 0; i < 3; i++) {
+      mA[i][0] = a[i];
+      mA[i][1] = b[i];
+      mA[i][2] = c[i];
+      mB[i] = LenN3FP * n3[i];
+/* fprintf(stderr,"%lg %lg %lg %lg\n", mA[i][0], mA[i][1], mA[i][2], mB[i]);*/
+   }
+   GaussianSolve3x3(mA, mB, mX);
+/* fprintf(stderr, "Result: %lg %lg %lg \n", mX[0], mX[1], mX[2]);*/
+   i0 = CPIndexDim3(ApatchDeg, 1, 0, 0, 2);
+   i1 = CPIndexDim3(ApatchDeg, 0, 1, 0, 2);
+   i2 = CPIndexDim3(ApatchDeg, 0, 0, 1, 2);
+   i3 = CPIndexDim3(ApatchDeg, 0, 0, 0, 3);
+   apatch->net[i0] = mX[0];
+   apatch->net[i1] = mX[1];
+   apatch->net[i2] = mX[2];
+   apatch->net[i3] = 0;
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void SetCFAPFirstFreeScalarByFarinDegElevation(Apatch* apatch)
+{
+   /* The array index at which to store the generated	                */
+   /* control scalars can be determined easily, and are therefore 	*/
+   /* referred to directly (the control scalars are stored in reverse	*/
+   /* lexographic order within a linear array).				*/
+
+   apatch->net[14] = (1.0 / 4.0) * (apatch->net[11] + apatch->net[12] +
+				    apatch->net[13] + apatch->net[15] +
+				    apatch->net[17] + apatch->net[18]);
+}
+
+/* -------------------------------------------------------------------- *
+ * A simple averaging scheme is used for this purpose.
+ * -------------------------------------------------------------------- */
+void SetCFAPRemainingFreeScalarsByAvg(Apatch* apatch, int sset[3])
+{
+   /* We need to determine the remaining control scalars which form the	*/
+   /* free parameters of our construction; used to control shape of the	*/
+   /* fitted Apatch.  The array index at which to store the generated	*/
+   /* control scalars can be determined easily, and are therefore 	*/
+   /* referred to directly (the control scalars are stored in reverse	*/
+   /* lexographic order within a linear array).				*/
+
+   if (sset[0] == 0)
+      apatch->net[5] = (1.0 / 2.0) * (apatch->net[4] + apatch->net[7]);
+   if (sset[1] == 0)
+      apatch->net[6] = (1.0 / 2.0) * (apatch->net[4] + apatch->net[9]);
+   if (sset[2] == 0)
+      apatch->net[8] = (1.0 / 2.0) * (apatch->net[7] + apatch->net[9]);
+
+   apatch->net[1]  = (1.0 / 3.0) * (apatch->net[4] + apatch->net[5] +
+				    apatch->net[6]);
+   apatch->net[2]  = (1.0 / 3.0) * (apatch->net[5] + apatch->net[7] +
+				    apatch->net[8]);
+   apatch->net[3]  = (1.0 / 3.0) * (apatch->net[6] + apatch->net[8] +
+				    apatch->net[9]);
+   apatch->net[0]  = (1.0 / 3.0) * (apatch->net[1] + apatch->net[2] +
+				    apatch->net[3]);
+
+   /* Modify a free parameter - the scalar at the top vertex. */
+   apatch->net[0]  = FaceTopScalarFP * apatch->net[0];
+#if 0
+   apatch->net[1]  = FaceTopScalarFP/2.0 * apatch->net[1];
+   apatch->net[2]  = FaceTopScalarFP/2.0 * apatch->net[2];
+   apatch->net[3]  = FaceTopScalarFP/2.0 * apatch->net[3];
+#endif
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void SetCFAPRemainingFreeScalarsBySimpleInterpolation(Apatch* apatch,
+						      int sset[3])
+{
+   if (sset[0] == 0)
+      apatch->net[5] = (1.0 / 2.0) * (apatch->net[4] + apatch->net[7]);
+   if (sset[1] == 0)
+      apatch->net[6] = (1.0 / 2.0) * (apatch->net[4] + apatch->net[9]);
+   if (sset[2] == 0)
+      apatch->net[8] = (1.0 / 2.0) * (apatch->net[7] + apatch->net[9]);
+
+   apatch->net[1] = 2 * apatch->net[4];
+   apatch->net[2] = 2 * apatch->net[7];
+   apatch->net[3] = 2 * apatch->net[9];
+   apatch->net[0] = apatch->net[4] + apatch->net[7] + apatch->net[9];
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void SetCFAPRemainingFreeScalarsByQuadPrecisionInterpolation(Apatch* apatch,
+							     int sset[3])
+{
+   if (sset[0] == 0)
+      apatch->net[5] = (1.0 / 2.0) * (apatch->net[4] + apatch->net[7]);
+   if (sset[1] == 0)
+      apatch->net[6] = (1.0 / 2.0) * (apatch->net[4] + apatch->net[9]);
+   if (sset[2] == 0)
+      apatch->net[8] = (1.0 / 2.0) * (apatch->net[7] + apatch->net[9]);
+
+   apatch->net[0] = apatch->net[4] + apatch->net[7] + apatch->net[9];
+   apatch->net[1] = (1.0/3.0 * apatch->net[0]) + apatch->net[4];
+   apatch->net[2] = (1.0/3.0 * apatch->net[0]) + apatch->net[7];
+   apatch->net[3] = (1.0/3.0 * apatch->net[0]) + apatch->net[9];
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void GenerateCFAPScalarsFromConvexConvexFaceDependency(Apatch* fap1,
+						       Apatch* fap2,
+						       int sset[3])
+{
+   int ef1i[2], nef1i, ef2i[2], nef2i;
+   int i, j, k;
+   Scalar sf1[4], sf2[4], se;
+   Point pt;
+   Scalar a[4], b[4];
+   int cpi[4];
+   double mA[3][3], mX[3], mB[3];
+   Vector tmpVec;
+
+   k = 0;
+   for (i = 1; i < 4; i++) {
+      for (j = 1; j < 4; j++) {
+         tmpVec = PPDiff(fap1->tetrahedron[i].position, 
+			 fap2->tetrahedron[j].position);
+ 	 if ( VVDot(tmpVec, tmpVec) == 0 ) {
+            ef1i[k] = i;
+            ef2i[k] = j;
+            k++;
+         }
+      }
+   }
+   if (k > 2) {
+      fprintf("Invalid edge vertex count, exiting.\n");
+      exit(1);
+   }
+   for (i = 1; i < 4; i++) {
+      if (i != ef1i[0] && i != ef1i[1])
+         nef1i = i;
+      if (i != ef2i[0] && i != ef2i[1])
+         nef2i = i;
+   }
+
+   cpi[0] = 0;  cpi[nef1i] = 0;  cpi[ef1i[0]] = 2;  cpi[ef1i[1]] = 1;
+   sf1[ef1i[0]] = fap1->net[CPIndex(ApatchDeg, 3, cpi)];
+   cpi[0] = 0;  cpi[nef1i] = 0;  cpi[ef1i[0]] = 1;  cpi[ef1i[1]] = 2;
+   sf1[ef1i[1]] = fap1->net[CPIndex(ApatchDeg, 3, cpi)];
+   cpi[0] = 0;  cpi[nef1i] = 1;  cpi[ef1i[0]] = 1;  cpi[ef1i[1]] = 1;
+   sf1[nef1i] = fap1->net[CPIndex(ApatchDeg, 3, cpi)];
+
+   cpi[0] = 0;  cpi[nef2i] = 0;  cpi[ef2i[0]] = 2;  cpi[ef2i[1]] = 1;
+   sf2[ef2i[0]] = fap2->net[CPIndex(ApatchDeg, 3, cpi)];
+   cpi[0] = 0;  cpi[nef2i] = 0;  cpi[ef2i[0]] = 1;  cpi[ef2i[1]] = 2;
+   sf2[ef2i[1]] = fap2->net[CPIndex(ApatchDeg, 3, cpi)];
+   cpi[0] = 0;  cpi[nef2i] = 1;  cpi[ef2i[0]] = 1;  cpi[ef2i[1]] = 1;
+   sf2[nef2i] = fap2->net[CPIndex(ApatchDeg, 3, cpi)];
+
+   pt = PPrr(fap1->tetrahedron[0].position, 
+	     fap2->tetrahedron[0].position, 1, 1);
+   PCoords(pt, fap1->apFrame, &a[0], &a[1], &a[2]);
+   a[3] = 1- a[0] - a[1] - a[2];
+/*
+fprintf(stderr, "Bcoords pt wrt fap1: %lg, %lg, %lg, %lg\n", a[0],a[1],a[2],a[3]);
+*/
+   PCoords(pt, fap2->apFrame, &b[0], &b[1], &b[2]);
+   b[3] = 1- b[0] - b[1]- b[2];
+/*
+fprintf(stderr, "Bcoords pt wrt fap2: %lg, %lg, %lg, %lg\n", b[0],b[1],b[2],b[3]);
+*/
+   mA[0][0] = 1;   mA[0][1] = -a[0];   mA[0][2] = 0;
+   mA[1][0] = 1;   mA[1][1] = 0;       mA[1][2] = -b[0];
+   mA[2][0] = 1;   mA[2][1] = -0.5;    mA[2][2] = -0.5;
+
+   mB[0] = a[1]*sf1[1] + a[2]*sf1[2] + a[3]*sf1[3];
+   mB[1] = b[1]*sf2[1] + b[2]*sf2[2] + b[3]*sf2[3];
+   mB[2] = 0;
+
+/*
+fprintf(stderr, "Solving matrix: \n");
+for (i=0; i<3; i++)
+fprintf(stderr, "%lf %lf %lf   %lf \n", mA[i][0], mA[i][1], mA[i][2], mB[i]);
+fprintf(stderr, "Matrix again: \n");
+for (i=0; i<3; i++)
+fprintf(stderr, "%lg %lg %lg   %lg \n", mA[i][0], mA[i][1], mA[i][2], mB[i]);
+*/
+
+   GaussianSolve3x3(mA, mB, mX);
+/*
+fprintf(stderr, "Result: %lg %lg %lg \n", mX[0], mX[1], mX[2]);
+*/
+
+   se     = mX[0];
+   sf1[0] = mX[1];
+   sf2[0] = mX[2];
+
+   cpi[0] = 1;  cpi[nef1i] = 0;  cpi[ef1i[0]] = 1;  cpi[ef1i[1]] = 1;
+   fap1->net[CPIndex(ApatchDeg, 3, cpi)] = sf1[0];
+   sset[nef1i - 1] = 1;
+   cpi[0] = 1;  cpi[nef2i] = 0;  cpi[ef2i[0]] = 1;  cpi[ef2i[1]] = 1;
+   fap2->net[CPIndex(ApatchDeg, 3, cpi)] = sf2[0];
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void ConstructConvexConvexEdgeApatchSimplex(Apatch* eap1, Apatch* eap2, 
+					    Apatch* f1ap, Apatch* f2ap,
+					    Edge* tedge, Face* f1, Face* f2,
+					    int f1type, int f2type, 
+					    Space wspace)
+{
+   VERTEX etetra[4];
+   Vertex* edgeV[2];
+
+   fprintf(stderr, "CCEdgeFaces: %s, %s\n",ReturnName(f1),ReturnName(f2));
+
+   if (f1type == ZERO_CONVEX && f2type == NEG_CONVEX) {
+      ConstructZeroConvexFaceApatch(f1ap, f1, 1, wspace);
+      ConstructSingleFaceApatchSimplex(f2ap, f2, f2type, wspace);
+   }
+   else if (f1type == NEG_CONVEX && f2type == ZERO_CONVEX) {
+      ConstructSingleFaceApatchSimplex(f1ap, f1, f1type, wspace);
+      ConstructZeroConvexFaceApatch(f2ap, f2, 1, wspace);
+   }
+   else if ((f1type == POS_CONVEX && f2type == NEG_CONVEX) ||
+            (f1type == NEG_CONVEX && f2type == POS_CONVEX)) {
+      fprintf(stderr, "Edge faces %s, %s must be handled separately by ConstructPosConvexNegConvexEdgeApatchSimplex().\n", ReturnName(f1), ReturnName(f2));
+      exit(1);
+   }
+   else {
+      ConstructSingleFaceApatchSimplex(f1ap, f1, f1type, wspace);
+      ConstructSingleFaceApatchSimplex(f2ap, f2, f2type, wspace);
+   }
+
+   etetra[1].position = PPrr(f1ap->tetrahedron[0].position,
+                             f2ap->tetrahedron[0].position, 1, 1);
+   GetEdgeVertices(tedge, &edgeV[0], &edgeV[1]);
+   etetra[2].position = ReturnUDPoint(edgeV[0]);
+   etetra[2].normal   = ReturnUDNormal(edgeV[0]);
+   etetra[3].position = ReturnUDPoint(edgeV[1]);
+   etetra[3].normal   = ReturnUDNormal(edgeV[1]);
+
+   etetra[0].position = f1ap->tetrahedron[0].position;
+   *eap1 = CreateApatch(ApatchDeg, etetra, wspace, EDGE1_COLOR);
+   etetra[0].position = f2ap->tetrahedron[0].position;
+   *eap2 = CreateApatch(ApatchDeg, etetra, wspace, EDGE2_COLOR);
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void FitConvexConvexCubicEdgeApatches(Apatch* eap1, Apatch* eap2,
+				      Apatch* f1ap, Apatch* f2ap,
+				      Face* f1, Face* f2, 
+				      int f1type, int f2type, Space wspace)
+{
+   int i, j, k, l;
+   int e1p2, e1p3, e2p2, e2p3, f1ne1, f2ne2;
+   int f1cpi[4], f2cpi[4], cpi[4];
+   int a0, a1, a2, a3;
+   Scalar be1[4], be2[4];
+   Vector tmpvec;
+   Scalar tmp;
+
+   FitSingleCubicFaceApatch(f1ap, f1, f1type, wspace);
+   FitSingleCubicFaceApatch(f2ap, f2, f2type, wspace);
+
+   /* Get the face-edge tetrahedra common edge vertex indices. */
+   for (i = 1; i < 4; i++) {
+      tmpvec = PPDiff(f1ap->tetrahedron[i].position, 
+		      eap1->tetrahedron[2].position);
+      if ( VVDot(tmpvec, tmpvec) == 0 ) {
+         e1p2 = i;
+      } 
+      else {
+         tmpvec = PPDiff(f1ap->tetrahedron[i].position, 
+			 eap1->tetrahedron[3].position);
+         if ( VVDot(tmpvec, tmpvec) == 0 ) {
+            e1p3 = i;
+         } 
+         else {
+            f1ne1 = i;
+         }
+      }
+      tmpvec = PPDiff(f2ap->tetrahedron[i].position, 
+		      eap2->tetrahedron[2].position);
+      if ( VVDot(tmpvec, tmpvec) == 0 ) {
+         e2p2 = i;
+      }
+      else {
+         tmpvec = PPDiff(f2ap->tetrahedron[i].position, 
+			 eap2->tetrahedron[3].position);
+         if ( VVDot(tmpvec, tmpvec) == 0 ) {
+            e2p3 = i;
+         }
+         else {
+            f2ne2 = i;
+         }
+      }
+   }
+
+fprintf(stderr,"e1p2: %d, e1p3: %d, f1ne1: %d, e2p2: %d, e2p3: %d, f2ne2: %d\n",e1p2,e1p3,f1ne1,e2p2,e2p3,f2ne2);
+
+   /* Set face-edge tetrahedra C0 continuity. */
+   j = 0;
+   for (i = 0; i <= ApatchDeg; i++) {
+      for (k = 0; k <= (ApatchDeg - i); k++) {
+         l = ApatchDeg - i - k;
+         f1cpi[0] = i;  f1cpi[f1ne1] = 0;  f1cpi[e1p2] = k;  f1cpi[e1p3] = l;
+         eap1->net[CPIndexDim3(ApatchDeg, i, 0, k, l)] =
+            f1ap->net[CPIndex(ApatchDeg, 3, f1cpi)];
+         f2cpi[0] = i;  f2cpi[f2ne2] = 0;  f2cpi[e2p2] = k;  f2cpi[e2p3] = l;
+         eap2->net[CPIndexDim3(ApatchDeg, i, 0, k, l)] =
+            f2ap->net[CPIndex(ApatchDeg, 3, f2cpi)];
+      }
+   }
+
+   /* Set face-edge tetrahedra C1 continuity. */
+   PCoords(eap1->tetrahedron[1].position, f1ap->apFrame, 
+	   &be1[0], &be1[1], &be1[2]);
+   PCoords(eap2->tetrahedron[1].position, f2ap->apFrame, 
+	   &be2[0], &be2[1], &be2[2]);
+   be1[3] = 1 - be1[0] - be1[1] - be1[2];
+   be2[3] = 1 - be2[0] - be2[1] - be2[2];
+   j = 1;
+   for (i = 0; i <= (ApatchDeg - j); i++) {
+      for (k = 0; k <= (ApatchDeg - i - j); k++) {
+         l = ApatchDeg - i - j - k;
+         cpi[0] = i+1;  cpi[f1ne1] = j-1;  cpi[e1p2] = k;    cpi[e1p3] = l;
+         a0 = CPIndex(ApatchDeg, 3, cpi);
+         cpi[0] = i;    cpi[f1ne1] = j;    cpi[e1p2] = k;    cpi[e1p3] = l;
+         a1 = CPIndex(ApatchDeg, 3, cpi);
+         cpi[0] = i;    cpi[f1ne1] = j-1;  cpi[e1p2] = k+1;  cpi[e1p3] = l;
+         a2 = CPIndex(ApatchDeg, 3, cpi);
+         cpi[0] = i;    cpi[f1ne1] = j-1;  cpi[e1p2] = k;    cpi[e1p3] = l+1;
+         a3 = CPIndex(ApatchDeg, 3, cpi);
+         eap1->net[CPIndexDim3(ApatchDeg,i,j,k,l)] = 
+	   ( (be1[0] * f1ap->net[a0]) + (be1[f1ne1] * f1ap->net[a1]) +
+	     (be1[e1p2] * f1ap->net[a2]) + (be1[e1p3] * f1ap->net[a3]) );
+
+         cpi[0] = i+1;  cpi[f2ne2] = j-1;  cpi[e2p2] = k;    cpi[e2p3] = l;
+         a0 = CPIndex(ApatchDeg, 3, cpi);
+         cpi[0] = i;    cpi[f2ne2] = j;    cpi[e2p2] = k;    cpi[e2p3] = l;
+         a1 = CPIndex(ApatchDeg, 3, cpi);
+         cpi[0] = i;    cpi[f2ne2] = j-1;  cpi[e2p2] = k+1;  cpi[e2p3] = l;
+         a2 = CPIndex(ApatchDeg, 3, cpi);
+         cpi[0] = i;    cpi[f2ne2] = j-1;  cpi[e2p2] = k;    cpi[e2p3] = l+1;
+         a3 = CPIndex(ApatchDeg, 3, cpi);
+         eap2->net[CPIndexDim3(ApatchDeg,i,j,k,l)] = 
+	   ( (be2[0] * f2ap->net[a0]) + (be2[f2ne2] * f2ap->net[a1]) +
+	     (be2[e2p2] * f2ap->net[a2]) + (be2[e2p3] * f2ap->net[a3]) );
+      }
+   }
+
+   /* Check if edge-edge tetrahedra C0 continuity is satisfied so far. */
+   i = 0;
+   for (j = 0; j <= (ApatchDeg - i); j++) {
+      for (k = 0; k <= (ApatchDeg - i - j); k++) {
+         l = ApatchDeg - i - j - k;
+         if ( fabs(eap1->net[CPIndexDim3(ApatchDeg,i,j,k,l)] -
+		   eap2->net[CPIndexDim3(ApatchDeg,i,j,k,l)]) > eps ) {
+            fprintf(stderr, "Edge-edge tetrahedra C0 continuity not satisfied by construction, exiting.\n");
+            exit(1);
+         }
+      }
+   }
+
+   /* Check if scalars determined for the edge tetrahedra are consistent   */
+   /* with the given normals (i.e. they interpolate them) at the vertices. */
+   /* Since edge-edge tetrahedra C0 continuity is satisfied, we only need  */
+   /* to examine the scalars along one of the edge tetrahedra.             */
+
+
+   /* Check if edge-edge tetrahedra C1 continuity is satisfied so far. */
+   PCoords(eap2->tetrahedron[0].position, eap1->apFrame,
+	   &be2[0], &be2[1], &be2[2]);
+   be2[3] = 1 - be2[0] - be2[1] - be2[2];
+   i = 1;
+   for (j = 0; j <= (ApatchDeg - i); j++) {
+     for (k = 0; k <= (ApatchDeg - i - j); k++) {
+        l = ApatchDeg - i -j- k;
+        a0 = CPIndexDim3(ApatchDeg, i,   j,   k,   l  );
+        a1 = CPIndexDim3(ApatchDeg, i-1, j+1, k,   l  );
+        a2 = CPIndexDim3(ApatchDeg, i-1, j,   k+1, l  );
+        a3 = CPIndexDim3(ApatchDeg, i-1, j,   k,   l+1);
+        switch (j) {
+        case 0:
+	  /* Check for C1 continuity across edge-edge tetrahedra. */
+          tmp = ( (be2[0] * eap1->net[a0]) + (be2[1] * eap1->net[a1]) +
+		  (be2[2] * eap1->net[a2]) + (be2[3] * eap1->net[a3]) );
+fprintf(stderr, "tmp is: %lf, eap2net[a0]: %lf \n", tmp, eap2->net[a0]);
+          if ( fabs(eap2->net[a0] - tmp) > eps ) {
+             fprintf(stderr, "Edge-edge tetrahedra C1 continuity not satisfied by construction.\n");
+          }
+          break;
+        case 1:
+	  /* Set edge-edge control scalars (e0210 and e0201)   */
+	  /* to ensure C1 continuity.                          */
+          if (be2[1] == 0) {
+             fprintf(stderr, "Divide by zero error in computing edge-edge scalars.\n");
+             exit(1);
+          }
+          eap1->net[a1] = 
+	    (1.0 / be2[1]) * (eap2->net[a0] - ((be2[0] * eap1->net[a0]) +
+					       (be2[2] * eap1->net[a2]) +
+					       (be2[3] * eap1->net[a3])));
+          eap2->net[a1] = eap1->net[a1];
+          break;
+        case 2:
+	  /* Set edge-edge tetrahedra free parameters and ensure continuity. */
+          /* eap1->net[a0] and eap2->net[a0] are the free parameters, and    */
+          /* eap1/2->net[a1] is set by continuity constraints.               */
+          eap1->net[a0] = 
+	    (1.0 / 3.0) * (eap1->net[CPIndexDim3(ApatchDeg,i+1,j-1,k,l)] +
+			   eap1->net[CPIndexDim3(ApatchDeg,i,j-1,k+1,l)] +
+			   eap1->net[CPIndexDim3(ApatchDeg,i,j-1,k,l+1)]);
+          eap2->net[a0] = 
+	    (1.0 / 3.0) * (eap2->net[CPIndexDim3(ApatchDeg,i+1,j-1,k,l)] +
+			   eap2->net[CPIndexDim3(ApatchDeg,i,j-1,k+1,l)] +
+			   eap2->net[CPIndexDim3(ApatchDeg,i,j-1,k,l+1)]);
+          if (be2[1] == 0) {
+             fprintf(stderr, "Divide by zero error in computing edge-edge scalars.\n");
+             exit(1);
+          }
+          eap1->net[a1] = 
+	    (1.0 / be2[1]) * (eap2->net[a0] - ((be2[0] * eap1->net[a0]) +
+					       (be2[2] * eap1->net[a2]) +
+					       (be2[3] * eap1->net[a3])));
+          eap2->net[a1] = eap1->net[a1];
+          break;
+        }
+     }
+   }
+}
+
+
+#if 0
+
+/* -------------------------------------------------------------------- *
+ * Check if the fitted A-patch gives correct normals at	                *
+ * the tetrahedral corners lying on the triangulation.  	        *
+ * Returns 0 if the evaluation is inconsistent with the data,           *
+ * returns 1 otherwise.                                                 *
+ * -------------------------------------------------------------------- */
+int IsFittedFaceApatchConsistentWithData(Apatch apatch, 
+					 TriangulationFace tface)
+{
+   VERTEX chkV;
+   Scalar chkVVal, chkx, chky, chkz;
+   Vector chkVec;
+
+   chkV.position = apatch.tetrahedron[1].position;
+   chkVVal = EvalApatch(apatch, &chkV);
+   if (fabs(chkVVal) > eps) {
+      fprintf(stderr, "Face %s: Scalar evaluated at vertex1 is not zero.\n", tface.name);
+      return 0;
+   }
+   /*   if (chkVVal != 0) {
+      fprintf(stderr, "Scalar evaluated at P1 is not zero.\n");
+      return 0;
+   }
+   */
+   /*
+NCoords(chkV.normal, StdFrame(tface.wspace), &chkx, &chky, &chkz);
+fprintf(stderr, "chkV.normal: %lg %lg %lg\n", chkx, chky, chkz);
+   */
+   chkVec = VVCross(NDual(chkV.normal), NDual(tface.vertices[0].normal));
+   VCoords(chkVec, StdFrame(apatch.wspace), &chkx, &chky, &chkz);
+   if (chkx != 0 || chky != 0 || chkz != 0) {
+      fprintf(stderr, "Face %s: Normal evaluated at vertex1 inconsistent with data.\n", tface.name);
+      return 0;
+   }
+   if (VVDot(NDual(chkV.normal), NDual(tface.vertices[0].normal)) < 0) {
+      fprintf(stderr, "Face %s: Normal evaluated at vertex1 should point in the opposite direction.\n", tface.name);
+      return 0;
+   }
+
+   chkV.position = apatch.tetrahedron[2].position;
+   chkVVal = EvalApatch(apatch, &chkV);
+   if (fabs(chkVVal) > eps) {
+      fprintf(stderr, "Face %s: Scalar evaluated at vertex2 is not zero.\n", tface.name);
+      return 0;
+   }
+   /*   if (chkVVal != 0) {
+      fprintf(stderr, "Scalar evaluated at P2 is not zero.\n");
+      return 0;
+   }
+   */
+   chkVec = VVCross(NDual(chkV.normal), NDual(tface.vertices[1].normal));
+   VCoords(chkVec, StdFrame(apatch.wspace), &chkx, &chky, &chkz);
+   if (chkx != 0 || chky != 0 || chkz != 0) {
+      fprintf(stderr, "Face %s: Normal evaluated at vertex2 inconsistent with data.\n", tface.name);
+      return 0;
+   }
+   if (VVDot(NDual(chkV.normal), NDual(tface.vertices[1].normal)) < 0) {
+      fprintf(stderr, "Face %s: Normal evaluated at vertex2 should point in the opposite direction.\n", tface.name);
+      return 0;
+   }
+
+   chkV.position = apatch.tetrahedron[3].position;
+   chkVVal = EvalApatch(apatch, &chkV);
+   if (fabs(chkVVal) > eps) {
+      fprintf(stderr, "Face %s: Scalar evaluated at vertex3 is not zero.\n", tface.name);
+      return 0;
+   }
+   /*   if (chkVVal != 0) {
+      fprintf(stderr, "Scalar evaluated at P3 is not zero.\n");
+      return 0;
+   }
+   */
+   chkVec = VVCross(NDual(chkV.normal), NDual(tface.vertices[2].normal));
+   VCoords(chkVec, StdFrame(apatch.wspace), &chkx, &chky, &chkz);
+   if (chkx != 0 || chky != 0 || chkz != 0) {
+      fprintf(stderr, "Face %s: Normal evaluated at vertex3 inconsistent with data.\n", tface.name);
+      return 0;
+   }
+   if (VVDot(NDual(chkV.normal), NDual(tface.vertices[2].normal)) < 0) {
+      fprintf(stderr, "Face %s: Normal evaluated at vertex3 should point in the opposite direction.\n", tface.name);
+      return 0;
+   }
+
+   return 1;
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void FitCubicFaceApatchPair(ApatchPair* apPair)
+{
+   FitSingleCubicFaceApatch(&apPair->ap1);
+   SetCubicFaceApatchPairContinuity(apPair);
+   SetCubicFaceApatchPairFreeScalarsByAvg(apPair);
+
+   /*
+   if (IsFittedFaceApatchConsistentWithData(apPair->ap1, tface) == 0) {
+      fprintf(stderr, "Face %s: Invalid apPair->ap1. Exiting.\n", tface.name);
+      exit(1);
+   }
+   if (IsFittedFaceApatchConsistentWithData(apPair->ap2, tface) == 0) {
+      fprintf(stderr, "Face %s: Invalid apPair->ap2. Exiting.\n", tface.name);
+      exit(1);
+   }
+   */
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void SetCubicFaceApatchPairContinuity(ApatchPair* apPair)
+{
+   Scalar b0, b1, b2, b3;
+   int v1index, i, j, k, l, a0, a1, a2, a3;
+
+   /* Ensure C0 continuity across the shared face. */
+   v1index = CPIndexDim3(ApatchDeg, 0, ApatchDeg, 0, 0);
+   for (i = v1index; i < apPair->ap1.netSize; i++) {
+      apPair->ap2.net[i] = apPair->ap1.net[i];
+   }
+
+   /* Ensure C1 continuity across the shared face. */
+   /* Get barycentric coords of ap2.tetrahedron[0] wrt ap1. */
+   PCoords(apPair->ap2.tetrahedron[0].position, apPair->ap1.apFrame,
+		&b0, &b1, &b2);
+   b3 = 1 - b0 - b1 - b2;
+   i = 1;
+   for (j = 0; j <= (ApatchDeg - i); j++) {
+      for (k = 0; k <= (ApatchDeg - i - j); k++) {
+         l = ApatchDeg - i - j - k;
+         a0 = CPIndexDim3(ApatchDeg, 1, j, k, l);
+         a1 = CPIndexDim3(ApatchDeg, 0, j+1, k, l);
+         a2 = CPIndexDim3(ApatchDeg, 0, j, k+1, l);
+         a3 = CPIndexDim3(ApatchDeg, 0, j, k, l+1);
+         apPair->ap2.net[a0] = (b0 * apPair->ap1.net[a0]) +
+			       (b1 * apPair->ap1.net[a1]) +
+			       (b2 * apPair->ap1.net[a2]) +
+			       (b3 * apPair->ap1.net[a3]);
+      }
+   }
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void SetCubicFaceApatchPairFreeScalarsByAvg(ApatchPair* apPair)
+{
+   /* We need to determine the remaining control scalars which form the	*/
+   /* free parameters of our construction; used to control shape of the	*/
+   /* fitted Apatch.  The array index at which to store the generated	*/
+   /* control scalars can be determined easily, and are therefore 	*/
+   /* referred to directly (the control scalars are stored in reverse	*/
+   /* lexographic order within a linear array).				*/
+
+   apPair->ap2.net[1] = (1.0 / 3.0) * (apPair->ap2.net[4] +
+			apPair->ap2.net[5] + apPair->ap2.net[6]);
+   apPair->ap2.net[2] = (1.0 / 3.0) * (apPair->ap2.net[5] +
+			apPair->ap2.net[7] + apPair->ap2.net[8]);
+   apPair->ap2.net[3] = (1.0 / 3.0) * (apPair->ap2.net[6] +
+			apPair->ap2.net[8] + apPair->ap2.net[9]);
+   apPair->ap2.net[0] = (1.0 / 3.0) * (apPair->ap2.net[1] +
+			apPair->ap2.net[2] + apPair->ap2.net[3]);
+
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void ConstructNonconvexNonconvexEdgeApatchSimplex(Apatch* eap1, Apatch* eap2, 
+						  Apatch* eap3, Apatch* eap4,
+						  ApatchPair* f1app, 
+						  ApatchPair* f2app,
+						  TriangulationEdge tedge)
+{
+   VERTEX e1tetra[4], e2tetra[4], e3tetra[4], e4tetra[4];
+   Scalar chk;
+   Point tmpP2, tmpP3;
+   int i;
+
+   fprintf(stderr, "Nonconvex Nonconvex Edge Faces: %s, %s\n", tedge.f1.name,tedge.f2.name);
+
+   ConstructFaceApatchPairSimplex(f1app, tedge.f1);
+   ConstructFaceApatchPairSimplex(f2app, tedge.f2);
+
+   /* Assuming all faces are given according to a right hand system */
+   /* and all normals point to the same side.                       */
+   /* So f1app->ap1 and f2app->ap1 should lie on the same side.     */
+   e1tetra[0].position = PPrr(f1app->ap1.tetrahedron[0].position,
+                              f2app->ap1.tetrahedron[0].position, 1, 1);
+   e2tetra[0].position = e1tetra[0].position;
+   e1tetra[1].position = f1app->ap1.tetrahedron[0].position;
+   e2tetra[1].position = f2app->ap1.tetrahedron[0].position;
+   e3tetra[0].position = PPrr(f1app->ap2.tetrahedron[0].position,
+                              f2app->ap2.tetrahedron[0].position, 1, 1);
+   e4tetra[0].position = e3tetra[0].position;
+   e3tetra[1].position = f1app->ap2.tetrahedron[0].position;
+   e4tetra[1].position = f2app->ap2.tetrahedron[0].position;
+   tmpP2 = tedge.vertices[0].position;
+   tmpP3 = tedge.vertices[1].position;
+   chk = VVDot( 
+            VVCross( 
+               PPDiff(tmpP2, e1tetra[1].position), 
+               PPDiff(tmpP3, tmpP2) ),
+            PPDiff(e1tetra[0].position, e1tetra[1].position) );
+   if (chk >= 0) {
+      e1tetra[2] = tedge.vertices[0];   e1tetra[3] = tedge.vertices[1];
+      e2tetra[2] = tedge.vertices[1];   e2tetra[3] = tedge.vertices[0];
+      e3tetra[2] = tedge.vertices[1];   e3tetra[3] = tedge.vertices[0];
+      e4tetra[2] = tedge.vertices[0];   e4tetra[3] = tedge.vertices[1];
+   }
+   else {
+      e1tetra[2] = tedge.vertices[1];   e1tetra[3] = tedge.vertices[0];
+      e2tetra[2] = tedge.vertices[0];   e2tetra[3] = tedge.vertices[1];
+      e3tetra[2] = tedge.vertices[0];   e3tetra[3] = tedge.vertices[1];
+      e4tetra[2] = tedge.vertices[1];   e4tetra[3] = tedge.vertices[0];
+   }
+
+   *eap1 = CreateApatch(ApatchDeg, e1tetra, tedge.wspace, EDGE1_COLOR);
+   *eap2 = CreateApatch(ApatchDeg, e2tetra, tedge.wspace, EDGE2_COLOR);
+   *eap3 = CreateApatch(ApatchDeg, e3tetra, tedge.wspace, EDGE1_COLOR);
+   *eap4 = CreateApatch(ApatchDeg, e4tetra, tedge.wspace, EDGE2_COLOR);
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void FitNonconvexNonconvexCubicEdgeApatches(Apatch* eap1, Apatch* eap2,
+					    Apatch* eap3, Apatch* eap4,
+					    ApatchPair* f1app, 
+					    ApatchPair* f2app)
+{
+   int i;
+
+   FitCubicFaceApatchPair(f1app);
+   FitCubicFaceApatchPair(f2app);
+
+   for (i = 0; i < NetSize(ApatchDeg,3); i++) {
+      eap1->net[i] = 0;
+      eap2->net[i] = 0;
+      eap3->net[i] = 0;
+      eap4->net[i] = 0;
+   }
+
+   /*Now set C0 continuity and set scalars to interpolate normals*/
+
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void ConstructPosConvexNegConvexEdgeApatchSimplex(Apatch* eap1, Apatch* eap2, 
+						  Apatch* fap3, 
+						  Apatch* f1ap, Apatch* f2ap,
+						  TriangulationEdge tedge, 
+						  int f1type, int f2type)
+{
+   fprintf(stderr, "Edge faces %s, %s are adjacent positive and negative convex. Not handled (no edge A-patches are constructed.\n", tedge.f1.name, tedge.f2.name);
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void FitPosConvexNegConvexCubicEdgeApatches(Apatch* eap1, Apatch* eap2, 
+					    Apatch* fap3, 
+					    Apatch* f1ap, Apatch* f2ap)
+{
+
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void ConstructConvexNonconvexEdgeApatchSimplex(Apatch* eap1, Apatch* eap2, 
+					       Apatch* fap, 
+					       ApatchPair* fapPair,
+					       TriangulationEdge tedge, 
+					       int f1type, int f2type)
+{
+   VERTEX e1tetra[4], e2tetra[4];
+   Scalar chk;
+   Point tmpP2, tmpP3;
+   int i;
+
+   fprintf(stderr, "Convex Nonconvex Edge Faces: %s, %s\n", tedge.f1.name, tedge.f2.name);
+
+   if (f1type != NON_CONVEX && f2type == NON_CONVEX) {
+      ConstructSingleFaceApatchSimplex(fap, tedge.f1, f1type);
+      ConstructFaceApatchPairSimplex(fapPair, tedge.f2);
+   }
+   else if (f1type == NON_CONVEX && f2type != NON_CONVEX) {
+      ConstructFaceApatchPairSimplex(fapPair, tedge.f1);
+      ConstructSingleFaceApatchSimplex(fap, tedge.f2, f2type);
+   }
+   else {
+      fprintf(stderr, "Edge without convex & nonconvex adjacent faces.\n");
+      exit(1);
+   }
+
+   if (f1type == NEG_CONVEX || f2type == NEG_CONVEX) {
+      e1tetra[0].position = PPrr(fap->tetrahedron[0].position,
+                                 fapPair->ap2.tetrahedron[0].position, 1, 1);
+      e2tetra[1].position = fapPair->ap2.tetrahedron[0].position;
+   }
+   else {
+      e1tetra[0].position = PPrr(fap->tetrahedron[0].position,
+                                 fapPair->ap1.tetrahedron[0].position, 1, 1);
+      e2tetra[1].position = fapPair->ap1.tetrahedron[0].position;
+   }
+   e2tetra[0].position = e1tetra[0].position;
+   e1tetra[1].position = fap->tetrahedron[0].position;
+   /*The following part should work.*/
+   tmpP2 = tedge.vertices[0].position;
+   tmpP3 = tedge.vertices[1].position;
+   chk = VVDot( 
+            VVCross( 
+               PPDiff(tmpP2, e1tetra[1].position), 
+               PPDiff(tmpP3, tmpP2) ),
+            PPDiff(e1tetra[0].position, e1tetra[1].position) );
+   if (chk >= 0) {
+      e1tetra[2] = tedge.vertices[0];   e1tetra[3] = tedge.vertices[1];
+      e2tetra[2] = tedge.vertices[1];   e2tetra[3] = tedge.vertices[0];
+   }
+   else {
+      e1tetra[2] = tedge.vertices[1];   e1tetra[3] = tedge.vertices[0];
+      e2tetra[2] = tedge.vertices[0];   e2tetra[3] = tedge.vertices[1];
+   }
+
+   *eap1 = CreateApatch(ApatchDeg, e1tetra, tedge.wspace, EDGE1_COLOR);
+   *eap2 = CreateApatch(ApatchDeg, e2tetra, tedge.wspace, EDGE2_COLOR);
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void FitConvexNonconvexCubicEdgeApatches(Apatch* eap1, Apatch* eap2,
+					 Apatch* fap, ApatchPair* fapPair)
+{
+   int i;
+
+   FitSingleCubicFaceApatch(fap);
+   FitCubicFaceApatchPair(fapPair);
+
+   for (i = 0; i < eap1->netSize; i++)
+      eap1->net[i] = 0;
+   for (i = 0; i < eap2->netSize; i++)
+      eap2->net[i] = 0;
+
+   /*Now set C0 continuity and set scalars to interpolate normals*/
+}
+
+/***************************/
+#endif
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void OutputS3dFaceApatchSimplex(FILE* fp, Apatch apatch)
+{
+   Material matTriangulation;
+   Material matSimplex;
+
+   matTriangulation = APColor1;
+   matSimplex = APColor2;
+
+   OutputS3dVMatPolygonTriangle(fp, matSimplex, apatch.tetrahedron[0],
+				matSimplex, apatch.tetrahedron[1],
+				matSimplex, apatch.tetrahedron[2], 0);
+   OutputS3dVMatPolygonTriangle(fp, matSimplex, apatch.tetrahedron[0],
+				matSimplex, apatch.tetrahedron[2],
+				matSimplex, apatch.tetrahedron[3], 0);
+   OutputS3dVMatPolygonTriangle(fp, matSimplex, apatch.tetrahedron[0],
+				matSimplex, apatch.tetrahedron[3],
+				matSimplex, apatch.tetrahedron[1], 0);
+   OutputS3dVMatPolygonTriangle(fp, matTriangulation, apatch.tetrahedron[1],
+				matTriangulation, apatch.tetrahedron[2],
+				matTriangulation, apatch.tetrahedron[3], 0);
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void OutputS3dFaceApatchPairSimplex(FILE* fp, ApatchPair apPair)
+{
+   OutputS3dFaceApatchSimplex(fp, apPair.ap1);
+   OutputS3dFaceApatchSimplex(fp, apPair.ap2);
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void OutputS3dEdgeApatchSimplex(FILE* fp, Apatch apatch)
+{
+   Material matTriangulation;
+   Material matSimplex;
+
+   matTriangulation = APColor1;
+   matSimplex = APColor2;
+
+   OutputS3dVMatPolygonTriangle(fp, matSimplex, apatch.tetrahedron[0], 
+				matTriangulation, apatch.tetrahedron[2],
+				matSimplex, apatch.tetrahedron[3], 0);
+   OutputS3dVMatPolygonTriangle(fp, matSimplex, apatch.tetrahedron[1], 
+				matTriangulation, apatch.tetrahedron[3],
+				matSimplex, apatch.tetrahedron[2], 0);
+   OutputS3dVMatPolygonTriangle(fp, matSimplex, apatch.tetrahedron[0],
+				matSimplex, apatch.tetrahedron[1],
+				matSimplex, apatch.tetrahedron[2], 0);
+   OutputS3dVMatPolygonTriangle(fp, matSimplex, apatch.tetrahedron[0],
+				matSimplex, apatch.tetrahedron[3],
+				matSimplex, apatch.tetrahedron[1], 0);
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+@
+
+
+1.6
+log
+@convex-convex completed.
+free parameter constuction - avgng vs. interpolation options.
+@
+text
+@d3 2
+a4 2
+/* $Date: 1998/12/22 02:06:29 $                                       */
+/* $Revision: 1.5 $                                                   */
+a34 1
+/* const int ApatchDeg = 3; */
+a74 1
+#if 0
+a81 1
+#endif
+a122 1
+
+d552 1
+d559 1
+d589 1
+d595 1
+d598 1
+d609 1
+d615 1
+d618 1
+d629 1
+d635 1
+d638 1
+a681 7
+   apatch->net[1] = (1.0 / 3.0) * (apatch->net[4] + apatch->net[7] +
+				   apatch->net[9]);
+   apatch->net[2] = apatch->net[1];
+   apatch->net[3] = apatch->net[1];
+   apatch->net[0] = apatch->net[1];
+
+   /*
+a689 1
+   */
+d693 1
+d697 1
+d705 6
+a710 1
+   /*LATER: check if all scalars of sset[3] are set.*/
+d723 6
+a728 1
+   /*LATER: check if all scalars of sset[3] are set.*/
+d808 9
+d818 4
+a840 6
+  /*
+   VERTEX e1tetra[4], e2tetra[4];
+   Scalar chk;
+   Point tmpP2, tmpP3;
+   int i;
+  */
+a862 23
+
+   /*
+   e1tetra[0].position = f1ap->tetrahedron[0].position;
+   e2tetra[0].position = f2ap->tetrahedron[0].position;
+   e1tetra[1].position = PPrr(f1ap->tetrahedron[0].position,
+                              f2ap->tetrahedron[0].position, 1, 1);
+   e2tetra[1].position = e1tetra[1].position;
+   tmpP2 = tedge.vertices[0].position;
+   tmpP3 = tedge.vertices[1].position;
+   chk = VVDot( 
+            VVCross( 
+               PPDiff(tmpP2, e1tetra[0].position), 
+               PPDiff(tmpP3, tmpP2) ),
+            PPDiff(e1tetra[1].position, e1tetra[0].position) );
+   if (chk >= 0) {
+      e1tetra[2] = tedge.vertices[1];   e1tetra[3] = tedge.vertices[0];
+      e2tetra[2] = tedge.vertices[0];   e2tetra[3] = tedge.vertices[1];
+   }
+   else {
+      e1tetra[2] = tedge.vertices[0];   e1tetra[3] = tedge.vertices[1];
+      e2tetra[2] = tedge.vertices[1];   e2tetra[3] = tedge.vertices[0];
+   }
+   */
+@
+
+
+1.5
+log
+@MAJOR CHANGES... Now uses face and edges directly for construction.
+@
+text
+@d3 2
+a4 2
+/* $Date: 1998/12/15 21:59:24 $                                       */
+/* $Revision: 1.4 $                                                   */
+d33 1
+d48 1
+a48 1
+void SetCFAPFirstFreeScalarByAvg(Apatch* apatch);
+d50 4
+d522 1
+a522 1
+   SetCFAPFirstFreeScalarByAvg(apatch);
+d543 1
+a543 1
+            SetCFAPFirstFreeScalarByAvg(&adjap);
+d556 6
+a561 1
+   SetCFAPRemainingFreeScalarsByAvg(apatch, sset);
+d644 1
+a644 1
+void SetCFAPFirstFreeScalarByAvg(Apatch* apatch)
+d651 1
+a651 1
+   apatch->net[14] = (1.0 / 6.0) * (apatch->net[11] + apatch->net[12] +
+d694 29
+@
+
+
+1.4
+log
+@no significant changes.  Before adding ForeachFaceFace...
+@
+text
+@d3 2
+a4 2
+/* $Date: 1998/12/12 04:01:57 $                                       */
+/* $Revision: 1.3 $                                                   */
+d20 3
+d37 15
+a51 15
+int TypeOfFace(TriangulationFace tface);
+void ConstructSingleFaceApatchSimplex(Apatch* apatch, TriangulationFace tface,
+				      int tfaceType);
+void ConstructZeroConvexFaceApatchSimplex(Apatch* apatch, 
+					  TriangulationFace tface,
+					  int aboveOrBelow);
+void FitSingleCubicFaceApatch(Apatch* apatch);
+void SetSingleCubicFaceApatchFreeScalarsByAvg(Apatch* apatch);
+int IsFittedFaceApatchConsistentWithData(Apatch apatch, 
+					 TriangulationFace tface);
+void ConstructFaceApatchPairSimplex(ApatchPair* apPair, 
+				    TriangulationFace tface);
+void FitCubicFaceApatchPair(ApatchPair* apPair);
+void SetCubicFaceApatchPairContinuity(ApatchPair* apPair);
+void SetCubicFaceApatchPairFreeScalarsByAvg(ApatchPair* apPair);
+d53 4
+a56 3
+					    Apatch* f1ap, Apatch* a2ap,
+					    TriangulationEdge tedge, 
+					    int f1type, int f2type);
+d58 3
+a60 31
+				      Apatch* f1ap, Apatch* f2ap);
+void ConstructNonconvexNonconvexEdgeApatchSimplex(Apatch* eap1, Apatch* eap2, 
+						  Apatch* eap3, Apatch* eap4,
+						  ApatchPair* f1app, 
+						  ApatchPair* f2app,
+						  TriangulationEdge tedge);
+void FitNonconvexNonconvexCubicEdgeApatches(Apatch* eap1, Apatch* eap2,
+					    Apatch* eap3, Apatch* eap4,
+					    ApatchPair* f1app, 
+					    ApatchPair* f2app);
+void ConstructPosConvexNegConvexEdgeApatchSimplex(Apatch* eap1, Apatch* eap2, 
+						  Apatch* fap3, 
+						  Apatch* f1ap, Apatch* f2ap,
+						  TriangulationEdge tedge, 
+						  int f1type, int f2type);
+void FitPosConvexNegConvexCubicEdgeApatches(Apatch* eap1, Apatch* eap2, 
+					    Apatch* fap3, 
+					    Apatch* f1ap, Apatch* f2ap);
+void ConstructConvexNonconvexEdgeApatchSimplex(Apatch* eap1, Apatch* eap2, 
+					       Apatch* fap, 
+					       ApatchPair* fapPair,
+					       TriangulationEdge tedge, 
+					       int f1type, int f2type);
+void FitConvexNonconvexCubicEdgeApatches(Apatch* eap1, Apatch* eap2,
+					 Apatch* fap, ApatchPair* fapPair);
+void OutputS3dMaterialTriangle(FILE* fp, Material m1, VERTEX v1,
+			       Material m2, VERTEX v2, Material m3,
+			       VERTEX v3, int nspeci);
+void OutputS3dMaterialVertex(FILE* fp, Material m, VERTEX v, int nspeci);
+void OutputS3dVertex(FILE* fp, VERTEX v, int nspeci);
+
+d64 1
+a64 1
+void ConstructFaceApatches(TriangulationFace tface)
+d66 1
+a66 1
+   int tfaceType;
+d68 15
+a82 3
+   tfaceType = TypeOfFace(tface);
+   /* fprintf(stderr, "type of face: %d, %s\n", tfaceType, tface.name); */
+   if (tfaceType == NON_CONVEX) {
+d84 1
+a84 1
+      ConstructFaceApatchPairSimplex(&apPair, tface);
+d93 1
+d97 1
+a97 1
+      ConstructSingleFaceApatchSimplex(&apatch, tface, tfaceType);
+d102 1
+a102 1
+         FitSingleCubicFaceApatch(&apatch);
+d111 1
+a111 1
+void ConstructEdgeApatches(TriangulationEdge tedge)
+d113 2
+d117 4
+a120 2
+   f1type = TypeOfFace(tedge.f1);
+   f2type = TypeOfFace(tedge.f2);
+d122 26
+d189 2
+a190 1
+						tedge, f1type, f2type);
+d196 2
+a197 1
+            FitConvexConvexCubicEdgeApatches(&eap1, &eap2, &f1ap, &f2ap);
+d252 1
+d257 1
+a257 1
+int ReadTriangulationFace(TriangulationFace* tface, Space wspace)
+d259 4
+a262 47
+   Frame wframe;
+   char* str;
+   char buf[100];
+
+   str = "TriangulationFace";
+   tface->wspace = wspace;
+   wframe = StdFrame(wspace);
+   if (!QueryDstructPath(str)) {
+      fprintf(stderr, "Read: %s not read in.\n", str);
+      exit(1);
+   }
+   clearBuffer(buf, 100);
+   sprintf(buf, "%s.name", str);
+   if (!GetString(buf, &tface->name)) {
+      fprintf(stderr, "Read: Failed upon reading face name.\n");
+      exit(1);
+   }
+   clearBuffer(buf, 100);
+   sprintf(buf, "%s.vertex1", str);  
+   if (!GetVertexNormal(buf, wframe, &tface->vertices[0].normal)) {
+      fprintf(stderr, "Read: Failed upon face vertex1 normal read.\n");
+      exit(1);
+   }
+   if (!GetVertexPosition(buf, wframe, &tface->vertices[0].position)) {
+      fprintf(stderr, "Read: Failed upon face vertex1 position read.\n");
+      exit(1);
+   }
+   sprintf(buf, "%s.vertex2", str);  
+   if (!GetVertexNormal(buf, wframe, &tface->vertices[1].normal)) {
+      fprintf(stderr, "Read: Failed upon face vertex2 normal read.\n");
+      exit(1);
+   }
+   if (!GetVertexPosition(buf, wframe, &tface->vertices[1].position)) {
+      fprintf(stderr, "Read: Failed upon face vertex2 position read.\n");
+      exit(1);
+   }
+   sprintf(buf, "%s.vertex3", str);  
+   if (!GetVertexNormal(buf, wframe, &tface->vertices[2].normal)) {
+      fprintf(stderr, "Read: Failed upon face vertex3 normal read.\n");
+      exit(1);
+   }
+   if (!GetVertexPosition(buf, wframe, &tface->vertices[2].position)) {
+      fprintf(stderr, "Read: Failed upon face vertex3 position read.\n");
+      exit(1);
+   }
+   return 1;
+}
+d264 7
+a270 74
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+int ReadTriangulationEdge(TriangulationEdge* tedge, Space wspace)
+{
+   Frame wframe;
+   char* str;
+   char buf[100];
+
+   str = "TriangulationEdge";
+   tedge->wspace = wspace;
+   tedge->f1.wspace = wspace;
+   tedge->f2.wspace = wspace;
+   wframe = StdFrame(wspace);
+   if (!QueryDstructPath(str)) {
+      fprintf(stderr, "Read: %s not read in.\n", str);
+      exit(1);
+   }
+   clearBuffer(buf, 100);
+   sprintf(buf, "%s.vertex1", str);  
+   if (!GetVertexPosition(buf, wframe, &tedge->vertices[0].position)) {
+      fprintf(stderr, "Read: Failed upon edge vertex1 position read.\n");
+      exit(1);
+   }
+   if (!GetVertexNormal(buf, wframe, &tedge->vertices[0].normal)) {
+      fprintf(stderr, "Read: Failed upon edge vertex1 normal read.\n");
+      exit(1);
+   }
+   sprintf(buf, "%s.vertex2", str);  
+   if (!GetVertexPosition(buf, wframe, &tedge->vertices[1].position)) {
+      fprintf(stderr, "Read: Failed upon edge vertex2 position read.\n");
+      exit(1);
+   }
+   if (!GetVertexNormal(buf, wframe, &tedge->vertices[1].normal)) {
+      fprintf(stderr, "Read: Failed upon edge vertex2 normal read.\n");
+      exit(1);
+   }
+   clearBuffer(buf, 100);
+   sprintf(buf, "%s.face1.name", str);
+   if (!GetString(buf, &tedge->f1.name)) {
+      fprintf(stderr, "Read: Failed upon reading edge-face1 name.\n");
+      exit(1);
+   }
+   clearBuffer(buf, 100);
+   sprintf(buf, "%s.face1.vertex1", str);  
+   if (!GetVertexPosition(buf, wframe, &tedge->f1.vertices[0].position)) {
+      fprintf(stderr, "Read: Failed upon edge f1 vertex1 position read.\n");
+      exit(1);
+   }
+   if (!GetVertexNormal(buf, wframe, &tedge->f1.vertices[0].normal)) {
+      fprintf(stderr, "Read: Failed upon edge f1 vertex1 normal read.\n");
+      exit(1);
+   }
+   sprintf(buf, "%s.face1.vertex2", str);  
+   if (!GetVertexPosition(buf, wframe, &tedge->f1.vertices[1].position)) {
+      fprintf(stderr, "Read: Failed upon edge f1 vertex2 position read.\n");
+      exit(1);
+   }
+   if (!GetVertexNormal(buf, wframe, &tedge->f1.vertices[1].normal)) {
+      fprintf(stderr, "Read: Failed upon edge f1 vertex2 normal read.\n");
+      exit(1);
+   }
+   sprintf(buf, "%s.face1.vertex3", str);  
+   if (!GetVertexPosition(buf, wframe, &tedge->f1.vertices[2].position)) {
+      fprintf(stderr, "Read: Failed upon edge f1 vertex3 position read.\n");
+      exit(1);
+   }
+   if (!GetVertexNormal(buf, wframe, &tedge->f1.vertices[2].normal)) {
+      fprintf(stderr, "Read: Failed upon edge f1 vertex3 normal read.\n");
+      exit(1);
+   }
+   clearBuffer(buf, 100);
+   sprintf(buf, "%s.face2.name", str);
+   if (!GetString(buf, &tedge->f2.name)) {
+      fprintf(stderr, "Read: Failed upon reading edge-face2 name.\n");
+a272 29
+   sprintf(buf, "%s.face2.vertex1", str);  
+   if (!GetVertexPosition(buf, wframe, &tedge->f2.vertices[0].position)) {
+      fprintf(stderr, "Read: Failed upon edge f2 vertex1 position read.\n");
+      exit(1);
+   }
+   if (!GetVertexNormal(buf, wframe, &tedge->f2.vertices[0].normal)) {
+      fprintf(stderr, "Read: Failed upon edge f2 vertex1 normal read.\n");
+      exit(1);
+   }
+   sprintf(buf, "%s.face2.vertex2", str);  
+   if (!GetVertexPosition(buf, wframe, &tedge->f2.vertices[1].position)) {
+      fprintf(stderr, "Read: Failed upon edge f2 vertex2 position read.\n");
+      exit(1);
+   }
+   if (!GetVertexNormal(buf, wframe, &tedge->f2.vertices[1].normal)) {
+      fprintf(stderr, "Read: Failed upon edge f2 vertex2 normal read.\n");
+      exit(1);
+   }
+   sprintf(buf, "%s.face2.vertex3", str);  
+   if (!GetVertexPosition(buf, wframe, &tedge->f2.vertices[2].position)) {
+      fprintf(stderr, "Read: Failed upon edge f2 vertex3 position read.\n");
+      exit(1);
+   }
+   if (!GetVertexNormal(buf, wframe, &tedge->f2.vertices[2].normal)) {
+      fprintf(stderr, "Read: Failed upon edge f2 vertex3 normal read.\n");
+      exit(1);
+   }
+   return 1;
+}
+d274 12
+a285 18
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+int TypeOfFace(TriangulationFace tface)
+{
+   Scalar n0dotp01, n1dotp10, n1dotp12, n2dotp21, n2dotp20, n0dotp02;
+
+   n0dotp01 = NVApply(tface.vertices[0].normal,
+	       PPDiff(tface.vertices[1].position, tface.vertices[0].position));
+   n1dotp10 = NVApply(tface.vertices[1].normal,
+	       PPDiff(tface.vertices[0].position, tface.vertices[1].position));
+   n1dotp12 = NVApply(tface.vertices[1].normal,
+	       PPDiff(tface.vertices[2].position, tface.vertices[1].position));
+   n2dotp21 = NVApply(tface.vertices[2].normal,
+	       PPDiff(tface.vertices[1].position, tface.vertices[2].position));
+   n2dotp20 = NVApply(tface.vertices[2].normal,
+	       PPDiff(tface.vertices[0].position, tface.vertices[2].position));
+   n0dotp02 = NVApply(tface.vertices[0].normal,
+	       PPDiff(tface.vertices[2].position, tface.vertices[0].position));
+d302 2
+a303 2
+void ConstructSingleFaceApatchSimplex(Apatch* apatch, TriangulationFace tface,
+				      int tfaceType)
+d311 1
+d314 2
+a315 2
+   if (tfaceType == ZERO_CONVEX) {
+      ConstructZeroConvexFaceApatchSimplex(apatch, tface, 0);
+d319 12
+a330 6
+   f = StdFrame(tface.wspace);
+   tmpPt = PPrr(tface.vertices[0].position, tface.vertices[1].position, 1, 1);
+   centroid = PPrr(tface.vertices[2].position, tmpPt, 2, 1);
+   if (tfaceType == POS_CONVEX) {
+      faceNorm = PPPNormal(tface.vertices[0].position, 
+                  tface.vertices[1].position, tface.vertices[2].position);
+d333 3
+a335 3
+   else if (tfaceType == NEG_CONVEX) {
+      faceNorm = PPPNormal(tface.vertices[0].position, 
+                  tface.vertices[2].position, tface.vertices[1].position);
+d339 1
+a339 1
+      fprintf(stderr, "An Apatch-Pair must be constructed for face %s.\n", tface.name);
+d347 3
+a349 3
+   for (i = 0; i < 3; i++) {
+      NCoords(tface.vertices[i].normal, f, &vnx, &vny, &vnz);
+      PCoords(tface.vertices[i].position, f, &vpx, &vpy, &vpz);
+d352 2
+a353 2
+      t[i] = -(vnx * cpx + vny * cpy + vnz * cpz + d) /
+		(double)(NVApply(tface.vertices[i].normal, NDual(faceNorm)));
+d356 1
+a356 1
+   if (t[0] >= t[1] && t[0] >= t[2])
+d358 1
+a358 1
+   else if (t[1] >= t[0] && t[1] >= t[2])
+d365 1
+a365 3
+   for (i = 1; i < 4; i++)
+      tetra[i] = tface.vertices[i-1];
+   *apatch = CreateApatch(ApatchDeg, tetra, tface.wspace, FACE_COLOR);
+d377 2
+a378 3
+void ConstructZeroConvexFaceApatchSimplex(Apatch* apatch, 
+					  TriangulationFace tface,
+					  int aboveOrBelow)
+d383 1
+d386 8
+a393 2
+   tmpPt = PPrr(tface.vertices[0].position, tface.vertices[1].position, 1, 1);
+   centroid = PPrr(tface.vertices[2].position, tmpPt, 2, 1);
+d395 2
+a396 2
+      faceNorm = PPPNormal(tface.vertices[0].position, 
+                  tface.vertices[1].position, tface.vertices[2].position);
+d399 2
+a400 2
+      faceNorm = PPPNormal(tface.vertices[0].position, 
+                  tface.vertices[2].position, tface.vertices[1].position);
+d406 1
+a406 3
+   for (i = 1; i < 4; i++)
+      tetra[i] = tface.vertices[i-1];
+   *apatch = CreateApatch(ApatchDeg, tetra, tface.wspace, FACE_COLOR);
+d416 141
+a556 1
+void FitSingleCubicFaceApatch(Apatch* apatch)
+a629 11
+
+   SetSingleCubicFaceApatchFreeScalarsByAvg(apatch);
+   /* Modify a free parameter - the scalar at the top vertex. */
+   apatch->net[0] = FaceTopScalarFP * apatch->net[0];
+
+   /*
+   if (IsFittedFaceApatchConsistentWithData(*apatch, tface) == 0) {
+      fprintf(stderr, "Face %s: Exiting.\n", tface.name);
+      exit(1);
+   }
+   */
+a632 1
+ * A simple averaging scheme is used for this purpose.
+d634 1
+a634 1
+void SetSingleCubicFaceApatchFreeScalarsByAvg(Apatch* apatch)
+d636 1
+a636 3
+   /* We need to determine the remaining control scalars which form the	*/
+   /* free parameters of our construction; used to control shape of the	*/
+   /* fitted Apatch.  The array index at which to store the generated	*/
+d641 3
+a643 248
+   apatch->net[14] = (1.0 / 6.0) * (apatch->net[11] + apatch->net[12] +
+				    apatch->net[13] + apatch->net[15] +
+				    apatch->net[17] + apatch->net[18]);
+   apatch->net[5]  = (1.0 / 2.0) * (apatch->net[4] + apatch->net[7]);
+   apatch->net[6]  = (1.0 / 2.0) * (apatch->net[4] + apatch->net[9]);
+   apatch->net[8]  = (1.0 / 2.0) * (apatch->net[7] + apatch->net[9]);
+   apatch->net[1]  = (1.0 / 3.0) * (apatch->net[4] + apatch->net[5] +
+				    apatch->net[6]);
+   apatch->net[2]  = (1.0 / 3.0) * (apatch->net[5] + apatch->net[7] +
+				    apatch->net[8]);
+   apatch->net[3]  = (1.0 / 3.0) * (apatch->net[6] + apatch->net[8] +
+				    apatch->net[9]);
+   apatch->net[0]  = (1.0 / 3.0) * (apatch->net[1] + apatch->net[2] +
+				    apatch->net[3]);
+}
+
+/* -------------------------------------------------------------------- *
+ * Check if the fitted A-patch gives correct normals at	                *
+ * the tetrahedral corners lying on the triangulation.  	        *
+ * Returns 0 if the evaluation is inconsistent with the data,           *
+ * returns 1 otherwise.                                                 *
+ * -------------------------------------------------------------------- */
+int IsFittedFaceApatchConsistentWithData(Apatch apatch, 
+					 TriangulationFace tface)
+{
+   VERTEX chkV;
+   Scalar chkVVal, chkx, chky, chkz;
+   Vector chkVec;
+
+   chkV.position = apatch.tetrahedron[1].position;
+   chkVVal = EvalApatch(apatch, &chkV);
+   if (fabs(chkVVal) > eps) {
+      fprintf(stderr, "Face %s: Scalar evaluated at vertex1 is not zero.\n", tface.name);
+      return 0;
+   }
+   /*   if (chkVVal != 0) {
+      fprintf(stderr, "Scalar evaluated at P1 is not zero.\n");
+      return 0;
+   }
+   */
+   /*
+NCoords(chkV.normal, StdFrame(tface.wspace), &chkx, &chky, &chkz);
+fprintf(stderr, "chkV.normal: %lg %lg %lg\n", chkx, chky, chkz);
+   */
+   chkVec = VVCross(NDual(chkV.normal), NDual(tface.vertices[0].normal));
+   VCoords(chkVec, StdFrame(apatch.wspace), &chkx, &chky, &chkz);
+   if (chkx != 0 || chky != 0 || chkz != 0) {
+      fprintf(stderr, "Face %s: Normal evaluated at vertex1 inconsistent with data.\n", tface.name);
+      return 0;
+   }
+   if (VVDot(NDual(chkV.normal), NDual(tface.vertices[0].normal)) < 0) {
+      fprintf(stderr, "Face %s: Normal evaluated at vertex1 should point in the opposite direction.\n", tface.name);
+      return 0;
+   }
+
+   chkV.position = apatch.tetrahedron[2].position;
+   chkVVal = EvalApatch(apatch, &chkV);
+   if (fabs(chkVVal) > eps) {
+      fprintf(stderr, "Face %s: Scalar evaluated at vertex2 is not zero.\n", tface.name);
+      return 0;
+   }
+   /*   if (chkVVal != 0) {
+      fprintf(stderr, "Scalar evaluated at P2 is not zero.\n");
+      return 0;
+   }
+   */
+   chkVec = VVCross(NDual(chkV.normal), NDual(tface.vertices[1].normal));
+   VCoords(chkVec, StdFrame(apatch.wspace), &chkx, &chky, &chkz);
+   if (chkx != 0 || chky != 0 || chkz != 0) {
+      fprintf(stderr, "Face %s: Normal evaluated at vertex2 inconsistent with data.\n", tface.name);
+      return 0;
+   }
+   if (VVDot(NDual(chkV.normal), NDual(tface.vertices[1].normal)) < 0) {
+      fprintf(stderr, "Face %s: Normal evaluated at vertex2 should point in the opposite direction.\n", tface.name);
+      return 0;
+   }
+
+   chkV.position = apatch.tetrahedron[3].position;
+   chkVVal = EvalApatch(apatch, &chkV);
+   if (fabs(chkVVal) > eps) {
+      fprintf(stderr, "Face %s: Scalar evaluated at vertex3 is not zero.\n", tface.name);
+      return 0;
+   }
+   /*   if (chkVVal != 0) {
+      fprintf(stderr, "Scalar evaluated at P3 is not zero.\n");
+      return 0;
+   }
+   */
+   chkVec = VVCross(NDual(chkV.normal), NDual(tface.vertices[2].normal));
+   VCoords(chkVec, StdFrame(apatch.wspace), &chkx, &chky, &chkz);
+   if (chkx != 0 || chky != 0 || chkz != 0) {
+      fprintf(stderr, "Face %s: Normal evaluated at vertex3 inconsistent with data.\n", tface.name);
+      return 0;
+   }
+   if (VVDot(NDual(chkV.normal), NDual(tface.vertices[2].normal)) < 0) {
+      fprintf(stderr, "Face %s: Normal evaluated at vertex3 should point in the opposite direction.\n", tface.name);
+      return 0;
+   }
+
+   return 1;
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void ConstructFaceApatchPairSimplex(ApatchPair* apPair, 
+				    TriangulationFace tface)
+{
+   Frame f;
+   Scalar vnx, vny, vnz, vpx, vpy, vpz, cpx, cpy, cpz;
+   Point tmpPt, centroid, top, bottom;
+   Normal faceNorm;
+   VERTEX tetra[4];
+   double d, t[3], max, min;
+   int i;
+
+   f = StdFrame(tface.wspace);
+
+   tmpPt = PPrr(tface.vertices[0].position, tface.vertices[1].position, 1, 1);
+   centroid = PPrr(tface.vertices[2].position, tmpPt, 2, 1);
+   faceNorm = PPPNormal(tface.vertices[0].position, tface.vertices[1].position,
+			tface.vertices[2].position);
+   faceNorm = VDual(VNormalize(NDual(faceNorm)));
+
+   /* Get the intersection of the line through the centroid with each	*/
+   /* of the vertex tangent planes.  Choose the farthest intersection	*/
+   /* points, one in the direction of the faceNorm defining the top 	*/
+   /* tetrahedron vertex, and the other in the opposite direction for 	*/
+   /* the bottom tetrahedron.  This ensures that all the tangent planes	*/
+   /* are contained within the pair of tetrahedra formed.		*/
+   for (i = 0; i < 3; i++) {
+      NCoords(tface.vertices[i].normal, f, &vnx, &vny, &vnz);
+      PCoords(tface.vertices[i].position, f, &vpx, &vpy, &vpz);
+      PCoords(centroid, f, &cpx, &cpy, &cpz);
+      d = -1 * (vnx * vpx + vny * vpy + vnz * vpz);
+      t[i] = -(vnx * cpx + vny * cpy + vnz * cpz + d) /
+		(double)(NVApply(tface.vertices[i].normal, NDual(faceNorm)));
+   }
+
+/*
+fprintf(stderr, "t[0] %f, t[1] %f, t[2] %f\n", t[0],t[1],t[2]);
+NCoords(faceNorm, f, &vnx, &vny, &vnz);
+fprintf(stderr, "face norm: %lg %lg %lg\n", vnx, vny, vnz);
+fprintf(stderr, "centroid: %lg %lg %lg\n", cpx, cpy, cpz);
+*/
+
+   if (t[0] >= t[1]) {
+      if (t[0] >= t[2]) {
+         max = t[0];
+         if (t[1] <= t[2])
+            min = t[1];
+         else
+            min = t[2];
+      }
+      else {
+         max = t[2];
+         min = t[1];
+      }
+   }
+   else {
+      if (t[1] >= t[2]) {
+         max = t[1];
+         if (t[0] <= t[2])
+            min = t[0];
+         else
+            min = t[2];
+      }
+      else {
+         max = t[2];
+         min = t[0];
+      }
+   }
+
+   tetra[0].position = PVAdd(centroid, 
+			     SVMult((SimplexFP * max), NDual(faceNorm)));
+/*
+PCoords(tetra[0].position, f, &vpx, &vpy, &vpz);
+fprintf(stderr, "top: %lg %lg %lg\n", vpx, vpy, vpz);
+*/
+   for (i = 1; i < 4; i++)
+      tetra[i] = tface.vertices[i-1];
+   apPair->ap1 = CreateApatch(ApatchDeg, tetra, tface.wspace, FACE_COLOR);
+
+   tetra[0].position = PVAdd(centroid, 
+			     SVMult((SimplexFP * min), NDual(faceNorm)));
+/*
+PCoords(tetra[0].position, f, &vpx, &vpy, &vpz);
+fprintf(stderr, "bottom: %lg %lg %lg\n", vpx, vpy, vpz);
+*/
+   /*
+   tetra[1] = tface.vertices[0];
+   tetra[2] = tface.vertices[2];
+   tetra[3] = tface.vertices[1];
+   */
+   apPair->ap2 = CreateApatch(ApatchDeg, tetra, tface.wspace, FACE_COLOR);
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void FitCubicFaceApatchPair(ApatchPair* apPair)
+{
+   FitSingleCubicFaceApatch(&apPair->ap1);
+   SetCubicFaceApatchPairContinuity(apPair);
+   SetCubicFaceApatchPairFreeScalarsByAvg(apPair);
+
+   /*
+   if (IsFittedFaceApatchConsistentWithData(apPair->ap1, tface) == 0) {
+      fprintf(stderr, "Face %s: Invalid apPair->ap1. Exiting.\n", tface.name);
+      exit(1);
+   }
+   if (IsFittedFaceApatchConsistentWithData(apPair->ap2, tface) == 0) {
+      fprintf(stderr, "Face %s: Invalid apPair->ap2. Exiting.\n", tface.name);
+      exit(1);
+   }
+   */
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void SetCubicFaceApatchPairContinuity(ApatchPair* apPair)
+{
+   Scalar b0, b1, b2, b3;
+   int v1index, i, j, k, l, a0, a1, a2, a3;
+
+   /* Ensure C0 continuity across the shared face. */
+   v1index = CPIndexDim3(ApatchDeg, 0, ApatchDeg, 0, 0);
+   for (i = v1index; i < apPair->ap1.netSize; i++) {
+      apPair->ap2.net[i] = apPair->ap1.net[i];
+   }
+
+   /* Ensure C1 continuity across the shared face. */
+   /* Get barycentric coords of ap2.tetrahedron[0] wrt ap1. */
+   PCoords(apPair->ap2.tetrahedron[0].position, apPair->ap1.apFrame,
+		&b0, &b1, &b2);
+   b3 = 1 - b0 - b1 - b2;
+   i = 1;
+   for (j = 0; j <= (ApatchDeg - i); j++) {
+      for (k = 0; k <= (ApatchDeg - i - j); k++) {
+         l = ApatchDeg - i - j - k;
+         a0 = CPIndexDim3(ApatchDeg, 1, j, k, l);
+         a1 = CPIndexDim3(ApatchDeg, 0, j+1, k, l);
+         a2 = CPIndexDim3(ApatchDeg, 0, j, k+1, l);
+         a3 = CPIndexDim3(ApatchDeg, 0, j, k, l+1);
+         apPair->ap2.net[a0] = (b0 * apPair->ap1.net[a0]) +
+			       (b1 * apPair->ap1.net[a1]) +
+			       (b2 * apPair->ap1.net[a2]) +
+			       (b3 * apPair->ap1.net[a3]);
+      }
+   }
+d647 1
+d649 1
+a649 1
+void SetCubicFaceApatchPairFreeScalarsByAvg(ApatchPair* apPair)
+d658 99
+a756 8
+   apPair->ap2.net[1] = (1.0 / 3.0) * (apPair->ap2.net[4] +
+			apPair->ap2.net[5] + apPair->ap2.net[6]);
+   apPair->ap2.net[2] = (1.0 / 3.0) * (apPair->ap2.net[5] +
+			apPair->ap2.net[7] + apPair->ap2.net[8]);
+   apPair->ap2.net[3] = (1.0 / 3.0) * (apPair->ap2.net[6] +
+			apPair->ap2.net[8] + apPair->ap2.net[9]);
+   apPair->ap2.net[0] = (1.0 / 3.0) * (apPair->ap2.net[1] +
+			apPair->ap2.net[2] + apPair->ap2.net[3]);
+d758 10
+d774 3
+a776 2
+					    TriangulationEdge tedge, 
+					    int f1type, int f2type)
+d778 2
+a779 1
+   VERTEX e1tetra[4], e2tetra[4], etetra[4];
+d783 3
+d787 1
+a787 1
+   fprintf(stderr, "Convex Convex Edge Faces: %s, %s\n", tedge.f1.name, tedge.f2.name);
+d790 2
+a791 2
+      ConstructZeroConvexFaceApatchSimplex(f1ap, tedge.f1, 1);
+      ConstructSingleFaceApatchSimplex(f2ap, tedge.f2, f2type);
+d794 2
+a795 2
+      ConstructSingleFaceApatchSimplex(f1ap, tedge.f1, f1type);
+      ConstructZeroConvexFaceApatchSimplex(f2ap, tedge.f2, 1);
+d799 1
+a799 1
+      fprintf(stderr, "Edge faces %s, %s are adjacent positive and negative convex faces and must be handled separately by ConstructPosConvexNegConvexEdgeApatches().\n", tedge.f1.name, tedge.f2.name);
+d803 2
+a804 2
+      ConstructSingleFaceApatchSimplex(f1ap, tedge.f1, f1type);
+      ConstructSingleFaceApatchSimplex(f2ap, tedge.f2, f2type);
+a829 1
+   etetra[0].position = f1ap->tetrahedron[0].position;
+d831 6
+a836 4
+                              f2ap->tetrahedron[0].position, 1, 1);
+   etetra[2].position = tedge.vertices[0].position;
+   etetra[3].position = tedge.vertices[1].position;
+   *eap1 = CreateApatch(ApatchDeg, etetra, tedge.wspace, EDGE1_COLOR);
+d838 2
+d841 1
+a841 1
+   *eap2 = CreateApatch(ApatchDeg, etetra, tedge.wspace, EDGE2_COLOR);
+d847 3
+a849 1
+				      Apatch* f1ap, Apatch* f2ap)
+d859 2
+a860 8
+   /* Initialize edge tetrahedra control scalar nets to zero. */
+   for (i = 0; i < NetSize(ApatchDeg,3); i++) {
+      eap1->net[i] = 0;
+      eap2->net[i] = 0;
+   }
+
+   FitSingleCubicFaceApatch(f1ap);
+   FitSingleCubicFaceApatch(f2ap);
+d991 2
+a992 1
+	  /* Set edge-edge control scalars (e0210 and e0201) to ensure C1 continuity. */
+d997 4
+a1000 3
+          eap1->net[a1] = (1.0 / be2[1]) * (eap2->net[a0] - ((be2[0] * eap1->net[a0]) +
+							     (be2[2] * eap1->net[a2]) +
+							     (be2[3] * eap1->net[a3])));
+d1007 8
+a1014 6
+          eap1->net[a0] = (1.0 / 3.0) * (eap1->net[CPIndexDim3(ApatchDeg,i+1,j-1,k,l)] +
+					 eap1->net[CPIndexDim3(ApatchDeg,i,j-1,k+1,l)] +
+					 eap1->net[CPIndexDim3(ApatchDeg,i,j-1,k,l+1)]);
+          eap2->net[a0] = (1.0 / 3.0) * (eap2->net[CPIndexDim3(ApatchDeg,i+1,j-1,k,l)] +
+					 eap2->net[CPIndexDim3(ApatchDeg,i,j-1,k+1,l)] +
+					 eap2->net[CPIndexDim3(ApatchDeg,i,j-1,k,l+1)]);
+d1019 4
+a1022 3
+          eap1->net[a1] = (1.0 / be2[1]) * (eap2->net[a0] - ((be2[0] * eap1->net[a0]) +
+							     (be2[2] * eap1->net[a2]) +
+							     (be2[3] * eap1->net[a3])));
+d1028 164
+d1374 3
+d1384 2
+a1385 2
+   matTriangulation = GreenMatte;
+   matSimplex = RedMatte;
+d1387 12
+a1398 12
+   OutputS3dMaterialTriangle(fp, matSimplex, apatch.tetrahedron[0],
+			     matSimplex, apatch.tetrahedron[1],
+			     matSimplex, apatch.tetrahedron[2], 0);
+   OutputS3dMaterialTriangle(fp, matSimplex, apatch.tetrahedron[0],
+			     matSimplex, apatch.tetrahedron[2],
+			     matSimplex, apatch.tetrahedron[3], 0);
+   OutputS3dMaterialTriangle(fp, matSimplex, apatch.tetrahedron[0],
+			     matSimplex, apatch.tetrahedron[3],
+			     matSimplex, apatch.tetrahedron[1], 0);
+   OutputS3dMaterialTriangle(fp, matTriangulation, apatch.tetrahedron[1],
+			     matTriangulation, apatch.tetrahedron[2],
+			     matTriangulation, apatch.tetrahedron[3], 0);
+d1416 2
+a1417 44
+   matTriangulation = GreenMatte;
+   matSimplex = RedMatte;
+
+   OutputS3dMaterialTriangle(fp, matSimplex, apatch.tetrahedron[0], 
+			     matTriangulation, apatch.tetrahedron[2],
+			     matSimplex, apatch.tetrahedron[3], 0);
+   OutputS3dMaterialTriangle(fp, matSimplex, apatch.tetrahedron[1], 
+			     matTriangulation, apatch.tetrahedron[3],
+			     matSimplex, apatch.tetrahedron[2], 0);
+   OutputS3dMaterialTriangle(fp, matSimplex, apatch.tetrahedron[0],
+			     matSimplex, apatch.tetrahedron[1],
+			     matSimplex, apatch.tetrahedron[2], 0);
+   OutputS3dMaterialTriangle(fp, matSimplex, apatch.tetrahedron[0],
+			     matSimplex, apatch.tetrahedron[3],
+			     matSimplex, apatch.tetrahedron[1], 0);
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void OutputS3dMaterialTriangle(FILE* fp, Material m1, VERTEX v1,
+			       Material m2, VERTEX v2, Material m3,
+			       VERTEX v3, int nspeci)
+{
+   fprintf(fp, "L 3 2 0\n");
+   OutputS3dMaterialVertex(fp, m1, v1, nspeci);
+   OutputS3dMaterialVertex(fp, m2, v2, nspeci);
+   OutputS3dMaterialVertex(fp, m3, v3, nspeci);
+   fprintf(fp, "E 0 0 0\n");
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void OutputS3dMaterialVertex(FILE* fp, Material m, VERTEX v, int nspeci)
+{
+   fprintf(fp, "d %g %g %g\n", m.diffuse.r, m.diffuse.g, m.diffuse.b);
+   OutputS3dVertex(fp, v, nspeci);
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void OutputS3dVertex(FILE* fp, VERTEX v, int nspeci)
+{
+   Scalar x,y,z;
+   Frame f;
+d1419 12
+a1430 7
+   f = StdFrame(SpaceOf(v.position));
+   if (nspeci) {
+      NCoords(v.normal, f, &x, &y, &z);
+      fprintf(fp, "n %lg %lg %lg\n", x, y, z);
+   }
+   PCoords(v.position, f, &x, &y, &z);
+   fprintf(fp, "v %lg %lg %lg\n", x, y, z);
+@
+
+
+1.3
+log
+@major changes.  Now supports direct construction of patches - first the hull and then if desired the contained patch.  Convex Convex edge consturction completed - C1 continuity is not currently satisfied.
+@
+text
+@d3 2
+a4 2
+/* $Date: 1998/12/05 02:44:29 $                                       */
+/* $Revision: 1.2 $                                                   */
+d1394 1
+a1394 1
+   fprintf(fp, "L 3 1 0\n");
+@
+
+
+1.2
+log
+@edge apatch simplicial hull construction added.
+@
+text
+@d3 2
+a4 2
+/* $Date: 1998/11/30 00:34:07 $                                       */
+/* $Revision: 1.1 $                                                   */
+d29 1
+d31 1
+d34 9
+a42 3
+void ConstructZeroConvexFaceApatch(Apatch* apatch, TriangulationFace tface,
+                                   int aboveOrBelow);
+int IsFittedFaceApatchConsistentWithData(Apatch apatch,
+d44 3
+a46 3
+void GetSingleCubicFaceApatchScalars(Apatch* apatch);
+void SetSingleCubicFaceApatchFreeParam(Apatch* apatch);
+void GetCubicFaceApatchPairScalars(ApatchPair* apPair);
+d48 184
+a231 1
+void SetCubicFaceApatchPairRemainingFreeParam(ApatchPair* apPair);
+a243 1
+
+a247 1
+
+a253 1
+
+a281 1
+
+a297 1
+
+a301 1
+
+a320 1
+
+a354 1
+
+a387 1
+
+d425 2
+a426 2
+void ConstructSingleFaceApatch(Apatch* apatch, TriangulationFace tface,
+                               int tfaceType)
+d434 1
+a434 1
+   int v1index, i;
+d437 1
+a437 1
+      ConstructZeroConvexFaceApatch(apatch, tface, 0);
+a471 7
+/*
+fprintf(stderr, "t[0] %f, t[1] %f, t[2] %f\n", t[0],t[1],t[2]);
+NCoords(faceNorm, f, &vnx, &vny, &vnz);
+fprintf(stderr, "face norm: %lg %lg %lg\n", vnx, vny, vnz);
+fprintf(stderr, "centroid: %lg %lg %lg\n", cpx, cpy, cpz);
+*/
+
+d483 1
+a483 93
+   *apatch = CreateApatch(ApatchDeg, tetra, tface.wspace);
+   GetSingleCubicFaceApatchScalars(apatch);
+
+   if (IsFittedFaceApatchConsistentWithData(*apatch, tface) == 0) {
+      fprintf(stderr, "Face %s: Exiting.\n", tface.name);
+      exit(1);
+   }
+}
+
+/* -------------------------------------------------------------------- *
+ * Check if the fitted A-patch gives correct normals at	                *
+ * the tetrahedral corners lying on the triangulation.  	        *
+ * Returns 0 if the evaluation is inconsistent with the data,           *
+ * returns 1 otherwise.                                                 *
+ * -------------------------------------------------------------------- */
+int IsFittedFaceApatchConsistentWithData(Apatch apatch, 
+					 TriangulationFace tface)
+{
+   VERTEX chkV;
+   Scalar chkVVal, chkx, chky, chkz;
+   Vector chkVec;
+
+   chkV.position = apatch.tetrahedron[1].position;
+   chkVVal = EvalApatch(apatch, &chkV);
+   if (fabs(chkVVal) > eps) {
+      fprintf(stderr, "Face %s: Scalar evaluated at vertex1 is not zero.\n", tface.name);
+      return 0;
+   }
+   /*   if (chkVVal != 0) {
+      fprintf(stderr, "Scalar evaluated at P1 is not zero.\n");
+      return 0;
+   }
+   */
+   /*
+NCoords(chkV.normal, StdFrame(tface.wspace), &chkx, &chky, &chkz);
+fprintf(stderr, "chkV.normal: %lg %lg %lg\n", chkx, chky, chkz);
+   */
+   chkVec = VVCross(NDual(chkV.normal), NDual(tface.vertices[0].normal));
+   VCoords(chkVec, StdFrame(apatch.wspace), &chkx, &chky, &chkz);
+   if (chkx != 0 || chky != 0 || chkz != 0) {
+      fprintf(stderr, "Face %s: Normal evaluated at vertex1 inconsistent with data.\n", tface.name);
+      return 0;
+   }
+   if (VVDot(NDual(chkV.normal), NDual(tface.vertices[0].normal)) < 0) {
+      fprintf(stderr, "Face %s: Normal evaluated at vertex1 should point in the opposite direction.\n", tface.name);
+      return 0;
+   }
+
+   chkV.position = apatch.tetrahedron[2].position;
+   chkVVal = EvalApatch(apatch, &chkV);
+   if (fabs(chkVVal) > eps) {
+      fprintf(stderr, "Face %s: Scalar evaluated at vertex2 is not zero.\n", tface.name);
+      return 0;
+   }
+   /*   if (chkVVal != 0) {
+      fprintf(stderr, "Scalar evaluated at P2 is not zero.\n");
+      return 0;
+   }
+   */
+   chkVec = VVCross(NDual(chkV.normal), NDual(tface.vertices[1].normal));
+   VCoords(chkVec, StdFrame(apatch.wspace), &chkx, &chky, &chkz);
+   if (chkx != 0 || chky != 0 || chkz != 0) {
+      fprintf(stderr, "Face %s: Normal evaluated at vertex2 inconsistent with data.\n", tface.name);
+      return 0;
+   }
+   if (VVDot(NDual(chkV.normal), NDual(tface.vertices[1].normal)) < 0) {
+      fprintf(stderr, "Face %s: Normal evaluated at vertex2 should point in the opposite direction.\n", tface.name);
+      return 0;
+   }
+
+   chkV.position = apatch.tetrahedron[3].position;
+   chkVVal = EvalApatch(apatch, &chkV);
+   if (fabs(chkVVal) > eps) {
+      fprintf(stderr, "Face %s: Scalar evaluated at vertex3 is not zero.\n", tface.name);
+      return 0;
+   }
+   /*   if (chkVVal != 0) {
+      fprintf(stderr, "Scalar evaluated at P3 is not zero.\n");
+      return 0;
+   }
+   */
+   chkVec = VVCross(NDual(chkV.normal), NDual(tface.vertices[2].normal));
+   VCoords(chkVec, StdFrame(apatch.wspace), &chkx, &chky, &chkz);
+   if (chkx != 0 || chky != 0 || chkz != 0) {
+      fprintf(stderr, "Face %s: Normal evaluated at vertex3 inconsistent with data.\n", tface.name);
+      return 0;
+   }
+   if (VVDot(NDual(chkV.normal), NDual(tface.vertices[2].normal)) < 0) {
+      fprintf(stderr, "Face %s: Normal evaluated at vertex3 should point in the opposite direction.\n", tface.name);
+      return 0;
+   }
+
+   return 1;
+d495 3
+a497 2
+void ConstructZeroConvexFaceApatch(Apatch* apatch, TriangulationFace tface,
+                                   int aboveOrBelow)
+d520 1
+a520 1
+   *apatch = CreateApatch(ApatchDeg, tetra, tface.wspace);
+d530 1
+a530 1
+void GetSingleCubicFaceApatchScalars(Apatch* apatch)
+d605 10
+a614 1
+   SetSingleCubicFaceApatchFreeParam(apatch);
+d620 1
+a620 1
+void SetSingleCubicFaceApatchFreeParam(Apatch* apatch)
+d632 95
+a726 11
+   apatch->net[5] = (1.0 / 2.0) * (apatch->net[4] + apatch->net[7]);
+   apatch->net[6] = (1.0 / 2.0) * (apatch->net[4] + apatch->net[9]);
+   apatch->net[8] = (1.0 / 2.0) * (apatch->net[7] + apatch->net[9]);
+   apatch->net[1] = (1.0 / 3.0) * (apatch->net[4] + apatch->net[5] +
+					apatch->net[6]);
+   apatch->net[2] = (1.0 / 3.0) * (apatch->net[5] + apatch->net[7] +
+					apatch->net[8]);
+   apatch->net[3] = (1.0 / 3.0) * (apatch->net[6] + apatch->net[8] +
+					apatch->net[9]);
+   apatch->net[0] = (1.0 / 3.0) * (apatch->net[1] + apatch->net[2] +
+					apatch->net[3]);
+d728 1
+d733 2
+a734 1
+void ConstructFaceApatchPair(ApatchPair* apPair, TriangulationFace tface)
+d809 1
+a809 1
+   apPair->ap1 = CreateApatch(ApatchDeg, tetra, tface.wspace);
+d822 2
+a823 2
+   apPair->ap2 = CreateApatch(ApatchDeg, tetra, tface.wspace);
+   GetCubicFaceApatchPairScalars(apPair);
+d825 9
+d842 1
+a842 11
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void GetCubicFaceApatchPairScalars(ApatchPair* apPair)
+{
+
+   GetSingleCubicFaceApatchScalars(&apPair->ap1);
+   SetCubicFaceApatchPairContinuity(apPair);
+   SetCubicFaceApatchPairRemainingFreeParam(apPair);
+
+d881 1
+a881 1
+void SetCubicFaceApatchPairRemainingFreeParam(ApatchPair* apPair)
+d903 4
+a906 3
+void ConstructConvexConvexEdgeApatches(Apatch* eap1, Apatch* eap2, 
+                                       TriangulationEdge tedge, 
+                                       int f1type, int f2type)
+d908 1
+a908 2
+   Apatch f1ap, f2ap;
+   VERTEX e1tetra[4], e2tetra[4];
+d916 2
+a917 2
+      ConstructZeroConvexFaceApatch(&f1ap, tedge.f1, 1);
+      ConstructSingleFaceApatch(&f2ap, tedge.f2, f2type);
+d920 2
+a921 2
+      ConstructSingleFaceApatch(&f1ap, tedge.f1, f1type);
+      ConstructZeroConvexFaceApatch(&f2ap, tedge.f2, 1);
+d929 2
+a930 2
+      ConstructSingleFaceApatch(&f1ap, tedge.f1, f1type);
+      ConstructSingleFaceApatch(&f2ap, tedge.f2, f2type);
+d933 6
+a938 5
+   e1tetra[0].position = PPrr(f1ap.tetrahedron[0].position,
+                              f2ap.tetrahedron[0].position, 1, 1);
+   e2tetra[0].position = e1tetra[0].position;
+   e1tetra[1].position = f1ap.tetrahedron[0].position;
+   e2tetra[1].position = f2ap.tetrahedron[0].position;
+d943 1
+a943 1
+               PPDiff(tmpP2, e1tetra[1].position), 
+d945 1
+a945 1
+            PPDiff(e1tetra[0].position, e1tetra[1].position) );
+d947 4
+d954 133
+a1086 3
+   else {
+      e1tetra[2] = tedge.vertices[1];   e1tetra[3] = tedge.vertices[0];
+      e2tetra[2] = tedge.vertices[0];   e2tetra[3] = tedge.vertices[1];
+d1089 4
+a1092 2
+   *eap1 = CreateApatch(ApatchDeg, e1tetra, tedge.wspace);
+   *eap2 = CreateApatch(ApatchDeg, e2tetra, tedge.wspace);
+a1093 4
+   for (i = 0; i < eap1->netSize; i++)
+      eap1->net[i] = 5;
+   for (i = 0; i < eap2->netSize; i++)
+      eap2->net[i] = 0;
+d1095 56
+a1150 1
+   /*Now set C0 continuity and set scalars to interpolate normals*/
+d1155 5
+a1159 3
+void ConstructNonconvexNonconvexEdgeApatches(Apatch* eap1, Apatch* eap2, 
+                                             Apatch* eap3, Apatch* eap4,
+                                             TriangulationEdge tedge)
+a1160 1
+   ApatchPair f1app, f2app;
+d1168 2
+a1169 2
+   ConstructFaceApatchPair(&f1app, tedge.f1);
+   ConstructFaceApatchPair(&f2app, tedge.f2);
+d1173 3
+a1175 3
+   /* So f1app.ap1 and f2app.ap1 should lie on the same side.       */
+   e1tetra[0].position = PPrr(f1app.ap1.tetrahedron[0].position,
+                              f2app.ap1.tetrahedron[0].position, 1, 1);
+d1177 4
+a1180 4
+   e1tetra[1].position = f1app.ap1.tetrahedron[0].position;
+   e2tetra[1].position = f2app.ap1.tetrahedron[0].position;
+   e3tetra[0].position = PPrr(f1app.ap2.tetrahedron[0].position,
+                              f2app.ap2.tetrahedron[0].position, 1, 1);
+d1182 2
+a1183 2
+   e3tetra[1].position = f1app.ap2.tetrahedron[0].position;
+   e4tetra[1].position = f2app.ap2.tetrahedron[0].position;
+d1204 17
+a1220 4
+   *eap1 = CreateApatch(ApatchDeg, e1tetra, tedge.wspace);
+   *eap2 = CreateApatch(ApatchDeg, e2tetra, tedge.wspace);
+   *eap3 = CreateApatch(ApatchDeg, e3tetra, tedge.wspace);
+   *eap4 = CreateApatch(ApatchDeg, e4tetra, tedge.wspace);
+d1235 5
+a1239 4
+void ConstructPosConvexNegConvexEdgeApatches(Apatch* eap1, Apatch* eap2, 
+                                             Apatch* fap3, 
+					     TriangulationEdge tedge, 
+					     int f1type, int f2type)
+d1246 14
+a1259 3
+void ConstructConvexNonconvexEdgeApatches(Apatch* eap1, Apatch* eap2, 
+                                          TriangulationEdge tedge, 
+                                          int f1type, int f2type)
+a1260 2
+   Apatch fap;
+   ApatchPair fapPair;
+d1269 2
+a1270 2
+      ConstructSingleFaceApatch(&fap, tedge.f1, f1type);
+      ConstructFaceApatchPair(&fapPair, tedge.f2);
+d1273 2
+a1274 2
+      ConstructFaceApatchPair(&fapPair, tedge.f1);
+      ConstructSingleFaceApatch(&fap, tedge.f2, f2type);
+d1282 3
+a1284 3
+      e1tetra[0].position = PPrr(fap.tetrahedron[0].position,
+                                 fapPair.ap2.tetrahedron[0].position, 1, 1);
+      e2tetra[1].position = fapPair.ap2.tetrahedron[0].position;
+d1287 3
+a1289 3
+      e1tetra[0].position = PPrr(fap.tetrahedron[0].position,
+                                 fapPair.ap1.tetrahedron[0].position, 1, 1);
+      e2tetra[1].position = fapPair.ap1.tetrahedron[0].position;
+d1292 1
+a1292 1
+   e1tetra[1].position = fap.tetrahedron[0].position;
+d1310 13
+a1322 2
+   *eap1 = CreateApatch(ApatchDeg, e1tetra, tedge.wspace);
+   *eap2 = CreateApatch(ApatchDeg, e2tetra, tedge.wspace);
+d1330 93
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 6
+a6 6
+/****************************************************************/
+/* Module: apconstruct.c                                        */
+/* $Date: 1998/07/28 19:39:17 $                                 */
+/* $Revision: 1.1 $                                             */
+/* $Source: /u/saggarwal/cs788/RCS/apconstruct.c,v $            */
+/****************************************************************/
+a23 2
+/*
+#define KDEFAULT 10.0
+a24 1
+*/
+a25 3
+extern double LengthN1, LengthN2, LengthN3;
+
+/* const int ApatchDeg = 3; */
+d27 3
+a29 3
+
+/* static double eps = EPS; */
+
+d32 4
+d60 7
+d69 1
+a69 1
+      fprintf(stderr, "Read: Failed upon first vertex normal read.\n");
+d73 1
+a73 1
+      fprintf(stderr, "Read: Failed upon first vertex position read.\n");
+d78 1
+a78 1
+      fprintf(stderr, "Read: Failed upon second vertex normal read.\n");
+d82 1
+a82 1
+      fprintf(stderr, "Read: Failed upon second vertex position read.\n");
+d87 1
+a87 1
+      fprintf(stderr, "Read: Failed upon third vertex normal read.\n");
+d91 112
+a202 1
+      fprintf(stderr, "Read: Failed upon third vertex position read.\n");
+d248 1
+a248 1
+   Point tmpPt, centroid, top;
+d253 5
+a257 3
+   VERTEX chkV;
+   Scalar chkVVal, chkx, chky, chkz;
+   Vector chkVec;
+a259 1
+
+d262 1
+a262 1
+   if ((tfaceType == ZERO_CONVEX) || (tfaceType == POS_CONVEX)) {
+d273 1
+a273 1
+      fprintf(stderr, "An Apatch-Pair must be constructed.\n");
+a276 14
+   if (tfaceType == ZERO_CONVEX) {
+      top = PVAdd(centroid, NDual(faceNorm));
+      tetra[0].position = top;
+      for (i = 1; i < 4; i++)
+         tetra[i] = tface.vertices[i-1];
+      *apatch = CreateApatch(ApatchDeg, tetra, tface.wspace);
+      v1index = CPIndexDim3(ApatchDeg, 0, ApatchDeg, 0, 0);
+      for (i = 0; i < v1index; i++)
+         apatch->net[i] = 1;
+      for (i = v1index; i < apatch->netSize; i++)
+         apatch->net[i] = 0;
+      return;
+   }
+
+d290 1
+a290 1
+
+d295 2
+d303 3
+a305 4
+   top = PVAdd(centroid, SVMult(t[i], NDual(faceNorm)));
+PCoords(top, f, &vpx, &vpy, &vpz);
+fprintf(stderr, "top: %lg %lg %lg\n", vpx, vpy, vpz);
+   tetra[0].position = top;
+d311 26
+a336 5
+   /* Check if the fitted A-patch gives correct scalars and normals at	*/
+   /* the input triangle corners.					*/
+   chkV.position = apatch->tetrahedron[1].position;
+   chkVVal = EvalApatch(*apatch, &chkV);
+   if (chkVVal != 0) {
+d338 1
+a338 1
+      exit(1);
+d340 5
+d346 1
+a346 1
+   VCoords(chkVec, StdFrame(apatch->wspace), &chkx, &chky, &chkz);
+d348 2
+a349 2
+      fprintf(stderr, "Normal evaluated at P1 inconsistent with data.\n");
+      exit(1);
+d352 2
+a353 2
+      fprintf(stderr, "Normal evaluated at P1 should point in the opposite direction.\n");
+      exit(1);
+d356 7
+a362 3
+   chkV.position = apatch->tetrahedron[2].position;
+   chkVVal = EvalApatch(*apatch, &chkV);
+   if (chkVVal != 0) {
+d364 1
+a364 1
+      exit(1);
+d366 1
+d368 1
+a368 1
+   VCoords(chkVec, StdFrame(apatch->wspace), &chkx, &chky, &chkz);
+d370 2
+a371 2
+      fprintf(stderr, "Normal evaluated at P2 inconsistent with data.\n");
+      exit(1);
+d374 2
+a375 2
+      fprintf(stderr, "Normal evaluated at P2 should point in the opposite direction.\n");
+      exit(1);
+d378 7
+a384 3
+   chkV.position = apatch->tetrahedron[3].position;
+   chkVVal = EvalApatch(*apatch, &chkV);
+   if (chkVVal != 0) {
+d386 1
+a386 1
+      exit(1);
+d388 1
+d390 1
+a390 1
+   VCoords(chkVec, StdFrame(apatch->wspace), &chkx, &chky, &chkz);
+d392 2
+a393 2
+      fprintf(stderr, "Normal evaluated at P3 inconsistent with data.\n");
+      exit(1);
+d396 2
+a397 2
+      fprintf(stderr, "Normal evaluated at P3 should point in the opposite direction.\n");
+      exit(1);
+d399 43
+d475 1
+a475 1
+      mB[i] = LengthN1 * n1[i];
+d492 1
+a492 1
+      mB[i] = LengthN2 * n2[i];
+d509 1
+a509 1
+      mB[i] = LengthN3 * n3[i];
+d537 2
+a538 2
+				apatch->net[13] + apatch->net[15] +
+				apatch->net[17] + apatch->net[18]);
+d588 7
+d622 6
+a627 2
+   top = PVAdd(centroid, SVMult(max, NDual(faceNorm)));
+   tetra[0].position = top;
+d631 7
+a637 2
+   bottom = PVAdd(centroid, SVMult(min, NDual(faceNorm)));
+   tetra[0].position = bottom;
+d639 3
+a641 2
+   for (i = 1; i < 4; i++)
+      tetra[i] = tface.vertices[i-1];
+d646 8
+d723 210
+@

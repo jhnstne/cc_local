@@ -1,0 +1,65 @@
+#! /bin/csh -f
+# File: animation/Script
+# Author: John K. Johnstone
+# Last Modified: 16 March 1995
+# Purpose: demo script
+
+#cd /usr/people/jj/animation;
+cp obj.littlemapleleaf object.input;
+
+####
+
+cp pos.in-evenspeed pos.input;
+cp quaternion.in2 quaternion.input
+
+echo Maple leaf 1A
+./animation
+set Pause = ($<)
+
+echo Maple leaf 1B
+./animation -m -i
+set Pause = ($<)
+
+echo Maple leaf 1B
+./animation-twisted -m -i
+set Pause = ($<)
+
+echo Maple leaf 1C
+./animation -a
+set Pause = ($<)
+
+####
+
+cp pos.in-evenspeed pos.input;
+cp quaternion.in1 quaternion.input;
+
+echo Maple leaf 2A
+./animation
+set Pause = ($<)
+
+echo Maple leaf 2B
+./animation -i
+set Pause = ($<)
+
+####
+
+cp pos.in-evenspeed pos.input
+cp quaternion.in5 quaternion.input
+
+echo Maple leaf 3A
+./animation
+set Pause = ($<)
+
+echo Maple leaf 3B
+./animation -i -m
+set Pause = ($<)
+
+####
+
+cp pos.in-leaf pos.input
+cp quaternion.in-leaf quaternion.input
+
+echo Falling maple leaf
+./animation -a
+set Pause = ($<)
+

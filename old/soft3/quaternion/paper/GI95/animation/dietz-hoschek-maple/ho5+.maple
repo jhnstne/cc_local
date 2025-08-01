@@ -1,0 +1,112 @@
+
+#p0 := stoc(40,80);
+#p1 := stoc(80,50);
+#p2 := stoc(45,30);
+#p3 := stoc(10,50);
+#p4 := stoc(50,80);
+
+
+#p0 := stoc(44.9,80);
+#p1 := stoc(80,50);
+#p2 := stoc(45,30);
+#p3 := stoc(10,50);
+#p4 := stoc(45.1,80);
+
+
+p0 := stoc(10,10);
+p1 := stoc(10,15);
+p2 := stoc(10,20);
+p3 := stoc(10,25);
+p4 := stoc(10,30);
+
+q0 := sigma_inverse(p0);
+q1 := sigma_inverse(p1);
+q2 := sigma_inverse(p2);
+q3 := sigma_inverse(p3);
+q4 := sigma_inverse(p4);
+
+q0bar := vector(bar(q0));
+q1bar := vector(bar(q1));
+q2bar := vector(bar(q2));
+q3bar := vector(bar(q3));
+q4bar := vector(bar(q4));
+
+
+
+q0barperp := vector(bar_perp(q0));
+q1barperp := vector(bar_perp(q1));
+q2barperp := vector(bar_perp(q2));
+q3barperp := vector(bar_perp(q3));
+q4barperp := vector(bar_perp(q4));
+
+
+
+ytw := cw0 * B_Basis(2,0,t) + cw1 * B_Basis(2,1,t) + cw2 * B_Basis(2,2,t);
+ytx := cx0 * B_Basis(2,0,t) + cx1 * B_Basis(2,1,t) + cx2 * B_Basis(2,2,t);
+yty := cy0 * B_Basis(2,0,t) + cy1 * B_Basis(2,1,t) + cy2 * B_Basis(2,2,t);
+ytz := cz0 * B_Basis(2,0,t) + cz1 * B_Basis(2,1,t) + cz2 * B_Basis(2,2,t);
+
+ 
+yt := [ytw,ytx,yty,ytz];
+ytv := vector(yt);
+
+
+yt0 := evalbez4(ytv,t=0);
+
+cw0 := q0[1];
+cx0 := q0[2];
+cy0 := q0[3];
+cz0 := q0[4];
+
+
+
+eq2 := simplify(dotprod(q1bar,evalbez4(ytv,t=.25)));
+eq3 := simplify(dotprod(q1barperp,evalbez4(ytv,t=.25)));
+eq4 := simplify(dotprod(q2bar,evalbez4(ytv,t=.5)));
+eq5 := simplify(dotprod(q2barperp,evalbez4(ytv,t=.5)));
+eq6 := simplify(dotprod(q3bar,evalbez4(ytv,t=.75)));
+eq7 := simplify(dotprod(q3barperp,evalbez4(ytv,t=.75)));
+eq8 := simplify(dotprod(q4bar,evalbez4(ytv,t=1)));
+eq9 := simplify(dotprod(q4barperp,evalbez4(ytv,t=1)));
+
+
+res1 := solve({eq2,eq3,eq4,eq5,eq6,eq7,eq8,eq9},{cw1,cx1,cy1,cz1,cw2,cx2,cy2,cz2});
+
+res2 := subs(res1,yt);
+#ytsoln := subs({cw0=1,cw1=1},res2);
+xthomo := delta(res2);
+xt := htoc(xthomo);
+RT := vector(xt);
+RD := vector([RDX,RDY,RDZ]);
+RDCROSS := crossprod(RD,vector([-RDZ,0,RDX]));
+
+
+r1Xr2 := crossprod(RT,vector([-RT[3],0,RT[1]]));
+RMATRIX := matrix(4,4,[ RT[1],RT[2],RT[3],0,
+		       -RT[3],0,RT[1],0,
+			r1Xr2[1],r1Xr2[2],r1Xr2[3],0
+			,0,0,0,1 ]);
+
+RDUMMY := matrix(4,4,[RDX,RDY,RDZ,0,-RDZ,0,RDX,0,
+			RDCROSS[1],RDCROSS[2],RDCROSS[3],0,
+			0,0,0,1]);
+
+PREDELTA_ORIENT_CONTROL := 	[	
+				[cw0,cw1,cw2],
+				[cx0,cx1,cx2],
+				[cy0,cy1,cy2],
+				[cz0,cz1,cz2]
+			    	];			
+
+PREDELTA_ORIENT_CONTROL :=  subs(res1,PREDELTA_ORIENT_CONTROL);
+ORIENT_CONTROL := eval(bezdelta(PREDELTA_ORIENT_CONTROL,2));
+
+
+
+
+
+
+
+
+
+

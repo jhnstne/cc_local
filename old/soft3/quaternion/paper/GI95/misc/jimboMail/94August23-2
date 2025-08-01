@@ -1,0 +1,19 @@
+From jj Tue Aug 23 12:22:46 1994
+Return-Path: <jj>
+Received: by cis.uab.edu (4.1/SMI-4.1)
+	id AA12574; Tue, 23 Aug 94 12:22:45 CDT
+Date: Tue, 23 Aug 94 12:22:45 CDT
+From: jj (John Johnstone)
+Message-Id: <9408231722.AA12574@cis.uab.edu>
+To: jimbo@blaze.cs.jhu.edu
+Cc: jj
+Status: OR
+
+Since our spherical curve on the 4-sphere is the 
+image of a cubic Bezier under M, which is a Bezier
+curve of degree 6 (see yesterday's note), don't we
+get continuity for free using Bezier curve properties?
+On first blush, I don't think that continuity arguments
+would change in 4d.
+jj
+

@@ -1,0 +1,14 @@
+README for executing a program that requires input from a data file
+-------------------------------------------------------------------
+
+In this example, suppose that the source program is called 'tube.cpp'
+and the data file is called 'data.j'
+
+1. Click 'Start'
+2. Click 'Programs'
+3. Click 'Accessories'
+4. Click 'Command Prompt'
+5. Change to the directory containing 'tube.cpp' using 'cd ITSHOMEDIRECTORY'.
+6. 'cd Debug' (the executable is automatically placed in this directory 
+	       by Visual C++ when you compile)
+7. 'tube < data.j'

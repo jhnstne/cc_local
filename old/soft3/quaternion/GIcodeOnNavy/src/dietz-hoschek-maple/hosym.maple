@@ -1,0 +1,66 @@
+
+
+read `genutils.maple`;
+read `bezutils.maple`;
+read `sphere_curves.maple`;
+
+p0 := [1,p0x,p0y,p0z];
+p1 := [1,p1x,p1y,p1z];
+p2 := [1,p2x,p2y,p2z];
+
+# p0 := [1,0,1,0];
+# p1 := [1,0,0,1];
+# p2 := [1,1,0,0];
+
+q0 := sigma_inverse(p0);
+q1 := sigma_inverse(p1);
+q2 := sigma_inverse(p2);
+
+q0bar := vector(bar(q0));
+q1bar := vector(bar(q1));
+q2bar := vector(bar(q2));
+
+
+q0barperp := vector(bar_perp(q0));
+q1barperp := vector(bar_perp(q1));
+q2barperp := vector(bar_perp(q2));
+
+
+cw0 := 1;
+cw1 := 1;
+
+ytw := cw0 * B_Basis(1,0,t) + cw1 * B_Basis(1,1,t);
+ytx := cx0 * B_Basis(1,0,t) + cx1 * B_Basis(1,1,t);
+yty := cy0 * B_Basis(1,0,t) + cy1 * B_Basis(1,1,t);
+ytz := cz0 * B_Basis(1,0,t) + cz1 * B_Basis(1,1,t);
+ 
+yt := [ytw,ytx,yty,ytz];
+ytv := vector(yt);
+
+
+
+
+eq0 := simplify(dotprod(q0bar,evalbez4(ytv,t=t0)));
+eq1 := simplify(dotprod(q0barperp,evalbez4(ytv,t=t0)));
+eq2 := simplify(dotprod(q1bar,evalbez4(ytv,t=t1)));
+eq3 := simplify(dotprod(q1barperp,evalbez4(ytv,t=t1)));
+eq4 := simplify(dotprod(q2bar,evalbez4(ytv,t=t2)));
+eq5 := simplify(dotprod(q2barperp,evalbez4(ytv,t=t2)));
+
+
+res1 := solve({eq0,eq1,eq2,eq3,eq4,eq5},{cx0,cy0,cz0,cx1,cy1,cz1});
+
+res2 := subs(res1,yt);
+ytsoln := subs({cw0=1,cw1=1},res2);
+xthomo := delta(ytsoln);
+xt := htoc(xthomo);
+
+
+
+
+
+
+
+
+
+

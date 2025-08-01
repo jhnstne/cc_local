@@ -1,0 +1,1451 @@
+%\documentclass{elsart}
+
+% Use the option doublespacing or reviewcopy to obtain double line spacing
+\documentclass[doublespacing]{elsart}
+
+% the natbib package allows both number and author-year (Harvard)
+% style referencing;
+%\usepackage{natbib}
+
+% if you use PostScript figures in your article
+% use the graphics package for simple commands
+\usepackage{graphics}
+% or use the graphicx package for more complicated commands
+\usepackage{graphicx}
+% or use the epsfig package if you prefer to use the old commands
+\usepackage{epsfig}
+
+% The amssymb package provides various useful mathematical symbols
+\usepackage{amssymb}
+
+\begin{document}
+
+\newtheorem{definitionenv}{Definition}
+\newenvironment{definition}{\begin{quote}\begin{definitionenv}}%
+                           {\end{definitionenv}\end{quote}}
+\newenvironment{defn2}{\begin{quote}\begin{definitionenv}}%
+                           {\end{definitionenv}\end{quote}}
+
+\newtheorem{propositionenv}{Proposition}
+\newenvironment{proposition}{\begin{quote}\begin{propositionenv}}%
+                           {\end{propositionenv}\end{quote}}
+
+\newtheorem{theoremenv}{Theorem}
+\newenvironment{theorem}{\begin{quote}\begin{theoremenv}}%
+                           {\end{theoremenv}\end{quote}}
+
+\newtheorem{lemmaenv}{Lemma}
+\newenvironment{lemma}{\begin{quote}\begin{lemmaenv}}%
+                           {\end{lemmaenv}\end{quote}}
+
+\newtheorem{corollaryenv}{Corollary}
+\newenvironment{corollary}{\begin{quote}\begin{corollaryenv}}%
+                           {\end{corollaryenv}\end{quote}}
+
+\newtheorem{observationenv}{Observation}
+\newenvironment{observation}{\begin{quote}\begin{observationenv}}%
+                           {\end{observationenv}\end{quote}}
+
+\newenvironment{proof}{\par\smallskip\noindent{\bf Proof.}\
+\ignorespaces}{\stopproof\ignorespaces\bigbreak}
+
+\newenvironment{notepar}{\par\smallskip\noindent{}\
+\ignorespaces}{\stopproof\ignorespaces\bigbreak}
+
+\newcommand{\cal}{\mathcal}
+\newcommand{\CH}{{\cal C}{\cal H}}
+\newcommand{\inner}[2]{\left<{#1}, {#2} \right>}
+
+\def\stopproof{\qquad\square}
+\def\square{\vbox{\hrule height.2pt\hbox{\vrule width.2pt height5pt
+\kern5pt \vrule width.2pt} \hrule height.2pt}}
+
+\newcommand{\Comment}[1]{\relax}  % makes a "comment" (not expanded)
+\newcommand{\QED}{\vrule height 1.4ex width 1.0ex depth -.1ex\ \vspace{.3in}} % square box
+\newcommand{\lyne}[1]{\mbox{$\stackrel{\textstyle \leftrightarrow}{#1}$}}
+\newcommand{\seg}[1]{\mbox{$\overline{#1}$}}
+\newcommand{\prf}{\noindent{{\bf Proof}:\ \ \ }}
+\newcommand{\choice}[2]{\mbox{\footnotesize{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}      
+\newcommand{\scriptchoice}[2]{\mbox{\scriptsize{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}
+\newcommand{\tinychoice}[2]{\mbox{\tiny{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}
+
+%\newtheorem{theorem}{Theorem}	
+%\newtheorem{rmk}[theorem]{Remark}
+%\newtheorem{example}[theorem]{Example}
+%\newtheorem{conjecture}[theorem]{Conjecture}
+%\newtheorem{claim}[theorem]{Claim}
+%\newtheorem{notation}[theorem]{Notation}
+%\newtheorem{lemma}[theorem]{Lemma}
+%\newtheorem{corollary}[theorem]{Corollary}
+%\newtheorem{defn2}[theorem]{Definition}
+%\newtheorem{observation}[theorem]{Observation}
+% \input{header}
+
+%\setlength{\oddsidemargin}{0pt}
+%\setlength{\topmargin}{0in}	% should be 0pt for 1in
+%\setlength{\textheight}{8.6in}
+%\setlength{\textwidth}{6.875in}
+%\setlength{\columnsep}{5mm}	% width of gutter between columns
+
+\begin{frontmatter}
+
+% Title, authors and addresses
+
+% use the thanksref command within \title, \author or \address for footnotes;
+% use the corauthref command within \author for corresponding author footnotes;
+% use the ead command for the email address,
+% and the form \ead[url] for the home page:
+% \title{Title\thanksref{label1}}
+% \thanks[label1]{}
+% \author{Name\corauthref{cor1}\thanksref{label2}}
+% \ead{email address}
+% \ead[url]{home page}
+% \thanks[label2]{}
+% \corauth[cor1]{}
+% \address{Address\thanksref{label3}}
+% \thanks[label3]{}
+
+\title{The Convex Hulls and Kernels\\ of Freeform Surfaces}
+
+% use optional labels to link authors explicitly to addresses:
+% \author[label1,label2]{}
+% \address[label1]{}
+% \address[label2]{}
+
+\author{}
+
+\address{}
+
+\begin{abstract}
+% Text of abstract
+
+\noindent 
+We present algorithms for computing the convex hulls and kernels of
+freeform rational surfaces.  The convex hull problem is reformulated
+as one of finding the zero-sets of polynomial equations;
+using these zero-sets
+we characterize developable surface patches and planar patches
+that belong to the boundary of the convex hull.
+The kernel computation can also be reduced to a zero-set finding problem.
+Using a plane-point duality, this paper explores a similar 
+duality relationship between the kernel and the convex hull.
+
+\end{abstract}
+
+\begin{keyword}
+Convex hull, kernel, duality, common tangent, zero-set finding,
+freeform rational surface, B-spline, symbolic computation
+\end{keyword}
+
+\end{frontmatter}
+
+%----------------------------------------------------------------------%
+% main text
+\section{Introduction}
+\label{sec-introduction}
+
+Computing the convex hull of a freeform surface
+is a challenging task in geometric modeling.
+Because of the difficulty in computing the exact convex hull
+of a spline surface, the convex hull of its control points is usually
+used as a simple, yet rough, approximation to the convex hull.
+When a tighter bound is needed for the convex hull, we can subdivide
+the surface into smaller pieces and then union the convex hulls of
+the control points of these small pieces. 
+This simple approach will require a large number of subdivisions 
+until the approximating convex hull converges to the exact convex hull
+within a certain reasonable bound.  In this paper, we present
+an algorithm that computes the convex hull of a rational surface
+without resorting to a polygonal approximation of the given surface
+or the subdivisions.
+
+The kernel of a closed surface is the set of interior points
+that can see every point of the surface.
+It is a convex connected subset of the surface's interior.
+The kernel is an important structure to understand in developing a theory of visibility.
+For example, interpreting the surface as the boundary of a room,
+a point of the kernel would be an ideal location to place a light, camera, or robot,
+since the entire room would be visible.
+
+The convex hull computation has applications in many important
+geometric problems such as interference checking in motion planning
+and object culling in graphics rendering.  Interference between two convex
+objects is considerably easier to test than between two non-convex objects.
+Consequently, convex hulls of general non-convex objects (or their rough
+approximations such as spheres and axis-aligned bounding boxes) are often used
+in a simple first test for checking the interference between the two
+original objects.   (If there is no interference between the convex hulls,
+it is guaranteed that the original objects has no interference.)
+These applications motivated the development of many efficient
+convex hull algorithms in computational geometry~\cite{Prep85}.
+The previous work, however, has been mostly limited to computing
+the convex hull of discrete points, polygons, and
+polyhedra~\cite{Graham83,Lee83,Prep85}.
+
+There are a few previous algorithms that can compute the convex hulls
+of rational curves in the plane.  Some of these algorithms are quite
+theoretical~\cite{Kim91,Souvaine90,Schaeffer87} in the sense that
+there are certain delicate issues that must be resolved for the efficiency
+and robustness of these algorithms to hold in actual implemention.
+More practical approaches were taken in two recent results reported
+by Elber et al.~\cite{Elber2001b} and Johnstone~\cite{Johnstone2001}.
+The convex hull algorithm we present in this paper is based on
+extending our recent result~\cite{Elber2001b} to the three-dimensional case.
+
+Given a point $S(u,v)$ on a rational surface, let $T(u,v)$ denote
+the tangent plane of the surface at the point $S(u,v)$.
+For the point $S(u,v)$ to be on the boundary of the convex hull,
+the surface $S$ should be completely contained in one side of
+the tangent plane $T(u,v)$.  Thus the Gaussian curvature of $S(u,v)$ 
+must be non-negative.  For the sake of simplicity of presentation,
+we assume that the Gaussian curvature is positive
+on this surface point $S(u,v)$ (i.e., the surface $S$ contains
+no line passing through the point $S(u,v)$).
+% which means
+%that the tangent plane $T(u,v)$ intersects the surface $S$
+%at no other point $S(s,t)$, for $(s,t) \neq (u,v)$.
+
+Let $D$ denote the region in the $uv$-domain, where the surface
+patch $S(u,v)$ belongs to the boundary of the convex hull.
+In this paper, we show that the boundary of this region $D$
+can be computed in terms of the zero-set of three equations in
+four variables $u,v,s,t$, and sometimes in terms of the zero-set of
+two equations in three variables $u,v,t$.  The boundary curves
+of the surface $S$ may also contribute to the convex hull of $S$.
+Let $I$ denote the parameter interval for a boundary curve segment
+that appears on the boundary of the convex hull of the surface $S$.
+The end points of the interval $I$ can be computed
+by solving three equations in three variables,
+and sometimes by solving two equations in two variables.
+The boundary of the convex hull may contain some triangles,
+each of which is obtained from a tangent plane touching at three 
+different points of the surface.  These planes can be computed
+by solving a system of six equations in six variables.
+
+The interior of the kernel of a freeform closed surface $S(u,v)$
+is characterized by the set of points that are never contained
+in the tangent planes of the surface.  The containment of
+a point $P = (x,y,z)$ in the tangent plane of $S(u,v)$ can be
+formulated as a polynomial equation in five variables:
+\[
+\inner{(x,y,z)-S(u,v)}{N(u,v)} = 0,
+\]
+where $N(u,v)$ is the normal vector of $S(u,v)$.
+The projection of the zero-set of this equation
+(onto the $xyz$-space) covers all non-interior points of the kernel.
+Thus the interior of the kernel is the volume
+that is uncovered by the projection of the zero-set.
+
+The duality between planes and points in the three-dimensional space
+implies a simular duality relationship between the kernel and
+the convex hull.  This paper explores the details of the duality
+and presents an algorithm for computing the kernel of a closed surface
+using the convex hull of its dual tangential surface.
+
+The computation of kernels from convex hulls offers a different point of
+view on the computation of the kernel, allowing all attention
+to be placed on the development of an algorithm
+for the efficient and robust computation of the convex hull.
+We can appeal to the Voronoi diagram and Delaunay triangulation
+for a comparable example.  There are algorithms for the computation of
+each of these structures, but many still prefer to always compute
+the Voronoi diagram by computing the Delaunay triangulation and then dualizing.
+
+The rest of this paper is organized as follows.
+In Section~2, we reduce the convex hull problem to
+computing the zero-sets of polynomial equations.
+The convex hull of rational space curves is needed
+to deal with the boundary curves of a rational surface.
+This is an important problem by itself;
+Section~3 thus presents an algorithm for computing
+the convex hull of a rational space curve.
+Section~4 computes tri-tangent planes by solving
+a system of six equations in six variables.  
+Section~5 discusses how to combine all these components
+to construct the boundary of the convex hull.
+In Section 6, we present algorithms for computing the kernels
+of freeform closed curves and surfaces.
+The duality relationship between the kernel and the convex hull
+is explored in depth in Section 7.
+Finally, in Section~8, we conclude this paper.
+
+%----------------------------------------------------------------------%
+\section{The Convex Hulls of Freeform Surfaces}
+\label{sec-ch-surface}
+
+In this section, we consider the convex hull of freeform surfaces.
+Although we will use one concave surface in the following discussion
+for clarity,  one may consider the second surface point $S(s,t)$
+as a point on another surface.
+
+Let $S(u,v)$ be a regular $C^1$-continuous rational surface. 
+Consider the tangent plane of $S$ at $S(u,v)$ as a moving plane
+while continuously touching the surface tangentially.
+Then, any surface point $S(u,v)$
+such that the surface is completely contained in one side of
+the tangent plane is on the boundary of the convex hull of
+the surface $S$. On the other hand, if the tangent plane at $S(u,v)$ 
+intersects the surface at any other surface point $S(s,t)$, then
+the surface point $S(u,v)$ cannot be on the boundary of
+the convex hull of the surface $S$.
+Note, however, that one must be careful of common bi-tangent planes because 
+a surface tangent point at which the tangent plane is also tangent to any 
+other surface point could be on the boundary of the convex hull. 
+
+The tangent plane of $S$ at $S(u,v)$ contains
+another surface point $S(s,t)$ if and only if 
+\begin{eqnarray*}
+   {\mathcal F}(u,v,s,t) &=& \inner{S(u,v)-S(s,t)}{N(u,v)}\\
+   &=& |S(u,v)-S(s,t)\ \ S_u(u,v)\ \ S_v(u,v)|\\
+   &=& 0,
+\end{eqnarray*}
+where $N(u,v) = S_u(u,v) \times S_v(u,v)$ is the normal vector field 
+of the surface $S$. Then, the set of surface points, for which 
+the tangent plane intersects the surface $S$ at no other points, 
+is defined as follows:
+\begin{eqnarray*}
+\CH{}^o(S) = \left\{~S(u,v)~\left|~ 
+{\cal F}(u,v,s,t) \neq 0,~\forall (s,t) \neq (u,v) \right. \right\}.
+\end{eqnarray*}
+This set $\CH{}^o(S)$ is clearly a subset of the boundary of the convex hull
+of $S$ and it is also a subset of the surface $S$ itself:
+\begin{equation}
+    \CH{}^o(S) \subset \CH{}(S) \cap S.
+\label{eqn-cho-ch}
+\end{equation}
+The difference $(\CH{}(S) \cap S) \setminus \CH{}^o(S)$ contains some extra
+points such as: (i) the boundary curve of each connected surface patch of
+$\CH{}^o(S)$ and, sometimes, (ii) the boundary curve of $S$ itself if $S$ is 
+not a closed surface.  (For now, we assume that each tangent plane of $S$ is
+tangent to $S(u,v)$ and at no more than two surface points;
+thus all isolated points and curve segments of
+$\CH{}(S) \cap S$ must be on the boundary curve of $S$.)
+
+As mentioned above, the zero-set of 
+${\mathcal F}(u,v,s,t) = 0 \wedge (u,v) \neq (s,t)$ in
+the $uvst$-domain cannot contribute to the boundary of the convex hull
+of the surface $S(u,v)$. That is, if the point $(u,v)$ in the parameteric 
+domain falls into the projection of this zero-set, then the corresponding
+surface point $S(u,v)$ cannot be on the boundary of the convex hull 
+of $S$. The boundary of the 'uncovered' region of the $uv$-plane
+(under this projection) is characterized as the projection of the 
+$st$-silhouette curves (along the $st$-direction) of the zero-set. This means
+that the $s$-partial derivative and the $t$-partial derivative must 
+simultaneously vanish along the silhouette curve, which can be 
+characterized as the
+intersection of the following three hypersurfaces in the $uvst$-space:
+\begin{eqnarray}
+   {\cal F}(u,v,s,t) &=& 0, \label{eqn-f-uvst} \\
+   {\cal F}_s(u,v,s,t) &=& 0, \label{eqn-s-partial}\\
+   {\cal F}_t(u,v,s,t) &=& 0. \label{eqn-t-partial}
+\end{eqnarray}
+One should consider only the solutions satisfying $(u,v) \neq (s,t)$
+from the above equations. Furthermore, if $(u,v)$ and $(s,t)$ are
+on the same surface, only $(u,v) > (s,t)$ should be considered, in
+lexicographic order.
+
+Now, consider Equations (\ref{eqn-s-partial}) and (\ref{eqn-t-partial})
+differently:
+\begin{eqnarray*}
+{\cal F}_s(u,v,s,t) &=& \frac{\partial}{\partial s} 
+\inner{S(u,v)-S(s,t)}{N(u,v)}, \\
+&=& - \inner{S_s(s,t)}{N(u,v)} = 0,\\
+{\cal F}_t(u,v,s,t) &=& - \inner{S_t(s,t)}{N(u,v)} = 0.
+\end{eqnarray*}
+Therefore, Equations (\ref{eqn-s-partial}) and (\ref{eqn-t-partial})
+characterize the condition that the tangent plane at the surface point
+$S(u,v)$ is also tangent to the surface at the other point $S(s,t)$.
+
+Having three Equations (\ref{eqn-f-uvst}), (\ref{eqn-s-partial}), and
+(\ref{eqn-t-partial}) in four variables, one gets a univariate curve
+as the simultaneous solution in the $uvst$-space. This solution curve can 
+be parameterized by a variable $\alpha$:
+\[
+   (u(\alpha),v(\alpha),s(\alpha),t(\alpha)).
+\]
+Denote by $T_\alpha$ the common bi-tangent plane of $S$
+at $S(u(\alpha),v(\alpha))$ and $S(s(\alpha),t(\alpha))$.
+Then, the surface patch that bounds the convex hull of the surface $S$ can
+be constructed by connecting the corresponding surface points
+$S(u(\alpha),v(\alpha))$ and $S(s(\alpha),t(\alpha))$ by line segments.
+All these line segments correspond to the common bi-tangent plane
+$T_\alpha$. Consequently, the surface patch that bounds the convex hull
+of $S$ is the envelope surface of the tangent planes $T_\alpha$, which is
+a developable surface~\cite{docarmo}.  We consider only solution 
+points which satisfy $\inner{N(u,v)}{N(s,t)} > 0$. Redundant solutions
+$(u,v,s,t)$, where $\inner{N(u,v)}{N(s,t)} < 0$, should be purged away. 
+Figure~\ref{fig-ch-surface-1} shows a developable surface patch 
+that bounds the convex hull of a B-spline surface.
+
+\begin{figure}
+    \begin{tabular}{cc}
+    \psfig{width=2.7in,figure={figures/ch-two-1.ps}} & 
+    \psfig{height=2.7in,figure={figures/ch-two-2.ps}} \\
+    {\large (a)}  &  {\large (b)} \\
+    \begin{picture}(0,0)
+        \put(20,80){\large $S(u,v) = S(s,t)$}
+	\put(240,75){\large $S(s,t)$}
+	\put(190,230){\large $S(u,v)$}
+    \end{picture}
+    \end{tabular}
+\vskip -0.5in
+    \caption{\textsf{(a) A developable surface patch on the boundary of
+    the convex hull of a rational surface $S(u,v)$ and (b)
+    a similar patch between two rational surfaces $S(u,v)$ and $S(s,t)$.}}
+    \label{fig-ch-surface-1}
+\vskip 0.2in
+\end{figure}
+
+In the above discussion, we assumed that both the surface points
+$S(u,v)$ and $S(s,t)$ are interior points of the surface $S$.
+When one of the two points is located on the boundary curve of $S$,
+the above characterization needs some refinements.
+We assume that the second point $S(s_0,t)$ is located
+on the boundary curve of $S$ with a fixed parameter $s=s_0$.
+Then, the above characterization can be modified as follows
+\begin{eqnarray}
+   {\cal F}(u,v,s_0,t) &=& 0, \label{eqn-ch-bndry}\\
+   {\cal F}_t(u,v,s_0,t) &=& 0. \nonumber
+\end{eqnarray}
+The zero-set of Equation (\ref{eqn-ch-bndry}) generates a silhouette curve 
+in the $uvt$-space, which can be parameterized by a variable $\alpha$:
+\[
+   (u(\alpha),v(\alpha),t(\alpha)).
+\]
+The bounding developable surface patch can be constructed
+by connecting the corresponding surface points
+$S(u(\alpha),v(\alpha))$ and $S(s_0,t(\alpha))$ by line segments.
+
+The curve $(u(\alpha),v(\alpha))$ outlines the boundary
+on the surface patch $S(u,v)$ that belongs to the boundary of
+the convex hull of the surface $S$.  The end points of
+the curve segment $S(s_0,t)$ that belong to the boundary
+of the convex hull are computed by solving the following
+three equations in three variables:
+\begin{eqnarray*}
+   {\cal F}(u,v,s_0,t) &=& 0,\\
+   {\cal F}_u(u,v,s_0,t) &=& 0,\\
+   {\cal F}_v(u,v,s_0,t) &=& 0.
+\end{eqnarray*}
+
+The second surface point may be a corner point $S(s_0,t_0)$ as well.
+In this case, one needs to solve the following bivariate equation:
+\[
+   {\cal F}(u,v,s_0,t_0) = 0,
+\]
+which characterizes the tangent planes from $S(s_0,t_0)$
+to the freeform surface $S(u,v)$.
+The zero-set generates a curve in the $uv$-plane,
+which can be parameterized by a variable $\alpha$:
+\[
+   (u(\alpha),v(\alpha)).
+\]
+The bounding developable surface patch is constructed
+as a conical surface that has its apex at the corner point
+$S(s_0,t_0)$ and is generated by the curve
+$S(u(\alpha),v(\alpha))$ on the surface $S$.
+
+The convex hull of a freeform surface also contains
+the convex hull of its boundary space curves.
+The approach to computing the convex hull of a rational space curve
+is slightly different from the above three cases.
+There is no unique tangent plane at a point on a space curve.
+The tangent planes form a one-parameter family of planes,
+each of which contains the tangent line of the space curve.
+Representing all tangent planes at a curve point requires
+one additional parameter for the rotation about the tangent line.
+Moreover, computing the convex hull of a space curve is 
+an interesting problem by itself.
+The next section is thus devoted to this special case.
+
+%----------------------------------------------------------------------%
+\section{The Convex Hull of a Space Curve}
+\label{sec-space-curve}
+
+In this section, we assume that the rational space curve $C(t)$ is
+non-planar; that is, its torsion is non-zero at all curve points.
+(The convex hull of a planar curve can be computed using the results
+of Elber et al.~\cite{Elber2001b} and Johnstone~\cite{Johnstone2001}.)
+The convex hull of a freeform space curve $C(t)$ is characterized
+by the planes that are tangent to the curve at two different locations.
+
+Assume that there is a plane tangent to the curve $C$ at two different
+locations $C(s)$ and $C(t)$.  Then the three vectors of
+$C'(s)$, $C'(t)$, and $C(s)-C(t)$ are parallel to the tangent plane.
+Hence, the determinant of a matrix consisting of these three vectors 
+must vanish:
+\begin{eqnarray*}
+{\cal G}(s,t) &=& |C(s)-C(t)\ \ C'(s)\ \ C'(t)|\\
+&=& \inner{C(s)-C(t)}{C'(s) \times C'(t)}\\
+&=& 0,
+\end{eqnarray*}
+which is a necessary condition for the existence of
+a common tangent plane at the two curve points $C(s)$ and $C(t)$.
+Once again, we need to consider only the solutions satisfying $s \neq t$.
+
+The zero-set of the above equation can be locally parameterized 
+by $t$ (or by $s$): ${\cal G}(s(t),t) = 0$
+(or ${\cal G}(s,t(s)) = 0$).
+By connecting the corresponding curve points $C(s(t))$ and $C(t)$
+by line segments, we can construct the surfaces
+that bound the convex hull of the space curve $C(t)$. Again, these
+surfaces are developable surfaces because all the line segments 
+connecting the points $C(s(t))$ and $C(t)$ are from the common 
+tangent planes and so the surfaces are envelope surfaces of these
+common tangent planes~\cite{Pottmann}.
+Figure~\ref{fig-ch-curve1}(a) shows a space curve and
+Figure~\ref{fig-ch-curve1}(b) shows its convex hull bounded by
+developable surface patches.
+
+We now consider how to compute the interior points of
+the curve segment $C(t)$ that belongs to the boundary of
+the convex hull.
+Let $T(t)$ denote the common tangent plane
+at two corresponding curve locations $C(s(t))$ and $C(t)$.
+This plane may not bound the convex hull of the curve $C$
+if the curve $C$ intersects this plane transversally
+at a third point $C(u)$, where $ u \neq s(t)$ and $u \neq t$.
+This condition can be formulated as follows
+\begin{eqnarray*}
+   {\cal H}(u,s,t)
+   &=& |C(u)-C(t)\ \ C'(s)\ \ C'(t)|\\
+   &=& \inner{C(u)-C(t)}{C'(s) \times C'(t)}\\
+   &=& 0,
+\end{eqnarray*}
+but
+\begin{eqnarray*}
+   {\cal H}_u(u,s,t)
+   &=& |C'(u)\ \ C'(s)\ \ C'(t)|\\
+   &=& \inner{C'(u)}{C'(s) \times C'(t)}\\
+   &\neq& 0,
+\end{eqnarray*}
+where ${\cal H}_u$ is the $u$-partial of ${\cal H}$.
+
+The redundancy of the solution $(s,t)$
+changes only through the configurations where
+three curve points $C(u),C(s),C(t)$ admit a common tangent plane.
+The condition is characterized by the following three equations:
+\begin{eqnarray*}
+{\cal G}(s,t) &=& 0,\\
+{\cal H}(u,s,t) &=& 0,\\
+{\cal H}_u(u,s,t) &=& 0.
+\end{eqnarray*}
+
+\begin{figure}
+    \begin{tabular}{cc}
+    \psfig{width=2.5in,figure={figures/curve1.ps}} & 
+    \psfig{width=2.5in,figure={figures/ch-curve1.ps}} \\  
+    {\large (a)}  &  {\large (b)} \\
+    \end{tabular}
+    \caption{\textsf{$C(t)$ is a rational space curve with non-zero torsion:
+    (a) shows a rational space curve $C(t)$; and
+    (b) shows the developable surface patches
+    that bound the convex hull of $C(t)$.}}
+\vskip 0.2in
+    \label{fig-ch-curve1}
+\end{figure}
+
+In the above discussion, we assumed that both the curve points
+$C(s)$ and $C(t)$ are interior points of the curve $C$.
+When one of the two points is an end point $C(s_0)$ of the curve $C$,
+we need a modification to this approach.
+Let $T(t)$ denote the tangent plane from a fixed point $C(s_0)$ to
+the curve $C(t)$.  Assume that the curve $C$ transversally intersects
+the tangent plane $T(t)$ at a third point $C(u)$, $u \neq t$.  Then,
+we have the following condition:
+\begin{eqnarray*}
+   && {\cal K}(u,t)\\
+   &=& |C(u)-C(s_0)\ \ C(t)-C(s_0)\ \ C'(t)|\\
+   &=& \inner{C(u)-C(s_0)}{(C(t)-C(s_0)) \times C'(t)}\\
+   &=& 0,
+\end{eqnarray*}
+but
+\begin{eqnarray*}
+   && {\cal K}_u(u,t)\\
+   &=& |C'(u)\ \ C(t)-C(s_0)\ \ C'(t)|\\
+   &=& \inner{C'(u)}{(C(t)-C(s_0)) \times C'(t)}\\
+   &\neq& 0.
+\end{eqnarray*}
+
+The redundancy of the solution $t$
+changes only through the configurations where
+three curve points $C(s_0),C(u),C(t)$ admit a common tangent plane.
+The condition is characterized by the following two equations:
+\begin{eqnarray*}
+{\cal K}(u,t) &=& 0,\\
+{\cal K}_u(u,t) &=& 0.
+\end{eqnarray*}
+
+Figure~\ref{fig-ch-curve2} shows a rational space curve $C(t)$
+and its convex hull which is bounded by two conical developable surfaces,
+where each surface has its apex at an end point of the curve and
+is generated by the curve $C(t)$.
+
+\begin{figure}
+\bigskip
+\bigskip
+\begin{center}
+    \begin{tabular}{c}
+    \psfig{width=2.7in,figure={figures/ch-curve2.ps}} \\
+    %\begin{picture}(0,0)
+    %    \put(70,60){\large $C(t)$}
+    %\end{picture}
+    \end{tabular}
+    \caption{\textsf{$C(t)$ is a rational space curve; its convex hull 
+	is bounded by two conical developable surface patches.}}
+    \label{fig-ch-curve2}
+\end{center}
+\vskip 0.2in
+\end{figure}
+
+%----------------------------------------------------------------------%
+\section{Tri-Tangent Planes}
+\label{sec-tri-tangencies}
+
+In Section \ref{sec-ch-surface}, we considered bi-tangent planes.
+In this section, we consider how to deal with tri-tangent planes.
+The bi-tangent condition prescribes a curve in the parameteric domains.
+The case of tri-tangency results in a solution with zero dimension. 
+To form the complete convex hull, one needs to combine 
+these tri-tangent planes with the bi-tangent developable surfaces which
+bound the convex hull.
+
+We can extend the three Equations (\ref{eqn-f-uvst})--(\ref{eqn-t-partial})
+from Section \ref{sec-ch-surface} to the tri-tangent condition. 
+Let the three tangent points be $S(u,v), S(s,t)$ and $S(m,n)$.
+Then, the three Equations 
+(\ref{eqn-f-uvst}), (\ref{eqn-s-partial}), and (\ref{eqn-t-partial}) 
+constrain the tangent plane at $S(u,v)$ to be tangent to 
+surface $S(s,t)$. We now add three more equations to constrain 
+this tangent plane to be tangent to the third surface point 
+$S(m,n)$ as well.  Consequently, we have six equations in six variables:
+\begin{eqnarray}
+   {\cal F}(u,v,s,t) &=& 0, \label{eqn-f-uvst-new} \\
+   {\cal F}_s(u,v,s,t) &=& 0, \label{eqn-s-partial-new}\\
+   {\cal F}_t(u,v,s,t) &=& 0. \label{eqn-t-partial-new} \\
+{\cal F}(u,v,m,n) &=& \inner{S(u,v)-S(m,n)}{N(u,v)} \label{eqn-g-uvmn} = 0,\\
+%&=& 0, \nonumber \\
+{\cal F}_m(u,v,m,n) &=& 0, \label{eqn-m-partial}\\
+{\cal F}_n(u,v,m,n) &=& 0. \label{eqn-n-partial}
+\end{eqnarray}
+These six Equations (\ref{eqn-f-uvst}-new)--(\ref{eqn-n-partial})
+in six variables have a zero dimensional solution or a finite set of points.
+An example for common tri-tangent planes to three surfaces is shown in
+Figure~\ref{fig-three-tangent}(a).
+
+\begin{figure}
+    \begin{tabular}{cc}
+    \psfig{width=2.7in,figure={figures/ch-three-tang.ps}} & 
+    \psfig{width=2.7in,figure={figures/ch-three-trim.ps}} \\
+    {\large (a)}  &  {\large (b)}
+    \end{tabular}
+    \caption{\textsf{(a) All the common tri-tangent planes to three surfaces. 
+	Note
+	that surface's topology don't need to be same. (b) One developable 
+	surface which bounds first two convex parts of the surface and 
+	the plane (triangle) which is common
+	tangent to the surface. The boundary of the developable
+	surface exactly intersect with the end point of the common 
+	tri-tangent triangle.}}
+    \label{fig-three-tangent}
+\vskip 0.2in
+\end{figure}
+
+%-----------------------------------------------------------------------%
+\section{Trimming and Combining the Convex Hull}
+\label{sec-trim-combine}
+
+As in the case of Section~\ref{sec-ch-surface}, the tri-tangent planes
+include some redundant solutions.
+The redundancy can be eliminated using the following three conditions:
+\begin{eqnarray}
+& & \inner{N(u,v)}{N(s,t)} > 0 \label{eqn-trim1} \\
+& & \inner{N(u,v)}{N(m,n)} > 0 \label{eqn-trim2} \\
+& & \inner{S(x,y) - S(u,v)}{N(u,v)} \neq 0,\ \textrm{ for } 
+\forall (x,y) \neq (u,v), (s,t), (m,n). \label{eqn-trim3}
+\end{eqnarray}
+The first two Equations (\ref{eqn-trim1}) and (\ref{eqn-trim2}) enforce 
+the tri-tangent planes to have their normal vectors in the same direction. 
+Then, Equation (\ref{eqn-trim3}) constrains the planes
+not to pass through the interior of the convex hull.
+%Equations (\ref{eqn-trim1}) and (\ref{eqn-trim2}) assume that
+%the input surfaces are properly oriented.
+
+To complete the convex hull construction, one needs to compute 
+bi-tangency for each pair of surface parts: the bi-tangency of $S(u,v)$ and 
+$S(s,t)$, the bi-tangency of $S(s,t)$ and $S(m,n)$, and the bi-tangency
+of $S(m,n)$ and $S(u,v)$. Not all the bi-tangent developable surfaces
+contribute to the boundary of the final convex hull. One needs to trim out
+certain parts of these developable surfaces according to
+the common tri-tangent planes to the three surface parts.
+
+Because all the developable surface patches, which form the convex hull of 
+two surface parts as mentioned in Section \ref{sec-ch-surface}, bound
+the convex hull of each pair of surface parts, the boundary curves of these 
+developable surfaces always intersect with tri-tangent planes
+at the corresponding surface points (see Figure~\ref{fig-three-tangent}(b)).
+In fact, we can always determine the trimming line of each developable surface.
+As all the developable surfaces are generated by a moving bi-tangent plane 
+between two surfaces, the trimmed developable surface is continuously 
+connected to a tri-tangent plane.
+Figures \ref{fig-ch-three1} and \ref{fig-ch-three2} show
+two examples of the convex hull.
+
+\begin{figure}
+\begin{center}
+    \begin{tabular}{cc}
+    \psfig{width=3.2in,figure={figures/s.ps}}
+    \psfig{width=2.7in,figure={figures/ch-three-1.ps}} \\
+    \end{tabular}
+    \caption{\textsf{(a) A surface with three convex parts;
+        and (b) its convex hull.}}
+    \label{fig-ch-three1}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+    \begin{tabular}{c}
+    \psfig{width=3.6in,figure={figures/ch-three-2.ps}} \\
+    \end{tabular}
+    \caption{\textsf{The convex hull of three ellipsoids.}}
+    \label{fig-ch-three2}
+\end{center}
+\bigskip
+\bigskip
+\end{figure}
+
+
+%----------------------------------------------------------------------%
+\section{The Kernel of a Freeform Curve and a Freeform Surface}
+\label{sec-kernel}
+
+In this section, we present an algorithm for computing the kernel of
+a freeform surface, which is closely related to the convex hull computation.
+For the clarity of explanation, we first consider the kernel of
+a freeform curve and generalize its construction to the case of
+computing the kernel of a closed surface.
+There is a dual relationship between the kernel and the convex hull.
+More details will be discussed in the next section
+(see also Jonstone~\cite{}).
+
+\subsection{The Kernel of a Freeform Curve}
+\label{subsec-kernel-curve}
+
+The kernel of a closed curve in the plane is the set of points
+that can see every point of the curve.
+%A self-intersecting curve always has an empty kernel
+%since no point can see every point in the neighborbood of
+%a self-intersection point.
+Let $C(t) = (x(t),y(t))$ be a $C^1$-continuous planar rational curve;
+and $P$ be a point in the plane.
+Assume that $P$ is located on the tangent line of the curve at $C(t)$:
+\[
+\inner{P-C(t)}{N(t)} = 0,
+\]
+where $N(t) = (y'(t),-x'(t))$ is the normal vector of $C(t)$.
+
+If the curve $C$ has non-zero curvature at the tangential point $C(t)$,
+the point $P$ cannot see at least a certain part of the curve
+unless $P$ is the tangent point $C(t)$ itself.
+At an inflection point, some points on the tangent line may see
+every point of the curve, at least in the local neighborhood of
+the tangent point $C(t)$.  Since there are only a finite number of
+such tangent lines and they cannot form a planar region.
+Tangent lines at inflection points may contribute to
+the boundary of the kernel, but not to the interior of the kernel.
+
+Now consider a point $P$ that is never covered by a tangent line
+of the curve:
+\begin{eqnarray}
+\inner{P - C(t)}{N(t)} \neq 0,\quad \forall\ t.
+\label{def-krnl-crv}
+\end{eqnarray}
+The point $P$ should be in the kernel of the curve $C$.
+Otherwise, there exists a curve point $C(t_1)$ that $P$ cannot see.
+In other words, a certain segment of $C$ blocks the sight of $C(t_1)$
+from the view point $P$.  Now consider the line connecting $P$ and
+$C(t_1)$ and rotate the line about the point $P$.  Since the curve
+is closed, there is a curve point $C(t)$ where the line touches
+tangentially.  Then the point $P$ is contained in the tangent line
+at this point $C(t)$, which is a contradiction.
+
+Now, assume that $P$ is a point in the interior of the kernel.
+Then this point is never on the tangent line of the curve; and
+the point $P$ satisfies Equation (\ref{eqn-krnl-crv}),
+which is a characterizing condition for the interior of the kernel.
+ 
+Consider the following single equation in three variables, 
+\begin{eqnarray}
+{\cal T}(x, y, t) = \inner{(x, y) - C(t)}{N(t)} = 0. \label{eqn-kernel-crv}
+\end{eqnarray}
+A plane point $P_0 = (x_0, y_0)$ is not included in the interior of
+the kernel if and only if there exists
+$t_0$ such that ${\cal T}(x_0, y_0, t_0) = 0$. Having one equation in 
+three variables, the zero-set of ${\cal T}(x, y, t) = 0$ is a bivariate 
+surface in the $xyt$-space. 
+Figure~\ref{fig-kernel-1}(a) illustrates one example of the zero-set for the 
+planar curve shown in white.  Now, by projecting the zero-set along
+the $t$-direction onto the $xy$-plane, the uncovered region in the $xy$-plane 
+is the region of the $xy$-plane that satisfies (\ref{eqn-krnl-crv})
+and hence is in the interior of the kernel of $C(t)$
+(see Figure \ref{fig-kernel-1}(b)).
+Another example is shown in Figure~\ref{fig-kernel-crv}.
+As one can see from these examples, the boundary of a kernel consists
+of some segments of the curve and tangent line segments
+at certain inflection points of the curve.
+
+\begin{figure}
+    \begin{tabular}{cc}
+    \psfig{width=2.7in,figure={figures/kernel-zero-1.ps}} & 
+    \psfig{width=2.7in,figure={figures/kernel-zero-2.ps}} \\
+    {\large (a)}  &  {\large (b)}
+    \end{tabular}
+    \caption{\textsf{(a) The zero-set of Equation (\ref{eqn-kernel-crv}) 
+	for the white-colored planar curve. 
+	(b) Top (along the $t$-direction) view of the 
+	zero-set. The uncovered region of this zero-set is
+	the kernel of the planar curve.}}
+    \label{fig-kernel-1}
+\vskip 0.3in
+\end{figure}
+
+\begin{figure}
+    \begin{tabular}{c}
+    \psfig{width=4.3in,figure={figures/kernel-crv-1.ps}} \\
+%    \psfig{width=2.7in,figure={figures/kernel-open-crv.ps}} \\
+%   {\large (a)}  &  {\large (b)}
+    \end{tabular}
+    \caption{\textsf{The kernel of a planar curve.}}
+%   (b) The kernel of an open curve.}}
+    \label{fig-kernel-crv}
+\end{figure}
+
+\subsection{The Gamma Kernel of a Freeform Curve}
+\label{subsec-gamma-kernel-curve}
+
+It is also interesting to consider an angle-variant of the kernel.
+Instead of considering the region uncovered by the tangent lines,
+we may consider a similar region uncovered by rotated lines
+that make angle $\gamma$ with the tangent lines.
+This generates a convex region that is contained in the kernel.
+The $\gamma$-kernel can also be defined as follows:
+
+\begin{definitionenv}
+Let $C(t)$ be a $C^1$-continuous planar curve.  A point $P$ is
+in the $\gamma$-kernel of $C(t)$ if $P$ has a line of sight with every point 
+of $C(t)$ that makes at least angle $\gamma$ with $C'(t)$,
+the tangent of $C(t)$.
+\end{definitionenv}
+If $\gamma = 0$, then the $\gamma$-kernel is reduced to the regular kernel 
+of $C(t)$. The $\gamma$-kernel of $C(t)$ can be computed by the zero-set 
+of the following equation:
+\begin{eqnarray*}
+{\cal T}_1(x, y, t) = \inner{(x,y) - C(t)}{R_{\pm\gamma} [N(t)]} = 0, 
+\end{eqnarray*}
+where $R_{\pm\gamma} [\ ]$ is the rotation operation by degree $\pm\gamma$.
+Figure~\ref{fig-r-kernel} shows two simple examples of $\gamma$-kernel.
+
+
+\begin{figure}
+    \begin{tabular}{cc}
+    \psfig{width=2.7in,figure={figures/kernel-r-1.ps}} & 
+    \psfig{width=2.7in,figure={figures/kernel-r-2.ps}} \\
+    {\large (a)}  &  {\large (b)}
+    \end{tabular}
+    \caption{\textsf{Two $\gamma$-kernels. (a) $\gamma = 20^\circ$. Note that
+	the regular kernel of a (convex) ellipse is the whole region surrounded
+	by the ellipse. 
+	(b) $\gamma = 5^\circ$. Compare this with Figure 
+	\ref{fig-kernel-crv}~(a) which is the regular kernel of the same 
+	curve.}}
+    \label{fig-r-kernel}
+\vskip 0.2in
+\end{figure}
+
+\subsection{The Kernel of a Freeform Surface}
+\label{subsec-kernel-surface}
+
+We consider the problem of computing the kernel of a freeform closed surface.
+In the surface case, we employ the following multivariate equation:
+\begin{eqnarray}
+{\cal L}(x,y,z,u,v) = \inner{(x,y,z) - S(u,v)}{N(u,v)} = 0,
+\label{eqn-kernel-srf}
+\end{eqnarray}
+where $N(u,v) = S_u(u,v) \times S_v(u,v)$ is the normal vector field of the 
+surface $S(u,v)$.   Consider the projection of the zero-set of
+the above equation onto the $xyz$-space.
+The uncovered volume under this projection is the kernel of the surface $S$.
+
+Similarly to the case of freeform closed curves in the plane,
+the kernel of a free-form closed surface is bounded
+by some patches of the surface and 
+some developable surfaces patches that are generated by
+tangent planes at parabolic points of the surface $S(u,v)$.
+
+Assume that a point $P$ is on the tangent plane of $S$ at
+an elliptic point $S(u,v)$.  The point $P$ may not see
+certain part of $S$ unless it is the tangent point $S(u,v)$ itself.
+Elliptic points may contribute to the boundary of the kernel.
+Moreover, for the case of a tangent plane at a hyperbolic point $S(u,v)$,
+it is clear that each point $P$ on the tangent plane may not see
+some part of the surface $S$.  Consequently, no hyperbolic points
+can contribute to the boundary of the kernel.  
+In the case of parabolic points, the envelope surface of tangent planes
+along the parabolic lines may contribute to the boundary of the kernel.
+
+Figure \ref{fig-kernel-srf} shows two examples of the kernel of a 
+free-form surface. These examples were computed by deriving the parabolic
+lines of the surfaces, following \cite{Elber93}, and computing the 
+envelope of the tangent planes moving along the parabolic lines.
+
+\begin{figure}
+    \begin{tabular}{ccc}
+    \psfig{width=1.8in,figure={figures/kernel-srf-1.ps}} & 
+    \psfig{width=1.8in,figure={figures/kernel-srf-2.ps}} & 
+    \psfig{width=1.8in,figure={figures/kernel-srf-3.ps}}\\
+    {\large (a)}  &  {\large (b)} &  {\large (c)}
+    \end{tabular}
+    \caption{\textsf{Three examples of computations of the kernel 
+	(dark region) of free-form surfaces. Please note that 
+	magenta-colored curves are 
+	parabolic lines of the surface.}}
+    \label{fig-kernel-srf}
+\vskip 0.2in
+\end{figure}
+
+
+%----------------------------------------------------------------------%
+\section{Duality between the Convex Hull and the Kernel}
+\label{sec-dual}
+
+There is a dual relationship between the kernel and convex hull
+for closed surfaces.
+This relationship can be used to compute kernels from convex hull algorithms,
+as we shall explore in this section.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Duality and Tangent Space}
+\label{sec:duality}
+
+We must begin by developing some theory of duality.
+There is a geometric duality between points and planes in 3-space \cite{hartshorne}.
+Classically, the plane $ax+by+cz+d=0$ is dual to the point $(a,b,c,d)$ in projective 3-space
+(or equivalently, the point $(\frac{a}{d},\frac{b}{d},\frac{c}{d})$ in Cartesian 3-space),
+although many other point-plane dual maps can be defined.
+Using geometric duality, the tangent space of a surface $S(u,v)$ can be mapped 
+to a surface $S^*(u,v)$ in dual space, by dualizing the tangent plane at $S(u,v)$ to the point $S^*(u,v)$.
+We call $S^*$ a tangential surface, as it represents a tangent space.
+This mapping to dual space is complicated by the fact that, for a closed surface with empty kernel,
+some tangent planes will inevitably map to infinity.
+To solve this problem, 
+three cooperating dualities are needed to represent a tangent space robustly.
+The reader is referred to \cite{jj03tangsurf} for the complete details
+on this representation, called the tangential surface system 
+(Figure~\ref{fig:peartangsystem}).
+However, when the kernel of $S$ is not empty and a single point of this
+kernel is known,
+a simpler dual representation of $S$'s tangent space is possible.\footnote{Since many
+	surfaces have empty kernels, this is not a general solution to
+	the representation of tangent spaces.}
+After translating the kernel point to the origin,
+the tangential d-surface alone is a robust representation of the tangent space of $S$.
+
+\begin{defn2}
+The plane $ax+by+cz+d=0$ is {\bf d-dual} to the point $(\frac{a}{d},\frac{b}{d},\frac{c}{d})$.
+The point $(a,b,c)$ is {\bf d-dual} to the plane $ax+by+cz+1=0$.
+$S^*$ is the {\bf tangential d-surface} of the surface $S$ if $S^*(u,v)$ 
+is the d-dual of the tangent plane at $S(u,v)$ (Figure~\ref{fig:peartangdsurf}).
+\end{defn2}
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics*[scale=.36]{img/peartangsystem.ps}
+\end{center}
+\caption{The tangential surface system of a pear}
+\label{fig:peartangsystem}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.36]{img/peartangdsurf.ps}
+\end{center}
+\caption{The tangential d-surface of a pear}
+\label{fig:peartangdsurf}
+\end{figure}
+
+\begin{lemma}
+\label{lem:drobust}
+If the origin lies inside the kernel of $S$,
+the tangential d-surface of $S$ is a robust representation of the tangent space of $S$.
+\end{lemma}
+\prf
+Planes through the origin are mapped to infinity by the d-duality.
+Since the origin lies inside the kernel,
+no tangent plane will pass through the origin (Lemma~\ref{lem:primalkernelchar} below), 
+so no tangent plane will map to infinity.
+\QED
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{A reduction to the convex hull}
+\label{sec:reduction}
+
+We are now ready to establish the dual relationship between kernel and convex hull
+for a closed surface $S$.
+The general structure of this relationship will be discussed in this section,
+while Section~\ref{sec:cusp} will study its details and provide a complete algorithm.
+In this section, it is assumed that a single point of the kernel has been computed and the surface $S$
+has been translated so that this point is at the origin.
+This makes the tangential d-surface $S^*$ into a closed finite surface
+and a robust representation for the tangent space (Lemma~\ref{lem:drobust}).
+Section~\ref{sec:firstpt} will treat the computation of a single point of the kernel.
+
+A point of the kernel is a point that sees the entire surface.
+An alternative characterization is available for surfaces:
+a point inside the kernel is not hit by any tangent
+plane.\footnote{A boundary point of the kernel is hit
+either by its own tangent plane or by the tangent plane of a parabolic point.}
+
+\begin{lemma}
+\label{lem:primalkernelchar}
+The point $P$ lies strictly inside the kernel of a smooth closed surface $S$ if and only if 
+no tangent plane of $S$ intersects $P$.
+\end{lemma}
+\prf
+If $P$ does not lie in the kernel,
+then $P$ does not see some point $Q \in S$.
+That is, $\seg{PQ}$ hits the surface in a second point $R$.
+Since the surface is closed, 
+as the line $\lyne{PR}$ is rotated about $P$,
+it will eventually become tangent to the surface.
+The tangent plane at this point contains $P$.
+Thus, if $P$ does not lie in the kernel, then it is hit by some tangent plane.
+A point of the kernel boundary, as a limit of this argument, will also be hit by some tangent plane.
+This shows that if no tangent plane of $S$ intersects $P$, 
+$P$ must lie in the interior of the kernel.
+
+Conversely, if the tangent plane at $Q \in S$ intersects $P$, then $P'Q$ will intersect $S$ twice for some point $P'$ in 
+the neighbourhood of $P$, meaning $P'$ is not in the kernel.
+Thus, if $P$ lies in the interior of the kernel, no tangent plane of $S$ can intersect $P$.
+\QED
+
+\noindent This characterization of a kernel point can be reinterpreted in dual space.
+
+\begin{defn2}
+A plane $P^*$ in dual space is {\bf free} if $P^*$ does not intersect the tangential surface $S^*$.
+\end{defn2}
+
+\begin{corollary}
+\label{cor:dualkernelchar}
+The point $P$ lies strictly inside the kernel of $S$ if and only if 
+the plane $P^*$ is free.
+\end{corollary}
+\prf
+The statement 'no tangent plane of $S$ intersects $P$' in primal space
+is equivalent to the statement 'no point of $S^*$ lies on $P^*$' in dual space.
+\QED
+
+Corollary~\ref{cor:dualkernelchar} identifies kernel points in primal space
+with free planes in dual space.
+Since the free planes of a surface bound its convex hull,
+this immediately suggests a relationship between the kernel and convex hull.
+
+\begin{theorem}
+\label{thm:kernelhull}
+If the origin lies inside the kernel of $S$,
+the kernel of $S$ is dual to the convex hull of the tangential d-surface $S^*$.
+More accurately, the kernel is dual to the family of planes whose
+envelope is the convex hull.
+\end{theorem}
+\prf
+The convex hull is well defined, since $S^*$ is a closed, finite surface.
+Since kernel points of $S$ correspond to free planes,
+boundary points of the kernel correspond to free tangent planes of $S^*$
+(free planes that are just about to intersect $S^*$).
+The free tangent planes of a surface $D$ bound its convex hull: the point $P \in D$ lies
+on the boundary of the convex hull of $D$ if and only if the tangent plane at $P$ 
+does not intersect $D$.
+Therefore, the boundary points of the kernel of $S$ correspond to the boundary points
+of the convex hull of $S^*$.\footnote{Typically, points in primal space would be associated with planes in dual space,
+	but we can also associate points with points:
+	the point $p \in S$ in primal space is associated
+	with the point $q \in S^*$ whose tangent plane dualizes to $p$.
+	This is particularly easy when there is a parameterization, since $p$ and $q$ 
+	have the same parameters.}
+\QED
+
+We delay a detailed treatment of how the kernel is computed from the hull
+until Section~\ref{sec:cusp}, after the hull of the tangential surface is better understood.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{The first point of the kernel}
+\label{sec:firstpt}
+
+The reduction of kernel to convex hull relies on the prior knowledge
+of a single point of the kernel.
+This point is used to adjust the surface before dualization, ensuring
+the finiteness of the tangential d-surface.
+This section discusses the computation of this first point of the kernel.
+
+For the remainder of the section, we assume that $S$ is concave.
+There is no loss of generality in only considering concave surfaces,
+since the kernel of a convex surface $S$ is simply the interior of $S$.
+% [if S is convex, then no parabolic points so no cusps, so obvious that S is convex]
+% We can also assume that $S$ has a nonempty kernel, otherwise any
+% candidate set will work.
+We shall see in Section~\ref{sec:cusp} that the tangential surface $S^*$ of
+a concave surface $S$ is also concave.
+In particular, $S^*$ has bitangent planes.
+Therefore, bitangent planes can be used in our construction. % of the candidate set.
+
+The search for a kernel point will be reduced to the search for a free plane,
+using the association of Corollary~\ref{cor:dualkernelchar}.
+This moves the search to dual space, consistent with keeping the computation
+of the kernel in dual space.
+To make the search for a free plane tractable, a candidate set will be found.
+A {\bf candidate set} is a finite set of planes in dual space
+that necessarily contains a free plane (whenever the kernel is not empty).
+We can test each candidate until a free plane is found.
+If no free plane is found amongst the candidates,
+the kernel must be empty.
+Otherwise, the dual of the free plane is a kernel point,
+which can be used to seed the algorithm of Section~\ref{sec:reduction}.
+Since there are a finite number of candidates, this is a valid solution.
+
+The challenge is to restrict the candidates for a free plane from
+all planes (a triply-infinite system) to a manageable finite set.
+There are three degrees of freedom to the search for a free plane.
+Two of these degrees of freedom can be removed by restricting the search
+to free bitangent planes.
+Consider a free plane in dual space.
+While preserving its freedom, we can move this free plane
+until it touches the surface once, generating a tangent plane,
+then pivot until it touches the surface again, generating a bitangent plane.
+Sometimes, this process can be continued one more level,
+moving the bitangent plane about the surface until it becomes a
+tritangent plane.
+However, in some cases, there may be no tritangent planes.
+Thus, we must handle both cases, a surface with tritangent planes
+and a surface with only one-parameter families of bitangent planes.
+
+The candidate set is built as follows.
+Consider a one-parameter family of bitangent planes of $S^*$.
+If some of these planes are free and some are not free,
+there will be a free tritangent plane at the boundary
+between free and nonfree planes of the family.
+Call a family of planes {\em homogeneous} if every plane is
+free or every plane is not free.
+We conclude that either all of the families of bitangent planes
+are homogeneous or some tritangent plane is free.
+This shows that the set consisting of all tritangent planes
+and one (arbitrary) representative from each bitangent family
+is a candidate set.
+Notice that it is a finite set and contains a free plane when anyone exists.
+By testing this candidate set, a free plane, and hence a kernel point, can be found.
+This defines a dual approach to finding the first point of the kernel.
+
+To get a robust seed point for the kernel,
+all of the free planes in the candidate set should be found,
+yielding a set of kernel points, and the seed kernel point 
+should be defined to be the centroid of this set.
+This works since the kernel is convex, and moves the point from the boundary
+into the interior of the kernel.
+
+Since there is no longer any way to guarantee the finiteness of the tangential surface
+in mapping to dual space (unlike Section~\ref{sec:reduction}),
+the computation of the first kernel point must use the tangential surface system 
+for robustness (Section~\ref{sec:duality}),
+by testing for freedom in all three cooperating dual spaces.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{The hull's structure}
+\label{sec:cusp}
+
+This section examines the structure of the convex hull of a tangential
+surface $S^*$, through an analysis of its bitangent and tritangent planes
+which are necessarily degenerate when the surface $S$ has a nontrivial kernel.
+This leads to a more precise understanding of the 
+dual relationship between kernel and hull, culminating in an
+algorithm for the construction of kernel from convex hull.
+
+\begin{defn2}
+A {\bf bitangent plane} of the surface $S^*$ is a plane that
+is tangent to $S^*$ at two or more distinct points.
+This plane is {\bf conventional} if the surface has unique, well-defined 
+tangent planes at the points of tangency,
+otherwise it is {\bf degenerate}.
+\end{defn2}
+
+\begin{lemma}
+\label{lem:degenerate}
+If $S$ has a nonempty kernel,
+all bitangent and tritangent planes of the tangential surface $S^*$ are 
+degenerate.
+\end{lemma}
+\prf
+Let $S$ be a surface with nonempty kernel.
+$S$ has no self-intersections, otherwise the kernel is empty
+since no point can see through a self-intersection.
+But conventional bitangent and tritangent planes of $S^*$ are associated
+with double and triple self-intersections of $(S^*)^* = S$ \cite{jj02,jj03tangsurf}.
+Thus, no bitangent and tritangent planes of $S^*$ are conventional.
+\QED
+
+In order to understand degenerate bitangent planes, we must understand cusps.
+Consider a concave
+surface $S$ with nonempty kernel.
+$S$ will contain parabolic points (points with zero Gaussian curvature \cite{struik}):
+after all, the kernel of a concave surface is the intersection of the inside
+halfplanes of the tangent planes of its parabolic points.
+Since the tangent planes at parabolic points of $S$ are dual to cusps on $S^*$,
+the tangential surface $S^*$ will contain cusps 
+(Figures~\ref{fig:peartangsystem}-\ref{fig:toptangdsurf}).
+In general, these cusps are not isolated: they gather into closed curves on the surface.
+Thus, one can talk about the tangent line of a cusp.
+
+\begin{defn2}
+\label{defn:tangline}
+Let $P$ be a cusp of $S^*$ that lies on a curve of cusps $C$.
+The {\bf tangent line} of $P$ is the tangent of $C$ at $P$.
+\end{defn2}
+
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.36]{img/toptangdsurf.ps}
+\end{center}
+\caption{The tangential d-surface of a top}
+\label{fig:toptangdsurf}
+\end{figure}
+
+Any plane through a cusp $P$ that contains the tangent line of $P$ may be considered
+a tangent plane of the surface.\footnote{Upon entering a cusp $P$, 
+	the tangent plane reverses direction, sweeping out all of 3-space 
+	by rotating about the tangent line of $P$,
+	until it is ready to leave $P$ on the other side in an opposite orientation.}
+This leads to a degenerate case of the bitangent plane.
+
+\begin{defn2}
+A {\bf degenerate bitangent plane} is 
+(1) a plane that contains the tangent line of two distinct cusps or
+(2) a tangent plane (at some noncusp point) that contains the tangent line of a cusp. 
+\end{defn2}
+
+It can be shown that, if the surface contains two or more cusp curves,
+a typical cusp point has a degenerate bitangent plane of the first type.
+That is, given the tangent line of a cusp, 
+it is possible to find a second tangent line that lies in the same plane.
+
+\begin{defn2}
+A {\bf degenerate tritangent plane} is 
+a plane that contains the tangent line of three cusps, 
+a tangent plane that contains the tangent lines of two cusps,
+or a bitangent plane that contains the tangent line of one cusp.\footnote{The
+	third case will not participate in the hull of $S^*$, since
+	it implies a self-intersection in $S$.}
+\end{defn2}
+
+The structure of the hulls of our tangential surfaces can now be clarified.
+A tangential surface will have a finite number of one-parameter families of degenerate bitangent planes
+and a finite number of degenerate tritangent planes.
+To create the convex hull, a surface is capped by bitangent developables
+(the envelopes of bitangent plane families) and tritangent planes.
+The bitangent developables
+are of two types, matching the two types of degenerate bitangent planes: 
+a lofting between two cusp curves (type 1) and
+a lofting between a cusp curve and a curve on the surface (type 2).
+
+Using this deeper understanding of the hull's structure,
+we now describe how to compute the kernel directly from the hull.
+The patches of the hull that lie on the surface $S^*$
+cause no trouble: they correspond directly
+to the patches of the kernel that lie on the surface $S$.
+It is the translation of the patches of the hull that do not lie on the surface 
+(the bitangent developables and tritangent planes)
+that requires some elaboration.
+
+Since a family of planes dualizes to a curve,
+each bitangent developable $D^*$ in the hull of $S^*$ 
+is associated with a curve $D$ in primal space.
+If two developables $D_1^*$ and $D_2^*$ of the hull meet at a cusp curve, 
+the kernel will contain a lofting between the associated curves 
+$D_1$ and $D_2$ in primal space 
+(which is well defined, since $D_1$ and $D_2$ 
+will necessarily have the same parameterization).\footnote{Each line 
+	of this lofting is generated by a tangent plane in dual space pivoting 
+	about a point of the cusp curve,
+	from one developable to the other developable.}
+
+This development is summed up in the following algorithm for computing the kernel of $S$ 
+from the convex hull of $S^*$.
+
+\begin{enumerate}
+\item Compute the convex hull of $S^*$.
+\item For each patch of the hull that lies on $S^*$, add the associated patch of $S$
+	to the kernel.
+\item For each bitangent developable $D^*$ of the hull, compute the associated curve $D$ in primal space.
+	$D$ is the dual of the bitangent planes along either boundary of $D^*$.
+\item For each pair of neighbouring bitangent developables on the hull,
+	add the lofting between their associated curves to the kernel.
+\item For each bitangent developable that neighbours a tritangent plane,
+	add the lofting between the developable's associated curve and the tritangent's 
+	associated point to the kernel.
+\end{enumerate}
+
+$D$ is easily computable.
+Suppose that the developable $D^*$ is the lofting between $C_1(t)$ and $C_2(t)$,
+where $C_1(t)$ is a cusp curve if $D^*$ is of type 1 and
+a curve of tangency with $S^*$ if $D^*$ is of type 2,
+while $C_2(t)$ is a cusp curve.
+For type 1 developables, the bitangent plane at $C_1(t)$ is the plane through
+$C_1(t)$ and the tangent line of $C_2(t)$.
+For type 2 developables, the bitangent plane at $C_1(t)$ is the tangent plane
+at $C_1(t)$, so $D$ is the image of $C_1(t)$.\footnote{A curve in primal
+	space and a curve in dual space are images if they share the same
+	parameters on their respective surfaces.}
+$D$ lies in the interior of $S$ for type 1 developables,
+and on $S$ for type 2 developables.
+
+This concludes the reduction of kernel to convex hull.
+The structural relationship between the kernel and hull that is revealed
+by this study is an important insight into these two fundamental geometric structures.
+
+\section{Acknowledgements}
+
+The authors would like to thank Wenping Wang for alerting us
+to a dual relationship between the kernel and the convex hull.
+We are appreciative of the stimulating research environment
+provided by the Dagstuhl Seminar on Geometric Modeling.
+This work was supported by the National Science Foundation under 
+grant CCR-0203586.
+
+
+%----------------------------------------------------------------------%
+% The Appendices part is started with the command \appendix;
+% appendix sections are then done as normal sections
+% \appendix
+
+% \section{}
+% \label{}
+
+% Bibliographic references with the natbib package:
+% Parenthetical: \citep{Bai92} produces (Bailyn 1992).
+% Textual: \citet{Bai95} produces Bailyn et al. (1995).
+% An affix and part of a reference:
+%   \citep[e.g.][Ch. 2]{Bar76}
+%   produces (e.g. Barnes et al. 1976, Ch. 2).
+
+\begin{thebibliography}{}
+
+% \bibitem[Names(Year)]{label} or \bibitem[Names(Year)Long names]{label}.
+% (\harvarditem{Name}{Year}{label} is also supported.)
+% Text of bibliographic item
+
+\bibitem{Kim91}
+C.~Bajaj and M.-S.~Kim.
+\newblock Convex Hulls of Objects Bounded by Algebraic Curves
+\newblock {\em Algorithmica\/}, Vol.~6, pp.~533--553, 1991.
+
+\bibitem{Souvaine90}
+D.~Dobkin and D.~Souvaine.
+\newblock Computational Geometry in a Curved World.
+\newblock {\em Algorithmica\/}, Vol.~5, No.~3, pp.~421--457, 1990.
+
+\bibitem{docarmo}
+M.P.~do Carmo.
+\newblock {\em Differential Geometry of Curves and Surfaces}.
+\newblock Prentice-Hall, Inc., Upper Saddle River, New Jersey 07458, 1976.
+
+\bibitem{Elber93}
+G.~Elber and E.~Cohen.
+\newblock Second-Order Surface Analysis Using Hybrid Symbolic and
+Numeric Operators.
+\newblock ACM Transactions on Graphics, Vol. 12, No.2, April 1993, 
+pp. 160--178.
+
+\bibitem{Elber2001a}
+G.~Elber and M.-S.~Kim.
+\newblock Geometric Constraint Solver
+Using Multivariate Rational Spline Functions.
+\newblock {\em Proc.~of ACM Symposium on Solid Modeling and Applications\/},
+Ann Arbor, MI, June 4--8, 2001.
+
+\bibitem{Elber2001b}
+G.~Elber, M.-S.~Kim, and H.-S.~Heo.
+\newblock The Convex Hull of Rational Plane Curves.
+\newblock To appear in {\em Graphical Models\/}, 2001.
+
+\bibitem{Graham83}
+R.~Graham and F.~Yao.
+\newblock Finding the Convex Hull of a Simple Polygon.
+\newblock {\em J.~of Algorithms\/}, Vol.~4, No.~4, pp.~324--331, 1983.
+
+% \bibitem[Hartshorne 77]{hartshorne}
+\bibitem{hartshorne}
+R.~Hartshorne.
+{\em Algebraic Geometry}. Springer-Verlag, New York, 1977.
+
+% \bibitem[Johnstone 01]{jj01}
+\bibitem{jj01}
+J.~Johnstone.
+A Parametric Solution to Common Tangents.
+International Conferenced on Shape Modelling and Applications (SMI2001),
+Genoa, Italy, IEEE Computer Society, 240--249, 2001.
+
+% \bibitem[Johnstone 02]{jj02}
+\bibitem{jj02}
+J.~Johnstone.
+The tangential curve, 2002.
+
+% \bibitem[Johnstone 03]{jj03tangsurf}
+\bibitem{jj03tangsurf}
+J.~Johnstone.
+The Bezier tangential surface system: a dual structure for visibility analysis.
+2003.
+
+\bibitem{Johnstone2001}
+J.~Johnstone.
+\newblock A Parametric Solution to Common Tangents.
+\newblock {\em Proc.~of Int'l Conf.~on Shape Modeling and Applications\/},
+Genova, Italy, May 7--11, 2001.
+
+\bibitem{Lee83}
+D.T.~Lee.
+\newblock On Finding the Convex Hull of a Simple Polygon.
+\newblock {\em Int'l J.~Computer and Information Sciences\/},
+Vol.~12, No.~2, pp.~87--98, 1983.
+
+\bibitem{Pottmann}
+H. Pottmann and J. Wallner.
+\newblock Computational Line Geometry.
+\newblock Springer--Verlag Berlin Heidelberg, pp. 400--410, 2001.
+
+\bibitem{Prep85}
+F.~Preparata and M.~Shamos.
+\newblock {\em Computational Geometry: An Introduction\/}.
+\newblock Springer-Verlag, New York, NY, 1985.
+
+\bibitem{Schaeffer87}
+A.~Sch\"affer and C.~Wan Wyk.
+\newblock Convex Hulls of Piecewise-Smooth Jordan Curves.
+\newblock {\em J.~of Algorithms\/}, Vol.~8, No.~1, pp.~66--94, 1987.
+
+% \bibitem[Struik 1961]{struik}
+\bibitem{struik}
+D.~Struik.
+Lectures on Classical Differential Geometry.
+Dover (New York), 1961.
+
+\end{thebibliography}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
+\end{thebibliography}
+
+\end{document}
+

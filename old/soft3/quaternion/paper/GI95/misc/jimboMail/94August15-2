@@ -1,0 +1,198 @@
+From jimbo@blaze.cs.jhu.edu Mon Aug 15 18:13:56 1994
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from blaze.cs.jhu.edu by cis.uab.edu (4.1/SMI-4.1)
+	id AA08849; Mon, 15 Aug 94 18:13:54 CDT
+Message-Id: <9408152313.AA08849@cis.uab.edu>
+Received: from mail-client (peregrine.cs.jhu.edu)
+           by blaze.cs.jhu.edu; Mon, 15 Aug 94 19:13:25 EDT
+From: jimbo@blaze.cs.jhu.edu (James P. Williams)
+Sender: jimbo@blaze.cs.jhu.edu
+Received: by mail-client (4.1) id AA08409; Mon, 15 Aug 94 19:13:24 EDT
+Date: Mon, 15 Aug 94 19:13:24 EDT
+To: jj@cis.uab.edu
+Subject: report - aug 18
+Cc: jimbo@blaze.cs.jhu.edu, jj@blaze.cs.jhu.edu
+Status: OR
+
+********************************************************************
+	`For canal surfaces, we can specify the path as an arbitrary
+	Bezier curve and then create a Dietz-Hoschek curve that will
+	serve as the pseudo-derivative of the path.'
+
+Can you elaborate on the exact (formal) meaning of this statement?
+(path = orientation curve on sphere, not the directrix of the sweep?
+pseudo-derivative = ?)
+********************************************************************
+
+	path = 	curve along which the center of the circle
+		moves = directrix
+
+	derivative of directrix is a vector valued function 
+	that gives the correct orientation for the circular 
+	cross section
+
+	- let X(t) be the directrix function
+	- then X'(t) will be the correct orientation function
+	- unforunately, building a rotation matrix from X'(t)
+	will produce a matrix with irrational entries
+	- we can approximate X'(t) with a D-H curve, let this
+	D-H curve be called PX'(t) for Pseudo-X'(t)
+	- we can construct PX'(t)=[X'(t) / || X'(t) ||] for 
+	a small finite number of values of t, this number depends on the
+	degree we choose for the curve PX'(t).  This type
+	of approximation is accomplished by interpolating a
+	finite number of points on the 3-sphere with the D-H
+	curve PX'(t)
+
+********************************************************************
+Also, can you motivate this approximation for practical use?
+********************************************************************
+
+	- the only practical use I can see for this is that it produces
+	an exact surface -- in fact it produces the bezier control
+	hull directly
+
+********************************************************************
+Would the resulting curve have to undergo the integration process,
+(of x' to x) or the Dietz-Hoschek inverse-image process (inverse
+image of point is line, which are interpolated rather than points)?
+********************************************************************
+
+	- no integration is needed because we are just approximating 
+	the first derivative, X'(t) with PX'(t) -- PX'(t) is just the
+	D-H curve that matches X'(t) at t0,t1...tk -- k = 1+degree of
+	PX'(t)
+
+********************************************************************
+In other words, can you give me a full page of overview on this
+strategy (without math at this point), ignoring the extensions
+to splines or 4-sphere for the moment.
+********************************************************************
+
+	Speaking of 4-Spheres.  I would like you to look over some
+	simple algebra that I did that seems to solve most of my problems
+	with the 4-sphere:
+
+----------------------------------------------------------------------------
+>From Aida in "History of the Th. of #'s" we get the sufficient conditions
+for Pyth. Quintuples:
+
+(p^2+q^2+r^2-s^2)^2 + (2ps)^2 + (2qs)^2 + (2rs)^2  = (p^2+q^2+r^2+s^2)^2
+
+							(EQN 1)
+
+let
+	A = (p^2+q^2+r^2-s^2)
+	B = (2ps)
+	C = (2qs)
+	D = (2rs)
+	E = (p^2+q^2+r^2+s^2) 				(EQN 2)
+
++ we know SQRT(A^2+B^2+C^2+D^2) = E
++ let {p,q,r,s} be polynomial functions of t
++ this implies that the curve F(t) = [A/E,B/E,C/E,D/E] has distance from the
+origin [0,0,0,0] as long as E(t) != 0
++ hence F(t) is a curve on the quaternion sphere
+
+So far nothing new -- this was just restatement of the problem.  We know
+that unit quaternions (points on the 4-sphere) correspond directly to
+rotations in 3-space (see Shoemake '85 for the conversions).  We also know
+that the conversion from unit quaternions to rotation matrices preserves
+rationality (if the unit quaternion Q is rational, so is the rotation matrix
+produced by converting Q as per Shoemake.)  
+
+If we could only make a rational curve on the unit 4-sphere that interpolates 
+an arbitrary set of user-specified points, we would have the problem
+of constructing rational swept surfaces with non-circular cross sections 
+licked.
+
+Let's look at (EQN 2) in the form of a mapping, M:
+
+M[p,q,r,s] = [(p^2+q^2+r^2-s^2),(2ps),(2qs),(2rs)]	(EQN 3)
+
+I have found that I can invert M[] nonuniquely:
+
+suppose M[p,q,r,s] = [x,y,z,w]  <x,y,z,w are known>
+
+	p = y/2s
+	q = z/2s
+	r = w/2s
+
+substituting back into (p^2+q^2+r^2-s^2) = x we get:
+
+	y^2/4s^2 + z^2/4s^2 + w^2/2s^2 - s^2 - x = 0 
+
+multiply through by 4s^2 yielding:
+
+	y^2 + w^2 + z^2 - 4s^4 - 4s^2x = 0
+
+multiply through by -1 for neatness:
+
+	4s^4 + 4s^2x - (y^2+z^2+w^2)
+ 
+What follows is a short Maple transcript solving this quartic:
+_____________________________________________________________________________
+> e1 := 4*s^4 + 4*s^2*x - (y^2+z^2+w^2);
+                                4      2      2    2    2
+                       e1 := 4 s  + 4 s  x - y  - z  - w
+
+_____________________________________________________________________________
+> solve(e1,s);
+                 1/2  1/2                  1/2  1/2                1/2  1/2
+   1/2 (- x + %1)    2   , - 1/2 (- x + %1)    2   , 1/2 (- x - %1)    2   ,
+
+                       1/2  1/2
+       - 1/2 (- x - %1)    2
+
+                             2    2    2    2 1/2
+%1 :=                      (x  + y  + z  + w )
+
+_____________________________________________________________________________
+
+
+As you see we get 4 roots, two of them always real, two always imaginary.
+We can use these roots to define the inverse function M-inverse[x,y,z,w] 
+
+
+
+Now let's consider the following problem:
+
+We have K unit quaternions which we wish to smoothly interpolate {q1...qK}
+
+	1 : 	apply M-inverse to {q1..qK} yielding {r1...rK} -- these
+		are the pre-images of {q1..qK} with respect to M[], i.e
+		M[rj] = qj
+
+	2 :	find a polynomial 4-space curve that interpolates 
+		{r1....rk}, let this curve be called PRE(t) -- use
+		whatever interpolation method you like -- the smoother
+		the better, splines are OK
+
+	3 :	apply M[] to PRE(t) -> M[PRE(t)] = POST(t), POST(t) is
+		a continuous curve, but does not lie on the 4-sphere
+
+	4 :	divide each element of POST(t) through by 
+		DOTPRODUCT(PRE(t),PRE(t)) -- this will yield a cont. curve
+		on the 4-sphere interpolating {q1...qK}
+
+NOTE: 	This method does not use the full design freedom available -- in
+	step 2 it is only really necessary to find a polynomial curve through
+	each inverse point -- only through inverse lines, but that lapse 
+	is not too serious. 
+
+
+I think that the simple math I gave here is all you really need for the
+4-sphere problem.  I would appreciate if you were able to chug through it
+yourself to verify it.  There are some issues to resolve (proving the
+mapping is continuity preserving etc..), but if this is valid, I think
+we have enough material here to make an interesting article.
+
+
+Jim
+
+
+
+
+
+
+

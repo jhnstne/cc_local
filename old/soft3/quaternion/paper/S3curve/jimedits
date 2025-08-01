@@ -1,0 +1,205 @@
+Here's my incorporation of your edits, finally.
+(Had to hack on the implementation all day to get
+some better pictures.)
+And in the next mail the new paper.
+Please look them over and give me your comments.
+
+Some other changes I made:
+
+-I added an explanation of the cusp conditions after the Cusp lemma.
+
+-In Section 4, I clarified that ANY interpolation method
+can be used in 4-space (so that nobody can write a different
+paper simply using, say, Catmull-Rom splines instead
+of B-splines).
+
+- added some sentences to the Conclusions, to emphasize that
+  one of the main points is the maps to and from the
+  sphere, which allows us to tap into classical
+  methods of point interpolation.
+
+- I promised a video if accepted, which should be doable
+	based on my implementations.
+
+- I changed the notation for projective space to
+	the graphics convention, homogeneous
+	coordinate last.  THis is a slightly
+	dangerous shift (esp since I did it at 10pm last night
+	when I was groggy, please look out for any typos)
+	but I forgot that we are sending this 
+	to graphics people, who always list the
+	homogeneous coord last and may get confused
+	or annoyed by our notation.
+	Ken Sloan, a veteran of Graphics Interface,
+	pointed this oversight out to me.
+
+John 
+
+I will send you a postscript file with pictures as soon as I've translated
+all of them from SGI format to ps.
+
+% ********************************************************
+
+EDIT #	PAGE	
+
+1	3	"...which leads to a system of equations approach..."
+		I believe ours could just as easily be a system of
+		equations based on the mail I sent you about Minv.
+
+  This is the way that I attacked the Minv issue.
+  I made an observation about our inverse images
+  as points rather than lines in the Related Work
+  section.  Also, I added a paragraph
+  at the end of Section 6.
+  Please give me your opinion.
+
+  P.S. For our work, it is a big win that we can
+  simply say `apply classical point interpolation
+  technique in 4-space', for readability and usability.
+  However, suppose this wasn't an issue.
+  What would we buy by using the approach of Dietz et. al.,
+  where inverse images are lines in projective space?
+  Anything?
+
+
+2	5	"We want a rational map from 4-space...."
+		Perhaps we should define rational map explicitly
+
+	Done.
+
+3	5	"Step 1 is well understood.."
+		Point out that there are two choices for each quaternion?
+
+	I don't think that we need to discuss this point because
+	it is a well known trait of quaternion, fully discussed in
+	Shoemake (which we point them to) and Barr,
+	and with a good solution.
+	I want steps 1 and 3-4 to be black boxes which are
+	factored out of the algorithm so that we can concentrate
+	all of our attention on steps 2 and 5.
+
+4	5	The result is from number theory, should we point out
+		the work done by Dietz in transferring Lebes. formula
+		to the polynomial ring and mention that our formula also
+		transfers to the polynomial ring in the same way.
+
+	We only use the map on a point by point basis,
+	for example f(t) = M(C(t)) means f(t_0) = M(C(t_0)),
+	where C(t_0) is of course a point.
+	So I don't think that we have to get into the polynomial ring issue.
+	Dietz et. al. have to jump through more hoops because they
+	are proving it is necessary and sufficient in the polynomial ring case.
+
+5	6	"We are not as lucky in 4-space..."
+		We are not as fortunate with M as it constitutes a
+		sufficient but not necessary condition for forming a
+		pythagorean quintuple (quadruple?).
+
+	I think that the next sentence makes it clear what I mean by `we
+	are not as lucky', in particular, `M does not map onto the set
+	of all rational interpolating curves'.
+	I don't want to belabor this point.
+	I had an earlier longer version where I discussed
+	more about this, but I think this version is more effective.
+	This is more of a theoretical point that would be of more interest
+	to a CAGD rather than graphics crowd.
+
+6	7	Why do we choose positive sqrt?  How can we justify this.
+
+	In the proof, if the negative sqrt is used, 
+	we get Minv(M(p,q,r,s,1)) = (2ps,2qs,2rs,2s^2,-2s) = (-p,-q,-r,-s,1),
+	which shows that this map is not the inverse, right?
+
+7	7	some properties of M and Minv we might mention:
+			Minv(kq) = sqrt(k)Minv(q)
+			M(kx) = k^2*M(x)
+			M(Minv(kq)) = M(sqrt(k)Minv(q)) = kM(Minv(q))
+
+	See end of Section 6.
+
+8	8	"...(compare () and ()." 
+		Is there a paren missing here?
+
+	Right.
+
+9	9	I did not see a close bracket "]" in the first equation
+
+	Right.
+
+10	10	Section 8.2 is a little unclear to me.  "If a curve segment
+		is k times longer..."  longer than?  I think that a figure
+		might help here, showing subdivision and measuring segments.
+
+	So that I can get this off to you,
+	I'll send you something on this later.
+	A figure may not be possible but I'll try to clarify the text.
+
+11	11	"...defined below and k=CC'/CC."
+		This should actually be CC/CC' because k is on the opposite
+		side as it is in the proof on page 12 (I think)
+
+	Right.  I have corrected it by keeping k the same 
+		and switching C' and C, since I want
+		to make sure C.C is in the denominator
+		(we can be sure it isn't 0 by condition 1,
+		unlike C.C')
+
+12	11	when you say C(t) is a cusp, maybe it should be a 
+		definite t like t sub 0 or something to distinguish it 
+		from the general "t"
+
+	Right.  I've changed it there and elsewhere in the statement
+		and proof.
+
+13	12	I think that this is an optimal place to include a table
+		something like:
+		
+		-------------------------------------------------
+		S	|	=0		|	!=0
+		--------------------------------------------------
+		S'	|			|
+			-----------------------------------------
+		=  0	|			|
+			-----------------------------------------
+		!= 0	|			|
+		-------------------------------------------------
+
+		and fill in the boxes with the relevant conditions.
+
+	Problem is that I don't see any overlap in conditions, so
+	I don't see how to make this type of table.
+	Hopefully my added commentary after the lemma is enough
+	for purposes of clarification.
+
+14	12	"Multiplying by ||C(t)||^2"  
+		this should be cubed I believe
+
+	Right.
+
+15	12	The eqn: ||C||^2C' - (C dot C')C = 0
+		is a vector equation so it should be = (0,0,0,0)
+
+	Right.
+
+16	12	General comment:  why use two different representations
+		for || C(t) ||, the radical may make it more confusing
+		to read
+
+	I used the radical because I thought it made the
+	evaluation of the derivative of the quotient
+	easier to see.  I think it's still OK.
+
+17	14	BIBLIO -- is Pletinckx the actual spelling?
+
+	Believe it or not, yes!
+
+18	14	BIBLIO -- should "PH Space Curves" be included?
+
+	I don't think we should include this: PH curves are
+	peripheral to this paper, so one reference is more than
+	enough.
+
+Jim
+
+
+

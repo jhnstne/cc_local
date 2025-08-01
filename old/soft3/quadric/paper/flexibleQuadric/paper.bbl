@@ -1,0 +1,160 @@
+\begin{thebibliography}{10}
+
+\bibitem{Boehm93}
+W.~Boehm.
+\newblock Some remarks on quadrics.
+\newblock {\em Computer Aided Geometric Design}, 10:231--236, 1993.
+
+\bibitem{Boehm91}
+W.~Boehm and D.~Hansford.
+\newblock {\em Bezier patches on quadrics}.
+\newblock SIAM, Philadelphia, 1991.
+
+\bibitem{Boehm-Hansford92}
+W.~Boehm and D.~Hansford.
+\newblock Parametric representation of quadric surfaces.
+\newblock {\em Mathematical modelling and numerical analysis}, 26(1):191--200,
+  1992.
+
+\bibitem{Chionh92c}
+E.~Chionh and R.~Goldman.
+\newblock {\em Implicitizing rational surfaces with base points by applying
+  perturbations and the factors of zero theorem}, pages 1--10.
+\newblock Academic Press, Boston, 1992.
+
+\bibitem{Chionh92a}
+E.~Chionh and R.~Goldman.
+\newblock Using multivariate resultants to find the implicit equation of a
+  rational surface.
+\newblock {\em The Visual Computer}, 8:171--180, 1992.
+
+\bibitem{Cobb88}
+J.~Cobb.
+\newblock Tiling the sphere with rational bezier patches.
+\newblock Technical Report UUCS-88-009, University of Utah, Dept.\ of Computer
+  Science, July 1988.
+
+\bibitem{Dahmen89}
+W.~Dahmen.
+\newblock {\em Smooth piecewise quadric surfaces}, pages 181--193.
+\newblock Academic Press, Boston, 1989.
+
+\bibitem{Dietz93}
+R.~Dietz, J.~Hoschek, and B.~Juttler.
+\newblock An algebraic approach to curves and surfaces on the sphere and on
+  other quadrics.
+\newblock {\em Computer Aided Geometric Design}, 10:211--229, 1993.
+
+\bibitem{FAR93}
+G.~Farin.
+\newblock {\em Curves and Surfaces for Computer Aided Geometric Design}.
+\newblock Academic Press, New York, third edition, 1993.
+
+\bibitem{Farin87}
+G.~Farin, B.~Piper, and A.~Worsey.
+\newblock The octant of a sphere as a non-degenerate triangular bezier patch.
+\newblock {\em Computer Aided Geometric Design}, 4:329--332, 1987.
+
+\bibitem{Goldman83}
+R.~Goldman.
+\newblock Quadrics of revolution.
+\newblock {\em {IEEE} Computer Graphics \& Applications}, pages 68--76, 1983.
+
+\bibitem{Gray93}
+A.~Gray.
+\newblock {\em Modern differential geometry of curves and surfaces}.
+\newblock CRC Press, Boca Raton, 1993.
+
+\bibitem{Hoschek92}
+J.~Hoschek.
+\newblock {\em Bezier curves and surface patches on quadrics}, pages 331--342.
+\newblock Academic Press, 1992.
+
+\bibitem{Hoschek-Seemann92}
+J.~Hoschek and G.~Seemann.
+\newblock Spherical splines.
+\newblock {\em Mathematical modelling and numerical analysis}, 26(1):1--22,
+  1992.
+
+\bibitem{Lodha90}
+S.~Lodha and J.~Warren.
+\newblock Bezier representation for quadric surface patches.
+\newblock {\em Computer Aided Design}, 22(9), November 1990.
+
+\bibitem{Manocha92}
+D.~Manocha.
+\newblock {\em Algebraic and numeric techniques in modeling and robotics}.
+\newblock PhD thesis, Dept.\ of Computer Science, University of California at
+  Berkeley, 1992.
+
+\bibitem{Piegl85}
+L.~Piegl.
+\newblock Representation of quadric primitives by rational polynomials.
+\newblock {\em Computer Aided Geometric Design}, 2:151--155, 1985.
+
+\bibitem{Piegl87}
+L.~Piegl and W.~Tiller.
+\newblock Curve and surface constructions using rational b-splines.
+\newblock {\em Computer Aided Design}, 19(9):485--498, November 1987.
+
+\bibitem{Seder83}
+T.~Sederberg.
+\newblock {\em Implicit and parametric curves and surfaces for computer aided
+  geometric design}.
+\newblock PhD thesis, Dept. of Mechanical Engineering, Purdue University, 1983.
+
+\bibitem{Sed87}
+T.~Sederberg.
+\newblock Algebraic geometry for surface and solid modeling.
+\newblock In G.~Farin, editor, {\em Geometric Modeling: Algorithms and New
+  Trends}, pages 29--42. SIAM, Philadelphia, 1987.
+
+\bibitem{Seder90a}
+T.~Sederberg.
+\newblock Techniques for cubic algebraic surfaces, part one.
+\newblock {\em {IEEE} Computer Graphics \& Applications}, 10(4):14--25, July
+  1990.
+
+\bibitem{Seder90b}
+T.~Sederberg.
+\newblock Techniques for cubic algebraic surfaces, part two.
+\newblock {\em {IEEE} Computer Graphics \& Applications}, 10(5):12--21,
+  September 1990.
+
+\bibitem{Seder85}
+T.~Sederberg and D.~Anderson.
+\newblock Steiner surface patches.
+\newblock {\em {IEEE} Computer Graphics \& Applications}, pages 23--36, May
+  1985.
+
+\bibitem{Teller91}
+S.~Teller and C.~Sequin.
+\newblock Constructing easily invertible bezier surfaces that parametrize
+  general quadrics.
+\newblock In {\em Proc. of 1st Symposium on Solid Modeling Foundations and
+  CAD/CAM Applications}, pages 303--315, 1991.
+
+\bibitem{Wang92}
+W.~Wang.
+\newblock {\em Results on conics and quadrics in computer aided geometric
+  design}.
+\newblock PhD thesis, Department of Computer Science, University of Alberta,
+  1992.
+
+\bibitem{Warren90a}
+J.~Warren.
+\newblock A bound on the implicit degree of polygonal bezier surfaces, October
+  1990.
+
+\bibitem{Warren92}
+J.~Warren.
+\newblock Creating multisided rational bezier surfaces using base points.
+\newblock {\em {ACM} Transactions on Graphics}, 11(2):127--139, April 1992.
+
+\bibitem{Zhou91}
+X.~Zhou and W.~Strasser.
+\newblock A nurbs representation for cyclides.
+\newblock In {\em Modeling in Computer Graphics: Proc. of IFIP WG 5.10, Tokyo},
+  New York, 1991. Springer-Verlag.
+
+\end{thebibliography}

@@ -1,0 +1,22 @@
+  arcball.zip
+***************
+
+This is a Delphi version of Ken Shoemake's ArcBall controller. ArcBall is an
+intuitive interface for 3D model viewers. It lets you rotate objects using the
+mouse, by clicking and dragging on the surface of a "virtual trackball".
+
+From a programmer's point of view, the most obvious way to interactively rotate
+a 3D object might be to update a set of Euler angles (pitch, yaw, roll) based on
+mouse movements. However, this can lead to a gimbal lock (a typical problem with
+Euler angles), so while it is easy to code, it is not very intuitive for your
+users. ArcBall doesn't suffer from the gimbal lock problem, and is very
+easy to use.
+
+This archive includes ArcBall.pas, which contains the implementation of the
+TArcBall class, and a small OpenGL demo to illustrate the use of this class.
+
+The ArcBall code was ported to Delphi by Chris Rorden; the OpenGL demo was
+written by Tom Nuydens.
+
+  Chris Rorden (chris.rorden@nottingham.ac.uk)
+  Tom Nuydens (tom@delphi3d.net)

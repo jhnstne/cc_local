@@ -1,0 +1,26 @@
+# File: project Makefile for projectSmooth/3d/surfbuild
+# Author: J.K. Johnstone
+# Last Modified: 5/16/05
+# History: 3/31/03: ported from SGI Irix to Linux
+#          9/10/03: added Heckbert quad-edge library
+#	   7/30/04: added CLAPACK
+
+ARCH	   = LINUX
+SHELL      = /bin/csh
+CC         = gcc
+HOME	   = /home/jj
+CBIN       = ${HOME}/Cbin
+CLAPACK    = $(HOME)/CLAPACK
+CLAPACKARC = $(CLAPACK)/lapack_LINUX.a $(CLAPACK)/blas_LINUX.a $(CLAPACK)/F2CLIBS/libF77.a
+LIBRARIES  = -lglut -lGLU -lGL -lm -ltcl 
+LDFLAGS    = -I${CBIN} -I${CLAPACK} $(CLAPACKARC)
+
+all: flythrough
+.cpp: 
+	${CC} -funroll-all-loops -O3 -Wno-deprecated -g -o $@ $< ${LIBRARIES} ${LDFLAGS}
+clean :
+	rm -f *.o *~ a.out core
+	ls -l
+touch :
+	touch flythrough.cpp
+

@@ -1,0 +1,7 @@
+See Graphics Gems IV for his arcball manipulation of an object, by projecting mouse position onto a sphere.
+The sphere is virtual one surrounding the window, centered.
+See the trackball implementation in GLUT glh_glut.h file included in Cg code ~/Cg/SDK/DEMOS/OpenGL/inc/glh/
+for implementation ideas.
+For example, the present point and the previous point define two points on the sphere and the rotation axis
+is the cross-product of these two vectors (to move between these two points on the sphere, we would want to
+roll the sphere along this cross-product).

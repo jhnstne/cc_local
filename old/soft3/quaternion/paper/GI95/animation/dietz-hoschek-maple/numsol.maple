@@ -1,0 +1,31 @@
+read `bezutils.maple`;
+read `quintic.maple`;
+read `elim.maple`;
+
+
+# predetermined control points for the curve
+
+control0 := [0,0,0];
+control1 := [3,1,2];
+control2 := [1,2,1];
+control4 := [1.5,1.5,1.5];
+control5 := [2,0,2];
+
+
+esys1 := subs(	x0 = control0[1], y0 = control0[2], z0 = control0[3],
+		x1 = control1[1], y1 = control1[2], z1 = control1[3],
+		x2 = control2[1], y2 = control2[2], z2 = control2[3],
+		x4 = control4[1], y4 = control4[2], z4 = control4[3],
+		x5 = control5[1], y5 = control5[2], z5 = control5[3],
+		eval(eqall));
+
+sesys := {esys1[1],esys1[2],esys1[3],esys1[4],esys1[5],esys1[6],esys1[7],
+	  esys1[8],esys1[9],esys1[10],esys1[11],esys1[12],esys1[13],
+	  esys1[14],esys1[15]};
+
+
+svars := {x3,y3,z3,p00,p01,p02,p10,p11,p12,p20,p21,p22,p30,p31,p32};
+
+
+
+

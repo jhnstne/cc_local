@@ -1,0 +1,589 @@
+\documentclass[10pt]{article} 
+\usepackage{times}
+\usepackage[pdftex]{graphicx}
+\input{header-consecutive}
+
+\newif\iftalk
+\talkfalse
+\newif\ifjournal
+\journalfalse
+
+\markright{\hfill \today \hfill}
+\pagestyle{myheadings}
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{0in}
+\setlength{\textheight}{8.6in}
+\setlength{\textwidth}{6.875in}
+\setlength{\columnsep}{5mm}
+
+% -----------------------------------------------------------------------------
+
+\title{A generalization of the cross product for higher dimensions}
+% A generalized cross product for rotation and intersection in higher dimensions
+% \\[5pt]{\small UAB Technical Report\\ March 2005}}
+\author{John K. Johnstone\thanks{Supported in part by the National Science Foundation
+        under grant CCR0203586.}}
+\begin{document}
+\maketitle
+
+To be considered for the International Workshop on Computational Geometry and Applications.
+
+To be submitted to Journal of Graphics Tools (jgt).
+
+\iftalk
+What do you get when you cross a mountain climber and a mosquito?
+Nothing, you can't cross a scaler and a vector.
+\fi
+
+\begin{abstract}
+We develop a generalization of the cross product that works effectively in arbitrary dimensions.
+We establish its connection to volume, which leads to a generalization of the Pythagorean Theorem.
+We apply the generalized cross product to the construction of normals and rotation matrices, and
+the intersection of hyperplanes, all in arbitrary dimensions.
+% We also consider a further generalization of the new cross product.
+\end{abstract}
+
+% Although rotation in 3-space is well understood in computer graphics, rotation
+% in higher dimensions is less so.
+% Higher-dimensional rotation is necessary, for example,
+% for the treatment of quaternion splines, which reside in 4-space.
+
+% -----------------------------------------------------------------------------
+
+\section{Introduction}
+
+% The cross product of two vectors in 3-space defines everything about the
+% parallelogram spanned by the two vectors.
+% It defines the normal of the parallelogram ...
+% It defines the area of the parallelogram ...
+
+The cross product of two vectors is a useful tool in 3-space.
+It is used to build normals, to build rotation matrices, to intersect planes, and
+% \cite{normal computation in jgt}
+many other geometric tasks that have especial utility throughout computer graphics.
+However, all of these tasks are needed in higher dimensions as well: is there
+a generalization of the cross product that will have the same utility in higher dimensions?
+And how exactly will it be used?
+This paper develops a generalization of the cross product, establishes some of its key properties,
+and shows how it can be applied to build normals and rotations and intersect planes
+in higher dimensions.
+We also consider an application to quaternion splines, an example of a higher dimensional
+problem that benefits from this new tool.
+
+\iftalk
+3 vector products: inner product, outer product, cross product
+\fi
+
+The cross product of two vectors in 3-space is a vector in 3-space, defined as follows:
+\[
+  A \times B = (a_1,a_2,a_3) \times (b_1,b_2,b_3) 
+             = (a_2b_3 - a_3b_2, a_3b_1 - a_1b_3, a_1b_2 - a_2b_1).
+\]
+The most notable feature of the cross product is that 
+\begin{itemize}
+\item $A \times B$ is orthogonal to $A$ and $B$
+\end{itemize}
+unless $A$ and $B$ are linearly dependent, in which case it is the zero vector.
+That is, 
+\begin{itemize}
+\item The cross product of two vectors is the normal of the plane spanned by these two vectors.
+\end{itemize}
+The second major property of the cross product is that its length 
+is the area of the parallelogram spanned by the two vectors:
+\begin{itemize}
+\item $\|A \times B\| =$ area of parallelogram spanned by $A$ and $B$.
+\end{itemize}
+This area property is a direct result of the well-known relationship of the cross product with
+$\sin\theta$, $\|A \times B\| = \|A\| \|B\| |\sin\theta|$, 
+where $\theta$ is the angle between $A$ and $B$ \cite{lang71}. % p. 34
+The area property in 3-space can be translated into a highly useful area property
+in 2-space.
+Consider a triangle $\bigtriangleup P_1P_2P_3$ in 2-space, 
+and two of its legs $P_2 - P_1$ and $P_3 - P_2$.
+That is, 
+\begin{itemize}
+\item the z-component of $(P_2 - P_1, 0) \times (P_3 - P_2, 0)$ is twice the signed area
+of the triangle $\bigtriangleup P_1P_2P_3$.
+\end{itemize}
+This is a simple consequence of the parallelogram area property;
+its main advantage is that it doesn't require a norm calculation (and therefore no square root,
+only addition and multiplication).
+%
+The signage of the triangle area allows it to be used in the computation of polygonal area:
+the area of a polygon in 2-space is the sum of the areas of all the triangles formed by 
+connecting the origin and a (consistently oriented) leg of the polygon \cite{orourke94}.
+The sign of the triangle area is also used to distinguish a left turn from a right turn:
+the turn at $P_2$ in $P_1P_2P_3$ is left if and only if the signed area of the triangle is positive
+\cite{orourke94}.% p. 31
+This result is used to maintain a consistent orientation for the triangles in a triangular mesh,
+as well as detecting concavities in a polygon (as a right turn).
+
+A fourth, less central, property of the cross product progresses from area to volume through 
+a combination with the inner product:
+\begin{itemize}
+\item $A \cdot B \times C =$ volume of parallelepiped spanned by $A$, $B$ and $C$.
+\end{itemize}
+This is called the triple scalar product \cite{wrede72}.
+% triple scalar product, p. 104, Wrede
+% triple scalar product, p. 50, Goodbody
+% triple product: Orourke, p. 46
+
+These properties establish the importance of the cross product in the geometry of 3-space
+and its direct relation to normals, areas (both in 2-space and 3-space),
+triangle orientations, and volumes.
+%
+Unfortunately, the cross product is only defined in 3-space.
+As Serge Lang cautions at the head of the section on the cross product:
+``This section applies only in 3-space!'' \cite{lang71}. % p. 32
+% mention later after introduction of determinant: 
+% volume spanned by $d-1$ vectors in $d$-space, rather than the 
+% determinant's volume spanned by $d$ vectors
+We would like to define a generalized cross product with the following properties:
+\begin{itemize}
+\item it works with vectors in $d$-space,
+\item it creates a vector from $d-1$ input vectors,
+\item the created vector is the normal of the hyperplane spanned by the input vectors
+      (if they are linearly independent),
+\item the length of the created vector is the volume of the parallelepiped spanned by the
+      input vectors.
+\end{itemize}
+These should yield the following secondary properties:
+\begin{itemize}
+\item the signed volume and the orientation of a simplex in $d-1$-space may be defined 
+  using the generalized cross product,
+\item the dot product with another vector yields the volume spanned by these $d$ vectors,
+      generalizing the triple scalar product, and
+\item further generalizations of the cross product work with fewer vectors and likewise
+      define vectors whose length is the volumes of the spanned parallelepipeds.
+\end{itemize}
+
+% -------------------------------------------------------------------------------------------
+
+\section{Determinants and volume}
+
+The classical tool to compute volumes is the determinant,
+so we should study it as volume computation is one of our goals.
+The determinant of $d$ vectors in $d$-space defines the volume 
+of the parallelepiped spanned by these vectors \cite{strang88}. % p. 234
+\Comment{
+Let $A_1,\ldots,A_d \in \Re^d$.
+\[
+\left|
+\begin{array}{c}
+A_1 \\
+\ldots\\
+A_d
+\end{array}
+\right|
+ = \mbox{volume (parallelepiped spanned by $A_1,\ldots,A_d$)}
+\]
+}
+The equivalence of determinant and volume uses two observations:
+if the box is orthogonal, the equivalence is easily established, and 
+if the box is not orthogonal, it can be transformed to an orthogonal box by a
+Gram-Schmidt orthogonalization process that preserves determinant
+(the typical operation being the subtraction of a multiple of one vector/row from
+another vector/row to realize a projection onto a subspace) \cite{strang88}.
+
+Incidentally, the triple scalar product $A \cdot B \times C$ 
+can be shown equivalent to the determinant $|A B C|$ \cite[p. 104]{wrede72}, % p. 104
+which explains its connection to volume.
+
+In anticipation of simplicial volumes, we mention here a subtly different formula
+for the volume of a simplex in $d$-space \cite[p. 27]{orourke94}:
+\[
+\left|
+\begin{array}{cc}
+A_1 & 1 \\
+\ldots \\
+A_{d+1} & 1 
+\end{array}
+\right|
+    = d! \mbox{ * volume of simplex with vertices $A_1,\ldots,A_{d+1}$} 
+\]
+
+\section{Related literature}
+
+other attempts to combine more than two vectors: p. 51 of Goodbody, Cartesian Tensors
+% A.M. Goodbody, Cartesian Tensors, Ellis Horwood (Chichester), 1982.
+
+\section{A generalization of the cross product}
+\label{sec:gcp}
+
+The cross product of two 3-vectors $A = (a_1,a_2,a_3)$ and $B = (b_1,b_2,b_3)$
+may be defined in terms of a determinant:
+\[
+A \times B = 
+\left|
+\begin{array}{ccc}
+e_1 & e_2 & e_3 \\
+a_1 & a_2 & a_3 \\
+b_1 & b_2 & b_3
+\end{array}
+\right|
+= (a_2b_3 - a_3b_2, a_3b_1 - a_1b_3, a_1b_2 - a_2b_1)
+\]
+where $e_1 = (1,0,0)$, $e_2 = (0,1,0)$ and $e_3 = (0,0,1)$ are the 
+unit coordinate vectors.
+This suggests the definition of the following {\bf generalized cross product (gcp)} for $d-1$ $d$-vectors
+$\{A_i = (a_{i,1},\ldots,a_{i,d})\}_{i=1}^{d-1}$:
+\begin{equation}
+\label{eqn:gcp}
+cross (A_1,\ldots,A_{d-1}) = 
+\left|
+\begin{array}{ccc}
+e_1 & \ldots & e_d \\
+a_{1,1} & \ldots & a_{1,d} \\
+\vdots \\
+a_{d-1,1} & \ldots & a_{d-1,d} 
+\end{array}
+\right|
+\end{equation}
+
+\subsection{Orthogonality}
+
+We need to show that the gcp is orthogonal to all of the input vectors,
+as with the cross product in 3-space:
+\[
+\mbox{cross}(A_1,\ldots,A_{d-1}) \cdot A_i = 0 \hspace{.2in} \mbox{ for } i=1,\ldots,d-1.
+\]
+Letting 
+\[
+A = \left(
+\begin{array}{c}
+x \\ A_1 \\ \ldots \\ A_{d-1}
+\end{array}
+\right)
+\in \Re^{dxd}
+\]
+be any matrix whose $i^{th}$ row is $A_{i-1}$ for $i=2,\ldots,d$
+(the first row is arbitrary),
+the generalized cross product may be reinterpreted as 
+\[ 
+(subdet(A,1,1), -subdet(A,1,2), \ldots, (-1)^{1+d} subdet(A,1,d))
+\]
+where $subdet(A,i,j)$ is the minor of $A$ with the $i^{th}$ row and $j^{th}$
+column removed.
+Thus, the dot product of the vector $A_i$ ($1 \leq i \leq d-1$) 
+with the generalized cross product is:
+\[
+a_{i,1} subdet(A,1,1) - a_{i,2} subdet(A,1,2) + \ldots + (-1)^{1+d} a_{i,d} subdet(A,1,d))
+\]
+If we now choose the matrix $A$ to have $A_i$ as its first row,
+this is an expansion of the determinant of $A$:
+\[
+\left|
+\begin{array}{c}
+A
+\end{array}
+\right|
+=
+\left|
+\begin{array}{c}
+A_i \\ A_1 \\ \ldots \\ A_{d-1}
+\end{array}
+\right|
+\]
+This determinant vanishes, since the first row is identical to the $(i+1)$st row.
+That is, 
+\[
+A_i \cdot \mbox{cross}(A_1,\ldots,A_{d-1})
+=
+\left|
+\begin{array}{c}
+A_i \\ A_1 \\ \ldots \\ A_{d-1}
+\end{array}
+\right| 
+= 0
+\]
+which proves our result:
+the generalized cross product $\mbox{cross}(A_1,\ldots,A_{d-1})$ 
+is orthogonal to all of its defining vectors $A_i$.
+
+% No it doesn't: distance formula for cross product involves sin of angle.
+% The generalized cross product preserves unit vectors, like the cross product.
+% That is, if $A_1,\ldots,A_{d-1}$ are unit vectors, 
+
+The generalized cross product of $A_1,\ldots,A_{d-1}$ becomes less robust
+as the matrix (\ref{eqn:gcp}) becomes more singular, or equivalently
+as the defining vectors $A_i$ become closer to linearly dependent.
+When the choice of $A_i$ is flexible, this robustness property should
+be observed in choosing the $A_i$.
+
+\subsection{Length is volume}
+
+We want to show that the length of the gcp is the volume of the parallelepiped
+spanned by its input vectors.
+
+To warm up, we might want to prove the known 3-dimensional case.
+This can be interpreted as a result about projections:
+the length of a vector whose components are the areas of the projections onto coordinate
+planes is the area of the original parallelepiped.
+
+The fact that 
+\[
+  \|A \times B\| = \mbox{area(parallelogram spanned by $A$ and $B$)}
+\]
+and 
+\[
+  \|A \times B\| =
+\| 
+\left|
+\begin{array}{ccc}
+e_1 & e_2 & e_3 \\
+& A \\
+& B
+\end{array}
+\right|
+\|
+\]
+leads to the following fact when the determinant is expanded by minors:
+\[
+\|A \times B\| = \|(
+\left|
+\begin{array}{c} 
+\mbox{proj}_x (A) \\
+\mbox{proj}_x (B)
+\end{array}
+\right|,
+\left|
+\begin{array}{c} 
+\mbox{proj}_y (A) \\
+\mbox{proj}_y (B)
+\end{array}
+\right|,
+\left|
+\begin{array}{c} 
+\mbox{proj}_z (A) \\
+\mbox{proj}_z (B)
+\end{array}
+\right|
+)\|
+\]
+or, letting $P = \mbox{parallelepiped spanned by $A$ and $B$}$,
+\[
+\mbox{area}(P) = 
+\|
+(\mbox{area(proj. $P$ onto $x=0$ plane)},\ 
+\mbox{area(proj. $P$ onto $y=0$ plane)},\ 
+\mbox{area(proj. $P$ onto $z=0$ plane)})
+\|
+\]
+
+{\bf The drafting literature must say something about the relationship of the
+area of an original shape to the area of its projections onto coordinate planes
+(side,front,above views). Following this proof, we may be able to generalize
+to volumes in higher dimensions.
+This is the remaining fly in the ointment.  Discuss with other mathematicians and colleagues.  Then this paper is done.}
+
+What happens to parallelepiped volume under projection?
+
+\subsection{Signed simplicial volume}
+
+The original cross product was used to compute simplicial 
+area (hypervolume) in a lower dimension, using zero settings for the final dimension and
+then applying the length of the cross product.
+This is valid since the simplex in d-space is defined by d vectors and the cross product
+only deals with $d-1$ vectors, forcing a drop in dimension to handle the simplex.
+The generalization of this idea is to compute the volume of a simplex in $d-1$-space
+by computing the length of the generalized cross product of the $d-1$ defining vectors
+of the simplex, all lifted into $d$-space by setting the $d$th component to 0.
+That's it, except for the fact that we are computing parallelepiped volumes rather than
+simplicial volumes, so the simplicial volume is some constant factor of the result,
+with the constant depending on dimension (undoubtedly $1/d!$).
+
+How does this compare to adding a row of 1's instead of a row of coordinate vectors:
+get the same result about volume, but the former yields a scalar and the latter a vector,
+so the latter must be used to define hyperplane normals.
+
+\subsection{Orientation}
+
+Orientation = Left-handed or right-handed coordinate system (see Strang p. 234).
+
+\subsection{A generalization of the triple scalar product}
+
+The absorption of a dot product into the generalized cross product
+to yield a higher dimensional volume (a determinant) should be straightforward.
+Follow the example of the scalar triple product proof of p. 104 of Wrede.
+
+\subsection{Further generalizations of the cross product}
+
+This is where we continue the addition of rows of canonical vectors $e_i$
+and see what happens to the determinant.
+{\bf This could be challenging, but is one of the more interesting developments.}
+
+\section{Application 1: Higher-dimensional rotation of a vector to a coordinate axis}
+
+% Rotation is a different beast in 4-space
+% The weaponry of rotation is intriguing, since we are working in a higher dimension.
+
+The generalized cross product may be used to construct a rotation matrix
+that sends an arbitrary vector to an arbitrary coordinate axis in n-space.
+The construction proceeds as follows.
+A rotation matrix is built from rows that are mutually orthogonal,
+since a rotation matrix is orthogonal.
+Under the rotation, 
+the rows of the rotation matrix are mapped to the coordinate axes:
+\[
+\left(
+\begin{array}{c}
+R_1^t \\ R_2^t \\ \ldots \\ R_n^t
+\end{array}
+\right)
+R_i
+= 
+\left(
+\begin{array}{c}
+R_1^t R_i \\ \ldots \\ R_n^t R_i
+\end{array}
+\right)
+=
+\left(
+\begin{array}{c}
+0 \\ \cdots \\ 0 \\ 1 \\ 0 \\ \cdots \\ 0
+\end{array}
+\right)
+=
+e_i
+\]
+because of the orthogonality of the rows.
+% This is a direct product of the Kronecker-delta behaviour of the dot product 
+% of the rows, reflecting orthonormality.
+Consider a matrix that rotates the arbitrary\footnote{Assume without loss of 
+      generality that $v$ is not a coordinate axis.
+      We can deal with the $d$ coordinate axes easily.} 
+unit vector $v \in \Re^n$ to the coordinate axis $e_i$.
+A candidate\footnote{There are an infinite number
+  of rotations that achieve the desired result, 
+  since there are remaining degrees of freedom in rotating
+  the frame about the coordinate axis.} 
+is the matrix whose $i^{th}$ row is $v$ and whose other rows are
+\begin{eqnarray}
+\label{eqn:R1}
+R_1 = cross (v,e_1,         \ldots,e_{d-2}) \\
+R_2 = cross (v,R_1,e_2,     \ldots,e_{d-2}) \\
+R_3 = cross (v,R_1,R_2,e_3, \ldots,e_{d-2}) \\
+\ldots \hfill \\
+\label{eqn:Rlast}
+R_{d-1} = cross (v,R_1,\ldots,R_{d-2})
+\end{eqnarray}
+all normalized to unit vectors.
+These rows are mutually orthogonal, since $v$ is included in every cross product
+and a row is introduced into the cross product as soon as it is generated.
+This matrix rotates $v$ to $e_i$ (i.e., $Mv = e_i$), 
+since $v$ is orthogonal to all rows except the $i^{th}$.
+% Note that we start with $v$ and the coordinate axes, then replace each 
+% coordinate axis by a row as soon as the row is computed.
+%          need n-1 other rows (other than v)
+%	  each of these rows needs n-1 vectors to build a generalized cross product
+%	      - one of these vectors is always v
+%	      - the last vector is the cross product of v and the other d-2 vectors
+%	      - one of the vectors can always be e_i
+%	  row1 = v
+%	  row2 = v x e_1 x ... x e_{d-2}
+%	  row3 = v x row2 x e_2 x ... x e_{d-2}
+%	  ...
+%	  rown = v x row2 x ... x row_{d-1}
+
+The choice of coordinate axes in the construction (\ref{eqn:R1})-(\ref{eqn:Rlast})
+of the rotation to a coordinate axis is flexible\footnote{Actually, we 
+  can use any vectors not equal to $v$, although coordinate axes are the 
+  natural choice.}
+and we should take care to make the most robust choice (see the end of 
+Section~\ref{sec:gcp}).
+Therefore, in (\ref{eqn:R1}), 
+the $d-2$ furthest coordinate axes from $v$ should be used.
+  % \footnote{Whether or not $e_i$ is included in the furthest coordinate axes 
+  % is irrelevant. We are simply looking for orthogonal vectors to $v$.}
+This has the added benefit of guaranteeing that the chosen coordinate axes
+do not agree with $v$, which avoids a preprocessing step.\footnote{{\bf See
+% recall that we are working in d-space, with d coordinate axes.
+    Vec4::rotToCoord where we check for this degenerate case 
+    when the cross product would be undefined.}}
+For added robustness, the newly introduced row should replace the remaining 
+coordinate axis closest to it, to avoid dependence between the $R_j$ and $e_j$.
+Under this improved scheme, a matrix that rotates $v$ to $e_i$ is the matrix
+whose $i^{th}$ row is $v$ and whose other rows are (in any order)
+\begin{eqnarray}
+R_1 = unit(cross (v,e_{\pi(1)},         \ldots,e_{\pi(d-2)})) \\
+R_2 = unit(cross (v,R_1,e_{\pi(2)},     \ldots,e_{\pi(d-2)})) \\
+R_3 = unit(cross (v,R_1,R_2,e_{\pi(3)}, \ldots,e_{\pi(d-2)})) \\
+\ldots \hfill \\
+R_{d-1} = unit(cross (v,R_1,\ldots,R_{d-2}))
+\end{eqnarray}
+where $unit(v)$ is the unit vector associated with the vector $v$,
+$e_{\pi(1)},\ldots,e_{\pi(d-2)})$ are the $d-2$ coordinate axes furthest from $v$,
+and $e_{\pi(i)}$ is the remaining coordinate axis closest to $R_i$.
+
+Since rotations should have determinant +1, % e.g., Cartan, Theory of Spinors, p.9
+the rows $R_i$ should be permuted to make this so.
+
+\subsection{More general rotations}
+
+Once it is known how to rotate a vector to a coordinate axis, more general
+rotations quickly follow.
+A rotation of the coordinate axis $e_i$ into an arbitrary vector $v$
+is simply the transpose of a rotation of $v$ into $e_i$.
+A rotation of the arbitrary vector $v$ to the arbitrary vector $w$ 
+(or equivalently a rotation of the point $v$ to the point $w$)
+is the product $AB$ of a rotation $B$ of $v$ to a coordinate axis $e_i$ 
+and a rotation $A$ of $e_i$ to $w$.
+
+\subsection{A review of rotation}
+Why do we need a review of rotation?  To put the higher-dimensional rotation section in context, I guess.
+
+A REVIEW OF ROTATION: SO(3), SO(n), Givens, Jacobi, cross product, determinants
+A REVIEW OF ROCOCO (and the construction of a rotation matrix using it 
+and cross product).
+
+This leads to a generalization of SO(3), the group of rotation matrices in 3-space.
+Notice that Givens (or Jacobi) rotations \cite{golubvanLoan} are also 
+generalizations
+of rotation matrices, but are restricted to rotations about the coordinate axes;
+we want a generalization of rotations about arbitrary vectors.
+
+\section{Application 2: Hyperplane intersection}
+
+The intersection of $d-1$ hyperplanes defined by $d-1$ normals is parallel 
+to the generalized cross product of these normals.
+(This is used in the construction of bisectors in d-space.)
+
+For example, the intersection of two planes in 3-space with normals N1 and N2 
+is the line in direction $N1 \times N2$.
+
+
+\section{Hyperplane definition: normals}
+
+A hyperplane is defined by a point and a normal.
+In general, $d-1$ vectors in $d$-space span a hyperplane.
+This hyperplane can be defined using the generalized cross product,
+since the gcp of the spanning vectors yields the hyperplane normal.
+The spanning vectors might come from partial derivatives of a surface
+or from polyhedral edges.
+
+\bibliographystyle{plain}
+\begin{thebibliography}{99}
+
+\bibitem{lang71}
+Lang, S. (1971) Linear Algebra.
+2nd edition, Addison-Wesley (Reading, MA).
+
+\bibitem{orourke94}
+O'Rourke, J. (1994)
+Computational Geometry in C.
+Cambridge University Press (New York).
+
+\bibitem{strang88}
+Strang, G. (1988) Linear Algebra and its Applications.
+3rd edition, Harcourt Brace Jovanovich (San Diego).
+
+\bibitem{wrede72}
+Wrede, R. (1972) Introduction to Vector and Tensor Analysis.
+Dover (New York).
+
+\end{thebibliography}
+
+{\bf Compare to qspline.c/'PerturbInput'.}
+
+\end{document}

@@ -1,0 +1,64 @@
+Orientation control
+-------------------
+
+build obstacles on the quaternion sphere
+	how to design a curve on S^3: theory and *software*
+	(designing a *closed* curve)
+design a path through these obstacles
+	shortest path motion amongst polygons in 2D (visibility graph)
+	shortest path motion amongst curves in 2D
+	shortest path motion amongst curves on S^2: geodesics become circles
+	shortest path motion amongst curves on S^3
+	    - does a curve really bound a region on S^3, since S^3 is a solid, not a surface?
+	    - do we need to generalize shortest path motion in 3D?
+camera control literature
+
+projects
+	*software releases*: Doug?  Writing code is poetic and healthy.
+
+	  	interpolating curves and surfaces
+		tangential curves and surfaces
+		bitangents and bitangent developables
+		visibility graphs in 2D
+		silhouettes in 3D
+		visibility regions in 2D
+		quaternion splines
+	
+		1st webable unit: interpolating curves
+		1st publishable unit: bitangent developables; silhouettes
+
+	start the seminar series officially in last week of July: Fridays at 1pm
+		July 30: me about projects generally; then about tangential varieties and software
+		August 6: me about quaternions and quaternion splines
+		August 13: Xiao about visibility and shadows literature review
+		August 20: Leonard about motion planning literature review; report on SIGGRAPH
+		August 27: Xiao about vizwall; Gopal about ME vizwall?
+	meet every other week with Tony/Puri?
+		September 3: me about kernels
+		September 10: me about bitangent developables and silhouettes
+		September 17: me and Xin about protein folding
+		September 24: Xiao: further review of visibility literature
+		October 1: camera control literature
+		Oct. 8:    medical projects (with ME)
+		Oct. 15:   Chengzui Zhang research
+		Oct. 22:   progress report Xiao, Leonard
+		Oct. 29:   progress report me
+		Nov.   :   parallel visibility	
+		Nov    :   software release meeting  (monthly)
+		Nov    :   parallel computation meeting (monthly)
+		Nov    :   theory of visibility (monthly)
+		Nov    :   practice of visibility: software (monthly)
+		Vetria about summer project
+
+	START GETTING SOFTWARE READY
+
+	bitangency: software up (silhouettes)
+	Xiao: invisibility in smooth 2d and 3d
+	kernel
+	Leonard: orientation control
+	James: morphing(?)/decomposition(?)
+	vizwall: SIGGRAPH reading
+	(parallel visibility: memory access of visible regions)
+	((numerical))
+	((bioinformatics visualization))
+		

@@ -1,0 +1,36 @@
+\title{On the relationship between Euler's 4-squares theorem, 
+	stereographic projection, and rational curves on S^3}
+
+We want the facility to set the end tangents of curves on the 3-sphere,
+so that curves can be smoothly spliced together.
+This allows a divide-and-conquer approach to curve fitting.
+
+\begin{lemma}
+Let $P=C(\hat{t})=(p1,p2,p3,p4)$ be a point of the S3-curve $C(t)$ 
+with tangent $C'(\hat{t}) = (t1,t2,t3,t4)$.
+Then the associated tangent of the curve $M^{-1}(C(t))$ is
+	(t2 
+That is, under the map $M^{-1}$, tangents are mapped as:
+	$C'(t)  \rightarrow (M^{-1}(C(t)))'$ \\
+	$(x_1,x_2,x_3,x_4) + s(x'_1,x'_2,x'_3,x'_4) \mapsto 
+	 M^{-1}(x_1,x_2,x_3,x_4) 
+      + s(\frac{x'_2 \alpha - x_2 \alpha'}{\alpha^2},
+	  \frac{x'_3 \alpha - x_3 \alpha'}{\alpha^2},
+	  \frac{x'_4 \alpha - x_4 \alpha'}{\alpha^2},
+	  \frac{-x'_1 \alpha - (1-x_1)\alpha'}{\alpha^2})$
+where $\alpha = \sqrt{2 - 2x_1}, $\alpha' = -\frac{x'_1}{\alpha}$.
+\end{lemma}
+\prf
+Simple differentiation of $M^{-1}(C(t))$.
+\QED
+
+Thus, if we want a spherical curve to have a prescribed end tangent,
+we can set the desired endtangent of the endpoint in image space
+using this lemma and fit the image curve to this tangent.
+
+see page FOO1
+
+If we are setting the tangent on the spherical curve independently, 
+notice that the tangent vector $C'(t_0)$ must be orthogonal to the vector $C(t_0)$
+since the tangent at any point of $C(t)$ must lie in the sphere's tangent plane
+at this point.)

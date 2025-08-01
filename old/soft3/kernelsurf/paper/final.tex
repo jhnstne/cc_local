@@ -1,0 +1,810 @@
+%
+% Authors:      Joon-Kyung Seong, Gershon Elber, John K.~Johnstone, 
+%                    and Myung-Soo Kim
+%               Computer Science Dept.
+%               SNU/Technion/UAB
+% Date: October 23 2003
+%
+
+\documentclass[11pt]{article}          % LaTeX 2e
+
+\usepackage{epsfig}
+
+\setlength{\oddsidemargin}{0.10in}    % was -0.4
+\setlength{\evensidemargin}{0.10in}   % was -0.4
+% \setlength{\headsep}{-0.43in}       % commented out
+\setlength{\topmargin}{0in}           % was 0.3
+\setlength{\textheight}{9.0in}        % was 9.5
+\setlength{\textwidth}{6.5in}
+\setlength{\parskip}{2.0mm}                  % added
+\setlength{\baselineskip}{1.7\baselineskip}  % added
+
+\newtheorem{corollaryenv}{Corollary}
+\newenvironment{corollary}{\begin{quote}\begin{corollaryenv}}%
+                           {\end{corollaryenv}\end{quote}}
+
+\newtheorem{definitionenv}{Definition}
+\newenvironment{definition}{\begin{quote}\begin{definitionenv}}%
+                           {\end{definitionenv}\end{quote}}
+
+\newtheorem{lemmaenv}{Lemma}
+\newenvironment{lemma}{\begin{quote}\begin{lemmaenv}}%
+                           {\end{lemmaenv}\end{quote}}
+
+\newtheorem{algenv}{Algorithm}[section]
+\newenvironment{algorithm}{\begin{quote}\begin{algenv}}%
+                          {\end{algenv}\end{quote}}
+
+\newenvironment{Algorithm}[2]%
+        {\begin{table}[#1]\renewcommand{\baselinestretch}{1.0}%
+        \begin{algorithm}\begin{tt}\label{#2}\begin{tabbing}%
+        \hspace{1em}\=\hspace{1em}\=\hspace{1em}\=\hspace{1em}\=%
+        \hspace{1em}\=\hspace{1em}\=\hspace{1em}\=\hspace{1em}\=%
+        \hspace{1em}\=\hspace{1em}\=\hspace{1em}\=\\}%
+        {\end{tabbing}\end{tt}\end{algorithm}%
+        \renewcommand{\baselinestretch}{1.0}\end{table}}
+
+%
+% Allow more freedom for Figures.
+%
+\renewcommand{\topfraction}{0.90}
+\renewcommand{\bottomfraction}{0.90}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\floatpagefraction}{0.90}
+\renewcommand{\dbltopfraction}{0.90}
+\renewcommand{\dblfloatpagefraction}{0.90}
+\setcounter{topnumber}{4}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+
+\def\binom#1#2{{#1\choose #2}}
+\newcommand{\choosein}[2]{\binom{#2}{#1}}
+\newcommand{\Bezier}{B\'{e}zier}
+\newcommand{\NURB}{NURBS}
+\newcommand{\Bspline}{B-spline}
+%\newcommand{\prbox}{\hfill\rule{1.5ex}{1.5ex}}
+\newcommand{\prbox}{\rule{1.5ex}{1.5ex}}
+\newcommand{\eqnref}[1]{(\ref{#1})}
+\newcommand{\eqnrange}[2]{(\ref{#1}--\ref{#2})}
+\newcommand{\CH}{{\cal C}{\cal H}}
+\newcommand{\inner}[2]{\left<{#1}, {#2} \right>}
+\newcommand{\twovert}[2]{\begin{array}{c} \mbox{\vspace{0.07in}} \\
+                                          \mbox{\normalsize ${#1}$} \\[-0.05in]
+                                          \mbox{\small ${#2}$}
+                         \end{array}}
+\newcommand{\ddcrv}{\frac{d^2C(t)}{dt^2}}
+\newcommand{\dcrv}{\frac{dC(t)}{dt}}
+\newcommand{\ducrv}{\frac{dC_1(u)}{du}}
+\newcommand{\dvcrv}{\frac{dC_2(v)}{dv}}
+\newcommand{\dSdu}{\frac{\partial S(u, v)}{\partial u}}
+\newcommand{\dSxdu}{\frac{\partial s_x(u, v)}{\partial u}}
+\newcommand{\dSydu}{\frac{\partial s_y(u, v)}{\partial u}}
+\newcommand{\dSzdu}{\frac{\partial s_z(u, v)}{\partial u}}
+\newcommand{\dSdv}{\frac{\partial S(u, v)}{\partial v}}
+\newcommand{\dSxdv}{\frac{\partial s_x(u, v)}{\partial v}}
+\newcommand{\dSydv}{\frac{\partial s_y(u, v)}{\partial v}}
+\newcommand{\dSzdv}{\frac{\partial s_z(u, v)}{\partial v}}
+\newcommand{\aprxsrf}[2]{({#1}$\leadsto${#2})}
+\newcommand{\Reals}{\mbox{\normalsize{\sl I\mbox{\hspace{-0.03in}}R}}}
+\newcommand{\vertspace}{\mbox{\LARGE $^{}_{}$ \hspace{-2mm}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+\title{\bf The Convex Hull of Freeform Surfaces}
+
+\author{\begin{tabular}{cccc}
+           {\em Joon-Kyung Seong} & {\em Gershon Elber} & 
+              {\em John K.~Johnstone} & {\em Myung-Soo Kim} \\
+           {\small SNU, Korea} & 
+              {\small Technion, Israel} &
+              {\small UAB, USA} &
+              {\small SNU, Korea} \\
+%           {\small Seoul National University} & 
+%              {\small Technion, Israel Inst.\ of Technology} & 
+%              {\small University of Alabama at Birmingham} &
+%              {\small Seoul National University} \\
+%           {\small Seoul 151-742, South Korea} & 
+%              {\small Haifa 32000, Israel} & 
+%              {\small Birmingham, AL 35294-1170} &
+%              {\small Seoul 151-742, South Korea} \\
+           {\small {\tt swallow@3map.snu.ac.kr}} & 
+              {\small {\tt gershon@cs.technion.ac.il}} & 
+              {\small {\tt jj@cis.uab.edu}} & 
+              {\small {\tt mskim@cse.snu.ac.kr}}
+        \end{tabular}}
+
+\date{}
+
+%
+% Double spacing this time.
+%
+% \setlength{\baselineskip}{1.0\baselineskip}
+%
+
+\maketitle
+
+\begin{abstract}
+\noindent
+   We present an algorithm for computing the convex hull of
+   freeform rational surfaces.  The convex hull problem is reformulated
+   as one of finding the zero-sets of polynomial equations;
+   using these zero-sets
+   we characterize developable surface patches and planar patches
+   that belong to the boundary of the convex hull.
+\end{abstract}
+
+\noindent
+{\bf Key Words:}
+Convex hull, common tangent, zero-set finding,
+freeform rational surface, B-spline, symbolic computation
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+
+Computing the convex hull of a freeform surface
+is a challenging task in geometric modeling.
+Because of the difficulty in computing the exact convex hull
+of a spline surface, the convex hull of its control points is usually
+used as a simple, yet rough, approximation to the convex hull.
+When a tighter bound is needed for the convex hull, we can subdivide
+the surface into smaller pieces and then union the convex hulls of
+the control points of these small pieces. 
+This simple approach will require a large number of subdivisions 
+until the approximating convex hull converges to the exact convex hull
+within a certain reasonable bound.  In this paper, we present
+an algorithm that computes the convex hull of a rational surface
+without resorting to a polygonal approximation of the given surface
+or the subdivisions.
+
+The convex hull computation has applications in many important
+geometric problems such as interference checking in motion planning
+and object culling in graphics rendering.  Interference between two convex
+objects is considerably easier to test than between two non-convex objects.
+Consequently, convex hulls of general non-convex objects (or their rough
+approximations such as spheres and axis-aligned bounding boxes) are often used
+in a simple first test for checking the interference between the two
+original objects.   (If there is no interference between the convex hulls,
+it is guaranteed that the original objects have no interference.)
+These applications motivated the development of many efficient
+convex hull algorithms in computational geometry~\cite{Prep85}.
+The previous work, however, has been mostly limited to computing
+the convex hull of discrete points, polygons, and
+polyhedra~\cite{Graham83,Lee83,Prep85}.
+
+There are a few previous algorithms that can compute the convex hulls
+of rational curves in the plane.  Some of these algorithms are quite
+theoretical~\cite{Kim91,Souvaine90,Schaeffer87} in the sense that
+there are certain delicate issues that must be resolved for the efficiency
+and robustness of these algorithms to hold in actual implementation.
+More practical approaches were taken in two recent results reported
+by Elber et al.~\cite{Elber2001b} and Johnstone~\cite{Johnstone2001}.
+The convex hull algorithm we present in this paper is based on
+extending our recent result~\cite{Elber2001b} to the three-dimensional case.
+
+Given a point $S(u,v)$ on a rational surface, let $T(u,v)$ denote
+the tangent plane of the surface at the point $S(u,v)$.
+For the point $S(u,v)$ to be on the boundary of the convex hull,
+the surface $S$ should be completely contained in one side of
+the tangent plane $T(u,v)$.  Thus the Gaussian curvature of $S(u,v)$ 
+must be non-negative.  For the sake of simplicity of presentation,
+we assume that the Gaussian curvature is positive
+on this surface point $S(u,v)$ and moreover the surface $S$ contains
+no line passing through the point $S(u,v)$).
+% which means
+%that the tangent plane $T(u,v)$ intersects the surface $S$
+%at no other point $S(s,t)$, for $(s,t) \neq (u,v)$.
+
+Let $D$ denote the region in the $uv$-domain where the surface
+patch $S(u,v)$ belongs to the boundary of the convex hull.
+In this paper, we show that the boundary of this region $D$
+can be computed in terms of the zero-set of three equations in
+four variables $u,v,s,t$, and sometimes in terms of the zero-set of
+two equations in three variables $u,v,t$.  The boundary curves
+of the surface $S$ may also contribute to the convex hull of $S$.
+Let $I$ denote the parameter interval for a boundary curve segment
+that appears on the boundary of the convex hull of the surface $S$.
+The end points of the interval $I$ can be computed
+by solving three equations in three variables,
+and sometimes by solving two equations in two variables.
+The boundary of the convex hull may contain some triangles,
+each of which is obtained from a tangent plane touching at three 
+different points of the surface.  These planes can be computed
+by solving a system of six equations in six variables.
+
+The rest of this paper is organized as follows.
+In Section~2, we reduce the convex hull problem to
+computing the zero-sets of polynomial equations.
+The convex hull of rational space curves is needed
+to deal with the boundary curves of a rational surface.
+This is an important problem by itself;
+Section~3 thus presents an algorithm for computing
+the convex hull of a rational space curve.
+Section~4 computes tritangent planes by solving
+a system of six equations in six variables.  
+Section~5 discusses how to combine all these components
+to construct the boundary of the convex hull.
+Finally, in Section~6, we conclude this paper.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{The Convex Hull of Freeform Surfaces}
+\label{sec-ch-surface}
+
+In this section, we consider the convex hull of freeform surfaces.
+Although we will use one non-convex surface in the following discussion
+for clarity,  one may consider the second surface point $S(s,t)$
+as a point on another surface.
+
+Let $S(u,v)$ be a regular $C^1$-continuous rational surface. 
+Consider the tangent plane of $S$ at $S(u,v)$ as a moving plane
+while continuously touching the surface tangentially.
+Then, any surface point $S(u,v)$
+such that the surface is completely contained in one side of
+the tangent plane is on the boundary of the convex hull of
+the surface $S$. On the other hand, if the tangent plane at $S(u,v)$ 
+intersects the surface at any other surface point $S(s,t)$, then
+the surface point $S(u,v)$ cannot be on the boundary of
+the convex hull of the surface $S$.
+Note, however, that one must be careful of common bitangent planes because 
+a surface point at which the tangent plane is also tangent to some
+other surface point could be on the boundary of the convex hull. 
+
+The tangent plane of $S$ at $S(u,v)$ contains
+another surface point $S(s,t)$ if and only if 
+\begin{eqnarray*}
+   {\mathcal F}(u,v,s,t) &=& \inner{S(u,v)-S(s,t)}{N(u,v)}\\
+   &=& |S(u,v)-S(s,t)\ \ S_u(u,v)\ \ S_v(u,v)|\\
+   &=& 0,
+\end{eqnarray*}
+where $N(u,v) = S_u(u,v) \times S_v(u,v)$ is the normal vector field 
+of the surface $S$ and $| \cdot |$ denotes the determinant of
+a matrix consisting of three column vectors.
+Then, the set of surface points, for which 
+the tangent plane intersects the surface $S$ at no other points, 
+is defined as follows:
+\begin{eqnarray*}
+\CH{}^o(S) = \left\{~S(u,v)~\left|~ 
+{\cal F}(u,v,s,t) \neq 0,~\forall (s,t) \neq (u,v) \right. \right\}.
+\end{eqnarray*}
+This set $\CH{}^o(S)$ is clearly a subset of the boundary of the convex hull
+of $S$ and it is also a subset of the surface $S$ itself:
+\begin{equation}
+    \CH{}^o(S) \subset \CH{}(S) \cap S.
+\label{eqn-cho-ch}
+\end{equation}
+The difference $(\CH{}(S) \cap S) \setminus \CH{}^o(S)$ contains some extra
+points such as: (i) the boundary curve of each connected surface patch of
+$\CH{}^o(S)$ and, sometimes, (ii) the boundary curve of $S$ itself if $S$ is 
+not a closed surface.  (For now, we assume that each tangent plane of $S$ is
+tangent to $S(u,v)$ at no more than two surface points;
+thus all isolated points and isolated curve segments of
+$\CH{}(S) \cap S$ must be on the boundary curve of $S$.)
+
+As mentioned above, the zero-set of 
+${\mathcal F}(u,v,s,t) = 0 \wedge (u,v) \neq (s,t)$ in
+the $uvst$-domain cannot contribute to the boundary of the convex hull
+of the surface $S(u,v)$. That is, if the point $(u,v)$ in the parametric
+domain falls into the projection of this zero-set, then the corresponding
+surface point $S(u,v)$ cannot be on the boundary of the convex hull 
+of $S$. The boundary of the `uncovered' region of the $uv$-plane
+(under this projection) is characterized as the projection of the 
+$st$-silhouette curves (along the $st$-direction) of the zero-set. This means
+that the $s$-partial derivative and the $t$-partial derivative must 
+simultaneously vanish along the silhouette curve, which can be 
+characterized as the
+intersection of the following three hypersurfaces in the $uvst$-space:
+\begin{eqnarray}
+   {\cal F}(u,v,s,t) &=& 0, \label{eqn-f-uvst} \\
+   {\cal F}_s(u,v,s,t) &=& 0, \label{eqn-s-partial}\\
+   {\cal F}_t(u,v,s,t) &=& 0. \label{eqn-t-partial}
+\end{eqnarray}
+One should consider only the solutions satisfying $(u,v) \neq (s,t)$
+from the above equations. Furthermore, if $(u,v)$ and $(s,t)$ are
+on the same surface, only $(u,v) > (s,t)$ should be considered, in
+lexicographic order.
+
+Now, consider Equations (\ref{eqn-s-partial}) and (\ref{eqn-t-partial})
+differently:
+\begin{eqnarray*}
+{\cal F}_s(u,v,s,t) &=& \frac{\partial}{\partial s} 
+\inner{S(u,v)-S(s,t)}{N(u,v)}, \\
+&=& - \inner{S_s(s,t)}{N(u,v)} = 0,\\
+{\cal F}_t(u,v,s,t) &=& - \inner{S_t(s,t)}{N(u,v)} = 0.
+\end{eqnarray*}
+Therefore, Equations (\ref{eqn-s-partial}) and (\ref{eqn-t-partial})
+characterize the condition that the tangent plane at the surface point
+$S(u,v)$ is also tangent to the surface at the other point $S(s,t)$.
+
+Having three Equations (\ref{eqn-f-uvst}), (\ref{eqn-s-partial}), and
+(\ref{eqn-t-partial}) in four variables, one gets a univariate curve
+as the simultaneous solution in the $uvst$-space. This solution curve can 
+be parametrized by a variable $\alpha$:
+\[
+   (u(\alpha),v(\alpha),s(\alpha),t(\alpha)).
+\]
+Denote by $T_\alpha$ the common bitangent plane of $S$
+at $S(u(\alpha),v(\alpha))$ and $S(s(\alpha),t(\alpha))$.
+Then, the surface patch that bounds the convex hull of the surface $S$ can
+be constructed by connecting the corresponding surface points
+$S(u(\alpha),v(\alpha))$ and $S(s(\alpha),t(\alpha))$ by line segments.
+All these line segments correspond to the common bitangent plane
+$T_\alpha$. Consequently, the surface patch that bounds the convex hull
+of $S$ is the envelope surface of the tangent planes $T_\alpha$, which is
+a developable surface~\cite{Aumann91,docarmo,JW99,Pottmann}.  We consider only solution 
+points which satisfy $\inner{N(u,v)}{N(s,t)} > 0$. Redundant solutions
+$(u,v,s,t)$, where $\inner{N(u,v)}{N(s,t)} < 0$, should be purged away. 
+Figure~\ref{fig-ch-surface-1}(a) shows a developable surface patch 
+that bounds the convex hull of a B-spline surface;
+Figure~\ref{fig-ch-surface-1}(b) shows a similar surface patch
+that bounds two convex surfaces.
+
+
+\begin{figure}
+    \begin{tabular}{cc}
+    \psfig{width=2.7in,figure={figures/ch-two-1.ps}} & 
+    \psfig{height=2.7in,figure={figures/ch-two-2.ps}} \\
+    {\large (a)}  &  {\large (b)} \\ \\
+    \begin{picture}(0,0)
+        \put(20,80){\large $S(u,v) = S(s,t)$}
+	\put(240,75){\large $S(s,t)$}
+	\put(190,230){\large $S(u,v)$}
+    \end{picture}
+    \end{tabular}
+\vskip -0.5in
+    \caption{(a) A developable surface patch on the boundary of
+    the convex hull of a rational surface $S(u,v)$ and (b)
+    a similar patch that bounds two rational surfaces $S(u,v)$ and $S(s,t)$.}
+    \label{fig-ch-surface-1}
+\vskip 0.37in
+\end{figure}
+
+In the above discussion, we assumed that both the surface points
+$S(u,v)$ and $S(s,t)$ are interior points of the surface $S$.
+When one of the two points is located on the boundary curve of $S$,
+the above characterization needs some refinements.
+We assume that the second point $S(s_0,t)$ is located
+on the boundary curve of $S$ with a fixed parameter $s=s_0$.
+Then, the above characterization can be modified as follows
+\begin{eqnarray}
+   {\cal F}(u,v,s_0,t) &=& 0, \label{eqn-ch-bndry}\\
+   {\cal F}_t(u,v,s_0,t) &=& 0. \nonumber
+\end{eqnarray}
+The zero-set of Equation (\ref{eqn-ch-bndry}) generates a silhouette curve 
+in the $uvt$-space, which can be parametrized by a variable $\alpha$:
+\[
+   (u(\alpha),v(\alpha),t(\alpha)).
+\]
+The bounding developable surface patch can be constructed
+by connecting the corresponding surface points
+$S(u(\alpha),v(\alpha))$ and $S(s_0,t(\alpha))$ by line segments.
+
+The curve $(u(\alpha),v(\alpha))$ outlines the boundary
+on the surface patch $S(u,v)$ that belongs to the boundary of
+the convex hull of the surface $S$.  The end points of
+the curve segment $S(s_0,t)$ that belong to the boundary
+of the convex hull are computed by solving the following
+three equations in three variables:
+\begin{eqnarray*}
+   {\cal F}(u,v,s_0,t) &=& 0,\\
+   {\cal F}_u(u,v,s_0,t) &=& 0,\\
+   {\cal F}_v(u,v,s_0,t) &=& 0.
+\end{eqnarray*}
+
+The second surface point may be a corner point $S(s_0,t_0)$ as well.
+In this case, one needs to solve the following bivariate equation:
+\[
+   {\cal F}(u,v,s_0,t_0) = 0,
+\]
+which characterizes the tangent planes from $S(s_0,t_0)$
+to the freeform surface $S(u,v)$.
+The zero-set generates a curve in the $uv$-plane,
+which can be parametrized by a variable $\alpha$:
+\[
+   (u(\alpha),v(\alpha)).
+\]
+The bounding developable surface patch is constructed
+as a conical surface that has its apex at the corner point
+$S(s_0,t_0)$ and is generated by the curve
+$S(u(\alpha),v(\alpha))$ on the surface $S$.
+
+The convex hull of a freeform surface also contains
+the convex hull of its boundary space curves.
+The approach to computing the convex hull of a rational space curve
+is slightly different from the above three cases.
+There is no unique tangent plane at a point on a space curve.
+The tangent planes form a one-parameter family of planes,
+each of which contains the tangent line of the space curve.
+Representing all tangent planes at a curve point requires
+one additional parameter for the rotation about the tangent line.
+Moreover, computing the convex hull of a space curve is 
+an interesting problem by itself.
+The next section is thus devoted to this special case.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The Convex Hull of a Space Curve}
+\label{sec-space-curve}
+
+In this section, we assume that the rational space curve $C(t)$ is
+non-planar; that is, its torsion is non-zero at all curve points
+except at finitely many inflection points.
+(The convex hull of a planar curve can be computed using the results
+of Elber et al.~\cite{Elber2001b} and Johnstone~\cite{Johnstone2001}.)
+The convex hull of a freeform space curve $C(t)$ is characterized
+by the planes that are tangent to the curve at two different locations.
+
+Assume that there is a plane tangent to the curve $C$ at two different
+locations $C(s)$ and $C(t)$.  Then the three vectors of
+$C'(s)$, $C'(t)$, and $C(s)-C(t)$ are parallel to the tangent plane.
+Hence, the determinant of a matrix consisting of these three vectors 
+must vanish:
+\begin{eqnarray*}
+{\cal G}(s,t) &=& |C(s)-C(t)\ \ C'(s)\ \ C'(t)|\\
+&=& \inner{C(s)-C(t)}{C'(s) \times C'(t)}\\
+&=& 0,
+\end{eqnarray*}
+which is a necessary condition for the existence of
+a common tangent plane at the two curve points $C(s)$ and $C(t)$.
+Once again, we need to consider only the solutions satisfying $s \neq t$.
+
+The zero-set of the above equation can be locally parametrized 
+by $t$ (or by $s$): ${\cal G}(s(t),t) = 0$
+(or ${\cal G}(s,t(s)) = 0$).
+By connecting the corresponding curve points $C(s(t))$ and $C(t)$
+by line segments, we can construct the surfaces
+that bound the convex hull of the space curve $C(t)$. Again, these
+surfaces are developable surfaces because all the line segments 
+connecting the points $C(s(t))$ and $C(t)$ are from the common 
+tangent planes and so the surfaces are envelope surfaces of these
+common tangent planes~\cite{Pottmann}.
+Figure~\ref{fig-ch-curve1}(a) shows a space curve and
+Figure~\ref{fig-ch-curve1}(b) shows its convex hull bounded by
+developable surface patches.
+
+We now consider how to compute the interior points of
+the curve segment $C(t)$ that belong to the boundary of
+the convex hull.
+Let $T(t)$ denote the common tangent plane
+at two corresponding curve locations $C(s(t))$ and $C(t)$.
+This plane may not bound the convex hull of the curve $C$
+if the curve $C$ intersects this plane transversally
+at a third point $C(u)$, where $ u \neq s(t)$ and $u \neq t$.
+This condition can be formulated as follows
+\begin{eqnarray*}
+   {\cal H}(u,s,t)
+   &=& |C(u)-C(t)\ \ C'(s)\ \ C'(t)|\\
+   &=& \inner{C(u)-C(t)}{C'(s) \times C'(t)}\\
+   &=& 0,
+\end{eqnarray*}
+but
+\begin{eqnarray*}
+   {\cal H}_u(u,s,t)
+   &=& |C'(u)\ \ C'(s)\ \ C'(t)|\\
+   &=& \inner{C'(u)}{C'(s) \times C'(t)}\\
+   &\neq& 0,
+\end{eqnarray*}
+where ${\cal H}_u$ is the $u$-partial of ${\cal H}$.
+
+The redundancy of the solution $(s,t)$
+changes only through the configurations where
+three curve points $C(u),C(s),C(t)$ admit a common tangent plane.
+The condition is characterized by the following three equations:
+\begin{eqnarray*}
+{\cal G}(s,t) &=& 0,\\
+{\cal H}(u,s,t) &=& 0,\\
+{\cal H}_u(u,s,t) &=& 0.
+\end{eqnarray*}
+
+\begin{figure}
+    \begin{tabular}{cc}
+    \psfig{width=2.5in,figure={figures/curve1.ps}} & 
+    \psfig{width=2.5in,figure={figures/ch-curve1.ps}} \\  
+    {\large (a)}  &  {\large (b)} \\
+    \end{tabular}
+    \caption{$C(t)$ is a rational space curve with non-zero torsion:
+    (a) shows a rational space curve $C(t)$; and
+    (b) shows the developable surface patches
+    that bound the convex hull of $C(t)$.}
+\vskip 0.37in
+    \label{fig-ch-curve1}
+\end{figure}
+
+In the above discussion, we assumed that both the curve points
+$C(s)$ and $C(t)$ are interior points of the curve $C$.
+When one of the two points is an end point $C(s_0)$ of the curve $C$,
+we need a modification to this approach.
+Let $T(t)$ denote the tangent plane from a fixed point $C(s_0)$ to
+the curve $C(t)$.  Assume that the curve $C$ transversally intersects
+the tangent plane $T(t)$ at a third point $C(u)$, $u \neq t$.  Then,
+we have the following condition:
+\begin{eqnarray*}
+   {\cal K}(u,t)
+   &=& |C(u)-C(s_0)\ \ C(t)-C(s_0)\ \ C'(t)|\\
+   &=& \inner{C(u)-C(s_0)}{(C(t)-C(s_0)) \times C'(t)}\\
+   &=& 0,
+\end{eqnarray*}
+but
+\begin{eqnarray*}
+   {\cal K}_u(u,t)
+   &=& |C'(u)\ \ C(t)-C(s_0)\ \ C'(t)|\\
+   &=& \inner{C'(u)}{(C(t)-C(s_0)) \times C'(t)}\\
+   &\neq& 0.
+\end{eqnarray*}
+
+The redundancy of the solution $t$
+changes only through the configurations where
+three curve points $C(s_0),C(u),C(t)$ admit a common tangent plane.
+The condition is characterized by the following two equations:
+\begin{eqnarray*}
+{\cal K}(u,t) &=& 0,\\
+{\cal K}_u(u,t) &=& 0.
+\end{eqnarray*}
+
+Figure~\ref{fig-ch-curve2} shows a rational space curve $C(t)$
+and its convex hull which is bounded by two conical developable surfaces,
+where each surface has its apex at an end point of the curve and
+is generated by the curve $C(t)$.
+
+\begin{figure}
+\bigskip
+\bigskip
+\begin{center}
+    \begin{tabular}{c}
+    \psfig{width=2.7in,figure={figures/ch-curve2.ps}} \\
+    %\begin{picture}(0,0)
+    %    \put(70,60){\large $C(t)$}
+    %\end{picture}
+    \end{tabular}
+    \caption{$C(t)$ is a rational space curve; its convex hull 
+	is bounded by two conical developable surface patches.}
+    \label{fig-ch-curve2}
+\end{center}
+\vskip 0.37in
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Tritangent Planes}
+\label{sec-tri-tangencies}
+
+In Section \ref{sec-ch-surface}, we considered bitangent planes.
+In this section, we consider how to deal with tritangent planes.
+The bitangent condition prescribes a curve in the parametric domain.
+The case of tritangency results in a solution with zero dimension. 
+To form the complete convex hull, one needs to combine 
+these tritangent planes with the bitangent developable surfaces which
+bound the convex hull.
+
+We can extend the three equations (\ref{eqn-f-uvst})--(\ref{eqn-t-partial})
+from Section \ref{sec-ch-surface} to the tritangent condition. 
+Let the three tangent points be $S(u,v), S(s,t)$ and $S(m,n)$.
+Then, the three equations (\ref{eqn-f-uvst})--(\ref{eqn-t-partial}) 
+constrain the tangent plane at $S(u,v)$ to be tangent to 
+surface $S(s,t)$. We now add three more equations to constrain 
+this tangent plane to be tangent to the third surface point 
+$S(m,n)$ as well.  Consequently, we have six equations in six variables:
+\begin{eqnarray}
+   {\cal F}(u,v,s,t) &=& \inner{S(u,v)-S(s,t)}{N(u,v)} = 0, \label{eqn-f-uvst-new} \\
+   {\cal F}_s(u,v,s,t) &=& -\inner{S_s(s,t)}{N(u,v)} = 0, \label{eqn-s-partial-new}\\
+   {\cal F}_t(u,v,s,t) &=& -\inner{S_t(s,t)}{N(u,v)} = 0, \label{eqn-t-partial-new} \\
+{\cal F}(u,v,m,n) &=& \inner{S(u,v)-S(m,n)}{N(u,v)} \label{eqn-g-uvmn} = 0,\\
+%&=& 0, \nonumber \\
+{\cal F}_m(u,v,m,n) &=& -\inner{S_m(m,n)}{N(u,v)} = 0, \label{eqn-m-partial}\\
+{\cal F}_n(u,v,m,n) &=& -\inner{S_n(m,n)}{N(u,v)} = 0. \label{eqn-n-partial}
+\end{eqnarray}
+These six equations (\ref{eqn-f-uvst-new})--(\ref{eqn-n-partial})
+in six variables have a zero-dimensional solution or a finite set of points.
+Examples for common tritangent planes to three surfaces are shown in
+Figure~\ref{fig-three-tangent}.
+
+\begin{figure}
+    \begin{tabular}{cc}
+    \psfig{width=2.7in,figure={figures/ch-three-tang.ps}} & 
+    \psfig{width=2.7in,figure={figures/ch-three-trim.ps}} \\
+    {\large (a)}  &  {\large (b)}
+    \end{tabular}
+    \caption{(a) All the common tritangent planes to three surfaces. 
+        (b) One developable 
+	surface which bounds first two convex parts of the surface and 
+	the planes (triangles) which are common tangent to the surface.
+        }
+    \label{fig-three-tangent}
+\vskip 0.37in
+\end{figure}
+
+%-----------------------------------------------------------------------%
+\section{Trimming and Combining the Convex Hull}
+\label{sec-trim-combine}
+
+As in the case of Section~\ref{sec-ch-surface}, the tritangent planes
+include some redundant solutions.
+The redundancy can be eliminated using the following three conditions:
+\begin{eqnarray}
+& & \inner{N(u,v)}{N(s,t)} > 0 \label{eqn-trim1} \\
+& & \inner{N(u,v)}{N(m,n)} > 0 \label{eqn-trim2} \\
+& & \inner{S(x,y) - S(u,v)}{N(u,v)} \neq 0,\ 
+\forall (x,y) \neq (u,v), (s,t), (m,n). \label{eqn-trim3}
+\end{eqnarray}
+The first two Equations (\ref{eqn-trim1}) and (\ref{eqn-trim2}) enforce 
+the tritangent planes to have their normal vectors in the same direction. 
+Then, Equation (\ref{eqn-trim3}) constrains the planes
+not to pass through the interior of the convex hull.
+%Equations (\ref{eqn-trim1}) and (\ref{eqn-trim2}) assume that
+%the input surfaces are properly oriented.
+
+To complete the convex hull construction, one needs to compute 
+bitangency for each pair of surface parts: the bitangency of $S(u,v)$ and 
+$S(s,t)$, the bitangency of $S(s,t)$ and $S(m,n)$, and the bitangency
+of $S(m,n)$ and $S(u,v)$. Not all the bitangent developable surfaces
+contribute to the boundary of the final convex hull. One needs to trim out
+certain parts of these developable surfaces according to
+the common tritangent planes to the three surface parts.
+
+Because all the developable surface patches, which form the convex hull of 
+two surface parts as mentioned in Section \ref{sec-ch-surface}, bound
+the convex hull of each pair of surface parts, the boundary curves of these 
+developable surfaces always intersect with tritangent planes
+at the corresponding tritangent points (see Figure~\ref{fig-three-tangent}(b)).
+In fact, we can also determine the trimming line of each developable surface
+as an edge of an adjacent tritangent plane.
+As all the developable surfaces are generated by a moving bitangent plane 
+between two surfaces, the trimmed developable surface is continuously 
+connected to a tritangent plane.
+Figures \ref{fig-ch-three1} and \ref{fig-ch-three2} show
+two examples of the convex hull.
+
+\begin{figure}
+\begin{center}
+    \begin{tabular}{cc}
+    \psfig{width=3.2in,figure={figures/s.ps}}
+    \psfig{width=2.7in,figure={figures/ch-three-1.ps}} \\
+    \end{tabular}
+    \caption{(a) A surface with three convex parts;
+        and (b) its convex hull.}
+    \label{fig-ch-three1}
+\end{center}
+\vskip 0.2in
+\end{figure}
+
+\begin{figure}
+\begin{center}
+    \begin{tabular}{c}
+    \psfig{width=3.6in,figure={figures/ch-three-2.ps}} \\
+    \end{tabular}
+    \caption{The convex hull of three ellipsoids.}
+    \label{fig-ch-three2}
+\end{center}
+\vskip 0.37in
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion}
+\label{sec-conclusion}
+In this paper, we have presented an algorithm for computing
+the convex hull of freeform surfaces.
+The problem was first reformulated as a zero-set finding problem;
+and it is then solved by computing the zero-set and
+projecting the solutions onto a proper subspace.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{ACKNOWLEDGMENTS}
+
+We would like to thank the anonymous referees for useful comments.
+We are appreciative of the stimulating research environment
+provided by the Dagstuhl Seminar on Geometric Modeling.
+% JJ
+This work was supported in part by the National Science Foundation under 
+grant CCR-0203586, in part by the Israeli Ministry of Science
+Grant No.~01--01--01509, and in part by
+the Korean Ministry of Science and Technology (MOST) under the
+Korean-Israeli binational research grant.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bibliographystyle{acm}
+\begin{thebibliography}{99}
+
+\bibitem{Aumann91}
+G.~Aumann.
+\newblock Interpolation with Developable B\'ezier Patches.
+\newblock {\em Computer Aided Geometric Design\/},
+Vol.~8, pp.~409--420, 1991.
+
+\bibitem{Kim91}
+C.~Bajaj and M.-S.~Kim.
+\newblock Convex Hulls of Objects Bounded by Algebraic Curves.
+\newblock {\em Algorithmica\/}, Vol.~6, pp.~533--553, 1991.
+
+\bibitem{Souvaine90}
+D.~Dobkin and D.~Souvaine.
+\newblock Computational Geometry in a Curved World.
+\newblock {\em Algorithmica\/}, Vol.~5, No.~3, pp.~421--457, 1990.
+
+\bibitem{docarmo}
+M.P.~do Carmo.
+\newblock {\em Differential Geometry of Curves and Surfaces}.
+\newblock Prentice-Hall, Inc., Upper Saddle River, New Jersey 07458, 1976.
+
+\bibitem{Elber93}
+G.~Elber and E.~Cohen.
+\newblock Second-Order Surface Analysis Using Hybrid Symbolic and
+Numeric Operators.
+\newblock ACM Transactions on Graphics, Vol. 12, No.2, April 1993, 
+pp. 160--178.
+
+\bibitem{Elber2001a}
+G.~Elber and M.-S.~Kim.
+\newblock Geometric Constraint Solver
+Using Multivariate Rational Spline Functions.
+\newblock {\em Proc.~of ACM Symposium on Solid Modeling and Applications\/},
+Ann Arbor, MI, June 4--8, 2001.
+
+\bibitem{Elber2001b}
+G.~Elber, M.-S.~Kim, and H.-S.~Heo.
+\newblock The Convex Hull of Rational Plane Curves.
+\newblock {\em Graphical Models\/}, Vol.~63, No.~3, pp.~151--162, 2001.
+
+\bibitem{Graham83}
+R.~Graham and F.~Yao.
+\newblock Finding the Convex Hull of a Simple Polygon.
+\newblock {\em J.~of Algorithms\/}, Vol.~4, No.~4, pp.~324--331, 1983.
+
+% \bibitem[Hartshorne 77]{hartshorne}
+%\bibitem{hartshorne}
+%R.~Hartshorne.
+%{\em Algebraic Geometry}. Springer-Verlag, New York, 1977.
+
+\bibitem{Johnstone2001}
+J.~Johnstone.
+\newblock A Parametric Solution to Common Tangents.
+\newblock {\em Proc.~of Int'l Conf.~on Shape Modeling and Applications\/},
+Genova, Italy, May 7--11, 2001, 240--249.
+
+% \bibitem[Johnstone 02]{jj02}
+%\bibitem{jj02}
+%J.~Johnstone.
+%The Tangential Curve, 2002.
+
+% \bibitem[Johnstone 03]{jj03tangsurf}
+%\bibitem{jj03tangsurf}
+%J.~Johnstone.
+%The Bezier tangential surface system: a dual representation of tangent space,
+%2003.
+
+%\bibitem{jj03}
+%% JJ
+%J.~Johnstone.  Kernels from Hulls, 2003.
+
+\bibitem{JW99}
+B.~J\"uttler and M.~Wagner.
+\newblock Rational Motion-based Surface Generation.
+\newblock {\em Computer-Aided Design\/},
+Vol.~31, No.~3, pp.~203--214, 1999.
+
+\bibitem{Lee83}
+D.T.~Lee.
+\newblock On Finding the Convex Hull of a Simple Polygon.
+\newblock {\em Int'l J.~Computer and Information Sciences\/},
+Vol.~12, No.~2, pp.~87--98, 1983.
+
+\bibitem{Pottmann}
+H.~Pottmann and J.~Wallner.
+\newblock {\em Computational Line Geometry\/}.
+\newblock Springer-Verlag, Berlin, 2001.
+
+\bibitem{Prep85}
+F.~Preparata and M.~Shamos.
+\newblock {\em Computational Geometry: An Introduction\/}.
+\newblock Springer-Verlag, New York, NY, 1985.
+
+\bibitem{Schaeffer87}
+A.~Sch\"affer and C.~Wan Wyk.
+\newblock Convex Hulls of Piecewise-Smooth Jordan Curves.
+\newblock {\em J.~of Algorithms\/}, Vol.~8, No.~1, pp.~66--94, 1987.
+
+\end{thebibliography}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}

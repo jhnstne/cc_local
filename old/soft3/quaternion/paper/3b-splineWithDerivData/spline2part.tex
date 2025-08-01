@@ -1,0 +1,313 @@
+Rational quaternion splines with derivative information
+-------------------------------------------------------
+
+DO AN ANALYSIS OF PATCHING TWO OF THESE SPLINES TOGETHER SMOOTHLY
+IN A SEPARATE PAPER.  OVERLY COMPLICATES THIS PAPER
+AND IS UNNECESSARY UNLESS YOU HAVE HUGE NUMBER OF POINTS
+OR WANT TO INTERPOLATE DERIVATIVE DATA
+
+We have shown that other choices of map {\em can} beat the surface
+parameterization.
+But what is the {\em best} map for a given surface and type of curve (e.g., interpolating)?
+
+Note: must take care with choice of knot sequence across spline
+in this multi-curve version.
+Centripetal knot vector worked best in the past.
+Also in the past, choice of knot vector had a large influence on the 
+quality of the quaternion spline (when two or more curves).
+
+\section{Interpolating derivative information}
+\label{sec:deriv}
+
+NO, SKIP IN THIS PAPER.
+
+It is desirable for the design of an interpolating curve to allow the 
+addition of derivative as well as position data.
+For example, it may be useful to enforce end tangents or curvatures,
+and derivative information may even be known at intermediate points.
+
+% added control, easy splicing
+
+% The inverse of a point on \Sn{3}\ is needed to interpolate points.
+% We may also want the inverse of a derivative so that we can 
+% interpolate derivative information on \Sn{3}.
+% Fortunately, this is computed using straightforward differentiation.
+
+% \begin{corollary}
+% \label{cor:higherderiv}
+% Let $C(t) = (x_1(t), x_2(t), x_3(t), x_4(t)) \subset \Sn{3}$
+	% don't use C, that is reserved for the curve in Euclidean space (see 2B)
+% be a curve on \Sn{3}\ not containing the pole $(1,0,0,0)$.
+% \[
+% 	M^{-1}(C(t)) = \alpha(t)(x_2(t), x_3(t), x_4(t), 1-x_1(t))
+% \]
+% \[
+% 	\frac{\partial}{\partial t}M^{-1}(C(t)) = 
+% 	\alpha(t)(x'_2(t), x'_3(t), x'_4(t), -x'_1(t)) +
+% 	\alpha'(t) (x_2(t), x_3(t), x_4(t), 1-x_1(t))
+% \]
+% \end{corollary}
+
+% This corollary shows that it is simple to design curves on \Sn{3}\ that
+% interpolate derivative data as well as points.
+% The inverse images of the derivatives are simply added as constraints
+% to the interpolation of step 2A.
+
+\section{Designing the curve in Euclidean space} 
+
+PREAMBLE SAME AS RATIONAL QUATERNION SPLINE PAPER.
+
+Therefore, we would prefer the curve in Euclidean space to move
+efficiently between the lines $\{M^{-1}(p_i)\}$.
+It would seem that an optimal choice of points	
+$\{q_i\}$ would be a set of closest points:
+	
+\begin{itemize}
+\item On the first inverse line, let $q_1$ be the intersection
+of the line $M^{-1}(p_1)$ and \Sn{3}.
+\item On subsequent lines, let $q_i$ be the closest point to $q_{i-1}$.
+\end{itemize}
+
+Unfortunately, a closer look at this solution reveals some problems.
+The first problem is that the points $\{q_i\}$ begin to fall
+into the origin, continually attracted inwards by their 
+shortness criterion (Figure~\ref{fig:spiral}).
+% See data66-1.
+% About 15 points seems to be the maximum before spiraling reaches origin.
+%
+% This problem is annoying, but it can be solved by decomposing
+% the data set into several parts.
+It is also very difficult or even impossible to add derivative data to 
+a quaternion spline, as we eventually want to do in Section~\ref{sec:deriv},
+with this choice of $q_i$.
+This is because the position of $q_i$ depends on the position
+of both $p_{i-1}$ and $p_i$, which complicates the mapping of tangents
+from \Sn{3}\ to Euclidean space.
+For these reasons, we do not use the `closest point' criterion for $\{q_i\}$.
+
+\begin{figure}
+\vspace{2in}
+\special{psfile=/usr/people/jj/modelTR/3b-splineWithDerivData/img/spiralIn.ps
+	 hoffset=150}
+\caption{$q_i$ spiraling into the origin when closest is chosen}
+% file: s3spline -c < data30-1
+% tops spiralIn.rgb -m 6.5 1.5 > spiralIn.ps
+\label{fig:spiral}
+\end{figure}
+
+\Comment{
+By choosing $q_i$ based on the `closest' criterion,
+the position of $q_i$ depends on the position of a {\em neighbour} $q_{i-1}$,
+and thus on the position of not only the associated data point $p_i$ on the
+surface, but also the position of a neighbouring data point $p_{i-1}$.
+We would prefer a choice of $q_i$ that only depends on the corresponding
+data point $p_i$ on the surface.
+(With our eventual choice of the intersection with \Sn{3},
+$q_i$ is dependent only on $p_i$, not any of its neighbours.)
+The neighbour-dependency of closest-$\{q_i\}$
+causes substantial difficulties when translating tangents in Riemannian space
+to tangents in Euclidean space: 
+we basically need knowledge of a neighbourhood of $p_i$ in Riemannian space
+to build the tangent at $q_i$ in Euclidean space.
+That is, we need a curve on the surface in order to build the tangents
+in Euclidean space!
+This is clearly backward.
+There is some possibility of solving this apparently self-referential problem,
+% recursive definition?
+but it involves a sophisticated solution and is a source for future work.
+%
+% For clarity, consider a new interpretation of our problem:
+% notice that by Theorem~\ref{thm:inverse},
+% \[
+%	q_i = \alpha_i * \mbox{defining point}(p_i),\ \ \alpha_i \in \Re, \ \alpha_i \neq 0.
+% \]
+% so the construction of $q_i$ can be reduced to the construction of $\alpha_i$.
+%
+% soln: build first curve, say on points 1-15;
+% then build tangent at 15 as follows: build optimal rotation for 13-30
+% (that is add in last couple of points of previous subcurve);
+% rotate first curve using this 13-30 rotation: the neighbourhood of the
+% curve around the endpoint 15 will be safely away from pole;
+% compute M^{-1} (first curve) and measure tangent at endpoint 15 off this curve.
+% This reduces the problem to finding M^{-1} (curve).
+% This reduces to finding $\alpha(t)$ for the inverse curve.
+% The set of inverse lines forms a ruled surface.
+% We are interested in a line of regression of this ruled surface,
+% which follows the closest point at each stage (I believe).
+% The computation of this line of regression is equivalent to computing
+% the closest point on every line.
+% Once \alpha(t) is known, we could determine the Bezier curve rep of the
+% curve alpha(t) (x2(t),x3(t),x4(t),1-x1(t))$, or we can simply 
+% differentiate $\alpha(t)(x2(t),x3(t),x4(t),1-x1(t))$ and evaluate at endpoint.
+}
+
+A good alternative to the `closest point' is the `point on \Sn{3}'.
+That is, suppose that we choose $q_i$ to be the intersection of
+$M^{-1}(p_i)$ with \Sn{3} with $t>0$.
+Then $q_i$ is a good approximation to the closest point to $q_{i-1}$.
+% being almost always close to $q_{i-1}$,
+This is especially true when the quaternions are not widely spaced, which
+is the common scenario in motion control.
+This is formalized in Lemma~\ref{lem:goodapprox} below.
+
+\begin{lemma}
+If $p = (x_{1}, x_{2}, x_{3}, x_{4}) \in \Sn{3}$, the intersection
+of $M^{-1}(p)$ with \Sn{3} (with $t>0$) is
+\[
+%	M^{-1}(p) \cap \Sn{3} 
+\frac{(x_{2}, x_{3}, x_{4}, 1 - x_{1})}{\sqrt{2-2x_{1}}}
+\]
+\end{lemma}
+\prf
+The defining point of $M^{-1}(p)$ is $(x_{2}, x_{3}, x_{4}, 1 - x_{1})$
+whose length is 
+$\sqrt{x_{2}^2 + x_{3}^2 + x_{4}^2 + (1 - x_{1})^2}
+= \sqrt{2-2x_{1}}$.
+\QED
+
+\begin{lemma}
+\label{lem:goodapprox}
+Let 
+\[ p=(p_1,p_2,p_3,p_4)
+\]
+and 
+\[
+P=(P_1 = p_1+\epsilon,P_2,P_3,P_4)
+\]
+be two unit quaternions at distance $\theta$ on \Sn{3}.
+% where $\theta$ is small.\footnote{$\theta$ should certainly be less than $\frac{\pi}{4}$.}
+Let 
+\[ 
+q = M^{-1}(p) \cap \Sn{3}
+\]
+and 
+\[
+Q = M^{-1}(P) \cap \Sn{3}
+\]
+be their inverse images on \Sn{3} (both using $t>0$),
+and let $Q'$ be the closest point to $q$ on $M^{-1}(P)$.
+Then
+\begin{itemize}
+\item	the distance between $q$ and $Q$ is $\cos^{-1}(\mbox{foo})$, and
+\item	the distance between $Q$ and $Q'$ is $1 - \mbox{foo}$
+\end{itemize}
+where
+\[
+	\mbox{foo} = \frac{(\cos \theta + 1) - 2p_1 - \epsilon}
+{2\sqrt{(1-p_1-\frac{\epsilon}{2})^2 - \frac{\epsilon^2}{4}}}
+	\approx \frac{(\cos \theta + 1) - 2p_1 - \epsilon}
+			  {2 - 2p_1 - \epsilon}
+\]
+If $\theta$ is small, both of these distances are also small.
+% , since foo is close to 1.
+\end{lemma}
+\prf
+The angle $\theta$ between $p$ and $P$ (which measures their distance on \Sn{3})
+satisfies 
+\[	
+	\cos \theta = p_1P_1 + p_2P_2 + p_3P_3 + p_4P_4.
+\]
+Similarly, the angle $\alpha$ between $q$ and $Q$ satisfies
+\[
+	\cos \alpha = \frac{(p_2,p_3,p_4,1-p_1)}{\sqrt{2-2p_1}}
+	\cdot
+	\frac{(P_2,P_3,P_4,1-P_1)}{\sqrt{2-2P_1}}
+	= \frac{\cos \theta + 1 - p_1 - P_1}
+	       {2\sqrt{1-p_1-P_1+p_1P_1}}
+\]
+\[
+	= \frac{\cos \theta + 1 - 2p_1 - \epsilon}
+	       {2\sqrt{1-2p_1-\epsilon+p_1^2 + \epsilon p_1}}
+	= \frac{\cos \theta + 1 - 2p_1 - \epsilon}
+	       {2\sqrt{(1-p_1-\frac{\epsilon}{2})^2 - \frac{\epsilon^2}{4}}}
+\]
+This is the expression called foo in the statement of the lemma.
+Now suppose that $\theta$ is small.
+Then $\epsilon$ is small and $\frac{\epsilon^2}{4}$ is very small.
+If we ignore it, we can simplify the above expression to
+\[
+	\cos \alpha 
+% = \frac{(\cos \theta + 1) - 2p_1 - \epsilon}
+% {2\sqrt{(1-p_1-\frac{\epsilon}{2})^2}}
+	       	    = \frac{(\cos \theta + 1) - 2p_1 - \epsilon}
+	       {2 - 2p_1 - \epsilon}
+\]
+Since $\cos \theta + 1$ is close to 2, 
+\[
+	\cos \alpha \approx 
+	\frac{2 - 2p_1 - \epsilon}{2 - 2p_1 - \epsilon} = 1
+\]
+This shows that the distance $\alpha$ between $q$ and $Q$ is
+small, since $\cos \alpha \approx 1$ implies $\alpha \approx 0$.
+Thus, quaternions that are close together are mapped to
+inverse images in Euclidean space that are close together.
+
+Figure~\ref{fig:QQdist} shows that the 
+distance between $Q$ and $Q'$ is $1-\cos \alpha$.
+This distance is also small because $\cos \alpha \approx 1$.
+\QED
+
+\begin{figure}
+\vspace{2.5in}
+\special{psfile=/usr/people/jj/modelTR/3b-splineWithDerivData/img/dist1-cosAlpha.ps
+	 hoffset=150}
+\caption{The distance between $Q$ and $Q'$ is $1-\cos\alpha$}
+% file: dist1-cosAlpha.showcase
+% tops dist1-cosAlpha.rgb -m 6.5 1.5 > dist1-cosAlpha.ps
+\label{fig:QQdist}
+\end{figure}
+
+We have established that the choice of $q_i$ on \Sn{3}\ is a good
+approximation to the closest point on the inverse line
+and will satisfy our goal of moving efficiently between the inverse lines.
+Consequently, the version of step (2b) that we implement is:
+%
+\begin{description}
+\item[(2b)]
+	Design a rational curve $C$ in Euclidean space,
+	interpolating $\{M^{-1}(p_i) \cap \Sn{3}\}_{i=1,\ldots,k}$.
+\end{description}
+
+The observant reader will have noticed that, by mapping to Euclidean
+space in this way, we have replaced the
+interpolation of points on \Sn{3} (quaternions) by the interpolation
+of points on \Sn{3} (their images in Euclidean space)!
+However, we have actually made progress:
+the design of the interpolating curve is no longer constrained to
+a surface.
+
+Open problems:
+\begin{itemize}
+\item
+	Determining tangent in Euclidean space when using closest point on inverse line.
+		(Involves computing $\alpha(t)$.)
+		[See comments embedded in paper above.]
+\item
+	Compare eager and lazy approaches to input subdivision,
+	   as well as maximal/optimal sizes for the subset in eager evaluation
+\item	
+	$C^2$ continuous splines, by passing 2nd derivative back too
+		(still easy to set 2nd derivative, filling the 2nd dof of the cubic spline)
+\end{itemize}		
+
+A topic for future study is the choice of an optimal value
+for the subset size $k$ in lazy subdivision 
+and the tradeoff between lazy and eager subdivision.
+
+
+
+
+Explicitly minimizing covariant acceleration:
+Covariant acceleration is zero at a point of a curve on \Sn{3}\ if the curve's
+second derivative vector is orthogonal to the sphere.
+We can try to enforce this restriction at data points,
+since the desired second derivative vector for the quaternion spline
+can be mapped to a desired second derivative vector in inverse space,
+where design is carried out.
+To interpolate a second derivative vector at every data point will require
+a quintic Hermite curve in inverse space, which will map to a degree 10
+curve on \Sn{3}.
+One can keep a cubic curve in inverse space by simply interpolating
+second derivative vectors at the endpoints, since there are two free
+end conditions in a cubic B-spline.
+

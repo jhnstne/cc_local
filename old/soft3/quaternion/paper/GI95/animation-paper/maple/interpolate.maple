@@ -1,0 +1,86 @@
+#	interpolate.maple
+#	interpolates points on the quaternion sphere
+#	with a single rational curve
+
+# 	Input a vector of k euler angle 3 tuples e1..ek and k times t1..tk
+# 	Output a degree 2k-2 rational curve on the quaternion
+#		sphere interpolating the quaternion equivalents
+#		of the euler angles such that f(t1) = quaternion(e1) etc...
+
+
+#	Created 8/30/94
+
+
+
+# general utility library
+# read `genutils.maple`;
+
+# quaternion library
+read `quaternions.maple`;
+
+# implementations of M and Minverse plus 
+# utility routines to test and verify the mappings
+read `maps.maple`;
+
+
+
+# vorient is a vector of euler angle 3 vectors to interpolate
+interpthis := proc(vorient,times)
+	vlength := vectdim(vorient);
+	tlength := vectdim(times);
+
+	if (vlength<>tlength) then
+		print(`Error, input vectors must be same length`);
+		return(0);
+	fi;
+
+# qvect will hold the result of euler->quaternion conversion
+	qvect := vector(vlength);
+	for i from 1 to vlength do
+		qvect[i] := 
+		euler2quaternion(vorient[i][1],vorient[i][2],vorient[i][3]);
+	od;
+# vqvects will hold the inverted quaternion points
+	vqvects := vector(vlength);
+	for i from 1 to vlength do
+		vqvects[i] := 
+		Minverse1(quaternion25vector(qvect[i]));
+	od;
+
+	wvect := vector(vlength);
+	xvect := vector(vlength);
+	yvect := vector(vlength);
+	zvect := vector(vlength);	
+	for i from 1 to vlength do
+		wvect[i] := vqvects[i][1];
+		xvect[i] := vqvects[i][2];
+		yvect[i] := vqvects[i][3];
+		zvect[i] := vqvects[i][4];
+	od;
+
+	p := interp(times,wvect,t);
+	q := interp(times,xvect,t);
+	r := interp(times,yvect,t);
+	s := interp(times,zvect,t);
+	
+	itemp0 := Mforward(vector([p,q,r,s]));
+	for i from 1 to vlength do
+		print(map(evalf,qvect[i]));
+		itemp1 := subs(t=eval(times[i]),eval(itemp0));
+		print(h5vect2quaternion(map(evalf,eval(itemp1))));
+	od;
+	eval(itemp0);
+end;
+
+
+
+runit := proc()
+	interpthis([[1,2,1],[0,2,1]],[0,1]);
+	end;
+
+
+
+
+
+
+

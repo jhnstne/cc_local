@@ -1,0 +1,462 @@
+
+
+
+C Library Functions                                   GEOMETRY(3)
+
+
+
+NNNNAAAAMMMMEEEE
+     geometry - A library of routines for  affine  and  euclidean
+     geometry
+
+SSSSYYYYNNNNTTTTAAAAXXXX
+     ####iiiinnnncccclllluuuuddddeeee ggggeeeeoooommmmeeeettttrrrryyyy....hhhh
+
+DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
+     _G_e_o_m_e_t_r_y is an implementation of the geometric abstract data
+     type  described  in [DeRose '89].  The reader is referred to
+     that document for a thorough discussion of the philosophy of
+     the ADT as well as several examples of its use.
+
+TTTTYYYYPPPPEEEESSSS
+     The data types supported by  this  package  are:  AffineMap,
+     Frame, Normal, Point, Scalar, and Space.  Below is an alpha-
+     betic description of each of the routines  exported  by  the
+     package.   There is a fairly loose convention for the naming
+     of these routines: the first several letters (A, F, N, P, V,
+     or S) indicate either the types of the arguments expected or
+     the type of the return value. Here, A stands for  AffineMap,
+     F stands for Frame, N for Normal, P for Point, V for Vector,
+     and S for Space or Scalar.
+
+
+RRRROOOOUUUUTTTTIIIINNNNEEEESSSS
+     AAAAffffffffiiiinnnneeeeMMMMaaaapppp AAAAAAAACCCCoooommmmppppoooosssseeee(((( TTTT1111,,,, TTTT2222))))
+     AAAAffffffffiiiinnnneeeeMMMMaaaapppp TTTT1111,,,, TTTT2222;;;;
+
+     Return the composition transform defined by  T2(T1(.)).   An
+     error  is  signaled  if  the range of T1 is not equal to the
+     domain of T2.
+
+     AAAAffffffffiiiinnnneeeeMMMMaaaapppp AAAACCCCrrrreeeeaaaatttteeee(((( ffff,,,, oooopppprrrriiiimmmmeeee,,,, vvvv0000pppprrrriiiimmmmeeee,,,, vvvv1111pppprrrriiiimmmmeeee [[[[,,,, vvvv2222pppprrrriiiimmmmeeee]]]]))))
+     FFFFrrrraaaammmmeeee ffff;;;;
+     PPPPooooiiiinnnntttt oooopppprrrriiiimmmmeeee;;;;
+     VVVVeeeeccccttttoooorrrr vvvv0000pppprrrriiiimmmmeeee,,,, vvvv1111pppprrrriiiimmmmeeee,,,, vvvv2222pppprrrriiiimmmmeeee;;;;
+
+     This is the lowest level affine transformation creation rou-
+     tine.   Returned  is  the affine transformation that carries
+     the origin of frame f onto the point oprime, the first basis
+     vector of f onto the vector v0prime, the second basis vector
+     of f onto the vector v1prime, (and if  f  belongs  to  a  3-
+     space)  the third basis vector of f onto the vector v2prime.
+     The domain of the transformation is set to be the  space  in
+     which  f belongs, the range is the space in which the primed
+     objects belong.  An error is signaled if the primed  objects
+     do not belong to a common space.  Notice that the dimensions
+     of the two spaces can differ.
+
+     AAAAffffffffiiiinnnneeeeMMMMaaaapppp AAAACCCCrrrreeeeaaaatttteeeeFFFF(((( ffff1111,,,, ffff2222))))
+     FFFFrrrraaaammmmeeee ffff1111,,,, ffff2222;;;;
+
+
+
+SunOS 5.6                 Last change:                          1
+
+
+
+
+
+
+C Library Functions                                   GEOMETRY(3)
+
+
+
+     This  routine  is  only  appropriate  for  creating   affine
+     transformations   between  spaces  of  a  common  dimension.
+     Returned is the affine transformation that carries the frame
+     f1  onto  the  frame  f2.  An error is signaled if f1 and f2
+     belong to spaces of unequal dimension.
+
+     AAAAffffffffiiiinnnneeeeMMMMaaaapppp AAAAIIIIddddeeeennnnttttiiiittttyyyy(((( SSSS))))
+     SSSSppppaaaacccceeee SSSS;;;;
+
+     Return the identity transformation from space S onto itself.
+
+     FFFFrrrraaaammmmeeee FFFFCCCCrrrreeeeaaaatttteeee(((( nnnnaaaammmmeeee,,,, oooorrrriiiiggggiiiinnnn,,,, vvvv0000,,,, vvvv1111 [[[[,,,, vvvv2222]]]]))))
+     cccchhhhaaaarrrr ****nnnnaaaammmmeeee;;;;
+     PPPPooooiiiinnnntttt oooorrrriiiiggggiiiinnnn;;;;
+     VVVVeeeeccccttttoooorrrr vvvv0000,,,, vvvv1111,,,, vvvv2222;;;;
+
+     Return a new coordinate frame.  Name is a  character  string
+     that  is  associated with the frame, primarily for debugging
+     purposes.  The next three or four arguments specify the ori-
+     gin  of the frame and a basis of vectors.  If the origin and
+     vectors belong to an affine 2-space, then only  the  vectors
+     v0  and  v1  are  required;  otherwise all three vectors are
+     expected.  The order of the vectors is important, especially
+     for  use  with  the  coordinate specification and extraction
+     routines (see, eg, PCoords below).
+
+     PPPPooooiiiinnnntttt FFFFOOOOrrrrgggg(((( ffff))))
+     FFFFrrrraaaammmmeeee ffff;;;;
+
+     Return the origin of the frame f.
+
+     VVVVeeeeccccttttoooorrrr FFFFVVVV(((( ffff,,,, iiii))))
+     FFFFrrrraaaammmmeeee ffff;;;;
+     iiiinnnntttt iiii;;;;
+
+     Return the i-th direction vector of frame f (numbered start-
+     ing at 0).
+
+     SSSSppppaaaacccceeee SSSSppppaaaacccceeeeOOOOffff(((( oooobbbbjjjj))))
+
+     Return the space that the geometric object obj ``lives in''.
+     Here  obj  can  be  either a point, a vector, a normal, or a
+     frame.  This routine is currently implemented as a macro.
+
+     NNNNoooorrrrmmmmaaaallll NNNNCCCCrrrreeeeaaaatttteeee(((( ffff,,,, cccc0000,,,, cccc1111 [[[[,,,,cccc2222]]]]))))
+     FFFFrrrraaaammmmeeee ffff;;;;
+     SSSSccccaaaallllaaaarrrr cccc0000,,,, cccc1111,,,, cccc2222;;;;
+
+     Return a normal vector whose coordinates relative to  f  are
+     (c0 c1 [c2]).  The coordinate c2 is needed only if f belongs
+     to a 3-space.  This routine has the same affect as  creating
+     a  primal  vector  whose  coordinates are (c0 c1 [c2]), then
+
+
+
+SunOS 5.6                 Last change:                          2
+
+
+
+
+
+
+C Library Functions                                   GEOMETRY(3)
+
+
+
+     dualizing it (using VDual) to create the corresponding  nor-
+     mal.
+
+     vvvvooooiiiidddd NNNNCCCCoooooooorrrrddddssss(((( nnnnoooorrrrmmmm,,,, ffff,,,, cccc0000,,,, cccc1111 [[[[,,,, cccc2222]]]]))))
+     NNNNoooorrrrmmmmaaaallll nnnnoooorrrrmmmm;;;;
+     FFFFrrrraaaammmmeeee ffff;;;;
+     SSSSccccaaaallllaaaarrrr ****cccc0000,,,, ****cccc1111,,,, ****cccc2222;;;;
+
+     Set the scalars pointed to by c0, c1 (and c2 if norm belongs
+     to  a  3-space)  to  the coordinates of norm relative to the
+     frame f.  The effect is to dualize norm to obtain  a  vector
+     V,  then  to  extract  the  coordinates of V relative to the
+     frame f.
+
+     VVVVeeeeccccttttoooorrrr NNNNDDDDuuuuaaaallll(((( nnnnoooorrrrmmmm))))
+     NNNNoooorrrrmmmmaaaallll nnnnoooorrrrmmmm;;;;
+
+     Convert norm into a primal vector as  described  in  [DeRose
+     '89].
+
+     SSSSccccaaaallllaaaarrrr NNNNVVVVAAAAppppppppllllyyyy(((( nnnnoooorrrrmmmm,,,, vvvveeeecccc))))
+     NNNNoooorrrrmmmmaaaallll nnnnoooorrrrmmmm;;;;
+     VVVVeeeeccccttttoooorrrr vvvveeeecccc;;;;
+
+     Apply the linear functional represented by norm to the  vec-
+     tor  vec.   The  effect  is  equivalent to dualizing norm to
+     obtain a vector nv, then forming the dot product <nv,vec>.
+
+     PPPPooooiiiinnnntttt PPPPAAAAxxxxffffoooorrrrmmmm(((( pppp,,,, TTTT))))
+     PPPPooooiiiinnnntttt pppp;;;;
+     AAAAffffffffiiiinnnneeeeMMMMaaaapppp TTTT;;;;
+
+     Return the image of p under the affine map T.
+
+     PPPPooooiiiinnnntttt PPPPCCCCrrrreeeeaaaatttteeee(((( ffff,,,, cccc0000,,,, cccc1111 [[[[,,,, cccc2222]]]]))))
+     FFFFrrrraaaammmmeeee ffff;;;;
+     SSSSccccaaaallllaaaarrrr cccc0000,,,, cccc1111,,,, cccc2222;;;;
+
+     Return a point whose coordinates relative to f  are  (c0  c1
+     [c2]).   The  coordinate c2 is needed only if f belongs to a
+     3-space.
+
+     vvvvooooiiiidddd PPPPCCCCoooooooorrrrddddssss(((( pppp,,,, ffff,,,, cccc0000,,,, cccc1111 [[[[,,,, cccc2222]]]]))))
+     PPPPooooiiiinnnntttt pppp;;;;
+     FFFFrrrraaaammmmeeee ffff;;;;
+     SSSSccccaaaallllaaaarrrr ****cccc0000,,,, ****cccc1111,,,, ****cccc2222;;;;
+
+     Set the scalars pointed to by c0, c1 (and c2 if norm belongs
+     to  a 3-space) to the coordinates of point p relative to the
+     frame f.
+
+
+
+
+
+SunOS 5.6                 Last change:                          3
+
+
+
+
+
+
+C Library Functions                                   GEOMETRY(3)
+
+
+
+     PPPPooooiiiinnnntttt PPPPPPPPaaaacccc(((( pppp1111,,,, pppp2222,,,, aaaa1111))))
+     PPPPooooiiiinnnntttt pppp1111,,,, pppp2222;;;;
+     SSSSccccaaaallllaaaarrrr aaaa1111;;;;
+
+     Return the point given by the  affine  combination  a1*p1  +
+     (1-a1)*p2.
+
+     PPPPooooiiiinnnntttt PPPPPPPPaaaacccc3333(((( pppp1111,,,, pppp2222,,,, pppp3333,,,, aaaa1111,,,, aaaa2222,,,, aaaa3333))))
+     PPPPooooiiiinnnntttt pppp1111,,,, pppp2222,,,, pppp3333;;;;
+     SSSSccccaaaallllaaaarrrr aaaa1111,,,, aaaa2222,,,, aaaa3333;;;;
+
+     Return the point given by the  affine  combination  a1*p1  +
+     a2*p2 + a3*p3.
+
+     PPPPooooiiiinnnntttt PPPPPPPPaaaaccccNNNN(((( nnnn,,,, pppp,,,, aaaa))))
+     iiiinnnntttt nnnn;;;;
+     PPPPooooiiiinnnntttt pppp[[[[]]]];;;;
+     SSSSccccaaaallllaaaarrrr aaaa[[[[]]]];;;;
+
+     Perform an affine combination of n points.  Return the point
+     a[0]  *  p[0]  +  ...  +  a[n-1] * p[n-1], where the a's are
+     assumed to sum to one.
+
+     VVVVeeeeccccttttoooorrrr PPPPPPPPvvvvccccNNNN(((( nnnn,,,, pppp,,,, aaaa))))
+     iiiinnnntttt nnnn;;;;
+     PPPPooooiiiinnnntttt pppp[[[[]]]];;;;
+     SSSSccccaaaallllaaaarrrr aaaa[[[[]]]];;;;
+
+     Perform a "vector combination", that is, a combination where
+     the coefficients sum to zero.  Return the vector a[0] * p[0]
+     + ... + a[n-1] * p[n-1], where the a's are assumed to sum to
+     zero.
+
+     VVVVeeeeccccttttoooorrrr PPPPPPPPDDDDiiiiffffffff(((( pppp1111,,,, pppp2222))))
+     PPPPooooiiiinnnntttt pppp1111,,,, pppp2222;;;;
+
+     Return the vector given by p1 - p2, that is, the vector from
+     p2  to p1.  An error is signaled if p1 and p2 belong to dif-
+     ferent spaces.
+
+     SSSSccccaaaallllaaaarrrr PPPPPPPPDDDDiiiisssstttt(((( pppp1111,,,, pppp2222))))
+     PPPPooooiiiinnnntttt pppp1111,,,, pppp2222;;;;
+
+     Return the distance between the points p1 and p2.  An  error
+     is signaled if p1 and p2 belong to different spaces.
+
+     NNNNoooorrrrmmmmaaaallll PPPPPPPPPPPPNNNNoooorrrrmmmmaaaallll(((( pppp1111,,,, pppp2222,,,, pppp3333))))
+     PPPPooooiiiinnnntttt pppp1111,,,, pppp2222,,,, pppp3333;;;;
+
+     Return an outward pointing normal  vector  to  the  triangle
+     spanned  by  the points p1, p2 and p3.  The outward pointing
+     direction is defined by the right-hand rule.
+
+
+
+SunOS 5.6                 Last change:                          4
+
+
+
+
+
+
+C Library Functions                                   GEOMETRY(3)
+
+
+
+     PPPPooooiiiinnnntttt PPPPPPPPrrrrrrrr(((( pppp1111,,,, pppp2222,,,, rrrr1111,,,, rrrr2222))))
+     PPPPooooiiiinnnntttt pppp1111,,,, pppp2222;;;;
+     SSSSccccaaaallllaaaarrrr rrrr1111,,,, rrrr2222;;;;
+
+     Return the point that breaks  the  line  segment  p1p2  into
+     relative  ratio  r1 to r2.  The ratios r1 and r2 do not have
+     to sum to unity.  For instance, PPrr( p1, p2, 1, 2)  returns
+     the point one third of the way from p1 to p2.
+
+     PPPPooooiiiinnnntttt PPPPVVVVAAAAdddddddd(((( pppp,,,, vvvv))))
+     PPPPooooiiiinnnntttt pppp;;;;
+     VVVVeeeeccccttttoooorrrr vvvv;;;;
+
+     Return the point obtained by adding vector v to point p.  An
+     error is signaled if p and v belong to different spaces.
+
+     SSSSppppaaaacccceeee SSSSCCCCrrrreeeeaaaatttteeee(((( nnnnaaaammmmeeee,,,, ddddiiiimmmm))))
+     cccchhhhaaaarrrr ****nnnnaaaammmmeeee;;;;
+     iiiinnnntttt ddddiiiimmmm;;;;
+
+     Return a new euclidean space.  Name is  a  character  string
+     used  primarily  for  debugging  purposes;  dim  is  one  of
+     TWOSPACE or THREESPACE, denoting that the new space is to be
+     a  euclidean 2-space or 3-space, respectively.  As described
+     in [DeRose '89], the returned space  S  comes  with  a  pre-
+     defined Cartesian frame denoted by StdFrame(S).
+
+     FFFFrrrraaaammmmeeee SSSSttttddddFFFFrrrraaaammmmeeee(((( SSSS))))
+     SSSSppppaaaacccceeee SSSS;;;;
+
+     Return the pre-defined Cartesian  frame  for  the  space  S.
+     This routine is currently implemented as a macro.
+
+     VVVVeeeeccccttttoooorrrr SSSSVVVVMMMMuuuulllltttt(((( ssss,,,, vvvv))))
+     SSSSccccaaaallllaaaarrrr ssss;;;;
+     VVVVeeeeccccttttoooorrrr vvvv;;;;
+
+     Return the vector given by s*v; that is, perform multiplica-
+     tion of a scalar and a vector.
+
+     VVVVeeeeccccttttoooorrrr VVVVAAAAxxxxffffoooorrrrmmmm(((( vvvv,,,, TTTT))))
+     VVVVeeeeccccttttoooorrrr pppp;;;;
+     AAAAffffffffiiiinnnneeeeMMMMaaaapppp TTTT;;;;
+
+     Return the image of v under the affine map T.
+
+     vvvvooooiiiidddd VVVVCCCCoooooooorrrrddddssss(((( vvvv,,,, ffff,,,, cccc0000,,,, cccc1111 [[[[,,,, cccc2222]]]]))))
+     VVVVeeeeccccttttoooorrrr vvvv;;;;
+     FFFFrrrraaaammmmeeee ffff;;;;
+     SSSSccccaaaallllaaaarrrr ****cccc0000,,,, ****cccc1111,,,, ****cccc2222;;;;
+
+
+
+
+
+SunOS 5.6                 Last change:                          5
+
+
+
+
+
+
+C Library Functions                                   GEOMETRY(3)
+
+
+
+     Set the scalars pointed to by c0, c1 (and c2 if norm belongs
+     to a 3-space) to the coordinates of vector v relative to the
+     frame f.
+
+     VVVVeeeeccccttttoooorrrr VVVVCCCCrrrreeeeaaaatttteeee(((( ffff,,,, cccc0000,,,, cccc1111 [[[[,,,, cccc2222]]]]))))
+     FFFFrrrraaaammmmeeee ffff;;;;
+     SSSSccccaaaallllaaaarrrr cccc0000,,,, cccc1111,,,, cccc2222;;;;
+
+     Return a vector whose coordinates relative to f are  (c0  c1
+     [c2]).   The  coordinate c2 is needed only if f belongs to a
+     3-space.
+
+     NNNNoooorrrrmmmmaaaallll VVVVDDDDuuuuaaaallll(((( vvvv))))
+     VVVVeeeeccccttttoooorrrr vvvv;;;;
+
+     Return the normal vector (ie, linear functional) dual to v.
+
+     SSSSccccaaaallllaaaarrrr VVVVMMMMaaaagggg(((( vvvv))))
+     VVVVeeeeccccttttoooorrrr vvvv;;;;
+
+     Return the magnitude of vector v.
+
+     VVVVeeeeccccttttoooorrrr VVVVNNNNoooorrrrmmmmaaaalllliiiizzzzeeee(((( vvvv))))
+     VVVVeeeeccccttttoooorrrr vvvv;;;;
+
+     Return the unit vector in the direction of vector v.
+
+     VVVVeeeeccccttttoooorrrr VVVVVVVVAAAAdddddddd(((( vvvv1111,,,, vvvv2222))))
+     VVVVeeeeccccttttoooorrrr vvvv1111,,,, vvvv2222;;;;
+
+     Return the vector sum of vectors v1 and  v2.   An  error  is
+     signaled if v1 and v2 belong to different spaces.
+
+     VVVVeeeeccccttttoooorrrr VVVVVVVVDDDDiiiiffffffff(((( vvvv1111,,,, vvvv2222))))
+     VVVVeeeeccccttttoooorrrr vvvv1111,,,, vvvv2222;;;;
+
+     Return the vector difference of vectors v1 and v2; that  is,
+     the  vector  given by v1 - v2 is returned.  An error is sig-
+     naled if v1 and v2 belong to different spaces.
+
+     VVVVeeeeccccttttoooorrrr VVVVVVVVCCCCrrrroooossssssss(((( vvvv1111,,,, vvvv2222))))
+     VVVVeeeeccccttttoooorrrr vvvv1111,,,, vvvv2222;;;;
+
+     Return the cross product of v1 and v2; that is,  the  vector
+     v1  x  v2  is  returned.   An error is signaled if v1 and v2
+     belong to different spaces.
+
+     SSSSccccaaaallllaaaarrrr VVVVVVVVDDDDooootttt(((( vvvv1111,,,, vvvv2222))))
+     VVVVeeeeccccttttoooorrrr vvvv1111,,,, vvvv2222;;;;
+
+     Return the dot product of v1 and v2.  An error  is  signaled
+     if v1 and v2 belong to different spaces.
+
+
+
+SunOS 5.6                 Last change:                          6
+
+
+
+
+
+
+C Library Functions                                   GEOMETRY(3)
+
+
+
+     VVVVeeeeccccttttoooorrrr VVVVVVVVllllccccNNNN(((( nnnn,,,, vvvv,,,, aaaa))))
+     iiiinnnntttt nnnn;;;;
+     VVVVeeeeccccttttoooorrrr vvvv[[[[]]]];;;;
+     SSSSccccaaaallllaaaarrrr aaaa[[[[]]]];;;;
+
+     Perform   a   linear   combination.    Return   the   vector
+     a[0]*v[0]+...+a[n-1]*v[n-1].
+
+     VVVVeeeeccccttttoooorrrr VVVVVVVVPPPPrrrroooojjjj((((vvvv,,,,wwww))))
+     VVVVeeeeccccttttoooorrrr vvvv,,,, wwww;;;;
+
+     Return the projection of vector v onto vector w.
+
+     VVVVeeeeccccttttoooorrrr VVVVZZZZeeeerrrroooo((((SSSS))))
+     SSSSppppaaaacccceeee SSSS;;;;
+
+     Return the zero vector in space S.
+
+BBBBUUUUGGGGSSSS
+AAAAUUUUTTTTHHHHOOOORRRRSSSS
+     Tony DeRose
+
+SSSSEEEEEEEE AAAALLLLSSSSOOOO
+     [DeRose '89] T. DeRose, "Coordinate-Free Geometric  Program-
+     ming",  Technical  Report  89-09-16,  Department of Computer
+     Science and Engineering, FR-35, Seattle, WA 98195 (September
+     1989).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SunOS 5.6                 Last change:                          7
+
+
+

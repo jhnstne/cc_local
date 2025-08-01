@@ -1,0 +1,4 @@
+GLUTS3curve < data/S3.in &
+GLUTS3curve -i < data/input3 &
+GLUTS3curve -i < data/input6 &
+

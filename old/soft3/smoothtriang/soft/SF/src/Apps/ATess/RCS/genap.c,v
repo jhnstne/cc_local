@@ -1,0 +1,235 @@
+head	1.2;
+access;
+symbols;
+locks
+	saggarwa:1.2; strict;
+comment	@ * @;
+
+
+1.2
+date	98.12.05.02.45.18;	author saggarwa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	98.11.30.00.31.19;	author saggarwa;	state Exp;
+branches;
+next	;
+
+
+desc
+@Main function for constructing a simplicial hull and then fitting an A-patch in terms of its scalars.
+@
+
+
+1.2
+log
+@added SimplexFP as a free parameter.  Handling of edge tetrahedra construction.
+@
+text
+@/****************************************************************/
+/* Module: genap.c                                              */
+/* $Date: 1998/11/30 00:31:19 $                                 */
+/* $Revision: 1.1 $                                             */
+/* $Source: /p/SurfaceFitting/SF/src/Apps/ATess/RCS/genap.c,v $ */
+/****************************************************************/
+
+#include <stdio.h>
+#include <math.h>
+#include "all.h"
+#include "apconstruct.h"
+#include "apatch.h"
+
+Space World;
+Frame WorldF;
+int ApatchDeg = 3;
+double LenN1FP = 1.0;
+double LenN2FP = 1.0;
+double LenN3FP = 1.0;
+double SimplexFP = 2.0;
+
+main(int argc, char* argv[])
+{
+   ParseCommandLine(argc, argv);
+
+   World = SCreate("World", 3);
+   WorldF = StdFrame(World);
+
+   while (ReadDstruct() != EOF) {
+/*      fprintf(stderr,"Read Dstruct successful.\n"); */
+      if (QueryDstructPath("TriangulationFace")) {
+         TriangulationFace tface;
+         int tfaceType;
+         ReadTriangulationFace(&tface, World);
+         tfaceType = TypeOfFace(tface);
+fprintf(stderr, "type of face: %d\n", tfaceType);
+         if (tfaceType == NON_CONVEX) {
+            ApatchPair apPair;
+            ConstructFaceApatchPair(&apPair, tface);
+            WriteApatchPair(apPair);
+            FreeApatchPair(apPair);
+         }
+         else {
+            Apatch apatch;
+            ConstructSingleFaceApatch(&apatch, tface, tfaceType);
+            WriteSingleApatch(apatch);
+            FreeApatch(apatch);
+         }
+      }
+      else if (QueryDstructPath("TriangulationEdge")) {
+         TriangulationEdge tedge;
+         int f1type, f2type;
+         ReadTriangulationEdge(&tedge, World);
+         f1type = TypeOfFace(tedge.f1);
+         f2type = TypeOfFace(tedge.f2);
+         if (f1type == NON_CONVEX && f2type == NON_CONVEX) {
+	    /* Both adjacent faces are non-convex. */
+            Apatch eap1, eap2, eap3, eap4;
+            ConstructNonconvexNonconvexEdgeApatches(&eap1, &eap2, &eap3, &eap4, tedge);
+            WriteSingleApatch(eap1);
+            WriteSingleApatch(eap2);
+            WriteSingleApatch(eap3);
+            WriteSingleApatch(eap4);
+            FreeApatch(eap1);
+            FreeApatch(eap2);
+            FreeApatch(eap3);
+            FreeApatch(eap4);
+         }
+         else if (f1type != NON_CONVEX && f2type != NON_CONVEX) {
+	   /* Both adjacent faces are convex. */
+           if (f1type == ZERO_CONVEX && f2type == ZERO_CONVEX) {
+	      /* Both adjacent faces are zero-convex.            */
+	      /* In this case the surface is defined directly by */
+	      /* the edge's adjacent faces of the triangulation. */
+              /* No edge tetrahedra need to be constructed.      */
+           }
+           else if ((f1type != POS_CONVEX && f2type != POS_CONVEX) ||
+                    (f1type != NEG_CONVEX && f2type != NEG_CONVEX)) {
+	     /* Both adjacent faces are non-positive or non-negative convex. */
+             Apatch eap1, eap2;
+             ConstructConvexConvexEdgeApatches(&eap1, &eap2, tedge, f1type, f2type);
+             WriteSingleApatch(eap1);
+             WriteSingleApatch(eap2);
+             FreeApatch(eap1);
+             FreeApatch(eap2);
+           }
+           else {
+             /* One adjacent face is positive convex and the other is
+                negative convex. */
+             Apatch eap1, eap2, fap3;
+             ConstructPosConvexNegConvexEdgeApatches(&eap1, &eap2, &fap3, tedge, f1type,f2type);
+	     /*
+             WriteSingleApatch(eap1);
+             WriteSingleApatch(eap2);
+             WriteSingleApatch(fap3);
+	     */
+             FreeApatch(eap1);
+             FreeApatch(eap2);
+             FreeApatch(fap3);
+           }
+         }
+         else {
+	   /* One adjacent face is convex and the other is non-convex. */
+           Apatch eap1, eap2;
+           ConstructConvexNonconvexEdgeApatches(&eap1, &eap2, tedge, f1type, f2type);
+           WriteSingleApatch(eap1);
+           WriteSingleApatch(eap2);
+           FreeApatch(eap1);
+           FreeApatch(eap2);
+         }
+      }
+      else {
+         fprintf(stderr, "%s: Unknown dstruct - Exiting.\n", argv[0]);
+         exit(1);
+      }
+   }
+
+  exit(0);
+}
+
+
+/*------------------------------------------------------------*/
+/*                   Command Line Handlers                    */
+/*------------------------------------------------------------*/
+
+void SetApatchDeg(char *num[])
+{
+   ApatchDeg = atoi(num[0]);
+   if (ApatchDeg < 3) {
+      fprintf(stderr, "ApatchDegree must be atleast 3; defaulting to 3.\n");
+      ApatchDeg = 3;
+   }
+}
+
+void SetVNormLenFP(char* arg[])
+{
+   LenN1FP = atof(arg[0]);
+   LenN2FP = atof(arg[1]);
+   LenN3FP = atof(arg[2]);
+}
+
+void SetTetraSimplexFP(char* arg[])
+{
+   SimplexFP = atof(arg[0]);
+   if (SimplexFP <= 1.0) {
+      fprintf(stderr, "SimplexFP must be greater than 1.0; defaulting to 2.0.\n");
+      SimplexFP = 2.0;
+   }
+}
+
+
+/* Table of available options -- register new options here */
+Option Options[] = {
+/* Name     Handler          #Args  HelpString */
+   "h",     Usage,             0, ": Print available options.",
+   "d",     SetApatchDeg,      1, "<apatchDegree> : Specify the degree of the Apatch to be constructed (minimum 3); the default is 3.",
+   "n",     SetVNormLenFP,     3, "<lenN1 lenN2 lenN3>: Set the length of the normals at each of the vertices of the surface triangulation.  These are free parameters controlling the shape of the Apatch.  The default lengths are all 1.",
+   "s",     SetTetraSimplexFP, 1,     "<simplex-scale-factor>: ",
+
+/*  DO not delete the next line */
+    NULL,    NULL,       0,      NULL,      NULL
+  };
+
+
+/* Global variables go here */
+char *Banner  = "";
+char *CommandName;
+
+char* UsageString = "genap < apatch-stream";
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d3 3
+a5 3
+/* $Date: 1998/07/28 19:39:58 $                                 */
+/* $Revision: $                                             */
+/* $Source: /u/saggarwal/cs788/RCS/genap.c,v $                    */
+d17 4
+a20 3
+double LengthN1 = 1.0;
+double LengthN2 = 1.0;
+double LengthN3 = 1.0;
+d30 1
+a30 1
+      fprintf(stderr,"Read Dstruct successful.\n");
+d50 62
+d135 1
+a135 1
+void SetVNormLen(char* arg[])
+d137 12
+a148 3
+   LengthN1 = atof(arg[0]);
+   LengthN2 = atof(arg[1]);
+   LengthN3 = atof(arg[2]);
+d154 5
+a158 4
+/* Name     Handler       #Args  HelpString */
+   "help",  Usage,        0,     ": Print available options.",
+   "d",     SetApatchDeg, 1,     "<apatchDegree> : Specify the degree of the Apatch to be constructed (minimum 3); the default is 3.",
+   "n",     SetVNormLen,  3,	 "<lenN1 lenN2 lenN3>: Set the length of the normals at each of the vertices of the surface triangulation.  These are free parameters controlling the shape of the Apatch.  The default lengths are all 1.",
+@

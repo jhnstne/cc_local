@@ -1,0 +1,126 @@
+\documentclass[12pt]{article}
+\usepackage{times}
+\usepackage[pdftex]{graphicx}
+\input{header-consecutive}  % remove if it causes you grief: you can always add
+%in your own commands right her
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{0in}
+\setlength{\textheight}{8.6in}
+\setlength{\textwidth}{6.875in}
+\setlength{\columnsep}{5mm}
+\markright{\hfill \today \hfill}
+\pagestyle{myheadings}
+
+% -----------------------------------------------------------------------------
+
+\title{Controlling a Virtual Camera}
+\author{Ross Ptacek}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+
+\section{Setup}
+\subsection{The Path}
+The path followed by our virtual camera has two distinct components, position
+and orientation.
+Since we are trying to precompute the entire path of the object, the keyframes
+that we use to specify the path must also have a position and orientation 
+component.
+The choice of representation for position in each keyframe is simply the x,y,
+and z coordinates of the point we want the camera to pass through.
+For orientation, we choose to use a quaternion to represent the orientation at
+each keyframe.
+Remember that a quaternion is a 4-vector that encodes a rotation around an
+arbitrary vector.
+We choose quaternions over the more typical choice of rotation matrices because
+quaternions allow us to develop rational motion.
+In between every two consecutive keyframes, we have to interpolate between the
+positions and orientations specified by the two keyframes.
+To interpolate position, we use a cubic Bezier curve.
+To interpolate orientations we use a method of rationally interpolating 
+quaternions proposed in ... .
+Let the Bezier spline formed by connecting the curves between consecutive
+keyframes be $B(t)$, and let the rational quaternion spline formed by 
+rationally interpolating through the orientations of the keyframes be $Q(t)$.
+Note that these two curves are parameterized the same.
+So at any parameter value $t_{i}$, the position of the camera is given by
+$B(t_{i})$, and the orientation of the camera is given by $Q(t_{i})$.
+The path specified by $B(t)$ and $Q(t)$ is our first guess at the path of the
+camera.
+Now we must ensure that this path does not collide with objects in the scene
+and modify the path if it does.
+
+%does this deserve a subsection?
+\subsection{The Scene}
+The scene can be any polygonal mesh.
+If the mesh is not already a Triangular mesh, then it will be converted to one.
+Optimally, a Delauney triangulation of the non-triangular faces will be used to
+break such faces into triangles.
+Triangles are preferred both because they are nicer to deal with but also
+because the octree data structure that we will use in collision decection works
+more simply with triangles.
+The set of triangles that represent the scene will be called $T_{s}$.
+
+
+\section{Camera Model}
+The path of the camera itself is insufficient to determine collisions.
+The virtual camera is infinitely small.
+In fact, collisions of the virtual camera with the scene are not necessarily
+collisions at all.
+The visible volume is a rectangular frustum.
+This frustum, the view frustum, is determined by the parameters $fovx$,$ fovy$,
+$near$, and $far$.
+$fovx$ and $fovy$ are angles defining the field of view in x and y.
+$near$ and $far$ are distances in z where the frustum is cut.
+The diagram below illustrates this.
+
+%insert figure here
+
+The diagram makes it clear that the near clipping plane of the view frustum
+is what we should be checking for collisions with.
+In effect, it is the ``lens'' of our virtual camera.
+\section{Collision Detection}
+\subsection{Calculating the Near Clipping Plane Corners}
+Our first task in computing collisions is to calculate exactly where the
+corners of the near clipping plane, NCP from now on, are at any time $t$ of the
+path.
+
+%diagram
+
+From the diagram we see there is simple arithmetic to find a vector from the
+camera position to any of the four corner points.
+
+%math from powerpoint slides
+
+It turns out that this vector is all that we really need.
+\subsection{Calculating Corner Curves}
+Using $B(t)$, $Q(t)$, and the vector from $B(t)$ to a corner of the NCP, $V$,
+we can construct the path of the corner curve as the camera moves along the
+path specified by $B(t)$ and $Q(t)$.
+The procedure to do so is outlined in (Johnstone \& Williams '95 
+``A Rational Model of the Surface Swept by a curve'').
+In general, this algorithm takes the quaternion spline and transforms it into a
+spline that interpolates rotation matrices.
+So its control points are rotation matrices rather than quaternions.
+Then the control matrices are all multiplied by $V$ to produce control points.
+These control points are finally translated by the control points of $B(t)$.
+The result is a degree 12 rational Bezier spline that specifies that path
+of a corner point.
+We will call these curves $C_{1}(s) \ldots C_{4}(s)$ where $C_{1}(s)$ is the 
+upper left corner of the NCP and the rest follow in counterclockwise order.
+Note that there is no guarantee that the corner curves are parameterized the
+same was as $B(t)$ and $Q(t)$.
+\subsection{Finding Collisions}
+
+
+
+
+\end{document}
+
+
+
+

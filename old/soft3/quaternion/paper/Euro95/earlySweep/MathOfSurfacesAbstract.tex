@@ -1,0 +1,135 @@
+\documentstyle[12pt]{article} 
+
+\makeatletter
+\def\@maketitle{\newpage
+\null
+ %\vskip 2em                   % Vertical space above title.
+\begin{center}
+      {\Large\bf \@title \par}  % Title set in \Large size. 
+      \vskip .5em               % Vertical space after title.
+      {\lineskip .5em           %  each author set in a tabular environment
+\begin{tabular}[t]{c}\@author 
+\end{tabular}\par}                   
+\end{center}
+\par
+\vskip .5em}                 % Vertical space after author
+\makeatother
+
+\parskip=8pt plus1pt
+\parindent=0pt
+
+\newcommand{\DoubleSpace}{\edef\baselinestretch{1.4}\Large\normalsize}
+
+\DoubleSpace
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\topmargin}{0pt}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+
+\title{Exact Bezier Representations of Swept Spheres along Arbitrary Paths
+	\thanks{This work supported by National Science Foundation 
+	grant CCR9213918.}}
+\author{John K. Johnstone 
+	and James P. Williams\thanks{Department of Computer Science,
+	The Johns Hopkins University,
+	Baltimore, Maryland 21218 USA.}}
+
+\begin{document}
+
+\maketitle
+
+Swept surfaces abound in the products that we wish to model in CAD/CAM
+and geometric modeling in general,
+from the motion of manufacturing tools such as ball cutters, lathes and robot 
+arms to the blending and joining of surfaces.
+In this paper, we are interested in the Bezier representation of swept surfaces.
+This has generally been done for restricted
+types of sweeping (e.g., rotational) or for approximations of the sweep.
+We address the problem of arbitrary sweeps and exact representations
+for the interesting problem of sweeping spheres.
+This representation is exact in the sense that the swept surface that 
+we create is consistent with all of the finite data we give it (see below).
+
+We are motivated by the following scenario:
+a sweeping sphere (or more general object) regularly outputs its position,
+its instantaneous direction of movement, 
+and size.\footnote{The object is allowed to scale during the sweep.
+	If appropriate, the orientation of the object is also
+	regularly output, but for spheres this is of course irrelevant.}
+Thus, we have a finite number of positions, tangents, and sizes of 
+the sweeping sphere.
+We wish to create a Bezier representation for a swept surface
+that interpolates this data, and is consistent with the fact
+that the sweeping object is always a sphere.
+%In particular, we will create a Bezier curve $c(t)$ that interpolates
+%the position (center of the sphere), a Bezier function $r(t)$
+%that interpolates the size (radius), impose a condition
+%that guarantees a sweeping sphere, and create a surface from this data.
+
+A sphere sweeping along a curve $c(t)$ called the directrix curve
+can be represented by a circle sweeping along $c(t)$ such
+that the plane of the circle is always normal to the directrix
+curve (or equivalently the normal of the circle's plane is
+always the tangent of the directrix curve).
+Therefore, we represent a sweeping sphere by a sweeping circle,
+which leads more simply to a parameterization without needing to compute
+envelopes of spheres.
+A sweeping circle is specified by a center, orientation, and radius
+function, $c(t)$, $o(t)$, $r(t)$; and 
+we have the added restriction that $o(t) = c'(t)$
+since we wish to represent sweeping spheres.
+The parameterization of the swept surface becomes
+$C(t)*O(t)*R(t)*\mbox{circ}(s)$,
+where $\mbox{circ}(s)$ is a piecewise Bezier parameterization 
+of the unit circle at the origin in the $xy$-plane,
+$C(t)$ is the matrix for translation by $c(t)$,
+$O(t)$ is the matrix for rotation by $o(t)$,
+and $R(t)$ is the matrix for scaling by $r(t)$.
+We want this parameterization to be rational so that we can translate
+it to a Bezier representation of the surface.
+The difficulty lies with the orientation/rotation component.
+By the nature of rotation matrices,
+$O(t)$ will not be rational unless the length of the vector 
+$o(t)$ can be rationally parameterized
+(without loss of generality, unit length).
+Since $o(t) = c'(t)$, this restricts the directrix curve $c(t)$ to
+be a curve with tangents of unit (or rationally parameterized) length.
+Curves of this form have been studied by Farouki, and were
+dubbed Pythagorean hodograph curves.\footnote{This restriction on the
+	form of the directrix curve shows why we cannot 
+	consider the representation of a swept sphere
+	where the position/size information is 
+	given exactly at {\em all} points, rather than only at a finite
+	number of points.  The directrix curve would not
+	be a Pythagorean hodograph curve in general.}
+
+We give a construction of quintic space Pythagorean hodograph splines,
+which serve as the directrix curves of the sweeping spheres.
+This extends Farouki's work, which had been predominantly on plane curves,
+to space curves.
+Also, by splining the Pythagorean hodograph curves 
+together we avoid problems arising from the restricted freedom
+of a single Pythagorean hodograph curve.
+
+Since functions $o(t)$ of unit-length vectors
+are equivalent to curves on the unit sphere,
+this paper is related to recent work by Dietz, Hoschek and J\"uttler
+that shows how to create a curve on the sphere that interpolates
+a finite number of points.
+However, their method cannot be applied to our problem
+because of our added restriction that $o(t)$ agree with the tangent of $c(t)$.
+Also, our method is closed-form, unlike theirs.
+Nevertheless, their method can be used to generate valid orientation
+functions that can be used with arbitrary center and radius functions
+to generate a more general type of rational swept surface generated
+by circles.
+
+In summary, we generate Bezier representations
+of arbitrary sweeps of spheres through the development of 
+interpolating splines that consistently have tangents of polynomial length,
+which are used as the directrix curves of the sweeps.
+
+\end{document}

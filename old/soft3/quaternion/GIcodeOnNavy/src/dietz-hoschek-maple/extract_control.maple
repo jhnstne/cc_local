@@ -1,0 +1,147 @@
+#
+#	The input to this function is as follows
+#
+#	extract_hull(RAD,degR,ORIENT,degO,DIRECT,degD,CUT,degC)
+#
+#	RAD -- 1D curve controlling the RADIUS
+#	degR - degree of the radius curve
+#
+#
+#	ORIENT -- 3D rational curve controlling the orientation
+#		  of the sweeping curve
+#	degO - degree of the orientation curve
+#
+#
+#	DIRECT  -- 3D rational directrix curve
+#	degD - degree of the directrix curve
+#
+#
+#	CUT -- 3D rational cutting surface (actually 2D)
+#	degC - degree of the cutting surface
+#
+
+
+extract_hull := proc(RAD,degR,ORIENT,degO,DIRECT,degD,CUT,degC)
+	resultDEG_t := 2*degO + degD + degR;
+	resultDEG_u := degC;
+
+# initalize vector position constants
+
+	W := 1;
+	X := 2;
+	Y := 3;
+	Z := 4;
+
+	print(`orientation polygon`);
+	print(ORIENT);
+# initalize the result control grid
+	rX := matrix((resultDEG_t+1),resultDEG_u+1);
+	rY := matrix((resultDEG_t+1),resultDEG_u+1);
+	rZ := matrix((resultDEG_t+1),resultDEG_u+1);
+	rW := matrix((resultDEG_t+1),resultDEG_u+1);
+	for i from 1 to resultDEG_t+1 do
+		for j from 1 to resultDEG_u+1 do
+			rX[i,j] := 0;
+			rY[i,j] := 0;
+			rZ[i,j] := 0;
+			rW[i,j] := 0;
+		od;
+	od;
+	print(`initilization complete`);
+# compute rX
+	term1 := bezproduct(ORIENT[W],degO,ORIENT[W],degO);
+
+	term1 := bezproduct(term1,2*degO,DIRECT[X],degD);
+	term1 := bezelevate_repeated(term1,2*degO+degD,degR);
+	term1 := beztproduct(term1,2*degO+degD+degR,CUT[W],degC);
+	print(`marker 1`);
+	term2 := bezproduct(RAD,degR,ORIENT[W],degO);
+	term2 := bezproduct(term2,degR+degO,DIRECT[W],degD);
+	print(eval(term2));
+	term3 := bezproduct(term2,degR+degO+degD,ORIENT[X],degO);
+	term3 := beztproduct(term3,resultDEG_t,CUT[X],degC);
+	print(eval(term3));
+	term4 := bezproduct(term2,degR+degO+degD,ORIENT[Y],degO);
+	term4 := beztproduct(term4,resultDEG_t,CUT[Y],degC);
+	print(eval(term4));
+	term5 := bezproduct(term2,degR+degO+degD,ORIENT[Z],degO);
+	term5 := beztproduct(term5,resultDEG_t,CUT[Z],degC);
+	print(eval(term5));
+
+	rX := add(term1,term3);		
+	rX := add(rX,term4);
+	rX := add(rX,term5);
+
+	print(`RX COMPUTED`);
+# compute rY
+
+	term1 := bezproduct(ORIENT[W],degO,ORIENT[W],degO);
+	term1 := bezproduct(term1,2*degO,DIRECT[Y],degD);
+	term1 := bezelevate_repeated(term1,2*degO+degD,degR);
+	term1 := beztproduct(term1,2*degO+degD+degR,CUT[W],degC);
+
+	term2 := bezproduct(RAD,degR,ORIENT[W],degO);
+	term2 := bezproduct(term2,degR+degO,DIRECT[W],degD);
+
+	term3 := bezproduct(term2,degR+degO+degD,ORIENT[Z],degO);
+	term3 := beztproduct(term3,resultDEG_t,CUT[X],degC);
+	term3 := scalarmul(term3,-1);
+
+	term4 := bezproduct(term2,degR+degO+degD,ORIENT[X],degO);
+	term4 := beztproduct(term4,resultDEG_t,CUT[Z],degC);
+	
+	
+	rY := add(term1,term3);		
+	rY := add(rY,term4);
+	
+
+# compute rZ
+	term1 := bezproduct(ORIENT[W],degO,ORIENT[W],degO);
+	term1 := bezproduct(term1,2*degO,DIRECT[Z],degD);
+	term1 := bezelevate_repeated(term1,2*degO+degD,degR);
+	term1 := beztproduct(term1,2*degO+degD+degR,CUT[W],degC);
+
+	term2 := bezproduct(RAD,degR,DIRECT[W],degD);
+	
+	term3 := bezproduct(term2,degR+degD,ORIENT[X],degO);
+	term3 := bezproduct(term3,degR+degD+degO,ORIENT[Y],degO);
+	term3 := beztproduct(term3,resultDEG_t,CUT[X],degC);
+	
+	term4 := bezproduct(term2,degR+degD,ORIENT[Z],degO);
+	term4 := bezproduct(term4,degR+degD+degO,ORIENT[Z],degO);
+	term4 := beztproduct(term4,resultDEG_t,CUT[Y],degC);
+	term4 := scalarmul(term4,-1);
+
+	term5 := bezproduct(term2,degR+degD,ORIENT[X],degO);
+	term5 := bezproduct(term5,degR+degD+degO,ORIENT[X],degO);
+	term5 := beztproduct(term5,resultDEG_t,CUT[Y],degC);
+	term5 := scalarmul(term5,-1);
+
+	term6 := bezproduct(term2,degR+degD,ORIENT[Y],degO);
+	term6 := bezproduct(term6,degR+degD+degO,ORIENT[Z],degO);
+	term6 := beztproduct(term6,resultDEG_t,CUT[Z],degC);
+
+	rZ := add(term1,term3);		
+	rZ := add(rZ,term4);
+	rZ := add(rZ,term5);
+	rZ := add(rZ,term6);
+
+
+# compute rW
+			
+	term1 := bezproduct(ORIENT[W],degO,ORIENT[W],degO);
+	term1 := bezproduct(term1,2*degO,DIRECT[W],degD);
+	term1 := bezelevate_repeated(term1,2*degO+degD,degR);
+	term1 := beztproduct(term1,2*degO+degD+degR,CUT[W],degC);
+
+	rW := term1;
+
+	extract_control_result := vector(4);
+	extract_control_result[W] := eval(rW);
+	extract_control_result[X] := eval(rX);
+	extract_control_result[Y] := eval(rY);
+	extract_control_result[Z] := eval(rZ);
+
+	eval(extract_control_result);
+	end;
+

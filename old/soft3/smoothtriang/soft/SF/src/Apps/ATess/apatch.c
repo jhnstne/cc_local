@@ -1,0 +1,513 @@
+/****************************************************************/
+/* Module: apatch.c                                             */
+/* $Date: 1999/10/25 22:34:00 $                                 */
+/* $Revision: 1.6 $                                             */
+/* $Source: /p/SurfaceFitting/SF/src/Apps/ATess/RCS/apatch.c,v $*/
+/****************************************************************/
+/*
+** Purpose: Implementation module for A-patches.
+*/
+
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+#include "geometry.h"
+#include "vertex.h"
+#include "dstruct.h"
+#include "getset.h"
+#include "material.h"
+#include "libgeo.h"
+#include "aputil.h"
+#include "apatch.h"
+
+#define KDEFAULT 10.0
+#define EPS 1.0e-8
+
+static double eps = EPS;
+
+Material APColor1 = {
+   {0.58, 0.19, 0.07},
+   {0.0,  0.0,  0.0 },
+   0, "APColor1"};
+Material APColor2 = {
+   {0.19, 0.48, 0.07},
+   {0.0,  0.0,  0.0 },
+   0, "APColor2"};
+Material APColor3 = {
+   {0.38, 0.38, 0.07},
+   {0.0,  0.0,  0.0 },
+   0, "APColor3"};
+
+/* Function Prototypes */
+int ReadApatch(Apatch* apatch, Space wspace, char* str);
+Frame CreateApatchFrame(VERTEX* tetra);
+void WriteApatch(Apatch apatch, char* str);
+
+/* -------------------------------------------------------------------- *
+ * Function: ReadSingleApatch						*
+ * Read an A-Patch from a dstruct.					*
+ * -------------------------------------------------------------------- */
+int ReadSingleApatch(Apatch* apatch, Space wspace)
+{
+   char* str = "Apatch";
+
+   ReadApatch(apatch, wspace, str);
+   if (CheckApatchOrientation(*apatch) == LEFT_ORIENTED)
+      ConvertApatchToRightHandedOrientation(apatch);
+   return 1;
+}
+
+/* -------------------------------------------------------------------- *
+ * Function: ReadApatchPair						*
+ * Read an A-Patch from a dstruct.					*
+ * -------------------------------------------------------------------- */
+int ReadApatchPair(ApatchPair* apPair, Space wspace)
+{
+   char* str1 = "ApatchPair.Apatch1";
+   char* str2 = "ApatchPair.Apatch2";
+
+   if (!QueryDstructPath("ApatchPair")) {
+      fprintf(stderr, "ReadApatchPair: Apatch-Pair not read in.\n");
+      exit(1);
+   }
+
+   ReadApatch(&apPair->ap1, wspace, str1);
+   ReadApatch(&apPair->ap2, wspace, str2);
+   return 1;
+}
+
+/* -------------------------------------------------------------------- *
+ * Function: ReadApatch							*
+ * Read an A-Patch from a dstruct.					*
+ * -------------------------------------------------------------------- */
+int ReadApatch(Apatch* apatch, Space wspace, char* str)
+{
+   Scalar degree;
+   VERTEX tetra[4];
+   Material mat;
+   Frame wframe;
+   Scalar color;
+   char buf[100];
+   int i;
+   double kmax = KDEFAULT;
+   double kmin = -KDEFAULT;
+
+   wframe = StdFrame(wspace);
+
+   if (!QueryDstructPath(str)) {
+      fprintf(stderr, "ReadApatch: %s not read in.\n", str);
+      exit(1);
+   }
+
+   sprintf(buf, "%s.degree", str);
+   if (!GetScalar(buf, &degree)) {
+      fprintf(stderr, "ReadApatch: Failed upon reading degree.\n");
+      exit(1);
+   }
+
+   clearBuffer(buf, 100);
+   sprintf(buf, "%s.tetrahedron.vertex1", str);  
+   if (!GetVertexPosition(buf, wframe, &tetra[0].position)) {
+      fprintf(stderr, "ReadApatch: Failed upon first vertex read.\n");
+      exit(1);
+   }
+   sprintf(buf, "%s.tetrahedron.vertex2", str);  
+   if (!GetVertexPosition(buf, wframe, &tetra[1].position)) {
+      fprintf(stderr, "ReadApatch: Failed upon second vertex read.\n");
+      exit(1);
+   }
+   sprintf(buf, "%s.tetrahedron.vertex3", str);  
+   if (!GetVertexPosition(buf, wframe, &tetra[2].position)) {
+      fprintf(stderr, "ReadApatch: Failed upon third vertex read.\n");
+      exit(1);
+   }
+   sprintf(buf, "%s.tetrahedron.vertex4", str);  
+   if (!GetVertexPosition(buf, wframe, &tetra[3].position)) {
+      fprintf(stderr, "ReadApatch: Failed upon fourth vertex read.\n");
+      exit(1);
+   }
+
+   clearBuffer(buf, 100);
+   sprintf(buf, "%s.color", str);
+   if (!GetScalar(buf, &color)) {
+      fprintf(stderr, "ReadApatch: Failed upon reading Apatch color.\n");
+      exit(1);
+   }
+
+   *apatch = CreateApatch((int)degree, tetra, wspace, color);
+
+   /* Scalar values for the net are assumed to be correctly given	*/
+   /* in reverse lexicographic order.					*/
+   clearBuffer(buf, 100);
+   for (i = 0; i < apatch->netSize; i++) {
+      sprintf(buf, "%s.net[%d]", str, i);
+      if (!GetScalar(buf, &(apatch->net[i]))) {
+         fprintf(stderr, "ReadApatch: Error reading control net.\n");
+         exit(1);
+      }
+      apatch->netMat[i] = KMat(apatch->net[i], kmin, kmax, 1.0);
+/*    apatch->netMat[i] = KMat(apatch->net[i], kmin, kmax, 0.625); */
+   }
+
+   return 1;
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+Apatch CreateApatch(int degree, VERTEX* tetra, Space wspace, int color)
+{
+   Apatch newPatch;
+   int i;
+
+   newPatch.degree = degree;
+   for (i = 0; i < 4; i++) {
+      newPatch.tetrahedron[i] = tetra[i];
+   }
+   newPatch.wspace = wspace;
+   newPatch.netSize = NetSize(degree, 3);
+   newPatch.net = (Scalar*) malloc(sizeof(Scalar) * newPatch.netSize);
+   for (i = 0; i < newPatch.netSize; i++)
+      newPatch.net[i] = 0;
+   newPatch.netMat = (Material*) malloc(sizeof(Material) * newPatch.netSize);
+   newPatch.apFrame = CreateApatchFrame(tetra);
+   newPatch.apColor = color;
+   return newPatch;
+}
+
+/* -------------------------------------------------------------------- *
+ * Function: CreateApatchFrame						*
+ * -------------------------------------------------------------------- */
+Frame CreateApatchFrame(VERTEX* tetra)
+{
+   Frame apFrame;
+   Point p3;
+   Vector v3to0, v3to1, v3to2;
+
+   p3 = tetra[3].position;
+   v3to0 = PPDiff(tetra[0].position, tetra[3].position);
+   v3to1 = PPDiff(tetra[1].position, tetra[3].position);
+   v3to2 = PPDiff(tetra[2].position, tetra[3].position);
+
+   apFrame = FCreate("ApatchFrame", p3, v3to0, v3to1, v3to2);
+   return apFrame;
+}
+
+/* -------------------------------------------------------------------- *
+ * Return the number of control points needed for an A-patch
+ * of the given degree.
+ * -------------------------------------------------------------------- */
+int NetSize(int deg, int dim)
+{
+   int temp;
+
+   if ((deg < 0) || (dim < 0))
+      return 0;
+   else if ((deg == 0) || (dim == 0))
+      return 1;
+   else {
+      temp = NetSize(deg-1, dim) + NetSize(deg, dim-1);
+      return temp;
+   }
+}
+
+/* -------------------------------------------------------------------- *
+ * Writes out the patch on stdout.
+ * -------------------------------------------------------------------- */
+void WriteSingleApatch(Apatch apatch)
+{
+   char* str = "Apatch";
+
+   WriteApatch(apatch, str);
+   FlushDstruct();
+}
+
+/* -------------------------------------------------------------------- *
+ * Writes out the patch on stdout.
+ * -------------------------------------------------------------------- */
+void WriteApatchPair(ApatchPair apPair)
+{
+   char* str1 = "ApatchPair.Apatch1";
+   char* str2 = "ApatchPair.Apatch2";
+
+   WriteApatch(apPair.ap1, str1);
+   WriteApatch(apPair.ap2, str2);
+   FlushDstruct();
+}
+
+/* -------------------------------------------------------------------- *
+ * Writes out the patch on stdout.
+ * -------------------------------------------------------------------- */
+void WriteApatch(Apatch apatch, char* str)
+{
+   int i;
+   char buf[100];
+
+   sprintf(buf, "%s.degree", str);
+   PutScalar(buf, (Scalar)apatch.degree);
+
+   clearBuffer(buf, 100);
+   sprintf(buf, "%s.tetrahedron.vertex1", str);
+   PutVertexPosition(buf, apatch.tetrahedron[0].position);
+   sprintf(buf, "%s.tetrahedron.vertex2", str);
+   PutVertexPosition(buf, apatch.tetrahedron[1].position);
+   sprintf(buf, "%s.tetrahedron.vertex3", str);
+   PutVertexPosition(buf, apatch.tetrahedron[2].position);
+   sprintf(buf, "%s.tetrahedron.vertex4", str);
+   PutVertexPosition(buf, apatch.tetrahedron[3].position);
+
+   clearBuffer(buf, 100);
+   sprintf(buf, "%s.color", str);
+   PutScalar(buf, (Scalar)apatch.apColor);
+
+   /* Scalar values for the net are written out in reverse		*/
+   /* lexicographic order.						*/
+   clearBuffer(buf, 100);
+   for (i = 0; i < apatch.netSize; i++) {
+      sprintf(buf, "%s.net[%d]", str, i);
+      PutScalar(buf, apatch.net[i]);
+   }
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+int CheckApatchOrientation(Apatch apatch)
+{
+   Scalar chk;
+   Vector v1, v2, v3, v4;
+
+   v1 = PPDiff(apatch.tetrahedron[2].position, apatch.tetrahedron[1].position);
+   v2 = PPDiff(apatch.tetrahedron[3].position, apatch.tetrahedron[2].position);
+   v3 = VVCross(v1, v2);
+   v4 = PPDiff(apatch.tetrahedron[1].position, apatch.tetrahedron[0].position);
+   chk = VVDot(v3, v4);
+
+   if (chk >= 0)
+      return LEFT_ORIENTED;
+   else
+      return RIGHT_ORIENTED;
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void ConvertApatchToRightHandedOrientation(Apatch* apatch)
+{
+   VERTEX tmptetra[4];
+   Scalar* tmpnet;
+   Material* tmpmat;
+   int i;
+
+   for (i = 0; i < 4; i++)
+      tmptetra[i] = apatch->tetrahedron[i];
+   tmpnet = (Scalar*) malloc(sizeof(Scalar) * apatch->netSize);
+   tmpmat = (Material*) malloc(sizeof(Material) * apatch->netSize);
+   for (i = 0; i < apatch->netSize; i++) {
+      tmpnet[i] = apatch->net[i];
+      tmpmat[i] = apatch->netMat[i];
+   }
+
+   apatch->tetrahedron[2] = tmptetra[3];
+   apatch->tetrahedron[3] = tmptetra[2];
+   apatch->net[2]  = tmpnet[3];
+   apatch->net[3]  = tmpnet[2];
+   apatch->net[5]  = tmpnet[6];
+   apatch->net[6]  = tmpnet[5];
+   apatch->net[7]  = tmpnet[9];
+   apatch->net[9]  = tmpnet[7];
+   apatch->net[11] = tmpnet[12];
+   apatch->net[12] = tmpnet[11];
+   apatch->net[13] = tmpnet[15];
+   apatch->net[15] = tmpnet[13];
+   apatch->net[16] = tmpnet[19];
+   apatch->net[17] = tmpnet[18];
+   apatch->net[18] = tmpnet[17];
+   apatch->net[19] = tmpnet[16];
+   apatch->netMat[2]  = tmpmat[3];
+   apatch->netMat[3]  = tmpmat[2];
+   apatch->netMat[5]  = tmpmat[6];
+   apatch->netMat[6]  = tmpmat[5];
+   apatch->netMat[7]  = tmpmat[9];
+   apatch->netMat[9]  = tmpmat[7];
+   apatch->netMat[11] = tmpmat[12];
+   apatch->netMat[12] = tmpmat[11];
+   apatch->netMat[13] = tmpmat[15];
+   apatch->netMat[15] = tmpmat[13];
+   apatch->netMat[16] = tmpmat[19];
+   apatch->netMat[17] = tmpmat[18];
+   apatch->netMat[18] = tmpmat[17];
+   apatch->netMat[19] = tmpmat[16];
+}
+
+/* -------------------------------------------------------------------- *
+ * Free storage associated with the A-patch.				*
+ * -------------------------------------------------------------------- */
+void FreeApatch(Apatch apatch)
+{
+   free(apatch.net);
+}
+
+/* -------------------------------------------------------------------- *
+ * Free storage associated with the A-patch Pair.			*
+ * -------------------------------------------------------------------- */
+void FreeApatchPair(ApatchPair apPair)
+{
+   FreeApatch(apPair.ap1);
+   FreeApatch(apPair.ap2);
+}
+
+/* -------------------------------------------------------------------- *
+ * Return the linear array index of the control scalar whose multiindex	*
+ * is mi[]......  Scalars are stored in reverse lexographic		*
+ * order within a linear array.						*
+ * -------------------------------------------------------------------- */
+int CPIndex(int deg, int dim, int mi[])
+{
+   int sum, offset, j;
+
+   sum = deg;
+   offset = 0;
+   for (j = 0; j < dim; j++) {
+      sum -= mi[j];
+      offset += NetSize(sum-1, dim-j);
+   }
+
+   return offset;
+}
+
+/* -------------------------------------------------------------------- *
+ * Return the linear array index of the control scalar whose multiindex	*
+ * is mi[]......  Scalars are stored in reverse lexographic		*
+ * order within a linear array.						*
+ * -------------------------------------------------------------------- */
+int CPIndexDim3(int deg, int i0, int i1, int i2, int i3)
+{
+   int index, cpi[4];
+
+   if (i0 + i1 + i2 + i3 != deg) {
+      fprintf(stderr, "Invalid multi-index for a control scalar.\n");
+      exit(0);
+   }
+
+   cpi[0] = i0;  cpi[1] = i1;  cpi[2] = i2;  cpi[3] = i3;
+   index = CPIndex(deg, 3, cpi);
+   return index;
+}
+
+/* -------------------------------------------------------------------- *
+ * Evaluate the Apatch and normal at the given point v->position.       *
+ * -------------------------------------------------------------------- */
+Scalar EvalApatch(Apatch apatch, VERTEX* v)
+{
+   Scalar px, py, pz, result;
+
+   PCoords(v->position, apatch.apFrame, &px, &py, &pz);
+   result = EvalApatchGivenBCoords(apatch, v, px, py, pz, (1-px-py-pz));
+   return result;
+}
+
+/* -------------------------------------------------------------------- *
+ * Evaluate the Apatch and normal at the point whose barycentric	*
+ * coordinates are (u0, u1, u2, u3).  Remember u0 + u1 + u2 + u3 = 1.	*
+ * -------------------------------------------------------------------- */
+Scalar EvalApatchGivenBCoords(Apatch apatch, VERTEX* v, Scalar u0,
+			      Scalar u1, Scalar u2, Scalar u3)
+{
+   Scalar result;
+   Scalar* tmpNet;
+   int level, l, m, n, i, j, k;
+
+   /* Create a temporary net for applying the de Casteljau's algorithm.	*/
+   tmpNet = (Scalar*) malloc(sizeof(Scalar) * apatch.netSize);
+   for (i = 0; i < apatch.netSize; i++) {
+      tmpNet[i] = apatch.net[i];
+   }
+
+   /* Do de Casteljau's algorithm in place on the temporary net.	*/
+   /* But, do not do the last level of evaluation yet.			*/
+   for (level = (apatch.degree - 1); level > 0; level--) {
+      i = 0;
+      j = 1;
+      k = 2;
+      for (l = 0; l <= (apatch.degree - 1); l++) {
+         for (m = 0; m <= l; m++) {
+            for (n = 0; n <= m; n++) {
+               tmpNet[i] = (u0 * tmpNet[i]) + (u1 * tmpNet[j]) +
+				(u2 * tmpNet[k]) + (u3 * tmpNet[k+1]);
+               i++;
+               j++;
+               k++;
+            }
+            k++;
+         }
+         k++;
+         j += l + 2;
+      }
+   }
+
+   /* Do last step of de Casteljau to compute the value of the A-patch	*/
+   /* at the vertex, v.							*/
+   result = (u0 * tmpNet[0]) + (u1 * tmpNet[1]) + (u2 * tmpNet[2]) + 
+		(u3 * tmpNet[3]);
+
+   if ( fabs(result) < eps ) {
+     /* Evaluate normal only at points on the Apatch surface. */
+      v->normal = EvalApatchNormal(apatch, tmpNet[0], tmpNet[1],
+				   tmpNet[2], tmpNet[3]);
+   }
+
+   free(tmpNet);
+   return result;
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+Normal EvalApatchNormal(Apatch apatch, Scalar i0, Scalar i1, Scalar i2,
+                        Scalar i3)
+{
+   Vector e0, e1, e2, normalVec;
+   Scalar f0, f1, f2, a, b, c, d;
+   Frame onframe;
+   Normal result;
+   Vector tmp1, tmp2, tmp3, tmp4, tmp5;
+
+   onframe = StdFrame(apatch.wspace);
+   e0 = FV(onframe, 0);
+   e1 = FV(onframe, 1);
+   e2 = FV(onframe, 2);
+
+   VCoords(e0, apatch.apFrame, &a, &b, &c);
+   d = 0 - a - b - c;
+   f0 = a * i0 + b * i1 + c * i2 + d * i3;
+   VCoords(e1, apatch.apFrame, &a, &b, &c);
+   d = 0 - a - b - c;
+   f1 = a * i0 + b * i1 + c * i2 + d * i3;
+   VCoords(e2, apatch.apFrame, &a, &b, &c);
+   d = 0 - a - b - c;
+   f2 = a * i0 + b * i1 + c * i2 + d * i3;
+
+   tmp1 = SVMult(f0, e0);
+   tmp2 = SVMult(f1, e1);
+   tmp3 = SVMult(f2, e2);
+   tmp4 = VVAdd(tmp1, tmp2);
+   tmp5 = VVAdd(tmp4, tmp3);
+
+#if 0
+   normalVec = VVAdd(SVMult(f0, e0), VVAdd(SVMult(f1, e1), SVMult(f2, e2)));
+#endif
+
+   normalVec = VNormalize(tmp5);
+   result = VDual(normalVec);
+
+   return result;
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+Material GetApatchMaterial(int apColor)
+{
+   if (apColor == FACE_COLOR)
+      return APColor1;
+   else if (apColor == EDGE1_COLOR)
+      return APColor2;
+   else if (apColor == EDGE2_COLOR)
+      return APColor3;
+}

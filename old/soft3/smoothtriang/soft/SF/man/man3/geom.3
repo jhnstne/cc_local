@@ -1,0 +1,69 @@
+.TH geom 3
+
+.SH NAME
+geom
+
+.SH SYNOPSIS
+Miscellaneous geometry routines.
+
+.SH SYNTAX
+
+.B #include "geom.h"
+
+.SH DESCRIPTION:
+
+.nf
+.B Scalar GaussianCurvature(d2u, d2uv, d2v, du, dv, n)
+.B Vector d2u, d2uv, d2v, du, dv, n;
+.fi
+
+Compute the Gaussian curvature based on the given derivative information.
+
+.nf
+.B Point LineIntersectPlane(p1,v1, p2,n2)
+.B Point p1;
+.B Vector v1;
+.B Point p2;
+.B Normal n2;
+.fi
+
+Return the point of intersection between the line determined by
+p1 and v1 with the plane determined by p2 and n2.  No error
+checking is done (ie, if n2 is perpendicular to v1 then a 
+divide by zero will result).
+
+.nf
+.B BOOLEAN LineIntersectLine(p1,v1, p2,v2, pr)
+.B Point p1;
+.B Vector v1;
+.B Point p2;
+.B Vector v2;
+.B Point* pr;
+.fi
+
+Find the intersection of two three space lines.  If the intersection
+exists, return non-zero and set *pr to the intersection.  Otherwise,
+return 0.
+
+.nf
+.B Point ConstructQuadratic
+.B Patch* p;
+.fi
+
+Return the "quadratic precision" point of a cubic patch (see, Farin 1983).
+p should point to a cubic patch where all the boundary points have
+been determined.  The quadratic precision point will be returned, but
+will NOT be set in p (this point would be the center point of p).
+
+.nf
+.B Point projPointOnPlane(p1, p2,n2)
+.B Point p1;
+.B Point p2;
+.B Normal n2;
+.fi
+
+Project the point p1 onto the plane determined by p2 and n2.
+
+
+.SH DATE
+January 3, 1992

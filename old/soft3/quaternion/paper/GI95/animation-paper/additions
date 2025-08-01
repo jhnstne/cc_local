@@ -1,0 +1,17 @@
+The observant reader may have noticed that the image of the origin
+under M is undefined (and is the only such point).
+This is not a problem since we will see that the inverse images 
+$M^{-1}$ of unit quaternions all lie above the plane $x_4=0$
+(with the sole exception of the identity quaternion $(1,0,0,0,1)$,
+which will map onto this plane but far from the origin)
+and the entire space curve interpolating the $M^{-1}(q)$ avoids the
+origin.
+% Moreover, it is easy to jump over a single undefined image, even if
+% the space curve passed through it!  That is, use the limit of the two
+% neighbouring points.
+
+We arbitrarily choose $M^{-1}(1,0,0,0,1) = (1,1,1,0,1)$ in our implementation.
+
+antipodal quaternions:
+
+Acknowledgements:  We thank the anonymous referees for their useful comments.

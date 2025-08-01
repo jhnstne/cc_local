@@ -1,0 +1,189 @@
+#NOTE : this module requires the combinatorial
+#	library
+
+
+
+#Generate a single bernstein basis function
+B_Basis := proc(deg,index,parameter)
+	numbcomb(deg,index) * parameter^(index) * (1-parameter)^(deg-index)
+	end;
+
+#evaluate a 4 element curve at the given param value
+evalbez4 := 
+	proc(e,q)
+		[
+		subs(q,e[1]),
+		subs(q,e[2]),
+		subs(q,e[3]),
+		subs(q,e[4])
+		]
+	end;
+
+
+# generate a bernstein polynomial of degree 'deg' using the
+# provided parameter name and coefficients
+gen_bernstein := proc(deg,parameter,coeffs)
+	gbernxxx := 0;
+	for i from 0 by 1 to deg do
+		gbernxxx := gbernxxx + B_Basis(deg,i,parameter) * coeffs[i+1]
+	od;
+end;
+
+
+
+# given coefficient vectors CY of size n+1 and CX of size m+1
+# return a coefficient vector of size m+n+1 containing the
+# coefficents of the product bezier curve
+
+bezproduct := proc(CX,m,CY,n)
+	temp := vector((m+n+1));
+# initialize result array
+	for i from 1 to (m+n+1) do
+	temp[i] := 0
+	od;
+# compute product 
+	for i from 1 to m+1 do
+	for j from 1 to n+1 do
+		temp[i+j-1] := temp[i+j-1] +
+		((numbcomb(m,i-1)*numbcomb(n,j-1))
+		/numbcomb(m+n,i+j-2))*CX[i]*CY[j]
+	od;
+	od;
+	
+	eval(temp);
+end;
+
+
+beztproduct := proc(CX,m,CY,n)
+	temp := matrix(m+1,n+1);
+# compute product 
+	for i from 1 to m+1 do
+	for j from 1 to n+1 do
+		temp[i,j] := CX[i] * CY[j];
+	od;
+	od;
+	eval(temp);
+end;
+
+
+
+# degree elevate curve CX once
+bezelevate := proc(CX,m)
+	n := m+1;
+	temp := array(1..(n+1));
+	temp[1] := CX[1];
+	temp[n+1] := CX[m+1];
+	for j from 2 to n do
+		temp[j] := ((j-1)/(n)) * CX[j-1] + 
+			   (1-((j-1)/(n)))* CX[j];
+	od;
+	eval(temp);
+	end;
+
+# degree elevate curve CX n times
+bezelevate_repeated := proc(CX,m,n)
+	result := CX;
+	for i from 1 to n do
+		result := bezelevate(result,m+i-1)
+	od;
+	eval(result);
+	end;
+
+# delta function for bezier control polygons
+bezdelta := 
+	proc(C,deg)
+		resW := 0; resX := 0; resY:= 0; resZ := 0; 
+	
+		temp1 := bezproduct(C[1],deg,C[1],deg);
+		temp2 := bezproduct(C[2],deg,C[2],deg);
+		temp3 := bezproduct(C[3],deg,C[3],deg);
+		temp4 := bezproduct(C[4],deg,C[4],deg);
+		temp1 := add(temp1,temp2);
+		temp1 := add(temp1,temp3);
+		temp1 := add(temp1,temp4);
+		resW  := eval(temp1);
+
+		temp1 := bezproduct(C[1],deg,C[2],deg);
+		temp1 := scalarmul(temp1,2);
+		temp2 := bezproduct(C[3],deg,C[4],deg);
+		temp2 := scalarmul(temp2,-2);
+		resX  := eval(add(temp1,temp2));
+
+
+		temp1 := bezproduct(C[2],deg,C[4],deg);
+		temp1 := scalarmul(temp1,2);
+		temp2 := bezproduct(C[1],deg,C[3],deg);
+		temp2 := scalarmul(temp2,2);
+		resY  := eval(add(temp1,temp2));
+
+		temp1 := bezproduct(C[2],deg,C[2],deg);
+		temp2 := bezproduct(C[3],deg,C[3],deg);
+		temp3 := bezproduct(C[1],deg,C[1],deg);
+		temp3 := scalarmul(temp3,-1);
+		temp4 := bezproduct(C[4],deg,C[4],deg);
+		temp4 := scalarmul(temp4,-1);
+		temp1 := add(temp1,temp2);
+		temp1 := add(temp1,temp3);
+		temp1 := add(temp1,temp4);
+		resZ  := eval(temp1);
+
+		bezdeltaresult    := vector(4);
+		bezdeltaresult[1] := eval(resW);
+		bezdeltaresult[2] := eval(resY); 
+		bezdeltaresult[3] := eval(resZ);
+		bezdeltaresult[4] := eval(resZ);
+		eval(bezdeltaresult);
+	end;
+
+
+
+# convert a tensor product control hull to an actual function
+
+beztensor_to_function := proc(C,deg1,deg2,var1,var2)
+	btfresult := vector(4);
+	btfresult[1] := 0;
+	btfresult[2] := 0;
+	btfresult[3] := 0;
+	btfresult[4] := 0;
+	for i from 0 by 1 to deg1 do
+		for j from 0 by 1 to deg2 do
+			btfresult[1] := btfresult[1] + B_Basis(deg1,i,var1)*
+					B_Basis(deg2,j,var2)*C[1][i+1,j+1];
+			btfresult[2] := btfresult[2] + B_Basis(deg1,i,var1)*
+					B_Basis(deg2,j,var2)*C[2][i+1,j+1];
+			btfresult[3] := btfresult[3] + B_Basis(deg1,i,var1)*
+					B_Basis(deg2,j,var2)*C[3][i+1,j+1];
+			btfresult[4] := btfresult[4] + B_Basis(deg1,i,var1)*
+					B_Basis(deg2,j,var2)*C[4][i+1,j+1];
+		od;
+	od;
+	eval(btfresult);
+	end;
+
+
+
+
+# Differentiate a curve once
+
+bezdiff := 
+	proc(Cx,deg)
+	bdiffresult := vector(deg);
+	for i from 1 to deg do
+		bdiffresult[i] := 0
+	od;
+	for i from 1 to (deg+1) do
+		if (evalb(i>1)) then
+			bdiffresult[i-1] := bdiffresult[i-1] + deg*Cx[i]
+		else
+			
+		fi;
+		if (evalb((deg+1)>i)) then
+			bdiffresult[i] := bdiffresult[i] - deg*Cx[i]
+		else
+
+		fi;
+	od;
+	eval(bdiffresult);
+	end;
+
+

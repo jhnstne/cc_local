@@ -1,0 +1,69 @@
+CK, here are some comments on the plane-revolute paper.
+	I also have a number of changes that are best described
+	by faxing you a copy of my annotated copy of the old paper
+	along with the new paper.
+	I will call you this afternoon to find out how best to fax to you.
+
+	Since I had already made most of the changes to the file
+	you sent me earlier, I am sending you an altered version
+	of the *old* file.
+	That is, I am not using the file that you sent me today.
+	
+	I have not addressed the two issues of Referee 2:
+	(1) advantages of the method or (2) relevance to computer graphics.
+	Would you please add something and then I can comment?
+	Your notes of this morning's mail could be incorporated:
+	((1) robustness (2) parallel sections)
+	but, for 1, you should also say that other methods are not written up
+	in the literature, 
+	and, for 2, I would also say that plane sections are fundamental 
+	for the definition of solids, which is needed in computer
+	graphics.
+
+p. 1, references on descriptive geometry: Couldn't an Engligh book also
+	be included?
+
+p. 4, Rmk 2.1: in Farin, position vectors and direction vectors are 
+	{\em points} and vectors.  Why don't you use that idea?
+
+p. 6, Lemma 3.4 (previous sentence): two parabolas do not necessarily have
+	the same focal length even if they are similar, if the similarity
+	involves scaling.  Therefore, state that intersection parabola
+	and meridian parabola are actually *identical*?
+
+p. 9, step 5: 	Need to elaborate on computation of squared semi-axis lengths.
+	Most importantly, elaborate on computation of squared height (at center).
+	(In order to explain negative value, and also to show how if surface
+	is not above center.)
+	A hint is given on p. 12 top, but more is needed.
+	(Note: height is defined initially as the absolute value of the
+	z-coordinate.  This does not seem appropriate given that it can be
+	imaginary.)
+
+p. 9, step 1: state the section where parabola case will be given.
+
+p. 10, proof of Lemma 5.2: `Since s = -a/b ' is wrong.
+	Would work if you replace -a/b by s in the next sentence
+	and remove `since s = -a/b < 0' statement.
+
+p. 13, just above Section 6: focal lengths of similar parabolas are the same?
+	wouldn't distance between focus and vertex stretch as parabola does?
+	this is the same concern as on p. 6, Lemma 3.4
+
+p. 18: why don't you collapse Lemma 7.2 with Lemma 7.1?
+	Simply say `Suppose P(B,o) is a plane and Q_E(V,l,a,b) 
+	is a prolate ellipsoid (or Q_E(V,l,b,a) is an oblate ellipsoid).'
+	Then replace all Q_EP by Q_E in the lemma and proof.
+
+	Similarly could collapse Thm 7.2 with Thm 7.1.
+
+
+
+It would be nice if $\theta$ was given some interpretation
+	(e.g., Thms 5.1, 6.1, 7.1, 8.1, etc.)
+
+In Section 4, I would have introduced what the axial plane is and
+	then said that we will create a coordinate system where the
+	axial plane is the xy-plane.  This would better
+	motivate the early development of the section.
+	This might be too much of a change to make now.

@@ -1,0 +1,4 @@
+revosurf ../data/revosurf/cokeDetailed.pts
+surfinterpolate -m ../data/bezierSurf/UtahTeapot.cpt3
+revosurf ../data/revosurf/pear.pts
+scene -l ../data/scene/kitchenScene

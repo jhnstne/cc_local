@@ -1,0 +1,77 @@
+head	1.2;
+access;
+symbols;
+locks
+	saggarwa:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	98.12.12.03.59.49;	author saggarwa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	98.11.30.00.29.43;	author saggarwa;	state Exp;
+branches;
+next	;
+
+
+desc
+@Makefile with ATess and genap.
+@
+
+
+1.2
+log
+@genap removed.
+@
+text
+@#
+# 	This is a generic makefile that sets up the include paths
+#  and libraries.  You will probably need to change BASEDIR to
+#  refer to the top-level surface pipeline directory.
+
+BASEDIR= ../../..
+CFLAGS = -g -I${BASEDIR}/include -L${BASEDIR}/lib
+LIBS   = \
+	-lkcurve \
+	-lmesh \
+	-lgeomat\
+	-ldstruct\
+	-lgeometry \
+	-lSFlib \
+	-lgeomat\
+	-lm -ly -ll
+
+ATess : ATess.o aputil.o apatch.o aptessellate.o
+	cc ${CFLAGS} -o ATess aptessellate.o apatch.o aputil.o ATess.o $(LIBS)
+
+AFitter: AFitter.o aputil.o apatch.o apconstruct.o
+	cc ${CFLAGS} -o AFitter apconstruct.o apatch.o aputil.o AFitter.o $(LIBS)
+
+clean:
+	rm -f *.o core ATess AFitter
+
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@a1 1
+# Authors: Tony DeRose and Steve Mann
+d21 2
+a22 5
+genap : genap.o aputil.o apconstruct.o apatch.o
+	cc ${CFLAGS} -o genap apconstruct.o apatch.o aputil.o genap.o $(LIBS)
+
+AFitter: AFitter.o
+	cc ${CFLAGS} -o AFitter AFitter.o $(LIBS)
+d25 1
+a25 1
+	rm -f *.o core ATess genap AFitter
+@

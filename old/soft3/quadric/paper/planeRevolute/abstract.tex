@@ -1,0 +1,68 @@
+% --------------------------------------------------------------------
+% Paaper Submitted to COMPUTERS & GRAPHICS
+%
+% Paper History:
+%    1)   Nov/22/91      First draft
+%    2)   May/31/92      Second draft
+%    3)   June/27/92     Final Version
+%    4)   Oct/23/92      Submitted
+%    5)   Nov/10/92      Acknowledged
+%    6)   May/04/93      Provisionally accepted
+% --------------------------------------------------------------------
+
+\documentstyle [12pt]{article}
+
+\newif\ifFull
+%\Fullfalse
+\Fulltrue
+
+\def\thefootnote{\fnsymbol{footnote}}
+
+\title{
+     Computing the Intersection of a Plane \\
+     and a Revolute Quadric}
+
+\author{Ching-Kuang Shene\\
+        Department of Mathematics and Computer Science \\
+        Northern Michigan University \\
+        Marquette, MI 49855--5340, USA\\[0.5cm]
+        John K. Johnstone \\
+        Department of Computer Science\\
+        The Johns Hopkins University \\
+        Baltimore, MD 21218--2686, USA}
+
+\date{\ }
+
+\newtheorem{example}{Example}[section]
+\newtheorem{property}{Property}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{corollary}{Corollary}[section]
+
+\newcommand{\DoubleSpace}{\edef\baselinestretch{1.4}\Large\normalsize}
+\newcommand{\QED}{\ \ \ \rule{2mm}{3mm}\\}
+\newcommand{\arrow}[1]{\vec{\bf #1}}
+
+%\DoubleSpace
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\topmargin}{0pt}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+     A method of computing the intersection of a plane and a revolute quadric
+surface is presented.  This problem is basic in geometric areas such as solid
+modeling and descriptive geometry.   Our method delivers a closed form
+representation of the intersection conic as well as all parallel sections
+without added computation.
+\end{abstract}
+
+\end{document}
+

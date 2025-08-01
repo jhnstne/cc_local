@@ -1,0 +1,437 @@
+head	1.5;
+access;
+symbols;
+locks
+	saggarwa:1.5; strict;
+comment	@ * @;
+
+
+1.5
+date	99.10.25.22.06.16;	author saggarwa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	99.01.13.04.18.24;	author saggarwa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	98.12.22.02.05.22;	author saggarwa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	98.12.12.03.56.56;	author saggarwa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	98.12.05.02.40.28;	author saggarwa;	state Exp;
+branches;
+next	;
+
+
+desc
+@Writes out FaceTriangulation and EdgeTriangulation dstructs.
+@
+
+
+1.5
+log
+@version to hand in
+@
+text
+@/******************************************************************/
+/* Module: AFitter.c                                              */
+/* $Date: 1999/01/13 04:18:24 $                                   */
+/* $Revision: 1.4 $                                               */
+/* $Source: /p/SurfaceFitting/SF/src/Apps/ATess/RCS/AFitter.c,v $ */
+/******************************************************************/
+/*
+ * Copyright (c) 1998, Computer Graphics Lab, University of Waterloo.
+ * Copying, use and development for non-commercial purposes permitted.
+ *                  All rights for commercial use reserved.
+ */
+
+#include <stdio.h>
+#include <math.h>
+#include "geometry.h"
+#include "dstruct.h"
+#include "getset.h"
+#include "mesh.h"
+#include "userData.h"
+#include "commandline.h"
+#include "usage.h"
+#include "apconstruct.h"
+
+/* Forward declarations for option handlers */
+extern void Usage();
+
+Space World;
+Frame WorldF;
+int ApatchDeg = 3;
+double LenN1FP = 1.0;
+double LenN2FP = 1.0;
+double LenN3FP = 1.0;
+double SimplexFP = 2.0;
+double FaceTopScalarFP = 1.0;
+int FPSelectionMethod = QUAD_PRECISION_INTERPOLATION;
+
+main(int argc, char **argv)
+{
+   Mesh* theMesh;
+   Face* thisFace;
+   Edge* thisEdge;
+
+   ParseCommandLine( argc, argv);
+
+   /* Read in the mesh */
+   theMesh = MeshParse(stdin);
+   World = SCreate( "World", 3);
+   WorldF = StdFrame(World);
+   AddGeometry(World, theMesh);
+
+   ForeachMeshFace(theMesh, thisFace) {
+      ConstructFaceApatches(thisFace, World);
+   } EndForeach;
+
+#if 1
+   ForeachMeshEdge(theMesh, thisEdge) {
+      if (!BoundaryEdge(thisEdge)) {
+         ConstructEdgeApatches(thisEdge, World);
+      }
+   } EndForeach;
+#endif
+}
+
+/*------------------------------------------------------------*/
+/*                   Command Line Handlers                    */
+/*------------------------------------------------------------*/
+
+void SetApatchDeg(char *num[])
+{
+   ApatchDeg = atoi(num[0]);
+   if (ApatchDeg != 0 && ApatchDeg != 3) {
+      fprintf(stderr, "Only cubic Apatch construction is handled currently; defaulting Apatch degree to 3.\n");
+      ApatchDeg = 3;
+   }
+}
+
+void SetVNormLenFP(char* arg[])
+{
+   LenN1FP = atof(arg[0]);
+   LenN2FP = atof(arg[1]);
+   LenN3FP = atof(arg[2]);
+}
+
+void SetTetraSimplexFP(char* arg[])
+{
+   SimplexFP = atof(arg[0]);
+   if (SimplexFP <= 1.0) {
+      fprintf(stderr, "SimplexFP must be greater than 1.0; defaulting to 2.0.\n");
+      SimplexFP = 2.0;
+   }
+}
+
+void SetFaceTopScalarFP(char* arg[])
+{
+   FaceTopScalarFP = atof(arg[0]);
+   if (FaceTopScalarFP <= 0.0) {
+      fprintf(stderr, "FaceTopScalarFP must be greater than 0.0; defaulting to 1.0.\n");
+      FaceTopScalarFP = 1.0;
+   }
+}
+
+void SetFPSelectionMethod(char *num[])
+{
+   FPSelectionMethod = atoi(num[0]);
+   if (FPSelectionMethod != AVERAGING &&
+       FPSelectionMethod != SIMPLE_INTERPOLATION &&
+       FPSelectionMethod != QUAD_PRECISION_INTERPOLATION) {
+      fprintf(stderr, "Invalid value for free parameter selection method.\n");
+      exit(1);
+   }
+}
+
+/* Table of available options -- register new options here */
+/* For full details on how to add options, see the file    */
+/* commandline.h.                                          */
+Option Options[] = {
+/* Name Handler          #args   helpstring  */
+   "h", Usage,             0,    ": Print available options.",
+   "d", SetApatchDeg,      1,    "<ApatchDegree> : Specify the degree of the Apatch to be fitted.  A value of zero outputs the simplicial hull over the mesh.  The default value is 3, constructing a cubic Apatch.", 
+   "n", SetVNormLenFP,     3,    "<lenN1 lenN2 lenN3>: Set the length of the normals at each of the vertices of the surface triangulation.  These are free parameters controlling the shape of the Apatch.  The default lengths are all 1.",
+   "s", SetTetraSimplexFP, 1,    "<simplex-scale-factor>: Set the multiplicative factor to vary the height of the simplex constructed; a value greater than 1.0 must be chosen to ensure tangent plane containment, the default is 2.0.",
+   "f", SetFaceTopScalarFP,1,    "<topScalar-multiplier>: If using averaging as the free parameter selection method, set the multiplicative factor to vary the value of the control scalar at the top of the face simplex; a value greater than 0.0 must be chosen to ensure the scalar maintains the correct sign, the default is 1.0.",
+   "m", SetFPSelectionMethod, 1, "<selection-method>: Set an integer value indicating the free parameter selection method to be used. Values: 0 = Averaging, 1 = SimpleInterpolation, 2 = QuadraticPrecisionInterpolation (default = 2).\n",
+
+/*  Do not delete the next line */
+    NULL,    NULL,       0,      NULL,      NULL
+  };
+
+/* Global variables go here */
+char *Banner  = "AFitter, Version 1";
+char *UsageString = "AFitter [options] < mesh";
+
+@
+
+
+1.4
+log
+@free params - avgng, interpolation options.
+convex-convex complete.
+@
+text
+@d3 2
+a4 2
+/* $Date: 1998/12/22 02:05:22 $                                   */
+/* $Revision: 1.3 $                                               */
+d55 1
+d61 1
+d122 1
+a122 1
+   "f", SetFaceTopScalarFP,1,    "<topScalar-multiplier>: If using averaging as the free parameter selection method, set the multiplicative factor to vary the value of the control scalar at the top of the face simplex; a value greater than 0.0 must be chosen to ensure the scalar maintains the correct sign, the default is 1.0.\n",
+@
+
+
+1.3
+log
+@MAJOR CHANGES... Now uses face and edges directly for construction.
+@
+text
+@d3 2
+a4 2
+/* $Date: 1998/12/12 03:56:56 $                                   */
+/* $Revision: 1.2 $                                               */
+d35 1
+d100 11
+d117 1
+a117 1
+   "d", SetApatchDeg ,     1,    "<ApatchDegree> : Specify the degree of the Apatch to be fitted.  A value of zero outputs the simplicial hull over the mesh.  The default value is 3, constructing a cubic Apatch.", 
+d120 2
+a121 1
+   "f", SetFaceTopScalarFP,1,    "<topScalar-scale-factor>: Set the multiplicative factor to vary the value of the control scalar at the top of the face simplex; a value greater than 0.0 must be chosen to ensure the scalar maintains the correct sign, the default is 1.0.\n",
+@
+
+
+1.2
+log
+@Major change.  No longer writes a dstruct;  now directly calls the apatch construction routines.  command line tags added for free parameters and for option to write out simplicial hull instead of apatch.
+@
+text
+@d3 2
+a4 2
+/* $Date: 1998/12/05 02:40:28 $                                   */
+/* $Revision: 1.1 $                                               */
+a6 1
+
+a21 3
+/*
+#include "patch.h"
+*/
+a40 3
+   Vertex* vertices[3];
+   Vertex* thisVertex;
+   int i;
+d51 1
+a51 18
+      TriangulationFace tface;
+      i = 0;
+      ForeachFaceVertex( thisFace, thisVertex) {
+         vertices[i++] = thisVertex;
+      } EndForeach;
+      if (i != 3) {
+	 fprintf(stderr, "Non-triangular face found, exiting.\n");
+	 exit(1);
+      }
+      tface.name = ReturnName(thisFace);
+      tface.vertices[0].position = ReturnUDPoint(vertices[0]);
+      tface.vertices[0].normal   = ReturnUDNormal(vertices[0]);
+      tface.vertices[1].position = ReturnUDPoint(vertices[1]);
+      tface.vertices[1].normal   = ReturnUDNormal(vertices[1]);
+      tface.vertices[2].position = ReturnUDPoint(vertices[2]);
+      tface.vertices[2].normal   = ReturnUDNormal(vertices[2]);
+      tface.wspace = World;
+      ConstructFaceApatches(tface);
+a54 4
+      TriangulationEdge tedge;
+      Face* f1;
+      Face* f2;
+
+d56 1
+a56 43
+         GetEdgeVertices(thisEdge, &vertices[0], &vertices[1]);
+         tedge.vertices[0].position = ReturnUDPoint(vertices[0]);
+         tedge.vertices[0].normal   = ReturnUDNormal(vertices[0]);
+         tedge.vertices[1].position = ReturnUDPoint(vertices[1]);
+         tedge.vertices[1].normal   = ReturnUDNormal(vertices[1]);
+         tedge.wspace = World;
+
+         GetEdgeFaces(thisEdge, &f1, &f2);
+         i = 0;
+         ForeachFaceVertex( f1, thisVertex) {
+            vertices[i++] = thisVertex;
+         } EndForeach;
+         if (i != 3) {
+            fprintf(stderr, "Non-triangular face found, exiting.\n");
+   	    exit(1);
+         }
+         tedge.f1.name = ReturnName(f1);
+         tedge.f1.vertices[0].position = ReturnUDPoint(vertices[0]);
+         tedge.f1.vertices[0].normal   = ReturnUDNormal(vertices[0]);
+         tedge.f1.vertices[1].position = ReturnUDPoint(vertices[1]);
+         tedge.f1.vertices[1].normal   = ReturnUDNormal(vertices[1]);
+         tedge.f1.vertices[2].position = ReturnUDPoint(vertices[2]);
+         tedge.f1.vertices[2].normal   = ReturnUDNormal(vertices[2]);
+         tedge.f1.wspace = World;
+
+         i = 0;
+         ForeachFaceVertex( f2, thisVertex) {
+            vertices[i++] = thisVertex;
+         } EndForeach;
+         if (i != 3) {
+            fprintf(stderr, "Non-triangular face found, exiting.\n");
+	    exit(1);
+         }
+         tedge.f2.name = ReturnName(f2);
+         tedge.f2.vertices[0].position = ReturnUDPoint(vertices[0]);
+         tedge.f2.vertices[0].normal   = ReturnUDNormal(vertices[0]);
+         tedge.f2.vertices[1].position = ReturnUDPoint(vertices[1]);
+         tedge.f2.vertices[1].normal   = ReturnUDNormal(vertices[1]);
+         tedge.f2.vertices[2].position = ReturnUDPoint(vertices[2]);
+         tedge.f2.vertices[2].normal   = ReturnUDNormal(vertices[2]);
+         tedge.f2.wspace = World;
+
+         ConstructEdgeApatches(tedge);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 6
+a6 6
+/****************************************************************/
+/* Module: AFitter.c                                            */
+/* $Date: 1998/11/30 00:31:19 $                                 */
+/* $Revision: 1.1 $                                             */
+/* $Source: $ */
+/****************************************************************/
+d23 1
+d25 2
+a30 15
+/* Table of available options -- register new options here */
+/* For full details on how to add options, see the file    */
+/* commandline.h.                                          */
+Option Options[] = {
+/*  Name     Handler     #args   helpstring  */
+    "h",     Usage,      0,      ": Print available options.",
+
+/*  Do not delete the next line */
+    NULL,    NULL,       0,      NULL,      NULL
+  };
+
+
+/* Global variables go here */
+char *Banner  = "AFitter, Version 1";
+char *UsageString = "AFitter [options] < mesh";
+d32 7
+a46 3
+   Point p;
+   Normal n;
+   Scalar x,y,z;
+d53 2
+a54 1
+   World = SCreate( "world", 3);
+d58 1
+d67 9
+a75 21
+      printf("(TriangulationFace .\n");
+      printf("   (name . \"%s\")\n", ReturnName(thisFace));
+      p = ReturnUDPoint(vertices[0]);
+      PCoords(p, StdFrame(World), &x, &y, &z);
+      printf("   (vertex1 . (pos . [%g, %g, %g])\n", x,y,z);
+      n = ReturnUDNormal(vertices[0]);
+      NCoords(n, StdFrame(World), &x, &y, &z);
+      printf("              (norm . [%g, %g, %g]))\n", x,y,z);
+      p = ReturnUDPoint(vertices[1]);
+      PCoords(p, StdFrame(World), &x, &y, &z);
+      printf("   (vertex2 . (pos . [%g, %g, %g])\n", x,y,z);
+      n = ReturnUDNormal(vertices[1]);
+      NCoords(n, StdFrame(World), &x, &y, &z);
+      printf("              (norm . [%g, %g, %g]))\n", x,y,z);
+      p = ReturnUDPoint(vertices[2]);
+      PCoords(p, StdFrame(World), &x, &y, &z);
+      printf("   (vertex3 . (pos . [%g, %g, %g])\n", x,y,z);
+      n = ReturnUDNormal(vertices[2]);
+      NCoords(n, StdFrame(World), &x, &y, &z);
+      printf("              (norm . [%g, %g, %g]))\n", x,y,z);
+      printf("\)\;\n");
+d79 1
+d85 5
+a89 13
+         printf("(TriangulationEdge .\n");
+         p = ReturnUDPoint(vertices[0]);
+         PCoords(p, StdFrame(World), &x, &y, &z);
+         printf("   (vertex1 . (pos . [%g, %g, %g])\n", x,y,z);
+         n = ReturnUDNormal(vertices[0]);
+         NCoords(n, StdFrame(World), &x, &y, &z);
+         printf("              (norm . [%g, %g, %g]))\n", x,y,z);
+         p = ReturnUDPoint(vertices[1]);
+         PCoords(p, StdFrame(World), &x, &y, &z);
+         printf("   (vertex2 . (pos . [%g, %g, %g])\n", x,y,z);
+         n = ReturnUDNormal(vertices[1]);
+         NCoords(n, StdFrame(World), &x, &y, &z);
+         printf("              (norm . [%g, %g, %g]))\n", x,y,z);
+d100 9
+a108 21
+         printf("   (face1 .\n");
+         printf("      (name . \"%s\")\n", ReturnName(f1));
+         p = ReturnUDPoint(vertices[0]);
+         PCoords(p, StdFrame(World), &x, &y, &z);
+         printf("      (vertex1 . (pos . [%g, %g, %g])\n", x,y,z);
+         n = ReturnUDNormal(vertices[0]);
+         NCoords(n, StdFrame(World), &x, &y, &z);
+         printf("                 (norm . [%g, %g, %g]))\n", x,y,z);
+         p = ReturnUDPoint(vertices[1]);
+         PCoords(p, StdFrame(World), &x, &y, &z);
+         printf("      (vertex2 . (pos . [%g, %g, %g])\n", x,y,z);
+         n = ReturnUDNormal(vertices[1]);
+         NCoords(n, StdFrame(World), &x, &y, &z);
+         printf("                 (norm . [%g, %g, %g]))\n", x,y,z);
+         p = ReturnUDPoint(vertices[2]);
+         PCoords(p, StdFrame(World), &x, &y, &z);
+         printf("      (vertex3 . (pos . [%g, %g, %g])\n", x,y,z);
+         n = ReturnUDNormal(vertices[2]);
+         NCoords(n, StdFrame(World), &x, &y, &z);
+         printf("                 (norm . [%g, %g, %g]))\n", x,y,z);
+         printf("   \)\n");
+d117 10
+a126 22
+         printf("   (face2 .\n");
+         printf("      (name . \"%s\")\n", ReturnName(f2));
+         p = ReturnUDPoint(vertices[0]);
+         PCoords(p, StdFrame(World), &x, &y, &z);
+         printf("      (vertex1 . (pos . [%g, %g, %g])\n", x,y,z);
+         n = ReturnUDNormal(vertices[0]);
+         NCoords(n, StdFrame(World), &x, &y, &z);
+         printf("                 (norm . [%g, %g, %g]))\n", x,y,z);
+         p = ReturnUDPoint(vertices[1]);
+         PCoords(p, StdFrame(World), &x, &y, &z);
+         printf("      (vertex2 . (pos . [%g, %g, %g])\n", x,y,z);
+         n = ReturnUDNormal(vertices[1]);
+         NCoords(n, StdFrame(World), &x, &y, &z);
+         printf("                 (norm . [%g, %g, %g]))\n", x,y,z);
+         p = ReturnUDPoint(vertices[2]);
+         PCoords(p, StdFrame(World), &x, &y, &z);
+         printf("      (vertex3 . (pos . [%g, %g, %g])\n", x,y,z);
+         n = ReturnUDNormal(vertices[2]);
+         NCoords(n, StdFrame(World), &x, &y, &z);
+         printf("                 (norm . [%g, %g, %g]))\n", x,y,z);
+         printf("   \)\n");
+         printf("\)\;\n");
+d131 56
+@

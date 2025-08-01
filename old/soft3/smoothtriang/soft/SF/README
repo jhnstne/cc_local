@@ -1,0 +1,43 @@
+This is a descendent of a surface fitting pipeline developed
+at the University of Washington.  The original pipeline was
+developed to test triangular interpolants of parametric
+scattered data, and was written in K&R C.
+
+I have since ported the software to ANSI C, and changed to
+the gcc compiler, which seems to work better with lex/yacc
+code than the native Sun compiler.
+
+The current version compiles on Suns.  It may compile on SGI's,
+but I haven't tested it there.  In the last port, I reduced
+and reorganized the software a bit; if you used an earlier
+version and can't find your favorite program, send me email
+and I'll see what I can do.
+
+To create the software, go to the src directory and type
+	make install
+All the executables will be placed in the bin directory.
+
+The basic idea of the package is to start with a mesh, and
+run a data fitting program on the mesh.  The data fitting
+program will produce either Bezier patches, triangles, or
+something else.  If the output is other than triangles, it
+should then be passed to Tess (or perhaps another program)
+for tesselation into triangles.  A material should be
+added to the triangles, and the resulting triangle stream
+should be converted to a form that your renderer can understand
+(you'll have to do this last step).
+
+Between stages of the pipeline, data is passed as 'dstruct's
+(dynamic structures).  The dstructs look similar to Lisp code;
+it is a verbose format that has the advantage of flexibility.
+
+
+The following is a sample run:
+	Fitter0 < octa.m | Tess -s 1 > octa.ds
+
+In the doc directory, you will find a copy of an SPIE paper that
+describes our software.
+
+Stephen Mann
+smann@cgl.uwaterloo.ca
+November 24, 1999

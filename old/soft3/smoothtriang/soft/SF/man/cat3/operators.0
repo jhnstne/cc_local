@@ -1,0 +1,264 @@
+
+
+
+C Library Functions                                  operators(3)
+
+
+
+NNNNAAAAMMMMEEEE
+     Operators - A set of routines to create mesh objects
+
+SSSSYYYYNNNNTTTTAAAAXXXX
+     ####iiiinnnncccclllluuuuddddeeee mmmmeeeesssshhhh....hhhh
+
+DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
+     _O_p_e_r_a_t_o_r_s are routines designed to simplify the creation  of
+     mesh objects.  The operators don't create _i_n_t_e_r_n_a_l or _e_x_t_e_r_-
+     _n_a_l data fields.
+
+
+RRRROOOOUUUUTTTTIIIINNNNEEEESSSS
+     VVVVeeeerrrrtttteeeexxxx ****AAAAddddddddVVVVeeeerrrrtttteeeexxxxEEEEddddggggeeee(((( mmmm,,,, eeee ))))
+     MMMMeeeesssshhhh ****mmmm;;;;
+     EEEEddddggggeeee ****eeee;;;;
+
+     Creates and returns vertex which splits edge e.   Works  for
+     half edges also.  This operator always succeeds.
+
+
+     VVVVeeeerrrrtttteeeexxxx**** CCCCeeeennnntttteeeerrrrSSSSpppplllliiiittttFFFFaaaacccceeee((((mmmm,,,, ffff))))
+     MMMMeeeesssshhhh**** mmmm;;;;
+     FFFFaaaacccceeee**** ffff;;;;
+
+     Split the face f by introducing a new vertex at  the  center
+     of  the  face  and  forming triangules from the edges of the
+     orignal face joined to the center vertex.  Thus, an n  sided
+     face  will  be split into n triangles.  The center vertex is
+     returned.
+
+
+     FFFFaaaacccceeee ****CCCCrrrreeeeaaaatttteeeeFFFFaaaacccceeee(((( mmmm ))))
+     MMMMeeeesssshhhh ****mmmm;;;;
+
+     Creates a new face, 3 half edges, 3 vertices.   Sets  inter-
+     nalData,  externalData,  name pointers to NULL.  Returns the
+     face created.
+
+
+     FFFFaaaacccceeee ****CCCCrrrreeeeaaaatttteeeeOOOOppppppppoooossssiiiinnnnggggTTTTrrrriiiiFFFFaaaacccceeee(((( mmmm,,,, eeee1111,,,, eeee2222 ))))
+     MMMMeeeesssshhhh ****mmmm;;;;
+     EEEEddddggggeeee ****eeee1111;;;;
+     EEEEddddggggeeee ****eeee2222;;;;
+
+     Create a new triangular face opposing the consecutive  boun-
+     dary  edge e1 and e2.  If e2 is NULL, the face merely bounds
+     e1 and a newly created vertex.  The newly  created  face  is
+     returned.  If e1 or e2 aren't boundary edges, or if the head
+     of e1 isn't the tail of e2, then NULL is returned.
+
+     MMMMeeeesssshhhh**** mmmm;;;;
+
+
+
+SunOS 5.6                 Last change:                          1
+
+
+
+
+
+
+C Library Functions                                  operators(3)
+
+
+
+     FFFFaaaacccceeee**** ffff;;;;
+
+     Create a new vertex in mesh m.
+
+
+     BBBBOOOOOOOOLLLLEEEEAAAANNNN DDDDeeeessssttttrrrrooooyyyyFFFFaaaacccceeee(((( mmmm,,,, ffff ))))
+     MMMMeeeesssshhhh ****mmmm;;;;
+     FFFFaaaacccceeee ****ffff;;;;
+
+     Removes a face from existence.  Any boundary vertex of  such
+     a  face  must  also  be  along  a boundary edge of the face.
+     Returns TRUE if face remove, FALSE if face not removed.
+
+
+     BBBBOOOOOOOOLLLLEEEEAAAANNNN DDDDeeeessssttttrrrrooooyyyyVVVVeeeerrrrtttteeeexxxx(((( mmmm,,,, vvvv ))))
+     MMMMeeeesssshhhh ****mmmm;;;;
+     VVVVeeeerrrrtttteeeexxxx ****vvvv;;;;
+
+     Remove the vertex v from the mesh.  v can not be removed  if
+     any edges point to it.
+
+
+     iiiinnnntttt FFFFiiiixxxxVVVVeeeerrrrttttiiiicccceeeessss((((mmmm,,,, ffff))))
+     MMMMeeeesssshhhh**** mmmm;;;;
+     vvvvooooiiiidddd ((((****ffff))))((((mmmm,,,, vvvvoooo,,,, vvvvnnnn))));;;;
+
+     A mesh that is read from a file can  contain  vertices  that
+     have  more than one boundary.  Such a mesh is invalid.  This
+     procedure finds all such vertices and splits them into  mul-
+     tiple  vertices, each having one boundary.  At each new ver-
+     tex, the user supplied function, f, is called with  the  old
+     and  new  vertices  as  arguments.   The return value is the
+     number of vertices created.
+
+
+     BBBBOOOOOOOOLLLLEEEEAAAANNNN JJJJooooiiiinnnnHHHHaaaallllffffEEEEddddggggeeee(((( mmmm,,,, hhhheeee1111,,,, hhhheeee2222 ))))
+     MMMMeeeesssshhhh ****mmmm;;;;
+     EEEEddddggggeeee ****hhhheeee1111,,,, ****hhhheeee2222;;;;
+
+     Joins two half edges;  they  must  point  to  two  different
+     faces.   Uses the first edge's vertices; discards the second
+     edge's vertices if they are not the same as the first.
+
+     WARNING: as described/implemented, this may destroy the mesh
+     property.
+
+
+     BBBBOOOOOOOOLLLLEEEEAAAANNNN JJJJooooiiiinnnnFFFFaaaacccceeeessss(((( mmmm,,,, ffff1111,,,, ffff2222,,,, ffffllllgggg ))))
+     MMMMeeeesssshhhh ****mmmm;;;;
+     FFFFaaaacccceeee ****ffff1111;;;;
+     FFFFaaaacccceeee ****ffff2222;;;;
+
+
+
+
+SunOS 5.6                 Last change:                          2
+
+
+
+
+
+
+C Library Functions                                  operators(3)
+
+
+
+     Removes face f2 by removing edge e between f1  and  f2.   f1
+     and  f2  must be neighbors.  Will not create an f1 such that
+     there is a duplicate vertex in a path of f1's edge.  If  flg
+     is  non-zero, the vertices that bounded e will be removed if
+     they only have 2 neighbors.
+
+     NOTE: In the current implementation, flg must be zero.
+
+
+     BBBBOOOOOOOOLLLLEEEEAAAANNNN JJJJooooiiiinnnnVVVVeeeerrrrttttiiiicccceeeessss(((( mmmm,,,, vvvv1111,,,, vvvv2222,,,, ffffllllgggg ))))
+     MMMMeeeesssshhhh ****mmmm;;;;
+     VVVVeeeerrrrtttteeeexxxx ****vvvv1111;;;;
+     VVVVeeeerrrrtttteeeexxxx ****vvvv2222;;;;
+
+     Remove vertex v2 by removing the edge  between  v1  and  v2.
+     The  faces  neighboring  the  edge  will have one less edge.
+     This may result in faces having only two edges.  Such  faces
+     will be removed if flg is non-zero.  An edge can not be col-
+     lapsed if both v1 and v2 are boundary vertices.
+
+     Certain vertices can not be joined.  In particular, two ver-
+     tices on a 3 cycle can not be joined.
+
+     TRUE is returned if the join was  performed,  FALSE  if  the
+     join was not performed.
+
+
+     EEEEddddggggeeee ****RRRReeeemmmmoooovvvveeeeVVVVeeeerrrrtttteeeexxxxEEEEddddggggeeee(((( mmmm,,,, vvvv ))))
+     MMMMeeeesssshhhh ****mmmm;;;;
+     VVVVeeeerrrrtttteeeexxxx ****vvvv;;;;
+
+     Removes vertex v from the mesh.  v must have degree 2; faces
+     around  v  must have > 3 vertices.  Joins the edges incident
+     on v into one edge.  Returns the  resulting  edge,  NULL  if
+     could not remove v.
+
+
+     EEEEddddggggeeee ****SSSSpppplllliiiittttEEEEddddggggeeee(((( mmmm,,,, eeee1111 ))))
+     MMMMeeeesssshhhh ****mmmm;;;;
+     EEEEddddggggeeee ****eeee1111;;;;
+
+     Splits edge into two distinct half edges; if a vertex of the
+     edge is already on a boundary, then the vertex is split into
+     two vertices, one for each half edge.  Returns a pointer  to
+     the previous sym edge of the input edge, NULL if the edge is
+     not a full edge.
+
+
+     FFFFaaaacccceeee ****SSSSpppplllliiiittttFFFFaaaacccceeee(((( mmmm,,,, ffff1111,,,, vvvv1111,,,, vvvv2222 ))))
+     MMMMeeeesssshhhh ****mmmm;;;;
+     FFFFaaaacccceeee ****ffff1111;;;;
+     VVVVeeeerrrrtttteeeexxxx ****vvvv1111,,,, ****vvvv2222;;;;
+
+
+
+SunOS 5.6                 Last change:                          3
+
+
+
+
+
+
+C Library Functions                                  operators(3)
+
+
+
+     Splits f1 by creating edge between vertices v1 & v2, creates
+     new  face.   v1  & v2 must lie on the boundary of f1 and can
+     not already be connected.  Returns new face,  NULL   if  not
+     created.
+
+
+AAAAUUUUTTTTHHHHOOOORRRRSSSS
+     Richard Schulte, Stephen Mann
+
+
+DDDDAAAATTTTEEEE
+     October 18, 1991
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SunOS 5.6                 Last change:                          4
+
+
+

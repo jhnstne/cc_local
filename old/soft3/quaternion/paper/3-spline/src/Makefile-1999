@@ -1,0 +1,76 @@
+#
+# File: Orientation/S3curve/soft/Makefile
+# Author: J.K. Johnstone
+# Last Modified: 7 Jan 1999
+
+ARCH = SGI
+
+HOME      = /usr/people/jj
+CLASSBASE = ${HOME}/Cbin
+BINBASE   = ${HOME}/cbin
+DEST      = ${HOME}/Orientation/bin
+SHELL     = /bin/csh
+CC        = cc
+LDOPTIONS_GLUT = -cckr -float -I${BINBASE}
+LOCAL_LIBRARIES_GLUT = -lglut -lGLU -lGL -lXmu -lXext -lX11 -lm
+LDFLAGS = -cckr -float -I${CLASSBASE} 
+# -fullwarn
+
+PROGRAMS = s3spline
+all: ${PROGRAMS}
+
+qspl: qspl.c++ qsplsupport.o
+	${CC} -o qspl qspl.c++ qsplsupport.o \
+	${CLASSBASE}/Vector.o ${CLASSBASE}/Miscellany.o \
+	${CLASSBASE}/Curve.o ${CLASSBASE}/BsplineCurve.o \
+	${CLASSBASE}/BezierCurve.o ${CLASSBASE}/RatBezierCurve.o \
+	${LDFLAGS} ${LOCAL_LIBRARIES_GLUT}
+	
+qsplsupport.o: qsplsupport.c++
+	${CC} -O -c qsplsupport.c++ -I${CLASSBASE} -I${GLUT}
+
+qspline: qspline.c
+	${CC} -o qspline qspline.c \
+	${BINBASE}/Bez.o ${BINBASE}/Bez4d.o ${BINBASE}/RatBez.o \
+	${BINBASE}/Fit4d.o ${BINBASE}/Fit.o ${BINBASE}/Fit3sphere.o \
+	${BINBASE}/Geom.o ${BINBASE}/Matrix.o ${BINBASE}/Matrix4d.o \
+	${BINBASE}/Misc.o ${BINBASE}/Quality.o \
+	${BINBASE}/Vec.o ${BINBASE}/Vec4d.o \
+	${LOCAL_LIBRARIES_GLUT} \
+	${LDOPTIONS_GLUT}
+	
+s3spline: s3spline.c
+	${CC} -o s3spline s3spline.c \
+	${BINBASE}/Bez.o ${BINBASE}/Bez4d.o ${BINBASE}/RatBez.o \
+	${BINBASE}/Fit4d.o ${BINBASE}/Fit.o ${BINBASE}/Fit3sphere.o \
+	${BINBASE}/Geom.o ${BINBASE}/Matrix.o ${BINBASE}/Matrix4d.o \
+	${BINBASE}/Misc.o ${BINBASE}/Quality.o \
+	${BINBASE}/Vec.o ${BINBASE}/Vec4d.o \
+	${LOCAL_LIBRARIES_GLUT} ${LDOPTIONS_GLUT}
+	
+ravani: ravani.c
+	${CC} -o ravani ravani.c \
+	${BINBASE}/Bez.o ${BINBASE}/Bez4d.o ${BINBASE}/RatBez.o \
+	${BINBASE}/Fit4d.o ${BINBASE}/Fit.o ${BINBASE}/Fit3sphere.o \
+	${BINBASE}/Geom.o ${BINBASE}/Matrix.o ${BINBASE}/Matrix4d.o \
+	${BINBASE}/Misc.o ${BINBASE}/Quality.o \
+	${BINBASE}/Vec.o ${BINBASE}/Vec4d.o \
+	${LOCAL_LIBRARIES_GLUT} \
+	${LDOPTIONS_GLUT}
+
+texture: texture.c
+	${CC} -o texture texture.c \
+	${BINBASE}/Vec.o ${BINBASE}/Misc.o \
+	${LOCAL_LIBRARIES_GLUT} ${LDOPTIONS_GLUT}
+
+install : ${PROGRAMS}
+	mv ${PROGRAMS} ${DEST}
+	(cd ${DEST}; chmod a+rx ${PROGRAMS})
+	ls -l ${DEST}
+
+clean :
+	rm -f *.o *~ a.out core
+	ls -l
+
+touch :
+	touch qspline.c++

@@ -1,0 +1,755 @@
+\documentstyle[12pt]{article}
+
+\newif\ifFull
+\Fullfalse
+
+\makeatletter
+\def\@maketitle{\newpage
+ \null
+ \vskip 2em                   % Vertical space above title.
+ \begin{center}
+       {\Large\bf \@title \par}  % Title set in \Large size. 
+       \vskip .5em               % Vertical space after title.
+       {\lineskip .5em           %  each author set in a tabular environment
+        \begin{tabular}[t]{c}\@author 
+        \end{tabular}\par}                   
+  \end{center}
+ \par
+ \vskip .5em}                 % Vertical space after author
+\makeatother
+
+% default values are 
+% \parskip=0pt plus1pt
+% \parindent=20pt
+
+\newcommand{\SingleSpace}{\edef\baselinestretch{0.9}\Large\normalsize}
+\newcommand{\DoubleSpace}{\edef\baselinestretch{1.4}\Large\normalsize}
+\newcommand{\Comment}[1]{\relax}  % makes a "comment" (not expanded)
+\newcommand{\Heading}[1]{\par\noindent{\bf#1}\nobreak}
+\newcommand{\Tail}[1]{\nobreak\par\noindent{\bf#1}}
+\newcommand{\QED}{\vrule height 1.4ex width 1.0ex depth -.1ex\ \vspace{.3in}} % square box
+\newcommand{\arc}[1]{\mbox{$\stackrel{\frown}{#1}$}}
+\newcommand{\lyne}[1]{\mbox{$\stackrel{\leftrightarrow}{#1}$}}
+\newcommand{\ray}[1]{\mbox{$\vec{#1}$}}          
+\newcommand{\seg}[1]{\mbox{$\overline{#1}$}}
+\newcommand{\tab}{\hspace*{.2in}}
+\newcommand{\se}{\mbox{$_{\epsilon}$}}  % subscript epsilon
+\newcommand{\ie}{\mbox{i.e.}}
+\newcommand{\eg}{\mbox{e.\ g.\ }}
+\newcommand{\figg}[3]{\begin{figure}[htbp]\vspace{#3}\caption{#2}\label{#1}\end{figure}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\prf}{\vspace{-.3in}\noindent{{\bf Proof}:\ \ \ }}
+\newcommand{\choice}[2]{\mbox{\footnotesize{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}      
+\newcommand{\scriptchoice}[2]{\mbox{\scriptsize{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}
+\newcommand{\tinychoice}[2]{\mbox{\tiny{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}
+\newcommand{\ddt}{\frac{\partial}{\partial t}}
+\newcommand{\Sn}[1]{\mbox{{\bf S}$^{#1}$}}
+\newcommand{\calP}[1]{\mbox{{\bf {\cal P}}$^{#1}$}}
+
+\newtheorem{rmk}{Remark}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{conjecture}{Conjecture}[section]
+\newtheorem{claim}{Claim}[section]
+\newtheorem{notation}{Notation}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{defn2}{Definition}[section]
+
+% \font\timesr10
+% \newfont{\timesroman}{timesr10}
+% \timesroman
+
+\SingleSpace
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{-.25in}	% technically should be 0pt for 1in
+\setlength{\headsep}{0pt}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+\setlength{\columnsep}{5mm}		% width of gutter between columns
+
+% -----------------------------------------------------------------------------
+
+\title{Rational quaternion curves}
+% Rational interpolation on the 3-sphere
+\author{J.K. Johnstone \and J.P. Williams}
+% ignore as much as possible the context of `pt on 3-sphere = unit quaternion = orientation'
+
+% History: begun 7/7/97.
+
+\begin{document}
+\maketitle
+\tableofcontents
+\clearpage
+\parskip=.2in
+\parindent=0pt
+\DoubleSpace
+
+\begin{abstract}
+The design of quaternion curves (or interpolating curves on the 3-sphere),
+an important problem in motion control for animation and robotics,
+has been solved in the literature using nonrational curves
+or rational curves limited in degree and continuity.
+In this paper, we develop a method for the design of quaternion
+curves that are rational of arbitrary degree and continuity.
+Unlike previous methods, which require the implementation of a new curve
+system, the proposed method relies on the existing machinery of 
+rational interpolating curves.
+
+The major challenge of the new approach is the design of a rational
+map from 4-space to the 3-sphere.
+We examine several maps to the 3-sphere, including stereographic projection
+and Hopf maps, and compare their quality with the chosen map,
+a map motivated by Euler's 4-Squares Theorem.
+
+The curves constructed by the new method are shown to be superior
+to those constructed by other rational maps to the 3-sphere,
+and superior or significantly more efficient than rational or 
+nonrational curves designed by earlier methods.
+\end{abstract}
+
+Keywords: curves on surfaces, interpolation, 3-sphere,
+	  orientation control, animation.
+
+\clearpage
+
+% ----------------------------------------------------------------------------
+
+\section{Introduction}
+\label{sec:intro}
+
+Quaternion curves (curves on $S^3$) are widely used for
+the interpolation of keyframe orientations.
+Much previous literature, notably Shoemake \cite{}, Barr et al \cite{},
+Kim et al \cite{}, and Ramamoorthi and Barr \cite{},
+has developed nonrational curves on $S^3$.
+Because of the computational efficiency of rational curves
+and the fact that rational curves (such as NURBS) are the standard
+curve in existing graphics and modeling systems,
+the development of rational curves on $S^3$ has certain strong attractions.
+Wang \cite{} and Nielson \cite{} constructed rational curves 
+of limited degree and continuity.
+In this paper, we develop a method for the design of interpolating
+curves on $S^3$ (quaternion curves)
+that are rational of arbitrary degree and continuity.
+
+Suppose that $f:\Re^4 \rightarrow S^3$ is a rational map to the 3-sphere.
+A rational curve on \Sn{3} interpolating the points 
+$p_i$, $i=1,\ldots,m$ can be built as follows.
+If $C(t)$ is a rational curve interpolating $f^{-1}(p_i)$,
+then $f(C(t))$ is a rational curve on \Sn{3} interpolating $p_i$.
+
+The strength of this approach is that, unlike the problem 
+of design of rational interpolating curves constrained to surfaces,
+the design of rational interpolating curves in $\Re^n$ is well understood.
+In the proposed method, in effect the constraint to the 3-sphere is
+enforced by the rational map $f$.
+
+The above approach reduces the problem of rational curve design on the 3-sphere
+to the design of rational maps to the 3-sphere.
+These maps are the focus of most of the rest of this paper,
+which is structured as follows.
+The previous literature is presented in more depth in Section --.
+The obvious choice for a map to the 3-sphere, stereographic projection,
+is explored in Section --.
+In Section --, we develop a superior map to the 3-sphere,
+and compare its quality for 3-sphere curve design with stereographic projection
+in Section --.
+Other maps to the 3-sphere, Hopf maps, are considered in Section --.
+Poles of the superior map to the 3-sphere are introduced in Section --,
+as well as their undesirable effect on 3-sphere curves
+and a method for their avoidance.
+Several examples of 3-sphere curves generated by the proposed method
+are presented in Section --.
+In Section --, we compare our curves to the nonrational 
+slerped curves of Shoemake \cite{},
+the nonrational optimized curves of Barr et al \cite{} 
+and Ramamoorthi and Barr \cite{},
+and the rational biarc curves of Wang \cite{}.
+Examples of applications that will benefit from rational 3-sphere curves
+are given in Section --.
+We conclude with ideas for future work in Section --.
+
+% ----------------------------------------------------------------------------
+
+\section{Basic definitions}
+
+\begin{defn2}
+{\rm 
+A {\em rational polynomial} is a quotient of polynomials.
+A {\em rational curve} is a parametric curve $C(t) = (x_1(t),\ldots,x_n(t)$ 
+whose components $x_i(t)$ are all rational polynomials.
+A {\em rational map} $h:\Re^n \rightarrow \Re^m$ is a map
+$h(x_1,\ldots,x_n) = (H_1 (x_1,\ldots,x_n),\ldots,H_m (x_1,\ldots,x_n))$
+whose components $H_i$ are all rational polynomials in $x_1,\ldots,x_n$.
+}
+\end{defn2}
+
+Since a rational curve can always be expressed using a common denominator,
+it can be interpreted as a polynomial curve in projective space:
+\[ 
+  (\frac{x_1(t)}{x_{n+1}(t)}, \frac{x_2(t)}{x_{n+1}(t)}, \ldots, 
+   \frac{x_n(t)}{x_{n+1}(t)})  \rightarrow (x_1(t),\ldots,x_{n+1}(t))
+\]
+This notational convenience will be used throughout the paper,
+for rational curves and for points (see (\ref{eq:M})).
+
+\begin{notation}
+{\rm 
+Projective $n$-space (over the field of real numbers) will be denoted \calP{n}.
+}
+\end{notation}
+
+\begin{defn2}
+{\rm
+The unit {\em $n$-sphere} $\Sn{n} \subset \Re^{n+1}$ 
+is the unit sphere in $\Re^{n+1}$, $x_1^2 + \cdots + x_{n+1}^2 = 1$.
+\Sn{1} is the unit circle, \Sn{2} is the unit sphere, and \Sn{3} is the
+unit hypersphere in 4-space.
+}
+\end{defn2}
+
+% ----------------------------------------------------------------------------
+
+\section{Previous work}
+
+Problems with optimization (give system to optimize) and slerping.
+
+Disadvantages of unconstrained interpolation: indirect definition of curve;
+e.g., more difficult to control secondary effects such as velocity,
+since this must be done through the mirror of the map
+(like da Vinci's trick of writing so that script is readable indirectly in a mirror,
+not directly.)
+
+Wang's approach is basically using our approach and the stereographic projection map.
+He uses a different method to avoid the pole of this map
+ahan we do (see Section~\ref{}).
+
+curves on quadrics: especially Dietz et al
+
+trimmed surfaces: idea of building curve in parameter plane
+is similar to building curve in stereographic projection hyperplane,
+since hyperplane is really parameter plane as standard parameterization
+of sphere uses stereographic projection `chart' (see Thorpe for chart).
+
+% ----------------------------------------------------------------------------
+
+\section{Stereographic projection}
+
+Stereographic projection is a map from \Sn{n} to $\Re^n$,
+embedded in $\Re^{n+1}$ as a hyperplane.
+A point is mapped to its projection from a center of projection $q$ on \Sn{n}
+to a hyperplane through the origin parallel to q's tangent plane (Figure~\ref{fig:stereo}).
+Conventionally, $q$ is the north pole $(0,\ldots,0,1)$
+and consequently the hyperplane is $x_{n+1}=0$.
+Stereographic projection $\sigma_q$ with pole $q$ and hyperplane $H$ is
+a map
+\[	\sigma_q : \Sn{n} - \{ q \} \rightarrow H \equiv \Re^n	\]
+
+\begin{figure}
+\vspace{2in}
+\caption{Stereographic projection}
+\label{fig:stereo}
+\end{figure}
+
+The inverse map to stereographic projection is a map onto the sphere
+\[	\varphi_H : H \rightarrow \Sn{n} - \{ q \}	\]
+Both maps are rational.
+
+\begin{lemma}
+Let $q$ be $(0,\ldots,0,1)$ and $H$ the hyperplane $x_{n+1}=0$.
+\[
+	\sigma_q (x_1,\ldots,x_{n+1}) = 
+	\frac{1}{1-x_{n+1}} (x_1, \ldots, x_n, 0)
+\]
+\[
+	\varphi_{x_{n+1}=0} (x_1,\ldots,x_n,0) = 
+	\frac{1}{x_1^2 + \cdots + x_n^2 + 1} 
+	(2x_1, \ldots, 2x_n, x_1^2 + \cdots + x_n^2 - 1)
+\]	% see thorpe79, p. 125 for latter formula
+Let $q$ be $(1,0,\ldots,0)$ and $H$ the hyperplane $x_1=0$.
+\[
+	\varphi_{x_1=0} (0,x_1,\ldots,x_n) =
+	\frac{1}{x_1^2 + \cdots + x_n^2 + 1} 
+	(x_1^2 + \cdots + x_n^2 - 1, 2x_1, \ldots, 2x_n)
+\]
+\end{lemma}
+\prf
+The line through $p = (x_1,\ldots,x_{n+1})$ and $q$, $tp + (1-t)q$,
+intersects $H$ at $t = \frac{1}{1 - x_{n+1}}$.
+The line through $(r,0)$ and $q$, $t(r,0) + (1-t)q$,
+intersects \Sn{n} at $t=0,\frac{2}{\|r\|^2 + 1}$.
+$\varphi_{x_1=0}$ can be derived from $\varphi_{x_{n+1}=0}$
+by permutation of coordinates.
+\QED
+
+The map $\varphi_H$ can be used to generate rational curves on $S^3$,
+using the approach of Section~\ref{sec:intro}.
+(See Section~\ref{} for examples of its use.)
+Is there another map to $S^3$ that generates better curves?
+It turns out that there is.
+We develop this improved map in the following section.
+
+% ----------------------------------------------------------------------------
+
+\section{An Eulerian map to the 3-sphere}
+
+Let us return to first principles.
+Consider a rational map $f : \Re^4 \rightarrow \Sn{3}$.
+By the definition of rational maps, $f$ can be expressed as follows:
+\[	f(x_1,x_2,x_3,x_4) = (\frac{g(x_1,x_2,x_3,x_4)}{k(x_1,x_2,x_3,x_4)}, 
+			      \frac{h(x_1,x_2,x_3,x_4)}{k(x_1,x_2,x_3,x_4)},
+			      \frac{i(x_1,x_2,x_3,x_4)}{k(x_1,x_2,x_3,x_4)},
+			      \frac{j(x_1,x_2,x_3,x_4)}{k(x_1,x_2,x_3,x_4)}) \]
+where $g,h,i,j,k$ are polynomials.
+Since $f(x_1,x_2,x_3,x_4) \in \Sn{3}$, $\| f(x_1,x_2,x_3,x_4) \| = 1$ or
+\begin{equation}
+\label{eq:quint}
+	g^2 + h^2 + j^2 + k^2 = l^2	
+\end{equation}
+The nature of the constraint (\ref{eq:quint}) suggests a number-theoretical 
+approach to the construction of a map to the 3-sphere.\footnote{Since
+	(\ref{eq:quint}) is a Pythagorean quintuple, one may think
+	that the theory of Pythagorean tuples can be used.
+	However, although there is a construction for all Pythagorean 
+	triples \cite{kubota} and quadruples \cite{dietz}, 
+	we are not aware of any such result for Pythagorean quintuples.}
+The sum of four squares has been studied extensively in number theory,
+motivated by the search for a proof that every natural number is the 
+sum of the squares of four natural numbers(?) \cite{dickson},
+a result originally conjectured by Fermat in 1659 and finally proved
+by Lagrange in 1770.
+An important result from this literature is Euler's Four-Squares 
+Theorem \cite{dickson52}.
+
+\begin{theorem}[Euler, 1748]		% May 4, 1748 for general form of theorem
+% {dickson52, p. 277,530}; {ebbinghaus90, Numbers, p. 209} in slightly different form
+% p. 210, Ebbinghaus for any commutative ring
+% {dickson52, p. 318} for specialized form
+% Euler proved 4 squares theorem in attempting to prove that 
+% 	every natural # is sum of 4 natural #'s,
+%	a result conjectured by Fermat (1659) and later proved by Lagrange (1770)
+% specialized formula later independently established by Aida \cite{dickson52}. 
+% 	(c. 1810) 
+
+\begin{equation}
+\label{eq:euler}
+(a^2 + b^2 + c^2 + d^2)^2 = 
+(a^2 + b^2 + c^2 - d^2)^2 + (2ad)^2 + (2bd)^2 + (2cd)^2
+\end{equation}
+where $a,b,c,d$ are elements of any commutative ring.
+\end{theorem}
+\prf
+This is actually a special case of Euler's Four Squares Theorem,
+which states that 
+\[
+(a^2 + b^2 + c^2 + d^2) (a'^2 + b'^2 + c'^2 + d'^2) = \hfill
+\]
+\[
+(aa' + bb' + cc' + dd')^2 +
+(ab' - ba' \pm cd' \mp dc')^2 +
+(ac' \mp bd' - ca' \pm db')^2 +
+(ad' \pm bc' \mp cb' - da')^2
+\]
+where $a,b,c,d,a',b',c',d'$ are elements of any commutative ring 
+(such as the integers, the rationals, the reals, or 
+polynomials over the integers, rationals, or reals).
+Let $a'=-a, b'=b, c'=c, d'=d$.
+\QED
+
+Interpreting this theorem in light of (\ref{eq:quint}),
+it reveals a rational map to \Sn{3} (which we shall rename
+$M$ to distinguish from the generic map $f$ to \Sn{3}):
+
+\[	g(x_1,x_2,x_3,x_4) = x_1^2 + x_2^2 + x_3^2 - x_4^2	\]
+\[	h(x_1,x_2,x_3,x_4) = 2x_1x_4	\]
+\[	i(x_1,x_2,x_3,x_4) = 2x_2x_4	\]
+\[	j(x_1,x_2,x_3,x_4) = 2x_3x_4	\]
+\[	k(x_1,x_2,x_3,x_4) = x_1^2 + x_2^2 + x_3^2 + x_4^2	\]
+Consequently,
+\begin{equation}
+\label{eq:M}
+	M(x_1,x_2,x_3,x_4) = \frac{1}{x_1^2 + x_2^2 + x_3^2 + x_4^2}
+			     (x_1^2 + x_2^2 + x_3^2 - x_4^2,
+			      2x_1x_4, 2x_2x_4, 2x_3x_4)	
+\end{equation}
+
+$M$ is a new map to \Sn{3}.
+It is undefined at the origin, so $M:\Re^4 - \{0\} \rightarrow \Sn{3}$.
+We will show in Section -- that this new map is
+preferable to the inverse of the stereographic projection map.
+
+Although we have presented the search for rational
+maps to \Sn{3} as just one method of finding rational
+curves on \Sn{3}, we can now establish that these two problems 
+are actually equivalent.
+We have seen that the search for rational maps to \Sn{3} 
+can be reduced to the search for Pythagorean quintuples over
+the ring of polynomials (\ref{eq:quint}).
+The search for quaternion curves can also be reduced
+to the search for Pythagorean quintuples over the ring
+of polynomials.
+
+\begin{defn2}
+{\rm 
+A {\em Pythagorean $n$-tuple} ($n \geq 3$) is an $n$-tuple 
+$(x_1,\ldots,x_n)$ that satisfies\\
+$x_1^2 + \ldots + x_{n-1}^2 = x_{n}^2$.
+If $x_i \in F$, we may refer to a Pythagorean $n$-tuple over $F$.
+}
+\end{defn2}
+
+\begin{lemma}
+A rational curve lies on the 3-sphere if and only if its components
+form a Pythagorean 5-tuple.
+Let $x(t) = (x_1(t),\ldots,x_{n+2}(t)) \subset \Re^{n+1}$
+be a rational curve.
+$x(t) \subset \Sn{n}$ if and only if $(x_1(t),\ldots,x_{n+2}(t))$ is a Pythagorean
+$(n+2)$-tuple over the ring of polynomials $\Re[t]$.
+\end{lemma}
+\prf
+$x(t)$ lies on \Sn{n} if and only if
+$(\frac{x_1(t)}{x_{n+2}(t)})^2 + \ldots 
+	+ (\frac{x_{n+1}(t)}{x_{n+2}(t)})^2 = 1$
+or
+$x_1^2(t) + \ldots + x_{n+1}^2(t) = x_{n+2}^2(t)$.
+\QED
+
+Thus, the general method of this paper,
+expressing a quaternion curve as the image $f(C)$ of a curve $C$
+interpolating $f^{-1}(p_i)$, where $f:\Re^4 \rightarrow \Sn{3}$,
+is basically the only way to build rational quaternion curves:
+any other method can be reduced to our method.
+
+% ----------------------------------------------------------------------------
+
+\section{$M^{-1}$}
+
+Before we go on to analyze the new map, let us develop its inverse $M^{-1}$,
+which is needed in our method of Section~\ref{sec:intro}.
+
+% ----------------------------------------------------------------------------
+
+\section{$M$ and stereographic projection}
+
+The new map $M$ is very similar to the inverse of the stereographic projection map,
+but the differences are important, leading to significant improvements
+in curve design (Section --).
+Consider the inverse stereographic projection map $\varphi_{x_1=0}$ in 4-space
+(with pole $(1,0,0,0)$):
+\[
+	\varphi_{x_1=0} (0,x_1,x_2,x_3) =
+	\frac{(x_1^2 + x_2^2 + x_3^2 - 1, 2x_1,2x_2,2x_3)}
+	     {x_1^2 + x_2^2 + x_3^2 + 1}
+\]
+In projective space after homogenization,
+\[
+	\varphi_{x_1=0} (0,x_1,x_2,x_3,w) =
+	(x_1^2 + x_2^2 + x_3^2 - w^2,
+	 2x_1w,2x_2 w,2x_3 w,
+	x_1^2 + x_2^2 + x_3^2 + w^2)
+\]
+This is identical to $M(x_1,x_2,x_3,w)$.
+However, notice that, in $M$, $w$ is functioning in Euclidean space,
+whereas in $\varphi_{x_1=0}$ it acts in projective space.
+$M$'s abduction into finite Euclidean space of the behaviour of stereographic 
+projection in projective space is critical.
+
+The relationship between the two maps can be made even more clear.
+The map $\nu: (a,b,c,d) \mapsto (0,\frac{a}{d},\frac{b}{d},\frac{c}{d})$
+is a simple affine map, the composition of a scaling, translation, 
+and rotation: $(a,b,c,d) \mapsto (\frac{a}{d},\frac{b}{d},\frac{c}{d},1)
+\mapsto (\frac{a}{d},\frac{b}{d},\frac{c}{d},0)
+\mapsto (0,\frac{a}{d},\frac{b}{d},\frac{c}{d})$.
+It is represented by the
+following matrix:
+\[
+	\left( \begin{array}{ccccc} 
+	0 & 0 & 0 & 1 & 0 \\
+	1 & 0 & 0 & 0 & 0 \\
+	0 & 1 & 0 & 0 & 0 \\
+	0 & 0 & 1 & 0 & 0 \\
+	0 & 0 & 0 & 0 & 1
+	\end{array} \right) 
+	\left( \begin{array}{ccccc} 
+	1 & 0 & 0 & 0 & 0 \\
+	0 & 1 & 0 & 0 & 0 \\
+	0 & 0 & 1 & 0 & 0 \\
+	0 & 0 & 0 & 1 & -1 \\
+	0 & 0 & 0 & 0 & 1 
+	\end{array} \right)
+	\left( \begin{array}{ccccc} 
+	\frac{1}{d} & 0 & 0 & 0 & 0 \\
+	0 & \frac{1}{d} & 0 & 0 & 0 \\
+	0 & 0 & \frac{1}{d} & 0 & 0 \\
+	0 & 0 & 0 & \frac{1}{d} & 0 \\
+	0 & 0 & 0 & 0 & 1
+	\end{array} \right)
+	\left( \begin{array}{c}
+	a \\ b \\ c \\ d \\ 1
+	\end{array} \right)	
+	= \left( \begin{array}{c}
+	0 \\ \frac{a}{d} \\ \frac{b}{d} \\ \frac{c}{d} \\ 1
+	\end{array} \right)
+\]
+\[
+	\left( \begin{array}{ccccc} 
+	0 & 0 & 0 & \frac{1}{d} & -1 \\
+	\frac{1}{d} & 0 & 0 & 0 & 0 \\
+	0 & \frac{1}{d} & 0 & 0 & 0 \\
+	0 & 0 & \frac{1}{d} & 0 & 0 \\
+	0 & 0 & 0 & 0 & 1
+	\end{array} \right)
+	\left( \begin{array}{c}
+	a \\ b \\ c \\ d \\ 1
+	\end{array} \right)
+	= \left( \begin{array}{c}
+	0 \\ \frac{a}{d} \\ \frac{b}{d} \\ \frac{c}{d} \\ 1
+	\end{array} \right)
+\]
+Thus, $M = \varphi_{x_1=0} \cdot \nu$.
+
+\section{Differences with stereographic projection}
+
+\begin{itemize}
+\item
+$M$ maps all of $\Re^4$ to the sphere while stereographic projection
+maps only a hyperplane.
+Thus, interpolation in image space is restricted to a plane in the latter,
+yielding a smaller class of curves(?).
+\item
+Notice that we needed to consider the stereographic projection map
+in projective space before it became similar to $M$.
+The interaction of projective space and its plane at infinity with the
+map $M$ is an important difference from standard stereographic projection.
+
+The $x_4=0$ hyperplane in the $M^{-1}$ image space
+is `equivalent' to the plane at infinity of stereographic projection.
+That is, $x_4=0$ is mapped to the plane at infinity by $\nu$.
+This can also be seen from the equation 
+$M(a,b,c,d) = \varphi_{x_1=0} (0,\frac{a}{d},\frac{b}{d},\frac{c}{d})$.
+The effect is that the behaviour of the hyperplane at infinity is 
+mapped into finite space (brought
+into play) in the $M^{-1}$ image space, since it becomes a finite hyperplane,
+whereas this behaviour is not felt in the
+stereographic projection image space (since data points will not be
+mapped to the plane at infinity in stereographic projection image space,
+since they avoid the pole).
+The use of projective space by $M$ is important.
+\end{itemize}
+
+% ----------------------------------------------------------------------------
+
+\section{Quality analysis}
+
+compare curves generated by M and stereographic projection;
+also compare nonrational curves generated by Shoemake and Kim [if we can implement in time]
+
+Hypothesis: STEREOG PROJ METHOD IS LIKELY TO BE EQUIVALENT WITH OUR METHOD, 
+SINCE AFFINE MAP $\nu$ TO PLANE DOES NOT DO MUCH.
+Hypothesis is wrong!
+
+\subsection{Covariant acceleration (Kim claims this is torque: p. 371 top)}
+
+less is better 
+	- 0 cov accel = geodesic
+		- thus, more efficient change of orientation if less cov accel
+	- Barr 92
+
+Note that any rational spherical curve will never be a geodesic, since these must have
+constant speed and we have observed that no rational curve can be arc-length parameterized.
+Thus, it will always have some nontrivial tangential acceleration.
+
+\subsection{Arc length}
+
+more efficient orientation curve if shorter: less unnecessary change
+
+\subsection{Angular velocity}
+
+\cite[p. 659]{beer77}
+
+preferable not to spin too fast (smaller is better)
+
+maximum and net (sum of squares)
+
+\subsection{Angular acceleration (Torque according to Kim)}
+
+preferable not to change rotation axis too fast (smaller is better)
+
+maximum and net (sum of squares)
+
+
+
+Note: not appropriate to consider strain energy for this nonplanar curve.
+
+% ----------------------------------------------------------------------------
+
+\section{Sufficiency of stereographic projection}
+
+Sufficient to generate all rational curves (Wang) by mapping.
+
+\section{Insufficiency of stereographic projection?}
+
+Only maps plane.
+In effect, maps $R^n$ to $S^n$ rather than $R^{n+1}$.
+Inefficiency of Wang's use of projection and moving pole.
+BUT WHY DO WE NEED TO MAP POINTS TO $N+1$ SPACE?
+$N$ SPACE MAY BE JUST AS GOOD.
+
+\section{Related work}
+
+The map to the 2-sphere used in Dietz, Hoschek and J\"{u}ttler
+\cite{} can also be derived from Euler's Four Squares Theorem.
+(They derive their map from a result of Lebesgue instead.)
+This time Euler's theorem yields a recipe for generating Pythagorean 4-tuples.
+
+% ----------------------------------------------------------------------------
+
+\section{Completeness}
+
+M is onto.
+
+Related fact: (Wang) Any rational curve on \Sn{3} is the image of some
+	rational curve under stereographic projection.
+	That is, given any rational curve $c(t)$ on \Sn{3},
+	there exists rational curve $d(t)$ such that $c = \varphi (d)$.
+
+\section{Rational maps to the sphere}
+
+We motivated the map $M$ through the generation of Pythagorean quintuples,
+which are equivalent to rational curves on \Sn{3}.
+$M$ is a rational quadratic map from $\Re^4$ to \Sn{3}.
+It turns out that any rational map from $\Re^4$ to \Sn{3} can be used
+to generate rational curves on \Sn{3}, by mapping rational curves in $\Re^4$
+to the 3-sphere using $M$.
+Let us consider this more general problem: 
+the construction of rational maps from $\Re^4$ to \Sn{3}.
+The lower the degree of these maps, the better.
+It is easy to see that there is no rational linear map from $\Re^4$ to \Sn{3}.
+$M$ is an example of a rational quadratic map.
+Are there others?
+We explore the theory of spherical maps \cite{ono94} for other maps.
+
+\section{Spherical maps}
+
+\begin{defn2}
+{\rm
+A map $f:\Re^m \rightarrow \Re^n$ is {\em quadratic} if 1) $f(kx) = k^2 f(x)$
+whenever $k \in \Re, x \in \Re^m$
+and 2) the map $(x,y) \mapsto \frac{1}{2} [f(x+y) - f(x) - f(y)], x,y\in\Re^m$
+is bilinear.
+	% restricting K to \Re, X to \Re^m, and Y to \Re^n in Ono, p. 165
+}
+\end{defn2}
+
+\begin{defn2}
+{\rm
+A quadratic map $f:\Re^m \rightarrow \Re^n$ is {\em spherical} 
+if $\| f(x) \| = \| x \|^2$ for all $x \in \Re^m$.
+Notice that $f(\Sn{m-1}) \subset \Sn{n-1}$.
+We shall be interested in the restriction of the map to 
+$f:\Sn{m-1} \rightarrow \Sn{n-1}$.
+	% restricting quadratic forms q_x and q_y to squared Euclidean norms
+	% x_1^2 + ... + x_m^2 (or x_n^2)
+	% which strictly translates into \| f(x) \|^2 = \| x \|^4,
+	% which is simplified to above form
+}
+\end{defn2}
+
+Hopf maps are special quadratic spherical maps (p. 172; Theorem 5.5, p. 183, and Theorem 5.7, p. 187).
+(Hopf himself studied the map (\ref{eqn:classicalHopf}) below from $\Sn{3}$ to $\Sn{2}$.)
+
+{\em How can a spherical map (and thus a Hopf map) 
+be a map from $\Re^{m}$ to \Sn{n-1},
+since $f(x) \in \Sn{n-1} \Rightarrow \| f(x) \| = 1 \Rightarrow \|x\|^2 = 1
+\Rightarrow \|x\| = 1$.
+That is, the only points that are mapped to the sphere are points already
+on the sphere!
+Does this jive with (\ref{eqn:HopfM} below, which seems to be almost equivalent
+to our $M$ and thus a map from $\Re^4$ to \Sn{3}?
+}
+
+
+Spherical maps can be combined with stereographic projection to
+construct rational maps from $\Re^4$ to \Sn{3}.
+Since stereographic projection is a map $P:\Re^4 \rightarrow \Sn{4}$,
+if we can find a rational spherical map $S:\Sn{4} \rightarrow \Sn{3}$,
+the composition yields the desired map: $S \circ P: \Re^4 \rightarrow \Sn{3}$.
+Unfortunately, there are no nontrivial quadratic spherical maps from $\Re^5$ to
+$\Re^4$, and thus none from \Sn{4} to \Sn{3} \cite[p. 196]{ono94}.
+
+Simplest nontrivial spherical map and Hopf map: $f:\Re^2 \rightarrow \Re^2$ 
+and $f:S^1 \rightarrow S^1$ is \cite[pp. 169,173]{ono94}:
+\[
+	f(x_1,x_2) = \left( \begin{array}{c}
+	x_1^2 - x_2^2 \\ 2x_1 x_2
+		\end{array} \right)
+\]
+
+Classical Hopf map and spherical map: $f:\Re^4 \rightarrow \Re^3$
+and $f:\Sn{3} \rightarrow \Sn{2}$ is \cite[pp. 171,174]{ono94}
+\[
+\label{eqn:classicalHopf}
+	f(x_1,x_2,x_3,x_4) = \left( \begin{array}{c}
+	x_1^2 + x_2^2 - x_3^2 - x_4^2 \\
+	2(x_1 x_3 + x_2 x_4) \\ 2(x_1 x_4 + x_2 x_3)
+		\end{array} \right)
+\]
+This is closely related to Dietz et. al.'s map.
+
+A Hopf map (of the first kind) $f:\Re^n \rightarrow \Re^n$ is \cite[p. 193]{ono94}
+\[
+\label{eqn:HopfM}
+	f(x,y_1,\ldots,y_{n-1}) = \left( \begin{array}{c}
+		x^2 - y_1^2 - \cdots - y_{n-1}^2 \\
+		2xy_1 \\ \vdots \\ 2xy_{n-1}
+		\end{array} \right)
+\]
+In 4-space, this map is very similar to $M$!
+(Not in projective space, and opposite sign to first component.)
+
+% ----------------------------------------------------------------------------
+
+\section{Future work}
+
+Does every rational map to $S^3$ involve stereographic projection
+in some strong way?
+Is there a better rational map to $S^3$ that yields even better curves?
+
+Conclusions:
+
+Have shown that our general approach to the construction
+of rational curves, finding rational maps to \Sn{3},
+is the only approach.
+
+Our discussion of rational maps to \Sn{3} also applies to
+rational maps to \Sn{n}, $n > 3$.
+Euler's Four Squares Theorem has an identical version in higher dimensions
+(see Aida and Hopf maps),
+as of course does stereographic projection.
+Thus, rational curves on general \Sn{n} can be built using this paper.
+Similar techniques to those used in Dietz \cite{} can be used to build
+rational curves on other quadric surfaces as well.
+
+% ----------------------------------------------------------------------------
+
+\bibliographystyle{plain}
+\begin{thebibliography}{Dickson 52}
+
+\bibitem[Dickson 52]{dickson52}
+Dickson, L.E. (1952) History of the Theory of Numbers: Volume II,
+Diophantine Analysis.  Chelsea (New York), pp. 277, 318.
+
+\bibitem[Ono 94]{ono94}
+Ono, T. (1994) Variations on a Theme of Euler.
+Plenum Press (New York).
+
+\bibitem[Thorpe 79]{thorpe79}
+Thorpe, J.A. (1979) Elementary Topics in Differential Geometry.
+Springer-Verlag (New York), p. 124.
+
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,5 @@
+echo Coke bottle
+cp POS.coke POS.input
+cp curve.circle curve.input
+sweep -k -s -i -S > sweep.out	# -S for small window
+

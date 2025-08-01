@@ -1,0 +1,448 @@
+head     1.1;
+branch   ;
+access   ;
+symbols  ;
+locks    ; strict;
+comment  @ * @;
+
+
+1.1
+date     91.02.22.08.29.40;  author smann;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+ * Copyright (c) 1990, Graphics and AI Laboratory, University of Washington
+ * Copying, use and development for non-commercial purposes permitted.
+ *                  All rights for commercial use reserved.
+ */
+
+/*
+ *----------------------------------------------------------------------
+ *  File:  toSticks.c
+ *----------------------------------------------------------------------
+ */
+
+#include <stdio.h>
+#include "all.h"
+#include "stick.h"
+#include "math.h"
+
+/* global variables */
+int intype = I_SGP;
+int outtype = I_SGP;
+
+double sphereRadius;
+double stickRadius;
+double tangentRadius;
+
+Material sphereMaterial;
+Material stickMaterial;
+Material normalFrontMaterial;
+Material normalBackMaterial;
+
+Space world;
+Frame worldF;
+
+int noBalls=0;
+int noSticks=0;
+int noNormals=0;
+int keep=0;
+
+
+
+/*
+ *----------------------------------------------------------------------
+ *  Function:  SetDefaults
+ *  NOTES:
+ *	Should make up a material if it can't find one in material 
+ *  library instead of exiting.
+ *----------------------------------------------------------------------
+ */
+void SetDefaults()
+{
+  sphereRadius = 0.15;
+  tangentRadius = 0.45;
+  stickRadius = 0.05;
+
+  if ( !MaterialLookup( "RedPlastic", &sphereMaterial ) ) {
+    fprintf(stderr,"SetDefaults: can't find material RedPlatic!  Exiting.\n");
+    exit(1);
+  }
+
+  if ( !MaterialLookup( "BluePlastic", &stickMaterial ) ){
+    fprintf(stderr,"SetDefaults: can't find material BluePlastic!  Exiting.\n");
+    exit(1);
+  }
+
+  if ( !MaterialLookup( "YellowPlastic", &normalFrontMaterial ) ){
+    fprintf(stderr,"SetDefaults: can't find material YellowPlastic!  Exiting.\n");
+    exit(1);
+  }
+
+  if ( !MaterialLookup( "DarkGreenPlastic", &normalBackMaterial ) ){
+    fprintf(stderr,"SetDefaults: can't find material DarkGreenPlastic!  Exiting.\n");
+    exit(1);
+  }
+}
+
+
+/*
+ *----------------------------------------------------------------------
+ *  Function:  OutputSphere
+ *----------------------------------------------------------------------
+ */
+void OutputSphere(p)
+Point p;
+{
+  Sphere s;
+  
+  s.c = p;
+  s.r = sphereRadius;
+  s.m = sphereMaterial;
+
+  TriangulateSphere(s);
+}
+
+
+/*
+ *----------------------------------------------------------------------
+ *  Function:  OutputNormal
+ *----------------------------------------------------------------------
+ */
+void OutputNormal(n,p)
+Normal n;
+Point p;
+{
+  Square sq;
+
+  sq.n = n;
+  sq.p = p;
+  sq.r = tangentRadius;
+  sq.m = normalFrontMaterial;
+  TriangulateNormal(sq);
+
+  sq.n = VDual( SVMult( -1.0, NDual(sq.n) ) );
+  sq.m = normalBackMaterial;
+  TriangulateNormal(sq);
+}
+
+
+/*
+ *----------------------------------------------------------------------
+ *  Function:  OutputStick
+ *----------------------------------------------------------------------
+ */
+void OutputStick(p1,p2)
+Point p1;
+Point p2;
+{
+  Stick s;
+
+  s.p1 = p1;
+  s.p2 = p2;
+  s.r = stickRadius;
+  s.m = stickMaterial;
+  TriangulateStick(s);
+}
+
+
+
+/*
+ *----------------------------------------------------------------------
+ *  Function:  OutputTriangle
+ *----------------------------------------------------------------------
+ */
+void OutputTriangle(t)
+Triangle t;
+{
+  int i;
+
+  for( i=0; i<3; i++){
+    if ( CheckAndAddPoint(t.p[i], sphereRadius/10.0) ) {
+      if ( !noBalls )
+	OutputSphere(t.p[i]);
+      if ( !noNormals )
+	OutputNormal(t.n[i],t.p[i]);
+    }
+    if ( CheckAndAddStick(t.p[i], t.p[(i+1)%3], stickRadius/10.0 ) ) {
+      if ( !noSticks )
+	OutputStick(t.p[i],t.p[(i+1)%3]);
+    }
+  }
+}
+
+
+
+/*
+ *----------------------------------------------------------------------
+ *  Function:  ReadTriangle
+ *----------------------------------------------------------------------
+ */
+int ReadTriangle(t)
+Triangle* t;
+{
+  switch(intype){
+  case I_DSTRUCT:
+    return ReadDstructTriangle(t);
+    break;
+  case I_SGP:
+    return ReadSGPTriangle(t);
+    break;
+  default:
+    fprintf(stderr,"ReadTriangle: unknown input format %d.  Exiting.\n",
+	    intype);
+    exit(1);
+  }
+}
+
+
+
+main(argc,argv)
+{
+  Triangle t;
+
+  SetDefaults();
+  InitDataStructure();
+
+  ParseCommandLine(argc, argv);
+
+  world = SCreate("triangle world",3);
+  worldF = StdFrame(world);
+
+  InitDataStructure();
+
+  while( ReadTriangle(&t) != EOF ) {
+    OutputTriangle(t);
+  }
+
+  exit(0);
+}
+
+
+
+
+
+
+
+
+/*------------------------------------------------------------*/
+/*                   Command Line Handlers                    */
+/*------------------------------------------------------------*/
+
+
+void InputType(argv)
+char* argv[];
+{
+  if ( strcmp(argv[0],"sgp") == 0 ) {
+    intype = I_SGP;
+  } else if ( strcmp(argv[0],"dstruct") == 0 ) {
+    intype = I_DSTRUCT;
+  } else {
+    fprintf(stderr,"Unknown input type '%s'.  Exiting.\n",argv[0]);
+    exit(1);
+  }
+    
+}
+
+
+void  Method(argv)
+char* argv[];
+{
+  if ( strcmp(argv[0],"sgp") == 0 ) {
+    outtype = I_SGP;
+  } else if ( strcmp(argv[0],"dstruct") == 0 ) {
+    outtype = I_DSTRUCT;
+  } else {
+    fprintf(stderr,"Unknown output type '%s'.  Exiting.\n",argv[0]);
+    exit(1);
+  }
+}
+
+
+void Quality(argv)
+char* argv[];
+{
+  extern int delta;
+
+  delta = 0;
+}
+
+
+void NoBalls()
+{
+  noBalls = 1;
+}
+
+
+void BallRadius(argv)
+char* argv[];
+{
+  sphereRadius = atof(argv[0]);
+}
+
+
+void BallColor(argv)
+char* argv[];
+{
+  double atof();
+
+  sphereMaterial.specularity = atof(argv[0]);
+  sphereMaterial.diffuse.r = atof(argv[1]);
+  sphereMaterial.diffuse.g = atof(argv[2]);
+  sphereMaterial.diffuse.b = atof(argv[3]);
+  sphereMaterial.specular.r = atof(argv[4]);
+  sphereMaterial.specular.g = atof(argv[5]);
+  sphereMaterial.specular.b = atof(argv[6]);
+}
+
+void BallMaterial(argv)
+char* argv;
+{
+  if ( !MaterialLookup( argv[0], &sphereMaterial) ){
+    fprintf(stderr,"BallMaterial: material `%s' doesn't exist.  Exiting.\n",
+	    argv[0]);
+    exit(1);
+  }
+}
+
+void NoSticks()
+{
+  noSticks = 1;
+}
+
+void SetStickRadius(argv)
+char* argv[];
+{
+  stickRadius = atof(argv[0]);
+}
+
+void StickColor(argv)
+char* argv[];
+{
+  double atof();
+
+  stickMaterial.specularity = atof(argv[0]);
+  stickMaterial.diffuse.r = atof(argv[1]);
+  stickMaterial.diffuse.g = atof(argv[2]);
+  stickMaterial.diffuse.b = atof(argv[3]);
+  stickMaterial.specular.r = atof(argv[4]);
+  stickMaterial.specular.g = atof(argv[5]);
+  stickMaterial.specular.b = atof(argv[6]);
+}
+
+void StickMaterial(argv)
+char* argv[];
+{
+  if ( !MaterialLookup( argv[0], &stickMaterial) ){
+    fprintf(stderr,"StickMaterial: material `%s' doesn't exist.  Exiting.\n",
+	    argv[0]);
+    exit(1);
+  }
+}
+
+void NoNormals()
+{
+  noNormals = 1;
+}
+
+void NormalRadius(argv)
+char* argv[];
+{
+  tangentRadius = atof(argv[0]);
+}
+
+void PCLNormalColor(argv)
+char* argv[];
+{
+  double atof();
+
+  normalFrontMaterial.specularity = atof(argv[0]);
+  normalFrontMaterial.diffuse.r = atof(argv[1]);
+  normalFrontMaterial.diffuse.g = atof(argv[2]);
+  normalFrontMaterial.diffuse.b = atof(argv[3]);
+  normalFrontMaterial.specular.r = atof(argv[4]);
+  normalFrontMaterial.specular.g = atof(argv[5]);
+  normalFrontMaterial.specular.b = atof(argv[6]);
+}
+void NormalMaterial(argv)
+char* argv[];
+{
+  if ( !MaterialLookup( argv[0], &normalFrontMaterial) ){
+    fprintf(stderr,"NormalMaterial: material `%s' doesn't exist.  Exiting.\n",
+	    argv[0]);
+    exit(1);
+  }
+}
+void PCLBackNormalColor(argv)
+char* argv[];
+{
+  double atof();
+
+  normalBackMaterial.specularity = atof(argv[0]);
+  normalBackMaterial.diffuse.r = atof(argv[1]);
+  normalBackMaterial.diffuse.g = atof(argv[2]);
+  normalBackMaterial.diffuse.b = atof(argv[3]);
+  normalBackMaterial.specular.r = atof(argv[4]);
+  normalBackMaterial.specular.g = atof(argv[5]);
+  normalBackMaterial.specular.b = atof(argv[6]);
+}
+
+void BackNormalMaterial(argv)
+char* argv[];
+{
+  if ( !MaterialLookup( argv[0], &normalBackMaterial) ){
+    fprintf(stderr,"BackNormalMaterial: material `%s' doesn't exist.  Exiting.\n",
+	    argv[0]);
+    exit(1);
+  }
+}
+
+
+
+
+       /* Table of available options -- register new options here */
+Option Options[] = {
+/*  Name     Handler     #args   helpstring  */
+    "help",  Usage,      0,      ": Print available options.",
+    "i",     InputType,  1,	 "x: Input is of type x, where is 'sgp' or 'dstruct'.",
+    "o",     Method,     1,	 "x: Set output method x, where 'x' is one of 'sgp' or 'dstruct'.",
+    "b",     NoBalls,  0,      ": Don't output balls.",
+    "br",    BallRadius, 1,	 "radius: Set ball radius to 'radius'.  [.15]",
+    "bm",    BallMaterial, 1,    "material: Set ball material to 'material'. [RedPlastic]",
+    "bc",    BallColor,  7,      "s rd gd bd rs gs bs: set ball color.",
+    "s",     NoSticks,  0,      ": Don't output sticks.",
+    "sr",    SetStickRadius, 1,	 "radius: Set stick radius to 'radius'. [.05]",
+    "sm",    StickMaterial, 1,    "material: Set stick material to 'material'. [BluePlastic]",
+    "sc",    StickColor,  7,      "s rd gd bd rs gs bs: set stick color.",
+    "n",     NoNormals,    0,     ": Don't output normals.",
+    "nr",    NormalRadius, 1,     "radius: Set normal Radius to 'radius'. [.45]",
+    "nm",    NormalMaterial, 1,   "material: Set normal material to 'material'. [YellowPlastic]",
+    "nbm",   BackNormalMaterial, 1, "material: Set back normal material to 'material'. [DarkGreenPlastic]",
+    "nc",    PCLNormalColor,  7,      "s rd gd bd rs gs bs: set normal color.",
+    "nbc",   PCLBackNormalColor, 7, "s rd gd bd rs gs bs: set back normal color.",
+    "Q",     Quality,    0,      ": Output 16 triangles for cylinders instead of 8.",
+    "",      Usage,	 0,      "",
+
+/*  Do not delete the next line */
+    NULL,    NULL,       0,      NULL,      NULL
+  };
+
+
+/* Global variables go here */
+char *Banner  = " Last Modified: Thu Apr 12 13:52:59 PDT 1990 ";
+char *CommandName;
+
+char* UsageString = "Stick [options] < stream-of-triangles";
+@

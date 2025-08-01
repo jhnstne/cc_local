@@ -1,0 +1,94 @@
+Examples (to be displayed)
+--------
+
+s3spline -m 90 < data5-1 &
+s3spline -m 120 < data/5nicepts.dat &
+s3spline -m 120 -a < data/input3 &
+s3spline -m 90 < data10-2 &
+s3spline       < data66-20deg &
+s3spline -m 90 < data100-1 &
+
+rejects:
+s3spline -m 90 < data3-1	too simple
+s3spline -m 90 < data5-2 	kink (handled well)
+s3spline -m 90 < data5-3	large gaps
+s3spline -m 90 < data7-1	almost duplicated point, sort of meaningless
+s3spline -m 90 < data10-1	a bit muddled because of proximity of data points
+s3spline -m 90 < data10-20deg
+s3spline -m 90 < data15-sharp	too spread out, noncohesive
+s3spline -m 90 < data30-1	cusplike behaviour because of huge jump
+s3spline -m 90 < data66-1
+s3spline -m 90 < data100-2
+s3spline -m 90 < data100-3-469571probes
+s3spline -m 105 < data300-1	takes forever
+
+
+invariance:
+
+s3spline -m 90 < data5-1 &
+s3spline -m 90 < data5-1-rot &
+
+unstable near pole:
+
+s3spline -m 90 -p < data3-cusp &
+s3spline -m 90	  < data3-cusp &
+
+s3spline -p -m 90 < data10-2			cusp at pole (superset of data3-cusp)
+s3spline -p -m 90 < data100-1			doesn't finish
+s3spline -p -o -m 90 < data/inputTooCloseToPole		cheating since using 'on S3', which is using wrong intersection with S3
+s3spline -p -m 90 <data/inputTooCloseToPole 	sometimes doesn't mind being close to pole; even if on S3 is used, you just have to be careful about choosing the right intersection of the line with the sphere, the closest to the previous inverse point on S3
+s3spline -p -m 90 < data/inputTooClose2
+s3spline -p -m 90 < data/inputTooClose3 	certainly cannot have a point on the pole
+
+execution times (of splines in examples section):
+
+ssrun -exp totaltime s3spline -m 90 -t < testdata/data5-1	: 0 seconds
+ssrun -exp totaltime s3spline -m 120 -t < testdata/data/5nicepts.dat : 0 seconds
+ssrun -exp totaltime s3spline -m 120 -t -a < testdata/data/input3 : 0 seconds
+ssrun -exp totaltime s3spline -m 90 -t  < testdata/data10-2 : 0 seconds
+ssrun -exp totaltime s3spline       -t  < testdata/data66-20deg : .03 seconds
+ssrun -exp totaltime s3spline -m 90 -t  < testdata/data100-1 	: .03 seconds
+ssrun -exp totaltime s3spline -d -m 50 -t < testdata/test200-50deg: .12 seconds
+ssrun -exp totaltime s3spline -d    -t  < testdata/test500-20deg: .27 seconds
+
+Analysis of closest, on, defining:
+---------------------------------------
+
+s3spline -d -m 60    < data100-2		17
+s3spline -d -m 60 -o < data100-2
+s3spline -d -m 60 -D < data100-2
+
+s3spline -d -m 55    < test100-55deg		6.3
+s3spline -d -m 55 -o < test100-55deg
+s3spline -d -m 55 -D < test100-55deg
+
+s3spline -d -m 30    < test100-30deg		2.6
+s3spline -d -m 30 -o < test100-30deg
+s3spline -d -m 30 -D < test100-30deg
+
+factor of 2-17 improvement using closest
+
+Analysis of trim:
+-----------------------------------------
+
+s3spline -d -m 60 < data100-2			32
+s3spline -d -m 60 < test100-60deg		18
+s3spline -d -m 50 < test200-50deg		 8
+s3spline -d 	  < test500-20deg		 6
+s3spline -d 	  < test300-20deg		 3
+
+factor of 3-32 improvement over trim curve
+
+Analysis of Park and Ravani:
+-----------------------------------------
+
+s3spline -d < test5-20deg			1791
+ravani   -d < test5-20deg
+
+s3spline -d < test10-20deg			870
+ravani   -d < test10-20deg
+
+s3spline -d -m 60 < data10-1			48
+ravani   -d       < data10-1
+
+factor of 48-1791 improvement over Ravani

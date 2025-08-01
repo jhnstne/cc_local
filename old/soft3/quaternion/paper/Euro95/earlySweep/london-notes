@@ -1,0 +1,17 @@
+change term for PH curves? to rational-length-tangent curves?
+
+Applications to smooth animation via always-rational-quaternions
+(i.e., always-rational rotation matrices) as needed by Wang@Alberta.
+
+We wish to create a Bezier representation for a swept surface
+that interpolates this data, and is consistent with the fact
+that the sweeping object is always a sphere.
+%In particular, we will create a Bezier curve $c(t)$ that interpolates
+%the position (center of the sphere), a Bezier function $r(t)$
+%that interpolates the size (radius), impose a condition
+%that guarantees a sweeping sphere, and create a surface from this data.
+
+DOES JIM HAVE THE IMPLEMENTATION THAT TAKES C-R-O AND CREATES
+A BEZIER SURFACE, SO THAT ALL THAT IS LACKING IS THE DEFN OF C
+(O IN TERMS OF C, AND R TRIVIALLY)? yes
+

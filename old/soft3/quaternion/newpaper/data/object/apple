@@ -1,0 +1,5 @@
+[ FILE: apple
+]
+{
+REVOSURF ../data/object/apple.pts 1 0 0 0
+}

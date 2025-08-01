@@ -1,0 +1,28 @@
+xt := x3*t^3 + x2 * t^2 + x1*t + x0;
+yt := y3*t^3 + y2 * t^2 + y1*t + y0;
+zt := z3*t^3 + z2 * t^2 + z1*t + z0;
+dxt := diff(xt,t);
+dyt := diff(yt,t);
+dzt := diff(zt,t);
+
+collect(dxt,t);
+collect(dyt,t);
+collect(dzt,t);
+
+p0 := p01 * t + p00;
+p1 := p11 * t + p10;
+p2 := p21 * t + p20;
+p3 := p31 * t + p30;
+
+
+dxt1 := 2*p0*p1 - 2*p2*p3;
+dyt1 := 2*p1*p3 + 2*p0*p2;
+dzt1 := p1^2 + p2^2 - p3^2 - p0^2;
+
+collect(dxt1,t);
+collect(dyt1,t);
+collect(dzt1,t);
+
+x0val := 0;
+y0val := 0;
+z0val := 0;

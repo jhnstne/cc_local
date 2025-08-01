@@ -1,0 +1,101 @@
+.TH bezier 3
+
+.SH NAME
+bezier
+
+.SH SYNOPSIS
+Routines for evaluating rational and polynomial Bezier curves and
+their derivatives.
+
+.SH SYNTAX
+
+.B #include "bezier.h"
+
+.SH DESCRIPTION:
+
+.nf
+.B Point EvalBezier(n, pt, t)
+.B int n;
+.B Point pt[];
+.B Scalar t;
+.fi
+
+Evaluate the nth degree Bezier curve given by control points pt at t.
+
+.nf
+.B Vector EvalBezierDeriv(n, pt, t)
+.B int n;
+.B Point pt[];
+.B Scalar t;
+.fi
+
+Evaluate the first derivative of the nth degree Bezier curve given by
+control points pt at t.
+
+.nf
+.B Vector EvalBezierNthDeriv(n, pt, t, deriv)
+.B int n;
+.B Point pt[];
+.B Scalar t;
+.B int deriv;
+.fi
+
+Evaluate the deriv derivative of the nth degree Bezier curve given by
+control points pt at t.
+
+.nf
+.B Scalar BezierCurvature(n, pt, t)
+.B int n;
+.B Point pt[];
+.B Scalar t;
+.fi
+
+Return the curvature of the nth degree Bezier curve given by control
+points pt at t.
+
+.nf
+.B Scalar ScalarBezier(n, w, t)
+.B int n;
+.B Scalar w[];
+.B Scalar t;
+.fi
+
+Evaluate the nth degree scalar Bezier curve given by scalar w at
+parameter value t.
+
+.nf
+.B Scalar ScalarBezierDeriv(n, w, t)
+.B int n;
+.B Scalar w[];
+.B Scalar t;
+.fi
+
+Evaluate the first derivative of the nth degree scalar Bezier curve
+given by scalar w at parameter value t.
+
+
+.nf
+.B Point RatBezier(n, p, w, t)
+.B int n;
+.B Point p[];
+.B Scalar w[];
+.B Scalar t;
+.fi
+
+Evaluate the nth degree rational Bezier curve given by points p and
+weights w at parameter value t.
+
+.nf
+.B Point RatBezierDeriv(n, p, w, t)
+.B int n;
+.B Point p[];
+.B Scalar w[];
+.B Scalar t;
+.fi
+
+Evaluate the first derivative of the nth degree rational Bezier curve
+given by points p and weights w at parameter value t.
+
+
+.SH DATE
+January 3, 1992

@@ -1,0 +1,27 @@
+(BezierTriangle .
+	(degree . d)
+	(normaldim . nd)
+	(net .
+		[
+			(pos . [x, y, z])
+			(norm . [x, y, z]),
+				...
+		]
+	)
+)
+
+(Triangle .
+	(name . "string")
+	(vertex1 .
+		(pos . [x, y, z])
+		(norm . [x, y, z])
+	)
+	(vertex2 .
+		(pos . [x, y, z])
+		(norm . [x, y, z])
+	)
+	(vertex3 .
+		(pos . [x, y, z])
+		(norm . [x, y, z])
+	)
+)

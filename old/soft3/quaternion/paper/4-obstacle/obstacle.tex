@@ -1,0 +1,124 @@
+\documentstyle[11pt]{article}
+\newif\ifFull
+\Fullfalse
+\input{header}
+\SingleSpace
+
+\setlength{\oddsidemargin}{0pt}
+%\setlength{\topmargin}{-.25in}	% technically should be 0pt for 1in
+\setlength{\headsep}{3em}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+\setlength{\columnsep}{5mm}		% width of gutter between columns
+
+\markright{Orientation obstacles: \today \hfill}
+\pagestyle{myheadings}
+
+% -----------------------------------------------------------------------------
+
+\title{Avoiding Obstacles in Orientation Space}
+\author{J.K. Johnstone}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We will study the addition of an obstacle-avoidance constraint 
+to the design of curves on a surface.
+\end{abstract}
+
+\vspace{1in}
+
+\noindent Keywords: 
+
+\clearpage
+
+\section{Introduction}
+
+In some applications, we need to design 
+curves on a surface that avoid certain regions of the surface.
+For example, consider the design of quaternion splines on \Sn{3},
+which are used to control the orientation of an object.
+
+Some orientations may be illegal: an orientation of a cup
+that spills its contents, an orientation of a camera that turns
+the world upside-down, or an orientation
+that is outside the kinematic constraints of a robot arm.
+These forbidden orientations can be modeled as forbidden regions
+(or obstacles) on the surface \Sn{3}.
+In general, portions of a surface may be undesirable:
+for example, visible regions of a car body may be undesirable
+for the design of functional objects that should be invisible.
+
+% Note: orientation constraints arising from kinematic and carrying constraints
+% (maintaining general free space flavor of motion planning:
+% that is, constraints inherent to the arm, not to the environment).
+
+The avoidance of obstacles in the plane has received much attention,
+especially for polygonal obstacles (e.g., \cite{lozano79,hersh88,ghosh91}).
+Some of these techniques can be lifted to a Riemannian context.
+For example, consider the classical visibility graph algorithm for polygons
+in 2-space.
+A basic idea that can be generalized is that of following tangents
+to the obstacles and common tangents between obstacles.
+However, the tangent or line-of-sight must now be translated to a Riemannian 
+context on a surface.
+By adding intermediate points in this way, and using convex-hull
+properties of Bezier curves and B-splines, obstacles could be avoided.
+
+Generalization of Euclidean motion planning algorithms to a surface.
+
+\section{An example of an obstacle on \Sn{3}}
+
+\begin{itemize}
+\item
+Claim: great sphere of \Sn{3}\ represents orientations orthogonal to a given
+	orientation.
+\item	
+Consider obstacles on \Sn{3} bounded by great spheres.
+\item
+Compute common tangents of great spheres on \Sn{3}.\
+\end{itemize}
+
+\section{Example on a real application}
+
+What is a naturally occuring sophisticated orientation obstacle?
+Moving mug of beer is too simple: only one hemispherical obstacle.
+
+
+\bibliographystyle{plain}
+\begin{thebibliography}{Johnstone \& Williams 95}
+
+\bibitem[Ghosh 91]{ghosh91}
+Ghosh, S. and D. Mount (1991)
+An Output-Sensitive Algorithm for Computing Visibility Graphs.
+SIAM J. Computing 20(5), 888-910.
+
+\bibitem[Hershberger 88]{hersh88}
+Hershberger, J. and L. Guibas (1988)
+An $O(n^2)$ Shortest Path Algorithm for a Non-Rotating Convex Body.
+Journal of Algorithms 9, 18--46.
+
+\bibitem[Johnstone \& Williams 95]{jj95}
+Johnstone, J. and J. Williams (1995)
+Rational Control of Orientation for Animation.
+Graphics Interface '95, 179--186.
+
+\bibitem[Johnstone \& Williams 99]{jj+jimbo99}
+Johnstone, J. and J. Williams (1999)
+Rational Quaternion Splines.
+Technical Report 99-03, CIS Dept., UAB.
+
+\bibitem[Lozano-Perez 79]{lozano79}
+Lozano-Perez, T. and M. Wesley (1979)
+An Algorithm for Planning Collision-Free Paths among Polyhedral Obstacles.
+CACM 22(10), 560--570.
+
+\bibitem[Lozano-Perez 83]{lozano83}
+Lozano-Perez, T. (1983)
+Spatial Planning: A Configuration Space Approach.
+IEEE Transactions on Computers, C-32 (2), February, 108--120.
+
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,33 @@
+# File: project Makefile for ~/soft3/walkthrough/src
+# Author: J.K. Johnstone
+# Last Modified: 10/31/07
+# History: 3/31/03: ported from SGI Irix to Linux
+#          9/10/03: added Heckbert quad-edge library
+#	   7/30/04: added CLAPACK
+
+ARCH	   = OSX
+SHELL      = /bin/bash
+CC         = g++
+LIBPATH += -L"/System/Library/Frameworks/OpenGL.framework/Libraries"
+FRAMEWORK = -framework GLUT
+FRAMEWORK += -framework OpenGL
+CLAPACK    = /Users/jj/Downloads/CLAPACK-3.2.1
+CLAPACKLIB = $(CLAPACK)/lapack_LINUX.a \
+             $(CLAPACK)/blas_LINUX.a \
+	     $(CLAPACK)/F2CLIBS/libf2c.a
+LIBRARIES  = -lGL -lGLU -lm -ltcl $(CLAPACKLIB)
+CBIN	   = /Users/jj/Software/Cbin
+INCLUDE    = -I$(CBIN) -I$(CLAPACK)
+
+all: flythrough-ross
+.cpp:
+	$(CC) $(FRAMEWORK) -o $@ $< $(LIBPATH) $(LIBRARIES) $(INCLUDE)
+clean :
+	rm -f *.o *~ a.out core
+	ls -l
+
+touch :
+	touch flythrough-ross.cpp
+
+
+

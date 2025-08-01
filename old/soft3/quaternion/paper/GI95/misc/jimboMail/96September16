@@ -1,0 +1,50 @@
+From jimbo@blaze.cs.jhu.edu Mon Sep 16 15:58 CDT 1996
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from cerulean.cis.uab.edu by cis.uab.edu (5.x/SMI-SVR4)
+	id AA16679; Mon, 16 Sep 1996 15:58:23 -0500
+Received: from cis.uab.edu by cerulean.cis.uab.edu via SMTP (940816.SGI.8.6.9/940406.SGI)
+	for <jj@cerulean> id OAA06108; Mon, 16 Sep 1996 14:55:14 -0700
+Received: from blaze.cs.jhu.edu by cis.uab.edu (5.x/SMI-SVR4)
+	id AA16673; Mon, 16 Sep 1996 15:58:16 -0500
+Received: from mail-client
+           by blaze.cs.jhu.edu with SMTP; Mon, 16 Sep 1996 20:58:08 GMT
+Received: by mail-client (4.1) id AA11318; Mon, 16 Sep 96 16:58:07 EDT
+Message-Id: <9609162058.AA16673@cis.uab.edu>
+From: jimbo@blaze.cs.jhu.edu (Jim Williams)
+Sender: jimbo@blaze.cs.jhu.edu
+Subject: Section 6
+To: jj@cerulean.cis.uab.edu (John K. Johnstone)
+Date: Mon, 16 Sep 1996 16:58:06 -0400 (EDT)
+Cc: jimbo@blaze.cs.jhu.edu (Jimbo)
+In-Reply-To: <9608290728.ZM9000@cerulean.cis.uab.edu> from "John K. Johnstone" at Aug 29, 96 07:28:19 am
+X-Mailer: ELM [version 2.4 PL13]
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Length: 751
+Status: ORr
+
+John,
+
+I'm back at my mail now.  I wanted to ask a question about section
+6.  I worked through the symbolics while I was away and it seems 
+sound.  One small point that I did not get:
+
+In the proof of theorem 6.2:
+
+	1.  Should you consider stating that for every member x
+	    of R(t) it is possible to factor x into a square 
+	    component and a square-free component?
+
+	2.  In the first example you annotate the last step
+	    with the comment "using X1^2+.....+Xn-1^2 = Xn^2."
+	    I don't see where you actually need to use this property
+	    to make the transformation.  It seems to me to just
+	    be a direct substitution based on the definition
+	    gh^2 = xn - x1.
+
+Jim
+
+P.S.  Did you receive the copy of the Boult paper that I mailed you?
+
+

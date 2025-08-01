@@ -1,0 +1,1564 @@
+/*
+  File:    	 qspline.c
+  Author:  	 J.K. Johnstone
+  Created: 	 circa 23 August 1996
+  Last modified: 1 December 1998
+  Purpose: Input: n points on the sphere S^3
+  	   Output: rational interpolating Bezier spline
+  	   Basically: Perturb input away from pole, map points to image space,
+		      interpolate and map curve back.
+  Reference: John K. Johnstone and James T. Williams (1995)
+	`Rational control of orientation for animation'
+  History: 4/14/97: Perturbed input points to avoid pole.
+	   4/15/97: Used rotation matrix to rotate, rather than incorrect
+		    quaternion multiplication.
+	   4/16/97: Added pan.
+	  	    Different perturbation routine using minimum eigenvector
+		    of covariance matrix.
+	   4/18/97: Distinguish between visualization and `true' computation.
+	   4/21/97: Enforce minimal sampling rate of quaternions,
+		    to avoid no perturbation with (0,0,1), (0,1,0), (1,0,0)
+		    input.  This is overkill, since only this set exhibits
+		    the bad behaviour of yielding no perturbation,
+		    even if larger sampling distances are chosen;
+		    but it is a reasonable assumption and a sufficient
+		    condition to avoid trouble.
+		    Moreover, it avoids the problem of choosing the
+		    wrong quaternion from the quaternion pair:
+		    this will create antipodally opposite quaternion,
+		    which will be flagged by the sampling criterion.
+	   4/23/97: Changed imagept from V5r to V4r.
+		    Added random input option, for better testing.
+	   4/24/97: Fit prescribed tangent at beginning of S3 curve.
+	   8/5/97:  Added spherical projection version of image curve generation.
+	   8/6/97:  Spit random input out to file (random.dat) for future use.
+ 		    Added quality analysis (net tangential acceleration).
+ 	   8/12/97: Added hyperplane display.
+
+  Test for cusps?
+  Compute knot sequence based on spherical chord-length parameterization?
+  Split points into smaller sets, connected with C^2 continuity,
+		if large point set forces some point too close to pole?
+		(or two points on opposite sides of pole?)
+  Compute amount of tangential acceleration of our curves.
+*/
+
+#include <GL/glut.h>
+#include <GL/glu.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include "Bez4d.h"
+#include "Color.h"
+#include "Fit4d.h"
+#include "Fit3sphere.h"
+#include "Geom.h"
+#include "Matrix.h"
+#include "Matrix4d.h"
+#include "Misc.h"
+#include "Quality.h"
+#include "REAL.h"
+#include "Vec.h"
+#include "Vec4d.h"
+
+/* #define PI 		 3.141593 */
+#define MAXANGLEDIFF 	 PI/3 /* formerly PI/3, formerly PI/2 */
+#define SUBSETSIZE	 15
+#define PTSPERBEZSEGMENT 40	/* # of points to draw on each Bezier segment */
+				/* previously 20 */
+#define NQUALITYPROBES 	 50	/* # of points to discretely sample in TangAccel_Spherical */
+
+static char *RoutineName;
+static void usage()
+{
+  printf("Usage is %s\n", RoutineName);
+  printf("\t[-a]   - (a)ngle-axis input of quaternion\n");
+  printf("\t[-r]   - (r)andom input of random # of pts (between 3 and 100)\n");
+  printf("\t[-R #] - (R)andom input of this size\n");
+  printf("\t[-d]   - (d)on't visualize (model in true 4D)\n");
+  printf("\t[-p]   - no (p)erturbation of the input\n");
+  printf("\t[-s #] - size of data (s)ubset defining subcurve (default 15)\n");
+  printf("\t[-o]   - choose inverse points (o)n S3 (default)\n");
+  printf("\t[-c]   - choose (c)losest inverse point\n");
+  printf("\t[-D]   - choose (d)efining points as inverse points\n");
+  printf("\t[-P #] - # of probes for covariant acceleration computation (default=50)\n");
+  printf("\t[-b #] - # of display points per Bezier segment (default 40)\n");
+  printf("\t < InputData\n");
+}
+
+static GLfloat   transx, transy, transz, rotx, roty, rotz, zoom;
+static GLfloat   initrotx, initroty, initrotz;
+static GLboolean rotate=1;	/* start rotating? */
+static int 	 panLeft=0;  		/* control panning for 3d effect */
+static int 	 panRight=1;
+static GLboolean leftMouseDown=0;
+static GLboolean middleMouseDown=0;
+static int	 firstx=1;	/* first MOUSEX reading? */
+static int 	 firsty=1;
+static int	 oldx,oldy;	/* previous value of MOUSEX and MOUSEY */
+static int	 DRAWDATAPTS=0;
+static int	 DRAWALLDATAPTS=0;
+static int	 DRAWTANGENTS=1;
+static int	 DRAWORDEROFPTS=0;	/* draw polyline through points? */
+static int	 DRAWHYPERPLANE=0;	/* draw hyperplane of stereog proj? */
+static int	 DRAWPOLE=0;		/* draw pole of M (to be avoided)? */
+static int	 DRAWPERTURBPTS=0;
+static int	 DRAWPERTURBTANGENTS=0;
+static int	 DRAWIMAGEPTS=0;
+static int	 DRAWIMAGEPTSSP=0;
+static int	 DRAWIMAGECURVE=0;
+static int	 DRAWIMAGECTLPOLY=0;
+static int	 DRAWIMAGECURVESP=0;
+static int	 DRAWS3CURVE=1;
+static int	 DRAWALLS3CURVE=0;
+static int	 DRAWS3CURVESP=0;
+static int	 DRAWPERTURBS3CURVE=0;
+static int	 DRAWPERTURBS3CURVESP=0;
+static int	 DRAWS3CTLPOLY=0;
+static int	 DRAWPERTURBS3CTLPOLY=0;
+static int	 DRAWIMAGELINES=0;	/* draw lines from pole to stereog image? */
+static int 	 DRAWFIGURE=0;	/* draw figure of stereog proj map (for paper)? */
+static GLboolean PAN=0;	 	/* rotate object back and forth for 3d effect? */
+
+static int 	 DEBUG = 1;	/* print debug statements? */
+static GLboolean INPUTANGLEAXIS=0;
+static GLboolean VISUALIZE=1;	/* draw graphics? */
+static GLboolean RANDOMINPUT=0;	/* generate input randomly? */
+static GLboolean NPTKNOWN=0;	/* # of random points given on command line? */
+static GLboolean PERTURB=1;	/* perturb the input to avoid pole? */
+static GLboolean IMAGEONS3=1;	/* use S3 point on inverse image line? */
+static GLboolean CLOSESTIMAGE=0;/* use closest point on inverse line? */
+static GLboolean TANGENTS=0;	/* design tangents in inverse space? */
+int    		 iSub=0;	/* which subcurve to display? */
+
+int       n;			/* # of input points */
+V4r      *pt;			/* input points */
+REAL	 *knot;			/* global knot vector */
+int   	  subsetSize = SUBSETSIZE;
+int   	  nSub;			/* # of subcurves */
+int	 *m;			/* size of each subset */
+V4r	 **subpt;		/* subsets of input points, defining subcurves */
+REAL 	 **subKnot;		/* knot vectors for subsets */
+V4r 	 **perturbpt;		/* subsets of perturbed input points */
+V4r       Pole = {1,0,0,0};
+V4r      **imagept;		/* images of input points under M^{-1} */
+V4r      **imageptSP;		/* images of input points under spherical proj */
+RatBez4d  *perturbS3curve;	/* sextic curve on unit 3-sphere S3 (M map) */
+RatBez4d  *perturbS3curveSP;	/* sextic curve on unit 3-sphere S3 (stereo proj map) */
+RatBez4d  *S3curve;		/* sextic curve on unit 3-sphere S3 */
+RatBez4d  *S3curveSP;		/* same under stereographic projection */
+Bez4d     *imageBez;		/* cubic image curve under M^{-1} */
+Bez4d     *imageBezSP;		/* cubic image curve under spherical proj */
+V4r      **perturbS3curveDisplay;
+V4r      **perturbS3curveDisplaySP;
+V4r      **S3curveDisplay;
+V4r      **S3curveDisplaySP;
+V4r      **imageCurveDisplay;
+V4r      **imageCurveDisplaySP;
+V4r  	  *beginTang;		/* beginning tangent of each subcurve */
+V4r  	  *endTang;		/* end tangent of each subcurve */
+V4r 	  *perturbBeginTang;	/* beginning tangent of each perturbed subcurve */
+V4r 	  *perturbEndTang;	/* end tangent of each perturbed subcurve */
+V4r 	  *imageEndTang;	/* end tangent on each image subcurve */
+REAL  	   RestoringRotation[4][4];
+REAL	   covAccel=0, covAccelSP=0;
+int	   ptsPerBezSegment=PTSPERBEZSEGMENT;
+
+void gfxinit(void)
+{
+/*GLfloat mat_ambient[]    = {0.8, 0.1, 0.1, 1.0}; */
+  GLfloat mat_ambient[]    = {0.1745, 0.01175, 0.01175}; 
+  GLfloat mat_specular[]   = {0.1, 0.1, 0.1, 1.0};
+/*GLfloat mat_diffuse[]    = {0.8, 0.5, 1.0, 1.0}; */  		/* purple */
+  GLfloat mat_diffuse[]    = {0.61424, 0.04136, 0.04136, 1.0}; 	/* red */
+  GLfloat mat_emission[]   = {0.1, 0.1, 0.1, 1.0};
+/*GLfloat high_shininess[] = { 30.0 }; */
+  GLfloat high_shininess[] = { 0.6 * 128.0 };
+  GLfloat light0_position[] = {-2.0, 0.0, 0.0, 0.0};		/* from left */
+  GLfloat light1_position[] = {2.0, 0.0, 0.0, 0.0};		/* right */
+  GLfloat light2_position[] = {0.0, -2.0, 0.0, 0.0};		/* back */
+  GLfloat light3_position[] = {0.0, 2.0, 0.0, 0.0};		/* front */
+  GLfloat light4_position[] = {0.0, 0.0, 2.0, 0.0};		/* top */
+  GLfloat light5_position[] = {0.0, 0.0, -2.0, 0.0};		/* bottom */
+/* GLfloat light_ambient[]   = {0.2, 0.2, 0.2, 1.0}; */
+  GLfloat whitelight[]      = {1.0, 1.0, 1.0, 1.0};
+
+  glClearColor (1.0, 1.0, 1.0, 1.0);
+/*glEnable(GL_DEPTH_TEST); */
+  glShadeModel (GL_FLAT);
+
+  glMaterialfv (GL_FRONT, GL_AMBIENT,   mat_ambient);
+  glMaterialfv (GL_FRONT, GL_DIFFUSE,   mat_diffuse);
+  glMaterialfv (GL_FRONT, GL_SPECULAR,  mat_specular);
+  glMaterialfv (GL_FRONT, GL_SHININESS, high_shininess);
+  glMaterialfv (GL_FRONT, GL_EMISSION,  mat_emission); 
+/*glColorMaterial (GL_FRONT, GL_DIFFUSE); */        /* set material using color */ 
+/*glEnable (GL_COLOR_MATERIAL); */
+
+/*glLightModeli (GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);  */ /* more expensive */
+  glLightfv (GL_LIGHT0, GL_POSITION, light0_position);  
+  glLightfv (GL_LIGHT1, GL_POSITION, light1_position); 
+  glLightfv (GL_LIGHT2, GL_POSITION, light2_position); 
+  glLightfv (GL_LIGHT3, GL_POSITION, light3_position); 
+  glLightfv (GL_LIGHT4, GL_POSITION, light4_position); 
+  glLightfv (GL_LIGHT5, GL_POSITION, light5_position);
+  glLightfv (GL_LIGHT0, GL_DIFFUSE, whitelight);
+  glLightfv (GL_LIGHT1, GL_DIFFUSE, whitelight);
+  glLightfv (GL_LIGHT2, GL_DIFFUSE, whitelight);
+  glLightfv (GL_LIGHT3, GL_DIFFUSE, whitelight);
+  glLightfv (GL_LIGHT4, GL_DIFFUSE, whitelight);
+  glLightfv (GL_LIGHT5, GL_DIFFUSE, whitelight);
+
+/*glEnable (GL_LIGHTING); */
+  glEnable (GL_LIGHT0);
+  glEnable (GL_LIGHT1);
+  glEnable (GL_LIGHT2);
+  glEnable (GL_LIGHT3);
+  glEnable (GL_LIGHT4);
+  glEnable (GL_LIGHT5);
+
+  glEnable (GL_BLEND);
+  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glEnable (GL_POINT_SMOOTH); 
+  glHint (GL_POINT_SMOOTH_HINT, GL_FASTEST);
+  glEnable (GL_LINE_SMOOTH);
+  glHint (GL_LINE_SMOOTH_HINT, GL_FASTEST);
+  glPointSize (10.0);
+  glLineStipple (1, 0xAAAA);
+
+  transx = 0.0;  transy = 0.0;  transz = 0.0;
+  rotx = initrotx = 90.0;	/* previously 90 */
+  roty = initroty = 0.0;
+  rotz = initrotz = 0.0;	/* 73 for #2 visible control polygon */
+				/* previously 40 */
+  zoom = 1.5;
+  
+/*  theNurb = gluNewNurbsRenderer();
+  gluNurbsProperty (theNurb, GLU_SAMPLING_TOLERANCE, 25.0);
+  gluNurbsProperty (theNurb, GLU_DISPLAY_MODE, GLU_FILL); */
+}
+
+/******************************************************************************/
+/******************************************************************************/
+
+void reshape(GLsizei w, GLsizei h)
+{
+  glViewport(0, 0, w, h);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(-2.0*(GLfloat)w/(GLfloat)h, 2.0*(GLfloat)w/(GLfloat)h, -2.0, 2.0, -6.0, 6.0);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+}
+
+/******************************************************************************/
+/******************************************************************************/
+
+void Rotate (void)
+{
+  rotz += 2.0; 
+  if (rotz > 360.0) 
+    rotz -= 360.0;
+  glutPostRedisplay();
+}
+
+/******************************************************************************/
+/******************************************************************************/
+
+void Pan (void)
+{
+  if (panLeft)
+   {
+    rotz += 0.1;
+    if (rotz > 360.0)
+      rotz -= 360.0;
+    panLeft++;
+    if (panLeft==200)
+     {
+       panLeft=0;
+       panRight=1;
+     }
+   }
+  else if (panRight)
+   {
+    rotz -= 0.1;
+    if (rotz < 0.0)
+      rotz += 360.0;
+    panRight++;
+    if (panRight==200)
+     {
+      panRight=0;
+      panLeft=1;
+     }
+   }
+  glutPostRedisplay();
+}
+
+/******************************************************************************/
+/******************************************************************************/
+
+void visibility (int status)
+{
+  if (status != GLUT_VISIBLE) {
+    if (rotate || PAN)
+      glutIdleFunc (NULL);
+  }
+  else if (rotate)
+    glutIdleFunc (Rotate);
+  else if (PAN)
+    glutIdleFunc (Pan);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+
+void mouse (int button, int state, int x, int y)
+{
+  switch (button) {
+  case GLUT_LEFT_BUTTON:
+	switch (state) {
+	case GLUT_DOWN: 
+ 	  leftMouseDown = firstx = firsty = 1;
+	  glutSetCursor (GLUT_CURSOR_UP_DOWN);
+	  break;
+	case GLUT_UP: 
+	  leftMouseDown = 0;
+	  glutSetCursor (GLUT_CURSOR_INHERIT);
+	  break;
+	default: break;
+	}
+	break;
+  case GLUT_MIDDLE_BUTTON:
+	switch (state) {
+	case GLUT_DOWN:
+	  middleMouseDown = firstx = firsty = 1; 
+	  glutSetCursor (GLUT_CURSOR_CYCLE);
+	  break;
+	case GLUT_UP: 		
+	  middleMouseDown = 0; 
+	  glutSetCursor (GLUT_CURSOR_INHERIT);
+	  break;
+	default: break;
+	}
+	break;
+  default:
+	break;
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
+
+void motion (int x, int y)
+{
+  if (leftMouseDown && !middleMouseDown)	   
+   {
+    if (firstx)  firstx=0; else zoom -= (float).02*(x-oldx);
+   }
+  else if (leftMouseDown && middleMouseDown)
+   {
+    if (firstx)  firstx=0; else transx += .01*(x-oldx); /* TRANSLATION: X */
+    if (firsty)  firsty=0; else transy += .01*(y-oldy); /* TRANSLATION: Y */
+   }
+  else if (middleMouseDown) 
+   {
+    if (firstx)  firstx=0;
+    else { roty += .5*(x-oldx); if (roty > 360.0) roty -= 360.0; } /* ORI: Y */
+
+    if (firsty)  firsty=0;
+    else { rotx += .5*(y-oldy); if (rotx > 360.0) rotx -= 360.0; } /* ORI: X */
+   }
+  oldx = x;  
+  oldy = y;
+  glutPostRedisplay();
+}
+
+/******************************************************************************/
+/******************************************************************************/
+
+void keyboard (unsigned char key, int x, int y)
+{
+  switch (key) {
+  case 27:	exit(1);	break;		/* ESCAPE */
+  case 'r':	if (rotate) { rotate=0; glutIdleFunc (NULL); }  /* r=114: toggle rotation */
+		else { rotate=1; glutIdleFunc (Rotate); } break;
+  case 'p':	if (PAN) { PAN=0; glutIdleFunc (NULL); }	/* p: toggle pan */
+  		else { PAN = 1; glutIdleFunc (Pan); } break;
+  case '1':     DRAWALLDATAPTS=DRAWALLS3CURVE=DRAWTANGENTS=1;
+  		DRAWDATAPTS = DRAWS3CURVE = 0;
+  		DRAWORDEROFPTS = DRAWPERTURBPTS=0;
+		DRAWIMAGEPTS = DRAWIMAGECURVE = DRAWIMAGECTLPOLY=0;
+		DRAWPERTURBS3CURVE = DRAWPERTURBS3CTLPOLY=0;
+		DRAWS3CTLPOLY = DRAWIMAGEPTSSP = DRAWIMAGECURVESP=0;
+		DRAWPERTURBS3CURVESP = DRAWS3CURVESP = 0;
+		DRAWHYPERPLANE = DRAWIMAGELINES =0;
+		DRAWPOLE = DRAWFIGURE = 0;
+  		break;
+  case '2':     DRAWALLDATAPTS=DRAWALLS3CURVE=0;
+  		DRAWDATAPTS = DRAWS3CURVE =DRAWTANGENTS = 1;
+  		DRAWORDEROFPTS = DRAWPERTURBPTS=0;
+		DRAWIMAGEPTS = DRAWIMAGECURVE = DRAWIMAGECTLPOLY=0;
+		DRAWPERTURBS3CURVE = DRAWPERTURBS3CTLPOLY=0;
+		DRAWS3CTLPOLY = DRAWIMAGEPTSSP = DRAWIMAGECURVESP=0;
+		DRAWPERTURBS3CURVESP = DRAWS3CURVESP = 0;
+		DRAWHYPERPLANE = DRAWIMAGELINES =0;
+		DRAWPOLE = DRAWFIGURE = 0;
+  		break;
+  case '3':	DRAWIMAGEPTS = DRAWIMAGECURVE = 1;
+  		DRAWDATAPTS=DRAWS3CURVE=0;
+  		DRAWORDEROFPTS = DRAWPERTURBPTS=0;
+		DRAWIMAGECTLPOLY=0;
+		DRAWPERTURBS3CURVE = DRAWPERTURBS3CTLPOLY=0;
+		DRAWS3CTLPOLY = DRAWIMAGEPTSSP = DRAWIMAGECURVESP=0;
+		DRAWPERTURBS3CURVESP = DRAWS3CURVESP = 0;
+		DRAWHYPERPLANE = DRAWIMAGELINES =0;
+		DRAWPOLE = DRAWFIGURE = 0;
+  		break;
+  case 32:	iSub = (iSub+1)%nSub; 		break; /* SPACE */
+  default:	break;
+  }
+  glutPostRedisplay();
+}
+
+/******************************************************************************/
+/******************************************************************************/
+
+void menu (int value)
+{
+  switch (value) {
+  case 1:	DRAWDATAPTS = !DRAWDATAPTS;    			break;
+  case 2: 	DRAWTANGENTS = !DRAWTANGENTS;			break;
+  case 3: 	DRAWPERTURBPTS = !DRAWPERTURBPTS; 		break;
+  case 22:	DRAWPERTURBTANGENTS = !DRAWPERTURBTANGENTS;	break;
+  case 4:	DRAWIMAGEPTS = !DRAWIMAGEPTS;  			break;
+  case 5:	DRAWIMAGECURVE = !DRAWIMAGECURVE;		break;
+  case 6:	DRAWIMAGECTLPOLY = !DRAWIMAGECTLPOLY;		break;
+  case 7:	DRAWPERTURBS3CURVE = !DRAWPERTURBS3CURVE;    	break;
+  case 8:	DRAWPERTURBS3CTLPOLY = !DRAWPERTURBS3CTLPOLY;	break;
+  case 9:	DRAWS3CURVE = !DRAWS3CURVE; 		break;
+  case 10:	DRAWS3CTLPOLY = !DRAWS3CTLPOLY;			break;
+  case 11:	DRAWIMAGEPTSSP = !DRAWIMAGEPTSSP;		break;
+  case 12:	DRAWIMAGECURVESP = !DRAWIMAGECURVESP;		break;
+  case 13:	DRAWPERTURBS3CURVESP = !DRAWPERTURBS3CURVESP;   break;
+  case 14:	DRAWHYPERPLANE = !DRAWHYPERPLANE;		break;
+  case 15:	DRAWIMAGELINES = !DRAWIMAGELINES;		break;
+  case 16:	DRAWPOLE = !DRAWPOLE;				break;
+  case 17:	DRAWFIGURE = !DRAWFIGURE;			break;
+  case 18: 	DRAWORDEROFPTS = !DRAWORDEROFPTS;		break;
+  case 19:      DRAWS3CURVESP = !DRAWS3CURVESP;			break;
+  case 20:	DRAWALLDATAPTS = !DRAWALLDATAPTS;		break;
+  case 21:	DRAWALLS3CURVE = !DRAWALLS3CURVE;		break;
+  default: 	break;
+  }
+  glutPostRedisplay();
+}
+
+/******************************************************************************/
+/******************************************************************************/
+
+void display (void)
+{
+  int i,j;
+
+  glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glPushMatrix();
+  glTranslatef (transx, transy, transz);
+  glRotatef (rotx, 1.0, 0.0, 0.0);
+  glRotatef (roty, 0.0, 1.0, 0.0);
+  glRotatef (rotz, 0.0, 0.0, 1.0);
+  glScalef  (zoom, zoom, zoom);
+
+  glLineWidth (1.0);
+  glColor3fv (grey);
+  glutWireSphere (1.0, 40, 40);
+  
+  if (DRAWALLDATAPTS)
+   {
+    glColor3fv (red);
+    glBegin (GL_POINTS);
+    glVertex3f (subpt[0][0][0], subpt[0][0][1], subpt[0][0][3]);
+    for (j=0; j<nSub; j++)
+      for (i=1; i<m[j]; i++)
+	glVertex3f (subpt[j][i][0], subpt[j][i][1], subpt[j][i][3]);  
+    glEnd();
+   }
+  if (DRAWDATAPTS) 
+   {
+    glColor3fv (orange);
+    glBegin (GL_POINTS);
+      for (i=0; i<m[iSub]; i++)
+	glVertex3f (subpt[iSub][i][0], subpt[iSub][i][1], subpt[iSub][i][3]);  
+			/* project to x3=0 in original space */
+    glEnd();
+    glColor3fv (black);
+    glBegin (GL_LINE_STRIP);
+      for (i=0; i<m[iSub]; i++)
+	glVertex3f (subpt[iSub][i][0], subpt[iSub][i][1], subpt[iSub][i][3]); 
+    glEnd();
+   }
+  if (DRAWTANGENTS)
+   {
+    glColor3fv (red);
+    glBegin (GL_LINES);
+    glVertex3f (subpt[iSub][0][0], subpt[iSub][0][1], subpt[iSub][0][3]);
+    glVertex3f (subpt[iSub][0][0] + beginTang[iSub][0],
+      	 	subpt[iSub][0][1] + beginTang[iSub][1],
+		subpt[iSub][0][3] + beginTang[iSub][3]);
+    glVertex3f (subpt[iSub][ m[iSub]-1 ][0],		
+    		subpt[iSub][ m[iSub]-1 ][1],
+		subpt[iSub][ m[iSub]-1 ][3]);
+    glVertex3f (subpt[iSub][ m[iSub]-1 ][0] + endTang[iSub][0],
+    		subpt[iSub][ m[iSub]-1 ][1] + endTang[iSub][1],
+		subpt[iSub][ m[iSub]-1 ][3] + endTang[iSub][3]);
+    glEnd();
+   }
+  if (DRAWPERTURBPTS) 
+   {
+    glColor3fv (green);
+    glBegin (GL_POINTS);
+      for (i=0; i<m[iSub]; i++)
+	glVertex3f (perturbpt[iSub][i][0], perturbpt[iSub][i][1], perturbpt[iSub][i][3]);  /* project to x3=0 in original space */
+    glEnd();
+    glColor3fv (black);
+    glBegin (GL_LINE_STRIP);
+      for (i=0; i<m[iSub]; i++)
+	glVertex3f (perturbpt[iSub][i][0], perturbpt[iSub][i][1], perturbpt[iSub][i][3]);  /* project to x3=0 in original space */
+    glEnd();
+   }
+  if (DRAWPERTURBTANGENTS)
+   {
+    glColor3fv (red);
+    glBegin (GL_LINES);
+    glVertex3f (perturbpt[iSub][0][0], perturbpt[iSub][0][1], perturbpt[iSub][0][3]);
+    glVertex3f (perturbpt[iSub][0][0] + perturbBeginTang[iSub][0],
+      	 	perturbpt[iSub][0][1] + perturbBeginTang[iSub][1],
+		perturbpt[iSub][0][3] + perturbBeginTang[iSub][3]);
+    glVertex3f (perturbpt[iSub][ m[iSub]-1 ][0],		
+    		perturbpt[iSub][ m[iSub]-1 ][1],
+		perturbpt[iSub][ m[iSub]-1 ][3]);
+    glVertex3f (perturbpt[iSub][ m[iSub]-1 ][0] + perturbEndTang[iSub][0],
+    		perturbpt[iSub][ m[iSub]-1 ][1] + perturbEndTang[iSub][1],
+		perturbpt[iSub][ m[iSub]-1 ][3] + perturbEndTang[iSub][3]);
+    glEnd();
+    
+   }
+
+  if (DRAWIMAGEPTS) {
+    glColor3fv (red);
+    glBegin (GL_POINTS);
+    for (i=0; i<m[iSub]; i++)
+     {
+/*      glPushMatrix();
+*      glTranslatef (imagept[i][0], imagept[i][2], imagept[i][3]); */ /* project to x2=0 in image space */
+/*      glutWireCube (.02);
+*      glPopMatrix(); */
+       glVertex3f (imagept[iSub][i][0], imagept[iSub][i][2], imagept[iSub][i][3]);
+     }
+    glEnd();
+    glBegin (GL_LINES);
+    for (i=0; i<m[iSub]; i++)
+     {
+      glVertex3f (0.,0.,0.);
+      glVertex3f (imagept[iSub][i][0], imagept[iSub][i][2], imagept[iSub][i][3]);
+     }
+    glEnd();
+  }
+
+  if (DRAWIMAGEPTSSP) {
+    glColor3fv (black);
+    for (i=0; i<m[iSub]; i++)
+     {
+      glPushMatrix();
+      glTranslatef (imageptSP[iSub][i][0], imageptSP[iSub][i][1], imageptSP[iSub][i][3]); /* project to x3=0 in image space */
+      glutWireCube (.02);
+      glPopMatrix();
+     }
+  }
+
+  if (DRAWIMAGELINES) {
+    glColor3fv (black);
+    glEnable (GL_LINE_STIPPLE);
+    glBegin (GL_LINES);
+    for (i=0; i<m[iSub]; i++)
+     {
+      glVertex3f (1., 0., 0.);
+      glVertex3f (imageptSP[iSub][i][0], imageptSP[iSub][i][1], imageptSP[iSub][i][3]); /* project to x3=0 in image space */
+     }
+    glEnd();
+    glDisable (GL_LINE_STIPPLE);
+  }
+
+  if (DRAWIMAGECURVE) {
+    glColor3fv (red);
+    glLineWidth (2.0);
+    glBegin (GL_LINE_STRIP);
+      for (i=0; i<imageBez[iSub].L * ptsPerBezSegment + 1; i++)
+	glVertex3f (imageCurveDisplay[iSub][i][0], 	  /* project to x2=0 in image space */
+		    imageCurveDisplay[iSub][i][2],
+		    imageCurveDisplay[iSub][i][3]);
+    glEnd();
+  }
+  if (DRAWIMAGECTLPOLY) {
+    glColor3fv (lred);
+    glLineWidth (2.0);
+    glBegin (GL_LINE_STRIP);
+      for (i=0; i<=imageBez[iSub].d * imageBez[iSub].L; i++)
+	glVertex3f (imageBez[iSub].x1[i], imageBez[iSub].x3[i], imageBez[iSub].x4[i]); /* to x2=0 */
+    glEnd();
+    glBegin(GL_POINTS);
+      for (i=0; i<=imageBez[iSub].d * imageBez[iSub].L; i++)
+	glVertex3f (imageBez[iSub].x1[i], imageBez[iSub].x3[i], imageBez[iSub].x4[i]); /* to x2=0 */
+    glEnd();
+  }
+  
+
+  if (DRAWIMAGECURVESP) {
+    glColor3fv (black);
+    glLineWidth (2.0);
+    glBegin (GL_LINE_STRIP);
+      for (i=0; i<imageBezSP[iSub].L * ptsPerBezSegment + 1; i++)
+	glVertex3f (imageCurveDisplaySP[iSub][i][0], 	  /* project to x3=0 in image space */
+		    imageCurveDisplaySP[iSub][i][1],
+		    imageCurveDisplaySP[iSub][i][3]);
+    glEnd();
+  }
+
+  if (DRAWS3CURVE) {
+    glColor3fv (blue);
+    glLineWidth (4.0);
+    glBegin (GL_LINE_STRIP);
+    for (i=0; i<S3curve[iSub].L * ptsPerBezSegment + 1; i++)
+	glVertex3f (S3curveDisplay[iSub][i][0], 	  /* project to x3=0 in orig space */
+		    S3curveDisplay[iSub][i][1],
+		    S3curveDisplay[iSub][i][3]);
+    glEnd();
+    glColor3fv (red);		/* end tangent */
+/*    glBegin (GL_LINES);
+    glVertex3f (subpt[iSub][ m[iSub]-1 ][0],
+    		subpt[iSub][ m[iSub]-1 ][1],
+		subpt[iSub][ m[iSub]-1 ][3]);
+    glVertex3f (subpt[iSub][ m[iSub]-1 ][0] + endTang[iSub][0],
+    		subpt[iSub][ m[iSub]-1 ][1] + endTang[iSub][1],
+		subpt[iSub][ m[iSub]-1 ][3] + endTang[iSub][3]);
+    glEnd(); */
+  }
+  if (DRAWALLS3CURVE) {
+    glLineWidth (4.0);
+    glBegin (GL_LINE_STRIP);
+    for (j=0; j<nSub; j++)
+     {
+      if (j%2 == 0) glColor3fv (red); else glColor3fv (lred);
+      for (i=0; i<S3curve[j].L * ptsPerBezSegment + 1; i++)
+	glVertex3f (S3curveDisplay[j][i][0], 	  /* project to x3=0 in orig space */
+		    S3curveDisplay[j][i][1],
+		    S3curveDisplay[j][i][3]);
+     }		    
+    glEnd();
+  }
+  if (DRAWPERTURBS3CURVE) {
+    glColor3fv (orange);
+    glLineWidth (4.0);
+    glBegin (GL_LINE_STRIP);
+      for (i=0; i<perturbS3curve[iSub].L * ptsPerBezSegment + 1; i++)
+	glVertex3f (perturbS3curveDisplay[iSub][i][0], 	  /* project to x3=0 in orig space */
+		    perturbS3curveDisplay[iSub][i][1],
+		    perturbS3curveDisplay[iSub][i][3]);
+    glEnd();
+    glColor3fv (red);		/* end tangent */
+/*    glBegin (GL_LINES);
+    glVertex3f (perturbpt[iSub][ m[iSub]-1 ][0],
+    		perturbpt[iSub][ m[iSub]-1 ][1],
+		perturbpt[iSub][ m[iSub]-1 ][3]);
+    glVertex3f (perturbpt[iSub][ m[iSub]-1 ][0] + perturbEndTang[iSub][0],
+    		perturbpt[iSub][ m[iSub]-1 ][1] + perturbEndTang[iSub][1],
+		perturbpt[iSub][ m[iSub]-1 ][3] + perturbEndTang[iSub][3]);
+    glEnd(); */
+  }
+
+  if (DRAWS3CURVESP) {
+    glColor3fv (orange);
+    glLineWidth (4.0);
+    glBegin (GL_LINE_STRIP);
+    for (i=0; i<S3curveSP[iSub].L * ptsPerBezSegment + 1; i++)
+	glVertex3f (S3curveDisplaySP[iSub][i][0], 	  /* project to x3=0 in orig space */
+		    S3curveDisplaySP[iSub][i][1],
+		    S3curveDisplaySP[iSub][i][3]);
+    glEnd();
+  }
+
+  if (DRAWPERTURBS3CURVESP) {
+    glColor3fv (black);
+    glLineWidth (4.0);
+    glBegin (GL_LINE_STRIP);
+      for (i=0; i<perturbS3curveSP[iSub].L * ptsPerBezSegment + 1; i++)
+	glVertex3f (perturbS3curveDisplaySP[iSub][i][0], 	  /* project to x3=0 in orig space */
+		    perturbS3curveDisplaySP[iSub][i][1],
+		    perturbS3curveDisplaySP[iSub][i][3]);
+    glEnd();
+  }
+
+  if (DRAWS3CTLPOLY) {
+    glColor3fv (lblue);
+    glLineWidth (2.0);
+    glBegin (GL_LINE_STRIP);
+    for (i=0; i<=S3curve[iSub].d * S3curve[iSub].L; i++)
+      glVertex3f (S3curve[iSub].x1[i], S3curve[iSub].x2[i], S3curve[iSub].x4[i]);  /* to x3=0 */
+    glEnd();
+  }
+
+  if (DRAWPERTURBS3CTLPOLY) {
+    glColor3fv (lgreen);
+    glLineWidth (2.0);
+    glBegin (GL_LINE_STRIP);
+      for (i=0; i<=perturbS3curve[iSub].d * perturbS3curve[iSub].L; i++)
+	glVertex3f (perturbS3curve[iSub].x1[i], perturbS3curve[iSub].x2[i], perturbS3curve[iSub].x4[i]);  /* to x3=0 */
+    glEnd();
+  }
+
+  	/***************************/
+
+  if (DRAWFIGURE)
+   {
+    glColor3fv (black);
+    glBegin (GL_LINE_LOOP);
+    glVertex3f (1.75, -1.75, 0);
+    glVertex3f (1.75, 1.75, 0);
+    glVertex3f (-1.75, 1.75, 0);
+    glVertex3f (-1.75, -1.75, 0);
+    glEnd();
+    
+    glBegin (GL_POINTS);
+    glVertex3f (0,0,1);
+    glVertex3f (.4, sqrt (.68), .4);
+    glVertex3f (.4/.6, sqrt(.68)/.6, 0);
+    glEnd();
+
+    glEnable (GL_LINE_STIPPLE);
+    glBegin (GL_LINES);
+    for (i=0; i<n; i++)
+     {
+      glVertex3f (0,0,1);
+      glVertex3f (.4/.6, sqrt(.68)/.6, 0);
+    }
+    glEnd();
+    glDisable (GL_LINE_STIPPLE);
+   }
+  if (DRAWORDEROFPTS)
+   {
+/*    glColor3fv (blue);
+    glBegin (GL_LINE_STRIP);
+      for (i=0; i<m[iSub]; i++)
+	glVertex3f (subpt[iSub][i][0], subpt[iSub][i][1], subpt[iSub][i][3]); */  /* project to x3=0 in original space */
+/*    glEnd(); */
+/*    for (i=0; i<m[iSub]; i++) 
+     {
+      glRasterPos3f (subpt[iSub][i][0], subpt[iSub][i][1], subpt[iSub][i][3]+.1);
+      glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 49+i); 	
+     } */
+    for (i=0; i<n; i++)
+     {
+      glRasterPos3f (pt[i][0], pt[i][1], pt[i][3]+.1);
+      if (i<9)
+        glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 49+i);   /* `1' = 49 in ASCII */
+      else
+       {
+        glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 48+(i+1)/10);   /* `0' = 48 in ASCII */
+/*        glRasterPos3f (pt[i][0]+.2, pt[i][1], pt[i][3]+.1); */
+        glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 48+((i+1)%10)); 
+       }
+     }
+   }
+  if (DRAWPOLE)
+   {
+    glColor3fv (red);
+    glBegin (GL_POINTS);
+    glVertex3i (1,0,0);
+    glEnd();
+   }
+
+  if (DRAWHYPERPLANE)
+   {
+    glColor3fv (lgrey);
+/*     glPolygonMode (GL_FRONT_AND_BACK, GL_FILL); */
+    glBegin (GL_POLYGON);
+    glVertex3f (0, 1.75, -1.75);
+    glVertex3f (0, 1.75, 1.75);
+    glVertex3f (0, -1.75, 1.75);
+    glVertex3f (0, -1.75, -1.75);
+    glEnd();
+   }
+
+  glPopMatrix();
+  glutSwapBuffers ();
+}
+
+/******************************************************************************
+	Either randomly generate (random # of points, random unit vector on S3)
+	or read in the input.
+	Maintain sampling criterion (consecutive pts at angular distance 
+	< MAXANGLEDIFF).
+	If in visualization mode, transform to x3=0 hyperplane.
+******************************************************************************/
+
+static void Input ()
+{
+  FILE *fp;
+  int i,j;
+  float angle, axis[3], unitaxis[3];
+
+  if (RANDOMINPUT)
+   {
+    srand(time(0));
+    if (NPTKNOWN)
+     { if (n<2) FatalError ("Need at least two input points\n"); }
+    else n = rand() % 98 + 3; 	/* generate 3 to 100 points */
+
+		printf("Input is %i random points.\n", n);
+		printf("Angular difference between consecutive points ");
+		printf("is bounded at %f radians.\n", MAXANGLEDIFF);
+		if (VISUALIZE)
+		  printf("Input projected to x3=0 hyperplane for visualization...\n");
+		printf("These points have been output to the file `random.dat'.\n");
+
+    pt = (V4r *) malloc (n * sizeof(V4r));
+    for (i=0; i<n; i++)	   /* generate random pts, at most MAXANGLEDIFF apart */
+      do
+       {
+        for (j=0; j<4; j++)
+          pt[i][j] = myRand();	/* random number in [-1,1] */
+	if (VISUALIZE) pt[i][2] = 0.;
+        Unit4r (pt[i], pt[i]);
+       }
+      while (SphericalDist4r (pt[i], pt[i==0?0:i-1]) > MAXANGLEDIFF);
+    fp = fopen ("random.dat", "w");
+    fprintf (fp,"%i\n", n);
+    for (i=0; i<n; i++)
+      fprintf(fp,"%f %f %f %f\n", pt[i][0], pt[i][1], pt[i][2], pt[i][3]);
+    fclose(fp);
+   }
+  else
+   {
+    scanf ("%i", &n);
+    if (n < 2) FatalError ("Need at least two input points\n");
+    pt = (V4r *) malloc (n * sizeof(V4r));
+    if (INPUTANGLEAXIS)
+      for (i=0; i<n; i++)
+       {
+        scanf ("%f %f %f %f", &angle, axis, axis+1, axis+2);
+        angle = deg2radians(angle);
+        Unit (axis, unitaxis);
+        SMult (unitaxis, sin(angle/2), axis);
+        for (j=0; j<3; j++)	pt[i][j+1] = axis[j];
+        pt[i][0] = cos(angle/2);
+       }
+    else
+      for (i=0; i<n; i++)
+        scanf ("%f %f %f %f", pt[i], pt[i]+1, pt[i]+2, pt[i]+3);
+
+    if (VISUALIZE)
+     {
+      for (i=0; i<n; i++)  { pt[i][2] = 0; Unit4r (pt[i], pt[i]); }
+      printf("Input projected to x3=0 hyperplane for visualization...\n");
+     }
+
+    /* test that input meets sampling criterion: no large gaps */
+    for (i=0; i<n-1; i++)
+      if (SphericalDist4r (pt[i], pt[i+1]) > MAXANGLEDIFF)
+       {
+        printf("\n(%f,%f,%f,%f) and (%f,%f,%f,%f) at angular distance of %f degrees.\n",
+		  pt[i][0], pt[i][1], pt[i][2], pt[i][3], 
+		  pt[i+1][0], pt[i+1][1], pt[i+1][2], pt[i+1][3], 
+		  radian2deg (SphericalDist4r (pt[i], pt[i+1])));
+        FatalError ("Unacceptable gap between consecutive quaternions.\n");
+       }
+   }
+   
+		if (DEBUG)
+		  for (i=0; i<n; i++)
+		    printf("pt[%i]: (%f,%f,%f,%f)\n", i, pt[i][0], pt[i][1], 
+		    				      pt[i][2], pt[i][3]);
+}			  
+
+/******************************************************************************
+	Define global knot vector on surface, using Riemannian metric.
+******************************************************************************/
+void GlobalKnotVector()
+{
+  int i;
+  
+  printf("Defining global knot vector...\n");
+  knot = (REAL *) malloc (n * sizeof(REAL));
+  knot[0] = 0.;
+  for (i=1; i<n; i++) 		/* distance = angle between points on S3 */
+    knot[i] = knot[i-1] + sqrt(acos(Dot4r(pt[i-1], pt[i])));
+  if (DEBUG)
+   {
+    printf("Global knot vector: (");
+    for (i=0; i<n-1; i++) printf(" %f, ", knot[i]);
+    printf("%f)\n",knot[n-1]);
+   }
+}
+
+/******************************************************************************
+	# of subsets = ceil (n-1 / s-1).
+     	let s = subsetSize; n = s + (s-1) i + left-over (since sets must overlap).
+	thus, n = (i+1)(s-1) + 1 + leftover or n-1 = (i+1)(s-1) + leftover.
+	thus, # of subsets = ceil (n-1 / s-1).
+******************************************************************************/
+void ComputeSubsets()
+{
+  int i,j;
+  int   collapseLast=0;	  /* collapse last subset into 2nd-last? */
+  			  /* (if smaller than 4 elts) */
+  
+  printf("Subdividing data points into subsets...\n");
+  nSub = ceil((float) (n-1)/ (float) (subsetSize-1));
+  /* if last subset smaller than 4, throw it into 2nd last subset */
+  if ((n-1)%(subsetSize-1) < 4 && (n-1)%(subsetSize-1) > 0 && nSub>1) 
+    { nSub-=1; collapseLast = 1; }
+  m = (int *) malloc (nSub * sizeof(int));
+  if (nSub==1) m[0] = n;
+  else
+   {
+    for (i=0; i<nSub-1; i++)  m[i] = subsetSize;
+    if (collapseLast)         m[nSub-1] = subsetSize + (n-1)%(subsetSize-1);
+    else
+     {
+      if ((n-1)%(subsetSize-1) == 0)  m[nSub-1] = subsetSize;
+      else 		    	    m[nSub-1] = (n-1)%(subsetSize-1);
+     }
+   }
+  subpt = (V4r **) malloc (nSub * sizeof(V4r *));
+  subKnot = (REAL **) malloc (nSub * sizeof(REAL *));
+  for (i=0; i<nSub; i++)  
+   {
+    subpt[i] = (V4r *) malloc (m[i] * sizeof(V4r));
+    subKnot[i] = (REAL *) malloc (m[i] * sizeof(REAL));
+   }
+  for (i=0; i<nSub; i++)
+    for (j=0; j<m[i]; j++)
+     {
+      Copy4r (subpt[i][j], pt[i*(subsetSize-1) + j]);
+      subKnot[i][j] = knot[i*(subsetSize-1) + j];
+     }
+   
+  /* allocate data structures for each subset */
+  printf("Allocating data structures...\n");
+  beginTang = (V4r *) malloc (nSub * sizeof(V4r));
+  endTang   = (V4r *) malloc (nSub * sizeof(V4r));
+  perturbBeginTang = (V4r *) malloc (nSub * sizeof(V4r));
+  perturbEndTang   = (V4r *) malloc (nSub * sizeof(V4r));
+  perturbpt = (V4r **) malloc (nSub * sizeof(V4r *));
+  imagept   = (V4r **) malloc (nSub * sizeof(V4r *));
+  imageptSP = (V4r **) malloc (nSub * sizeof(V4r *));
+  for (i=0; i<nSub; i++)
+   {
+    perturbpt[i] = (V4r *) malloc (m[i] * sizeof(V4r));
+    imagept[i]   = (V4r *) malloc (m[i] * sizeof(V4r));
+    imageptSP[i] = (V4r *) malloc (m[i] * sizeof(V4r));
+   }
+  imageEndTang = (V4r *) malloc (nSub * sizeof(V4r));
+  imageBez = (Bez4d *) malloc (nSub * sizeof(Bez4d));
+  imageBezSP = (Bez4d *) malloc (nSub * sizeof(Bez4d));
+  imageCurveDisplay = (V4r **) malloc (nSub * sizeof(V4r *));
+  imageCurveDisplaySP = (V4r **) malloc (nSub * sizeof(V4r *));
+  perturbS3curve = (RatBez4d *) malloc (nSub * sizeof(RatBez4d));
+  perturbS3curveSP = (RatBez4d *) malloc (nSub * sizeof(RatBez4d));
+  perturbS3curveDisplay = (V4r **) malloc (nSub * sizeof(V4r *));
+  perturbS3curveDisplaySP = (V4r **) malloc (nSub * sizeof(V4r *));
+  S3curve = (RatBez4d *) malloc (nSub * sizeof(RatBez4d));
+  S3curveSP = (RatBez4d *) malloc (nSub * sizeof(RatBez4d));
+  S3curveDisplay = (V4r **) malloc (nSub * sizeof(V4r *));
+  S3curveDisplaySP = (V4r **) malloc (nSub * sizeof(V4r *)); 
+}
+
+/******************************************************************************
+	Compute end tangents between subsets.
+	Use FMILL tangent, but then force tangent onto tangent plane 
+	at that point.
+******************************************************************************/
+
+void ComputeEndTangents()
+{
+  int i;
+  V4r FMILLtang, tangEndPt, newTangEndPt;
+  
+  printf("Defining end tangents for each subset...\n");
+  for (i=0; i<nSub-1; i++) /* define tangent at end of ith subcurve */
+   {
+    Minus4r (subpt[i+1][1], subpt[i][ m[i]-2 ], FMILLtang); /* vec between nbours */
+/*    SMult4r (FMILLtang, .25, FMILLtang); */	/* FMILL is too long */ 
+/* HACK! */
+    AddNew4r (subpt[i+1][0], FMILLtang, tangEndPt);
+    /* project onto tangent plane */
+    Project4r (tangEndPt, subpt[i+1][0], subpt[i+1][0], newTangEndPt);
+    Minus4r (newTangEndPt, subpt[i+1][0], endTang[i]);
+    /* ADJUST IT BY KNOT LENGTH HERE OR WHEN DESIGNING CURVE? */
+    /* same tangent at beginning of next subcurve, except adjusted by knot lengths */
+    Copy4r (beginTang[i+1], endTang[i]);
+/*    SMult4r (endTang[i], (subKnot[i+1][1] - subKnot[i+1][0]) / 
+      			 (subKnot[i][m[i]-1] - subKnot[i][m[i]-2]), 
+	     beginTang[i+1]);  */
+	   
+				/* multiply tangent by delta1 / delta0 */
+      				/* relative lengths of tangents related to knot lengths */
+   }
+  for (i=0; i<4; i++)  beginTang[0][i] = endTang[nSub-1][i] = 0.; /* empty tangents at ends */
+}
+
+/******************************************************************************
+	Rotate the input points as far away from pole (1,0,0,0) as possible.
+        Compute minimum eigenvector of covariance matrix of the input points
+	on the quaternion sphere
+        This represents the minor axis of the best-fitting
+        ellipsoid, and thus the normal of the best-fitting plane.
+	In particular, if we rotate this point, q_new, to the pole
+	then the input points are pushed far away from the pole,
+	in the least-squares optimal sense.
+
+	Since for visualization we are using input quaternions with q3=0,
+	the minimum eigenvector will always be (0,0,1,0),
+	so we use the 2nd smallest eigenvector in this code.
+
+	To rotate a unit quaternion v to the x-axis (1,0,0,0),
+	we use a 4-space rotation matrix:
+		| v		|
+	M = 	| unit (w1)	|
+		| unit (w2)	|
+		| unit (w3)	|
+	where w1 = v   x   (0,0,1,0)   x   (1,0,0,0)
+	      w2 = v   x   (1,0,0,0)   x    w1
+	      w3 = v   x   w1  	       x    w2.
+	If v lies in x3=0, M is a rotation about the x3-axis
+	that maps points in x3=0 to points in x3=0.
+	Here we are assuming that v is not e1 or e3: if it is, a trivial
+	rotation matrix can be used.
+******************************************************************************/
+
+static void PerturbInput (int n, V4r *pt, V4r begTangOnS3, V4r endTangOnS3, 
+			  GLboolean PERTURB, V4r *perturbpt, 
+			  V4r perturbBegTangOnS3, V4r perturbEndTangOnS3, 
+			  REAL RestoringRotation[4][4])
+{
+  int i,j;
+  V4r  e1 = {1,0,0,0};
+  V4r  e3 = {0,0,1,0};
+  REAL M[4][4];
+  V4r  qNew;		/* point to be mapped to pole for perturbation */
+  V4r  qNewImage;
+  REAL  minDist=5.;	/* minimum distance of an input point from pole */
+
+  if (!PERTURB)
+   {
+    for (i=0; i<n; i++)
+      Copy4r (perturbpt[i], pt[i]);
+    Copy4r (perturbBegTangOnS3, begTangOnS3);
+    Copy4r (perturbEndTangOnS3, endTangOnS3);
+    for (i=0; i<4; i++)
+      for (j=0; j<4; j++)
+        if (i==j) RestoringRotation[i][j] = 1; else RestoringRotation[i][j] = 0;
+    return;
+   }
+
+  if (VISUALIZE)
+    minNonZeroEigenvectorCovMatrix4r (pt, n, qNew);
+  else
+    minEigenvectorCovMatrix4r (pt, n, qNew); 
+ 
+/*  Copy4r (qNew, e1);	 *//* force no perturbation */
+
+	if (DEBUG)
+	  printf("qNew: (%f,%f,%f,%f)\n", qNew[0], qNew[1], qNew[2], qNew[3]);
+
+			/* compute rotation matrix */
+  for (i=0; i<4; i++)
+    for (j=0; j<4; j++)
+      M[i][j] = 0.0;
+
+  if (Equal4r(qNew, e1))	/* identity matrix */
+    M[0][0] = M[1][1] = M[2][2] = M[3][3] = 1.0;
+  else if (Equal4r (qNew, e3))
+    M[0][2] = M[1][1] = M[2][0] = M[3][3] = 1.0;
+  else
+   {
+    Copy4r (M[0], qNew);
+    TripleCrossProduct (qNew, e1,   e3,   M[1]);
+    TripleCrossProduct (qNew, e1,   M[1], M[2]);
+    TripleCrossProduct (qNew, M[1], M[2], M[3]);
+    for (i=1; i<4; i++)
+      Unit4r (M[i], M[i]);
+   }
+	if (DEBUG)
+	 {
+	  printf("Rotation matrix:\n");
+	  for (i=0; i<4; i++)
+	   {
+	    for (j=0; j<4; j++)	      printf("%f  ", M[i][j]);
+	    printf("\n");
+	   }
+	 }
+  MultMatrix4r (M, qNew, qNewImage);
+  if (!Equal4r(qNewImage,Pole))
+    FatalError ("Source of perturbation not mapped to pole.\n");
+ 			
+			/* map all points under this rotation matrix */
+  for (i=0; i<n; i++)
+    MultMatrix4r (M, pt[i], perturbpt[i]);
+  MultMatrix4r (M, begTangOnS3, perturbBegTangOnS3);
+  MultMatrix4r (M, endTangOnS3, perturbEndTangOnS3);
+	if (DEBUG)
+	 {
+	  printf("Perturbing input...\n");
+	  for (i=0; i<n; i++)  printf("perturbpt[%i]: (%f,%f,%f,%f)\n", i, perturbpt[i][0], 
+				       perturbpt[i][1], perturbpt[i][2], perturbpt[i][3]);
+	 }
+  			/* compute M^{-1} = M^t, the restoration matrix */
+  for (i=0; i<4; i++)
+    for (j=0; j<4; j++)
+      RestoringRotation[i][j] = M[j][i];
+   	if (DEBUG)
+	 {
+	  for (i=0; i<n; i++)
+	    if (SphericalDist4r (perturbpt[i], Pole) < minDist)
+      	      minDist = SphericalDist4r (perturbpt[i], Pole);
+	  printf("Closest point to pole after perturbation is at distance %f = %f degrees.\n", 
+  			  minDist, radian2deg(minDist)); 
+	 }
+}
+
+/******************************************************************************
+	Find 2nd control point in Euclidean space,
+	given first control point b,  desired tangent on S3, 
+	and length of parameter interval of this Bezier curve.
+	See Section 11 of paper.
+	end = 1 iff solving for end (as opposed to beginning) tangent.
+******************************************************************************/
+
+static void solveTang (V4r b, V4r tang, REAL knotlength, 
+		       V4r image2ndCtrlPt, int end)
+{
+  int i,j;
+  float bhat;
+  float **A;	/* matrix associated with solution for 2nd control point
+  			/* of size 4x4 but using Numerical Recipes A[1..n][1..n] */
+  int indx[5];	/* for lu */
+  REAL  d;	/* for lu */
+  REAL  T[5];
+  float foo;
+  
+  REAL dist, t;
+  V4r  bar, foobar;
+
+  A = (float **) malloc (5 * sizeof(float *));
+  for (i=0; i<5; i++) A[i] = (float *) malloc (5 * sizeof(float));
+  bhat = b[0]*b[0] + b[1]*b[1] + b[2]*b[2] - b[3]*b[3];
+/*    for (i=0; i<3; i++) A[0][i] = b[i]*(1-bhat);
+    A[0][3] = b[3]*(-1-bhat);
+    foo = 1-2*b[3]*b[3];
+    for (i=0; i<3; i++) A[i+1][3] = b[i] * foo;		
+    for (i=0; i<3; i++) A[i+1][i] = b[3] * (1-2*b[i]*b[i]); 	
+    A[2][0] = A[1][1] = -2*b[0]*b[1]*b[3];   
+    A[3][0] = A[1][2] = -2*b[0]*b[2]*b[3];
+    A[3][1] = A[2][2] = -2*b[1]*b[2]*b[3];
+    for (i=0; i<4; i++) for (j=0; j<4; j++) A[i][j] *= 6. */
+    
+    /* IMPLEMENT ELEGANT LUDECOMPOSITION MYSELF! */
+/*    LUsolve (4, A, image2ndCtrlPt, begTang); */
+    
+    
+  for (i=1; i<4; i++) A[1][i] = b[i-1]*(1-bhat);
+  A[1][4] = b[3]*(-1-bhat);
+  foo = 1-2*b[3]*b[3];
+  for (i=0; i<3; i++) A[i+2][4] = b[i] * foo;		/* last column */
+  for (i=0; i<3; i++) A[i+2][i+1] = b[3] * (1-2*b[i]*b[i]); 	/* subdiagonal */
+  A[3][1] = A[2][2] = -2*b[0]*b[1]*b[3];   /* symmetric part of lower-left 3x3 */
+  A[4][1] = A[2][3] = -2*b[0]*b[2]*b[3];
+  A[4][2] = A[3][3] = -2*b[1]*b[2]*b[3];
+  for (i=1; i<=4; i++) for (j=1; j<=4; j++) A[i][j] *= 6.;
+    
+  ludcmp (A, 4, indx, &d); 
+  for (i=0; i<4; i++) T[i+1] = knotlength * tang[i];
+  lubksb (A, 4, indx, T);
+  for (i=0; i<4; i++) image2ndCtrlPt[i] = T[i+1];
+  
+  if (end && (dist = Dist4r(b,image2ndCtrlPt)) > .1)
+   {
+    /* use same tangent in Euclidean space, but shorter */
+    /* to keep control point (and thus curve) closer to S3 */
+    t = .1/dist; 	/* use (1-t)b + t 2nd control point */
+    SMult4r (b, 1-t, bar);
+    SMult4r (image2ndCtrlPt, t, foobar);
+    AddNew4r (bar, foobar, image2ndCtrlPt);
+   }
+  
+  /* Unit4r (image2ndCtrlPt, image2ndCtrlPt);  */ /* force onto S3 so not pulling
+  					curve down or up yielding strange behaviour */
+}
+
+/******************************************************************************
+	Map input data to Euclidean space.
+	The beginning tangent is mapped to Euclidean space by computing the
+	2nd control point of the Bezier curve in Euclidean space.
+	(See paper.)
+******************************************************************************/
+
+static void MapInput (int n, V4r *pt, REAL *knot, V4r begTang, V4r endTang, 
+		      int SPflag, V4r *imagept, 
+		      V4r image2ndCtrlPt, V4r image2ndLastCtrlPt)
+{
+  int i,j;
+  V4r definingPt;
+  V4r origin = {0.,0.,0.,0.};
+  V4r flipEndTang;
+  
+  if (SPflag)
+   {
+    for (i=0; i<n; i++) SP (pt[i], imagept[i]); 
+    /* STUB: NEED TO COMPUTE IMAGE OF TANGENT UNDER STEREOGRAPHIC PROJECTION */
+    /* for now, just so tangent is well defined */ 
+    Copy4r (image2ndCtrlPt, begTang); Copy4r (image2ndLastCtrlPt, endTang);
+    return;
+   }
+  for (i=0; i<n; i++)
+   {				/* (p2,p3,p4,1-p1) */
+    for (j=0; j<3; j++)  definingPt[j] = pt[i][j+1];
+    definingPt[3] = 1 - pt[i][0];
+    if      (IMAGEONS3)     Unit4r (definingPt, imagept[i]);
+    else if (CLOSESTIMAGE)
+     {
+      if (i==0) Unit4r (definingPt, imagept[i]);
+      else ClosestPtOnLine4r (imagept[i-1], imagept[i], origin, definingPt);
+     }
+    else  		    Copy4r (imagept[i], definingPt); /*use defining pt*/
+   }
+  
+  /* compute 2nd and 2nd-last control points of Bezier curve in Euclidean space */
+  if (IMAGEONS3 && !Equal4r (begTang, origin))
+    solveTang (imagept[0], begTang, knot[1] - knot[0], image2ndCtrlPt, 0);
+  else
+    Copy4r (image2ndCtrlPt, begTang);	/* incorrect: just so image tangent is defined */
+    
+  if (IMAGEONS3 && !Equal4r (endTang, origin))
+   {
+    /* use formula at other end by symmetry, but need to flip end tangent */
+    SMult4r (endTang, -1., flipEndTang);
+    solveTang (imagept[n-1], flipEndTang, knot[n-1] - knot[n-2], 
+    	       image2ndLastCtrlPt, 1);
+   }
+  else
+    Copy4r (image2ndLastCtrlPt, endTang);
+
+  if (DEBUG)
+    for (i=0; i<n; i++)
+      printf("imagept[%i]: (%f,%f,%f,%f)\n", i, imagept[i][0], imagept[i][1], imagept[i][2], imagept[i][3]);
+}
+
+/******************************************************************************
+	Design curve in image space.
+******************************************************************************/
+
+static void DesignImageCurve (int n, V4r *imagept, REAL *knot, 
+			      V4r ctrlPt2nd, V4r ctrlPt2ndLast,
+			      int SPflag, Bez4d *imageBez, 
+			      V4r **imageCurveDisplay, int ptsPerBezSegment)
+{	
+  int   i;
+  V4r   zeroVec={0.,0.,0.,0.};
+
+  if (Equal4r (ctrlPt2nd, zeroVec) && Equal4r (ctrlPt2ndLast, zeroVec))
+    FitCubicBezWithKnot_4d (n, imagept, knot, imageBez);
+  else if (Equal4r (ctrlPt2nd, zeroVec))
+    FitCubicBezWithKnotAnd2ndLastCtrlPt_4d (n, imagept, knot, ctrlPt2ndLast, imageBez);
+  else if (Equal4r (ctrlPt2ndLast, zeroVec))
+    FitCubicBezWithKnotAnd2ndCtrlPt_4d (n, imagept, knot, ctrlPt2nd, imageBez);
+  else
+    FitCubicBezWithKnotAnd2ndAnd2ndLastCtrlPt_4d (n, imagept, knot, 
+    				ctrlPt2nd, ctrlPt2ndLast, imageBez);
+    
+  PrintBez_4d (imageBez);
+  /*  CheckC2Continuity_Bez4d (imageBez); */
+  PrepareBezDisplay_4d (imageBez, &(*imageCurveDisplay), ptsPerBezSegment); 
+  if (SPflag)
+    /* prep SP's image curve for application of M_curve, by shifting left */
+    for (i=0; i<=imageBez->d * imageBez->L; i++)
+     {
+      imageBez->x1[i] = imageBez->x2[i];
+      imageBez->x2[i] = imageBez->x3[i];
+      imageBez->x3[i] = imageBez->x4[i];
+      imageBez->x4[i] = 1;
+     }
+}
+
+/******************************************************************************
+	Map image curve to S3.
+******************************************************************************/
+
+static void MapCurve (Bez4d *imageBez, RatBez4d *S3curve, V4r **S3curveDisplay,
+		      int ptsPerBezSegment)
+{
+  M_curve (imageBez, S3curve);
+  PrepareRatBezDisplay_4d (S3curve, S3curveDisplay, ptsPerBezSegment);
+  CheckC1Continuity_RatBez4d (S3curve);
+  /* CheckC2Continuity_RatBez4d (S3curve); */ /* not correct rational check yet */
+  
+  if (DEBUG) printf("Beginning tangent on sphere is (%f,%f,%f,%f).\n",
+		(6*S3curve->weights[1]/S3curve->weights[0])
+			* (S3curve->x1[1] - S3curve->x1[0]),
+		(6*S3curve->weights[1]/S3curve->weights[0])
+			* (S3curve->x2[1] - S3curve->x2[0]),
+		(6*S3curve->weights[1]/S3curve->weights[0])
+			* (S3curve->x3[1] - S3curve->x3[0]),
+		(6*S3curve->weights[1]/S3curve->weights[0])
+			* (S3curve->x4[1] - S3curve->x4[0]));
+} 
+
+/******************************************************************************
+******************************************************************************/
+
+static void RestorePerturbation (RatBez4d *S3curve, RatBez4d *perturbS3curve, 
+			         REAL RestoringRotation[4][4])
+{			  
+  int   i,j;
+  V4r   ctrlpt, newctrlpt; 
+
+  S3curve->d = 6;
+  S3curve->L = perturbS3curve->L;
+  S3curve->knots  = (REAL *) malloc ((S3curve->L + 1) * sizeof(REAL));
+  S3curve->x1 = (REAL *) malloc ((S3curve->d * S3curve->L + 1) * sizeof(REAL));
+  S3curve->x2 = (REAL *) malloc ((S3curve->d * S3curve->L + 1) * sizeof(REAL));
+  S3curve->x3 = (REAL *) malloc ((S3curve->d * S3curve->L + 1) * sizeof(REAL));
+  S3curve->x4 = (REAL *) malloc ((S3curve->d * S3curve->L + 1) * sizeof(REAL));
+  S3curve->weights = (REAL *) malloc ((S3curve->d * S3curve->L + 1) * sizeof(REAL));
+
+  for (i=0; i<=S3curve->L; i++)
+    S3curve->knots[i] = perturbS3curve->knots[i];
+  for (i=0; i<=S3curve->d * S3curve->L; i++)
+   {
+    ctrlpt[0] = perturbS3curve->x1[i];		/* wow! inelegant!! */
+    ctrlpt[1] = perturbS3curve->x2[i];
+    ctrlpt[2] = perturbS3curve->x3[i];
+    ctrlpt[3] = perturbS3curve->x4[i];
+    MultMatrix4r (RestoringRotation, ctrlpt, newctrlpt);
+    S3curve->x1[i] = newctrlpt[0];
+    S3curve->x2[i] = newctrlpt[1];
+    S3curve->x3[i] = newctrlpt[2];
+    S3curve->x4[i] = newctrlpt[3];
+    S3curve->weights[i] = perturbS3curve->weights[i];
+   }
+}
+
+/******************************************************************************
+	begTangOnS3 and endTangOnS3 is input to the S3spline: 
+	the curve should be designed to match these end tangents on S3.	
+	knot vector of curve in Euclidean space is predefined in knot.
+******************************************************************************/
+
+void S3spline (int n, V4r *pt, REAL *knot, V4r begTangOnS3, V4r endTangOnS3,
+	       int SPflag, V4r *imagept, Bez4d *imageBez, int ptsPerBezSegment,
+	       V4r **imageCurveDisplay, RatBez4d *S3curve,
+	       V4r **S3curveDisplay)
+{
+  V4r   image2ndCtrlPt;		/* 2nd Bezier control point of spline in Euclidean space */
+  V4r   image2ndLastCtrlPt;
+
+  MapInput (n, pt, knot, begTangOnS3, endTangOnS3, SPflag, 
+  	    imagept, image2ndCtrlPt, image2ndLastCtrlPt);
+  DesignImageCurve (n, imagept, knot, image2ndCtrlPt, image2ndLastCtrlPt, 
+  		    SPflag, imageBez, imageCurveDisplay, ptsPerBezSegment);
+  MapCurve (imageBez, S3curve, S3curveDisplay, ptsPerBezSegment);
+}	       
+
+/******************************************************************************/
+/******************************************************************************/
+
+int main(int argc, char **argv)
+{
+  int   i,j;
+  int   ArgsParsed=0;
+  int   nProbes = NQUALITYPROBES;	/* for covariant accel computation */
+  V4r   BeginTang, EndTang;
+  
+  RoutineName = argv[ArgsParsed++];
+  while (ArgsParsed < argc)
+    if ('-' == argv[ArgsParsed][0])
+      switch (argv[ArgsParsed++][1])
+       {
+	case 'a':	INPUTANGLEAXIS = 1;	break;
+	case 'd':	VISUALIZE = 0; 		break;
+	case 'r':	RANDOMINPUT = 1;	break;
+	case 'R': 	NPTKNOWN = RANDOMINPUT = 1;
+			n = atoi(argv[ArgsParsed++]); break;
+	case 'p':	PERTURB = 0;		break;
+	case 's':	subsetSize = atoi(argv[ArgsParsed++]); break;
+	case 'c': 	CLOSESTIMAGE=1; IMAGEONS3=0; break;
+	case 'o':	IMAGEONS3=1; CLOSESTIMAGE=0; break;
+	case 'D': 	IMAGEONS3=CLOSESTIMAGE=0;	break;
+	case 'P':	nProbes = atoi(argv[ArgsParsed++]); break;
+	case 'b':	ptsPerBezSegment = atoi(argv[ArgsParsed++]); break;
+        case 'h': 
+	default: 	usage(); exit(-1);
+       }
+    else { usage(); exit(-1); }
+ 
+  /************************************************************/
+
+  Input();		/* generates n and pt */
+  GlobalKnotVector();
+  ComputeSubsets();
+  ComputeEndTangents();
+  for (i=0; i<nSub; i++)
+   {
+    printf("\n\nSubcurve %d\n", i);
+    PerturbInput (m[i], subpt[i], beginTang[i], endTang[i], PERTURB, 
+  	 	  perturbpt[i], perturbBeginTang[i], perturbEndTang[i],
+		  RestoringRotation);
+    S3spline (m[i], perturbpt[i], subKnot[i], 
+    	      perturbBeginTang[i], perturbEndTang[i], 0, 
+  	      imagept[i], &(imageBez[i]), ptsPerBezSegment, &(imageCurveDisplay[i]),
+	      &(perturbS3curve[i]), &(perturbS3curveDisplay[i]));
+
+    RestorePerturbation (&(S3curve[i]), &(perturbS3curve[i]), RestoringRotation);
+    PrepareRatBezDisplay_4d (&(S3curve[i]), &(S3curveDisplay[i]), ptsPerBezSegment);
+
+    /* determine changed end tangent on S3 (after shortening in Euclidean space) */
+    if (i<nSub-1) 
+     {
+      EndTangRat_4d (&(perturbS3curve[i]), perturbEndTang[i]);
+      EndTangRat_4d (&(S3curve[i]), endTang[i]);
+      Copy4r (beginTang[i+1], endTang[i]);
+     }
+
+    S3spline (m[i], perturbpt[i], subKnot[i], 
+    	      perturbBeginTang[i], perturbEndTang[i], 1,
+  	      imageptSP[i], &(imageBezSP[i]), ptsPerBezSegment, &(imageCurveDisplaySP[i]),
+	      &(perturbS3curveSP[i]), &(perturbS3curveDisplaySP[i]));
+    RestorePerturbation (&(S3curveSP[i]), &(perturbS3curveSP[i]), RestoringRotation);
+    PrepareRatBezDisplay_4d (&(S3curveSP[i]), &(S3curveDisplaySP[i]), ptsPerBezSegment);
+
+    covAccel += CovariantAccel_Spherical (&(S3curve[i]), nProbes);
+    covAccelSP += CovariantAccel_Spherical (&(S3curveSP[i]), nProbes);
+    
+/*    BegTangRat_4d (&(S3curve[i]), beginTang[i]); */	/* display use only */
+/*    EndTangRat_4d (&(S3curve[i]), endTang[i]); */
+/*  if (i<nSub-1)
+*      SMult4r (endTang[i], (subKnot[i+1][1] - subKnot[i+1][0]) / 
+*      			   (subKnot[i][m[i]-1] - subKnot[i][m[i]-2]), 
+*	       begTang); */
+		/* multiply tangent by delta1 / delta0 */
+      		/* relative lengths of tangents related to knot lengths */
+/*    EndTangRat_4d (&(perturbS3curve[i]), perturbEndTang[i]); */ /* display use only */
+/*    EndTangRat_4d (&(S3curveSP[i]), begTangSP); */
+   }
+   
+  printf("Net squared tangential (covariant) acceleration of S3 curve generated by M = %f\n",
+	  	covAccel);
+  printf("Net squared tangential (covariant) acceleration of S3 curve generated by spherical projection = %f\n",
+  	  	covAccelSP); 
+		
+  for (i=1; i<nSub; i++)
+   {
+    printf("Desired beg tangent of subcurve %i: (%f,%f,%f,%f)\n",
+    	    i, beginTang[i][0], beginTang[i][1], beginTang[i][3]);
+    BegTangRat_4d (&(S3curve[i]), BeginTang);
+    printf("Actual  beg tangent of subcurve %i: (%f,%f,%f,%f)\n",
+    	    i, BeginTang[0], BeginTang[1], BeginTang[3]);
+/*    printf("Desired end tangent of subcurve %i: (%f,%f,%f,%f)\n",
+    	    i, endTang[i][0], endTang[i][1], endTang[i][3]);
+    EndTangRat_4d (&(S3curve[i]), EndTang);
+    printf("Actual  end tangent of subcurve %i: (%f,%f,%f,%f)\n",
+    	    i, EndTang[0], EndTang[1], EndTang[3]); */
+   }
+
+  /************************************************************/
+
+  if (VISUALIZE)
+   {
+    glutInitWindowPosition (0,0);
+    glutInitWindowSize (500,500);
+    glutInit (&argc, argv);
+    glutInitDisplayMode (GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+    glutCreateWindow ("Rational quaternion splines");
+    glutDisplayFunc (display);
+    glutKeyboardFunc (keyboard);
+    glutMouseFunc (mouse);
+    glutMotionFunc (motion);
+    glutReshapeFunc (reshape);
+    glutVisibilityFunc (visibility);
+    gfxinit();
+    glutCreateMenu (menu);
+    glutAddMenuEntry ("Order of input points", 18);
+    glutAddMenuEntry ("All input points", 20);
+    glutAddMenuEntry ("All S3 curve", 21);
+    glutAddMenuEntry ("Input points of a subset", 1);
+    glutAddMenuEntry ("Perturbed input points of a subset", 3);
+    glutAddMenuEntry ("Tangents of subset", 2);
+    glutAddMenuEntry ("Perturbed tangents of subset", 22);
+    glutAddMenuEntry ("Image points", 4);
+    glutAddMenuEntry ("Image curve", 5);
+    glutAddMenuEntry ("Image curve control polygon", 6);
+    glutAddMenuEntry ("Perturbed S3 curve", 7);
+    glutAddMenuEntry ("Perturbed S3 curve control polygon", 8);
+    glutAddMenuEntry ("S3 curve", 9); 
+    glutAddMenuEntry ("S3 curve control polygon", 10); 
+    glutAddMenuEntry ("Image points under SP", 11); 
+    glutAddMenuEntry ("Image curve under SP", 12);
+    glutAddMenuEntry ("Perturbed S3 curve under SP", 13);
+    glutAddMenuEntry ("Hyperplane", 14);
+    glutAddMenuEntry ("Image lines", 15);
+    glutAddMenuEntry ("Pole", 16);
+    glutAddMenuEntry ("Figure", 17);
+    glutAddMenuEntry ("S3 curve under SP", 19);
+    glutAttachMenu (GLUT_RIGHT_BUTTON);
+    glutMainLoop();
+   }
+  return 0;             /* ANSI C requires main to return int. */
+}
+
+
+
+
+
+/******************************************************************************
+	PerturbOld : see oldsoft/qspline.c for code. (stripped because of AddNew)
+
+	Rotate the input points so that none is at the pole.
+
+	Check if any point is the pole (1,0,0,0).
+	If yes, compute a point Q_{new} not equal to any of the input points,
+	as follows: find closest point Qc to first point Q1;
+	set Q_{new} = midpoint (Q1,Qc) on sphere.
+	Rotate sphere so that Qnew becomes the pole.
+	This will move all input points away from pole.
+	This is an O(n) procedure, which is optimal for finding a point
+	not in the input.
+
+	WRONG: Note that to rotate a quaternion q to (1,0,0,0)
+	is particularly easy since (1,0,0,0) is the identity quaternion:
+	it suffices to multiply the quaternion by q^{-1}.
+	MULTIPLICATION OF A POINT IN 4-SPACE (or 3-space for that matter)
+	BY A QUATERNION DOES NOT RESULT IN ROTATION OF THE POINT
+	BY THE ASSOCIATED QUATERNION ROTATION.
+	Thus, the perturbing rotation is q -> q_new^{-1} * q
+	and the restoring rotation is q -> q_new * q.
+
+	To rotate a unit quaternion q to the x-axis (1,0,0,0),
+	we use a 4-space rotation matrix:
+
+		| v		|
+	M = 	| unit (w1)	|
+		| unit (w2)	|
+		| unit (w3)	|
+
+	where w1 = v   x   (0,0,1,0)   x   (1,0,0,0)
+	      w2 = v   x   (1,0,0,0)   x    w1
+	      w3 = v   x   w1  	       x    w2.
+	If v lies in x3=0, M is a rotation about the x3-axis
+	that maps points in x3=0 to points in x3=0.
+	Here we are assuming that v is not e1 or e3: if it is, a trivial
+	rotation matrix can be used.
+		
+******************************************************************************/
+
+

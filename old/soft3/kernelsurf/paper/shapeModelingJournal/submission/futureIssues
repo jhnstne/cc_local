@@ -1,0 +1,68 @@
+Action items for extension of 'The Kernel of a Freeform Surface and its Duality
+with a Certain Convex Hull'
+------------------------------------------------------------------------
+
+we want to compute cusp curves, bitangent and tritangent planes, and general
+tangential surfaces for any rational Bezier surface
+
+we will begin by designing some test surfaces with interesting bitangent
+families and tritangent planes, as well as interesting kernels
+
+we will explore the construction of tensor product Bezier surfaces from
+Alan Barr's spherical product (which he used in the construction of superquadrics).
+Gershon's IRIT system is another source of models and model construction schemes.
+
+extend the tangential surface theory to rational Bezier surfaces
+(to allow the computation of tangential surfaces for surfaces of revolution)
+	see tangsurfsrc/completeTangSurf.cpp
+
+present datasets: teapot and teapot components, pear, top
+future datasets (if extended to rational): all the surfaces of revolution
+desired datasets: Elber models
+
+complexity of computing tangential d-surface (no clipping)
+	we get O(m^2 n^2) using \sum_{k=0}^{2m-1} \sum_{l=0}^{2n-1} kl
+	since the lemma on d_alpha,beta in Dagstuhl paper suggests
+	that one control point requires O(kl) time, since we must find
+	all pairs that sum to k (of which there appear to be k/2, since (0,k)
+	(1,k-1),... and all pairs that sum to l)
+complexity of computing tangential a-surface (clipping)
+complexity of computing tangential surface system
+
+*computation of cusps and cusp curves*
+
+	note that you compute curve cusps as duals of inflection points;
+	inflection points are computed as zeros of curvature;
+	perhaps we should find cusp curves as duals of parabolic curves;
+	and find parabolic curves by numerically tracing (by computing
+	Gaussian curvature)
+	
+	Gershon could help here (with computation of parabolic curves)
+
+computation of convex hull of degenerate surfaces (like tangential surfaces)
+
+computation of bitangent planes
+	(the Dagstuhl paper only addressed computation of tangential surfaces)
+computation of tritangent planes
+computation of bitangent plane families
+
+computation of silhouettes from tangential surfaces
+
+detailed analysis of the computation of the first point of a kernel 
+(for bootstrapping the kernel computation, or for choosing a good point
+for visibility applications)
+
+note: the bitangent developables of the tangential surface
+are computed using cusp curves (directly) rather than mapping back
+to the original surfaces (the dual of the dual)
+
+cowrite these papers with Gershon and Myung-Soo
+
+journal version of curve kernel paper (perhaps with Wenping as well)
+
+invite Wenping again (to work on these ideas)
+
+-------------------------
+
+(this file was initiated during the final revisions of the journal 
+version of 'A Kernel of a Freeform Surface ...')

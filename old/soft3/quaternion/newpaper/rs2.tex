@@ -1,0 +1,325 @@
+\documentclass[12pt]{article} 
+\usepackage{times}
+\usepackage[pdftex]{graphicx}
+\input{header-consecutive}
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{0in}
+\setlength{\textheight}{8.6in}
+\setlength{\textwidth}{6.875in}
+\setlength{\columnsep}{5mm}
+% \markright{Sweeping frustra (\today) \hfill}
+% \pagestyle{myheadings}
+
+% -----------------------------------------------------------------------------
+\title{Tech report 2: Sweeping view frustra along rational motions: blind motion planning}
+% Johnstone and Williams
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Think camera control in CSI, Las Vegas, Smallville, Final Fantasy.
+Think automated motion planning through a virtual scene.
+\end{abstract}
+
+Suppose that we have the capacity to build a rational interpolating quaternion spline.
+\begin{itemize}
+\item Define the Bezier paths of the four corners of the back view frustrum.
+      (we know the offset vector from the center, explored in drawCameraWindowGlobal)
+      (Eurographics 1995 paper gave us the Bezier representation of the quaternion spline
+       as rotation matrix: degree 12 spline)
+      (this should yield the answer using P(t) + O(t)*offsetVector)
+\item Intersect the Bezier paths with the polyhedral scene.
+      (should we intersect with individual triangles? no, too many triangles)
+      (should we gather mesh into a Brep? not the highest priority)
+      (we need to store the mesh in a spatial decomposition like an octree)
+      (how expensive is Bezier curve intersection detection with a triangle? this is
+       a generalization of ray casting, perhaps called curve casting)
+\end{itemize}
+
+Challenges: 
+\begin{itemize}
+\item octree spatial decomposition for triangular mesh (may be available already)
+\item development of other mesh formats, especially architectural
+\item Vienna city scene, New Orleans mesh
+\item collection/editing tool for orientation keyframes
+\item orientation constraints
+\item bitangents on S3 for shortest path around obstacles
+\item very interesting problem: smooth interpolation of points while avoiding obstacles
+      (examined in SIGGRAPH 2004 paper but punted by using optimization)
+\item motion planning through a visibility structure!!
+\end{itemize}
+
+Tangential curve challenges:
+\begin{itemize}
+\item smooth soft shadows
+\item release of the software for tangential curves and surfaces
+\item revisit this in class
+\end{itemize}
+
+\section{Vertex paths}
+
+The path followed by a vertex of the camera (back view frustrum)
+under a rational motion may be defined by a rational Bezier curve.
+We now develop the details of this rational Bezier representation of the vertex path.
+The position curve $P(t)$ defines the path followed by the center of the camera 
+(back view frustrum).
+This is a polynomial path built through standard interpolation of the keyframe positions.
+Let $V$ be the vector from the center to a corner of the back view frustrum.
+The rational quaternion spline $Q(t)$ defines the camera's orientation along the path.
+It may be translated to a parameterized rotation matrix $O(t)$,
+represented in the Bernstein polynomial basis (see Eurographics paper \cite{jjjimbo95b}).
+The vertex path may be represented by $P(t) + O(t)V$, which may be expressed
+in the Bernstein basis, and thus as a rational Bezier curve.
+In particular, suppose that the positions and orientations of the keyframes
+are $\{P_i\}_{i=0}^n$ and quaternions $\{Q_i\}_{i=0}^n$.
+
+Extract relevant parts of Euro95: Lemma 6.2 and variant of Theorem 7.1
+
+\section{Vertex path intersection}
+
+Intersection of rational Bezier curve and triangle.
+
+Identification of the relevant triangles using a spatial decomposition.
+
+Consider the intersection of a rational Bezier curve and a triangle.
+The polyhedral mesh should be entered into a spatial decomposition (octree or BSP, probably octree)
+with leaves containing faces (possibly split into subfaces to accomodate better
+storage in octree).
+The curve is then subdivided into the octree.
+Since we are only interested in the first intersection, not all intersections,
+we first consider the closer half of each subdivision, only descending to the further
+half when it has been determined that the first half does not intersect.
+The curve is subdivided and passed down the octree until it is small enough
+or until there are a small number of triangles in the octree cell.
+Once we have identified a small number of triangles to intersect with a small curve segment, the curve/triangle intersection is done as follows.
+
+Get an axis-aligned bounding box (ABB) of the triangle.
+Get an ABB of the curve segment.
+Subdivide until ABB of curve is small enough (and maximum curvature is low: to avoid
+missing an intersection from a very small loop).
+Replace the curve by a line segment between its two endpoints.
+Intersect the line segment with the plane of the triangle.
+Then, if an intersection exists, test it against the three edges of the triangle.
+Notice that the curve-triangle intersection may be parallelized (although we will
+only have a small number of these intersections if the octree decomposition is done 
+correctly).
+
+\section{Rational camera control}
+
+Consider the following camera control problem.
+Given certain desired viewpoints for a camera, we are to move the camera through the scene
+so that it hits these predefined cues.
+Suppose that the camera path is designed as if the motion is in free space,
+which is a much simpler motion plan.
+As the camera moves along the computed path, it will collide with the scene 
+(i.e., the view will cut through some of the scene).
+We want to detect these camera collisions (and eventually correct them).
+
+% Application: camera control through a scene, given certain desired viewpoints.
+%    i.e., you specify certain viewpoints in a scene from which to build a flythrough
+%    that hits certain cues.
+% Issue: camera is not an object like typical animations;
+%        however, orientation is a key input to a camera, and collision is well defined:
+% Source of positions: camera viewpoints at hit points.
+% Source of orientations: camera viewpoints at hit points.
+
+This camera collision detection problem is formalized as follows.
+The position of the camera is the center of the back of the frustrum.
+The orientation of the camera is the normal to the frustrum's back plane.
+A bad camera configuration is one whose back plane of the viewing frustrum 
+intersects the scene (the side planes will almost always do so, with no ill effects).
+We only have to keep track of the back plane of the view frustrum: this makes possible
+a swept envelope approach, as follows.
+Consider the back plane of the view frustrum moving through space with a moving camera.
+We are interested in its intersections with the scene, which reflect ugly cutthroughs
+of the scene in the rendering of the flythrough.
+The four edges of the quadrilateral defining the back plane define four ruled surfaces
+as they sweep through space.
+These are rational ruled surfaces when the motion is rational.
+We could consider the intersection of these four ruled surfaces with the scene,
+but we can simplify further.
+Suppose that the back plane of the view frustrum starts out in a free position,
+not intersecting the scene.
+Then one of its line segments can intersect the scene if and only if one of its vertices
+(an endpoint of the line segment) intersects the scene.
+Moreover, the vertex intersection detects the initial collision.
+Therefore, it is sufficient to test the intersection of the four vertex curves
+(the four rational curves defined by the motion of the four vertices of the back plane
+of the view frustrum) with the scene.
+Intersection points reveal collisions where the motion must be altered.
+In short, a camera path is safe iff the 4 rational endcurves of its view frustrum
+backplane do not intersect the scene (where the camera starts out safe).
+
+% WE NEED RULED SURFACE INTERSECTION?: 
+Since a scene object could interfere with a frustrum edge without
+interfering with a frustrum vertex, we must compute the intersection of the moving edge
+not the moving vertex, and hence the intersection of a ruled surface with the scene
+rather than a curve with the scene.
+% Therefore, think of ruled surface intersection methods.
+
+Initial challenges:
+\begin{itemize}
+\item find realistic hit points;
+      how close do they have to be to allow dumb interpolation rather than
+      smart motion planning?
+\item find 4 rational endcurves of view frustrum from position/orientation 
+\item verify that motions generated from these keyframes are locally perturbable
+      to collision-free motions
+\end{itemize}
+
+Another interpretation of this paper: DUMB OR BLIND MOTION PLANNING (this 
+strongly motivates rational motion).
+Collision detection using the rational swept volumes generated by the rational motions;
+this would be a 'blind' replacement of the keen-sighted, or general, motion planner 
+proposed below, which incorporates the environment into its planning;
+dumb or blind in the sense that a motion is generated (with no knowledge of obstacles)
+and tested for collision, then regenerated
+based on the found collision and retested, etc.;  it is a valid strategy for local
+motions that are not expected to require large adjustments; the global motion, at a
+crude level, would be built by a different planner.
+% A rational motion is defined for a rigid object by interpolating 
+% positions/orientations; these orientations are found how?
+
+\section{Related work}
+
+Drucker et. al. \cite{drucker92} on procedural camera movements.
+Symposium on interactive 3d graphics 1992, p. 67-70.
+See Shoemake's citings for various papers on camera control.
+
+\section{Followup paper}
+
+How should the motion be altered when a collision is detected?
+Once a collision is detected, there are several options to correct the motion.
+As a first crack, assume that a small perturbation will correct the motion:
+that is, the distance of our present path from a safe path is small.
+If a collision is detected between keyframes i and i+1, we could perturb i,
+we could perturb i+1, or we could add a new keyframe local to the collision.
+We prefer the latter option, but there are various options here.
+We will start by using the first collision only, and move perpendicular to the
+present curve's tangent at this collision, which seems to correct in the best
+direction to avoid a collision (we don't want to move in the present tangent direction).
+The direction in this normal plane could be determined using which vertex of the four
+back vertices has intersected: we could move within the normal plane 
+towards the nonintersecting vertices.  
+Alternatively, we could intersect the entire backplane quadrilateral with the scene
+and determine a motion in this plane of the quadrilateral (which is also the normal plane)
+that is guaranteed to remove collision.
+Experiments with these approaches are necessary.
+
+Flowchart: generation of flythrough $\rightarrow$ collision detection $\rightarrow$ 
+path correction.
+We could generate better paths by forcing paths down center of halls by shrinking
+the corridors inward a set amount.  This shrinking could be removed if the path
+correction gets too difficult.
+
+6/22/05 thoughts:
+At present, we are finding the intersection of ruled surface triangles 
+(the ruled surface defined by an edge of the frustrum), of which there are 8 between each pair
+of frustrum samples, since there are 4 edges.
+By adding four more triangles, two each that define the frustrum at each sample, we can find
+intersections with the face of the frustrum as well as the vertices and edges, which detects
+the unusual but certainly possible 
+collision where the scene enters through the frustrum face without touching the edges, as
+in a camera that is taking a closeup of a concave protrusion from the wall and gets too close,
+shattering the camera lens.  This solves this nagging problem.
+
+The first approach to collision correction is the introduction of new keyframes in the 
+region of a collision.
+We will detect the entire interval of a continuous collision, 
+and measure the depth of collision along this interval to find the maximum depth.
+Depth is measured as the maximum distance of a colliding vertex from a scene face that the
+frustrum intersects.
+This depth dictates the size of the correction.
+The time location of the correction depends on the length of the collision interval:
+if the interval is short, a new keyframe is introduced at the midpoint of the interval,
+or possibly at the point of deepest collision;
+if the interval is long, new keyframes are introduced at regular distances along the 
+collision interval.
+At the time location of the correction, the direction of correction is chosen as an 
+average of the vectors from the colliding vertices (at this time location) to the frustrum center.
+
+The time location, size and direction of the corrections are all a matter of experimentation.
+We also need to try techniques where orientation is changed at the introduced keyframes.
+At the moment, a keyframe introduced at time $t'$ will be given orientation $Q(t')$,
+where $Q(t)$ is the quaternion spline.
+
+\section{Future papers}
+
+\begin{itemize}
+\item Orientation planning with orientation constraints on camera.
+
+Equivalently, ACTIVE ORIENTATION OBSTACLES.
+Design of quaternion splines that avoid active orientation obstacles
+(and the definition of these orientation obstacles using quaternion splines);
+an active orientation obstacle is an obstacle based on the movement of the robot,
+not on the environment, such as not spilling milk;
+
+See obstacle.tex
+
+\item high level motion algorithm (decomposition of scene into cells)
+
+\item PASSIVE ORIENTATION OBSTACLES AND INTELLIGENT PLANNING.
+Generation of collision-free motions, using
+passive orientation obstacles defined by the environment; this is harder
+and would solve a problem mentioned way back in Lozano-Perez.
+
+\item camera or object paths that are sensitive to the visibility structure of the scene
+\item camera paths that remain invisible to a certain light or object
+\item camera paths that keep a certain object visible
+\end{itemize}
+
+Ross reading:
+\begin{itemize}
+\item my quaternion spline papers
+\item * my Bezier curve software
+\item Bezier intersection papers, ruled surface intersection paper
+\item rational Bezier
+\item * introduction to robot motion (Latombe)
+\item give me game design examples, TV examples
+\item * build more architectural flythroughs
+\item what underlying data structure to store the scene?
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+
+\subsection{Coordination of position and orientation in the motion}
+
+{\bf Elaborate on this simple coordination strategy in next motion paper:}
+DON'T USE SAME KNOT SEQUENCE FOR POSITION AND ORIENTATION CURVES.
+DEFINE CURVES TOTALLY INDEPENDENTLY AND USE KEYFRAME CORRESPONDENCE TO
+COORDINATE MOTION.
+FOR EXAMPLE, IF POSITION KEYFRAMES HAVE KNOTS 0,1,2,3,4,5 AND 
+ORIENTATION KEYFRAMES HAVE KNOTS 0 .1 .6 10 20 21, THEN
+SAMPLE AT 3.5 ON POSITION CURVE CORRESPONDS TO SAMPLE AT 15 ON ORIENTATION CURVE.
+
+\clearpage
+
+% written May 11, 2005
+\section{}
+
+The motion is described by a changing position and a changing orientation,
+which are represented by a position spline and a quaternion spline respectively.
+The position spline is built from position keyframes, and the quaternion spline
+from orientation keyframes.
+Suppose that at some stage of the motion, the position is P = (p1,p2,p3) and the
+orientation is Q = (q1,q2,q3,q4).
+This quaternion is translated to a rotation matrix M.
+The quaternion or rotation matrix represents the change in orientation undergone by
+the object from a canonical orientation.
+
+Suppose that the motion is of a camera.
+Then gluLookAt can be used to encode the motion.
+gluLookAt depends on an eye position, a direction vector, and an up vector.
+The eye position is P.
+% what is the interpretation of the orientation? change of orientation from canonical?
+Canonically, the camera looks down the negative z-axis.
+Under a rotation by M, the third row is transformed into the z-axis (see ROCOCO),
+so the direction vector is the negated third row of M.
+Canonically, the camera's up vector is the y-axis.
+Under a rotation by M, the second row is the preimage of the y-axis (see ROCOCO),
+so the up vector is the second row of M.
+
+\end{document}

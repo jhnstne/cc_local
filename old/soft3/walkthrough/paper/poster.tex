@@ -1,0 +1,355 @@
+% This is "sig-alternate.tex" V1.3 OCTOBER 2002
+% This file should be compiled with V1.6 of "sig-alternate.cls" OCTOBER 2002
+%
+% This example file demonstrates the use of the 'sig-alternate.cls'
+% V1.6 LaTeX2e document class file. It is for those submitting
+% articles to ACM Conference Proceedings WHO DO NOT WISH TO
+% STRICTLY ADHERE TO THE SIGS (PUBS-BOARD-ENDORSED) STYLE.
+% The 'sig-alternate.cls' file will produce a similar-looking,
+% albeit, 'tighter' paper resulting in, invariably, fewer pages.
+%
+% ----------------------------------------------------------------------------------------------------------------
+% This .tex file (and associated .cls V1.6) produces:
+%       1) The Permission Statement
+%       2) The Conference (location) Info information
+%       3) The Copyright Line with ACM data
+%       4) NO page numbers
+%
+% as against the acm_proc_article-sp.cls file which
+% DOES NOT produce 1) thru' 3) above.
+%
+% Using 'sig-alternate.cls' you have control, however, from within
+% the source .tex file, over both the CopyrightYear
+% (defaulted to 2002) and the ACM Copyright Data
+% (defaulted to X-XXXXX-XX-X/XX/XX).
+% e.g.
+% \CopyrightYear{2003} will cause 2002 to appear in the copyright line.
+% \crdata{0-12345-67-8/90/12} will cause 0-12345-67-8/90/12 to appear in the copyright line.
+%
+% ---------------------------------------------------------------------------------------------------------------
+% This .tex source is an example which *does* use
+% the .bib file (from which the .bbl file % is produced).
+% REMEMBER HOWEVER: After having produced the .bbl file,
+% and prior to final submission, you *NEED* to 'insert'
+% your .bbl file into your source .tex file so as to provide
+% ONE 'self-contained' source file.
+%
+% ================= IF YOU HAVE QUESTIONS =======================
+% Questions regarding the SIGS styles, SIGS policies and
+% procedures, Conferences etc. should be sent to
+% Adrienne Griscti (griscti@acm.org)
+%
+% Technical questions _only_ to
+% Gerald Murray (murray@acm.org)
+% ===============================================================
+%
+% For tracking purposes - this is V1.3 - OCTOBER 2002
+
+\documentclass{sig-alternate}
+
+\begin{document}
+%
+% --- Author Metadata here ---
+\conferenceinfo{ACM SE'06}{March 10-12, 2006, Melbourne, Florida, USA}
+\CopyrightYear{2006} % Allows default copyright year (2002) to be over-ridden - IF NEED BE.
+\crdata{1-59593-315-8/06/0004}  % Allows default copyright data (X-XXXXX-XX-X/XX/XX) to be over-ridden.
+% --- End of Author Metadata ---
+
+\title{Controlling the Entire Path of a Virtual Camera
+%\titlenote{
+%(Produces the permission block, and
+%copyright information). For use with
+%SIG-ALTERNATE.CLS. Supported by ACM.}}
+}
+%\titlenote{The work of both authors was partially supported by the NSF under
+%  grant #CCR-0203586}
+%\subtitle{[Extended Abstract]
+%\titlenote{A full version of this paper is available as
+%\textit{Author's Guide to Preparing ACM SIG Proceedings Using
+%\LaTeX$2_\epsilon$\ and BibTeX} at
+%\texttt{www.acm.org/eaddress.htm}}}
+%
+% You need the command \numberofauthors to handle the "boxing"
+% and alignment of the authors under the title, and to add
+% a section for authors number 4 through n.
+%
+% Up to the first three authors are aligned under the title;
+% use the \alignauthor commands below to handle those names
+% and affiliations. Add names, affiliations, addresses for
+% additional authors as the argument to \additionalauthors;
+% these will be set for you without further effort on your
+% part as the last section in the body of your article BEFORE
+% References or any Appendices.
+
+\numberofauthors{2}
+%
+% You can go ahead and credit authors number 4+ here;
+% their names will appear in a section called
+% "Additional Authors" just before the Appendices
+% (if there are any) or Bibliography (if there
+% aren't)
+
+% Put no more than the first THREE authors in the \author command
+\author{
+%
+% The command \alignauthor (no curly braces needed) should
+% precede each author name, affiliation/snail-mail address and
+% e-mail address. Additionally, tag each line of
+% affiliation/address with \affaddr, and tag the
+%% e-mail address with \email.
+\alignauthor Ross Ptacek\\
+%\titlenote{The secretary disavows any knowledge of this author's actions.}\\
+       \affaddr{Computer and Information Sciences}\\
+       \affaddr{University of Alabama at Birmingham}\\
+       \affaddr{Birmingham, Alabama 35294-1170}\\
+       \email{rptacek@uab.edu}
+\alignauthor John K. Johnstone
+       \titlenote{The work of both authors was partially supported by the NSF 
+	          under grant CCR-0203586.}\\
+       \affaddr{Computer and Information Sciences}\\
+       \affaddr{University of Alabama at Birmingham}\\
+       \affaddr{Birmingham, Alabama 35294-1170}\\
+       \email{jj@cis.uab.edu}
+%\alignauthor Lars Th{\Large{\sf{\o}}}rv{$\ddot{\mbox{a}}$}ld\titlenote{This author is the
+%one who did all the really hard work.}\\
+%       \affaddr{The Th{\large{\sf{\o}}}rv{$\ddot{\mbox{a}}$}ld Group}\\
+%       \affaddr{1 Th{\large{\sf{\o}}}rv{$\ddot{\mbox{a}}$}ld Circle}\\
+%       \affaddr{Hekla, Iceland}\\
+%       \email{larst@affiliation.org}
+}
+
+\date{20 Jan 2006}
+\maketitle
+\begin{abstract}
+This paper considers the design of a camera path through a scene.
+Given a valid set of keyframes for the camera, we want to build a camera path 
+that avoids collisions with the scene.
+The first problem is to define a camera path that interpolates the keyframes.
+We build a rational interpolating motion using rational interpolation of both 
+position and orientation.
+The second problem is to detect collisions of the planned path with the scene.
+A spatial decomposition is used to accelerate this detection.
+The third problem is to correct the path to avoid the detected collisions.
+Keyframes are added in the neighbourhood of the collision to correct the collision.
+\end{abstract}
+
+% A category with the (minimum) three required fields
+\category{I.3.7}{Computer Graphics}{Three Dimensional Graphics and Realism}
+
+\terms{Algorithms, Theory}
+
+\keywords{Camera control, collision detection.}
+
+\section{Introduction}
+The path of a virtual camera through a scene is often controlled interactively,
+either through a GUI in a game or by an animator.
+However, it is also reasonable to define the desired camera path by some
+keyframes that the camera must pass through.
+The keyframes could be generated automatically by a higher level motion planner,
+given a description of the goal of the motion, or they could be designed by hand.
+The camera path is generated from the keyframes by interpolation, a classical
+animation problem \cite{shoemake85}.
+An issue that immediately arises is that the resulting camera path may collide
+with the scene that it is flying through, causing undesirable cutthroughs of 
+walls and other scene objects.
+This is similar to to the classical collision detection problem in interactive
+camera or character control \cite{ericson05}, but with important differences.
+In interactive control, there is little or no way to anticipate a collision
+because the future motion is unknown.
+With the keyframe approach, the entire motion is fully known and controllable
+before the animation is begun, so collisions are avoidable {\em a priori}.
+Our approach is twofold: find the collisions of the camera with the scene by
+building the surface swept out by the camera and intersecting it with the
+scene, and then correct the collisions by adding new keyframes in the 
+neighbourhood of the collision.
+
+The rest of the paper is organized as follows.
+Section 2 discusses camera control, reducing the motion of the 
+camera to a swept surface.
+Collision detection of the camera with the scene is solved in Section 3.
+The detected collisions are corrected in Section 4 by adding new keyframes.
+
+\section{The Camera Control}
+%One method of controlling the camera motion in computer graphics is to allow
+%the user to control the camera's position and orientation in real time, in a 
+%manner similar to those employed by 3D games.
+%However, this depends greatly on the user's manual dexterity to produce smooth
+%motions.
+%Often, a better approach is to allow the user to specify keyframes.
+%Each keyframe represents a position and orientation (as a quaternion [5]) that
+%the camera will move through.
+Our motion is defined by keyframes.
+Each keyframe represents a position and orientation (as a quaternion) 
+that the camera will move through.
+We can enforce smooth motion between the keyframes using interpolation.
+For position, we use cubic interpolating B-splines.
+For orientation, we use rational interpolating quaternion splines
+\cite{jjjw95}.
+This can be used to define the path of any point of the camera from a set of
+keyframes.
+
+We want to define the motion of the entire camera, not just a single
+point.
+When trying to determine collisions, the quadrilateral of intersection of the
+near clipping plane with the view frustrum, which we call the 
+\emph{near quadrilateral}, is what interests us.
+We will track the near quadrilateral through the motion.
+With care, tracking its vertices is sufficient.
+Given the frustum parameters and a frame of the camera's motion (position and
+orientation), we can easily calculate the positions of the near quadrilateral's
+vertices.
+
+We want to define the entire motion of the near quadrilateral, not just one
+frame at a time.  
+Fortunately, the entire rational B-spline curve defining the motion
+of a corner of the near quadrilateral can be defined using methods from 
+\cite{jjeuro95}.
+Finally, the four corner curves can be translated into a swept surface,
+consisting of the four ruled surfaces that loft between pairs of adjacent
+corner curves, representing the envelope of the entire path of the near
+quadrilateral (Figure~\ref{fig:viewfrustum}).
+
+\clearpage
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=3in]{ruledSurface.png}
+\end{center}
+\caption{A swept camera surface, sampled down to triangles.}
+\label{fig:viewfrustum}
+\end{figure}
+
+\section{Collision Detection} 
+
+Once we have defined the camera's motion by a swept surface, collision
+detection is simply intersection of the camera surface with the scene.
+In this paper, we consider camera control through scenes that are defined by
+triangular meshes.
+The swept surface, which is originally smooth, is sampled down to triangles 
+for the purposes of intersection.
+Every camera surface triangle is intersected with every scene triangle to
+calculate collisions.
+An octree is used as spatial decomposition to reduce the amount of computation.
+
+\section{Collision Correction}
+
+In traditional collision detection \cite{ericson05}, the user interactively moves to avoid
+the collision once it is detected.
+Since we have no user, 
+our strategy for correcting the collisions is to insert new keyframes at parts
+of the motion where collisions are detected.
+Since the motion is constrained to pass through the keyframes, if we continue
+to insert new, valid keyframes in problematic areas, eventually the path will
+become collision-free.
+
+In the following discussion, let $P(t)$ and $O(t)$ be the position curve and
+quaternion spline defining the camera motion, let $C(t)$ be the near
+quadrilateral at position $P(t)$ and orientation $O(t)$, and
+let $T_c$ be the set of swept camera surface triangles.
+Note that the vertices of $T_c$ 
+can be annotated with a parameter value from the motion.
+
+We first calculate parameter intervals of the camera motion $C(t)$ where
+collisions exist.
+The general strategy is to test $T_c$ triangles in order (by parameter value)
+against the scene.
+When a triangle causes an intersection, we note its position and the position 
+of the previous triangle that was intersected without causing an intersection.
+We can search between these two values to find the exact point where the
+interval begins.
+This procedure naturally extends to finding the endpoint of the interval.
+The result of this step is two values, $t_i$ and $t_f$, that 
+define an interval $(t_i,t_f)$ on $C(t)$ where an intersection occurs.
+
+We next want to insert a new keyframe in the calculated parameter interval.
+We arbitrarily choose the middle parameter value, $t_{mid} = (t_i + t_f)/2$,
+as the place to insert.
+The new keyframe needs both a position and an orientation.
+Currently, we only use position changes to remove the collision.
+We choose $O(t_{mid})$ for the orientation.
+The procedure for finding the new position is as follows.
+We first calculate a vector that points away from the collisions,
+then approximate the depth of the collision and scale the vector by that 
+depth, and move $P(t_{mid})$ along the scaled vector to define the position
+of the new keyframe.
+
+To find a vector $v$ that points away from the collisions, we first
+classify each vertex of $C(t_{mid})$ as good or bad, as follows.
+The line segments from the center of $C(t)$ to each vertex are
+intersected with the scene: 
+if any line segment intersects the scene, we classify the vertex as bad,
+otherwise it is good.
+The vector $v$ is the normalized sum of vectors to good corners.
+
+The length of the step in the direction $v$ is found as follows,
+by approximating the collision depth $d$.
+We assign a depth approximation to each bad vertex, 
+by intersecting the two adjacent edges of the near 
+quadrilateral with the scene and recording the closest intersection on each edge.
+The depth of that vertex is approximated as the distance from the vertex to the
+furthest of the two intersections.
+$d$ is set to the maximum bad vertex depth, and
+the new keyframe's position is calculated as $P(t) + d*\frac{v}{\|v\|}$.
+
+This procedure is not guaranteed to completely correct the collision,
+but it will make some progress.
+The procedure is applied iteratively until the keyframe no longer
+intersects the scene.
+When the new keyframe has been inserted, we rescan the interval $(t_i,t_f)$ 
+to make sure that the path is corrected.  
+If necessary, additional keyframes are added over the interval.
+It is also possible that a valid path does not exist in a certain region.
+At the moment, we simply cut off iteration after a certain number of steps.
+A future solution is to shrink the camera when no correction can be found.
+
+We have implemented this algorithm in C++.
+Typically each collision took no more than three iterations to correct.
+Future work centers around providing orientation constraints to the motion and
+using orientation changes to correct collisions. 
+
+\section{Acknowledgments}
+We thank the U.C. Berkeley Walkthrough Group for the U.C. Berkeley Soda Hall
+WALKTHRU Model.
+%
+% The following two commands are all you need in the
+% initial runs of your .tex file to
+% produce the bibliography for the citations in your paper.
+%\bibliographystyle{abbrv}
+%\bibliography{sigproc}  % sigproc.bib is the name of the Bibliography in this case
+% You must have a proper ".bib" file
+%  and remember to run:
+% latex bibtex latex latex
+% to resolve all references
+%
+% ACM needs 'a single self-contained file'!
+%
+%APPENDICES are optional
+%\balancecolumns
+
+\bibliographystyle{abbrv}
+% \bibliographystyle{plain}
+\begin{thebibliography}{}
+
+\bibitem{ericson05}
+Ericson, Christer (2005)
+Real-Time Collision Detection.
+Morgan Kaufmann (New York).
+
+\bibitem{jjjw95}
+Johnstone, J. and J.P. Williams (1995)
+Rational Control of Orientation for Animation.
+Graphics Interface '95, 179--186.
+
+\bibitem{jjeuro95}
+Johnstone, J. and J.P. Williams (1995)
+A Rational Model of the Surface Swept by a Curve.
+Eurographics '95, {\em Computer Graphics Forum} 14(3), 77--88.
+
+\bibitem{shoemake85}
+Shoemake, K. (1985) Animating rotation with quaternion curves.
+SIGGRAPH '85, San Francisco, 19(3), 245--254.
+
+\end{thebibliography}
+
+\end{document}
+

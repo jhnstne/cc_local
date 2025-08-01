@@ -1,0 +1,57 @@
+From jimbo@scr.siemens.com Wed Aug 18 08:21:34 1999
+X-SCR-Return-Path: <jimbo@exchange.scr.siemens.com>   (as seen by scr.siemens.com)
+From: "Williams, James" <jimbo@scr.siemens.com>
+To: "'jj@cis.uab.edu'" <jj@cis.uab.edu>
+Subject: RE: Back from trip!
+Date: Wed, 18 Aug 1999 09:19:30 -0400
+MIME-Version: 1.0
+
+
+
+Hi John,
+
+
+How was SIGGRAPH? I went over the paper a couple of more times. The only
+thing
+that seems strange to me is why the nearest neighbor selection method for
+the inverse
+image of the points should produce such dramatically better covariant
+acceleration
+numbers. Do you have any intuition here? 
+
+One small point -- in the text following definition 4.6, it might be good to
+mention that
+[Johnstone 99b] explains the title "most natural."
+
+Another thing that I have been meaning to ask you about -- could you take a
+look at 
+CH4 Appendix 4.A of my thesis. if you dont have a copy, the .ps is on my JHU
+web page.
+I wonder if this section actually invalidates most of the reasons for
+building rational curves
+on S^3. I didn't want to emphasize this before my defense ;).
+
+On another note. I think there are at most 384 unique quadratic maps from R4
+to S3 or subsets of
+S3. This gets back to the issue of quadratic forms which is something I wish
+I 
+understood better.
+
+Otherwise everything looks good!
+
+Regards,
+Jim
+
+From jimbo@scr.siemens.com Wed Aug 18 16:16:45 1999
+X-SCR-Return-Path: <jimbo@exchange.scr.siemens.com>   (as seen by scr.siemens.com)
+From: "Williams, James" <jimbo@scr.siemens.com>
+To: "'jj@cis.uab.edu'" <jj@cis.uab.edu>
+Subject: 384
+Date: Wed, 18 Aug 1999 17:14:44 -0400
+MIME-Version: 1.0
+
+
+384 is (I think) the number of permutations of the
+quadratic formin section 3.A of the thesis.
+
+jim

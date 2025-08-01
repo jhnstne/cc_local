@@ -1,0 +1,73 @@
+From jimbo@blaze.cs.jhu.edu Wed Oct  5 11:08 CDT 1994
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from blaze.cs.jhu.edu by cis.uab.edu (5.0/SMI-SVR4)
+	id AA03167; Wed, 5 Oct 1994 11:08:23 -0500
+Received: from mail-client (peregrine.cs.jhu.edu)
+           by blaze.cs.jhu.edu; Wed, 5 Oct 94 12:08:18 EDT
+Received: by mail-client (4.1) id AA13268; Wed, 5 Oct 94 12:08:17 EDT
+Message-Id: <9410051608.AA03167@cis.uab.edu>
+From: jimbo@blaze.cs.jhu.edu (James P. Williams)
+Sender: jimbo@blaze.cs.jhu.edu
+Subject: Re: Status
+To: jj@redmont1.cis.uab.edu (John Johnstone)
+Date: Wed, 5 Oct 1994 12:08:16 -0400 (EDT)
+In-Reply-To: <9410041702.AA24212@cis.uab.edu> from "John Johnstone" at Oct 4, 94 12:02:29 pm
+X-Mailer: ELM [version 2.4 PL13]
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Length: 2483
+Status: OR
+
+ 
+>         There is a Nov. 1 deadline for both the Solid Modeling
+>         conference and for Graphics Interface (the Canadian graphics
+>         meeting, a good alternative to SIGGRAPH). 
+>         This falls into the two paper idea too: animation to
+>         Graphics Interface and swept surface to Solid Modeling,
+>         if there is enough.  Otherwise choose the best application
+>         and just send it to one.
+>         So ... Nov. 1 is the goal.
+>         When I get something for you to look at, probably a rough
+>         draft of the paper, I'll send it on to you.
+>         Since I'm concentrating on the animation aspects right now,
+>         you might be most useful concentrating on the swept surface
+>         side of the story, getting back to the old canal surface
+>         and (c,r,o) issues, and figuring out what the problems there are.
+>         For example, it would be very useful if you could get a good,
+>         terse description (in Latex so that it is fully readable and
+>         typeset ready for submission, mostly fully readable) of your
+>         work on building up PH orientation curves (the more general
+>         version of Farouki's stuff that we were going to submit to
+>         Mathematics of Surfaces).  
+
+With respect to using PH orientation curves, the sufficient conditions
+that Farouki chose for his paper are much easier to solve than the 
+nesc. and sufficient conditions given by Dietz, and Farouki is fully 
+aware of the Dietz conditions.  I think he chose to use the easier set
+because of the extreme messiness involved with solving the full one.  
+I think what I did on the full conditions adds little to Farouki's work
+besides complication.
+
+ 
+>         Also, can you resurrect your code on Dietz/Hoschek and 
+>         send it to me?  Our paper will certainly refer to their
+>         work on spherical curves and it would be good to have
+>         some comparative figures of our 4d-spherical curves and their
+>         3d-spherical curves, as well as a toolbox to fool around with.
+>                   
+> Cheers,
+> John
+> 
+
+
+I will package up those Maple files and send them to you.  I have 
+begun to use a package called Geomview almost exclusively for all of my
+visualization now.  I highly recommend it, as it will render anything 
+we need and has simple file formats.  I can give you the ftp site
+if you are interested.  Geomview is targeted at SGI's so it takes
+full advantage of the graphics capabilities.
+
+Jim
+
+

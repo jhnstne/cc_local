@@ -1,0 +1,86 @@
+CK, thanks for the notes.
+I'm glad we both went over it since we each found some things
+that the other missed.
+Here are some comments:
+
+They want current addresses in the title,
+so I changed yours to Northern Michigan University (and
+of course mine to UAB).
+
+I added `solid modeling' to the list of Additional Key Words
+and Phrases on p. 1.  What do you think?
+
+What do you think of adding the following two sentences to
+the abstract, just before `Using the theory developed ...':
+	Degenerate cases are frequent in geometric/solid
+	modeling, because degeneracies are often required
+	by design.  Their detection is important because
+	degenerate intersections can be computed more easily
+	and allow simpler treatment of important problems.
+
+I think that we need some motivation in the abstract (which
+may be the only thing people read).
+
+Let me know what you think of this before I send it off.
+
+I seem to remember that Sederberg has written a paper that
+we should add to the previous work on intersection curves
+of two algebraic surfaces.  I'll have to look it up, and 
+I'll add it if I can find it.
+
+Did Goldman and Miller ever publish anything in a journal
+on their degenerate intersection work?  It's been a while
+since we sent this off and I don't want to forget anything
+that has come out recently.  
+
+p. 2, end of 3rd paragraph of Section 2, I changed
+	Miller [1987] also provides an incomplete enumeration.
+to
+	Miller [1987] also provides a partial enumeration
+which is more diplomatic.
+
+The script Q's in their typesetting look terrible (not
+at all like Q's)  so I've changed all the script Q's
+to normal Q's.  For example, p. 2 bottom, Lemma 4.2 proof, etc.
+
+I think at top of p. 7 before the algorithm I should add
+	where Q_i is an axial natural quadric with vertex V_i
+	axis l_i and half angle \alpha_i (if Q_i is a cone).
+
+since the angle is used in step 3.
+
+Are Rebeis and Rehbock truly separate publications?
+It is unusual that they have exactly the same title and
+the same year of publication!?
+
+p. 9, before the algorithm, I added (again because the vertices,
+and axes are used in the alg):
+
+	Based on this theorem, the following algorithm computes
+	the intersection conic of the two cones C_1(V_1,l_1,\alpha_1)
+	and C_2(V_2,l_2,\alpha_2).
+where the C are script letters.
+
+p. 11, Remark 7.1: The first sentence appears redundant.
+	I propose to eliminate it, add the 1991c reference
+	above at:
+		Recently, Shene and Johnstone [1991a,1991c]
+		and Goldman and Miller ...
+	and remove the `Moreover,' from the second sentence
+	of Remark 7.1
+
+
+p. 12 just before Corollary 7.1, I propose to remove the
+	`also' from `also reported from Goldman and Miller'
+	which will give them the appropriate credit.
+
+I found a few other typos, but nothing major.
+
+Please let me know as soon as possible what you think
+of all of these comments, since I will need to send
+the galleys off tomorrow morning.
+
+
+Thanks.
+
+John

@@ -1,0 +1,906 @@
+/***********************************************************************/
+/* Module: aptessellate.c                                              */
+/* $Date: 1999/10/25 22:35:47 $                                        */
+/* $Revision: 1.6 $                                                    */
+/* $Source: /p/SurfaceFitting/SF/src/Apps/ATess/RCS/aptessellate.c,v $ */
+/***********************************************************************/
+/*
+** Purpose: 
+*/
+
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+#include "geometry.h"
+#include "vertex.h"
+#include "dstruct.h"
+#include "getset.h"
+#include "material.h"
+#include "apatch.h"
+#include "libgeo.h"
+#include "aputil.h"
+#include "aptessellate.h"
+
+#define EPS 1.0e-8
+
+extern int EdgeSamples;
+extern int GetRootFindingInfo;
+extern int DoPatchColoring;
+
+static double eps = EPS;
+
+/* Function Prototypes */
+FaceSampleNet CreateFaceSampleNet(Apatch apatch, int apFaceVi[3]);
+EdgeSampleNet CreateEdgeSampleNet(Apatch apatch, int apZeVi[2],
+                                  int apNZeVi[2]);
+void GetSampledFaceApatch(Apatch apatch, FaceSampleNet snet, VERTEX topV,
+                          Scalar topVVal, VERTEX* sampledApatch,
+                          int* bisecSteps, int* rfSteps);
+void GetSampledEdgeApatch(Apatch apatch, EdgeSampleNet snet,
+                          VERTEX* sampledApatch, int* bisecSteps,
+                          int* rfSteps);
+void GetSampledFaceApatchPair(ApatchPair apPair, FaceSampleNet snet,
+                              VERTEX* sampledApatch, int* bisecSteps,
+                              int* rfSteps);
+VERTEX VertexOnApatchByRegulaFalsi(Apatch apatch, VERTEX v1, Scalar s1,
+                                   VERTEX v2, Scalar s2, int* steps);
+VERTEX VertexOnApatchByBisec(Apatch apatch, VERTEX v1, Scalar s1,
+                             VERTEX v2, Scalar s2, int* steps);
+void OutputFaceRootFindingInfo(FILE* fp, int size, int* bisecSteps,
+                               int* rfSteps, int apVinNet[4],
+                               int apFaceVi[3]);
+void OutputEdgeRootFindingInfo(FILE* fp, int size, int* bisecSteps,
+                               int* rfSteps);
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void TessellateApatch(Apatch apatch)
+{
+   int apVinNet[4], apTopVi, apFaceVi[3], apZeVi[2], apNZeVi[2];
+   VERTEX topV;
+   Scalar topVVal;
+   int i, j;
+
+   if (EdgeSamples == 0) {
+      OutputS3dApatchScalarNet(stdout, apatch);
+      return;
+   }
+
+   apVinNet[0] = CPIndexDim3(apatch.degree, apatch.degree, 0, 0, 0);
+   apVinNet[1] = CPIndexDim3(apatch.degree, 0, apatch.degree, 0, 0);
+   apVinNet[2] = CPIndexDim3(apatch.degree, 0, 0, apatch.degree, 0);
+   apVinNet[3] = CPIndexDim3(apatch.degree, 0, 0, 0, apatch.degree);
+
+   i = 0;
+   for (j = 0; j < 4; j++) {
+      if ((apatch.net[apVinNet[j]] == 0) && (i < 3)) {
+         apFaceVi[i] = j;
+         i++;
+      }
+      else {
+         apTopVi = j;
+      }
+   }
+
+   if (i == 0 || i == 1) {
+      fprintf(stderr, "Patch passes through less than 2 tetra-vertices; not handled.\n");
+      exit(0);
+   }
+   else if (i == 2) {
+      fprintf(stderr, "Patch passes through 2 of the tetra-vertices.\n");
+      for (j = 0; j < 4; j++) {
+         if ((apFaceVi[0] != j) && (apFaceVi[1] != j) && (apTopVi != j)) {
+            apNZeVi[0] = j;
+            apNZeVi[1] = apTopVi;
+            apZeVi[0]  = apFaceVi[0];
+            apZeVi[1]  = apFaceVi[1];
+            /* Check that the 2 non-zero vertices have the same sign. */
+            if (((apatch.net[apVinNet[apNZeVi[0]]] > 0) &&
+                 (apatch.net[apVinNet[apNZeVi[1]]] < 0)) ||
+                ((apatch.net[apVinNet[apNZeVi[0]]] < 0) &&
+                 (apatch.net[apVinNet[apNZeVi[1]]] > 0))) {
+               fprintf(stderr, "Invalid scalars at the non-zero vertices.\n");
+               exit(1);
+            }
+         }
+      }
+      TessellateEdgeApatch(apatch, apVinNet, apZeVi, apNZeVi);
+   }
+   else /*(i == 3)*/ {
+      /* Ensure scalar at apTopVi is not zero. */
+      if (apatch.net[apVinNet[apTopVi]] == 0) {
+         fprintf(stderr, "All 4 vertices lie on the Apatch; not handled.\n");
+         exit(0);
+      }
+      fprintf(stderr, "Patch passes through 3 of the tetra-vertices.\n");
+      /* face and top vertices should already be correctly assigned. */
+      TessellateFaceApatch(apatch, apVinNet, apFaceVi, apTopVi);
+   }
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void TessellateFaceApatch(Apatch apatch, int apVinNet[4], int apFaceVi[3],
+			  int apTopVi)
+{
+   FaceSampleNet snet;
+   VERTEX* sampledApatch;
+   VERTEX topV;
+   Scalar topVVal;
+   int* bisecSteps;
+   int* rfSteps;
+   int i;
+
+   topV.position = apatch.tetrahedron[apTopVi].position;
+   topVVal = apatch.net[apVinNet[apTopVi]];
+   snet = CreateFaceSampleNet(apatch, apFaceVi);
+
+   sampledApatch = (VERTEX*) malloc(sizeof(VERTEX) * snet.size);
+   bisecSteps = (int*) malloc(sizeof(int) * snet.size);
+   rfSteps = (int*) malloc(sizeof(int) * snet.size);
+   for (i = 0; i < snet.size; i++) {
+      bisecSteps[i] = 0;
+      rfSteps[i] = 0;
+   }
+   GetSampledFaceApatch(apatch, snet, topV, topVVal, sampledApatch,
+			bisecSteps, rfSteps);
+   OutputS3dSampledFaceApatch(stdout, sampledApatch, apatch.apColor, snet.esamples, 2, 1);
+   if (GetRootFindingInfo == 1) {
+      OutputFaceRootFindingInfo(stderr, snet.size, bisecSteps, rfSteps,
+				apVinNet, apFaceVi);
+   }
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void TessellateEdgeApatch(Apatch apatch, int apVinNet[4], int apZeVi[2],
+			  int apNZeVi[2])
+{
+   EdgeSampleNet snet;
+   VERTEX* sampledApatch;
+   int* bisecSteps;
+   int* rfSteps;
+   int i;
+
+   snet = CreateEdgeSampleNet(apatch, apZeVi, apNZeVi);
+   sampledApatch = (VERTEX*) malloc(sizeof(VERTEX) * snet.size);
+   bisecSteps = (int*) malloc(sizeof(int) * snet.size);
+   rfSteps = (int*) malloc(sizeof(int) * snet.size);
+   for (i = 0; i < snet.size; i++) {
+      bisecSteps[i] = 0;
+      rfSteps[i] = 0;
+   }
+   GetSampledEdgeApatch(apatch, snet, sampledApatch, bisecSteps, rfSteps);
+   OutputS3dSampledEdgeApatch(stdout, sampledApatch, apatch.apColor, snet.size, 1);
+   if (GetRootFindingInfo == 1) {
+      OutputEdgeRootFindingInfo(stderr, snet.size, bisecSteps, rfSteps);
+   }
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void TessellateApatchPair(ApatchPair apPair)
+{
+   FaceSampleNet snet;
+   VERTEX* sampledApatch;
+   int apVinNet[4], apFaceVi[3];
+   Scalar topVVal, botVVal;
+   int cpi[4], i;
+   int* bisecSteps;
+   int* rfSteps;
+   Vector tmpvec1, tmpvec2, tmpvec3;
+
+   if (EdgeSamples == 0) {
+      OutputS3dApatchPairScalarNet(stdout, apPair);
+      return;
+   }
+
+   topVVal = apPair.ap1.net[0];
+   botVVal = apPair.ap2.net[0];
+   if ((topVVal == 0) || (botVVal == 0)) {
+      fprintf(stderr, "No Apatch-Pair in the pair of tetrahedra.\n");
+      exit(1);
+   }
+   if ((topVVal < 0 && botVVal < 0) || (topVVal > 0 && botVVal > 0)) {
+      fprintf(stderr, "Invalid Apatch-Pair; top and bottom vertex scalars must be of opposite signs.\n");
+      exit(1);
+   }
+
+   apFaceVi[0] = 1;
+   apFaceVi[1] = 2;
+   apFaceVi[2] = 3;
+
+   tmpvec1 = PPDiff(apPair.ap1.tetrahedron[1].position, 
+		    apPair.ap2.tetrahedron[1].position);
+   tmpvec2 = PPDiff(apPair.ap1.tetrahedron[2].position, 
+		    apPair.ap2.tetrahedron[2].position);
+   tmpvec3 = PPDiff(apPair.ap1.tetrahedron[3].position, 
+		    apPair.ap2.tetrahedron[3].position);
+   if ( (VVDot(tmpvec1, tmpvec1) != 0) ||
+	(VVDot(tmpvec2, tmpvec2) != 0) ||
+	(VVDot(tmpvec3, tmpvec3) != 0) ) {
+      fprintf(stderr, "Apatch-Pair data incorrect; tetrahedra vertices are not given in the same order.\n");
+      exit(1);
+   }
+
+   cpi[0] = 0;  cpi[1] = apPair.ap1.degree;  cpi[2] = 0; cpi[3] = 0;
+   apVinNet[1] = CPIndex(apPair.ap1.degree, 3, cpi);
+   cpi[1] = 0;  cpi[2] = apPair.ap1.degree;
+   apVinNet[2] = CPIndex(apPair.ap1.degree, 3, cpi);
+   cpi[2] = 0;  cpi[3] = apPair.ap1.degree;
+   apVinNet[3] = CPIndex(apPair.ap1.degree, 3, cpi);
+   if ((apPair.ap1.net[apVinNet[1]] != 0) ||
+       (apPair.ap1.net[apVinNet[2]] != 0) ||
+       (apPair.ap1.net[apVinNet[3]] != 0)) {
+      fprintf(stderr, "Invalid Apatch-Pair data; the Apatch values at the vertices on the common face must all be zero.\n");
+   }
+
+   if (apPair.ap1.degree != apPair.ap2.degree) {
+      fprintf(stderr, "This implementation requires that the Apatch-Pair tetrahedra should have same degree.\n");
+      exit(1);
+   }
+   for (i = apVinNet[1]; i < apPair.ap1.netSize; i++) {
+      if (apPair.ap1.net[i] != apPair.ap2.net[i]) {
+         fprintf(stderr, "Invalid Apatch-Pair data; Apatch values across the common face should be the same to ensure C0 continuity.\n");
+         exit(1);
+      }
+   }
+
+   /* Can use either Apatch to define snet since faceV are same. */
+   snet = CreateFaceSampleNet(apPair.ap1, apFaceVi);
+
+   sampledApatch = (VERTEX*) malloc(sizeof(VERTEX) * snet.size);
+   bisecSteps = (int*) malloc(sizeof(int) * snet.size);
+   rfSteps = (int*) malloc(sizeof(int) * snet.size);
+   for (i = 0; i < snet.size; i++) {
+      bisecSteps[i] = 0;
+      rfSteps[i] = 0;
+   }
+   GetSampledFaceApatchPair(apPair, snet, sampledApatch, bisecSteps, rfSteps);
+   OutputS3dSampledFaceApatch(stdout, sampledApatch, apPair.ap1.apColor,
+			      snet.esamples, 2, 1);
+   if (GetRootFindingInfo == 1) {
+      OutputFaceRootFindingInfo(stderr, snet.size, bisecSteps, rfSteps,
+				apVinNet, apFaceVi);
+   }
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+FaceSampleNet CreateFaceSampleNet(Apatch apatch, int apFaceVi[3])
+{
+   FaceSampleNet newSnet;
+   Point faceV[3];
+   double step, r, s, t;
+   int i, i0, i1, i2, cpi[3], nindex;
+   Point samplePos;
+
+   newSnet.esamples = EdgeSamples;
+   newSnet.size = NetSize(EdgeSamples, 2);
+   for (i = 0; i < 3; i++) {
+      faceV[i] = apatch.tetrahedron[apFaceVi[i]].position;
+   }
+   newSnet.netV = (VERTEX*) malloc(sizeof(VERTEX) * newSnet.size);
+
+   if (EdgeSamples != 0) {
+      step = 1.0 / ((double) EdgeSamples);
+   }
+
+   for (i0 = 0, r = 0.0; i0 <= EdgeSamples; i0++, r += step) {
+      for (i1 = 0, s = 0.0; i1 <= EdgeSamples - i0; i1++, s += step){
+         i2 = EdgeSamples - i0 - i1;
+         t  = 1.0 - r - s;
+         cpi[0] = i0;  cpi[1] = i1;  cpi[2] = i2;
+         nindex = CPIndex(EdgeSamples, 2, cpi);
+         samplePos = PPac3(faceV[0], faceV[1], faceV[2], r, s, t);
+         newSnet.netV[nindex].position = samplePos;
+      }
+   }
+
+   return newSnet;
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+EdgeSampleNet CreateEdgeSampleNet(Apatch apatch, int apZeVi[2],
+				  int apNZeVi[2])
+{
+   EdgeSampleNet newSnet;
+   Point p1, p2;
+   int i;
+
+   newSnet.esamples = EdgeSamples;
+   newSnet.size = 2 + ((EdgeSamples - 1) * (EdgeSamples + 1));
+
+   newSnet.zeroEV = (VERTEX*) malloc(sizeof(VERTEX) * (EdgeSamples + 1));
+   newSnet.zEVVal = (Scalar*) malloc(sizeof(Scalar) * (EdgeSamples + 1));
+   p1 = apatch.tetrahedron[apZeVi[0]].position;
+   p2 = apatch.tetrahedron[apZeVi[1]].position;
+   for (i = 0; i <= EdgeSamples; i++) {
+      newSnet.zeroEV[i].position = PPrr(p1, p2, i, EdgeSamples-i);
+      newSnet.zEVVal[i] = EvalApatch(apatch, &newSnet.zeroEV[i]);
+   }
+
+   newSnet.nonzEV = (VERTEX*) malloc(sizeof(VERTEX) * (EdgeSamples + 1));
+   newSnet.nzEVVal = (Scalar*) malloc(sizeof(Scalar) * (EdgeSamples + 1));
+   p1 = apatch.tetrahedron[apNZeVi[0]].position;
+   p2 = apatch.tetrahedron[apNZeVi[1]].position;
+   for (i = 0; i <= EdgeSamples; i++) {
+      newSnet.nonzEV[i].position = PPrr(p1, p2, i, EdgeSamples-i);
+      newSnet.nzEVVal[i] = EvalApatch(apatch, &newSnet.nonzEV[i]);
+   }
+
+   return newSnet;
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void GetSampledFaceApatch(Apatch apatch, FaceSampleNet snet, VERTEX topV,
+			  Scalar topVVal, VERTEX* sampledApatch,
+			  int* bisecSteps, int* rfSteps)
+{
+   Scalar snetVVal;
+   int i;
+   VERTEX tmpV;
+   Scalar t1, t2, t3, s1, s2, s3;
+
+   for (i = 0; i < snet.size; i++) {
+      snetVVal = EvalApatch(apatch, &snet.netV[i]);
+      bisecSteps[i] = 0;
+      rfSteps[i] = 0;
+
+/*      if (snetVVal == 0) { */
+      if (fabs(snetVVal) < eps) {
+         sampledApatch[i].position = snet.netV[i].position;
+         sampledApatch[i].normal = snet.netV[i].normal;
+      }
+      else if ( ((snetVVal > 0) && (topVVal > 0)) ||
+		((snetVVal < 0) && (topVVal < 0)) ) {
+         fprintf(stderr, "An Apatch-Pair is required.\n");
+         exit(1);
+      }
+      else {
+         sampledApatch[i] = VertexOnApatchByRegulaFalsi(apatch, topV,
+					topVVal, snet.netV[i], snetVVal,
+					&rfSteps[i]);
+         if (GetRootFindingInfo == 1) {
+            tmpV = VertexOnApatchByBisec(apatch, topV, topVVal,
+					snet.netV[i], snetVVal, 
+					&bisecSteps[i]);
+            PCoords(tmpV.position, StdFrame(apatch.wspace), &t1,&t2,&t3);
+            PCoords(sampledApatch[i].position, StdFrame(apatch.wspace),
+			&s1, &s2, &s3);
+            if ((fabs(t1-s1) > 2*eps) || (fabs(t2-s2) > 2*eps) ||
+		(fabs(t3-s3) > 2*eps)) {
+               fprintf(stderr, "Face Apatch root found by regula falsi and by bisection methods are not consistent.\n");
+               exit(1);
+            }
+         }
+      }
+   }
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void GetSampledEdgeApatch(Apatch apatch, EdgeSampleNet snet,
+			  VERTEX* sampledApatch, int* bisecSteps, 
+			  int* rfSteps)
+{
+   int i, j, k;
+   VERTEX tmpV;
+   Scalar t1, t2, t3, s1, s2, s3;
+
+   sampledApatch[0] = snet.zeroEV[0];
+   sampledApatch[snet.size-1] = snet.zeroEV[snet.esamples];
+
+   i = 1;
+   for (j = 1; j < snet.esamples; j++) {
+      for (k = 0; k < (snet.esamples + 1); k++) {
+         if (snet.nzEVVal[k] == 0) {
+            fprintf(stderr, "GetSampledEdgeApatch: Zero scalar on nonzero edge.\n");
+            exit(1);
+         }
+         else if (((snet.zEVVal[j] > 0) && (snet.nzEVVal[k] > 0)) ||
+                  ((snet.zEVVal[j] < 0) && (snet.nzEVVal[k] < 0))) {
+            fprintf(stderr, "GetSampledEdgeApatch: Invalid control scalar net.\n");
+            exit(1);
+         }
+         else {
+            sampledApatch[i] = VertexOnApatchByRegulaFalsi(apatch,
+				snet.zeroEV[j], snet.zEVVal[j], 
+				snet.nonzEV[k], snet.nzEVVal[k],
+				&rfSteps[i]);
+            if (GetRootFindingInfo == 1) {
+               tmpV = VertexOnApatchByBisec(apatch, snet.zeroEV[j],
+				snet.zEVVal[j], snet.nonzEV[k], 
+				snet.nzEVVal[k], &bisecSteps[i]);
+               PCoords(tmpV.position, StdFrame(apatch.wspace), &t1,&t2,&t3);
+               PCoords(sampledApatch[i].position, StdFrame(apatch.wspace),
+			&s1, &s2, &s3);
+               if ((fabs(t1-s1) > 2*eps) || (fabs(t2-s2) > 2*eps) ||
+		   (fabs(t3-s3) > 2*eps)) {
+                  fprintf(stderr, "Edge Apatch root found by regula falsi and by bisection methods are not consistent.\n");
+                  exit(1);
+               }
+            }
+
+            i++;
+            if (i > (snet.size - 1)) {
+               fprintf(stderr, "Edge Apatch sample net size too small.\n");
+               exit(1);
+            }
+         }
+      }
+   }
+   if (i < (snet.size - 1)) {
+      fprintf(stderr, "Edge Apatch sample net size set too large.\n");
+      exit(1);
+   }
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void GetSampledFaceApatchPair(ApatchPair apPair, FaceSampleNet snet,
+			      VERTEX* sampledApatch, int* bisecSteps,
+			      int* rfSteps)
+{
+   Scalar snetVVal, topVVal, botVVal, tmpVVal;
+   VERTEX topV, botV, tmpV;
+   int i;
+   Vector tmpVec;
+   Scalar c1, c2, c3;   
+   VERTEX checkV;
+   Scalar t1, t2, t3, s1, s2, s3;
+
+   topVVal = apPair.ap1.net[0];
+   botVVal = apPair.ap2.net[0];
+   topV.position = apPair.ap1.tetrahedron[0].position;
+   botV.position = apPair.ap2.tetrahedron[0].position;
+
+   for (i = 0; i < snet.size; i++) {
+      snetVVal = EvalApatch(apPair.ap1, &snet.netV[i]);
+
+      if (snetVVal == 0) {
+         tmpV.position = snet.netV[i].position;
+         tmpVVal = EvalApatch(apPair.ap2, &tmpV);
+         if (tmpVVal != 0) {
+            fprintf(stderr, "C0 continuity not met across Apatch-Pair.\n");
+            exit(1);
+         }
+         tmpVec = VVCross(NDual(tmpV.normal), NDual(snet.netV[i].normal));
+         VCoords(tmpVec, apPair.ap1.apFrame, &c1, &c2, &c3);
+         if (c1 != 0 || c2 != 0 || c3 != 0) {
+            fprintf(stderr, "C1 continuity not met across Apatch-Pair.\n");
+            exit(1);
+         }
+         if (VVDot(NDual(tmpV.normal), NDual(snet.netV[i].normal)) < 0) {
+            fprintf(stderr, "Apatch-Pair normals point in opposite directions.\n");
+            exit(1);
+         }
+
+         sampledApatch[i].position = snet.netV[i].position;
+         sampledApatch[i].normal = snet.netV[i].normal;
+      }
+      else if ( ((snetVVal > 0) && (topVVal > 0)) ||
+		((snetVVal < 0) && (topVVal < 0)) ) {
+         sampledApatch[i] = VertexOnApatchByRegulaFalsi(apPair.ap2,
+							botV, botVVal, snet.netV[i],
+							snetVVal, &rfSteps[i]);
+         if (GetRootFindingInfo == 1) {
+            checkV = VertexOnApatchByBisec(apPair.ap2, botV, botVVal,
+					   snet.netV[i], snetVVal, &bisecSteps[i]);
+            PCoords(checkV.position, StdFrame(apPair.ap2.wspace), &t1, &t2, &t3);
+            PCoords(sampledApatch[i].position, StdFrame(apPair.ap2.wspace), &s1, &s2, &s3);
+            if ((fabs(t1-s1) > 2*eps) || (fabs(t2-s2) > 2*eps) || (fabs(t3-s3) > 2*eps)) {
+               fprintf(stderr, "Apatch Pair root found by regula falsi and by bisection methods are not consistent.\n");
+               exit(1);
+            }
+         }
+      }
+      else {
+         sampledApatch[i] = VertexOnApatchByRegulaFalsi(apPair.ap1,
+							topV, topVVal, snet.netV[i],
+							snetVVal, &rfSteps[i]);
+         if (GetRootFindingInfo == 1) {
+            checkV = VertexOnApatchByBisec(apPair.ap1, topV, topVVal,
+					   snet.netV[i], snetVVal, &bisecSteps[i]);
+            PCoords(checkV.position, StdFrame(apPair.ap1.wspace), &t1, &t2, &t3);
+            PCoords(sampledApatch[i].position, StdFrame(apPair.ap1.wspace), &s1, &s2, &s3);
+            if ((fabs(t1-s1) > 2*eps) || (fabs(t2-s2) > 2*eps) || (fabs(t3-s3) > 2*eps)) {
+               fprintf(stderr, "Apatch Pair root found by regula falsi and by bisection methods are not consistent.\n");
+               exit(1);
+            }
+         }
+      }
+   }
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+VERTEX VertexOnApatchByRegulaFalsi(Apatch apatch, VERTEX v1, Scalar s1,
+				   VERTEX v2, Scalar s2, int* steps)
+{
+   VERTEX tmpV;
+   Scalar tmpVVal;
+
+   tmpV.position = PVAdd(v1.position, SVMult((-1*s1)/(s2-s1), 
+				PPDiff(v2.position, v1.position)));
+   tmpVVal = EvalApatch(apatch, &tmpV);
+   (*steps)++;
+
+   while (fabs(tmpVVal) > eps) {
+      if ((s1 > 0 && tmpVVal > 0) || (s1 < 0 && tmpVVal < 0)) {
+         v1.position = tmpV.position;
+	 v1.normal = tmpV.normal;
+         s1 = tmpVVal;
+      }
+      else if ((s2 > 0 && tmpVVal > 0) || (s2 < 0 && tmpVVal < 0)) {
+         v2.position = tmpV.position;
+	 v2.normal = tmpV.normal;
+         s2 = tmpVVal;
+      }
+      else {
+         fprintf(stderr, "Regula Falsi: error during root finding.\n");
+         exit(1);
+      }
+
+      tmpV.position = PVAdd(v1.position, SVMult((-1*s1)/(s2-s1), 
+				PPDiff(v2.position, v1.position)));
+      tmpVVal = EvalApatch(apatch, &tmpV);
+      (*steps)++;
+   }
+
+   return tmpV;
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+VERTEX VertexOnApatchByBisec(Apatch apatch, VERTEX v1, Scalar s1,
+			     VERTEX v2, Scalar s2, int* steps)
+{
+   VERTEX midV;
+   Scalar midVVal;
+
+   midV.position = PPrr(v1.position, v2.position, 1, 1);
+   midVVal = EvalApatch(apatch, &midV);
+   (*steps)++;
+
+   while (fabs(midVVal) > eps) {
+      if ((s1 > 0 && midVVal > 0) || (s1 < 0 && midVVal < 0)) {
+         v1.position = midV.position;
+	 v1.normal = midV.normal;
+         s1 = midVVal;
+      }
+      else if ((s2 > 0 && midVVal > 0) || (s2 < 0 && midVVal < 0)) {
+         v2.position = midV.position;
+	 v2.normal = midV.normal;
+         s2 = midVVal;
+      }
+      else {
+         fprintf(stderr, "Bisection: error during root finding.\n");
+         exit(1);
+      }
+
+      midV.position = PPrr(v1.position, v2.position, 1, 1);
+      midVVal = EvalApatch(apatch, &midV);
+      (*steps)++;
+   }
+
+   return midV;
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void OutputS3dSampledFaceApatch(FILE* fp, VERTEX* sampledApatch, int apColor,
+				int sampleDeg, int sampleDim, int nspecified)
+{
+   int i0, i1, i2;
+   int cpi[3], sapi[3];
+   Material mat;
+
+   if (DoPatchColoring == 1)
+      mat = GetApatchMaterial(apColor);
+   else
+      mat = APColor1;
+   OutputS3dMaterial(fp, mat);
+
+   for (i0 = 1; i0 <= sampleDeg; i0++) {
+      for (i1 = 0; i1 <= (sampleDeg - i0); i1++) {
+         i2 = sampleDeg - i0 - i1;
+         cpi[0] = i0;      cpi[1] = i1;      cpi[2] = i2;
+         sapi[0] = CPIndex(sampleDeg, sampleDim, cpi);
+         cpi[0] = i0 - 1;  cpi[1] = i1 + 1;  cpi[2] = i2;
+         sapi[1] = CPIndex(sampleDeg, sampleDim, cpi);
+         cpi[0] = i0 - 1;  cpi[1] = i1;      cpi[2] = i2 + 1;
+         sapi[2] = CPIndex(sampleDeg, sampleDim, cpi);
+
+         OutputS3dPolygonTriangle(fp, sampledApatch[sapi[0]], 
+				  sampledApatch[sapi[1]], 
+				  sampledApatch[sapi[2]], nspecified);
+      }
+   }
+
+   for (i0 = 1; i0 < sampleDeg; i0++) {
+      for (i1 = 1; i1 <= (sampleDeg - i0); i1++) {
+         i2 = sampleDeg - i0 - i1;
+         cpi[0] = i0;      cpi[1] = i1;      cpi[2] = i2;
+         sapi[0] = CPIndex(sampleDeg, sampleDim, cpi);
+         cpi[0] = i0 - 1;  cpi[1] = i1;      cpi[2] = i2 + 1;
+         sapi[1] = CPIndex(sampleDeg, sampleDim, cpi);
+         cpi[0] = i0;      cpi[1] = i1 - 1;  cpi[2] = i2 + 1;
+         sapi[2] = CPIndex(sampleDeg, sampleDim, cpi);
+
+         OutputS3dPolygonTriangle(fp, sampledApatch[sapi[0]],
+				  sampledApatch[sapi[1]], 
+				  sampledApatch[sapi[2]], nspecified);
+      }
+   }
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void OutputS3dSampledEdgeApatch(FILE* fp, VERTEX* sampledApatch, int apColor,
+				int size, int nspecified)
+{
+   int i, j, row;
+   Material mat;
+
+   if (DoPatchColoring == 1)
+      mat = GetApatchMaterial(apColor);
+   else
+      mat = APColor1;
+   OutputS3dMaterial(fp, mat);
+
+   for (i = 1; i < (EdgeSamples + 1); i++) {
+      OutputS3dPolygonTriangle(fp, sampledApatch[0], sampledApatch[i],
+			       sampledApatch[i+1], nspecified);
+   }
+
+   for (i = (size - 2); i > (size - EdgeSamples - 2); i--) {
+      OutputS3dPolygonTriangle(fp, sampledApatch[size-1], sampledApatch[i],
+			       sampledApatch[i-1], nspecified);
+   }
+
+   for (row = 0; row < (EdgeSamples - 2); row++) {
+      j = 1 + ((row + 1) * (EdgeSamples + 1));
+      for (i = (1+(row*(EdgeSamples+1))); i < ((row+1)*(EdgeSamples+1)); i++) {
+         OutputS3dPolygonTriangle(fp, sampledApatch[i], sampledApatch[j],
+				  sampledApatch[j+1], nspecified);
+         OutputS3dPolygonTriangle(fp, sampledApatch[i], sampledApatch[j+1],
+				  sampledApatch[i+1], nspecified);
+         j++;
+      }
+   }
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void OutputS3dApatchScalarNet(FILE* fp, Apatch apatch)
+{
+   VERTEX* apnetV;
+   Point tmpPt;
+   int i, j, k, l, apnetVi;
+   int cpi[4], ai[4];
+   Scalar b[3];
+   int dim = 3;
+
+   /* Place the control scalars along the tetrahedral simplex. */
+   /* This placement is relative to the ratio of the simplex   */
+   /* vertices in the corresponding blossom to the degree of   */
+   /* the algebraic, defining the scalar position in terms of  */
+   /* barycentric coordinates.                                 */
+   apnetV = (VERTEX*) malloc(sizeof(VERTEX) * apatch.netSize);
+   for (cpi[0] = 0; cpi[0] <= apatch.degree; cpi[0]++) {
+      for (cpi[1] = 0; cpi[1] <= (apatch.degree-cpi[0]); cpi[1]++) {
+         for (cpi[2] = 0; cpi[2] <= (apatch.degree-cpi[0]-cpi[1]); cpi[2]++) {
+            cpi[3] = apatch.degree - cpi[0] - cpi[1] - cpi[2];
+            apnetVi = CPIndex(apatch.degree, dim, cpi);
+            for (i = 0; i < 3; i++) {
+               b[i] = cpi[i] / (double) apatch.degree;
+            }
+            tmpPt = PCreate(apatch.apFrame, b[0], b[1], b[2]);
+            PCoords(tmpPt, StdFrame(apatch.wspace), &b[0], &b[1], &b[2]);
+            apnetV[apnetVi].position = PCreate(StdFrame(apatch.wspace),
+					       b[0], b[1], b[2]);
+         }
+      }
+   }
+
+   /* Output upward pointing subtetrahedra. */
+   for (i = 1; i <= apatch.degree; i++) {
+      for (j = 0; j <= (apatch.degree - i); j++) {
+         for (k = 0; k <= (apatch.degree - i - j); k++) {
+            l = apatch.degree - i - j - k;
+            cpi[0] = i;    cpi[1] = j;    cpi[2] = k;   cpi[3] = l;
+            ai[0] = CPIndex(apatch.degree, dim, cpi);
+            cpi[0] = i-1;  cpi[1] = j;    cpi[2] = k+1;  cpi[3] = l;
+            ai[1] = CPIndex(apatch.degree, dim, cpi);
+            cpi[0] = i-1;  cpi[1] = j;    cpi[2] = k;    cpi[3] = l+1;
+            ai[2] = CPIndex(apatch.degree, dim, cpi);
+            cpi[0] = i-1;  cpi[1] = j+1;  cpi[2] = k;    cpi[3] = l;
+            ai[3] = CPIndex(apatch.degree, dim, cpi);
+
+            OutputS3dVMatPolylineTriangle(fp, apatch.netMat[ai[0]],
+		apnetV[ai[0]], apatch.netMat[ai[1]], apnetV[ai[1]],
+		apatch.netMat[ai[2]], apnetV[ai[2]], 0);
+            OutputS3dVMatPolylineTriangle(fp, apatch.netMat[ai[0]],
+		apnetV[ai[0]], apatch.netMat[ai[2]], apnetV[ai[2]],
+		apatch.netMat[ai[3]], apnetV[ai[3]], 0);
+            OutputS3dVMatPolylineTriangle(fp, apatch.netMat[ai[0]],
+		apnetV[ai[0]], apatch.netMat[ai[3]], apnetV[ai[3]],
+		apatch.netMat[ai[1]], apnetV[ai[1]], 0);
+            OutputS3dVMatPolylineTriangle(fp, apatch.netMat[ai[1]],
+		apnetV[ai[1]], apatch.netMat[ai[2]], apnetV[ai[2]],
+		apatch.netMat[ai[3]], apnetV[ai[3]], 0);
+         }
+      }
+   }
+
+   /* Output downward facing triangles. */
+   cpi[0] = 0;
+   for (j = 1; j < apatch.degree; j++) {
+      for (k = 1; k <= (apatch.degree - j); k++) {
+         l = apatch.degree - j - k;
+         cpi[1] = j;      cpi[2] = k;      cpi[3] = l;
+         ai[0] = CPIndex(apatch.degree, dim, cpi);
+         cpi[1] = j - 1;  cpi[2] = k;      cpi[3] = l + 1;
+         ai[1] = CPIndex(apatch.degree, dim, cpi);
+         cpi[1] = j;      cpi[2] = k - 1;  cpi[3] = l + 1;
+         ai[2] = CPIndex(apatch.degree, dim, cpi);
+         OutputS3dVMatPolylineTriangle(fp, apatch.netMat[ai[0]],
+		apnetV[ai[0]], apatch.netMat[ai[1]], apnetV[ai[1]],
+		apatch.netMat[ai[2]], apnetV[ai[2]], 0);
+      }
+   }
+   cpi[1] = 0;
+   for (i = 1; i < apatch.degree; i++) {
+      for (k = 1; k <= (apatch.degree - i); k++) {
+         l = apatch.degree - i - k;
+         cpi[0] = i;      cpi[2] = k;      cpi[3] = l;
+         ai[0] = CPIndex(apatch.degree, dim, cpi);
+         cpi[0] = i - 1;  cpi[2] = k;      cpi[3] = l + 1;
+         ai[1] = CPIndex(apatch.degree, dim, cpi);
+         cpi[0] = i;      cpi[2] = k - 1;  cpi[3] = l + 1;
+         ai[2] = CPIndex(apatch.degree, dim, cpi);
+         OutputS3dVMatPolylineTriangle(fp, apatch.netMat[ai[0]],
+		apnetV[ai[0]], apatch.netMat[ai[1]], apnetV[ai[1]],
+		apatch.netMat[ai[2]], apnetV[ai[2]], 0);
+      }
+   }
+   cpi[2] = 0;
+   for (i = 1; i < apatch.degree; i++) {
+      for (j = 1; j <= (apatch.degree - i); j++) {
+         l = apatch.degree - i - j;
+         cpi[0] = i;      cpi[1] = j;      cpi[3] = l;
+         ai[0] = CPIndex(apatch.degree, dim, cpi);
+         cpi[0] = i - 1;  cpi[1] = j;      cpi[3] = l + 1;
+         ai[1] = CPIndex(apatch.degree, dim, cpi);
+         cpi[0] = i;      cpi[1] = j - 1;  cpi[3] = l + 1;
+         ai[2] = CPIndex(apatch.degree, dim, cpi);
+         OutputS3dVMatPolylineTriangle(fp, apatch.netMat[ai[0]],
+		apnetV[ai[0]], apatch.netMat[ai[1]], apnetV[ai[1]],
+		apatch.netMat[ai[2]], apnetV[ai[2]], 0);
+      }
+   }
+   cpi[3] = 0;
+   for (i = 1; i < apatch.degree; i++) {
+      for (j = 1; j <= (apatch.degree - i); j++) {
+         k = apatch.degree - i - j;
+         cpi[0] = i;      cpi[1] = j;      cpi[2] = k;
+         ai[0] = CPIndex(apatch.degree, dim, cpi);
+         cpi[0] = i - 1;  cpi[1] = j;      cpi[2] = k + 1;
+         ai[1] = CPIndex(apatch.degree, dim, cpi);
+         cpi[0] = i;      cpi[1] = j - 1;  cpi[2] = k + 1;
+         ai[2] = CPIndex(apatch.degree, dim, cpi);
+         OutputS3dVMatPolylineTriangle(fp, apatch.netMat[ai[0]],
+		apnetV[ai[0]], apatch.netMat[ai[1]], apnetV[ai[1]],
+		apatch.netMat[ai[2]], apnetV[ai[2]], 0);
+      }
+   }
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void OutputS3dApatchPairScalarNet(FILE* fp, ApatchPair apPair)
+{
+   OutputS3dApatchScalarNet(fp, apPair.ap1);
+   OutputS3dApatchScalarNet(fp, apPair.ap2);
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void OutputFaceRootFindingInfo(FILE* fp, int size, int* bisecSteps, 
+			       int* rfSteps, int apVinNet[4],
+			       int apFaceVi[3])
+{
+   /* Calculate and output the mean and standard deviation for the 	*/
+   /* number of steps taken to find the root using the bisection and	*/
+   /* regula falsi methods respectively.				*/
+   /* The corners of the face Apatch are not included since they are	*/
+   /* points on the given surface triangulation and are therefore always*/
+   /* zero and including them would just bias our results.		*/
+
+   double meanBisec, meanRF, varBisec, varRF, stdevBisec, stdevRF;
+   int i;
+
+   meanBisec = 0;
+   meanRF = 0;
+   for (i = 0; i < size; i++) {
+      meanBisec += bisecSteps[i];
+      meanRF += rfSteps[i];
+   }
+   meanBisec = meanBisec / (size - 3);
+   meanRF = meanRF / (size - 3);
+
+   varBisec = 0;
+   varRF = 0;
+   for (i = 0; i < size; i++) {
+      if ((i != apVinNet[apFaceVi[0]]) && (i != apVinNet[apFaceVi[1]]) &&
+          (i != apVinNet[apFaceVi[2]])) {
+         varBisec += ((bisecSteps[i] - meanBisec) * (bisecSteps[i] - meanBisec));
+         varRF += ((rfSteps[i] - meanRF) * (rfSteps[i] - meanRF));
+      }
+   }
+   varBisec = varBisec / (size - 3);
+   varRF = varRF / (size - 3);
+   stdevBisec = sqrt(varBisec);
+   stdevRF = sqrt(varRF);
+
+   fprintf(fp, "\nBisection method:\n");
+   fprintf(fp, "Mean number of steps taken: %f\n", meanBisec);
+   fprintf(fp, "Standard Deviation: %f\n", stdevBisec);
+   fprintf(fp, "\nRegula Falsi method:\n");
+   fprintf(fp, "Mean number of steps taken: %f\n", meanRF);
+   fprintf(fp, "Standard Deviation: %f\n", stdevRF);
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+void OutputEdgeRootFindingInfo(FILE* fp, int size, int* bisecSteps, 
+			       int* rfSteps)
+{
+   /* Calculate and output the mean and standard deviation for the 	*/
+   /* number of steps taken to find the root using the bisection and	*/
+   /* regula falsi methods respectively.				*/
+   /* For the edge Apatch the endpoints of the edge on the given 	*/
+   /* surface triangulation are always zero and are therefore not	*/
+   /* included in the calculations as they would just bias the results.	*/
+   /* These points are known to be the first and the last samples 	*/
+   /* within the given data arrays.					*/
+
+   double meanBisec, meanRF, varBisec, varRF, stdevBisec, stdevRF;
+   int i;
+
+   meanBisec = 0;
+   meanRF = 0;
+   for (i = 0; i < size; i++) {
+      meanBisec += bisecSteps[i];
+      meanRF += rfSteps[i];
+   }
+   meanBisec = meanBisec / (size - 2);
+   meanRF = meanRF / (size - 2);
+
+   varBisec = 0;
+   varRF = 0;
+   /* Not including the first and last data values as they are always	*/
+   /* zero and will bias our results.					*/
+   for (i = 1; i < size-1; i++) {
+      varBisec += ((bisecSteps[i] - meanBisec) * (bisecSteps[i] - meanBisec));
+      varRF += ((rfSteps[i] - meanRF) * (rfSteps[i] - meanRF));
+   }
+   varBisec = varBisec / (size - 2);
+   varRF = varRF / (size - 2);
+   stdevBisec = sqrt(varBisec);
+   stdevRF = sqrt(varRF);
+
+   fprintf(fp, "\nBisection method:\n");
+   fprintf(fp, "Mean number of steps taken: %f\n", meanBisec);
+   fprintf(fp, "Standard Deviation: %f\n", stdevBisec);
+   fprintf(fp, "\nRegula Falsi method:\n");
+   fprintf(fp, "Mean number of steps taken: %f\n", meanRF);
+   fprintf(fp, "Standard Deviation: %f\n", stdevRF);
+}
+
+/* -------------------------------------------------------------------- *
+ * -------------------------------------------------------------------- */
+

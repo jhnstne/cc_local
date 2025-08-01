@@ -1,0 +1,1953 @@
+% --------------------------------------------------------------------
+% REVISION HISTORY:
+%    1)   Sept/04/91     -- written
+%    2)   May/18/93      -- revised
+%    3)   June/04/93     -- 2nd revision
+% --------------------------------------------------------------------
+
+\documentstyle [12pt]{article}
+
+\input{table}
+
+\def\thefootnote{\fnsymbol{footnote}}
+
+\title{
+     On the Lower Degree Intersections of \\
+     Two Natural Quadrics\footnotemark[1]\ \footnotemark[2]}
+
+\author{Ching-Kuang Shene\footnotemark[3]\ \footnotemark[4]\ \ \ \
+          John K. Johnstone\footnotemark[3]}
+
+\date{\ }
+
+\newtheorem{example}{Example}[section]
+\newtheorem{property}{Property}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{corollary}{Corollary}[section]
+\newtheorem{remark}{Remark}[section]
+
+\newcommand{\DoubleSpace}{\edef\baselinestretch{1.4}\Large\normalsize}
+\newcommand{\QED}{\ \ \ \rule{2mm}{3mm}\\}
+\newcommand{\arrow}[1]{\vec{\bf #1}}
+
+%\DoubleSpace
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\topmargin}{0pt}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+
+
+\begin{document}
+\maketitle
+\footnotetext[1]{This work was supported by
+          National Science Foundation grant IRI--8910366.}
+\footnotetext[2]{Preliminary results from this work were presented at the
+          ACM Symposium on Solid Modeling Foundations and CAD/CAM Applications,
+          June 1991 and at 1993 ASME Design Automation Conference,
+          September 1993.}
+\footnotetext[3]{Authors' address: Department of Computer Science,
+          Johns Hopkins University, Baltimore, Maryland 21218--2686, USA.}
+\footnotetext[4]{Current address: Department of Mathematics and Computer
+          Science, Northern Michigan University,
+          Marquette, Michigan 49855--5340, USA}
+
+\def\thefootnote{\arabic{footnote}}
+\setcounter{footnote}{0}
+
+
+% --------------------------------------------------------------------
+%                               ABSTRACT
+% --------------------------------------------------------------------
+
+\begin{center}
+\begin{minipage}{14cm}
+{\small
+\_$\!$\hrulefill
+\noindent
+
+     In general, two quadric surfaces intersect in a space quartic curve.
+However, the intersection  frequently degenerates to  a collection of
+plane curves.  In this paper, we investigate this problem
+for natural quadrics.  Algorithms are presented to detect and compute
+conic intersections and linear intersections.
+These methods reveal the relationship between the planes of the degenerate
+intersections and the quadrics.  Using the theory developed in the paper,
+we present a new and simplified proof of a necessary and sufficient
+condition for conic intersection.
+Finally, we present a simple method for
+determining the types of conic in a degenerate intersection
+without actually computing the intersection,
+and an enumeration of all possible conic types.
+Since only elementary geometric routines such as line intersection
+are used, all of the above algorithms are intuitive and easily implementable.
+\\
+\par
+Categories and Subject Descriptors: I.3.5 [{\bf Computer Graphics}]:
+Computational Geometry and Object Modeling---{\em curve, surface, and object
+representations, geometric algorithms}; J.6. [{\bf Computer Applications}]:
+Computer-Aided Engineering---{\em computer-aided design}
+\\
+\par
+General Terms: Algorithms, Design
+\\
+\par
+Additional Key Words and Phrases: Natural quadrics, surface intersection,
+planar intersection
+
+\_$\!$\hrulefill
+
+}
+\end{minipage}
+\end{center}
+
+
+% ----------------------------------------------------------------------
+%                       INTRODUCTION
+%
+% REVISION HISTORY:
+%    1)   Sept/04/91     Written
+%    2)   Apr/04/93      Revised
+% ----------------------------------------------------------------------
+
+\section{Introduction}
+\label{section:introduction}
+
+     Natural quadrics consist of the spheres, the circular cylinders and
+the right cones.  Many papers have been dedicated to this class because, in
+most geometric/solid modeling systems, they are still the most useful and
+natural objects to model mechanical parts.  In this paper, we will investigate
+the degenerate intersection of natural quadrics.
+In general, two quadric surfaces intersect in a space quartic curve.
+However, the intersection may degenerate to a collection of plane curves.
+Using a simple geometric argument, it can be shown that there are
+four types of degenerate intersection for natural quadrics, as outlined
+in Table~\ref{tbl:intersection-type}.
+These degenerate cases are very frequent and important in geometric/solid
+modeling,
+because degeneracies are often required by design.
+We shall develop a method of detecting and computing degenerate intersections
+of natural quadrics.
+This detection is important, because
+degenerate intersections can be computed more easily, and also allow
+simpler treatment of important problems.
+For example,
+if two natural quadrics have planar intersection, the two surfaces can be
+blended using two distinct families of cyclides (Boehm~\cite{boehm:1990},
+Pratt~\cite{pratt:1990}, Sabin~\cite{sabin},
+Johnstone and Shene~\cite{johnstone-shene:1992} and
+Shene~\cite{shene:1992,shene:1993a});
+or if two quadrics have planar
+intersection, they can be blended using a quadric or cubic surface, rather
+than a quartic (Warren~\cite{warren:1987,warren:1989}).
+
+\begin{table}
+\caption{Possible Intersection Types of Two Natural Quadrics}
+\label{tbl:intersection-type}
+$$
+\BeginTable
+     \BeginFormat
+     |5 c              | c                    | c             |5
+     \EndFormat
+     \_5
+     | \it Number of | \it Number of | \it Number of | \\
+     | \it Conics    | \it Lines     | \it Points    | \\ \_4
+     |      2        |       0       |       0       | \\ \_
+     |      1        |       1       |       0       | \\ \_
+     |      0        | 1, 2, 3, 4    |       0       | \\ \_
+     |      0        |       0       |      1,2      | \\
+     \_5
+\EndTable
+$$
+\end{table}
+
+     This paper is divided into ten  sections.
+Section~\ref{section:previous-work} reviews related work.
+Section~\ref{section:notation} introduces the notation used in the paper.
+In Section~\ref{section:conic}, our algorithm for detecting and
+calculating conic intersections is presented in its most general form without
+concern for degenerate cases.
+By observing that natural quadrics with planar intersection must have coplanar
+axes, the computation of the intersection is reduced to this plane of the axes.
+Then planar intersections are determined by testing the height from a
+point on this plane to both surfaces.
+These computations only involve line intersections
+and simple arithmetic operations.
+Section~\ref{section:degen}
+discusses how to handle the degenerate cases so that the presentation of our
+algorithm is complete.
+Section~\ref{section:linear} presents a simple algorithm for detecting
+and computing linear intersections.
+In Section~\ref{section:simplification}, we present a necessary and sufficient
+condition for conic intersection, the common inscribed sphere criterion.
+An interesting application of this criterion is discussed in
+Section~\ref{section:enumeration}, where we discuss a method to determine
+the types of the intersection conics without actually computing them.
+Finally, Section~\ref{section:conclusion} gives our conclusion.
+
+
+% ----------------------------------------------------------------------
+%                       PREVIOUS WORK
+%
+% REVISION HISTORY:
+%    1)   Sept/04/91     Written
+%    2)   May/14/93      Revised
+% ----------------------------------------------------------------------
+
+\section{Previous Work}
+\label{section:previous-work}
+
+     The intersection of two surfaces is a fundamental and challenging problem
+in geometric/solid modeling.  Many powerful algorithms have been developed for
+computing the intersection curve of two algebraic surfaces: for example,
+Abhyankar and Bajaj~\cite{abhyankar-bajaj:1989},
+Garrity and Warren~\cite{garrity-warren:1989},
+Hoffmann~\cite{hoffmann:1989},
+Hohmeyer~\cite{hohmeyer:1991} and
+Manocha and Canny~\cite{manocha-canny:1991}.
+For two quadric surfaces,
+the computation is simpler and has theoretically been solved in the last
+century (see, for example, Bromwich~\cite{bromwich:1971}).
+In the context of geometric/solid modeling, Sabin~\cite{sabin:1976}
+is one of the earliest rigorous solutions of this problem.
+During the past decade, starting with Levin~\cite{levin:1976,levin:1979},
+algebraic methods based on the pencil of two quadrics have been
+successfully used to attack quadric intersection.  Other examples are
+Farouki, Neff and O'Connor~\cite{farouki:1989}, Miller~\cite{miller:1987},
+Ocken, Schwartz and Sharir~\cite{ocken:1987},
+O'Connor~\cite{oconnor:1989},
+% it does not distinguish the degenerate cases and thus the two
+% intersection conics may be parameterized as a space general quartic.
+and Sarraga~\cite{sarraga:1983}.
+
+Recent attention has been drawn to the conditions that cause
+degenerate intersection curves,
+since a general algorithm may be insufficient for degenerate cases.
+Farouki, Neff and O'Connor~\cite{farouki:1989}
+is a complete study for general quadric surfaces,
+using the pencil technique.
+
+Samuel, Requicha and Elkind~\cite{samuel:1976} and
+Hakala, Hillyard, Nourse and Malraison~\cite{hakala:1980} are two of the first
+studies of natural quadrics by the geometric/solid modeling community.
+In his papers~\cite{piegl:1989,piegl:1992}, Piegl distinguishes eight
+cases for cylinder--cone intersection, in which two of them give conic
+intersection.  However, from this enumeration, it is not  clear how to devise
+an extension to the cone--cone case, which is more general and more
+subtle than the cylinder--cone case.
+% since conic intersection can be obtained
+% even if the vertex of the cone lies inside the other surface.
+Miller~\cite{miller:1987} also provides an incomplete enumeration.
+
+Concurrently with the development of our work on degenerate intersection
+of natural quadrics \cite{shene-johnstone:1991a},
+Goldman and Miller~\cite{g-m:1990,g-m:1991a,m-g:1991,m-g:1991a}
+developed conditions for degenerate intersection of two natural quadrics.
+They use the pencil method, in which the singular
+members of the one-parameter family ${\cal Q}_1+\lambda{\cal Q}_2=0$ are
+computed, where ${\cal Q}_1$ and ${\cal Q}_2$ are two natural quadrics.
+If ${\cal Q}_1\cap{\cal Q}_2$ has planar intersection,
+we can find some $\bar{\lambda}$ such that
+${\cal Q}_1+\bar{\lambda}{\cal Q}_2$ is of rank two or less and thus can be
+factored into the product of two planes.
+If the two quadrics have planar
+intersections, then the two planar
+members in the pencil are computed
+(Miller and Goldman~\cite{m-g:1991}).
+Finally, these planar members are intersected with the natural quadric to
+compute the intersection curve
+(Miller and Goldman~\cite{m-g:1991a} and
+Johnstone and Shene~\cite{johnstone-shene:1991}).
+
+In our method, we depart from the pencil method and use geometric rather
+than algebraic arguments.
+These help to reveal the structure of the problem, simplify the development,
+and allow detection and computation of the degenerate intersections to
+be done at the same time.
+One of the most interesting aspects of our method is
+that the topology of the degenerate intersection curve
+(Table~\ref{tbl:intersection-type}) is classified prior to any calculations
+that are used to compute the geometry.  Thus, our method is more robust than
+previous methods.
+Robustness also motivates our use
+of geometric representations for the quadrics and intersection conics
+({\em e.g.}, the representation of a conic by its major and minor axis
+and their lengths, or a cone by its axis, vertex, and cone angle) in the
+rest of this paper:
+Goldman \cite{goldman:1983b} and Wilson \cite{wilson:1987} address this
+issue well, showing how geometric representations, if they are available
+(as they are for quadrics), are more robust than
+algebraic (implicit or parametric) representations (also see the following
+remark).
+% (For example, after a series of rigid motions,
+% the radius of a cylinder as calculated indirectly through its implicit
+% equation may have accumulated considerable error.)
+
+%We also consider the question of disjointedness: that is, whether
+%the surfaces intersect at all.
+
+% Since
+% our approach is geometric (only geometric arguments are used), it does not
+% depend on the representation ({\em e.g.}, parametric or implicit).
+% This provides
+% an advantage over the algebraic pencil method since it can be adapted to any
+% representation as long as that representation is capable of calculating the
+% intersection of lines and planes.
+% Also, the simplicity of our method makes
+% it generalizable, unlike other methods that are already complicated and
+% therefore have to push further.
+
+\begin{remark} \rm
+To better appreciate our approach, it is illuminating to investigate
+the shortcomings of a conceptually simple algorithm that appears to
+solve the problem:
+
+\begin{enumerate}
+\item
+     \ [Reduce to a simple case] Map the cones to cylinders.
+     Then map the cylinders (simultaneously) to circular cylinders.
+\item
+     If the cylinders' axes intersect at a finite point and the
+     cylinders' radii are equal, the intersection of the cylinders consists
+     of two conics.
+     If the cylinders' axes intersect at infinity,
+     the intersection consists of four lines.
+     In all other cases, the intersection is not degenerate.
+\item
+     Transform the lines or conics
+     computed in the last step (if they exist)
+     back to the original coordinate system.
+\end{enumerate}
+
+\noindent The main problem with this method lies in the use of transformed
+quadrics, rather than working directly with the original quadrics.
+In step (2), the axes of the transformed cylinders have to be extracted
+and tested for intersection, and the radii must be extracted and tested
+for equality.
+However, the transformations of step (1)
+distort information such as axes and radii,
+as discussed in Goldman \cite{goldman:1983b} and Wilson \cite{wilson:1987}.
+Due to the effect of transformations, we are not sure whether a pair
+of non-intersecting axes are indeed intersecting in the original
+coordinate system, or whether two radii are truly equal.
+This is a particularly important problem in the context of the detection
+of degenerate intersection, because degenerate intersection is inherently
+a fragile condition: a small perturbation of the quadrics will change a
+degenerate intersection into an irreducible intersection.
+We wish to work with the purest data, which is the original data.
+
+Other problems exist as well, such as the complexity of step (1),
+the need for complex arithmetic in steps (1) and (3),\footnote{Complex
+     arithmetic is needed to transform a hyperbolic cylinder to a
+     circular cylinder.}
+and the need to use an algebraic representation
+rather than a geometric representation.
+
+Our method works directly with the original quadrics without using
+any transformations, it uses only real arithmetic, and it uses geometric
+representations of the quadrics.
+The predominant calculation is line intersection, which can be implemented
+robustly.
+$\Box$
+\end{remark}
+
+
+% ----------------------------------------------------------------------
+%                           NOTATION
+% ----------------------------------------------------------------------
+
+\section{Notation}
+\label{section:notation}
+
+     We need to develop some terminology and notation.
+
+\begin{definition}
+     A {\bf natural} quadric is a sphere, a circular cylinder, or a right cone.
+An {\bf axial} natural quadric is a
+natural quadric with an axis, namely a cylinder or a cone.
+\end{definition}
+
+\begin{definition}
+     A {\bf conic} intersection is a composite intersection curve such that
+the highest degree among all component curves is two (Cases 1 and 2 in
+Table~\ref{tbl:intersection-type}).  A {\bf linear} intersection is a
+composite intersection curve such that the highest degree among all component
+curves is one (Case 3 of Table~\ref{tbl:intersection-type}).  A {\bf point}
+intersection is a composite intersection such that the components are all
+isolated points (Case 4 of Table~\ref{tbl:intersection-type}).  {\bf Tangency}
+means a point intersection.  Hence a common tangent line is a linear
+intersection.
+\end{definition}
+
+\begin{remark} \rm
+Detection and computation of one-point and two-point tangency, as well
+as the detection of disjointness of two natural quadrics, are discussed
+in Shene and Johnstone~\cite{shene-johnstone:1991a,shene-johnstone:1991c}.
+$\Box$
+\end{remark}
+
+\begin{definition}
+     Two surfaces are {\bf congruent} if and only if there exists a rigid
+motion transforming one into the other.
+\end{definition}
+
+\noindent{\bf Notation:} ${\cal C}(V,\ell,\alpha)$
+is the cone with vertex $V$, axis $\ell$ and half angle $\alpha$.
+${\cal Z}(\ell,r)$ is the cylinder with axis $\ell$ and radius $r$.
+${\cal S}(O,r)$ is the sphere with center $O$ and radius $r$.
+$\stackrel{\longleftrightarrow}{AB},
+          \stackrel{\longrightarrow}{AB},\overline{AB}$ and
+          $|\overline{AB}|$ are the line, the ray, the segment, and the
+          length of the segment determined by two points $A$ and $B$.
+
+\vspace{1em}
+
+In the rest of this paper, we will only consider cylinders and cones,
+the axial natural quadrics.
+Detection and computation of planar intersection with a sphere is very simple,
+since all planar curves on a sphere are circles.
+If two spheres intersect, their intersection is always a circle,
+whose computation is trivial.
+For the intersection of a sphere and an axial natural quadric,
+since the only circles on a cylinder or cone lie in the planes
+perpendicular to the axis,
+a necessary condition for planar intersection
+is that the center of the sphere
+lies on the axis of the axial natural quadric,
+which again makes the detection and computation simple.
+
+% --------------------------------------------------------------------
+%                           THE MAIN IDEA
+% --------------------------------------------------------------------
+
+\section{Conic Intersections}
+\label{section:conic}
+
+     In this section, we present our algorithm for detecting and computing
+conic intersection in a
+generic form, ignoring degenerate cases.  The idea is to  reduce the surface
+intersection problem to a simple planar line intersection problem.
+Section~\ref{section:fundamental} presents some basic results which play a
+fundamental role in our study.  Section~\ref{section:axial-plane} introduces
+the concept of the axial plane and proves our first characterization result
+for conic intersection.  Section~\ref{section:height} discusses the concept
+of height at some point on the axial plane and its computation.
+
+
+% ********************************************************************
+%                       FUNDAMENTAL RESULTS
+% ********************************************************************
+
+\subsection{Some Fundamental Results}
+\label{section:fundamental}
+
+     In this section, we establish that a necessary condition for conic
+intersection is coplanar axes.  The following classical result is useful.
+
+\begin{theorem}[Dandelin Sphere]
+\label{thm:dandelin-sphere}
+     Let the plane $P$ intersect the axial natural quadric ${\cal Q}$ in a
+conic.  There are one or two spheres inscribed in ${\cal Q}$ and tangent to
+$P$.  The tangent points of these spheres on $P$ are the foci of the
+intersection conic (Figure~\ref{fig:dandelin-sphere-and-foci}).
+\end{theorem}
+
+\begin{figure}
+\vspace{8.5cm}
+\caption{The Dandelin Spheres}
+\label{fig:dandelin-sphere-and-foci}
+\end{figure}
+
+     These spheres are called {\em focal spheres} or {\em Dandelin spheres},
+after G. Dandelin~\cite{dandelin:1822} (see, for example, Hilbert and
+Cohn-Vossen~\cite{hilbert:1952} for more on the Dandelin sphere).
+The Dandelin sphere has a direct application
+in the computation of the intersection conic of a plane and an axial natural
+quadric (Johnstone and Shene~\cite{johnstone-shene:1991} and
+Miller and Goldman~\cite{m-g:1991a}).
+
+     Using the Dandelin sphere, we can prove the following important
+technical lemma.
+
+\begin{lemma}
+\label{lemma:perpendicular-stuff}
+     Let $P$ be a plane cutting an axial natural quadric in a conic $C$.
+Then the plane $E$ determined by the major axis of $C$ and the axis of
+the axial natural quadric is perpendicular to $P$.
+\end{lemma}
+{\bf Proof:} Note that $P$ cannot contain the axis $\ell$ of the axial
+natural quadric, since otherwise the intersection is two lines, not a
+conic. If $P$ is perpendicular to $\ell$, the intersection is a circle,
+and the lemma is obviously true.   If $P$ is not perpendicular to $\ell$,
+consider the Dandelin sphere $D$ yielding the focus $F$
+(Figure~\ref{fig:perpendicular}).  The plane $E$ containing $\ell$ and
+perpendicular to $P$ cuts the surface, the plane $P$ and the Dandelin
+sphere\footnote{Since it is an inscribed sphere,
+     the center of a Dandelin sphere lies on the axis of the quadric,
+     and thus on the plane $E$.  Therefore $E$ cuts the sphere into two
+     symmetric parts.}
+$D$ into two symmetric parts.
+Therefore $\bar{\ell}=E\cap P$ must be an axis
+of the intersection conic.  Note that the tangent point $F$ lies on
+$\bar{\ell}=E\cap P$ because of symmetry.
+Hence $\ell$ must be the major axis.  \QED
+
+\begin{figure}
+\vspace{7.5cm}
+\caption{Relation of Plane $P$ and Plane $E$}
+\label{fig:perpendicular}
+\end{figure}
+
+Notice that this lemma implies that the axis of the quadric
+intersects the major axis of the plane section $C$.
+We can immediately use this lemma to develop a necessary condition for
+conic intersection.
+
+\begin{lemma}
+\label{lemma:non-skew}
+     If two axial natural quadrics have a conic intersection, their
+axes are coplanar.
+\end{lemma}
+{\bf Proof:}  Let ${\cal Q}_1$ and ${\cal Q}_2$ be two axial natural quadrics.
+If ${\cal Q}_1\cap{\cal Q}_2$ contains a circle, then the axes must coincide.
+Otherwise, let $P$ be the plane containing one of the intersection conics.
+By Lemma~\ref{lemma:perpendicular-stuff}, the plane ${\cal H}$ determined by
+the major axis of the intersection conic and the axis of ${\cal Q}_1$ is
+perpendicular to $P$.  The same is true for ${\cal Q}_2$.  Hence both axes of
+${\cal Q}_1$ and ${\cal Q}_2$ lie in plane ${\cal H}$.  \QED
+
+In the sequel, we shall deal exclusively with quadrics with coplanar axes.
+
+\begin{definition}
+     If the axes of two axial natural quadrics are distinct and coplanar,
+they determine a plane called the {\bf axial plane}.\footnote{If the axes are
+identical, then the two quadrics are either identical, disjoint or have an
+intersection of two circles that is easy to compute.}  This plane cuts each
+surface in a pair of straight lines, called the  {\bf skeletal pair}.
+The lines in a skeletal pair are called {\bf skeletal lines}
+(Figure~\ref{fig:diagonals}).
+\end{definition}
+
+
+
+
+% ********************************************************************
+%                           AXIAL PLANE
+% ********************************************************************
+
+\subsection{The Axial Plane}
+\label{section:axial-plane}
+
+     In this section, we will discuss the axial plane and identify the planes
+that must contain the conics of a conic intersection.
+
+\begin{definition}
+     Consider the non-degenerate case in which neither vertex of the axial
+natural quadrics lies on a skeletal line.\footnote{The degenerate case will
+     be considered in Section~\ref{section:degen}.}
+Then the four skeletal lines
+form a  complete quadrilateral with six intersection points
+(e.g., $A$, $B$, $C$, $D$, and the two cone vertices in
+Figure~\ref{fig:diagonals}(a)).
+(Some of these intersections may be at infinity if some of the skeletal
+lines are parallel.  We assume that we are working in the Euclidean plane
+with a line at infinity
+so that any two lines, even if parallel, intersect in a point.)
+These six points generate two lines that are not skeletal lines
+and that do not contain either vertex,\footnote{Since the axial plane
+     cuts a cylinder in two parallel lines
+     and parallel lines meet at the point of infinity along the lines'
+     direction,
+     a cylinder has its vertex at the point of infinity along the
+     direction of any line on its surface.}
+which we call {\bf diagonals}.
+\end{definition}
+
+\begin{example}
+Figure~\ref{fig:diagonals} shows some examples of
+skeletal pairs and their diagonals $\stackrel{\longleftrightarrow}{AC}$
+and $\stackrel{\longleftrightarrow}{BD}$.
+Parts of the diagonals that lie in the
+interior of both surfaces are indicated by thick line segments.
+In Figures~\ref{fig:diagonals}(c) and \ref{fig:diagonals}(d),
+the lines in one skeletal pair are
+parallel to their counterparts from the other pair.  Hence two intersection
+points are at infinity and the diagonal $\stackrel{\longleftrightarrow}{BD}$
+containing them is the line at
+infinity.  In Figure~\ref{fig:diagonals}(e), notice that one diagonal
+$\stackrel{\longleftrightarrow}{BD}$ includes
+an intersection point $D$ at infinity.
+\end{example}
+
+\begin{figure}
+\vspace{9cm}
+\caption{Some Examples of Diagonals}
+\label{fig:diagonals}
+\end{figure}
+
+We can now characterize the position of the intersection conics precisely.
+
+\begin{lemma}
+\label{lemma:coincide-conic}
+     If two axial natural quadrics with distinct axes have conic
+intersection, then the conics lie in the planes through a diagonal and
+perpendicular to the axial plane.
+\end{lemma}
+{\bf Proof:}
+Suppose two axial natural quadrics with distinct axes have a conic
+intersection.  Let one of the intersection conics be $C$.  Since the axial
+plane ${\cal H}$ cuts both surfaces into two symmetric parts, $C$ is
+symmetric about ${\cal H}$.  In particular, if $P$ is the plane containing $C$,
+$P\cap{\cal H}$ is the major axis of $C$ (Figure~\ref{fig:major}).
+By Lemma~\ref{lemma:perpendicular-stuff}, $P$ is
+perpendicular to the axial plane ${\cal H}$.  Since $C$ belongs to both
+surfaces, the points of $C\cap {\cal H}$ are intersection points of the two
+skeletal pairs, and $P\cap{\cal H}$ must be a diagonal. \QED
+
+\begin{figure}
+\vspace{4.5cm}
+\caption{The Axial Plane and the Intersection Conic}
+\label{fig:major}
+\end{figure}
+
+
+
+% ********************************************************************
+%                             HEIGHT
+% ********************************************************************
+
+\subsection{The Height and Its Computation}
+\label{section:height}
+
+     Lemma~\ref{lemma:coincide-conic} tells us that the planes through a
+diagonal and perpendicular to the axial plane are important.
+In particular, if $P$ is such a plane,
+through the diagonal $d$, and it intersects
+the two given surfaces in $C_1$ and $C_2$ (Figure~\ref{fig:heights}),
+then the two quadrics have conic (degenerate) intersection if and only if
+$C_1 = C_2$.
+We want to develop a simple, indirect method to test if $C_1=C_2$.
+
+$C_1$ and $C_2$ must have
+the same major axis, $d$, by symmetry with the axial plane.
+Let $R$ and $S$ be the intersections of the diagonal $d$ and
+any skeletal pair, and suppose that both $R$ and $S$ are finite
+({\em i.e.}, $C_1$ and $C_2$ are central conics).
+The case of infinite $R$ or $S$ will be addressed at the end of this section.
+$C_1$ and $C_2$ have major axis $\stackrel{\longleftrightarrow}{RS}$,
+and the direction of
+their minor axes are the same: through the midpoint of $\overline{RS}$ and
+perpendicular to ${\cal H}$.  Thus the question reduces
+to testing if the length of the minor axes of $C_1$ and $C_2$ are the
+same.  We shall use a height computation to check this.
+
+\begin{definition}
+\label{defn:height}
+Pick any point $U$ on the diagonal $d$,
+construct a line  through $U$ and perpendicular to ${\cal H}$, and compute
+the distance from $U$ to the quadric surface along this line.
+This distance is called the {\bf height} at $U$.
+Because the surface is symmetric about the
+axial plane ${\cal H}$, the heights from $U$ to either side of the surface
+are equal.  Hence the concept of height is well-defined.
+\end{definition}
+
+Since there are
+two surfaces, we have two heights at $U$, $h_1$ and $h_2$.
+$C_1=C_2$ if and only if $h_1=h_2$.  To see this more formally,
+let $a=\frac{1}{2}|\overline{RS}|$ be the
+semi-major axis length.  If the midpoint of $\overline{RS}$ and
+$\stackrel{\longleftrightarrow}{RS}$
+are taken to be
+the coordinate origin and $x$-axis,
+$C_i$'s equation is $\frac{1}{a^2}{x^2}+B_iy^2=1$,
+where $B_i$ is unknown.  Then, by plugging $x=u$, the $x$-coordinate of $U$,
+and $y=h_i$ into the equation, we have $B_i=\frac{a^2-u^2}{a^2h_i^2}$.
+Hence, if $h_1=h_2$, $B_1=B_2$ and thus $C_1=C_2$.
+
+\begin{remark}\rm
+\label{rmk:minor}
+Notice that $\sqrt{1/|B_i|} = \frac{|ah_i|}{\sqrt{|a^2 - u^2|}}$
+is the semi-minor axis length.
+If $B_i>0$, the conic is an ellipse, otherwise it is a hyperbola.
+$\Box$
+\end{remark}
+
+\begin{figure}
+\vspace{4cm}
+\caption{Equal Height Implies Equal Conics}
+\label{fig:heights}
+\end{figure}
+
+     The height computation is particularly simple for natural quadrics.  From
+$U$, consider the plane
+perpendicular to the surface axis $\ell$ meeting it at $K$.  This plane
+intersects the surface in a circle.
+Let $d_1=\mbox{dist}(U,\ell)=|\overline{UK}|$,
+and let $r$ be the radius of the circle.
+If the surface is a cone with vertex $V$,
+then $r = d_2\tan\alpha$, where $\alpha$ is the cone angle and
+$d_2=|\overline{VK}|$ (Figure~\ref{fig:height-comp}(a));
+if the surface is a cylinder, $r$ is the radius of the cylinder.
+Then the squared height at $U$ is $r^2-d_1^2$
+(Figure~\ref{fig:height-comp}(b-c)).
+Note that if $U$ lies outside of the
+circle, the squared height will be negative.  This is equivalent to saying that
+we have an imaginary $y$-coordinate at $U$.
+
+
+\begin{figure}
+\vspace{5cm}
+\caption{Height Computation}
+\label{fig:height-comp}
+\end{figure}
+
+We have shown how to detect and calculate the first intersection conic,
+using two height computations.
+It would appear that another height computation is needed to calculate the
+second intersection conic, using the other diagonal.
+However, by calculating the height from the intersection point $X$ of the
+two diagonals (Figure~\ref{fig:point-and-line}),
+we deal with both conics at the same time and
+it is possible to use only two squared height computations in total.
+
+     The above discussion assumes that $R$ and $S$ are finite.  If one of $R$
+and $S$, say $S$, is at infinity, the intersection conic must be a parabola
+and the computation is very similar, still involving two  height computations.
+$R$ is the vertex of the parabola, while the line $d_\perp$ through $R$ and
+perpendicular to ${\cal H}$ gives the direction of the directrix.
+If $d,d_\perp$ and $R$ are chosen to be the $x$-axis, the $y$-axis and the
+origin, the parabola has equation $y^2=4fx$, where $f$ is the unknown focal
+length.  Using a height computation at any point $U$ on the diagonal $d$,
+we have $f=h_u^2/4u$, where $u$ is the $x$-coordinate of $U$
+and $h_u^2$ is the squared height at $U$.
+By using the height at $X$, the intersection of the diagonals, only
+two height computations are needed to find both intersection
+conics.
+
+     We are now ready to present the algorithm for detection and computation
+(if applicable) of conic intersection for
+${\cal Q}_1\cap{\cal Q}_2$, where ${\cal Q}_i$ is an axial natural quadric with
+vertex $V_i$ and axis $\ell_i$.
+
+\begin{center}
+\begin{minipage}{5in}
+\vspace{8mm}
+\begin{center}
+     {\bf Algorithm: } Detection and Computation of Conic-Intersection
+               (Non-degenerate Case)
+\end{center}
+{\small
+\begin{enumerate}
+     \item Test for coplanarity of the axes.
+          If not coplanar, then ${\cal Q}_1$ and ${\cal Q}_2$
+          do not have conic intersection.
+     \item \ [Special case]
+          If $\ell_1=\ell_2$ and $V_1\neq V_2$, the intersection consists
+          of two circles;  if $\ell_1=\ell_2$ and $V_1=V_2$, the intersection
+          is the common vertex or the entire surface.
+          Thus, assume $\ell_1 \neq \ell_2$ in the sequel.
+     \item \ [Test for degeneracy]
+          Let $\ell_{11}$ and $\ell_{12}$ be ${\cal Q}_1$'s skeletal lines
+          (easily computed as the lines in the axial plane through $V_1$
+          at an angle $\pm \alpha_1$ from the axis $\ell_1$),
+          and $\ell_{21}$, $\ell_{22}$ be ${\cal Q}_2$'s skeletal lines.
+          If $V_1\in\ell_{21}\cup\ell_{22}$ or $V_2\in\ell_{11}\cup\ell_{12}$,
+          we have a degenerate case (see Section~\ref{section:degen}).
+     \item \ [Find the intersections of the skeletal lines, which define
+          the diagonals]
+          Let $P_1=\ell_{11}\cap\ell_{21}, P_2=\ell_{11}\cap\ell_{22},
+          P_3=\ell_{22}\cap\ell_{12}$, $P_4=\ell_{21}\cap\ell_{12}$
+          (Figure~\ref{fig:point-and-line}).\footnote{Line intersection
+          is a simple problem.
+          See Goldman~\cite{goldman:1990} for a good treatment.}
+          If the diagonals intersect,
+       let $X=\stackrel{\longleftrightarrow}{P_1P_3}\cap
+          \stackrel{\longleftrightarrow}{P_2P_4}$, the intersection of the
+          diagonals.
+          If one of the diagonals, $\stackrel{\longleftrightarrow}{P_1P_3}$
+          or $\stackrel{\longleftrightarrow}{P_2P_4}$, is the line at
+          infinity, then let $X$ be any point on the finite diagonal
+       (but $X$ not on any skeletal line).
+          If the diagonals are parallel, then ${\cal Q}_1$ and ${\cal Q}_2$
+          do not have conic intersection.\footnote{We can show that if
+          the quadrics have conic intersection,
+          the diagonals will not be parallel.
+       In particular, if the axes intersect,
+          the diagonals are not parallel by Shene \cite[Lemma~4.5]{shene:1992}.
+          If the axes are parallel but distinct,
+          the cone angles are equal
+          (Theorem~\ref{theorem:parallel-axes} below) which
+          implies one of the diagonals is the line at infinity.
+          Finally, step 2 deals with identical axes.}
+     \item \ [Compute height]
+          Compute the squared heights $h_{1}^2$ and $h_{2}^2$ to both
+          surfaces at $X$ (using the formula after
+          Definition~\ref{defn:height}, $r^2 - d_1^2$).
+     \item If $h_{1}^2=h_{2}^2$, we have conic intersection.
+          The conics lie in the planes through the diagonals and perpendicular
+          to the axial plane:
+\begin{enumerate}
+     \item If $P_1$ and $P_3$ are both finite, the intersection on
+          diagonal $\stackrel{\longleftrightarrow}{P_1P_3}$ is a central conic
+       with major axis $\stackrel{\longleftrightarrow}{P_1P_3}$,
+       center $\frac{1}{2}(P_1 + P_3)$, and the length of its semi-major
+       axis is $\frac{1}{2}|\overline{P_1 P_3}|$.
+       The minor axis is the line through the center and perpendicular to
+          the axial plane, with length and type
+       as computed in Remark~\ref{rmk:minor}.
+
+     \item If $P_3$ is at infinity, the intersection on  diagonal
+          $\stackrel{\longleftrightarrow}{P_1P_3}$ is a parabola
+          with vertex $P_1$, directrix direction perpendicular to the axial
+          plane, and focal length as computed above ($f=h_u^2/4u$).
+\end{enumerate}
+          The intersection conic on $\stackrel{\longleftrightarrow}{P_2P_4}$
+          can be computed similarly.
+\end{enumerate}
+}
+\end{minipage}
+\end{center}
+
+\begin{figure}
+\vspace{5.5cm}
+\caption{Points and Lines Used in Determining the Intersection}
+\label{fig:point-and-line}
+\end{figure}
+
+
+% --------------------------------------------------------------------
+%                         DEGENERATE CASES
+% --------------------------------------------------------------------
+
+\section{Degenerate Cases}
+\label{section:degen}
+
+     In the previous section, we ignored the degenerate case when the vertex
+of one surface lies on a skeletal line.
+Let $S_i$ be the skeletal pair of the quadric ${\cal Q}_i$.
+There are four cases:
+(1) $V_1\in S_2$ and $V_2\not\in S_1$, (2) $V_1\not\in S_2$
+and $V_2\in S_1$, (3) $V_1\in S_2$ and $V_2\in S_1$, and (4) $V_1=V_2$.
+We will show that
+the first two cases cannot have degenerate intersection, while the third
+always delivers a conic intersection and the fourth always delivers
+linear intersection.
+Our treatment of the fourth case is postponed to
+Section~\ref{section:linear}.
+
+
+% ********************************************************************
+%                 EXACTLY ONE VERTEX ON SURFACE
+% ********************************************************************
+
+\subsection{Exactly One Vertex Lies on the Other Surface}
+\label{section:exactly-one}
+
+\begin{lemma}
+\label{lemma:one-vtx-on-surface}
+     Let ${\cal Q}_1$ and ${\cal Q}_2$ be two axial natural quadrics with
+coplanar  and distinct axes.  If exactly one vertex lies on the other surface,
+then ${\cal Q}_1$ and ${\cal Q}_2$ do not have conic or linear intersection.
+\end{lemma}
+{\bf Proof:}
+Suppose $V_1$ lies on the skeletal line $\ell_{21}$ from $S_2$
+(Figure~\ref{fig:vtx-on-pair}).
+The lines of $S_1$ intersect the other skeletal line $\ell_{22}$ of $S_2$
+in two points, say $R$ and $S$.
+Suppose that ${\cal Q}_1$ and ${\cal Q}_2$ have conic intersection.
+The plane $P$ containing one of the intersection conics must have two points
+of intersection with skeletal lines, and the candidate points are
+$V_1$, $V_2$, $R$, and $S$ since they must lie on both skeletal pairs
+(being on the intersection conic).
+$P$ cannot contain $V_1$ or $V_2$, otherwise $P \cap {\cal Q}_1$
+or $P \cap {\cal Q}_2$ is linear (rather than conic).
+The only candidate points left are $R$ and $S$, but if $P$ contains both
+$R$ and $S$ then it will also contain $V_2$, a contradiction.
+Hence ${\cal Q}_1\cap {\cal Q}_2$ is not a conic intersection.
+
+\begin{figure}
+\vspace{3.5cm}
+\caption{$V_1\in S_2$ and $V_2\not\in S_1$}
+\label{fig:vtx-on-pair}
+\end{figure}
+
+${\cal Q}_1\cap{\cal Q}_2$ is not a linear intersection, either.
+If it contains a line, this line must contain both $V_1$ and $V_2$ and thus
+the intersection line is $\ell_{21}=\stackrel{\longleftrightarrow}{V_1V_2}$.
+Then the axial plane cuts ${\cal Q}_1$ in three lines, two in $S_1$ and
+$\ell_{21}=\stackrel{\longleftrightarrow}{V_1V_2}$, which is impossible.
+\QED
+
+     In fact, the intersection curve is a space quartic with one isolated
+point.  However we will not elaborate this issue here.
+
+
+% ********************************************************************
+%                          COMMON LINE
+% ********************************************************************
+
+\subsection{A Double Line and Conic}
+\label{section:common-line}
+
+     If $V_1\in S_2, V_2\in S_1$ and $V_1\neq V_2$, we have
+a common line $\stackrel{\longleftrightarrow}{V_1V_2}$ on the axial plane
+(Figure~\ref{fig:v1v2}).
+Since the plane containing this line and perpendicular to the axial plane is
+tangent to both surfaces, this  is a double line.  By Bezout's theorem, the
+residue curve of the complete quadric intersection is a conic.
+In this section we
+will find the residue conic.  We will concentrate on the cone--cone case.
+The same argument works for the cylinder--cone case.  Since the
+intersection of two cylinders is strictly linear, it will not be discussed.
+\begin{figure}
+\vspace{6.5cm}
+\caption{The Common Line $\stackrel{\longleftrightarrow}{V_1V_2}$ on the Axial P
+lane}
+\label{fig:v1v2}
+\end{figure}
+
+If $\ell_1$ is parallel to $\ell_2$,
+where $\ell_1$ and $\ell_2$ are the axes of the cones,
+the two given cones have equal cone angles.
+Their intersection consists of the double line
+$\stackrel{\longleftrightarrow}{V_1V_2}$ and a circle at infinity on which
+any point is the intersection of two corresponding parallel rulings, one from
+each cone.
+
+     In general, $\ell_1$ is not parallel to $\ell_2$.  The common
+inscribed sphere is crucial to the computation of the conic intersection
+in this case.
+
+\begin{lemma}
+\label{lemma:common-sphere}
+     Let $O=\ell_1\cap\ell_2$ and $d$ be the distance from $O$ to
+$\stackrel{\longleftrightarrow}{V_1V_2}$.  The sphere ${\cal S}$ with center
+$O$ and radius $d$ is a common inscribed sphere of both cones
+(Figure~\ref{fig:inscribed-sphere}).
+\end{lemma}
+{\bf Proof:}  Simple. \QED
+
+     Note that $d=d_1\sin\alpha_1=d_2\sin\alpha_2$, where $d_i$ is the
+distance from $O$ to $V_i$.
+The following result is analogous to Lemma~\ref{lemma:coincide-conic}.
+
+\begin{figure}
+\vspace{4.5cm}
+\caption{The Inscribed Sphere with center $O$ and radius $d$}
+\label{fig:inscribed-sphere}
+\end{figure}
+
+\begin{theorem}
+\label{theorem:double-line}
+     Suppose two cones ${\cal Q}_1(V_1,\ell_1,\alpha_1)$ and
+${\cal Q}_2(V_2,\ell_2,\alpha_2)$, $\ell_1$ not parallel to $\ell_2$,
+have a common line $\stackrel{\longleftrightarrow}{V_1V_2}$ on the axial plane
+${\cal H}$.  Let $P$ be the intersection point of the other two skeletal lines
+and $Q$ the tangent point on $\stackrel{\longleftrightarrow}{V_1V_2}$ of the
+common inscribed sphere.  Then the intersection conic of
+${\cal Q}_1\cap{\cal Q}_2$ lies in the plane through
+$\stackrel{\longleftrightarrow}{PQ}$ and perpendicular to the axial plane
+${\cal H}$.
+\end{theorem}
+{\bf Proof:}  We know that the conic must lie in a plane
+perpendicular to ${\cal H}$ (Lemma~\ref{lemma:perpendicular-stuff})
+and must pass through $P$.  Thus we must only show that the plane
+containing the conic passes through $Q$.
+
+     Suppose the axial plane ${\cal H}$ is chosen to be the $xy$-plane with
+$O=\ell_1\cap\ell_2$ the origin.  Let ${\cal S}(O,r)$ be a sphere.
+Any cone with axis on the $xy$-plane and inscribed sphere ${\cal S}$ can
+be obtained by rotating a  cone with equation
+$-c^2(x-u)^2+y^2+z^2=0$, where $(u,0,0), u>0$, is the cone vertex and
+$\alpha$ the cone angle, $c=\tan\alpha$.
+
+     Let ${\cal S}(O,r)$ be the common inscribed sphere of both cones
+(Lemma~\ref{lemma:common-sphere}).  By rotation we can assume without loss of
+generality that these two cones have a common skeletal line $y+r=0$.
+It suffices to show that the planar members of the pencil
+formed by these two transformed cones both pass through
+$Q=(0,-r,0)$, the tangent point of the common line and the common inscribed
+sphere.
+
+     If the cone $-c^2(x-u)^2+y^2+z^2=0$ has an inscribed sphere
+$x^2+y^2+z^2=r^2$, then $c^2u^2=r^2(1+c^2)$.  To see this, note that the cone
+angle $\alpha$ must be an acute angle.  Let one of the skeletal lines be
+tangent to the inscribed sphere at $T$ (Figure~\ref{fig:relation-of-cru}).
+We have $c=\tan\alpha=\frac{|\overline{OT}|}{|\overline{VT}|}$.  Since
+$r=|\overline{OT}|$ and $|\overline{TV}|=\sqrt{u^2-r^2}$, we have
+$c^2=\frac{r^2}{u^2-r^2}$ and hence $c^2u^2=r^2(1+c^2)$.
+Note that this relation is an invariant under rotation transformation, since
+$r$ and $c$ are constants, and $u$ is the distance from the cone's vertex to
+$O$, which does not change under rotation.
+\begin{figure}
+\vspace{4.5cm}
+\caption{The Relation of $c, r$ and $u$}
+\label{fig:relation-of-cru}
+\end{figure}
+
+     After rotation, the first cone is a  cone rotated by $\alpha$, or
+\begin{equation}
+\label{eqn:cone-1}
+     (1-c^2)y^2+2cxy+2rcx-2c^2ry-r^2(1+c^2)+z^2=0,
+\end{equation}
+while the second cone, which is obtained by rotating the  cone
+$-d^2(x-v)^2+y^2+z^2=0$, is
+\begin{equation}
+\label{eqn:cone-2}
+     (1-d^2)y^2+2dxy+2rdx-2d^2ry-r^2(1+d^2)+z^2=0,
+\end{equation}
+where $d=\tan\beta$ or $d=\tan(\pi+\beta)$.
+Subtracting (\ref{eqn:cone-2}) from (\ref{eqn:cone-1}) and applying
+$c^2u^2=r^2(1+c^2)$ and $d^2v^2=r^2(1+d^2)$, we have
+
+\[ y^2-\frac{2}{c+d}xy-\frac{2r}{c+d}x+2ry+r^2=0. \]
+This equation can be factored into two linear factors:
+
+\[ \left(y+r\right)\left(y-\frac{2}{c+d}x+r\right)=0. \]
+$y+r=0$ and $y-\frac{2}{c+d}x+r=0$ are clearly the two planar members.
+Note that both planes are perpendicular to the $xy$-plane as we expected and
+both planes pass through $Q=(0,-r,0)$ as desired. \QED
+
+     Based on this theorem, the following algorithm computes the
+intersection conic.
+
+\begin{center}
+\begin{minipage}{5in}
+\vspace{8mm}
+\begin{center}
+     {\bf Algorithm:} Common Line and Conic Intersection
+\end{center}
+{\small
+\begin{enumerate}
+     \item If $\ell_1//\ell_2$, the intersection consists of only one finite
+          component $\stackrel{\longleftrightarrow}{V_1V_2}$.
+     \item If $\ell_1$ and $\ell_2$ are not parallel, let $O=\ell_1\cap\ell_2$.
+        Let $P$ be the intersection point of the other two skeletal lines.
+          From $O$ drop a perpendicular
+          to $\stackrel{\longleftrightarrow}{V_1V_2}$ meeting it at $Q$.
+       The intersection conic, which lies in the plane through
+       $\stackrel{\longleftrightarrow}{PQ}$ perpendicular to the axial
+       plane, can be computed as follows:
+     \begin{itemize}
+          \item $P$ is finite :  Let $X$ be the midpoint of $\overline{PQ}$
+               and compute the squared height $h_X^2$ to ${\cal C}_1$
+               (or ${\cal C}_2$).  The intersection is a central conic with
+               major axis $\stackrel{\longleftrightarrow}{PQ}$, center $X$,
+            and the length of its semi-major axis is
+               $\frac{1}{2}|\overline{PQ}|$.
+               The minor axis is the line through $X$ and perpendicular to
+               ${\cal H}$ and the length of the semi-minor axis is
+            $\sqrt{|h_X^2|}$.  Note that if
+               $h_X^2>0$, the conic is an ellipse, otherwise it is a hyperbola.
+          \item $P$ is at infinity : The intersection
+            is a parabola with major axis
+               $\stackrel{\longleftrightarrow}{PQ}$ and vertex $Q$.  The focal
+               length of this parabola can be determined using the technique
+               of Section~\ref{section:height}.
+     \end{itemize}
+\end{enumerate}
+}
+\end{minipage}
+\end{center}
+
+\begin{remark}\rm
+     Alternatively, since the plane containing the intersection conic is
+perpendicular to the axial plane and passing  through
+$\stackrel{\longleftrightarrow}{PQ}$, we can use the algorithms given
+in Johnstone and Shene~\cite{johnstone-shene:1991} to compute the intersection
+conic by intersecting this plane with one of the two given surfaces.
+Another way of computation is directly determining one of the foci on
+$\stackrel{\longleftrightarrow}{PQ}$ using a Dandelin sphere
+(Shene~\cite{shene:1992}).  $\Box$
+\end{remark}
+
+
+
+% --------------------------------------------------------------------
+%                        LINEAR INTERSECTION
+% --------------------------------------------------------------------
+
+\section{Linear Intersections}
+\label{section:linear}
+
+This section handles the last degenerate case, $V_1=V_2$.
+We will show that $V_1=V_2$ implies linear intersection.
+(Recall that under our
+definition, a linear intersection is an intersection whose components are all
+linear.)  For the cylinder--cylinder case, $V_1=V_2$ means all rulings on both
+surfaces are parallel, since the vertex of a cylinder is the point at infinity
+along the direction given by the axes.  In this case, the intersection is
+either empty, a common tangent, or two parallel lines.  $V_1=V_2$ is obviously
+impossible for the cylinder--cone case.  Thus, we need only consider
+cone--cone intersection.
+
+\begin{definition}
+     Let ${\cal C}_1(V,\ell_1,\alpha_1)$ and ${\cal C}_2(V,\ell_2,\alpha_2)$
+be two cones with the common vertex $V$ and distinct axes $\ell_1$ and
+$\ell_2$.  Let $P_{11}$ and $P_{12}$ be distinct points on $\ell_1$ such that
+$|\overline{P_{11}V}|=|\overline{P_{12}V}|=\cos\alpha_1$, while $P_{21}$ and
+$P_{22}$ are distinct points on $\ell_2$ such that
+$|\overline{P_{21}V}|=|\overline{P_{22}V}|=\cos\alpha_2$.
+The lines on the axial plane through $P_{11}$ and $P_{12}$ and perpendicular
+to $\ell_1$, and through $P_{21}$ and $P_{22}$ and perpendicular to $\ell_2$
+form a parallelogram $ABCD$ (Figure~\ref{fig:linear}).  Denote the two
+diagonals $\stackrel{\longleftrightarrow}{AC}$ and
+$\stackrel{\longleftrightarrow}{BD}$ of this parallelogram by $L_1$ and $L_2$
+respectively.
+The $L_i$ are important and act like diagonals (see
+Theorem~\ref{theorem:linear-intersection} below).
+\end{definition}
+
+The following lemma characterizes $L_1$ and $L_2$.
+
+\begin{figure}
+\vspace{4.5cm}
+\caption{Lines $L_1$ and $L_2$}
+\label{fig:linear}
+\end{figure}
+
+\begin{lemma}
+\label{lemma:L1-L2}
+     A point $P$, $P\neq V$, on ${\cal H}$ lies on $L_1\cup L_2$ if and only
+if the ratio of distances from $V$ to the perpendicular feet of $P$ on
+$\ell_1$ and $\ell_2$ is $\frac{\cos\alpha_1}{\cos\alpha_2}$.
+\end{lemma}
+{\bf Proof:}  See Figure~\ref{fig:linear}. \QED
+
+     $L_1$ and $L_2$ in turn characterize the intersection lines of
+${\cal C}_1$ and ${\cal C}_2$.
+Notice the similarity with Lemma~\ref{lemma:coincide-conic} again.
+
+\begin{theorem}
+\label{theorem:linear-intersection}
+     Two cones with identical vertices ${\cal C}_1(V,\ell_1,\alpha_1)$ and
+${\cal C}_2(V,\ell_2,\alpha_2)$, $\ell_1\neq\ell_2$, always intersect in
+lines.  The lines are the intersection of either cone with the plane through
+$L_i,i=1,2$ and perpendicular to the axial plane.
+\end{theorem}
+{\bf Proof:}  First, we will show that the plane through $L_i$ and
+perpendicular to the axial plane ${\cal H}$ contains one pair of intersection
+lines of ${\cal C}_1\cap{\cal C}_2$ by computing the squared heights to both
+cones at an arbitrary point $T\in L_i, T\neq V$. (This is obviously true for
+$T=V$.)  From $T$, drop a perpendicular to $\ell_i$ meeting it at $T_i,i=1,2$
+(Figure~\ref{fig:quadrilateral}(a)).  By the above lemma, we can assume
+$|\overline{VT_i}|=t\cos\!\alpha_i, i=1,2$, for some $t>0$.
+Let $t_i=|\overline{TT_i}|$ and $p=|\overline{VT}|$.  Then the squared height
+from $T$ to ${\cal C}_i$ is $h_i^2=t^2\sin^2\!\alpha_i-t_i^2$
+(Figure~\ref{fig:quadrilateral}(b)).  From $\bigtriangleup TT_iV$, since
+$\angle TT_iV=\frac{\pi}{2}$,
+$p^2=t^2\cos^2\!\alpha_i+t_i^2=t^2-t^2\sin^2\!\alpha_i+t_i^2$ and hence
+$t^2\sin^2\!\alpha_i-t_i^2=t^2-p^2$.  Therefore, we have $h_1^2=t^2-p^2=h_2^2$.
+These equal heights imply that the plane through $L_i$ and perpendicular to
+${\cal H}$ cuts the cones in a common intersection curve.  Since this plane
+passes though the common vertex $V$, the common intersection curve must be
+a pair of lines.  According as $h_1^2=h_2^2$ is positive,
+zero, or negative, the intersection lines are distinct real, double real, or
+conjugate imaginary.  With the above argument, we have already found four
+lines of intersection.  By Bezout's theorem, these are the only intersections
+of ${\cal C}_1\cap{\cal C}_2$. \QED
+
+\begin{figure}
+\vspace{4cm}
+\caption{Quadrangle $TT_1VT_2$ and the Height at $T$}
+\label{fig:quadrilateral}
+\end{figure}
+
+     The computation procedure is simple and consists of the following steps:
+\begin{center}
+\begin{minipage}{5in}
+\vspace{8mm}
+\begin{center}
+     {\bf Algorithm:} Linear Intersection ($V_1=V_2$)
+\end{center}
+{\small
+\begin{enumerate}
+     \item Determine the axial plane ${\cal H}$.
+     \item Determine the parallelogram $ABCD$ (Figure~\ref{fig:linear}).
+     \item For points $A$ and $D$, compute the squared heights $h_A^2$ and
+          $h_D^2$.  One can use the method in the proof of
+          Theorem~\ref{theorem:linear-intersection}.
+     \item Based on the sign of $h_A^2$ we have three cases:
+     \begin{enumerate}
+          \item $h_A^2>0$ : On the line through $A$ and perpendicular to
+               the axial plane, choose the two points at distance $h_A$
+               from $A$.  Connecting these two points to $V$ gives two
+               intersection lines.
+          \item $h_A^2=0$ : The intersection line is $L_1$, the line through
+               $V$ and $A$.
+          \item $h_A^2<0$ : The intersection lines are imaginary.  Thus, for
+               our purpose, the intersection consists of only one point,
+               the vertex $V$.
+     \end{enumerate}
+     \item Do the same thing using $D$ and $h_D^2$.
+\end{enumerate}
+}
+\end{minipage}
+\end{center}
+
+
+% -----------------------------------------------------------------
+%           SIMPLIFICATION OF GOLDMAN-MILLER THEORY
+% -----------------------------------------------------------------
+
+\section{A Necessary and Sufficient Condition for Conic Intersection: The
+     Common Inscribed Sphere}
+\label{section:simplification}
+
+     It is well known by descriptive geometers that two axial natural
+quadrics with intersecting axes have conic intersection if they have a
+common inscribed sphere.  For example, Bereis~\cite{bereis:1964} and
+Rehbock~\cite{rehbock:1964} use this property implicitly, while
+Gordon and Sementsov-Ogievskii~\cite[p. 283]{gordon:1980} state
+it explicitly and indicate that it is also true for revolute quadrics.
+However, in this literature,
+the existence of a common inscribed sphere is only
+stated as a sufficient condition for conic
+intersection.\footnote{In~\cite{goldman-warren:1990} Goldman and Warren
+point out that this condition is provably not necessary for revolute
+quadrics.}
+
+     Recently, Shene and Johnstone~\cite{shene-johnstone:1991a} and Goldman and
+Miller~\cite{g-m:1990,g-m:1991a} have shown that
+the common inscribed sphere is
+actually a necessary and sufficient condition.  The method and proof of
+Goldman and Miller is an exhaustive algebraic analysis, while the method and
+proof of Shene and Johnstone is geometric.
+In this section, using Lemma~\ref{lemma:perpendicular-stuff} and
+Lemma~\ref{lemma:non-skew} as our starting point, we will provide a new and
+very short algebraic proof for the common inscribed sphere
+criterion.\footnote{To the best of our knowledge, this is also the only proof
+published in a journal.}
+The purpose of this proof is to illustrate how the use of the axial plane
+can simplify previous proofs.
+Another algebraic proof can be found in Goldman and
+Warren~\cite{goldman-warren:1990}.
+
+\begin{remark}\rm
+     For a complete geometric proof of this criterion, the interested reader
+should consult Shene and Johnstone~\cite{shene-johnstone:1991b} and
+Shene~\cite{shene:1992}.  Moreover, a geometric proof that establishes the
+equivalence among the existence of a planar intersection, the existence of a
+common inscribed sphere and the existence of a Dupin blending cyclide is
+presented in Shene~\cite{shene:1992,shene:1993a}. $\Box$
+\end{remark}
+
+     The following lemma provides all of the necessary theory for our proof.
+
+\begin{lemma}
+\label{lemma:factor}
+     Two axial natural quadrics with coplanar and distinct axes have conic or
+linear intersection if and only if the parallel projection of their
+intersection curve to the axial plane factors.
+The projection curve is of second degree.
+\end{lemma}
+{\bf Proof:}  Suppose the axial plane is taken to be the $xy$-plane.
+Because of symmetry, there will be no $z$-term in the equations of the given
+axial natural quadrics, $Q_1(x,y)+z^2=0$ and $Q_2(x,y)+z^2=0$,
+where $Q_1(x,y)$ and $Q_2(x,y)$ are second degree polynomials of $x$ and $y$.
+Note that eliminating the $z$ terms from both equations is equivalent to
+performing a parallel projection of the intersection curve to the
+$xy$-plane.  Thus the projection curve
+has equation $Q_1(x,y)-Q_2(x,y)=0$, which is obviously a conic.
+
+     $(\Rightarrow)$ Recall that the intersection conics lie on two
+planes both perpendicular to the axial plane.  Thus the projection generates
+two straight lines.  Since the projection curve is of second degree and it
+has two lines as components, it must factor.
+
+     $(\Leftarrow)$ If the projection curve factors into two lines,
+the intersection curve is contained in two planes through the lines and
+perpendicular to the axial plane.  Each such plane cuts the surfaces
+in a conic or two lines. \QED
+
+     By Lemma~\ref{lemma:non-skew}, we can assume without loss of generality
+that the two given axial natural quadrics have coplanar axes.
+We have two theorems, based on whether the axes are parallel or intersecting.
+
+\begin{theorem}[Common Inscribed Sphere Criterion]
+\label{theorem:intersecting}
+     Two axial natural quadrics with intersecting and distinct axes have
+conic intersection if and only if they have a common inscribed sphere.
+\end{theorem}
+{\bf Proof:}
+We will prove this theorem using two
+cones.  The cases of cone--cylinder and cylinder--cylinder are similar.
+We can simplify the calculation by making the axial plane the $xy$-plane.
+We can also assume without loss of generality that the intersection point of
+the two axes is the coordinate origin.
+By an appropriate rotation bringing one cone's axis to the $x$-axis,
+the corresponding equation becomes $-c^2(x-u)^2+y^2+z^2=0$, where $(u,0)$ is
+the cone's vertex.  The second cone, which is the rotation of a cone
+$-d^2(x-v)^2+y^2+z^2=0$ by angle $\theta\neq 0,\pi$, has the equation
+\[ -d^2(x\cos\theta-y\sin\theta-v)^2+(x\sin\theta+y\cos\theta)^2+z^2=0. \]
+Eliminating the $z^2$ term gives the following projection curve on the
+$xy$-plane:
+\[ [c^2-d^2+(1+d^2)\sin^2\theta]x^2-(1+d^2)\sin^2\theta y^2
+   +2\sin\theta\cos\theta(1+d^2)xy \]
+\[ +2(d^2v\cos\theta-c^2u)x
+   -2d^2v\sin\theta y+(c^2u^2-d^2v^2)=0.                      \]
+The discriminant of this conic (after some reduction) is
+\begin{eqnarray*}
+\Delta&=&\left| \begin{array}{ccc}
+     c^2-d^2+(1+d^2)\sin^2\theta & \sin\theta\cos\theta(1+d^2) &
+                     d^2v\cos\theta-c^2u \\
+     \sin\theta\cos\theta(1+d^2) & -(1+d^2)\sin^2\theta & -d^2v\sin\theta \\
+     d^2v\cos\theta-c^2u & -d^2v\sin\theta & c^2u^2-d^2v^2
+                 \end{array} \right| \\
+     &=& \sin^2\theta(1+c^2)(1+d^2)\left[
+                    \frac{d^2v^2}{1+d^2}-\frac{c^2u^2}{1+c^2}
+                       \right].
+\end{eqnarray*}
+Therefore the projection curve factors if and only if $\Delta=0$,  if and only
+if $\frac{d^2v^2}{1+d^2}=\frac{c^2u^2}{1+c^2}$.  However, from the proof of
+Theorem~\ref{theorem:double-line}, we have $r_1^2=\frac{c^2u^2}{1+c^2}$,
+where $r_1$ is the radius of the inscribed sphere of the first cone with
+center the origin.
+Similarly, for the second cone, we have
+$r_2^2=\frac{d^2v^2}{1+d^2}$,
+where $r_2$ is the radius of the inscribed sphere of the second cone
+with center the origin.
+Now it is obvious that $\Delta=0$ if and only
+if the radii of the inscribed spheres are equal.  That is, if and only if
+the two given cones have a common inscribed sphere. \QED
+
+    The following corollary, also reported in
+Goldman and Miller~\cite{g-m:1990,g-m:1991a}, is a simple
+consequence of Theorem~\ref{theorem:intersecting}.
+
+\begin{corollary}
+     Consider two axial natural quadrics with $\ell_1$ and $\ell_2$,
+$\ell_1\neq\ell_2, O=\ell_1\cap\ell_2$,  as their axes.
+\begin{itemize}
+     \item Two cones ${\cal C}_1(V_1,\ell_1,\alpha_1)$ and
+          ${\cal C}_2(V_2,\ell_2,\alpha_2)$ have a conic intersection
+          if and only if $r=d_1\sin\alpha_1=d_2\sin\alpha_2$, where
+          $d_i=|\overline{OV_i}|$ and $r$ the radius of the common
+          inscribed sphere.
+     \item A cone ${\cal C}(V,\ell_1,\alpha)$ and a cylinder
+          ${\cal Z}(\ell_2,r)$ have a conic intersection if and only if
+          $d_1\sin\alpha_1=r$, where $d_1=|\overline{OV_1}|$
+          and $r$ the radius of the common inscribed sphere.
+     \item Two cylinders ${\cal Z}_1(\ell_1,r_1)$ and
+          ${\cal Z}_2(\ell_2,r_2)$ have conic intersection if and only
+          if $r_1=r_2$.
+\end{itemize}
+\end{corollary}
+{\bf Proof:}
+The radius of the inscribed sphere of ${\cal C}_i$ with center $O$
+is $d_i\sin\alpha_i$.
+\QED
+
+\begin{theorem}[Parallel Axes]
+\label{theorem:parallel-axes}
+     Two axial natural quadrics with parallel and distinct axes have conic
+intersection if and only if they have equal cone angles.
+\end{theorem}
+{\bf Proof:}
+Again assume that the axial plane is the $xy$-plane.
+The cone with axis
+the $x$-axis and vertex the origin has equation $-c^2x^2+y^2+z^2=0$,
+while the other cone with axis parallel to the $x$-axis and vertex $(u,v)$
+has equation $-d^2(x-u)^2+(y-v)^2+z^2=0$.  Note that since
+the axes are distinct,
+$v\neq 0$.  Eliminating the $z^2$ term gives the following
+projection curve on the $xy$-plane:
+\[ (c^2-d^2)x^2+2d^2ux-2vy+(v^2-d^2u^2)=0. \]
+This conic's discriminant is the following:
+\[ \Delta=\left| \begin{array}{ccc}
+                    c^2-d^2 & 0 & d^2u \\
+                        0   & 0 & -v   \\
+                       d^2u & -v & v^2-d^2u^2
+                 \end{array} \right| = -v^2(c^2-d^2). \]
+Thus, the projection curve factors if and only if $\Delta=0$, if and only if
+$c^2=d^2$. \QED
+
+\begin{remark} \rm
+Theorem~\ref{theorem:parallel-axes} also satisfies the
+common inscribed sphere criterion, since
+the two cones have a common inscribed sphere with center at the point at
+infinity along the two parallel axes. $\Box$
+\end{remark}
+
+
+% --------------------------------------------------------------------
+%              Enumerating All Conic Intersection Types
+%
+% REVISION HISTORY:
+%    Written   -- Feb/02/93
+%    Revised   -- May/09/93
+% --------------------------------------------------------------------
+
+\section{Enumerating All Conic Intersection Types}
+\label{section:enumeration}
+
+     Although two axial natural quadrics can intersect in two conics, some
+combinations such as two parabolas are impossible.  In this
+section, as an application of the common inscribed sphere criterion,
+we will investigate the possible combinations that can be
+obtained from two cones.
+We will also give a very simple method for determining the types of conic
+in a degenerate intersection (Table~\ref{tbl:transform}).
+
+The technique we will use is to fix one cone and rotate the other about the
+center of the common inscribed sphere.  By locating the positions
+at which the
+intersection type can change, and determining the intersection type at these
+points and in the arc between any two adjacent positions, we will obtain a
+clear picture of the possible degenerate intersections of two cones.
+
+     Suppose two cones ${\cal C}_1(V_1,\ell_1,\alpha_1)$ and
+${\cal C}_2(V_2,\ell_2,\alpha_2)$, $\alpha_1<\alpha_2$, have
+conic intersection (and intersecting axes).
+Then they have a common
+inscribed sphere with center $O=\ell_1\cap\ell_2$.  Let $I$ be the intersection
+circle of the common inscribed sphere and the axial plane.
+Fix cone ${\cal C}_1$ and rotate ${\cal C}_2$'s vertex
+$V_2$ about $O$ in the axial plane.
+The locus of $V_2$ is a circle $J$ with
+radius $|\overline{OV_2}|$ and center $O$.  Because $\alpha_1<\alpha_2$, $V_1$
+lies outside of $J$.
+
+\begin{definition}
+Parallel to each skeletal line of ${\cal C}_1$, construct
+a tangent line of $I$.  These two tangent lines meet at a point $V_1^\prime$,
+which also lies outside of $J$.  Since these two pairs of parallel lines form a
+parallelogram and $J$ has larger radius, $J$ cuts the four sides of the
+parallelogram in eight points.  We call them the
+{\bf critical points}\index{critical point}\index{point,critical},
+since the types of the intersection conics change
+when $V_2$ crosses these points.
+\end{definition}
+
+If $V_2$ is one of the critical points,
+two skeletal lines, one from each skeletal pair, are either parallel or
+identical.  In the former case, one of the intersection conics is a parabola,
+while in the latter case one of the intersection conics degenerates to a double
+line.  Between any two consecutive critical points, it is not difficult to see
+that the types of the intersection conics do not change.
+We have three cases to consider:
+(1) $\alpha_1+\alpha_2<\frac{\pi}{2}$, (2) $\alpha_1+\alpha_2=\frac{\pi}{2}$,
+and (3) $\alpha_1+\alpha_2>\frac{\pi}{2}$ (Figure~\ref{fig:enum}).
+\begin{figure}
+\vspace{4.5cm}
+\caption{Enumeration of All Types of Intersection Conics}
+\label{fig:enum}
+\end{figure}
+
+     One should have no difficulty verifying the results documented in
+Table~\ref{tbl:case-1}.
+In this table, $\cal E, P, H$ and $\cal L$ indicate an ellipse, a parabola, a
+hyperbola and a double line respectively.  Note that this table is based on
+the assumption that $\alpha_1<\alpha_2$.  For $\alpha_1=\alpha_2$, we have
+$V_1^\prime=A=H$ and $V_1=D=E$ and the corresponding parts in the table still
+give correct results.
+\begin{table*}
+\caption{Intersection Type for Two Cones $(\alpha_1<\alpha_2)$}
+\label{tbl:case-1}
+$$
+\BeginTable
+     \OpenUp22
+     \def\E{$\cal E$}
+     \def\P{$\cal P$}
+     \def\H{$\cal H$}
+     \def\L{$\cal L$}
+     \BeginFormat
+     |5   c   | c   |   c   | c  |5
+     \EndFormat
+     \_5
+     |\it Range | $\alpha_1+\alpha_2<\frac{\pi}{2}$ |
+                  $\alpha_1+\alpha_2=\frac{\pi}{2}$ |
+                  $\alpha_1+\alpha_2>\frac{\pi}{2}$ | \\ \_3
+     | $(H,A)$             | \use3 \E+\E                       | \\ \_
+     | $A$ and $H$         | \use3 \E+\P                       | \\ \_
+     | $(A,B)$ and $(G,H)$ | \use3 \E+\H                       | \\ \_
+     | $B$ and $G$         | \E+\L |        | \H+\P            | \\
+     & \use2 \=                    &        & \=               & \\0
+     | $(B,C)$ and $(F,G)$ | \E+\E | \P+\L  | \H+\H            | \\
+     & \use2 \=                    &        & \=               & \\0
+     | $C$ and $F$         | \E+\P |        | \H+\L            | \\ \_
+     | $(C,D)$ and $(E,F)$ | \use3 \E+\H                       | \\ \_
+     | $D$ and $E$         | \use3 \E+\L                       | \\ \_
+     | $(D,E)$             | \use3 \E+\E                       | \\ \_5
+\EndTable
+$$
+\end{table*}
+
+     We can transform Table~\ref{tbl:case-1} into a format that is even easier
+to use.  In particular, we can replace the computation of the critical points
+by the computation of $\cos\theta=\arrow{v}_1\cdot\arrow{v}_2$, where
+$\arrow{v}_1$ and $\arrow{v}_2$ are the normalized vectors of
+$\stackrel{\longrightarrow}{OV}_1$ and $\stackrel{\longrightarrow}{OV}_2$, and
+$\theta$ is the angle between $\arrow{v}_1$ and $\arrow{v}_2$.
+Suppose circle $J$ intersects one of the skeletal lines of
+${\cal C}_1$ at $X_1$ and $Y_1$ with $X_1 \in \overline{V_1 Y_1}$
+(Figure~\ref{fig:transform}(a)).
+Then, $\angle OX_1Y_1=\angle OY_1X_1=\alpha_2$.  Therefore,
+$\angle V_1OX_1=\alpha_2-\alpha_1$ and
+$\angle V_1OY_1=\angle V_1OX_1+\angle X_1OY_1=
+(\alpha_2-\alpha_1)+(\pi-2\alpha_2)=\pi-(\alpha_1+\alpha_2)$.
+Thus, if $V_2$ is identical to
+$X_1$ ({\em resp.}, $Y_1$), we have $\theta=\alpha_2-\alpha_1$
+({\em resp.}, $\theta=\pi-(\alpha_1+\alpha_2$)).
+Note that $X_1$ and $Y_1$ are two of the four points $A,B,C$ and $D$.
+Finally, let $X_2$ and $Y_2$ be the symmetric images with respect
+to the line through
+$O$ and perpendicular to $\stackrel{\longleftrightarrow}{V_1V_1^\prime}$
+(Figure~\ref{fig:transform}(b)).
+Notice that
+$\angle V_1OX_2=\pi-\angle V_1OX_1=\pi-(\alpha_2-\alpha_1)$ and
+$\angle V_1OY_2=\pi-\angle V_1OY_1=\alpha_1+\alpha_2$.
+We can now identify the critical points with values of angle $\theta$,
+splitting the problem into the following three cases:
+\begin{figure}
+\vspace{4cm}
+\caption{Determining the Angles of the Critical Points}
+\label{fig:transform}
+\end{figure}
+\begin{enumerate}
+     \item \ [$\alpha_1+\alpha_2<\frac{\pi}{2}$]:
+          $X_1$, $Y_1$, $X_2$ and $Y_2$ correspond to $D$, $B$, $A$ and $C$
+          respectively (Figure~\ref{fig:enum}(a)), and the
+          $\theta$'s corresponding to $V_1$, $D$, $C$, $B$, $A$ and
+       $V_1^\prime$ are \\$0 < \alpha_2-\alpha_1 < \alpha_1+\alpha_2
+          < \pi-(\alpha_1+\alpha_2) < \pi-(\alpha_2-\alpha_1) < \pi$,
+       respectively.
+
+     \item \ [$\alpha_1+\alpha_2=\frac{\pi}{2}$]:
+          $X_1$, $Y_1=Y_2$ and $X_2$ correspond to $D$, $B=C$ and $A$
+          respectively (Figure~\ref{fig:enum}(b)), and the
+          $\theta$'s corresponding to $V_1$, $D$, $B=C$, $A$ and $V_1^\prime$
+          are \\$0 < \alpha_2-\alpha_1 < \alpha_1+\alpha_2=\frac{\pi}{2}
+          < \pi-(\alpha_2-\alpha_1) < \pi$, respectively.
+
+     \item \ [$\alpha_1+\alpha_2>\frac{\pi}{2}$]:
+          $X_1$, $Y_2$, $X_2$ and $Y_2$ correspond to $D$, $B$, $A$ and $C$
+          as in the first case (Figure~\ref{fig:enum}(c)), however
+          the $\theta$'s corresponding to $V_1$, $D$, $C$, $B$, $A$ and
+          $V_1^\prime$ are $0 < \alpha_2-\alpha_1 < \pi-(\alpha_1+\alpha_2)
+          < \alpha_1+\alpha_2 < \pi-(\alpha_2-\alpha_1) < \pi$, respectively.
+\end{enumerate}
+
+     For the sake of simplicity, let $c_{-}$ and $c_{+}$ be
+$\cos(\alpha_2-\alpha_1)$ and $\cos(\alpha_1+\alpha_2)$ respectively.
+Using $c_{-}$, $c_{+}$ and $\cos\theta$, Table~\ref{tbl:case-1} is transformed
+to the more manageable form of Table~\ref{tbl:transform}
+(where ${\cal C}$ indicates a circle).
+
+\begin{table*}
+\caption{Intersection Types for Two Cones $(\alpha_1<\alpha_2)$}
+\label{tbl:transform}
+$$
+\BeginTable
+     \OpenUp22
+     \ninepoint
+     \def\E{$\cal E$}
+     \def\P{$\cal P$}
+     \def\H{$\cal H$}
+     \def\L{$\cal L$}
+     \def\C{$\cal C$}
+     \BeginFormat
+     |5 c | c | c | c | c | c | c | c | c | c | c | c |5
+     \EndFormat
+     " \use{12} \JustCenter (a) $\alpha_1+\alpha_2<\frac{\pi}{2}$ " \\ \_5
+     |\it $\cos\theta$ | 1 " $\dots$ " $c_{-}$
+          " $\dots$ " $c_{+}$ " $\dots$
+          " $-c_{+}$ " $\dots$ " $-c_{-}$
+          " $\dots$ " $-1$ | \\ \_3
+     | \it Type | \C+\C " \E+\E " \E+\L " \E+\H " \E+\P
+          " \E+\E " \E+\L " \E+\H " \E+\P " \E+\E " \C+\C | \\
+     \_5
+\EndTable
+$$
+
+\vspace{0.8cm}
+$$
+\BeginTable
+     \OpenUp22
+     \ninepoint
+     \def\E{$\cal E$}
+     \def\P{$\cal P$}
+     \def\H{$\cal H$}
+     \def\L{$\cal L$}
+     \def\C{$\cal C$}
+     \BeginFormat
+     |5 c | c | c | c | c | c | c | c | c | c |5
+     \EndFormat
+     " \use{10} \JustCenter (b) $\alpha_1+\alpha_2=\frac{\pi}{2}$ " \\ \_5
+     |\it $\cos\theta$ | 1 " $\dots$ " $c_{-}$
+          " $\dots$ " 0 " $\dots$
+          " $-c_{-}$ " $\dots$ " $-1$ | \\ \_3
+     | \it Type | \C+\C " \E+\E " \E+\L " \E+\H " \P+\L
+          " \E+\H " \E+\P " \E+\E " \C+\C | \\
+     \_5
+\EndTable
+$$
+\vspace{0.8cm}
+$$
+\BeginTable
+     \OpenUp22
+     \ninepoint
+     \def\E{$\cal E$}
+     \def\P{$\cal P$}
+     \def\H{$\cal H$}
+     \def\L{$\cal L$}
+     \def\C{$\cal C$}
+     \BeginFormat
+     |5 c | c | c | c | c | c | c | c | c | c | c | c |5
+     \EndFormat
+     " \use{12} \JustCenter (c) $\alpha_1+\alpha_2>\frac{\pi}{2}$ " \\ \_5
+     |\it $\cos\theta$ | 1 " $\dots$ " $c_{-}$
+          " $\dots$ " $-c_{+}$ " $\dots$
+          " $c_{+}$ " $\dots$ " $-c_{-}$
+          " $\dots$ " $-1$ | \\ \_3
+     | \it Type | \C+\C " \E+\E " \E+\L " \E+\H " \H+\L
+          " \H+\H " \H+\P " \E+\H " \E+\P " \E+\E " \C+\C | \\
+     \_5
+\EndTable
+$$
+\end{table*}
+
+In conclusion,
+if  the common inscribed sphere criterion indicates that the cones have
+conic intersection, then the types of the intersection conics can be
+determined immediately as follows.
+First, from the cone vertices and the center of the
+common inscribed sphere, we can compute the vectors $\arrow{v}_1$ and
+$\arrow{v}_2$ and hence
+$\cos\theta=\arrow{v}_1\cdot\arrow{v}_2$.  Then, based on
+the relation between $\alpha_1+\alpha_2$ and $\frac{\pi}{2}$,
+we can choose an appropriate
+table in Table~\ref{tbl:transform} and search using $\cos\theta$
+to find the types of the intersection conics.
+
+
+
+% -----------------------------------------------------------------------
+%                          CONCLUSIONS
+%
+% REVISION HISTORY:
+%    1)   Sept/04/93     Written
+%    2)   May/14/93      Remove all references to Part II
+% -----------------------------------------------------------------------
+
+\section{Conclusions}
+\label{section:conclusion}
+
+     This paper has successfully developed a fully geometric technique for
+detecting and computing the planar intersections of two natural quadric
+surfaces.  The fundamental method involves a comparison of two heights from a
+point in the axial plane to the surfaces.  In developing the method, the
+structure of planar intersection has been revealed, such as that the axes are
+coplanar and the planes containing the intersection curves are perpendicular
+to this plane.
+
+     The techniques of this paper can be generalized to cover more general
+quadric surfaces, and we are working on this problem.   However, some lemmas
+presented here will not hold for more general surfaces; for example, planar
+intersection need not imply coplanar axes.  Another interesting question is
+whether one can compute the higher degree intersection curves of natural
+quadrics using the techniques presented in this paper.
+
+
+% ---------------------------------------------------------------------
+%                       THE BIBLIOGRAPHY
+% ---------------------------------------------------------------------
+
+\newpage
+\begin{thebibliography}{999}
+
+\bibitem{abhyankar-bajaj:1989}
+     Abhyankar, S. S., and Bajaj, C. L.
+     Automatic Parameterization of Rational Curves and Surfaces IV:
+          Algebraic Space Curves,
+     {\em ACM Transactions on Graphics},
+     Vol. 8 (1989), No. 4 (October), pp. 325--334.
+
+\bibitem{bereis:1964}
+     Bereis, R.
+     {\em Darstellende Geometrie I},
+     Akademie-Verlag, Berlin, 1964.
+
+\bibitem{boehm:1990}
+     Boehm, W.
+     On Cyclides in Geometric Modeling,
+     {\em Computer Aided Geometric Design},
+     Vol. 7 (1990), pp. 243--255.
+
+\bibitem{bromwich:1971}
+     Bromwich, T. J. I'A
+     {\em Quadratic Forms and Their Classification
+          by Means of Invariant-Factors},
+     Hafner Publishing Company, New York, 1971.
+
+\bibitem{dandelin:1822}
+     Dandelin, G. P.
+     M\'{e}moire sur quelques propri\'{e}t\'{e}s remarquables de la Focal
+     Parabolique,
+     {\em Nouveaux M\'{e}moires de l'Acad\'{e}mie Royale des Sciences et
+     Belles-lettres de Bruxelles},
+     Vol. 2 (1822), pp. 171--202.
+
+\bibitem{farouki:1989}
+     Farouki, R. T., Neff, C. A., and O'Connor, M. A.
+     Automatic Parsing of Degenerate Quadric-Surface Intersection,
+     {\em ACM Transaction on Graphics},
+     Vol. 8 (1989), No. 3, pp. 174--203.
+
+\bibitem{garrity-warren:1989}
+     Garrity, T., and Warren, J. D.
+     On Computing the Intersection of a Pair of Algebraic Surfaces,
+     {\em Computer Aided Geometric Design},
+     Vol. 9 (1989), No. 2 (May), pp. 137--153.
+
+%\bibitem{graphics-gems}
+%     Glassner, A., editor.
+%     {\em Graphics Gems},
+%     Academic Press, New York, 1990.
+
+\bibitem{goldman:1983b}
+     Goldman, R. N.
+     Two Approaches to a Computer Model for Quadric Surfaces,
+     {\em IEEE Computer Graphics and Applications},
+     Vol. 3 (1983), No. 6, pp. 21--24.
+
+\bibitem{goldman:1990}
+     Goldman, R. N.
+     Intersection of Two Lines in Three-Space,
+     in {\em Graphics Gems}, edited by Andrew S. Glassner,
+     Academic Press, Boston, 1990, p. 304.
+
+\bibitem{g-m:1990}
+     Goldman, R. N., and Miller, J. R.
+     Detecting and Calculating Conic Sections in the Intersection of Two
+     Natural Quadric Surfaces, Part I: Detection,
+     Draft, October 1990.
+
+\bibitem{g-m:1991a}
+     Goldman, R. N., and Miller, J. R.
+     Combining Algebraic Rigor with Geometric Robustness for the Detection
+          and Calculation of Conic Sections in the Intersection of Two
+          Natural Quadric Surfaces,
+     in {\em ACM Symposium on Solid Modeling Foundations and
+          CAD/CAM Applications},
+     June 1991, pp. 221--231.
+
+\bibitem{goldman-warren:1990}
+     Goldman, R. N., and Warren, J. D.
+     A Sufficient Condition for the Intersection of Two Quadrics of Revolution
+     to Degenerate into a Pair of Conic Sections,
+     Technical Report, Rice University, December 1990.
+
+\bibitem{gordon:1980}
+     Gordon, V. O., and Sementsov-Ogievskii, M. A.
+     {\em A Course in Descriptive Geometry},
+     translated from Russian by Leonid Levant,
+     MIR Publishers, Moscow, 1980.
+
+\bibitem{hakala:1980}
+     Hakala, D. G., Hillyard, R. C., Nourse, B. E., and Malraison, P. J.
+     Natural Quadrics in Mechanical Design,
+     {\em Proceedings of Autofact West 1},
+     Anaheim, CA., Nov. 1980, pp. 363--378.
+
+\bibitem{hilbert:1952}
+     Hilbert, D. and Cohn-Vossen, S.
+     {\em Geometry and the Imagination},
+     translated from the German edition
+     {\em Anschauliche Geometrie}
+     by P. Nemenyi,
+     Chelsea, New York, 1952.
+
+\bibitem{hoffmann:1989}
+     Hoffmann, C. M.
+     {\em Geometric and Solid Modeling: An Introduction},
+     Morgan Kaufmann, San Mateo, CA, 1989.
+
+\bibitem{hohmeyer:1991}
+     Hohmeyer, M. E.
+     A Surface Intersection Algorithm Based on Loop Detection,
+     {\em International Journal of Computational Geometry \& Applications},
+     Vol. 1 (1991), No. 4 (December), pp. 473--490.
+
+\bibitem{johnstone-shene:1991}
+     Johnstone, J. K. and Shene, C.-K.
+     Computing the Intersection of a Plane and a Natural Quadric,
+     {\em Computers \& Graphics},
+     Vol. 16 (1992), No. 2, pp. 179--186.
+
+\bibitem{johnstone-shene:1992}
+     Johnstone, J. K. and Shene, C.-K.
+     Dupin Cyclides as Blending Surfaces for Cones,
+     to appear in {\em Mathematics of Surfaces V},
+     Oxford University Press.
+
+\bibitem{levin:1976}
+     Levin, J. Z.
+     A Parametric Algorithm for Drawing Pictures of Solid Objects Composed
+          of Quadric Surfaces,
+     {\em Communications of ACM},
+     Vol. 19 (1976), No. 10, pp. 555--563.
+
+\bibitem{levin:1979}
+     Levin, J. Z.
+     Mathematical Models for Determining the Intersections of Quadric Surfaces,
+     {\em Computer Graphics and Image Processing},
+     Vol. 11 (1979), pp. 73--87.
+
+\bibitem{manocha-canny:1991}
+     Manocha, D., and Canny, J.
+     A New Approach for Surface Intersection,
+     {\em International Journal of Computational Geometry \& Applications},
+     Vol. 1 (1991), No. 4, pp. 491--516.
+
+\bibitem{miller:1987}
+     Miller, J. R.
+     Geometric Approaches to Nonplanar Quadric Surface Intersection Curves,
+     {\em ACM Transactions on Graphics},
+     Vol. 6 (1987), No. 4, pp. 274--307.
+
+\bibitem{m-g:1991}
+     Miller, J. R., and Goldman, R. N.
+     Detecting and Calculating Conic Sections in The Intersection of
+     Two Natural Quadric Surfaces, Part II: Calculation,
+     Draft, February 1991.
+
+\bibitem{m-g:1991a}
+     Miller, J. R., and Goldman, R. N.
+     Using Tangent Balls to Find Plane Sections of Natural Quadric Surfaces,
+     {\em IEEE Computer Graphics and Applications},
+     Vol. 12 (1992), No. 2 (March), pp. 68--82.
+
+\bibitem{ocken:1987}
+     Ocken, S., Schwartz, J. T., and Sharir, M.
+     Precise Implementation of CAD Primitives Using Rational Parameterizations
+     of Standard Surfaces,
+     in {\em Planning, Geometry, and Complexity of Robot Motion}, edited by
+     Jacob T. Schwartz, Micha Sharir and John Hopcroft,
+     Ablex Publishing Co., Norwood, New Jersey, 1987, pp. 245--266.
+
+\bibitem{oconnor:1989}
+     O'Connor, M. A.
+     Natural Quadrics: Projections and Intersections,
+     {\em IBM Journal of Research and Development},
+     Vol. 33 (1989), No. 4 (July), pp. 417--446.
+
+\bibitem{piegl:1989}
+     Piegl, L.
+     Geometric Method of Intersecting Natural Quadrics Represented in Trimmed
+     Surface Form,
+     {\em Computer Aided Design}, Vol. 21 (1989), No. 4, pp. 201--212.
+
+\bibitem{piegl:1992}
+     Piegl, L.
+     Constructive Geometric Approach to Surface-Surface Intersection,
+     in {\em Geometry Processing for Design and Manufacturing},
+     edited by Robert E. Barnhill, SIAM, Philadelphia, 1992, pp. 137--159.
+
+\bibitem{pratt:1990}
+     Pratt, M. J.
+     Cyclides in Computer Aided Geometric Design,
+     {\em Computer Aided Geometric Design},
+     Vol. 7 (1990), pp. 221--242.
+
+\bibitem{pratt:1992}
+     Pratt, M. J.
+     The Virtues of Cyclides in CAGD,
+     in {\em Mathematical Methods in Computer Aided Geometric Design II},
+     edited by Tom Lyche and Larry L. Schumaker,
+     Academic Press, Boston, 1992, pp. 457--473.
+
+\bibitem{rehbock:1964}
+     Rehbock, F.
+     {\em Darstellende Geometrie},
+     second edition, Springer-Verlag, New York, 1964.
+
+\bibitem{sabin:1976}
+     Sabin, M. A.
+     A Method for Displaying the Intersection Curve of Two Quadric Surfaces,
+     {\em The Computer Journal},
+     Vol. 19 (1976), No. 4, pp. 336--338.
+
+\bibitem{sabin}
+     Sabin, M. A.
+     as communicated to Pratt in \cite{pratt:1990}.
+
+\bibitem{samuel:1976}
+     Samuel, N. M., Requicha, A. A. G., and Elkind, S. A.
+     Methodology and Results of an Industrial Part Survey,
+     Technical Memorandum No. 21,
+     Production Automation Project,
+     University of Rochester, Rochester, NY, 1976.
+
+\bibitem{sarraga:1983}
+     Sarraga, R. F.
+     Algebraic Methods for Intersections of Quadric Surfaces in GMSOLID,
+     {\em Computer Vision, Graphics, and Image Processing},
+     Vol. 22 (1983), pp. 222--238.
+
+\bibitem{shene:1992}
+     Shene, C.-K.
+     Planar Intersection and Blending of Natural Quadrics,
+     Ph.D. thesis,
+     Department of Computer Science,
+     The Johns Hopkins University,
+     Baltimore, Maryland, August 1992.
+
+\bibitem{shene:1993a}
+     Shene, C.-K.
+     Planar Intersection, Common Inscribed Sphere and Blending Dupin Cyclides
+     (Extended Abstract),
+     {\em Second ACM/IEEE Symposium on Solid Modeling and
+     Applications}, May 1993.
+
+\bibitem{shene-johnstone:1991a}
+     Shene, C.-K., and Johnstone, J. K.
+     On the Planar Intersection of Natural Quadrics,
+     in {\em ACM Symposium on Solid Modeling Foundations and
+     CAD/CAM Applications}, June 1991, pp. 233--242.
+
+\bibitem{shene-johnstone:1991c}
+     Shene, C.-K., and Johnstone, J. K.
+     On the Lower Degree Intersections of Two Natural Quadrics,
+     Technical Report JHU--91/15,
+     Department of Computer Science,
+     The Johns Hopkins University,
+     September 1991.
+
+\bibitem{shene-johnstone:1991b}
+     Shene, C.-K., and Johnstone, J. K.
+     When Does a Quadrilateral Have an Inscribed Circle?
+     Technical Report JHU--91/22,
+     Department of Computer Science,
+     The Johns Hopkins University,
+     December 1991.
+
+\bibitem{warren:1987}
+     Warren, J. D.
+     Blending Quadric Surfaces with Quadric and Cubic Surfaces,
+     {\em Proceedings of the Third Annual Symposium on Computational Geometry},
+     Waterloo, Ontario, Canada 1987, pp. 341--347.
+
+\bibitem{warren:1989}
+     Warren, J. D.
+     Blending Algebraic Surfaces,
+     {\em ACM Transactions on Graphics},
+     Vol. 8 (1989), No. 4 (October), pp. 263--278.
+
+\bibitem{wilson:1987}
+     Wilson, P. R.
+     Conic Representations for Shape Description,
+     {\em IEEE Computer Graphics and Applications},
+     Vol. 7 (1987), No. 4, pp. 23--40.
+
+\end{thebibliography}
+
+
+% --------------------------- THE END --------------------------------
+
+\end{document}
+

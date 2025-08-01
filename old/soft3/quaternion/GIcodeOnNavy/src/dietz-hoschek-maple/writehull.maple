@@ -1,0 +1,86 @@
+writepoint := proc(P,colp)
+	print(evalf(P[1],10),evalf(P[2],10),evalf(P[3],10),colp);
+	end;
+
+
+writehull := proc(file,C,deg1,deg2,colp)
+		writeto(file);
+		tpoint1 := vector(4);
+		tpoint2 := vector(4);
+		for i from 1 to deg1 do
+			for j from 1 to deg2 do
+				tpoint1[1] := C[1][i,j];
+				tpoint1[2] := C[2][i,j];
+				tpoint1[3] := C[3][i,j];
+				tpoint1[4] := C[4][i,j];
+
+				tpoint2[1] := C[1][i,j+1];
+				tpoint2[2] := C[2][i,j+1];
+				tpoint2[3] := C[3][i,j+1];
+				tpoint2[4] := C[4][i,j+1];
+			
+				writepoint(htoc(tpoint1),colp);
+				writepoint(htoc(tpoint2),colp);
+			od;
+		od;
+
+		for j from 1 to deg2 do
+			for i from 1 to deg1 do
+				tpoint1[1] := C[1][i,j];
+				tpoint1[2] := C[2][i,j];
+				tpoint1[3] := C[3][i,j];
+				tpoint1[4] := C[4][i,j];
+
+				tpoint2[1] := C[1][i+1,j];
+				tpoint2[2] := C[2][i+1,j];
+				tpoint2[3] := C[3][i+1,j];
+				tpoint2[4] := C[4][i+1,j];
+			
+				
+				writepoint(htoc(tpoint1),colp);
+				writepoint(htoc(tpoint2),colp);
+			od;
+		od;
+		writeto(terminal);
+	end;
+
+
+
+writecurve := proc(file,C,deg1,deg2,tsteps,usteps,colp)
+	uinc := 1/(usteps-1);
+	tinc := 1/(tsteps-1);
+	cpoint := vector(4);
+	lpoint := vector(4);
+	uval := 0;
+	tval := 0;
+	fun := beztensor_to_function(C,deg1,deg2,t,u);
+	writeto(file);
+	for i from 1 to tsteps do
+		tval := (i-1) * tinc;
+		for j from 1 to usteps do
+			uval := (j-1) * uinc;
+			cpoint[1] := evalf(subs(t=tval,u=uval,fun[1]),10);
+			cpoint[2] := evalf(subs(t=tval,u=uval,fun[2]),10);
+			cpoint[3] := evalf(subs(t=tval,u=uval,fun[3]),10);
+			cpoint[4] := evalf(subs(t=tval,u=uval,fun[4]),10);
+			if (evalb(j=1)) then 
+				lpoint[1] := eval(cpoint[1]);
+				lpoint[2] := eval(cpoint[2]);
+				lpoint[3] := eval(cpoint[3]);
+				lpoint[4] := eval(cpoint[4]);
+			else
+				writepoint(htoc(lpoint),colp);
+				writepoint(htoc(cpoint),colp);
+				lpoint[1] := eval(cpoint[1]);
+				lpoint[2] := eval(cpoint[2]);
+				lpoint[3] := eval(cpoint[3]);
+				lpoint[4] := eval(cpoint[4]);
+			fi;
+		od;
+	od;
+	writeto(terminal);
+	end;
+
+
+
+

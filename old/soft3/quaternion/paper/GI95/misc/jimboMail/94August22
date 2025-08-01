@@ -1,0 +1,46 @@
+From jj Mon Aug 22 14:12:36 1994
+Return-Path: <jj>
+Received: by cis.uab.edu (4.1/SMI-4.1)
+	id AA05503; Mon, 22 Aug 94 14:12:35 CDT
+Date: Mon, 22 Aug 94 14:12:35 CDT
+From: jj (John Johnstone)
+Message-Id: <9408221912.AA05503@cis.uab.edu>
+To: jimbo@blaze.cs.jhu.edu
+Cc: jj
+Status: OR
+
+For your records:
+
+A cubic Bezier curve in 4-space, with control points b_i,
+maps under the map M = (p^2+q^2+r^2+s^2,p^2+q^2+r^2-s^2,2ps,2qs,2rs)
+to a Bezier curve of degree 6 on the unit 4-sphere.
+My calculations show that the kth control pt of this deg 6 Bezier curve is:
+
+	c_k = \sum_{i,j \geq 0, i+j=k} 
+		(\choose{3}{i} \choose{3}{j}) / \choose{6}{k}
+		(b_ip b_jp + b_iq b_jq + b_ir b_jr + b_is b_js,
+		 b_ip b_jp + b_iq b_jq + b_ir b_jr - b_is b_js,
+		 2b_ip b_js,
+		 2b_iq b_js,
+		 2b_ir b_js)
+
+where \choose{a}{b} is "a choose b" and \geq is 'greater than or equal to'.
+Notice the similarity to the M map, except for the leading `choose' term
+and the summation over all i,j summing to k.
+
+No matter what interpolation technique we use to create the original 
+curve in 4-space, we should ensure that it is cubic B-spline/Bezier
+so that it can be decomposed into the above segments.
+
+It would be good for us to soon investigate the characteristics of 
+the class of spherical
+curves that the map M creates, since it is not all spherical curves
+(that is, given k points on the 4-sphere, we are looking
+at some subclass of all curves that interpolate these points while
+remaining on the sphere: the class arising from the image under M of 
+space curves).
+Your suggestion of looking at the continuity of the `M-class of spherical
+curves' that you mentioned in a recent mail is one tack at this.
+
+jj
+

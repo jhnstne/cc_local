@@ -1,0 +1,52 @@
+From jimbo@blaze.cs.jhu.edu Tue Oct 25 15:03 CDT 1994
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from blaze.cs.jhu.edu by cis.uab.edu (5.0/SMI-SVR4)
+	id AA06944; Tue, 25 Oct 1994 15:03:57 -0500
+Received: from mail-client (peregrine.cs.jhu.edu)
+           by blaze.cs.jhu.edu; Tue, 25 Oct 94 16:03:51 EDT
+Received: by mail-client (4.1) id AA16727; Tue, 25 Oct 94 16:02:02 EDT
+Message-Id: <9410252003.AA06944@cis.uab.edu>
+From: jimbo@blaze.cs.jhu.edu (Jim)
+Sender: jimbo@blaze.cs.jhu.edu
+Subject: the mapping Minverse
+To: jj@redmont1.cis.uab.edu (John Johnstone)
+Date: Tue, 25 Oct 1994 16:02:02 -0400 (EDT)
+In-Reply-To: <9410251657.AA05541@cis.uab.edu> from "John Johnstone" at Oct 25, 94 11:57:30 am
+X-Mailer: ELM [version 2.4 PL13]
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Length: 935
+Status: OR
+
+I was thinking that something should be mentioned
+about how Minverse really maps unit quaternions to 
+lines.
+
+When we take Minv(1,q1,q2,q3,q4) we could just
+as well use the projectively equivalent point
+Minv(k,kq1,kq2,kq3,kq4) because 
+
+M(Minv(q)) =proj= M(Minv(kq))
+
+where =proj= is equivalence under homogenization
+
+Which means we could choose any point along a line
+in projective 4-space, and it will yield the same 
+ultimate curve even though
+
+Minv(q) != Minv(kq)
+
+It makes life a lot simpler to choose k=1 as we have
+done, but I think this should be explicit in the
+treatment on page 7 and should be noted in the end
+of section 2 : Realted Work where you state that a
+difference between us and Dietz is the linear system.
+In fact we are just making life easier by choosing
+given points on a projecting line, where Dietz just
+works the whole projecting line. I think it may also
+be good to toss this into "future directions"
+
+
+Jim
+

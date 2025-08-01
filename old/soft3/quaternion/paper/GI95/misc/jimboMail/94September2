@@ -1,0 +1,71 @@
+From jimbo@blaze.cs.jhu.edu Fri Sep  2 10:12 CDT 1994
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from blaze.cs.jhu.edu by cis.uab.edu (5.0/SMI-SVR4)
+	id AA15582; Fri, 2 Sep 1994 10:12:50 -0500
+Received: from mail-client (peregrine.cs.jhu.edu)
+           by blaze.cs.jhu.edu; Fri, 2 Sep 94 11:13:33 EDT
+Received: by mail-client (4.1) id AA22576; Fri, 2 Sep 94 11:13:28 EDT
+Message-Id: <9409021512.AA15582@cis.uab.edu>
+From: jimbo@blaze.cs.jhu.edu (James P. Williams)
+Sender: jimbo@blaze.cs.jhu.edu
+Subject: More cusp results
+To: jj@blaze.cs.jhu.edu (Dr. John Johnstone)
+Date: Fri, 2 Sep 1994 11:13:28 -0400 (EDT)
+Cc: jimbo@blaze.cs.jhu.edu (James P. Williams)
+In-Reply-To: <no.id> from "Dr. John Johnstone" at Sep 1, 94 12:19:36 pm
+X-Mailer: ELM [version 2.4 PL13]
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Length: 1375
+Status: OR
+
+A second, and hopefully final result on cusps:
+
+In the previous message, I showed that if we split
+the mapping into two parts, M1 & M2, it was easy to
+show that M1 introduced cusps only if the source
+curve passed through the origin.  Here is another
+take on cusps:
+
+
+Let's look at the whole mapping:
+
+	Let A = p^2 + q^2 + r^2 + s^2
+
+	M: [p,q,r,s] -> [(p^2+q^2+r^2-s^2)/A,(2ps)/A,(2qs)/A,(2rs)/A]
+
+	d/dt(A) = A' = 2pp' + 2qq' + 2rr' + 2ss'
+
+	d/dt(M([p,q,r,s]))=[ 	A(2pp'+2qq'+2rr'-2ss') - A'(p^2+q^2+r^2-s^2)
+			     	-------------------------------------------  ,
+				 		A^2
+				(A(ps'+p's) - A'(ps))/A^2,
+				(A(qs'+q's) - A'(qs))/A^2,
+				(A(rs'+p's) - A'(rs))/A^2	]
+
+	d/dt(M([p,q,r,s]))=[0,0,0,0] implies
+
+				(A(ps'+p's) - A'(ps))/A^2 = 0
+				(A(qs'+q's) - A'(qs))/A^2 = 0 
+				(A(rs'+r's) - A'(rs))/A^2 = 0 
+
+	Solving these expressions for p',q',r' respectively and back substituting
+	into the first component of the derivitive vector causes the first 
+	component to go to zero.  So we can concentrate on these three similar
+	expressions.
+
+	It is obvious from inspection that if s=s'=0 these expressions will go to zero.
+	
+	We assume that A', [p',q',r',s'] <> [0,0,0,0], so this condition does not apply.
+	We also assume that A<>0 because earlier I determined that this will cause a
+	cusp.
+
+	Now note, if [p,q,r,s] = [p',q',r',s'] then all terms go to zero.
+
+Jim
+
+
+	
+		
+

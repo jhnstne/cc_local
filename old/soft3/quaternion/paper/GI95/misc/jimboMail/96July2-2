@@ -1,0 +1,84 @@
+From jimbo@blaze.cs.jhu.edu Tue Jul  2 12:38 CDT 1996
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from cerulean.cis.uab.edu by cis.uab.edu (5.x/SMI-SVR4)
+	id AA04751; Tue, 2 Jul 1996 12:37:58 -0500
+Received: from cis.uab.edu by cerulean.cis.uab.edu via SMTP (940816.SGI.8.6.9/940406.SGI)
+	for <jj@cerulean> id MAA28071; Tue, 2 Jul 1996 12:25:02 -0700
+Received: from blaze.cs.jhu.edu by cis.uab.edu (5.x/SMI-SVR4)
+	id AA04748; Tue, 2 Jul 1996 12:37:54 -0500
+Received: from mail-client
+           by blaze.cs.jhu.edu with SMTP; Tue, 2 Jul 1996 17:37:48 GMT
+Received: by mail-client (4.1) id AA22164; Tue, 2 Jul 96 13:37:48 EDT
+Message-Id: <9607021737.AA04748@cis.uab.edu>
+From: jimbo@blaze.cs.jhu.edu (Jim Williams)
+Sender: jimbo@blaze.cs.jhu.edu
+Subject: Re: Result On Angular Velocity
+To: jj@cerulean.cis.uab.edu (John K. Johnstone)
+Date: Tue, 2 Jul 1996 13:37:47 -0400 (EDT)
+Cc: jimbo@blaze.cs.jhu.edu (Jimbo)
+In-Reply-To: <9607020920.ZM27450@cerulean.cis.uab.edu> from "John K. Johnstone" at Jul 2, 96 09:20:39 am
+X-Mailer: ELM [version 2.4 PL13]
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Length: 2202
+Status: ORr
+
+> 
+> That's a good proof that arc-length parameterized quaternion curves
+> yield constant velocity of the actual object.
+> Another way to see this is that the metrics of the quaternion sphere
+> and rotation matrices are equivalent, so a constant speed along the
+> quaternion sphere (arc-length param) yields a constant speed of rotation.
+> 
+> I am particularly interested in proving some properties of *our M map*
+> related to velocity or tangential acceleration,
+> and thus properties of our quaternion curve rather than general quaternion
+> curves.
+> While you're in the groove, why don't you think about this issue?
+
+
+The motivation behind showing this for a general unit quaternion curve
+was that it is not difficult to discretely calculate the arc-length 
+function of our curves using a standard numerical integration technique.
+The fact that the arc length function is positive and monotonically 
+increasing makes numerical integration an efficient approach -- simple
+trapezoid method based techniques would do the job (as opposed to more
+complex things like romberg integration etc..).
+
+Using these well known and easy to implement techniques, it is possible
+to create a series of t-values {t1....tk} which represent keyframes of
+the animation spaced at intervals of equal arc length.
+
+It would be nicer to find a closed form for the arc length function, but
+I am not optimistic about this prospect.
+
+
+
+> I am tantalizingly close to establishing that our M map is related to
+> the nec and suff condition for Pythagorean quintuples in the same way
+> that Dietz et. al.'s map is for Pyth quadruples
+> (and thus that M is onto all rational quaternion curves).
+> 
+
+This would be a good result, but there is one thing that confuses me,
+M(K1*Minverse(P)) = M(K2*Minverse(P)) for all K1,K2 -- this
+projective equivalence mean that Minverse is non-unique.  Does this
+matter to your proof?
+
+
+> 
+> P.S. I have found a useful book re quaternions: `Numbers' by
+> H.D. Ebbinghaus et. al. (Springer 1990).
+> For example, it has a statement of the length-preserving rule you prove
+> (|q1q2| = |q1| |q2|).
+
+
+
+I will look up that book! Good luck on the proof, I will look further
+at physical properties.
+
+Jim
+ 
+
+

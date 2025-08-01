@@ -1,0 +1,169 @@
+(Message inbox:2363)
+Return-Path: jj
+Return-Path: <jj@server.cs.jhu.edu>
+Received: by server.cs.jhu.edu ; Tue, 30 Apr 91 09:26:49 -0400
+From: jj@server.cs.jhu.edu
+Sender: jj@server.cs.jhu.edu
+To: siamconfs@wharton.upenn.edu
+Cc: jj
+Subject: Speaker abstracts for `Cyclides' minisymposium
+Date: Tue, 30 Apr 91 09:26:45 EDT
+
+
+
+
+Dear Sir or Madam: 
+	
+	Earlier this month I submitted a proposal for a minisymposium
+on `Cyclides' for the Second SIAM Conference on Geometric Design.
+At that time, I promised to send the full speakers abstracts for all 
+four talks by the end of the month.  I enclose the promised abstracts.
+(I had already sent you Dutta's abstract: it has not changed but I enclose
+it for completeness.)  Thank you for your consideration to this matter.
+
+				Prof. John K. Johnstone
+				Chair of the `Cyclides' Minisymposium
+
+
+
+Abstract for First talk
+
+Title: 		Circles and the geometry of cyclides
+Abstract: 
+
+This talk will discuss the geometry of the Dupin cyclide.
+One of its themes will be the 
+connection between the Dupin cyclide and the circle.
+We will show that the extension of the vocabulary from quadrics
+to cyclides is very natural, because cyclides are natural generalizations
+of quadrics.
+The cyclide will be introduced and some of its classical properties will
+be reviewed.
+Methods for decomposing the cyclide into circles,
+properties of these circles, 
+and applications of this decomposition, such as intersection and offsetting,
+will be studied.
+The relevance of inversion in the study of cyclides will be underlined.
+
+Author's full name: 	John K. Johnstone
+Affiliation:		The Johns Hopkins University
+Department:		Department of Computer Science
+Address: 		Baltimore, Maryland, USA  21218
+Telephone: 		(301) 338-5560
+Fax: 			(301) 338-6134
+e-mail:			jj@cs.jhu.edu
+
+Type of presentation: 		Minisymposium
+Equipment for Visual Support: 	Overhead Projector
+Organizer of Minisymposium:  	John K. Johnstone
+Minisymposium title: 		Cyclides
+About industrial problem?	No
+Subject Classification:		Group 2: 14 (Applied Geometry etc.)
+				Group 3: 07 (Computational mathematics etc.)
+
+
+---------------
+
+Abstract for Second talk
+
+Title: 		Patching with cyclides
+Abstract: 
+
+This talk considers the properties of individual Dupin's Cyclide patches,
+and how they may be put together to make up a composite surface, including
+default choices for patches and optimisation of designs. Other topics of
+interest when modeling surfaces will also be discussed, including the
+intersection of cyclide surfaces, joining cyclide surfaces together, local
+modification of composite cyclide surfaces, and offset surfaces.
+
+Author's full name: 	Ralph Martin
+Affiliation: 		University of Wales, College of Cardiff
+Department: 		Department of Computing Maths
+Address: 		P.O. Box 916, Cardiff,  CF2 4YN, United Kingdom
+Telephone:		?
+Fax:			?
+e-mail:			ralph@computing-maths.cardiff.ac.uk
+
+Type of presentation: 		Minisymposium
+Equipment for Visual Support: 	Overhead Projector
+Organizer of Minisymposium:  	John K. Johnstone
+Minisymposium title: 		Cyclides
+About industrial problem?	No
+Subject Classification:		Group 2: 14 (Applied Geometry etc.)
+				Group 3: 07 (Computational mathematics etc.)
+
+
+---------------
+
+Abstract for Third talk
+
+Title: 		Variable Radius Blending and Dupin Cyclides
+
+Abstract: 
+
+Variable radius blends are commonly found in a wide
+variety of mechanical parts including molds and dies.
+Such blending surfaces are mathematically complex and
+of high algebraic degree. This motivates approximating
+them by lower degree algebraic surfaces. A candidate 
+for the approximant is the Dupin cyclide. Discovered
+by Charles P. Dupin in 1822, this quartic surface has
+circular lines of curvature and is closed under offsetting.
+This talk will focus on the use of cyclides for approximating
+variable radius blends.
+
+Author's full name: 	Debasish Dutta
+Affiliation: 		University of Michigan
+Department: 		Dept. of Mechanical Engineering and Applied Mechanics,
+Address:		2250 G. G. Brown, Ann Arbor, Michigan, USA 48109-2125
+Telephone:		(313) 936-3567
+Fax:			?
+e-mail:			dutta@caen.engin.umich.edu
+
+
+Type of presentation: 		Minisymposium
+Equipment for Visual Support: 	Overhead Projector
+Organizer of Minisymposium:  	John K. Johnstone
+Minisymposium title: 		Cyclides
+About industrial problem?	No
+Subject Classification:		Group 2: 14 (Applied Geometry etc.)
+				Group 3: 07 (Computational mathematics etc.)
+
+
+---------------
+
+Abstract for Fourth talk
+
+Title: 	`The Future of Cyclides in CAGD' 
+	(previously entitled `Generalizations of the cyclide')
+
+Abstract: 	
+
+This talk will cover the following points:
+(1) The virtues of cyclides in CAD in having low algebraic degree and
+	concise geometric representation.
+(2) The existence of exact C^{1} blends between any pair of cyclides
+    (including natural quadrics), made up either of a single third cyclide
+    or a further pair of cyclides.
+(3) Generalisation of the above to cope with the blending of three
+    surfaces and configurations containing umbilical points.
+(4) Possibilities of widening the class of surfaces which may be used 
+    in this way; in particular, a review of the properties of a class
+    of generalised cyclides discovered by Degen.
+
+Author's full name: 	Michael Pratt
+Affiliation:		Cranfield Institute of Technology
+Department:		Dept. of Applied Computing and Mathematics
+Address:		Cranfield, Bedford  MK43 OAL, England
+Telephone:		011-44-234-750-111  
+Fax:			011-44-234-752-769 	
+e-mail:			?
+
+
+Type of presentation: 		Minisymposium
+Equipment for Visual Support: 	Overhead Projector
+Organizer of Minisymposium:  	John K. Johnstone
+Minisymposium title: 		Cyclides
+About industrial problem?	No
+Subject Classification:		Group 2: 14 (Applied Geometry etc.)
+				Group 3: 07 (Computational mathematics etc.)

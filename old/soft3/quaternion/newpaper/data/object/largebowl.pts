@@ -1,0 +1,18 @@
+[ FILE: largebowl.pts
+  Source: shadow input of our large white ceramic bowl, 4/17/03
+  For some reason, although bowl is above floor, floor grid is visible in bottom.
+]
+{
+0 	0
+.7	.02
+1.4	.03
+1.5	.1
+1.6	.44
+1.9	.6
+2.3	.9
+2.7	1.4
+3	2
+3.2	2.4
+3.35	2.7
+3.3	2.8
+}

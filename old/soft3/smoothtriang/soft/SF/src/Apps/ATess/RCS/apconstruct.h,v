@@ -1,0 +1,187 @@
+head	1.5;
+access;
+symbols;
+locks
+	saggarwa:1.5; strict;
+comment	@ * @;
+
+
+1.5
+date	99.01.13.04.21.17;	author saggarwa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	98.12.22.02.06.52;	author saggarwa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	98.12.12.04.03.51;	author saggarwa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	98.12.05.02.44.57;	author saggarwa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	98.11.30.00.33.07;	author saggarwa;	state Exp;
+branches;
+next	;
+
+
+desc
+@Functions for generating the simplicial hull and fitting an A-patch in terms of a control scalar net.  Setting of free parameters done in here.
+@
+
+
+1.5
+log
+@convex-convex;  free param stuff.
+@
+text
+@/***********************************************************************/
+/* Module: apconstruct.h                                               */
+/* $Date: 1998/12/22 02:06:52 $                                        */
+/* $Revision: 1.4 $                                                    */
+/* $Source: /p/SurfaceFitting/SF/src/Apps/ATess/RCS/apconstruct.h,v $  */
+/***********************************************************************/
+/*
+** Purpose:.
+*/
+
+#ifndef _APCONSTRUCT_H_
+#define _APCONSTRUCT_H_
+
+#include "vertex.h"
+#include "apatch.h"
+
+enum {
+   ZERO_CONVEX = 0,
+   POS_CONVEX  = 1,
+   NEG_CONVEX  = 2,
+   NON_CONVEX  = 3
+};
+
+enum {
+   AVERAGING                    = 0,
+   SIMPLE_INTERPOLATION         = 1,
+   QUAD_PRECISION_INTERPOLATION = 2
+};
+
+void ConstructFaceApatches(Face* apFace, Space wspace);
+void ConstructEdgeApatches(Edge* tedge, Space wspace);
+void OutputS3dFaceApatchSimplex(FILE* fp, Apatch apatch);
+void OutputS3dFaceApatchPairSimplex(FILE* fp, ApatchPair apPair);
+void OutputS3dEdgeApatchSimplex(FILE* fp, Apatch apatch);
+
+#endif /* _APCONSTRUCT_H_ */
+
+@
+
+
+1.4
+log
+@MAJOR CHANGES... Now uses face and edges directly for construction.
+@
+text
+@d3 2
+a4 2
+/* $Date: 1998/12/12 04:03:51 $                                        */
+/* $Revision: 1.3 $                                                    */
+d22 6
+@
+
+
+1.3
+log
+@new functions - no longer need to use a triangulation dstruct.
+@
+text
+@d1 5
+a5 5
+/**********************************************************************/
+/* Module: apconstruct.h                                              */
+/* $Date: 1998/12/05 02:44:57 $                                       */
+/* $Revision: 1.2 $                                                   */
+/* $Source: /p/SurfaceFitting/SF/src/Apps/ATess/RCS/apconstruct.h,v $ */
+d24 3
+a26 18
+typedef struct {
+   char* name;
+   VERTEX vertices[3];
+   Space wspace;
+} TriangulationFace;
+
+typedef struct {
+   VERTEX vertices[2];
+   TriangulationFace f1;
+   TriangulationFace f2;
+   Space wspace;
+} TriangulationEdge;
+
+
+void ConstructFaceApatches(TriangulationFace tface);
+void ConstructEdgeApatches(TriangulationEdge tedge);
+int ReadTriangulationFace(TriangulationFace* tface, Space wspace);
+int ReadTriangulationEdge(TriangulationEdge* tedge, Space wspace);
+a27 1
+void OutputS3dFaceApatchSimplex(FILE* fp, Apatch apatch);
+@
+
+
+1.2
+log
+@edge apatch simplicial hull construction added.
+@
+text
+@d3 2
+a4 2
+/* $Date: 1998/11/30 00:33:07 $                                       */
+/* $Revision: 1.1 $                                                   */
+d38 2
+d42 3
+a44 17
+int TypeOfFace(TriangulationFace tface);
+void ConstructSingleFaceApatch(Apatch* apatch, TriangulationFace tface,
+                               int tfaceType);
+void ConstructFaceApatchPair(ApatchPair* apPair, TriangulationFace tface);
+void ConstructConvexConvexEdgeApatches(Apatch* eap1, Apatch* eap2, 
+                                       TriangulationEdge tedge, 
+                                       int f1type, int f2type);
+void ConstructNonconvexNonconvexEdgeApatches(Apatch* eap1, Apatch* eap2, 
+                                             Apatch* eap3, Apatch* eap4,
+                                             TriangulationEdge tedge);
+void ConstructPosConvexNegConvexEdgeApatches(Apatch* eap1, Apatch* eap2, 
+                                             Apatch* fap3, 
+					     TriangulationEdge tedge, 
+					     int f1type, int f2type);
+void ConstructConvexNonconvexEdgeApatches(Apatch* eap1, Apatch* eap2, 
+                                          TriangulationEdge tedge, 
+                                          int f1type, int f2type);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 6
+a6 6
+/****************************************************************/
+/* Module: apconstruct.h                                        */
+/* $Date: 1998/07/28 19:39:40 $                                 */
+/* $Revision: 1.1 $                                             */
+/* $Source: /u/saggarwal/cs788/RCS/apconstruct.h,v $                 */
+/****************************************************************/
+d25 1
+d31 3
+d39 1
+d42 1
+a42 1
+                           int tfaceType);
+d44 13
+@

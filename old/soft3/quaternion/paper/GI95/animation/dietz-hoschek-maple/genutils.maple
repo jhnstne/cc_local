@@ -1,0 +1,20 @@
+htoc := proc(a) ([a[2]/a[1],a[3]/a[1],a[4]/a[1]]) end;
+ctoh := proc(a) ([1,a[1],a[2],a[3]]) end;
+
+dis3 := proc(x) sqrt(x[1]^2+x[2]^2+x[3]^2); end;
+dis4 := proc(x) sqrt((x[2]/x[1])^2+(x[3]/x[1])^2+(x[4]/x[1])^2); end;
+
+dtor := proc(d)
+	evalf(d/180 * Pi);
+	end;
+
+stoc := proc(t,p)
+		[ 1,
+		evalf(cos(dtor(t))*sin(dtor(p))),
+		evalf(sin(dtor(t))*sin(dtor(p))),
+		evalf(cos(dtor(p)))
+		]
+	end;
+
+
+

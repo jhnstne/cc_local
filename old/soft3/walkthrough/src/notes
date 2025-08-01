@@ -1,0 +1,168 @@
+what is a room?  what is a 3D cell?
+how is motion perfected between two rooms?
+how is natural GUI built (follow the cursor?)
+
+animation paper: orientation obstacle
+	1) given certain well-defined restrictions on the orientation of an object 
+	(e.g., teapot), produce a model of these obstacles on the quaternion sphere
+	2) given obstacles on the quaternion sphere, design a motion on S^3 amongst
+	   these obstacles
+	3) visualize flythrough from the side (animation not flythrough)
+orientation paper: finalized pure rational quaternion spline
+motion paper: swarms (on cluster)
+arterial flythrough:
+lung flythrough:
+focused flythrough: keeping one object in view as keyframes are interpolated, with
+	minimal vertigo; start with a simple environment of cubes;
+	involves visibility and motion planning and orientation
+comp geometry paper: smooth 3D kernels
+comp geometry paper: kernel/hull duality
+modeling paper: ruled surface model and intersection; applied to kinematic poser models
+visibility paper: global visibility framework in a 2D smooth environment
+visibility paper: 3D bitangent developables 
+parallel rendering paper:
+GPU paper:
+project: quadric --> circle generators, moving circles generating quadric
+project: ruled quadric --> line generators, moving line --> ruled surface
+
+1) ugviewer.cpp: UniGrafix
+	- parse UniGrafix format; my normal display GUI
+	(ugviewerQuad.cpp: only handles quadrilaterals)
+2) walkthroughRudi.cpp: gluLookAt
+	- flythrough of a rudimentary scene (pillars and sphere) using gluLookAt
+	various other styles of flythrough are in commented code
+3) ugviewerGUI.cpp: UniGrafix, gluPerspective / NSEW movt
+	- adding more natural walkthrough GUI to ugviewer, walking 
+	  north/south/east/west/up/down, rotation is nonintuitive normal rotation about
+	  coordinate axes
+4) keyframe.cpp: ugviewerGUI + keyframes
+	- allow capture of keyframes through space key
+	- draw keyframes as points
+	- encode position only of keyframes (hardwiring the 90 degree shift in xrot)
+	- read keyframe file
+	- still use global rotation about origin (like ugviewerGUI)
+4.1) flythroughGUI.cpp: ?
+4.2) wrlviewer.cpp: ?
+5) keylocal.cpp: keyframe + local control 
+	- rotation is now local, about present position in room
+	  (means that controls are absolute: u always means global north)
+	- capture orientation as well as position of keyframes
+	- number the keyframes
+	- camera avatar, slightly in front of present position
+	- ability to read off file format
+	- generalize from GL_QUADS to GL_POLYGON
+6) flythroughPos.cpp: use keyframes collected in keylocal.cpp to build a 
+	flythrough, position only
+	- spline interpolates the keyframe positions
+	- still allow additional keyframes to be collected
+	- will want to edit some keyframes, eventually
+	- will want to incorporate orientation, eventually, first using Frenet frame
+7) keyfly.cpp: add Shoemake's arcball to keylocal.cpp for more natural keyframe selection
+
+build a better flythrough dataset of csb5
+interpolate orientations too
+*build better GUI for moving around building (want relative, not absolute, movt)
+*use motion planning to plan motion through the rooms
+*number the rooms, for easier motion designation
+sophisticated model for rooms, built automatically from a triangular mesh
+	*given a mesh, decompose into cells: see Teller's definition of a room
+	buy motion planning book
+*another building dataset: architecture websites, Doom, building grammar
+	especially Piano/Calatrava/Gehry/Meier
+get no-cost extension
+**interactive camera control with built-in orientation constraint 
+	(and collision detection for position constraint?)
+	Note: position constraints (collision detection) are expensive;
+	      implicit orientation constraints are cheap since they are a local concern,
+	      unrelated to data (unless we incorporate obstacle's effect on
+	      orientation: explicit orientation constraint)
+implement object animation (fixed camera, moving teapot)
+motion AI in a game environment, motivated by visibility
+plan motion to avoid visibility from outside (for example)
+
+For input to a flythrough, we only need a source of faces, preferably colored.
+After all, we just want a context for our flight path.
+UniGrafix files are a good example: they provide colors, vertices and faces.
+Off files lack color, which is annoying.
+WRL files provide much more than is necessary for a flythrough.
+The sole purpose of our file parsers is to sift through the data file for these faces
+(and thus vertices and colors).
+We do not organize the mesh into an organized data structure, like winged edge or
+quadedge, at the moment, since the models are small.
+This would be quite easy given our software on winged-edges, however.
+
+Challenge: parse Inventor files for their faces (all objects combined) and colors
+Back of this challenge broken.
+
+Consider motion planning through a building or around a building.
+The two prime approaches are roadmap and cell decomposition techniques.
+The roadmap approach lends itself to the design of precise, optimal paths,
+in the sense that distance is encoded precisely in visibility graphs or
+safest paths is encoded precisely in Voronoi diagrams.
+However, the confinement to a 1D highway is restrictive for maintaining visibility
+and preserving safe orientations.
+Cell decomposition is more flexible, since the path space is 3D;
+it preserves issues of distance
+through high-level paths (go to room 12, then room 26, then ...) and through
+locally optimal paths between cells;
+So perhaps a combined approach is best, 
+with AI-like planning of the overall path using cells,
+and low-level optimal paths perhaps altered subtly by visibility and orientation
+considerations.
+Let's start with the high-level issue.
+(Concern: how often will the eventual goal B be known?
+We are designing high-level paths from A to B, rather than exploring from A without
+a commitment.
+Answer: flythroughs and high-level animations certainly have this flavour, with
+a small number of desired keyframe views or small number of rendezvous points in the 
+animation.)
+High-level planning reduces the scene/building to a graph, where nodes are --- or rooms.
+
+What is a node in the Falling Water model (kaufmann.wrl)?
+We are looking beyond a naive mathematical cell definition like swath homogeneous in z.
+(This is reminiscent of pothole definition.)
+Can you determine it from 2d floorplan?
+Can you determine it from convex hulls of objects?
+Can we use a BSP tree?
+
+Once we identify a cell, we shall still have to perfect the motion between two
+adjacent cells. 
+This should be the focus of our work initially.
+Then once cell-to-cell motion is written up, we can explore the definition of cells
+in a scene/object.
+Getting the wrl format to visualize kaufmann.wrl is still fun and a good test case for
+perfect local motions.
+
+I cannot find a rigorous open-source Inventor/VRML parser (e.g., ivcon.cc/translate 3ds)
+	- Inventor format; wrl example
+I cannot find yet a good candidate for 3D exact cell definition.
+	- need for 3d cell in flythrough
+	- what is a room? csb5.macro.ug and kaufcam*jpg
+
+m403.off is a good monumental building with flythrough colonnades
+m420.off is a good columned arcade
+
+topics touched by the flythrough work
+-------------------------------------
+
+file formats (UniGrafix, iv, obj, stl, tmesh)
+winged edge
+Lischinski
+Heckbert
+mesh databases
+Cyberware
+orientability
+Teller walkthrough
+flythrough
+camera control
+
+
+todo
+----
+
+test call of drawCameraWindowBlue in keylocal.cpp (make keylocal and run)
+
+	are the blue corners in the corner?
+edit reu.tex
+add vertex path intersection notes to rs2.tex
+clean up software along plans of reu

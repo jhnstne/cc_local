@@ -1,0 +1,41 @@
+From jj Wed Aug 18 09:06:10 1999
+Date: Wed, 18 Aug 1999 09:06:10 -0500
+From: jj (John Johnstone)
+To: jimbo@scr.siemens.com
+Subject: RE: Back from trip!
+Cc: jj
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-MD5: 3pzq9kG/7sw6lmrXY2sWqA==
+
+Thanks for the comments.
+I'll add the note about 'most natural', as well as your earlier comment
+about further explaining the spiralling toward the origin.
+It's hard to understand behaviour in 4d, where the covariant acceleration
+effects are seen.  The better approximation to geodesy of the nearest
+neighbour explains a bit, but not all, as you rightly suggest.
+Not all of the examples show a huge difference, but the ones upon which 
+our method beats other methods by a lot seem also to be the ones where the 
+nearest neighbour is significantly better than 'on S3'.
+
+I'll check out your thesis.
+And 384 is an interesting number.  Where does it come from?
+
+SIGGRAPH had its moments.  For one thing, I attended some courses
+(on motion editing and visualizing quaternions) that were talking
+about quaternion splines but weren't aware of our spline,
+which happened to solve all of the problems that they were mentioning
+with quaternion splines (closed form, efficiency).
+I informed the speakers of our work and will send them copies of our paper.
+I may add a couple of sentences to the paper emphasizing that we
+have a closed form which allows derivatives to be taken easily,
+which seems a big deal in spacetime optimization of motion.
+Also a couple of references.
+
+I'll hope to get the paper out the door soon to TOG.
+
+Best,
+jj
+
+P.S. You MUST go see the Getty Center in LA.  
+The architecture is staggering.

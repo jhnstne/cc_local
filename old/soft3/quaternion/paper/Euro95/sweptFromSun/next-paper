@@ -1,0 +1,26 @@
+> 
+> Jim, I think that we can write a paper related to swept surfaces,
+> for submission to a conference soon.
+> I've been thinking about this paper over the weekend though,
+> and feel that there are some loose ends that need to be thought
+> about, such as the final Bezier form of this surface
+> and an implementation of some of the ideas to give us confidence
+> in their efficacy.   So I think one of the graphics conferences
+> with January deadlines, such as Eurographics, would be the
+> appropriate timeframe.
+> 
+> I've got some other things to work on in the immediate future,
+> such as a grant proposal, but I'll start bouncing ideas off
+> of you soon.
+> 
+> John
+> 
+
+
+I'm going to see if I can come up with a problem that will
+"showcase" some of the advantages of the rational rotation 
+technique in surface design. I'll probably look through some
+past EG's for ideas.
+
+Jim
+

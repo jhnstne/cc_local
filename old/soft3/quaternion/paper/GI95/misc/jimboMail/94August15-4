@@ -1,0 +1,23 @@
+From jj Mon Aug 15 20:49:19 1994
+Return-Path: <jj>
+Received: by cis.uab.edu (4.1/SMI-4.1)
+	id AA09623; Mon, 15 Aug 94 20:49:17 CDT
+Date: Mon, 15 Aug 94 20:49:17 CDT
+From: jj (John Johnstone)
+Message-Id: <9408160149.AA09623@cis.uab.edu>
+To: jimbo@blaze.cs.jhu.edu
+Cc: jj
+Status: OR
+
+I will read your mail and check the development ASAP.
+I'm glad that you're thinking about this aspect of the
+problem because after looking everything over today
+I concluded that the most intneresting problem is
+`rational quaternion curves' (i.e., rational interpolating
+curves on the 4-sphere, interpreted as the quaternion sphere)
+because of the applications to animation and sweeping both.
+Thus, duplication of Dietz-Hoschek for the new (Aida)
+sufficient condition is the best track, just as you
+have been doing!  I'll be in touch.
+jj
+

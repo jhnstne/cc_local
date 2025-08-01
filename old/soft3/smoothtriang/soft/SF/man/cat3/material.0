@@ -1,0 +1,132 @@
+
+
+
+C Library Functions                                   material(3)
+
+
+
+NNNNAAAAMMMMEEEE
+     material
+
+
+SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
+     Routines  for  evaluating  rational  and  polynomial  Bezier
+     curves and their derivatives.
+
+
+SSSSYYYYNNNNTTTTAAAAXXXX
+     ####iiiinnnncccclllluuuuddddeeee bbbbeeeezzzziiiieeeerrrr....hhhh
+
+
+DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN::::
+     A library for dealing with materials.  A number of materials
+     are pre-defined and can be referred to by name.  The follow-
+     ing are the C structures that are used.
+
+     typedef struct {
+         double r, g, b;
+     } Color;
+
+     typedef struct {
+         Color diffuse;
+         Color specular;
+         int specularity;
+         char* name;          /* used internally;
+                       should only be read by user */
+     } Material;
+
+     The following are the names of the pre-defined materials:
+
+       NullMaterial,
+       RedPlastic,
+       NewBlue,
+       NewGreen,
+       NewPurple,
+       RedMatte,
+       GreenPlastic,
+       DarkGreenPlastic,
+       GreenMatte,
+       BluePlastic,
+       BlueMatte,
+       YellowPlastic,
+       YellowMatte,
+       PurplePlastic,
+       PurpleMatte,
+       Steel,
+       White,
+       Black
+
+     MMMMaaaatttteeeerrrriiiiaaaallll MMMMaaaatttteeeerrrriiiiaaaallllCCCCrrrreeeeaaaatttteeee((((ddddrrrr,,,, ddddgggg,,,, ddddbbbb,,,, ssssrrrr,,,, ssssgggg,,,,
+
+
+
+SunOS 5.6                 Last change:                          1
+
+
+
+
+
+
+C Library Functions                                   material(3)
+
+
+
+     ddddoooouuuubbbblllleeee ddddrrrr,,,,ddddgggg,,,,ddddbbbb,,,,ssssrrrr,,,,ssssgggg,,,,ssssbbbb;;;;
+     iiiinnnntttt ssssppppeeeecccc;;;;
+
+
+     Create and return a new material.  The diffuse reflection in
+     the  red,  green,  and blue channels is given by dr, dg, and
+     db; the specular reflection is given by sr, sg, and sb;  the
+     Phong coefficient is given by spec.
+
+
+     vvvvooooiiiidddd MMMMaaaatttteeeerrrriiiiaaaallllWWWWrrrriiiitttteeee(((( ffffpppp,,,, mmmm))))
+     FFFFIIIILLLLEEEE ****ffffpppp;;;;
+     MMMMaaaatttteeeerrrriiiiaaaallll mmmm;;;;
+
+     Write a material on the given stream.
+
+     iiiinnnntttt MMMMaaaatttteeeerrrriiiiaaaallllRRRReeeeaaaadddd(((( ffffpppp,,,, mmmmpppp))))
+     FFFFIIIILLLLEEEE ****ffffpppp;;;;
+     MMMMaaaatttteeeerrrriiiiaaaallll ****mmmmpppp;;;;
+
+     Read in a material descriptor from the given stream.  One is
+     returned on success, zero on end of file.
+
+     iiiinnnntttt MMMMaaaatttteeeerrrriiiiaaaallllLLLLooooooookkkkuuuupppp(((( nnnnaaaammmmeeee,,,, mmmmpppp))))
+     cccchhhhaaaarrrr ****nnnnaaaammmmeeee;;;;
+     MMMMaaaatttteeeerrrriiiiaaaallll ****mmmmpppp;;;;
+
+     Set the material pointed to by mp  to  the  named  material.
+     Returned is one on success, zero otherwise.
+
+     iiiinnnntttt IIIIssssNNNNuuuullllllllMMMMaaaatttteeeerrrriiiiaaaallll(((( mmmm))))
+     MMMMaaaatttteeeerrrriiiiaaaallll mmmm;;;;
+
+     Return one if the given material is equivalent to  the  null
+     material.  Return zero otherwise.
+
+     MMMMaaaatttteeeerrrriiiiaaaallll KKKKMMMMaaaatttt((((kkkk,,,, kkkkmmmmiiiinnnn,,,, kkkkmmmmaaaaxxxx,,,, ggggaaaammmmmmmmaaaa))))
+     ddddoooouuuubbbblllleeee kkkk,,,, kkkkmmmmiiiinnnn,,,, kkkkmmmmaaaaxxxx,,,, ggggaaaammmmmmmmaaaa;;;;
+
+     Return a material based on the value k.  k will  be  clamped
+     to  be  in the range kmin to kmax.  If kmax < kmin, the null
+     material is returned.  The color assigned is an  HLS  color,
+     where  H  is  k (mapped to -1,1), L is .5, and S is .9.  The
+     hue range is 240.  A suggested gamma value is 0.625.
+
+
+
+DDDDAAAATTTTEEEE
+     January 3, 1992
+
+
+
+
+
+
+SunOS 5.6                 Last change:                          2
+
+
+

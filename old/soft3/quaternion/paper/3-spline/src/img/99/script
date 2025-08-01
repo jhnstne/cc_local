@@ -1,0 +1,3 @@
+tops unstable.rgb    -m 8.5 2 > unstable.ps
+tops all6.rgb 	     -m 8.5 4 > all6.ps
+tops data5-1+rot.rgb -m 8.5 2 > data5-1+rot.ps

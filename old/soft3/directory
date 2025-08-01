@@ -1,0 +1,15 @@
+0: surfbuild
+1: ruled
+2: tube
+3: ringed
+4: quadric
+5: cyclide
+6: subdiv
+7: architecture
+8: tangsurf
+9: kernelsurf
+10: intersect
+11: silhouette
+12: bidev
+13: quaternion
+14: flythru

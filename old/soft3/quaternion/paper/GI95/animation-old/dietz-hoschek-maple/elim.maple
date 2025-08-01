@@ -1,0 +1,65 @@
+
+count_eqns_with := proc(eqns,numeqns,var)
+	ceres := 0;
+	for i from 1 to numeqns do
+		if (evalb(degree(eqns[i],var)>0)) then 
+		ceres := ceres+1;
+		else
+		fi;
+	od;
+	eval(ceres);
+	end;
+
+step_reduce := proc(eqns,numeqns,var)
+	last_used := 0;
+	srresult := vector(numeqns-1);
+	ressize := 0;
+	print(`reducing equations wrt:`);
+	print(var);
+
+	# find the first eqn containing var
+	for i from 1 to numeqns while(evalb(last_used = 0)) do
+		if (evalb(degree(eqns[i],var)>0)) then 
+			print(i);
+			last_used := i;
+		else
+			print(i);
+		 	srresult[i] := eqns[i];
+			ressize := ressize +1;
+		fi;
+	od;
+	
+	# do the resultant elimination
+	for i from (last_used+1) to numeqns do
+		print(i);
+		if (evalb(degree(eqns[i],var)>0)) then 
+			ressize := ressize +1;
+	lprint(`reducing eq:`,i,`using eq:`,last_used);
+	lprint(`degrees :`,degree(eqns[last_used],var),degree(eqns[i],var));
+			srresult[ressize] := 
+			sort(simplify(resultant(eqns[last_used],eqns[i],var)));
+			last_used := i;
+		else
+			ressize := ressize+1;
+			srresult[ressize] := eqns[i];
+		fi;
+	od;
+	eval(srresult);
+	end;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

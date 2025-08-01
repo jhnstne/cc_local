@@ -1,0 +1,59 @@
+From rdietz@mathematik.th-darmstadt.de Wed Oct 30 11:02 CST 1996
+Return-Path: <rdietz@mathematik.th-darmstadt.de>
+Received: from rs2.hrz.th-darmstadt.de ([130.83.22.63]) by cis.uab.edu (5.x/SMI-SVR4)
+	id AA13125; Wed, 30 Oct 1996 11:01:26 -0600
+Received: from fb0430.mathematik.th-darmstadt.de (daemon@fb0430.mathematik.th-darmstadt.de [130.83.2.30]) by rs2.hrz.th-darmstadt.de (8.6.12/8.6.12.1ms) with ESMTP id SAA81651 for <johnstone@cis.uab.edu>; Wed, 30 Oct 1996 18:01:02 +0100
+Received: from fb0431.mathematik.th-darmstadt.de by fb0430.mathematik.th-darmstadt.de (1.37.109.16/Server-1.5/HRZ-THD)
+	id AA160864863; Wed, 30 Oct 1996 18:01:03 +0100
+Received: by fb0431.mathematik.th-darmstadt.de (1.37.109.16/Client-1.5/HRZ-THD)
+	id AA252394859; Wed, 30 Oct 1996 18:00:59 +0100
+From: Roland Dietz <rdietz@mathematik.th-darmstadt.de>
+Message-Id: <199610301700.AA252394859@fb0431.mathematik.th-darmstadt.de>
+Subject: curves on S3
+To: johnstone@cis.uab.edu
+Date: Wed, 30 Oct 1996 18:00:59 MEZ
+Cc: rdietz@mathematik.th-darmstadt.de
+X-Mailer: Elm [revision: 109.14]
+Content-Type: text
+Content-Length: 1475
+Status: OR
+
+
+Dear Prof. Johnstone,
+
+I read with interest the manuscript by James Williams and you of the paper
+
+     ``Rational interpolating curves on the 3-sphere''.
+
+You suggest to use a map M from P^4 to S^3 in order to construct curves that
+interpolate orientations described by unit quaternions. Concerning this
+map I would like to make the following remarks:
+
+- M(a,b,c,d,1) is nothing else than stereographic projection of the
+  point (0,a,b,c,d) onto S^3 with the center of projection (1,0,0,0,1).
+
+- The inverse map M^(-1) onto a hyperplane of P^4 is a projective map,
+  e.g. in the X_5=1 -hyperplane:
+       M^(-1) (x_1,x_2,x_3,x_4,x_5) = (x_2,x_3,x_4,x_5-x_1,1)
+
+- Interpolating curves constructed by M depend on the chosen coordinate system,
+  since the center of projection is fixed. The curve may have singularities
+  if the projection center is interpolated.
+
+- If the P^4-curve is set up as cubic curve, not all sextic rational curves
+  on the S^3 are representable by M. In this sence the representation is not
+  complete.
+
+- There is no reason why a cubic B-spline curve should be converted to
+  Bezier representation when mapped to the S^3. How to multiply B-splines
+  can be found in e.g.
+  Morken, K.: Some identities for products and degree raising of splines,
+              Construct. Approx. 7 (1991), 195-208
+  Dietz, R.; Hoschek, J.; Juettler, B.: Rational patches on quadrics,
+              Computer-Aided Design 27 (1995), 27-40
+
+
+Best regards
+
+Roland Dietz
+

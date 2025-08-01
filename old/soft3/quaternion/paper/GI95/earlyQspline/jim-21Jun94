@@ -1,0 +1,105 @@
+Introduction:
+
+Smoothly interpolating a discrete series of "key frame" orientations is an 
+essential and seemingly well explored problem in computer animation.  Most
+proposed techniques [REF] rely on hyper-complex quaternions, numerical 
+optimization methods [REF] or both [REF].  It is also true that the matrix
+representation of rotations has remained the mainstay of most commercial 
+animation packages, perhaps due to it's intuitive appeal and computational
+simplicity.
+
+I propose a method for "in-betweening" a series of orientations using 
+Bezier interpolate curves embedded in the unit sphere.  This method, in addition
+to providing a smooth interpolation of these orientations, produces a rotation
+matrix for the entire series of rotations whose entries are rational functions
+of a single parameter -- hence "Rational Rotations."
+
+
+1. Continuous Rotations as Curves on the Unit Sphere
+
+The rotation of a 3D rigid body with respect to some initial reference frame can
+be represented as a single unit length 3-vector, more simply, a point on the unit
+sphere.  It follows that the continuous rotation of a rigid body will correspond
+to  a continuous curve on the unit sphere.
+ 
+Suppose we are given a set of orientations: {O0,....,Om} that
+represent key frames of a continuous rotation.  Shoemake [REF] clearly 
+illustated that the "smoothest" connection of these key frames corresponds to
+a curve on the unit sphere, "C",  that interpolates {O0,O1,...,Om}.  Optimally, this
+curve would be parametric, C(t), and the user would be allowed to specify a time,ti,
+at which C(t) would interpolate each of the orientations Oi, i.e. C(ti) = Oi.
+
+	[ILLUSTRATION] [Show curve on the unit sphere connecting key frames]
+
+2. Bezier Interpolates on the Unit Sphere
+
+Dietz,Hoschek & Juttler
+[REF] developed a method for interpolating K points on the unit sphere
+with a degree K-1 Bezier curve.  I will provide only a cursory description of
+this method here, concentrating more on application.  It is important to note,
+however, that they do prove existence and uniqueness (up to linear dependence)
+of the solution to this interpolation problem and that the interpolation
+problem itself can be expressed as a linear system.
+
+In this paper I will cover only single Bezier curve segments on the sphere.
+Piecewise Bezier and Bsplines on the sphere are a natural extension and their 
+construction is described in [REF] [DIETZ et al].  Given that we can extract
+Bezier control hulls from Bspline control polygons, it is sufficiently general to 
+develop using single curves.
+
+Let C(t)=(x(t),y(t),z(t),w(t)) be a rational curve on the unit sphere. The follwing 
+properties of all such curves are due to [REF]
+
+	If a rational curve lies on the unit sphere, it's coordinate 
+	functions are a solution to the equation:
+	
+	w(t)^2 = x(t)^2 + y(t)^2 + z(t)^2
+
+	Which implies that x(t),y(t),z(t),w(t) are of the form
+	
+	[FORMULA] -- [Dietz general pythagorean quadruple form]
+
+
+Starting with a set of orientation/time pairs: {(O0,t0),...,(Om,tm)} we will
+define the functions:
+
+	[FORMULA] [sigma and sigma inverse]
+	[FORMULA] [delta]
+
+and unitary operations:
+
+	[FORMULA] [bar]
+	[FORMULA] [perp]
+	[FORMULA] [bar perp]
+
+and polynomials:
+	
+	[FORMULA] y(t) = [yw(t),yx(t),yy(t),yz(t)] [degree m/2 -> 2m+4 unknowns]
+	[FORMULA] C(t) = delta(y(t))
+
+We will interpolate the m+1 orientations with a degree m Bezier curve, C(t).  This
+interpolant will be the projection under [delta] of a degree m/2 Bezier curve, y(t).
+Our first task is to determine y(t).  The following set of linear equations form 
+a nonsingular system whose solution yields the coefficients for y(t):
+
+i.	Four equations for t0:
+	
+	y(t0) = sigma_inverse(O0)
+
+ii.	For each i={1..m} we get two equations yielding 2m equations:
+
+	<bar(sigma_inverse(Oi)),y(ti)> = 0
+	<barperp(sigma_inverse(Oi)),y(ti)> = 0
+
+	Combining i & ii gives us 2m+4 equations to match the 2m+4 unknown 
+	coefficients of y(t). Solve this system for the coefficents of y(t) then
+	project y(t) through [delta] to yield C(t).
+
+
+
+3. Using the Spherical Curve to Parameterize Rotation
+
+Now we have a spherical curve C(t) with all the desired properties that we
+specified in 
+
+

@@ -1,0 +1,4 @@
+ugviewerGUI data/csb3r.macro.ug
+flythroughPos ../data/csb5.macro.ug ../key/tour.key
+flythroughPos ../data/csb5.macro.ug ../key/keyframe18short
+keylocal -p ~/software/data/princetonBenchmark/db/4/princeton4/m401/m401.off

@@ -1,0 +1,33 @@
+Captions:
+
+ViewFrustum -
+
+This figure shows the rectangular frustum that determines what is visible or
+not visible.
+Notice how the intersection of the near clipping plane with the rectangular
+pyramid produces the near quadrilateral.
+
+IntersectionDepth -
+
+A sample near quadrilateral where the upper left, lower right,and upper right
+vertices protrude through the scene, illustrated by grey lines.
+Each protruding, "bad", vertex takes the max of the intersections closest to it
+on each adjacent edge as its approximate depth.
+The depth of the intersection is taken as the maximum of these vertex depths.
+
+ParmInterval - 
+
+Red Lines indicate scene geometry that intersects.
+Numbers indicate the order in which surface triangles are tested against the 
+scene.
+In this case, s0 and s1 would be interpolated between to find $t_i$ and s2
+and s3 woudl be interpolated between to find $t_f$.
+
+Intersection -
+Black lines are corner curves before correction.
+Green curves are corner curves after correction.
+The black rectangles represent the parameter interval over which the collision
+took place.
+Notice that after the change is made to correct the collision, the green
+and black lines coincide.
+

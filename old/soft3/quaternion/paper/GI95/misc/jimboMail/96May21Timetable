@@ -1,0 +1,52 @@
+From jj Tue May 21 15:57:54 1996
+Return-Path: <jj>
+Received: by leeds.cis.uab.edu (SMI-8.6/SMI-SVR4)
+	id PAA00267; Tue, 21 May 1996 15:57:46 -0500
+Date: Tue, 21 May 1996 15:57:46 -0500
+From: jj (John Johnstone)
+Message-Id: <199605212057.PAA00267@leeds.cis.uab.edu>
+To: jimbo@blaze.cs.jhu.edu
+Subject: timetable
+Cc: jj
+Content-Length: 1339
+Status: OR
+
+
+I think it might be a good idea of we put together a 
+production timetable for a journal article version of
+the swept surfaces work.  Should I be checking the review boards
+on some of the graphics journals?
+
+	Excellent idea.
+        A reasonable timetable seems to be:  
+        July 1: full sketch of what results we are going to
+                include in this paper (i.e., pure animation
+                or animation plus sweeping or...), including
+                section titles
+                + 
+                full literature search done 
+                + 
+                completion of any extra results (e.g., independent
+                of coordinate system, ...)
+
+        August 1: complete draft of paper
+
+        August 15 (modulo SIGGRAPH): submit
+
+There is probably some added software that needs to be written,
+which should be added to the August 1 list.    
+
+Potential journals seem to be:
+        IEEE Computer Graphics and Applications
+        IEEE Transactions on Visualization and Computer Graphics
+        spinoff of CVGIP (the graphics half)
+
+We can refine that list based on editorial boards and recent journal content.
+
+I'm off to Europe tomorrow, but I'm free come June.  
+
+John
+
+P.S.  I also like your previous idea of a spinoff of this work
+	to vision problem.  We can talk about that as we refine this one.
+

@@ -1,0 +1,83 @@
+From jj Tue Oct  4 12:02 CDT 1994
+Return-Path: <jj>
+Received: by cis.uab.edu (5.0/SMI-SVR4)
+	id AA24212; Tue, 4 Oct 1994 12:02:29 -0500
+Date: Tue, 4 Oct 1994 12:02:29 -0500
+From: jj (John Johnstone)
+Message-Id: <9410041702.AA24212@cis.uab.edu>
+To: jimbo@blaze.cs.jhu.edu
+Subject: Status
+Cc: jj
+Content-Type: text
+Content-Length: 3468
+Status: OR
+
+What's your status?  I think we should put together a timetable for
+producing this paper.  Have you read over the text I sent you?
+ 
+        I am concentrating right now on getting a working
+        implementation.  I feel that our theory needs to be
+        tested out so that we know where any weaknesses are
+        and where to push.  The problem of visualizing the
+        quaternion curves in 3d has been solved elegantly by
+        noticing that a unit quaternion (x0,x1,x2,0,x4), that
+        is with x3=0, is mapped to a point in 4space with x2=0,
+        so we can visualize in 3d by zeroing the x3 coordinate
+        of all our quaternions.  This is similar to Barr et. al's
+        trick for quaternion curve visualization.
+
+        I'm making good progress, and am in the middle of the
+        fitting code right now (that is, fitting cubic Bezier
+        to our 4d data in 4space).
+
+        The implementation has already yielded some insight
+        (e.g., the inverse image of the quaternion (1,0,0,0)
+        is the entire x4=0 hyperplane, rather than a single point;
+        this is the only exception to the M^{-1} map)
+        
+        Once I get the implementation somewhat stable,
+        I want to pursue the speed-of-sweep issue (ie, arc length
+        of quaternion curve) to make sure that the animation
+        spreads its change of orientation over the entire curve.
+        I have already thought about that, but need to test out
+        some ideas.  
+
+        I have browsed over your paper (although you should
+        learn Latex! :) ) I am also writing up a formal document.
+        I want to try to factor the animation aspects out from
+        the solid modeling, and make two papers or at least
+        make sure that the two applications, which have different
+        requirements, don't get confused in the formal development
+        of the theory.
+
+
+        There is a Nov. 1 deadline for both the Solid Modeling
+        conference and for Graphics Interface (the Canadian graphics
+        meeting, a good alternative to SIGGRAPH). 
+        This falls into the two paper idea too: animation to
+        Graphics Interface and swept surface to Solid Modeling,
+        if there is enough.  Otherwise choose the best application
+        and just send it to one.
+        So ... Nov. 1 is the goal.
+        When I get something for you to look at, probably a rough
+        draft of the paper, I'll send it on to you.
+        Since I'm concentrating on the animation aspects right now,
+        you might be most useful concentrating on the swept surface
+        side of the story, getting back to the old canal surface
+        and (c,r,o) issues, and figuring out what the problems there are.
+        For example, it would be very useful if you could get a good,
+        terse description (in Latex so that it is fully readable and
+        typeset ready for submission, mostly fully readable) of your
+        work on building up PH orientation curves (the more general
+        version of Farouki's stuff that we were going to submit to
+        Mathematics of Surfaces).  
+
+        Also, can you resurrect your code on Dietz/Hoschek and 
+        send it to me?  Our paper will certainly refer to their
+        work on spherical curves and it would be good to have
+        some comparative figures of our 4d-spherical curves and their
+        3d-spherical curves, as well as a toolbox to fool around with.
+                  
+Cheers,
+John
+

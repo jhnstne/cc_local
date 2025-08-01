@@ -1,0 +1,500 @@
+# This is a shell archive.  Remove anything before this line,
+# then unpack it by saving it in a file and typing "sh file".
+#
+# Wrapped by osprey.cs.jhu.edu!jimbo on Mon Mar 31 14:25:08 EST 1997
+# Contents:  Makefile deigens.c quat_min.c deigens.h
+ 
+echo x - Makefile
+sed 's/^@//' > "Makefile" <<'@//E*O*F Makefile//'
+CFLAGS	= -g
+all:	quat_min
+
+quat_min:	deigens.o quat_min.c
+	cc $(CFLAGS) -o quat_min quat_min.c deigens.o -lm
+@//E*O*F Makefile//
+chmod u=rwx,g=rx,o=rx Makefile
+ 
+echo x - deigens.c
+sed 's/^@//' > "deigens.c" <<'@//E*O*F deigens.c//'
+ /*							eigens.c
+ *
+ *	Eigenvalues and eigenvectors of a real symmetric matrix
+ *
+ *
+ *
+ * SYNOPSIS:
+ *
+ * int n;
+ * double A[n*(n+1)/2], EV[n*n], E[n];
+ * void eigens( A, EV, E, n );
+ *
+ *
+ *
+ * DESCRIPTION:
+ *
+ * The algorithm is due to J. vonNeumann.
+ *                   -     -
+ * A[] is a symmetric matrix stored in lower triangular form.
+ * That is, A[ row, column ] = A[ (row*row+row)/2 + column ]
+
+BEGIN JPW COMMENTARY
+
+^^^ I think he mixed up row and column here if so:
+JPW : for 3x3 this means : [xx,yx,yy,zx,zy,zz]
+JPW : for 4x4 this means : [ww,xw,xx,yw,yx,yy,zw,zx,zy,zz]
+^^^ If he has this one correct then the orders will be
+JPW : for 3x3 this means : [xx,xy,xz,yy,yz,zz] etc
+
+
+The way he calls it is the first way ([xx,yx,yy,zx,zy,zz])
+END COMMENTARY
+
+ * or equivalently with row and column interchanged.  The
+ * indices row and column run from 0 through n-1.
+ *
+ * EV[] is the output matrix of eigenvectors stored columnwise.
+ * That is, the elements of each eigenvector appear in sequential
+ * memory order.  The jth element of the ith eigenvector is
+ * EV[ n*i+j ] = EV[i][j].
+ *
+ * E[] is the output matrix of eigenvalues.  The ith element
+ * of E corresponds to the ith eigenvector (the ith row of EV).
+ *
+ * On output, the matrix A will have been diagonalized and its
+ * orginal contents are destroyed.
+ *
+ * ACCURACY:
+ *
+ * The error is controlled by an internal parameter called RANGE
+ * which is set to 1e-10.  After diagonalization, the
+ * off-diagonal elements of A will have been reduced by
+ * this factor.
+ *
+ * ERROR MESSAGES:
+ *
+ * None.
+ *
+ */
+/*
+Copyright 1973, 1991 by Stephen L. Moshier
+Copyleft version.
+*/
+
+void d_real_symmetric_eigens( A, RR, E, N )
+double A[], RR[], E[];
+int N;
+{
+int IND, L, LL, LM, M, MM, MQ, I, J, K, IA, LQ;
+int IQ, IM, IL, NLI, NMI;
+double ANORM, ANORMX, AIA, THR, ALM, QI, ALL, AMM, X, Y;
+double SINX, SINX2, COSX, COSX2, SINCS, AIL, AIM;
+double RLI, RMI, Q, V;
+double sqrt(), fabs();
+static double RANGE = 3.0517578e-5;
+
+
+/* Initialize identity matrix in RR[] */
+for( J=0; J<N*N; J++ )
+	RR[J] = 0.0;
+MM = 0;
+for( J=0; J<N; J++ )
+	{
+	RR[MM + J] = 1.0;
+	MM += N;
+	}
+
+ANORM=0.0;
+for( I=0; I<N; I++ )
+	{
+	for( J=0; J<N; J++ )
+		{
+		if( I != J )
+			{
+			IA = I + (J*J+J)/2;
+			AIA = A[IA];
+			ANORM += AIA * AIA;
+			}
+		}
+	}
+if( ANORM <= 0.0 )
+	goto done;
+ANORM = sqrt( ANORM + ANORM );
+ANORMX = ANORM * RANGE / N;
+THR = ANORM;
+
+while( THR > ANORMX )
+{
+THR=THR/N;
+
+do
+{ /* while IND != 0 */
+IND = 0;
+
+for( L=0; L<N-1; L++ )
+	{
+
+for( M=L+1; M<N; M++ )
+	{
+	MQ=(M*M+M)/2;
+	LM=L+MQ;
+	ALM=A[LM];
+	if( fabs(ALM) < THR )
+		continue;
+
+	IND=1;
+	LQ=(L*L+L)/2;
+	LL=L+LQ;
+	MM=M+MQ;
+	ALL=A[LL];
+	AMM=A[MM];
+	X=(ALL-AMM)/2.0;
+	Y=-ALM/sqrt(ALM*ALM+X*X);
+	if(X < 0.0)
+		Y=-Y;
+	SINX = Y / sqrt( 2.0 * (1.0 + sqrt( 1.0-Y*Y)) );
+	SINX2=SINX*SINX;
+	COSX=sqrt(1.0-SINX2);
+	COSX2=COSX*COSX;
+	SINCS=SINX*COSX;
+
+/*	   ROTATE L AND M COLUMNS */
+for( I=0; I<N; I++ )
+	{
+	IQ=(I*I+I)/2;
+	if( (I != M) && (I != L) )
+		{
+		if(I > M)
+			IM=M+IQ;
+		else
+			IM=I+MQ;
+		if(I >= L)
+			IL=L+IQ;
+		else
+			IL=I+LQ;
+		AIL=A[IL];
+		AIM=A[IM];
+		X=AIL*COSX-AIM*SINX;
+		A[IM]=AIL*SINX+AIM*COSX;
+		A[IL]=X;
+		}
+	NLI = N*L + I;
+	NMI = N*M + I;
+	RLI = RR[ NLI ];
+	RMI = RR[ NMI ];
+	RR[NLI]=RLI*COSX-RMI*SINX;
+	RR[NMI]=RLI*SINX+RMI*COSX;
+	}
+
+	X=2.0*ALM*SINCS;
+	A[LL]=ALL*COSX2+AMM*SINX2-X;
+	A[MM]=ALL*SINX2+AMM*COSX2+X;
+	A[LM]=(ALL-AMM)*SINCS+ALM*(COSX2-SINX2);
+	} /* for M=L+1 to N-1 */
+	} /* for L=0 to N-2 */
+
+	}
+while( IND != 0 );
+
+} /* while THR > ANORMX */
+
+done:	;
+
+/* Extract eigenvalues from the reduced matrix */
+L=0;
+for( J=1; J<=N; J++ )
+	{
+	L=L+J;
+	E[J-1]=A[L-1];
+	}
+}
+@//E*O*F deigens.c//
+chmod u=rwx,g=rx,o=rx deigens.c
+ 
+echo x - quat_min.c
+sed 's/^@//' > "quat_min.c" <<'@//E*O*F quat_min.c//'
+#include <stdio.h>
+#include <math.h>
+#include "deigens.h"
+
+/* The idea: given a set of n quaternions, q1..qn,
+   find the quaternion qd that minimizes the quantity
+   <qd,q1>+...+<qd,qn> -- the sum of angular distance 
+   (cos(theta)) between unit vectors 
+
+   The unit vector corresponding to the minumum eigenvalue
+   of the covariance matrix of the input quaternions Qmin will
+   minimize this quantity.  Perturbing the input by Qmin will
+   maximize average distance to the pole in the least-squares
+   sense.
+
+   JPW - Mar 31, 1997
+   */
+
+
+/* 
+   How to test it: (theoretically it works)
+
+   Generate n random quaternions.
+   Construct cov. matrix
+   Find Qmin
+
+   Compute sum of squares distance for Qmin = sumQmin
+
+   Generate a lot of random quaternions, and comute 
+   sum of squares distance for these quaternions.  Verify
+   that these sums are less that sumQmin
+   */
+
+
+/* number of quaternions in the set */
+
+#define NUM_N	10	
+
+double	**input_quaternions;
+double  *min_quaternion;
+
+
+
+double	dot_product(double *v1, double *v2, int dim)
+{
+  int i;
+  double result = 0.0;
+
+  for(i=0;i<dim;i++)
+    result += v1[i]*v2[i];
+  return result;
+}
+
+
+double	sum_of_squares_dist(double **vects, double *ref_vect, int nvect)
+{
+  int i,j;
+  double dp;
+  double result =0;
+
+  for(i=0;i<nvect;i++)
+    {
+      dp = dot_product(vects[i],ref_vect,4);
+      result += dp*dp;
+    }
+  return result;
+}
+
+void	normalize_vector(double *v,int dim)
+{
+  int i;
+  double len;
+
+  len = 0;
+  for(i=0;i<dim;i++)
+    {
+      len += v[i]*v[i];
+    }
+  len = sqrt(len);
+  for(i=0;i<dim;i++)
+    {
+      v[i] = v[i]/len;
+    }
+}
+
+double	*random_quaternion()
+{
+  static double result[4];
+  int i;
+
+  for(i=0;i<4;i++) result[i] = (double) ((random() % 10000) - 5000);
+  normalize_vector(result,4);
+  return result;
+}
+
+
+void	init_quaternions()
+{
+  int i,j;
+  
+
+
+  input_quaternions = (double **) malloc(sizeof(double *) * NUM_N);
+
+  for(i=0;i<NUM_N;i++)
+    {
+      input_quaternions[i] = (double *) malloc(sizeof(double) * 4);
+      for(j=0;j<4;j++)
+	{
+	  input_quaternions[i][j] = (double) (random()%10000 - 5000);
+	}
+      normalize_vector(input_quaternions[i],4);
+    }
+}
+
+
+double	*min_eigenvector4X4(double **vectors, int nvect)  
+{
+  double	lower_tri_matrix[10];
+  int		i,j,k;
+  int		dex,mindex;
+  double	res_evects[16];
+  double	res_evals[4],min_eval;
+  double	*result;
+
+  result = (double *) malloc(sizeof(double)*4);
+  
+  for(i=0;i<10;i++)
+    lower_tri_matrix[i] = 0.0;
+
+  for(i=0;i<nvect;i++)
+    {
+      dex = 0;
+      for(j=0;j<4;j++)
+	{
+	  for(k=0;k<=j;k++)
+	    {
+	      lower_tri_matrix[dex] += vectors[i][j]*vectors[i][k];
+	      dex++;
+	    }
+	}
+    }
+
+  d_real_symmetric_eigens(lower_tri_matrix,res_evects,res_evals,4);
+  
+
+  /* output eigen vectors and values */
+  for(i=0;i<4;i++)
+    {
+      printf("%lf \t:",res_evals[i]);
+      for(j=0;j<4;j++)
+	printf("%lf \t",res_evects[i*4+j]);
+      printf("\n");
+    }
+
+  min_eval = 99999.9;
+  for(i=0;i<4;i++)
+    {
+      if(res_evals[i] < min_eval)
+	{
+	  mindex = i;
+	  min_eval = res_evals[i];
+	}
+    }
+  
+  for(i=0;i<4;i++) result[i] = res_evects[mindex*4 + i];
+  printf("min vector is #%d\n",mindex);
+  return result;
+}
+
+
+main(int argc, char **argv)
+{
+int i,j;
+int seed;
+double minsos,best_sos,cur_sos;
+double best_guess[4],*guess;
+
+
+if(argc!=2)
+  {
+  printf("usage:\t%s <integer seed>\n",argv[0]);
+  exit(1);
+  }
+
+sscanf(argv[1],"%d",&seed);
+srandom(seed);
+init_quaternions();
+min_quaternion = min_eigenvector4X4(input_quaternions,NUM_N);
+minsos = sum_of_squares_dist(input_quaternions,min_quaternion,NUM_N);
+printf("min S of S = %lf\n",minsos);
+best_sos = 9999999.9;
+for(i=0;i<100000;i++)
+  {
+    guess = random_quaternion();
+    cur_sos = sum_of_squares_dist(input_quaternions,guess,NUM_N);
+    if(cur_sos<best_sos)
+      {
+	best_sos = cur_sos;
+	for(j=0;j<4;j++) best_guess[j] = guess[j];
+      }
+  }
+   
+printf("best guess SOS = %lf\n",best_sos);
+for(i=0;i<4;i++)
+  printf("\t%lf",best_guess[i]);
+printf("\n");
+}
+@//E*O*F quat_min.c//
+chmod u=rw,g=,o= quat_min.c
+ 
+echo x - deigens.h
+sed 's/^@//' > "deigens.h" <<'@//E*O*F deigens.h//'
+void d_real_symmetric_eigens(/* A, RR, E, N */ );
+/* float A[], RR[], E[];
+   int N; 
+   */
+
+/*							eigens.c
+ *
+ *	Eigenvalues and eigenvectors of a real symmetric matrix
+ *
+ *
+ *
+ * SYNOPSIS:
+ *
+ * int n;
+ * float A[n*(n+1)/2], EV[n*n], E[n];
+ * void eigens( A, EV, E, n );
+ *
+ *
+ *
+ * DESCRIPTION:
+ *
+ * The algorithm is due to J. vonNeumann.
+ *                   -     -
+ * A[] is a symmetric matrix stored in lower triangular form.
+ * That is, A[ row, column ] = A[ (row*row+row)/2 + column ]
+
+BEGIN JPW COMMENTARY
+
+^^^ I think he mixed up row and column here if so:
+JPW : for 3x3 this means : [xx,yx,yy,zx,zy,zz]
+JPW : for 4x4 this means : [ww,xw,xx,yw,yx,yy,zw,zx,zy,zz]
+^^^ If he has this one correct then the orders will be
+JPW : for 3x3 this means : [xx,xy,xz,yy,yz,zz] etc
+
+
+The way he calls it is the first way ([xx,yx,yy,zx,zy,zz])
+END COMMENTARY
+
+ * or equivalently with row and column interchanged.  The
+ * indices row and column run from 0 through n-1.
+ *
+ * EV[] is the output matrix of eigenvectors stored columnwise.
+ * That is, the elements of each eigenvector appear in sequential
+ * memory order.  The jth element of the ith eigenvector is
+ * EV[ n*i+j ] = EV[i][j].
+ *
+ * E[] is the output matrix of eigenvalues.  The ith element
+ * of E corresponds to the ith eigenvector (the ith row of EV).
+ *
+ * On output, the matrix A will have been diagonalized and its
+ * orginal contents are destroyed.
+ *
+ * ACCURACY:
+ *
+ * The error is controlled by an internal parameter called RANGE
+ * which is set to 1e-10.  After diagonalization, the
+ * off-diagonal elements of A will have been reduced by
+ * this factor.
+ *
+ * ERROR MESSAGES:
+ *
+ * None.
+ *
+ */
+/*
+Copyright 1973, 1991 by Stephen L. Moshier
+Copyleft version.
+*/
+@//E*O*F deigens.h//
+chmod u=rwx,g=rx,o=rx deigens.h
+ 
+exit 0
+

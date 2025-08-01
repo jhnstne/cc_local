@@ -1,0 +1,49 @@
+read `bezutils.maple`;
+read `quintic.maple`;
+read `elim.maple`;
+
+
+# predetermined control points for the curve
+
+control0 := [0,0,0];
+control1 := [1,1,1];
+control4 := [3,3,2];
+control5 := [4,4,1];
+
+p00val := 0;
+p11val := 0;
+p22val := 0;
+
+esys1 := subs(	x0 = control0[1], y0 = control0[2], z0 = control0[3],
+		x1 = control1[1], y1 = control1[2], z1 = control1[3],
+		x4 = control4[1], y4 = control4[2], z4 = control4[3],
+		x5 = control5[1], y5 = control5[2], z5 = control5[3],
+		p00 = p00val, p22 = p22val, p11 = p11val,
+		eval(eqall));
+
+sesys := {esys1[1],esys1[2],esys1[3],esys1[4],esys1[5],esys1[6],esys1[7],
+	  esys1[8],esys1[9],esys1[10],esys1[11],esys1[12],esys1[13],
+	  esys1[14],esys1[15]};
+
+
+svars := {x2,y2,z2,x3,y3,z3,p01,p02,p10,p12,p20,p21,p30,p31,p32};
+
+sol1 := solve({esys1[1],esys1[6],esys1[11]},{p10,p20,p30});
+
+esys2 := subs(sol1,eval(esys1));
+
+sol2 := solve({esys2[5],esys2[10],esys2[15]},{p02,p12,p32});
+
+esys3 := subs(sol2,eval(esys2));
+sesys3 := {esys3[2],esys3[3],esys3[4],esys3[7],esys3[8],esys3[9],esys3[12],
+	  esys3[13],esys3[14]};
+
+svars3 := {x2,y2,z2,x3,y3,z3,p01,p21,p31};
+Digits :=15;
+sesys4 := map(evalf,sesys3);
+#fsolve(sesys4,svars3,maxsols=1);
+
+
+
+
+

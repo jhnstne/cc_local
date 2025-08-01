@@ -1,0 +1,44 @@
+Myung-Soo,
+
+I finally have time to think about research calmly after finals week.
+Belated thanks for the packet of papers and proceedings.
+I'd definitely like to work on some research with you and Gershon.
+I have been following and have greatly enjoyed your recent work with Elber 
+on the bisector and intersection of ruled/ringed surfaces.
+
+We have considerably different approaches to the preliminary step of
+the convex hull, the computation of the developable surfaces that straddle
+the concavities, which will be difficult to merge since you work in primal
+space while I heavily leverage duality to work in dual space.
+However, computing the bitangent developables is only 
+the beginning of the road to the convex hull and the best way to extract
+the convex hull from these developables is something I would like to work on.
+(I have thought more about the curve case than the surface case so far.)
+If I can make no contributions to your work on the convex hull problem, 
+then there are other spinoffs of this work that we could start fresh on,
+such as motion planning.
+
+So that we are clear, I will be submitting
+a journal version of the SMI02 submission that I sent you 
+('Of tangential surfaces and bitangent developables'),
+with fuller proofs and specific treatment for Bezier surfaces.
+Since this deals with the dual approach to the pure computation of
+bitangent developables, without application to problems such as the convex hull
+or visibility analysis or motion etc., I view this as separate from the
+convex hull problem.  Let me know if this is a problem for you.
+A good analogy may be provided by the bisector.
+I see the relationship between the bitangent developable and the convex hull
+as similar to the relationship between the bisector and the Voronoi diagram:
+the bisector is the main tool used in the computation of the Voronoi diagram,
+yet there is much still to be said about the computation of Voronoi diagrams
+once it is understood how to compute bisectors.
+Similarly, given the bitangent developables, I believe that there
+is still something to say about the computation of convex hulls.
+
+I look forward to a productive collaboration!
+I will be in touch.
+
+Have a jolly holiday season and Happy New Year!
+
+Cheers,
+John

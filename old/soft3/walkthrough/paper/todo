@@ -1,0 +1,22 @@
+joystick control
+SDL for joystick translational control
+GUI for joystick
+*new keyframes
+Powerpoint for Gatlinburg
+**Writeup for ACMSE (fly.tex is a basis)
+	- formal writeup of camera model and orientation control (qspline and swept surface)
+	- formal writeup of collision detection by Friday
+	- formal writeup of collision correction by next Wednesday
+SIGGRAPH expenses (me!)
+LAPACK on laptop
+software writeup: review of the software you have written and pull it together
+	- e.g., octree software
+**clean up flythrough-ross.cpp (e.g., functions, documentation)
+Gatlinburg registration/hotel/car
+
+hot button issues:
+
+	pdf or ASCII version of collision detection writeup
+	collision correction writeup (to complete rough draft of conference paper)
+	SDL for translational control: does it work and how much of an adjustment to code is it?
+	hotel and car

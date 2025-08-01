@@ -1,0 +1,244 @@
+CK, here are most of my comments.
+	I will discuss them with you over the phone,
+	but you might look them over beforehand if you can.
+	I am also sending the present form of the paper (again, most
+	but not all comments are incorporated) in the next mail,
+	so that you have something to refer to during our discussion.
+	It would help greatly if you could make a copy of the new paper
+	before we talk.
+	
+	Talk to you soon.
+
+John
+
+**********************
+
+Page numberings are from new version that you faxed to me.
+
+p. 2, near top, `Using a simple geometric argument':
+	What is the argument that (space cubic, line) never arises?
+	Could put as a footnote here.
+
+p. 2, `For example': I changed `conic intersection'
+	to `planar intersection'.
+
+p. 3, last paragraph: I rewrote this discussion.
+	The discussion of robustness of geometric representation is only 
+	a minor point, and should be made subsidiary to later points in
+	the paragraph.
+%	(Note: robustness is not the sole motivation of geometric
+%	approach, simplicity of the method and thus speed is another reason.)
+
+environment of p. 4: We do not state *anywhere* that we will restrict to
+	axial natural quadrics (rather than all natural quadrics), 
+	and why this is OK (i.e., why spheres are simple to work with).
+	This must be added and would come naturally at the end of Section 3.
+
+p. 4: no return after Notation.
+
+p. 4, Figure 1: annotate with P.
+
+p. 4, added material: I think it is redundant and tedious.
+	Remove it.  (Is it ever important that direction vectors are unit
+	length, though?)
+
+p. 4, section 4, line 1: changed.
+
+p. 5, paragraph on Dandelin spheres: this should probably be significantly
+	shortened, since it is not the place of this paper to review
+	all references on Dandelin spheres.
+	The first sentence and its footnote could be reduced to:
+	`These spheres are called focal spheres or Dandelin spheres,
+	after G. Dandelin [6] (see, for example, --- or --- for more on
+	the Dandelin sphere).
+
+[to Rossignac]: the proof of Lemma 4.1 is necessary for the development
+	and is a much better proof than the one in the ACM paper.
+	The proof of Lemma 4.2 is necessary for intuition and understanding,
+	although it exists in the ACM paper.
+	The proof of Lemma 4.4 is not even in the ACM paper.
+	
+	It turns out to be impossible to use the ACM paper,
+	because of the different terminology in the papers
+	(which is less rigorous in the ACM paper)
+	and the subtle difference in the results.
+	The journal form has been improved and clarified.
+	Also the comments made above about importance of keeping 
+	the journal proofs.
+	Therefore, our condensation has been achieved through other
+	means.
+
+	Condensations: Proof of Thm 5.1 has been sketched and a reference
+	to the technical report substituted for most of the proof.
+
+	Lateness: first author moved to a different university,
+	which made communication difficult initially.
+	Moreover, the addition of material from Part II took extra time.
+	
+p. 6, proof of Lemma 4.1: it is not clear to me why the plane E must cut
+	the Dandelin sphere D into two symmetric parts.
+	Is an elaboration necessary?
+
+p. 6: I added a note after proof of Lemma 4.1, and after proof of Lemma 4.2.
+	Moved Defn 4.1 immediately after Lemma 4.1, which motivates it.
+	
+p. 7: I made the definition of diagonals into an explicit Definition.
+	I made an explicit Example of the following material.
+	I believe that this helps the reader to follow the
+	development, by highlighting the major concept of the section
+	(the diagonal).
+
+p. 7: The paragraph that defines diagonals and 
+	the following example paragraph have been changed somewhat.
+	
+p. 7: end of example: is a `diagonal' that is the line at infinity
+	considered a diagonal?
+
+p. 7-8: why is Lemma 4.3 necessary: remove it?
+
+p. 7, Figure 3: annotate the points of intersection as A,B,C,D, 
+	in a consistent way so that AC and BD are always the diagonals,
+	and if any intersections are at infinity they are B and D.
+	Also *remove* the annotation of V1 and V2.
+
+p. 8: I believe that the flow is helped by moving the proof of Lemma 4.4
+	into an explicit proof after the lemma, that the reader can skip
+	if he wants.
+	This allows the reader more freedom and avoids the problem
+	of the reader getting annoyed by details if he wants to just
+	get the big picture.
+
+p. 8: Lemma 4.4: removed restriction to coplanar axes, which is redundant
+	since it is implied by Lemma 4.2.
+	This is also done in other places where it is redundant.
+
+p. 8, proof of Lemma 4.4: I don't remember why P \cap H must be the MAJOR
+	axis (and not say the minor axis).
+	It seems that symmetry only implies that P \cap H is an axis 
+	of the conic.  Is an expanded argument needed?
+
+p. 8, last sentence of Section 4.2: I removed it, since without
+	the discussion of the next section, this comment suggests
+	that you mean the naive algorithm of Goldman and Miller 
+	(compute plane sections and see if they coincide).
+	I have added a sentence to the next section that replaces
+	this sentence.
+
+p. 9, Figure 5: you have the annotation `d = P \cap H';
+	I think that the `P \cap H' part does not add anything
+	and just confuses the picture.
+	Similarly in the first paragraph of Section 4.3.
+	I would remove all of them, leaving just `d'.
+	
+p.8, line 4 of Section 4.3: again, why not minor axis rather than major?
+
+p. 8-9: I have changed the first two paragraphs of Section 4.3.
+	
+p. 9: made formal definition of height.
+
+p. 10: small changes.
+
+p. 10, `Once the first intersection conic
+	is determined, any point from the other diagonal can be used
+	to compute the other intersection conic.':
+	why is this sentence (new to this version) necessary?
+	Why not just cover it in the algorithm?
+
+p. 10, computation of focal length: what is u?  Above it is the distance
+	of U from the midpoint of RS, but now there is no midpoint of RS.
+
+p. 11, algorithm: make it clearer that the conic is *computed*, 
+	not just detected.
+	Thus, specify what the axes, axis lengths, and conic types are.
+
+p. 11, step 10: *need to elaborate*
+
+[for Rossignac]  we have made it clearer that the algorithm indeed computes
+	the degenerate intersection if it is detected.
+	In the algorithm at the end of Section 4, the intersection conics
+	are given.
+
+p. 11, algorithm: I have tried to highlight the main steps of the algorithm,
+	by including explanatory headings to steps,
+	and by combining steps that logically belong together.
+
+p. 12, Section 5: it seems more logical to make the linear intersections
+	section the last subsection of Section 5, since it is one
+	of the degenerate cases.  I understand your wish to make linear
+	intersections an important topic, but I believe that it still is
+	as its own subsection.
+	This affects the first paragraph of Section 5, as well as Section 1.
+
+p.12, I removed the first paragraph of subsection 5.1, since it simply repeats
+	what was said in the introduction of Section 5.
+
+p. 12, Lemma 5.1: again for flow, I made explicit proof.
+	rewording of statement, rewording of proof.
+
+p. 13, Section 5.2: you mention the cylinder/cone and cyl/cyl cases here.
+	However, they are generally ignored throughout the paper.
+	Would it be better to state that the paper only discusses cones?
+
+p. 13, second paragraph: shortened somewhat.
+	Also, there is no formal proof in Theorem 8.2 so I removed that
+	statement.  (A proof is not needed.)
+
+p. 14, proof of Thm 5.1: To make the paper shorter (for Rossignac),
+	this proof could be sketched and a reference made to the technical
+	report.  The reason I believe this is alright is that
+	(1) the proof is not intuitive, (2) is only trying to prove that
+	the conic passes through Q, and (3) the result is analogous to 
+	Lemma 4.4.
+
+p. 15, algorithm: I replaced the wording of the technical report in step 2:
+	I believe it is ambiguous otherwise (e.g., length).
+
+
+Section 7 (Common inscribed sphere): 
+	Theorem 7.1: Do you think that the proof could be replaced by
+	the ACM proof and thus removed via a reference?
+	The proof techniques are very different.
+
+Section 8 (Alternate form of algorithm): 
+	I am sure that Rossignac and TOG will
+	consider this added four pages to be overkill, especially
+	when Rossignac has demanded that we be more concise.
+	Therefore, I think this section should be removed.
+	Also, it is apparently covered by your ASME paper?
+
+	For my own understanding: 
+	Why do you want to compute X as the intersection of AB and CD,
+	where A,B,C,D must be computed separately,
+	rather than as the intersection of diagonals,
+	which are easily defined in terms of skeletal lines,
+	which are easily found as a pair of lines through the vertex?
+
+	About the argument that the alternate algorithm moves the
+	detection step forward:
+	I am sure that referees like the second one will jump all over this,
+	and argue that we are splitting hairs here.
+	That is, the loss of time in doing detection/computation at the
+	same time as in the first algorithm is trivial compared to
+	detecting a nondegenerate intersection before you do any height
+	computations.
+
+Section 9 (Enumeration): it is enough to add this section:
+	This will satisfy the request to add material from Part II,
+	and yet also satisfy the request to make the paper more concise
+	because we have shortened original material
+	and removed one section (tangency) to counterbalance this
+	added section.
+
+p. 24: remove `as the second application' if Section 8 is indeed removed.
+	
+p. 25 (Section 9): you start out talking about axial natural quadrics,
+	but only discuss cones in the rest of the section.
+	What about cylinders, or should the entire section only mention	
+	cones?
+
+small but important changes throughout Section 9 
+(e.g., made critical points into a defn)
+
+I have not yet incorporated my comments on Linear Intersections
+or the Common Inscribed Sphere sections.
+I will have these shortly 

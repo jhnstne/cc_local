@@ -1,0 +1,6 @@
+[ FILE: teapot
+  A 'scene' consisting solely of the Utah teapot.
+]
+{
+BEZSURF ../../../../../surfbuild/data/bezierSurf/UtahTeapot.cpt3 0 0 0
+}

@@ -1,0 +1,446 @@
+From jimbo@blaze.cs.jhu.edu Mon Sep 26 13:11 CDT 1994
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from blaze.cs.jhu.edu by cis.uab.edu (5.0/SMI-SVR4)
+	id AA27752; Mon, 26 Sep 1994 13:11:36 -0500
+Received: from mail-client (peregrine.cs.jhu.edu)
+           by blaze.cs.jhu.edu; Mon, 26 Sep 94 14:11:34 EDT
+Received: by mail-client (4.1) id AA16972; Mon, 26 Sep 94 14:11:33 EDT
+Message-Id: <9409261811.AA27752@cis.uab.edu>
+From: jimbo@blaze.cs.jhu.edu (James P. Williams)
+Sender: jimbo@blaze.cs.jhu.edu
+Date: Mon, 26 Sep 94 14:11:33 EDT
+To: jj@blaze.cs.jhu.edu
+Subject: draft
+Content-Type: text
+Content-Length: 16332
+Status: OR
+
+ABSTRACT
+
+ We examine the problem of creating rational, parametric, swept surfaces from
+the perspective of computer animation, specifically, treatment of a swept
+surface as a locus of points traversed by a planar cross-section as it
+translates and rotates with time. In the process, we derive techniques
+applicable to both rational swept surface generation in CAGD and smooth
+key-frame in-betweening in animation.
+
+SECTION 1 : Parameterizing Direction
+
+1.1	Canal Surfaces
+
+	One of the simplest types of swept surfaces is the Canal Surface [ref].
+A Canal Surface, S(s,t), is the envelope (boundary) of the set of points
+traversed by the sweeping of a center of a sphere of radius R along a spatial
+path which we will refer to as the "directrix" curve D(t).  For our
+applications, we will assume the directrix to be a rational, parametric curve in
+3-space. The resulting surface is a tube encasing the directrix curve.  If we
+examine the tube with respect to a specific point on the directrix curve, D(ti),
+we note that the cross section of the tube with respect to the plane normal to
+D'(ti) is a circle of radius R.  Using this observation, we can view the canal
+surface as the locus of points swept out by a circle of radius R, centered at
+D(t), lying in the plane defined by the direction D'(t).
+
+
+1.2	Canal Surfaces as Matrix-Vector Products
+
+	Let us denote the rotation matrix that rotates the vector (0,0,1) into
+the vector D'(t)/||D'(t)|| as ROT(t).  Note that ROT(t) will have components
+which are functions of t.  Define C(s)=(Cx(s),Cy(s),0) to be a piecewise Bezier
+representation of a circle of radius R lying in the x-y plane.  We can express
+S(s,t) as a rotation of C(s) into a plane of D'(t), followed by a translation of
+the rotated result to D(t):
+
+	S(s,t) = ROT(t)C(s) + D(t) 					[EQ.1]
+
+	To construct ROT(t) we need a mutually orthogonal unit basis of vectors
+including the unit tangent vector as a function of t, T(t), and two arbitrary
+unit vector-valued functions denoted here as E0(t) and E1(t).  The expression
+for ROT(t) in terms of this triple is:
+
+		 |							|
+  	ROT(t) = |  transpose(T(t)) transpose(E0(t)) transpose(E1(t))	|
+		 |							|
+	
+									[EQ. 2]	
+
+1.3	Rational Canal Surfaces
+
+	Rational Bezier and Non-Uniform Rational Bspline (NURB) surfaces are the
+de-facto standard for representation in most CAGD packages.  We would like to
+develop canal surfaces in this domain.  The problem is forcing S(s,t) to be
+rational.  If it were possible to make the entries of ROT(t) rational, then
+S(s,t) would be rational.
+
+1.3.A.	Pythagorean Hodograph Directrix Curves
+
+	Suppose one is to restrict D(t) to a class of curves that allows an
+exact, rational ROT(t) to be constructed.  The particular family of curves
+suited to this application are the "Pythagorean Hodograph Space Curves"
+developed by Farouki [ref].  A Pythagorean Hodograph (hereinafter PH) curve has
+the property that for any PH curve P(t), ||P'(t)|| is a rational function of t.
+In [ref] Farouki and Sakkalis detail the construction of a rationally
+parameterized orthogonal unit basis around the unit tangent vector of a PH
+curve.  They go on to describe a system similar to [EQ. 1] for constructing
+rational canal surfaces.
+	The price paid for using PH directrix curves is limited design freedom
+relative to Bezier/Bspline curves.  As yet PH curves are suited primarily to the
+role of interpolation.  Even as interpolates, heuristic techniques may be
+required to choose the most "suitable" PH interpolate for a given set of points.
+In addition, piecewise PH curves have a practical continuity limit of C1 [ref].
+
+1.3.B. 	Rational Curves on the Unit Sphere 
+
+	If we allow D(t) to be a Bezier or Bspline curve, S(s,t) cannot usually
+be an exact canal surface.  The justification for this lies in the fact that the
+isoparametric curves S(k,t) are offset curves of D(t).  It is proven in [ref]
+that offsets of rational curves are rarely rational themselves.  The exception
+is, of course, offsets of the family of PH curves described in [1.3.A].
+	For now, let us consider the case where we want to construct a canal
+surface of radius R around a specified parameter interval ([0..1] for
+simplicity) of a single Bezier curve, D(t).  This case generalizes to piecewise
+Bezier curves and Bsplines, as both can be treated on one level as sets of
+individual, connected Bezier curves.
+	In most cases (PH D(t) excluded) we will have to construct some rational
+approximation for the orthogonal unit basis {T(t),E0(t),E1(t)}.  Let's start by
+approximating T(t).  T(t) is a unit-vector valued funtion, a curve on the unit
+sphere.  A rational approximation, Tapprox(t), of T(t) must be a rational curve
+on the unit sphere, Q.  In [ref], Dietz and Hoschek describe a mechanism for
+interpolation with rational Bezier curves on Q.  In the process they also give
+an explicit representation for rational Bezier curves on the unit sphere.
+Quoting Dietz et al. :
+
+	Every irreducible rational Bezier curve of degree 2n for n c N
+	on the unit sphere Q can be obtained by the formula [EQ.3] where
+	p0..p3 are Bernstein polynomials of degree n.
+
+	x0 = (p0^2 + p1^2 + p2^2 + p3^2) = x1^2 + x2^2 + x3^2
+	x1 = 2p0p1 - 2p2p3
+	x2 = 2p1p3 + 2p0p2
+	x3 = p1^2 + p2^2 - p0^2 - p3^2				[EQ.3]
+
+	(Note that the formula used by Farouki in the development of PH
+	 space curves can be obtained from [EQ.3] by substituting 0 for
+	 p2)
+
+	In this paper, we will not cover the minimization problem of determining
+which points to interpolate on Q to make Tapprox(t) a "good" approximation of
+T(t).  A similar optimization problem was studied in [ref] [fem..offset
+techniques].  We choose to focus simply on the equational tools required to make
+this construction viable.  The problem at hand is the construction of a
+rational, orthonormal basis about Tapprox(t).  To solve it, we borrow a trick
+from Farouki.
+
+
+1.4 Extracting an Orthonormal Basis from a Rational Curve on the Unit Sphere
+
+	Suppose we have a curve on the unit sphere, 
+	Tapprox(t) = (w(t),x(t),y(t),z(t)) = (x0(t),x1(t),x2(t),x3(t))
+	
+	By dropping the homogeneous term w(t) we get the preimage
+	of Tapprox(t), r(t), with the property that for all t, 
+	Tapprox(t) X r(t) = 0.
+
+	Since Tapprox(t) is a scaling of r(t), it is sufficient to construct
+	an orthonormal basis about r(t).  This basis will also work
+	for Tapprox(t).
+
+	r(t) is now taken as the tangent curve of the directrix, using
+	a direct definition for the Frenet frame:
+
+	t = r/|r|   n= ((r X r') X r)/ |r X r'||r|  b = (r X r')/|r X r'|
+
+	|r| = w(t) by  [EQ.3], substitution yields:
+
+	t = r/w  n = ((r X r') X r)/ w|r X r'|   b = (r X r')/|r X r'|
+
+	let's examine the term |r X r'|
+
+	r(t) = (x(t),y(t),z(t)) = 
+		(2p0p1 - 2p2p3, 2p1p3 + 2p0p2, p1^2 + p2^2 - p0^2 - p3^2)
+
+	Where p0..p3 are polynomial functions of t.  Differentiating, we get:
+
+	x' = 2p0'p1 + 2p0p1' - 2p2'p3 - 2p2p3'
+	y' = 2p1'p3 + 2p1p3' + 2p0'p2 + 2p0p2'
+	z' = 2p1'p1 + 2p2'p2 - 2p0'p0 - 2p3'p3
+	
+	Substituting these into (|r X r'|) yields:
+
+	|r X r'|^2 = 
+	4w^2[(p1'p3 - p1p3' + p2p0' - p0p2')^2 + (p2'p3 - p3'p2 + p0p1' - p1p0')^2] 
+
+	We see that r X r' is the sum of two polynomial squares.  Using this
+	fact we define the sine and cosine of some arbitrary angle B to be:
+
+	[cos(B),sin(B)] = 
+		
+	2w[(p1'p3 - p1p3' + p2p0' - p0p2'),(p2'p3 - p3'p2 + p0p1' - p1p0')] 
+	-------------------------------------------------------------------
+				|r X r'|
+
+	Using the sin and cos of B, we can construct a matrix that rotates the
+	vectors n and b within the plane they span and eliminates their
+	potentially (and likely) irrational denominators.
+
+	| E0(t) |	|  cosB  sinB | | n |
+	| E1(t) |   =  	| -sinB  cosB | | b |
+
+	
+	We can now construct the matrix that rotates (1,0,0) into Tapprox(t)
+
+		 	|	|
+ 	ROT(t) =	| n b t |
+			|	|
+
+1.4	Limitations
+
+	The method we have described to parameterize direction is applicable to
+planar symmetric problems like describing canal surfaces, but falls short in
+applications requiring parameterized orientation.  For this we will need
+something more powerful.
+
+
+SECTION 2 : Parameterizing Orientation
+
+2.1	Rotations in Space
+
+	Systems for describing orientation or (equivalently) rotation relative
+to some fixed frame of reference, are a mature subject in mathematics and, more
+recently, CAGD and graphics.  Shoemake [REF] presented an excellent synthesis of
+this material and justified why interpolation on the quaternion sphere is the
+most natural way to interpolate spatial orientations.  Shoemake used spherical
+linear interpolation on the surface of the unit 4-sphere to in-between the
+orientation of objects.  We would like to use a curve on the 4-sphere to
+rationally parameterize an orthonormal frame.  For this reason, we must learn
+how to constuct rational curves on the unit 4-sphere.  This is how they could be
+used:
+
+	Swept Surfaces : A swept surface can be thought of as the set of
+	points swept out by a planar cross section as it translates, rotates
+	and scales with respect to time.  Section 1 described this
+	interpretation in detail.  If the cross section is allowed to be
+	an arbitrary rational planar curve, ROT(t) must now parameterize
+	orientation instead of merely direction.
+
+	Animation : Since we will derive a closed form for quaternion curves,
+	traditional analysis techniques can be applied to rotational components
+	of animation sequences.  Computation of irrational functions is
+	also avoided.   
+
+
+
+2.2	Our Solution to the Classic In-Betweening Problem
+
+
+	PROBLEM : Suppose we are given a series of orientations, given 
+	as unit quaternions {Q1...QN}.   In addition, we are given a 
+	series of times {T1...TN}. Our job is to construct a rational,
+	parametric curve on the unit 4-sphere, R(t), such that
+	R(Tj) = Qj.  R(t) should be a smooth, continuous curve.
+
+	We will use an approach similar to that taken by Dietz et al. [REF] to
+construction rational curves on the 3-sphere.  We would like a form to describe
+polynomial pythagorean quintuples, A^2 + B^2 + C^2 + D^2 = E^2.  If we had such
+a form we could use it to form polynomials if projective 4-space of the form
+(E,A,B,C,D) where E is the homogenous coordinate.  All such polynomials would
+correspond be curves on the 4-sphere in Euclidean space.  Aida [REF] presented a
+sufficient form for numerical pythagorean quintuples:
+
+(p^2 + q^2 + r^2 - s^2)^2 + (2ps)^2 + (2qs)^2 + (2rs)^2 = 
+						(p^2 + q^2 + r^2 + s^2)^2
+
+									[EQ.2.1]
+
+	This form can be extended to the polynomial ring by a process identical
+to that in Dietz [REF].  This suggests to us the mapping:
+
+	M : P4 -> P5
+
+	M[p,q,r,s] = [p^2 + q^2 + r^2 + s^2,p^2 + q^2 + r^2 - s^2,2ps,2qs,2rs]
+
+									[EQ.2.2]
+
+	If [p,q,r,s] is a rational 4-space curve of degree D, M[p,q,r,s] is a
+curve in projective 4-space whose projection in Euclidean 4-space is a curve on
+the unit 4-sphere of degree 2D.  We must determine what conditions to impose on
+[p,q,r,s] that will make M[p,q,r,s] a solution to our interpolation problem.
+Let us try to invert, possibly non-uniquely, the mapping M:
+
+i		assume X=(x0,x1,x2,x3,x4) = M(p,q,r,s)
+	
+ii		this implies p = x2/2s, q = x3/2s, r = x4/2s 
+	
+		substituting into x1 = p^2 + q^2 + r^2 - s^2 yields
+
+iii		4s^4 + (4x1)s^2 - (x2^2 + x3^2 + x4^2) = 0
+
+		we examine x0=p^2 + q^2 + r^2 + s^2, 
+
+		which after substitution yields
+
+iv		4s^4 - (4x0)s^2 + (x2^2 + x3^2 + x4^2) = 0.
+
+		iii + iv yields
+
+v		8s^4 + 4(x1-x0)s^2 = 4s^2(2s^2 + x1 - x0) = 0
+
+		solving for s we get
+
+vi		s = {sqrt( (x0-x1)/2 ),-sqrt( (x0-x1)/2 ),0}
+
+
+		Substituting the nonzero roots from vi into the equations for 
+		p,q,r,s yields the nonunique inverse map:
+
+vii 		Minverse(x0,x1,x2,x3,x4) = (+-2 \sqrt{(x0-x1)/2},x2,x3,x4,x0-x1).
+
+									[EQ.2.3]
+
+	Using the inverse for M given in (vii), the interpolation problem
+changes in flavor.  We no longer need to concern ourselves with interpolation on
+the 4-sphere, instead we can invert {Q1...QN}, giving us a series of points in
+4-space {Qinverse1...QinverseN} which we can interpolate with a general 4-space
+curve, Rinverse(t).  Just about any interpolation technique that the user
+desires can be used here with the provision that it will produce a rational,
+parametric space curve.  We can then apply M to Rinverse(t) to yield our desired
+R(t).  Note that the degree of R(t) will be twice the degree of Rinverse(t), so
+cubic spatial curves will yield degree 6 curves on the 4-sphere etc...   
+
+
+
+2.3 	Properties of M and Minverse
+
+	It is desireable for M to be a "well behaved" mapping in the sense that
+we would like to be sure that if Rinverse(t) has no cusps over the parameter
+interval [a,b] then M(Rinverse(t)) will also have no cusps over the interval
+[a,b].  Unfortunately, this is not true, but we have identified conditions for
+Rinverse(t) that will help avoid cusp introduction.
+
+
+CONDITION 1:
+
+Let us consider M to map R4 -> R4 by explicity dividing through by the
+homogeneous coordinate in advance.  Now we can regard M as the composition of
+two mappings.
+
+M1: [p,q,r,s] -> [p^2 + q^2 + r^2 -s^2 , 2ps,2qs,2rs]
+
+and
+
+M2: V -> V/||V|| -- normalization
+
+M = M2 o M1
+
+We would like to see if M1 introduces any new cusps.  Let us
+assume that [p,q,r,s] has no cusps:
+
+M1[p,q,r,s] has a cusp iff d/dt(M1[p,q,r,s]) = [0,0,0,0]
+
+d/dt(M1[p,q,r,s]) =     [       2pp' + 2qq' + 2rr'  - 2ss',
+                                2p's + 2ps',
+                                2q's + 2qs',
+                                2r's + 2rs'     ]
+
+d/dt(M1[p,q,r,s]) = [0,0,0,0] implies
+
+        p' = -p(s'/s)
+        q' = -q(s'/s)
+        r' = -r(s'/s)
+
+substituting into {2pp' + 2qq' + 2rr'  - 2ss'} we get :
+
+        -2p^2(s'/s)-2q^2(s'/s)-2r^2(s'/s) -2s's = 0
+
+multiply through by -(s/s')/2 to yield :
+
+        p^2 + q^2 + r^2 + s^2 = 0
+
+
+THEREFORE : M1 introduces a cusp IFF [p,q,r,s] passes through [0,0,0,0]
+
+
+CONDITION 2:
+
+Let's look at the whole mapping:
+
+        Let A = p^2 + q^2 + r^2 + s^2
+
+
+        M: [p,q,r,s] -> [(p^2+q^2+r^2-s^2)/A,(2ps)/A,(2qs)/A,(2rs)/A]
+
+        d/dt(A) = A' = 2pp' + 2qq' + 2rr' + 2ss'
+
+        d/dt(M([p,q,r,s]))=[    A(2pp'+2qq'+2rr'-2ss') - A'(p^2+q^2+r^2-s^2)
+                                -------------------------------------------  ,
+                                                A^2
+                                (A(ps'+p's) - A'(ps))/A^2,
+                                (A(qs'+q's) - A'(qs))/A^2,
+                                (A(rs'+p's) - A'(rs))/A^2       ]
+
+        d/dt(M([p,q,r,s]))=[0,0,0,0] implies
+
+                                (A(ps'+p's) - A'(ps))/A^2 = 0
+                                (A(qs'+q's) - A'(qs))/A^2 = 0 
+                                (A(rs'+r's) - A'(rs))/A^2 = 0 
+
+        Solving these expressions for p',q',r' respectively and back substituting
+        into the first component of the derivitive vector causes the first 
+        component to go to zero.  So we can concentrate on these three similar
+        expressions.
+
+        It is obvious from inspection that if s=s'=0 these expressions will go to zero.
+        
+        We assume that A', [p',q',r',s'] <> [0,0,0,0], so this condition does not apply.
+        We also assume that A<>0 because earlier it was  determined that this will cause a
+        cusp.
+
+        Now note, if [p,q,r,s] = [p',q',r',s'] then all terms go to zero.
+	
+	If degree 4 or smaller polynomials are used for {p,q,r,s} then this
+	condition can be evaluated in closed form.
+
+
+2.4 	Using Quaternion Curves for Rational Rotation
+
+	Suppose we have computed the curve R(t) to our satisfaction.  We now
+want to use it to perform rotations.  R(t0) is a unit quaternion, in order to
+rotate the vector V by R(t0) we need to evaluate the quaternion product:
+
+	inverse(R(t0)) [0,V] R(t0)
+
+	Or we could choose to convert R(t) into a rotation matrix :
+
+	start with R(t):
+
+	R(t) = [x0(t),x1(t),x2(t),x3(t),x4(t)]
+
+	homogenize:
+
+	R(t) = [x1(t)/x0(t),x2(t)/x0(t),x3(t)/x0(t),x4(t)/x0(t)] = [w,x,y,z]
+
+	and plug the homogenized coordinates into the matrix:
+
+// consider all the redundant computations in this matrix
+
+			| 1-2y^2-2z^2	2xy+2wz		2xz-2wy     |
+	MATRIX(R(t)) =	| 2xy - 2wz	1-2x^2-2z^2	2yz+2wx	    |
+			| 2xz + 2wy	2yz-2wx		1-2x^2-2y^2 |
+	
+	
+
+SECTION 3:	Practical and Computational Considerations
+
+
+3.1	Direct Computation of Tensor Product Bezier Surfaces
+
+	Using the form for a canal surface given in [EQ.1] :
+
+	S(s,t) = ROT(t)C(s) + D(t) 		
+ 		
+
+
+
+
+
+
+

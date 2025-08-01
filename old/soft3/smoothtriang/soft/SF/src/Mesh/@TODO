@@ -1,0 +1,14 @@
+Mesh Parser
+	Don't allow duplicate names.
+	Use SetName() everywhere.
+	Allow for integer names
+	Make sure syms of edges in edgeList aren't marked
+	Add a format for edges.  For example:
+		<v1, v2> = (Edge . (...));
+	    where the edge <v1, v2> must be part of an
+	    already defined face.
+
+General
+	A hash table for all objects (on names).
+	A unique id?  Perhaps the name can do this.
+	Make sure memory is freed

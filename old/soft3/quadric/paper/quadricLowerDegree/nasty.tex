@@ -1,0 +1,211 @@
+\documentstyle [12pt]{article}
+
+\newtheorem{example}{Example}[section]
+\newtheorem{property}{Property}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{corollary}{Corollary}[section]
+\newtheorem{remark}{Remark}[section]
+
+\newcommand{\DoubleSpace}{\edef\baselinestretch{1.4}\Large\normalsize}
+\newcommand{\QED}{\ \ \ \rule{2mm}{3mm}\\}
+\newcommand{\arrow}[1]{\vec{\bf #1}}
+
+%\DoubleSpace
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\topmargin}{0pt}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+
+
+\begin{document}
+\begin{center}\Large\bf
+     Response to Reviewer 92-1-2
+\end{center}
+\vspace{1cm}
+     Reviewer 92-1-2 suggested the following algorithm as a replacement of
+ours:
+\begin{enumerate}
+     \item\label{step-1}
+          Use a linear transformation transforming both right cones to
+          circular cylinders.
+          This can be done with the Gram-Schmidt diagonalization technique.
+     \item\label{step-2}
+          If the cylinder axes do not intersect, intersection is irreducible;
+          if the axes intersect at infinity, the intersection consists of four
+          lines.
+     \item\label{step-3}
+          If the cylinder axes intersect at a finite point and the cylinders
+          have equal radii, the cylinders intersect in two conics.
+     \item\label{step-4}
+          Transform the conics computed in the last step back to the original
+          coordinate system.
+\end{enumerate}
+
+     This algorithm is short and mathematically correct, however, not very
+encouraging because the reviewer missed some important issues required to design
+a robust algorithm.  The following is our response:
+
+\begin{enumerate}
+     \item In step (\ref{step-1}) above, since Gram-Schmidt process is used, we
+          assume that the reviewer uses an algebraic model ({\em i.e.},
+          using an equation to represent  a quadric).
+          In his paper ``Two Approaches to a Computer Model for Quadric
+          Surfaces'', {\em IEEE Computer Graphics}, Vol. 3 (1983), No. 6,
+          pp. 21--24, Goldman pointed out that because of floating point
+          inaccuracy,
+          \begin{quote}
+               ... from the algebraic model it is not possible to ascertain
+               with any certainty the type of surface being modeled; yet this
+               decision critically affects our interpretation of all the other
+               invariants of the surface. (page 21)
+          \end{quote}
+          After some discussions, Goldman concluded with
+          \begin{quote}
+               ... in terms of speed, size, and accuracy, the geometric model
+               is far superior to the algebraic model. (page 24)
+          \end{quote}
+          This is one of the major reasons, among others, that we choose
+          a geometric representation as our starting point.  However, a common
+          wisdom is that geometric analysis usually requires a case-by-case
+          study.
+
+     \item In step (\ref{step-3}), the reviewer's algorithm extracts the radii
+          of both transformed cylinders and tests for equality.  This is a
+          dangerous step as Goldman has discussed:
+          \begin{quote}
+               Suppose, for example, that we initially select two cylinders
+               of equal radii. If after performing several rigid motions to
+               position one of the two cylinders we then extract the two radii
+               from the invariants of the representative matrices, these radii
+               will no longer be identical.  In fact, the more manipulations we
+               perform on the cylinders, the more dissimilar the radii will
+               become because of accumulated floating point inaccuracies.
+               (page 22)
+          \end{quote}
+
+          Goldman continued with
+          \begin{quote}
+               For example, if the axes intersect and the radii are identical,
+               the intersection curve is actually two intersecting ellipses;
+               however, if the axes intersect and the radii are not
+               identical, the intersection curve is a two branch, nonplanar
+               curve.  While these curves may be very close geometrically,
+               they are very different topologically.
+          \end{quote}
+
+          Thus, applying transformations to the original surfaces and then
+          transforming the intersection curve back could have unexpected
+          result.  Furthermore, in the new coordinate system, the reviewer's
+          algorithm has to extract the axes of the cylinders.  Due to the
+          effect of transformations, we are not sure whether a pair of
+          non-intersecting axes are indeed intersecting in the original
+          coordinate system.
+          In our algorithm, since line intersection computations are used,
+          which can be implemented accurately and have a meaningful geometric
+          tolerance, we avoid using any transformation.
+
+     \item In step (\ref{step-4}), the reviewer's algorithm transforms the two
+          ellipses back to the origin coordinate system.
+          There are two drawbacks: (1) we don't know the types of the
+          intersection conics in the original coordinate system since
+          projective transformations change the affine type of a conic
+          ({\em i.e.}, transforms an ellipse to any other type).
+          Therefore, we have to extract the type with an additional
+          step. (2) Transformation may distort the types of the intersection
+          conics because of numerical inaccuracy.  In Wilson's study,
+          ``Conic Representations for Shape Description'',
+          {\em IEEE Computer Graphics and Applications}, Vol. 7 (1987), No. 4,
+          pp. 23-30, he discovered that after some transformations,
+          \begin{quote}
+               [for the implicit form], a quarter of the circles were distorted,
+               or classified, into ellipses.  This has important practice
+               consequences when one considers manufacturing a design -- a
+               circular hole could be drilled or bored, but an elliptical
+               hole would have to milled, which is a much more expensive
+               operation (page 28).
+          \end{quote}
+          In our algorithm, the types of the intersection conics are
+          determined by raw input without any transformation and hence
+          are more accurate than the reviewer's.
+
+     \item The reviewer's algorithm implicitly uses complex arithmetic and hence
+          performance is worse than ours.  For example, if any cone's vertex
+          is contained in the other cone's interior, any plane through the line
+          joining the vertices intersects a cone in two intersecting lines.
+          If this plane is chosen to be the plane at infinity, then the cone
+          becomes a {\em hyperbolic} cylinder.  To transform this hyperbolic
+          cylinder to a circular one so that its radius can be extracted,
+          complex arithmetic is unavoidable.  Worse, if in the new coordinate
+          system the intersection of cylinders consists of two ellipses,
+          extra work must be performed to determine if in the original
+          coordinate system the intersection conics are
+          real, pure imaginary or consisting of one or two real points.
+
+     \item In step (\ref{step-1}) of the reviewer's algorithm, he/she claims
+          \begin{quote}
+               This computation involves nothing more than using the
+               Gram-Schmidt process to diagonalize a real symmetric matrix,
+               and it reduces the problem of intersecting the two ``axial
+               natural quadrics'' to the simpler problem of intersecting
+               two cylinders.
+          \end{quote}
+          After taking a plane containing both vertices as the plane at
+          infinity, the cones becomes elliptic cylinders.  We are not very
+          clear, with a Gram-Schmidt diagonalization process, how to transform
+          {\em both} elliptic cylinders to circular cylinders
+          at the same time.  The reviewer should be more specific
+          at this point.
+
+     \item Note that to push both vertices to infinity, a center computation
+          is necessary and this computation makes performance worse.
+
+     \item In general, this is a good mathematical procedure.  Unfortunately,
+          it treats robust and performance with simplicity.  A mathematical
+          correct procedure in general is not a good computational algorithm.
+          For example, it is well-known that we can transform any pair of
+          quadric surfaces to some normal forms, compute the intersection and
+          then transform the curve back. (See T. J. I'A Bromwich,
+          {\em Quadric Forms and Their Classification by Means of Invariant
+          Factors}, Cambridge University Press,
+          or S. Ocken, J. T. Schwartz and M. Sharir,
+          {\em Precise Implementation of CAD Primitives Using Rational
+          Parameterizations of Standard Surfaces}, in {\em Planning,
+          Geometry, and Complexity of Robot Motion}, edited by Jacob T.
+          Schwartz, Micha Sharir and John Hopcroft, Ablex Publishing Co.,
+          1987, pp. 245--266 for a modern formulation.)
+          We don't use these ``simple'' procedures for natural quadrics
+          because their computation cost is higher and robustness is worse
+          than specially designed algorithms.  If the reviewer's
+          ``computational point of view'' is identical to the perception of
+          geometric computing community, he should be able to recognize the
+          importance of robustness and performance, instead of only simplicity.
+
+     \item We strongly disagree with the contents in the last paragraph of this
+          reviewer's report.
+          It is true that users are ``interested in having the computer paint
+          pictures for us, and it does not need, nor even understand, geometric
+          intuition, ...''.  But, there must be implementers spending
+          their time in coding programs that paint the screen.
+          Therefore, the easier the algorithm to be understood the lesser bugs
+          the final programs my have.  If our algorithm is ``part of an
+          advanced high school text book on coordinate geometry'', then
+          perhaps high school students can implement a conic intersection
+          detection and computation algorithm without much trouble.
+          This is a benefit, not a drawback.
+          After all, {\em TOG} focuses on solving computer graphics problems,
+          not a mathematical journal in which mathematicians search for
+          abstraction and generalization.
+
+\end{enumerate}
+
+     Based on the above reasons, it is not worth to add or even mention the
+reviewer's algorithm in our paper.  However, we strongly suggest that the
+reviewer submits his algorithm to a journal and listens to some other experts'
+comments.  Hopefully, responses would be essentially what we have mentioned
+above.
+
+\end{document}

@@ -1,0 +1,1539 @@
+\documentstyle[conf]{article}
+
+\newtheorem{remark}{Remark}[section]
+\newtheorem{cor}{Corollary}[section]
+\newcommand{\QED}{\vrule height 1.4ex width 1.0ex depth -.1ex\ } % square box
+
+\input{table}
+
+\title{
+Dupin cyclides as blending surfaces for cones
+}
+
+\author{
+John~K.~Johnstone \and C.-K.~Shene
+\affil The Johns Hopkins University
+}
+
+\shortauthor{Johnstone and Shene}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+A surface blends two surfaces if it is tangent to them, each along a curve.
+Blending surfaces are used to smooth the intersection of two surfaces
+or to connect two disjoint surfaces.
+Two quadric surfaces can always be blended by a quartic 
+surface \cite{hoffmann-hopcroft:1986,hoffmann-hopcroft:1987}.
+However, an arbitrary quartic blending surface is not necessarily optimal,
+although its degree is minimal in general \cite{hoffmann-hopcroft:1986}, 
+since it will not be clear what its geometry is.
+The Dupin cyclide is a quartic surface that has been recognized as a
+good surface for blending 
+\cite{boehm:1990,chandru-dutta-hoffmann:1990,dutta:1989,pratt:1989,pratt:1990} 
+(e.g., as a variable radius blend or a natural candidate for blending pipes)
+and, importantly, it is 
+very well understood geometrically and algebraically.
+This is useful in order to anticipate what the blending surface will 
+look like.
+The Dupin cyclide is in general nonsingular (and has at worst two
+singularities), which is another advantage for blending.
+Finally, it is feasible to include Dupin cyclides 
+as primitives in a solid modeling vocabulary 
+along with the quadric and torus (see \cite{jj92}),
+more so than it is to include all quartic surfaces.
+% we explore blending cones
+
+In this paper, we fully explore the use of Dupin cyclides to blend cones
+(one of the most widely used surfaces).
+We characterize when this is possible, and show how to construct all of the
+possible blends.
+The blending of a cone 
+by a cyclide has been studied by Pratt, Sabin, and Boehm
+\cite{pratt:1989,pratt:1990,boehm:1990}.
+Two cones cannot always be blended by a cyclide.
+Pratt \cite{pratt:1990} 
+examined a necessary and sufficient condition for two cones
+to have a cyclide blending surface (credited to Sabin), 
+using a common inscribed sphere condition.
+However, Pratt includes only the proof for sufficiency, using the offset 
+properties of the cyclide.
+The common inscribed sphere condition also implicitly assumes nondegeneracy:
+thus, two cones {\em with nonparallel axes and distinct
+vertices} can be blended by a Dupin cyclide if and only if
+the cones have a common inscribed sphere.
+
+We reexplore this problem, yielding some interesting new results.
+We find a slightly different necessary and sufficient condition 
+that deals with all cases (including degeneracies), 
+and give a full proof of its necessity and sufficiency.
+In particular, we prove that two cones can be blended by a Dupin cyclide
+(either nondegenerate or degenerate)
+if and only if they have planar intersection.
+Our condition relates to Pratt's condition as follows:
+for two cones with intersecting axes,
+the existence of a common inscribed sphere
+is equivalent to planar intersection that contains at least one conic.
+We also show that the condition has one interesting exception.
+We illustrate the need for parabolic cyclides to cover degenerate cases.
+
+Given two cones with planar intersection, there is not just one cyclide
+that blends them, there are an infinite number.
+The second major contribution of this paper is a method of controlling
+the choice of blending cyclide,
+which is useful in choosing an optimal blending cyclide for the desired shape.
+We identify all of the possible blending cyclides, classify them 
+into families,
+and give a method for constructing any specific member from a family.
+This is done by making a constructive proof of the sufficiency condition.
+
+This paper shows both the strengths and weaknesses of the Dupin cyclide as
+a blending surface.
+Its weakness is that, as a restricted class of surfaces, it can only blend
+in restricted cases.
+(Note however, the importance of the restricted class of `cones with planar
+intersection' in practical design, and the potential for blending more general
+cases by using more than one cyclide.)
+Its strength is that one has a large amount of control over the final result,
+in both anticipating the geometry of the blending surface and 
+controlling the choice of cyclide from the families of potential blending
+cyclides.
+Its other strength is that the cyclide is a more tractable primitive in
+a solid model than the general quartic surface.
+
+We should note that two cones with planar intersection can also be blended by 
+a quadric \cite{warren:1987}.
+However, there are many configurations for the blend that can only be
+achieved by cyclide blends.
+Examples of such blends will be given in Section~\ref{section:eg}.
+
+All of our results also apply directly 
+to the blending of a cone and a cylinder, or two
+cylinders, but we restrict to cones for brevity.
+We also sketch or omit some proofs for this paper.
+A full development can be found in Shene \cite{shenethesis}.
+
+Section~\ref{section:basic} reviews the basic properties of both
+the quartic and (degenerate) cubic Dupin cyclide,
+and presents some useful technical lemmas.
+Section~\ref{section:interpolating} develops several 
+restrictions on the relative positions of the cones and cyclide
+when the cones can be blended by a cyclide, ending with the necessity
+of planar intersection.
+Section~\ref{section:cyclide-non-degen} proves the
+sufficiency of planar intersection,
+with the sole exception highlighted in Section~\ref{section:line-conic}.
+The proof is constructive: the blending cyclide is actually created.
+In this section, we also show how the families of blending
+cyclides that blend two given cones can be controlled by diagonals.
+A definition of a nondegenerate Dupin cyclide by three circles is developed in 
+Section~\ref{section:spec} and used to construct the blending cyclide.
+Section~\ref{section:eg} ends with a number of examples of cones blended
+by Dupin cyclides.
+
+\section{Dupin Cyclides}
+\label{section:basic}
+
+The Dupin cyclide is a generalization of the torus (Figure~\ref{fig:cyclides}).
+It has been the subject of a substantial amount of recent
+research, including the work of Martin and others on cyclide patches
+\cite{depont:1984,martin:1982,nutbourne-martin:1988,sharrock:1985}, 
+the work of Pratt and Boehm on blending with cyclides 
+\cite{boehm:1990,pratt:1989,pratt:1990}, 
+the work of Chandru, Dutta and Hoffmann 
+on the more general blending of arbitrary surfaces by a network of cyclides 
+\cite{chandru-dutta-hoffmann:1989,chandru-dutta-hoffmann:1990,dutta:1989},
+the work of one of the present authors on intersection with cyclides
+\cite{jj92}, and many other papers.
+
+\begin{definition}
+A {\bf Dupin cyclide} is a quartic surface whose two families of lines of 
+curvature are all circles.  
+\end{definition}
+
+Dupin's original definition is the envelope of a sphere that is tangent to
+three fixed spheres in a continuous manner \cite{maxwell:1868}.
+
+% use entire figure, but shrunk
+\begin{figure}
+\vspace{18.5cm}
+\caption{Dupin Cyclides (taken from [39] with permission)}
+\label{fig:cyclides}
+\end{figure}
+
+\begin{definition}
+The Dupin cyclide has two planes of symmetry, which both intersect
+the cyclide in two circles.\footnote{One of the circles may degenerate
+	to a point.}
+In one of these planes, which we call the {\bf horizontal symmetric plane},
+the circles either intersect or lie one inside the other;
+while in the {\bf vertical symmetric plane}, the circles either intersect
+or lie one outside the other.\footnote{There is no trouble distinguishing
+	the two planes since, in at least one of the planes, the circles
+	do not intersect.}
+The horizontal and vertical symmetric planes are perpendicular.
+The circles in the horizontal (resp., vertical) symmetric plane are called
+{\bf horizontal} (resp., {\bf vertical}) {\bf principal circles} in this 
+paper, and their radical axis\footnote{The radical axis of two 
+	nonconcentric circles is the line such that
+	the lengths of the tangents from any point of the line to both
+	circles are equal.}
+is called the {\bf horizontal} (resp., {\bf vertical}) {\bf radical axis}.
+\end{definition}
+
+There are several types of Dupin cyclide, based on the configuration of
+the principal circles in the symmetric planes:
+ring, singly horned, doubly horned, and spindle (with one or two 
+singularities).  See Figure~\ref{fig:cyclides}(a)-(e), respectively.
+
+\begin{definition}
+\label{defn:HV}
+The two families of lines of curvature of a Dupin cyclide will be called
+{\bf horizontal} (or {\bf $H$-}) {\bf circles} and
+{\bf vertical} (or {\bf $V$-}) {\bf circles}.
+The planes that contain the $H$-circles (resp., $V$-circles)
+all intersect in a line that is perpendicular to the vertical 
+(resp., horizontal) symmetric plane and passes through a center of
+similitude\footnote{See Definition~\ref{defn:cofs}.}
+of the vertical (resp., horizontal) circles.
+(This leads to a method of generating the cyclide.)
+\end{definition}
+
+There is a useful relationship between the $H$-circles and the vertical
+radical axis.
+
+\begin{lemma}
+\label{lemma:on-radical-axis}
+     All of the tangent planes of a Dupin cyclide along an $H$-circle 
+(resp., $V$-circle) meet at a point on the vertical (resp., horizontal)
+radical axis.
+\end{lemma}
+{\bf Proof:}
+Consider a horizontal (resp., vertical) circle $D$.  There is a
+sphere tangent to the cyclide along $D$.  Since this sphere and the cyclide are
+tangent along $D$, any tangent plane of the cyclide is also a tangent plane of
+the sphere.  However, all tangent planes along a circle on a sphere envelope a
+cone and thus meet at a point $V$.  $V$ may be at
+infinity, if $D$ is a great circle of the sphere.  The tangent lengths from
+$V$ to the sphere and thus to the cyclide are all equal.  Because of symmetry,
+$V$ lies on the vertical (resp., horizontal) plane and hence must be a point
+on the vertical (resp., horizontal) radical axis. 
+\QED
+
+A full treatment of the blending of cones by Dupin cyclides requires
+parabolic cyclides as well.
+
+\begin{definition}
+A {\bf parabolic} (or {\bf cubic}) cyclide is a degenerate Dupin cyclide
+of degree three, where one circle from each family of lines of curvature
+degenerates to a line (Figure~\ref{fig:den-cyclides}).
+\end{definition}
+
+% use entire figure, but shrink
+\begin{figure}
+\vspace{12cm}
+\caption{Parabolic Dupin Cyclides (taken from [39] with permission)}
+\label{fig:den-cyclides}
+\end{figure}
+
+\begin{definition}
+The parabolic cyclide again has two planes of symmetry.
+When a parabolic cyclide is placed in normal form
+these are the $yz$- and $xz$-planes, which we call the {\bf horizontal}
+and {\bf vertical symmetric planes}, respectively.
+Each plane of symmetry intersects the parabolic cyclide in a circle,
+the {\bf horizontal} (or {\bf vertical}) {\bf principal circle},
+and a line, the {\bf horizontal} (or {\bf vertical}) {\bf principal line}.
+We can again distinguish two families of circles on the parabolic cyclide,
+the {\bf $H$-} and {\bf $V$-circles}.
+The planes that contain the $H$-circles (resp., $V$-circles)
+all intersect in the vertical (resp., horizontal) principal line.
+\end{definition}
+
+Because of the lack of a radical axis, 
+a different form of Lemma~\ref{lemma:on-radical-axis} is needed.
+
+\begin{lemma}
+\label{lemma:on-principal-line}
+     All of the tangent planes of a parabolic 
+cyclide along an $H$-circle (resp., 
+$V$-circle) meet at a point on the vertical (resp., horizontal) principal line.
+\end{lemma}
+{\bf Proof:} See \cite[Lemma~5.4]{shenethesis}. 
+\QED
+
+In the rest of the paper, we will use the shorthand term
+`cyclide' for the quartic Dupin cyclide and
+`parabolic cyclide' for the cubic degenerate Dupin cyclide.
+We end this section with a technical lemma.
+
+\begin{definition}
+\label{defn:cofs}
+     Given two nonconcentric circles, with centers $O_1$ and $O_2$ and 
+distinct radii $r_1$ and $r_2$, the point $S\in\overline{O_1O_2}$
+(resp., $S \in \stackrel{\longleftrightarrow}{O_1O_2}-\overline{O_1O_2}$) 
+satisfying 
+$\frac{|\overline{O_1S}|}{|\overline{SO_2}|}=\frac{r_1}{r_2}$ is called the
+{\bf internal} (resp., {\bf external}) {\bf center of similitude}.  
+\end{definition}
+
+\begin{lemma}
+\label{cor:tangent-center}
+From any point on the radical axis of two circles, construct a tangent to each
+circle giving two tangent points.  
+The line joining these two tangent points passes through a center of 
+similitude of the circles.
+\end{lemma}
+{\bf Proof:}
+See \cite[Lemma~5.1 and Corollary~5.1]{shenethesis}.
+\QED
+
+\section{Necessary Conditions}
+\label{section:interpolating}
+
+If a cyclide is to blend two cones, the cones must be in a special position.
+In this section, we establish many useful restrictions on the relative
+positions of the cones and cyclide, culminating with the condition that
+the two cones must have planar intersection.
+We begin with a restriction on the tangent curves of the blend.
+
+\begin{lemma}
+\label{lemma:tan}
+If a quadric and a Dupin\footnote{The Dupin 
+		cyclide can be nondegenerate or degenerate.}
+cyclide are tangent along a curve, this curve
+must be a circle (in particular, an $H$-circle or $V$-circle of the cyclide).
+\end{lemma}
+{\bf Proof:}
+Given a cyclide and a quadric, consider all of the planes that are tangent
+to both surfaces.
+Humbert has shown that on the cyclide, the tangent points of these planes
+define a line of curvature of the cyclide \cite{humbert:1885,jessop:1916}.
+Thus, if the quadric and cyclide are tangent along a curve, since
+the tangent planes of the surfaces must coincide along this curve, the curve
+must be a line of curvature.
+The lines of curvature of a Dupin cyclide are the $H$- and $V$-circles.
+\QED
+
+\begin{cor}
+If a Dupin cyclide blends two quadrics, the curves of tangency must be two
+$H$-circles or two $V$-circles of the cyclide.
+\end{cor}
+
+Note that the curves of tangency cannot be from different families of circles,
+otherwise they intersect.
+This result limits the type of clipping curves that can be used in blending
+cones with cyclides.
+Restrictions on clipping curves are not new: they also arise in the blending
+of quadrics by quadrics, as demonstrated by Warren \cite{warren:1987}.
+
+\begin{remark}
+Lemma~\ref{lemma:tan} verifies Pratt's observation that the 
+cone/torus intersection of the Cranfield object
+cannot be blended by a Dupin cyclide.
+The cyclide cannot blend as desired if it must meet the cone in a circle.
+See Pratt~\cite{pratt:1990} for pictures and a discussion of the Cranfield 
+object.
+\end{remark}
+
+The choice of a cyclide as blending surface also forces the two 
+cones into a special relative position.
+
+% START HERE
+
+\begin{lemma}
+\label{lemma:coplanar}
+Two cones can be blended by a Dupin\footnote{The Dupin 
+		cyclide can be nondegenerate or degenerate.}
+cyclide only if their axes are coplanar.
+\end{lemma}
+{\bf Proof:}  Suppose that two cones can be blended by a
+cyclide.  The cones are tangent to the
+cyclide along two circles $C_1$ and $C_2$ from the same family,
+say both $H$-circles.  From Lemma~\ref{lemma:on-radical-axis} 
+(resp., Lemma~\ref{lemma:on-principal-line} if the cyclide is parabolic),
+each cone's vertex lies on the vertical radical axis 
+(resp., vertical principal line) of the cyclide.  
+In particular, the cone vertices 
+lie in the vertical symmetric plane.  This plane cuts
+each $H$-circle symmetrically, and thus
+contains the centers of $C_1$ and $C_2$.  
+Therefore, the vertical symmetric plane contains both cone axes,
+since the axis of a cone is the line joining the cone's
+vertex and the center of any circle on the cones (say $C_1$ and $C_2$),
+both of which lie in the vertical symmetric plane.
+\QED
+
+Therefore, when blending with cyclides, we can speak of the
+{\bf axial plane} of two cones.
+We shall reduce most of our reasoning and construction to this plane.
+
+The following result can be extracted from the proof of the lemma.
+It shows that, once the cones are defined, the position of the blending
+cyclide is already quite constrained.
+
+\begin{cor}
+\label{cor:on-radical-axis}
+If two cones are blended by a Dupin cyclide,
+the axial plane of the cones must be a symmetric plane of the cyclide,
+and the cone vertices must lie on the radical axis of the symmetric plane.
+\end{cor}
+
+\noindent In Section~\ref{section:cyclide-non-degen}, 
+we shall identify the degrees of freedom of 
+the cyclide that remain once one of the symmetric planes and radical axes
+are fixed by Corollary~\ref{cor:on-radical-axis}.
+
+A stronger restriction to the relative position of the cones
+is possible if the blending cyclide is parabolic.
+
+\begin{lemma}
+\label{cor:para->common-line}
+Two cones can be blended by a parabolic cyclide only if
+all three surfaces share a common line.
+\end{lemma}
+{\bf Proof:} 
+See \cite[Corollary~5.4]{shenethesis}.
+\QED
+
+We can go one more step in strengthening the restriction on the relative
+position of two cones that can be blended by a cyclide: they must have
+planar intersection.
+As we shall show in later sections, this is the strongest restriction
+possible.
+We first need to define the geometry of the cones' axial plane.
+
+\begin{definition}
+If the axes of two cones are distinct and coplanar, they determine a plane
+called the {\bf axial plane}.
+This plane cuts each cone in a pair of straight lines, called the 
+{\bf skeletal pair}.
+The lines in a skeletal pair are called {\bf skeletal lines}.
+If neither cone vertex lies on a skeletal line, the skeletal lines have
+four non-vertex intersection points, called {\bf diagonal points},
+which define two non-skeletal lines, called {\bf diagonals}.
+See Figure~\ref{fig3.1}.
+The plane through a diagonal and perpendicular to the axial plane is called a
+{\bf diagonal plane}.
+\end{definition}
+
+% This is figure 3.1 from thesis: use (a), (b) and (c) (last two are overkill)
+\begin{figure}
+\vspace{5cm}
+\caption{Skeletal lines and diagonals}
+\label{fig3.1}
+\end{figure}
+
+\begin{theorem}
+Two cones can be blended by a Dupin cyclide only if they have 
+planar intersection.
+\end{theorem}
+{\bf Proof (sketch):}
+By Lemma~\ref{lemma:coplanar}, we can assume that the cones have coplanar axes.
+Some additional conditions immediately imply planar intersection:
+common vertices, common skeletal line,
+or both lines in one skeletal pair parallel to those in the other pair
+(see \cite[Section~5.6]{shenethesis}).
+Therefore, we will assume distinct vertices, distinct skeletal lines, and
+at most one line from each skeletal pair are parallel.
+From Lemma~\ref{cor:para->common-line}, we may further assume that the cyclide
+is not parabolic, since the common line also implies planar intersection.
+
+It can be shown that at least one of the two diagonals, say 
+$\stackrel{\longleftrightarrow}{RS}$,
+has two finite diagonal points, say $R$ and $S$ 
+\cite[Lemmas~5.7 and 5.8]{shenethesis}.
+We will show that the diagonal plane through 
+$\stackrel{\longleftrightarrow}{RS}$ intersects the two cones in the same 
+conic.
+Since diagonal points $R$ and $S$ are finite, the intersection 
+conics in the diagonal plane through $\stackrel{\longleftrightarrow}{RS}$ 
+must be an ellipse or a hyperbola.
+Since these intersection conics lie in the diagonal plane and are central,
+it suffices to show that the conics have the same type and the same 
+focal length (see \cite[Theorem 4.2]{shenethesis}).
+(They automatically have the same major and minor axes by virtue
+of the fact that they lie in the diagonal plane.)
+
+Recall that the axial plane of the cones must be a symmetric plane of the
+cyclide (Lemma~\ref{cor:on-radical-axis}).
+It is easy to see that the radical axis of this symmetric plane
+lies inside both of the cones
+if the axial plane is the vertical symmetric plane, and outside both
+otherwise (Figure~\ref{fig:int-ext}).
+Thus, the line between the cone vertices $V_1$ and $V_2$, 
+which is this radical axis by
+Lemma~\ref{cor:on-radical-axis}, lies inside both or outside both cones.
+This reduces the number of possible configurations of the two cones,
+and in turn makes it clear that the diagonal plane through 
+$\stackrel{\longleftrightarrow}{RS}$ intersects both cones in the same type
+of conic (see Figure~\ref{fig:configs}).
+
+% use only the ring column
+\begin{figure}
+\vspace{8cm}
+\caption{The Radical Axis Lies in Both Interiors or Both Exteriors}
+\label{fig:int-ext}
+\end{figure}
+
+% use entire thing: if we get stretched for space, use only first column
+\begin{figure}
+\vspace{7cm}
+\caption{The six possible placements of $\stackrel{\longleftrightarrow}{V_1V_2}$}
+\label{fig:configs}
+\end{figure}
+
+We finish by showing that the focal lengths of these conics
+are equal.
+It can be shown that the focal lengths of the ellipse and hyperbola are
+$f_E=\frac{1}{2}|\ |\overline{V_iR}|-|\overline{V_iS}|\ |$ and
+$f_H=\frac{1}{2}(|\overline{V_iR}|+|\overline{V_iS}|)$, respectively
+\cite[Lemma~4.1]{shenethesis}.
+Let $\stackrel{\longleftrightarrow}{V_1R}$ and
+$\stackrel{\longleftrightarrow}{V_2R}$ (resp.,
+$\stackrel{\longleftrightarrow}{V_1S}$ and
+$\stackrel{\longleftrightarrow}{V_2S}$) be tangent to $C_1$ (resp., $C_2$) at
+$A$ and $C$ (resp., $B$ and $D$) respectively, where $C_1$ and $C_2$ are the 
+principal circles in the axial plane (Figure~\ref{fig:Q-RS}). 
+The focal length equality follows immediately from the following identities:
+$|\overline{V_1A}|=|\overline{V_1B}|$ and 
+$|\overline{V_2C}|=|\overline{V_2D}|$ (since $V_1$ and $V_2$ lie on the radical
+axis of $C_1$ and $C_2$ by Corollary~\ref{cor:on-radical-axis}),
+$|\overline{RA}|=|\overline{RC}|$ and $|\overline{SB}|=|\overline{SD}|$.
+(Consider the ellipse example in Figure~\ref{fig:Q-RS}.)
+\QED
+
+% use only first of two pictures
+\begin{figure}
+\vspace{7cm}
+\caption{The Axial Plane, with Principal Circles}
+\label{fig:Q-RS}
+\end{figure}
+
+\begin{cor}
+In general,
+%(nonparabolic blending cyclide, distinct vertices,
+%distinct skeletal lines, skeletal lines in one pair not both parallel
+%to the lines in other pair),
+the plane that contains the intersection
+is the diagonal plane through the diagonal with two finite diagonal points.
+\end{cor}
+
+\section{Planar Intersection is Sufficient}
+\label{section:cyclide-non-degen}
+
+We now want to show that the planar intersection condition is also sufficient:
+two cones can be blended by a Dupin cyclide whenever
+they have planar intersection, with only one exception.
+This exception is
+two cones with parallel axes and a double line and conic in their intersection.
+We will deal with the three cases of planar intersection separately:
+a planar intersection of two conics in Section~\ref{ssection:nondegn}, 
+a line and a conic in Section~\ref{section:line-conic}, 
+and a linear intersection in which all 
+intersection curves are lines in Section~\ref{section:cyc-linear}.
+We start by showing how to define the blending cyclide in the next subsection.
+
+\subsection{Specifying a cyclide}
+\label{section:spec}
+
+Given two cones with planar intersection, we need to be able to specify
+a Dupin cyclide that will blend them.  
+A quartic Dupin cyclide is uniquely defined by its principal circles in one
+symmetric plane, the type\footnote{This type may be fully determined by the
+	principal circles ({\it e.g.}, if one circle lies inside the other, 
+	the type must be horizontal).}
+of this symmetric plane (horizontal or vertical),
+and the type\footnote{Again, some of these types may be ruled out 
+	by the principal circles ({\it e.g.}, if they intersect, the cyclide
+	cannot be ring).} 
+of the cyclide (ring, singly horned, etc.) \cite{jj92}.
+However, we do not want to involve type information in the definition:
+we want a clean geometric definition by three circles, the third circle
+replacing the type information.
+The following lemma shows how.
+
+\begin{lemma}
+\label{lemma:non-degen-construction}\ 
+\begin{enumerate}
+     \item Let $C_1$ and $C_2$ be two circles on a plane ${\cal P}$
+	(Figure~\ref{fig:specification-nondegen}).
+     \item Let $\ell$ be a line perpendicular to ${\cal P}$ and through one of
+          the two centers of similitude of $C_1$ and $C_2$.  
+     \item Let $D$ be a circle, with center in ${\cal P}$ and lying in a plane
+          through $\ell$, meeting $C_1$ and $C_2$ at $E_1$ and $E_2$, 
+          respectively, such that the tangents of $C_i$ at $E_i$ ($i=1,2$) 
+          meet at a point on the radical axis of $C_1$ and $C_2$.  
+\end{enumerate}
+Then, there exists a unique cyclide containing $C_1,C_2$ and $D$.  This cyclide
+is denoted by ${\cal Z}(C_1,C_2,D,\ell)$.  
+${\cal P}$ is a symmetric plane in which $C_1$ and $C_2$ are principal circles.
+\end{lemma}
+{\bf Proof (sketch):}
+Consider all of the cyclides with principal circles $C_1$ and $C_2$.
+We must show that exactly one contains $D$.
+Another way of defining a Dupin cyclide is as follows:
+the envelope of a sphere with
+center on a plane (which becomes a symmetric plane) and tangent to two
+circles in this plane (which become the principal circles) 
+\cite{chandru-dutta-hoffmann:1989}.
+The locus of the sphere's center describes a conic, called a 
+{\bf directrix conic}.
+It can be shown that, if the two principal circles $C_1$ and $C_2$ are fixed
+(with centers $O_1$ and $O_2$, radii $r_1$ and $r_2$),
+there are at most four choices of directrix conic: 
+if $C_1$ and $C_2$ are horizontal principal circles, the directrix conic
+can be an ellipse with foci $O_1$ and $O_2$ (where $O_1$ and $O_2$ are the
+centers of $C_1$ and $C_2$) such that the sum of distances from the foci
+is $r_1 + r_2$ or $|r_1 - r_2|$;
+if $C_1$ and $C_2$ are vertical principal circles, the directrix conic
+can be a hyperbola with foci $O_1$ and $O_2$
+and difference of distances $r_1 + r_2$ or $|r_1 - r_2|$ 
+(see \cite[Section~5.4.2]{shenethesis}).
+We will use this definition to show that there is a unique cyclide with
+principal circles $C_1$ and $C_2$ that contains $D$.
+
+% use it exactly the same 
+\begin{figure}
+\vspace{4.5cm}
+\caption{Specifying a Dupin Cyclide}
+\label{fig:specification-nondegen}
+\end{figure}
+
+Let $V$ be the intersection point of the two tangents at $E_1$ and $E_2$
+(Figure~\ref{fig:specification-nondegen}).  
+Since $V$ lies on the radical axis, 
+$|\overline{VE_1}|=|\overline{VE_2}|$ and there exists a circle $C$
+tangent to $\stackrel{\longleftrightarrow}{VE_i}$ at $E_i$,
+say with center $O$ and radius $r$.
+By revolving the circle $C$ about $\stackrel{\longleftrightarrow}{VO}$,
+we get a sphere $S$ tangent to $C_1$ and $C_2$ at $E_1$ and $E_2$,
+which also has center $O$.
+It can be shown that $O$ lies on exactly one of the four possible directrix
+conics for the principal circles $C_1$ and $C_2$ (see above),
+depending on the relative position of $C$, $C_1$ and $C_2$ 
+\cite[Lemma~5.3]{shenethesis}.
+Let this directrix conic be $DC$, and let the cyclide defined by
+$C_1$, $C_2$, and $DC$ be ${\cal C}$.
+Notice that the sphere $S$ is one of the spheres with center on $DC$
+and tangent to $C_1$ and $C_2$ (at $E_1$ and $E_2$).
+$D$ lies on $S$, and $D$ is also tangent to $C_1$ and $C_2$ 
+at $E_1$ and $E_2$.
+Thus, it is easy to show that $D$ lies on the cyclide ${\cal C}$ and
+${\cal Z}(C_1,C_2,D,\ell) = {\cal C}$.
+The uniqueness of the cyclide containing $C_1$, $C_2$ and $D$ is simple,
+and its proof is omitted.
+% This is where choice of center of similitude comes in
+\QED
+
+\begin{remark} \rm
+The conditions on the third circle $D$ are important.
+It is simple to find a cyclide that cannot contain all three circles if
+the conditions are violated (Figure~\ref{fig:wrong-example}).
+\end{remark}
+
+% use it (Figure 5.11 in red book called '... does not meet condition (3)')
+\begin{figure}
+\vspace{5.5cm}
+\caption{No Cyclide Contains These Three Circles}
+\label{fig:wrong-example}
+\end{figure}
+
+\noindent We have a similar method of defining parabolic cyclides.
+
+\newpage
+
+\begin{lemma}
+\label{lemma:para-construction} \ 
+\begin{enumerate}
+     \item Let $\ell$ and $C$ be a line and a circle on a plane ${\cal P}$.  
+     \item Let $P\not\in\ell$ be an intersection point of $C$ and the 
+          line through the center of $C$ and perpendicular to $\ell$.  
+\end{enumerate}
+Then, there exists a unique parabolic cyclide that contains $\ell$ and $C$,
+and has a principal line through $P$ and perpendicular to ${\cal P}$.  
+This cyclide is denoted by ${\cal Z}_P(\ell,C,P)$.
+${\cal P}$ is a symmetric plane in which $\ell$ and $C$ are the 
+principal line and principal circle, respectively.  
+\end{lemma}
+{\bf Proof:}
+See \cite[Lemma~5.5]{shenethesis}.
+\QED
+
+% **********************************************************************
+
+\subsection{Nondegenerate Planar Intersection}
+\label{ssection:nondegn}
+
+Suppose that two cones have planar intersection.  
+In general ({\it i.e.}, if the four skeletal lines in the axial plane
+are distinct), this intersection will consist of two conics
+(including possibly an infinite one).
+We shall deal with this case in this section.  
+In the following subsection, 
+we also assume that the quadrics' axes are intersecting.
+The parallel axes case is dealt with in 
+Section~\ref{section:cyc:parallel-axes}.
+
+\subsubsection{Intersecting Axes}
+\label{section:intersecting-axes}
+
+A major advantage of the following proof is that it directly reveals
+a construction algorithm for the blending cyclide.
+
+\begin{lemma}
+\label{lemma:int-cyclide}
+If two cones with intersecting and distinct\footnote{If the axes coincide, 
+	it is easy to show that there are two families of
+	blending tori.}
+axes have planar intersection consisting of two conics, they can be blended
+by a Dupin cyclide.
+\end{lemma}
+{\bf Proof:}
+For brevity, we shall only consider the general case where the two cones
+do not have two parallel skeletal lines
+(i.e., the diagonal points R and S below are both finite).
+If one of the diagonal points is at infinity, the construction is similar
+(see \cite[Lemma~5.13]{shenethesis}).
+
+We will define two cyclides, one tangent to each cone, and then show that
+they are the same cyclide, which therefore blends the cones.
+First, we introduce the basic configuration on the axial plane for our
+construction.
+Consider two cones that intersect in two conics, with vertices $V_1$ and
+$V_2$ and intersecting axes $\ell_1$ and $\ell_2$.
+Two cones with conic intersection must have coplanar axes 
+\cite{shene-johnstone:1991a}
+and thus the axial plane is well defined.
+Let $\stackrel{\longleftrightarrow}{RS}$ and 
+$\stackrel{\longleftrightarrow}{R^\prime S^\prime}$ be the diagonals in the 
+axial plane, where $R$, $S$, $R^\prime$ and $S^\prime$ are diagonal 
+points.\footnote{One of $R$ and $S$ (or one of $R^\prime$ and $S^\prime$)
+	may be at infinity, in which case the diagonal is parallel to one
+	skeletal line from each skeletal pair.}
+Since the cones have conic intersection, they must have a common inscribed
+sphere \cite{shene-johnstone:1991a}, 
+which the axial plane intersects in a circle.
+Let the skeletal lines 
+$\stackrel{\longleftrightarrow}{V_1R}$, $\stackrel{\longleftrightarrow}{V_1S}$,
+$\stackrel{\longleftrightarrow}{V_2R}$ and 
+$\stackrel{\longleftrightarrow}{V_2S}$ be tangent to the circle at $A, B, C$ 
+and $D$ respectively (Figure~\ref{fig:int-config}).  By Brianchon's 
+theorem,\footnote{Brianchon's theorem states that the 
+	three opposite diagonals of a
+	hexagon circumscribing a conic intersect in a point 
+	\cite{johnson:1929}.}
+$\stackrel{\longleftrightarrow}{AB}$, $\stackrel{\longleftrightarrow}{CD}$,
+$\stackrel{\longleftrightarrow}{RS}$ and
+$\stackrel{\longleftrightarrow}{R^\prime S^\prime}$ meet at a point, say $X$.
+
+% use both pictures in figure (to show that we cover vertices inside or out)
+\begin{figure}
+\vspace{6.5cm}
+\caption{The Basic Configuration in the Axial Plane}
+\label{fig:int-config}
+\end{figure}
+
+Next, we present our construction of the blending cyclide.
+For each cone, we must find three circles that define a cyclide tangent
+to the cone, and then we must show that these two cyclides are equivalent.
+Let $X^\prime$ be any point on $\stackrel{\longleftrightarrow}{RS}$
+(Figure~\ref{fig:int-config}).
+Through $X^\prime$ construct a line perpendicular to $\ell_1$ 
+meeting $\stackrel{\longleftrightarrow}{V_1A}$ and
+$\stackrel{\longleftrightarrow}{V_1B}$ at $A^\prime$ and $B^\prime$
+respectively.
+Through $X^\prime$ construct another line perpendicular to $\ell_2$ 
+meeting $\stackrel{\longleftrightarrow}{V_2C}$ and
+$\stackrel{\longleftrightarrow}{V_2D}$ at $C^\prime$ and $D^\prime$
+respectively.
+
+We claim that $|\overline{RA^\prime}|=|\overline{RC^\prime}|$
+and thus there is a (unique) circle $O_1$ on the axial plane 
+tangent to $\stackrel{\longleftrightarrow}{V_1R}$ and 
+$\stackrel{\longleftrightarrow}{V_2R}$ at $A^\prime$ and $C^\prime$.
+Since $\bigtriangleup XRA \sim\bigtriangleup X^\prime RA^\prime$,
+$\frac{|\overline{RA}|}{|\overline{RA^\prime}|}=
+\frac{|\overline{RX}|}{|\overline{RX^\prime}|}$.
+Similarly, from
+$\bigtriangleup XRC \sim \bigtriangleup X^\prime RC^\prime$, 
+$\frac{|\overline{RC}|}{|\overline{RC^\prime}|}=
+\frac{|\overline{RX}|}{|\overline{RX^\prime}|}$.
+Since $A$ and $B$ are both tangent points from $R$, 
+$|\overline{RA}|=|\overline{RC}|$.
+Thus, $|\overline{RA^\prime}|=|\overline{RC^\prime}|$.
+By the same argument, there is also a (unique) circle 
+$O_2$ tangent to $\stackrel{\longleftrightarrow}{V_1S}$ and
+$\stackrel{\longleftrightarrow}{V_2S}$ at $C^\prime$ and $D^\prime$.
+
+Let $D_{\overline{A^\prime B^\prime}}$, the third circle in the definition of
+the cyclide, be the circle with diameter
+$\overline{A^\prime B^\prime}$ and perpendicular to the axial plane.
+Finally, we show that $X^\prime$ is a center of similitude
+of the circles $O_1$ and $O_2$.
+Since $|\overline{V_1A}|=|\overline{V_1B}|$ and
+$\stackrel{\longleftrightarrow}{AB}$ is parallel to
+$\stackrel{\longleftrightarrow}{A^\prime B^\prime}$,
+$|\overline{V_1A^\prime}|=|\overline{V_1B^\prime}|$; and similarly,
+$|\overline{V_2C^\prime}|=|\overline{V_2D^\prime}|$.
+Therefore, $V_1$ and $V_2$ lie on the radical axis of $O_1$ and $O_2$.
+Using Lemma~\ref{cor:tangent-center}, a center of similitude of 
+$O_1$ and $O_2$ lies on both 
+$\stackrel{\longleftrightarrow}{A^\prime B^\prime}$ and
+$\stackrel{\longleftrightarrow}{C^\prime D^\prime}$,
+which intersect at $X^\prime$.
+Thus, $X^\prime$ is a center of similitude.
+Let $\ell_{X^\prime}$ be the line through $X^\prime$ and perpendicular to the 
+axial plane. 
+
+By Lemma~\ref{lemma:non-degen-construction}, there is a unique 
+Dupin cyclide
+${\cal Z}(O_1,O_2,D_{\overline{A^\prime B^\prime}},\ell_{X^\prime})$
+that contains the circles $O_1, O_2$ and $D_{\overline{A^\prime B^\prime}}$.
+This cyclide is tangent to the first cone along the circle 
+$D_{\overline{A^\prime B^\prime}}$:
+it is clear that the cone contains $D_{\overline{A^\prime B^\prime}}$
+and, by Lemma~\ref{lemma:on-radical-axis}, 
+the cyclide is tangent to the cone along 
+$D_{\overline{A^\prime B^\prime}}$.
+
+By the same argument, there is a Dupin cyclide
+${\cal Z}(O_1,O_2,D_{\overline{C^\prime D^\prime}},\ell_{X^\prime})$
+tangent to the second cone along the circle $D_{\overline{C^\prime D^\prime}}$ 
+with diameter 
+$\overline{C^\prime D^\prime}$ and perpendicular to the axial plane.
+Since these two cyclides have the same principal circles and center of
+similitude $X^\prime$, it can be shown that they are identical.
+Therefore, there is a cyclide that blends the two cones.
+\QED
+
+In the construction of the blending cyclide in the above lemma, each point
+$X^\prime$ on a diagonal determines a unique blending cyclide: thus, there
+are an infinite number of blending cyclides controlled by the two diagonals.
+
+\begin{definition}
+\label{defn:family}
+The cyclide 
+${\cal Z}(O_1,O_2,D_{\overline{A^\prime B^\prime}},\ell_{X^\prime})$
+constructed from 
+$X^\prime$ on the diagonal $\stackrel{\longleftrightarrow}{RS}$, 
+as defined in the proof of Lemma~\ref{lemma:int-cyclide},
+will be denoted \mbox{${\cal Z}[\stackrel{\longleftrightarrow}{RS}|X^\prime]$},
+and the family of cyclides on this diagonal will be denoted 
+\mbox{${\cal Z}[\stackrel{\longleftrightarrow}{RS}] =$} \\
+\mbox{$\{ {\cal Z}[\stackrel{\longleftrightarrow}{RS}|X^\prime]: X^\prime \in 
+\stackrel{\longleftrightarrow}{RS}\}$}.
+\end{definition}
+
+\begin{remark}
+In this nondegenerate conic intersection case, we have two distinct
+and finite diagonals, and each provides a family of blending cyclides.
+These families have a common member, the common inscribed sphere of the cones,
+which is generated when $X^\prime\in\stackrel{\longleftrightarrow}{RS}\cap
+\stackrel{\longleftrightarrow}{R^\prime S^\prime}$.
+\end{remark}
+
+The following lemma shows that the two families 
+${\cal Z}[\stackrel{\longleftrightarrow}{RS}]$ and 
+${\cal Z}[\stackrel{\longleftrightarrow}{R^\prime S^\prime}]$
+account for all of the blending cyclides.
+
+\begin{lemma}
+\label{lemma:two-families}
+If $Z$ is a cyclide that blends two cones with intersecting
+axes and planar intersection consisting of two conics, 
+there exists a point $X$ on a diagonal $\stackrel{\longleftrightarrow}{RS}$
+such that $Z = {\cal Z}[\stackrel{\longleftrightarrow}{RS}|X]$.
+\end{lemma}
+{\bf Proof:} 
+Let $C_1$ and $C_2$ be the two cones, with vertices $V_1$ and $V_2$.
+Since they can be blended by a cyclide, their axes are coplanar;
+and the axial plane is a symmetric plane of the cyclide.
+We wish to choose the proper diagonal 
+$\stackrel{\longleftrightarrow}{RS}$.
+Let $R$ (resp., $S$) be the intersection of the skeletal lines that are
+tangent to the first (resp., second) principal circle 
+(Figure~\ref{fig:concurrent}).
+We only consider the case where $R$ and $S$ are finite: the other cases
+are similar (see \cite[Lemma~5.14]{shenethesis}).
+
+Let $\stackrel{\longleftrightarrow}{V_1R}$ and 
+$\stackrel{\longleftrightarrow}{V_2R}$ (resp., 
+$\stackrel{\longleftrightarrow}{V_1S}$ and
+$\stackrel{\longleftrightarrow}{V_2S}$) be tangent to one (resp., the other)
+principal circle at $A$ and $C$ (resp., $B$ and $D$).
+See Figure~\ref{fig:concurrent}.
+It suffices to show that $\stackrel{\longleftrightarrow}{AB}$,
+$\stackrel{\longleftrightarrow}{CD}$ and $\stackrel{\longleftrightarrow}{RS}$
+meet at the same point, say $X^\prime$.  
+From Lemma~\ref{cor:tangent-center}, $X^\prime$ is a center of similitude
+of the two principal circles.   Therefore, applying the construction 
+algorithm to $X^\prime$ shows that the given blending cyclide 
+is a member of the family generated by the diagonal 
+$\stackrel{\longleftrightarrow}{RS}$, 
+${\cal Z}[\stackrel{\longleftrightarrow}{RS}]$.
+($\stackrel{\longleftrightarrow}{AB}$ is perpendicular to the axis of $C_1$
+since $|\overline{V_1A}|=|\overline{V_1B}|$ and the axis is the angle bisector
+of the cone angle.   Similarly, 
+$\stackrel{\longleftrightarrow}{CD}$ is perpendicular to the axis of $C_2$.)
+
+We will first show that 
+$\stackrel{\longleftrightarrow}{V_1V_2}$,
+$\stackrel{\longleftrightarrow}{AC}$ and
+$\stackrel{\longleftrightarrow}{BD}$ meet at the same point
+(Figure~\ref{fig:concurrent}).  
+Let $X=\stackrel{\longleftrightarrow}{AC}\cap
+\stackrel{\longleftrightarrow}{V_1V_2}$.  If $X$ is a point at infinity, then
+$\stackrel{\longleftrightarrow}{AC}$ is parallel to
+$\stackrel{\longleftrightarrow}{V_1V_2}$, implying that both
+$|\overline{V_1R}|=|\overline{V_2R}|$ and $V_1$ and $V_2$ are symmetric about 
+the line joining the centers of the principal circles on the axial plane.  
+This implies that $|\overline{V_1S}|=|\overline{V_2S}|$.  Therefore, 
+$\stackrel{\longleftrightarrow}{V_1V_2}$,
+$\stackrel{\longleftrightarrow}{AC}$ and
+$\stackrel{\longleftrightarrow}{BD}$ are parallel to each other, and
+they meet at the same point at infinity.
+Suppose $X$ is finite.  Let $\bar{X}=\stackrel{\longleftrightarrow}{BD}\cap
+\stackrel{\longleftrightarrow}{V_1V_2}$.  $\bar{X}$ must be finite, otherwise
+$X$ will be at infinity.  In $\bigtriangleup V_1RV_2$,
+$\stackrel{\longleftrightarrow}{AC}$ is a transversal and by Menelaus' 
+Theorem\footnote{Menelaus' theorem \cite{johnson:1929} states that 
+	if a line intersects the sides of a triangle 
+	$\bigtriangleup ABC$ at $X\in\stackrel{\longleftrightarrow}{AB}$,
+	$Y\in\stackrel{\longleftrightarrow}{BC}$ and
+	$Z\in\stackrel{\longleftrightarrow}{CA}$,
+	then $\frac{|\overline{AX}|}{|\overline{XB}|}\cdot
+	     \frac{|\overline{BY}|}{|\overline{YC}|}\cdot
+	     \frac{|\overline{CZ}|}{|\overline{ZA}|} = 1$.}
+we have 
+$\frac{|\overline{V_1A}|}{|\overline{AR}|}\cdot
+   \frac{|\overline{RC}|}{|\overline{CV_2}|}\cdot
+   \frac{|\overline{V_2X}|}{|\overline{XV_1}|} = 1$.
+Since $|\overline{RA}|=|\overline{RC}|$,
+$\frac{|\overline{XV_1}|}{|\overline{XV_2}|} =
+   \frac{|\overline{V_1A}|}{|\overline{V_2C}|}$.
+Similarly, in $\bigtriangleup V_1SV_2$, using 
+$\stackrel{\longleftrightarrow}{BD}$ as a transversal, we have
+$\frac{|\overline{\bar{X}V_1}|}{|\overline{\bar{X}V_2}|} =
+   \frac{|\overline{V_1A}|}{|\overline{V_2C}|}$.
+With these two identities, we finally have $X=\bar{X}$ and hence,
+$\stackrel{\longleftrightarrow}{V_1V_2}$,
+$\stackrel{\longleftrightarrow}{AC}$ and
+$\stackrel{\longleftrightarrow}{BD}$ are concurrent.
+
+% only use (a) and shrink (very tall)
+\begin{figure}
+\vspace{11cm}
+\caption{Any Blending Cyclide Belongs to One of the Two Families}
+\label{fig:concurrent}
+\end{figure}
+
+     In $\bigtriangleup RAC$ and $\bigtriangleup SBD$, their corresponding 
+sides meet at three collinear points $V_1, V_2$ and $X=\bar{X}$.  By
+Desargues' theorem,\footnote{Desargues' theorem \cite{johnson:1929} states 
+	that, given two triangles $\bigtriangleup A_1A_2A_3$ and 
+	$\bigtriangleup B_1B_2B_3$ with no two of the six sides identical,
+	$\stackrel{\longleftrightarrow}{A_1B_1}$,
+	$\stackrel{\longleftrightarrow}{A_2B_2}$ and
+	$\stackrel{\longleftrightarrow}{A_3B_3}$ are concurrent if and only if
+	$\stackrel{\longleftrightarrow}{A_1A_2}\cap\stackrel{\longleftrightarrow}{B_1B_2}$,
+	$\stackrel{\longleftrightarrow}{A_2A_3}\cap\stackrel{\longleftrightarrow}{B_2B_3}$ and
+	$\stackrel{\longleftrightarrow}{A_3A_1}\cap\stackrel{\longleftrightarrow}{B_3B_1}$
+	are collinear.} 
+the lines joining corresponding vertices are concurrent.
+That is, $\stackrel{\longleftrightarrow}{AB}$,
+$\stackrel{\longleftrightarrow}{CD}$ and $\stackrel{\longleftrightarrow}{RS}$
+meet at the same point.
+\QED
+
+\subsubsection{Parallel Axes}
+\label{section:cyc:parallel-axes}
+
+     In this section, we shall examine the parallel axes case.  
+In this case, in order to have a conic intersection, the 
+corresponding skeletal lines must be parallel to each other. 
+Thus, we have only one finite diagonal with two finite diagonal points $R$ 
+and $S$.  
+The result is the same as Section~\ref{section:intersecting-axes},
+but with only one diagonal.
+(Since there is no finite common inscribed sphere, a slightly different proof
+technique is needed.)
+
+\begin{lemma}
+\label{lemma:para-cyclide}\ 
+\begin{enumerate}
+\item
+     If two cones, with parallel and distinct axes,
+have planar intersection consisting of two conics, 
+they can be blended by a cyclide.
+\item
+     There is an entire family of blending cyclides.
+If $\stackrel{\longleftrightarrow}{RS}$ is the only diagonal with two finite
+diagonal points $R$ and $S$, the family of cyclides is 
+${\cal Z}[\stackrel{\longleftrightarrow}{RS}]$ (exactly as defined in 
+Definition~\ref{defn:family}), {\it i.e.}, the typical cyclide is
+${\cal Z}(O_1,O_2,D_{\overline{A^\prime B^\prime}},\ell_{X^\prime})$
+as defined in Lemma~\ref{lemma:int-cyclide}, where 
+$X^\prime \in \stackrel{\longleftrightarrow}{RS}$.
+\item
+	Any cyclide that blends these cones is a member of this family.
+\end{enumerate}
+\end{lemma}
+{\bf Proof:}  
+See \cite[Lemmas~5.15 and 5.16]{shenethesis}.
+\QED
+
+\subsection{Degenerate Conic Intersection}
+\label{section:line-conic}
+
+     In this section, we shall consider the degenerate conic intersection
+case in which the 
+complete planar intersection consists of a double line and a conic. 
+If two cones have a double line and a conic in their intersection, then
+in the axial plane two skeletal lines, one from each skeletal pair, coincide 
+and the common line is a double line.  
+One of the two diagonals disappears, 
+becoming the common line and leaving a triangle rather than the typical
+quadrilateral in the axial plane (Figure~\ref{fig:three-lines}).
+Therefore, we only expect one family of blending cyclides.
+
+% use just the 1st col (which is a repeat of next figure, but less cluttered)
+% and (f) (for the parallel axes case)
+\begin{figure}
+\vspace{7.5cm}
+\caption{There is Only One Diagonal in the Line-Conic Case}
+\label{fig:three-lines}
+\end{figure}
+
+We first show that any blending cyclide must be parabolic.
+
+\begin{lemma}
+\label{lemma:only-one-family}
+     A cyclide that blends two cones with degenerate conic
+intersection (i.e., a double line and a conic in their intersection) must be
+parabolic.
+\end{lemma}
+{\bf Proof (sketch):} 
+If the blending cyclide has two principal circles in the axial plane,
+it can be shown that they must be tangent to the double line at the same point.
+Both of the resulting cases (one circle inside the other, or both circles
+outside the other) lead to cyclides that 
+cannot be tangent to the cones along circles.
+See \cite[Lemma~5.17]{shenethesis}.
+\QED
+
+An immediate result of this lemma is that there exists a special
+class of cones with planar intersection that have no blending cyclide.  This
+is the only exception to the necessity and sufficiency of planar intersection
+for a blending cyclide.
+
+\begin{cor}
+\label{cor:no-cyclide-at-all}
+Two cones with parallel axes and degenerate conic intersection 
+have no blending cyclide.
+\end{cor}
+{\bf Proof:}  Suppose these two cones have a blending parabolic 
+cyclide.  Let it be tangent to the two cones along the circles $C_1$ and $C_2$.
+Since the planes containing $C_1$ and $C_2$ are perpendicular
+to the parallel axes, they are parallel to each other.
+However, $C_1$ and $C_2$ are circles from the same family of a parabolic
+cyclide, and all planes containing circles from the same family pass through
+a finite common line, one of the two principal lines of the parabolic cyclide.
+This contradiction shows that the cones do not have any blending cyclide. \QED
+
+Note that if the axes are parallel (Figure~\ref{fig:three-lines}c),
+there is no diagonal.  
+We now establish the converse of Lemma~\ref{cor:para->common-line},
+and the analogue of Lemma~\ref{lemma:int-cyclide}.
+
+\begin{lemma}
+\label{lemma:three-line-cyclide}
+If two cones with intersecting axes have degenerate conic
+intersection, they can be blended by a parabolic cyclide.
+\end{lemma}
+{\bf Proof (sketch):} 
+We begin with some notation.
+Let ${\cal C}_1$ and ${\cal C}_2$ be the two cones 
+(with vertices $V_1$ and $V_2$ and axes $\ell_1$ and $\ell_2$) 
+and $\stackrel{\longleftrightarrow}{V_1V_2}$ be the only double line in the
+intersection curve.  
+Let $\stackrel{\longleftrightarrow}{RS}$ be the only diagonal,
+which is the 
+line joining the tangent point $R$ of the common inscribed sphere on 
+$\stackrel{\longleftrightarrow}{V_1V_2}$
+and the intersection point $S$ of the two non-coincident skeletal lines
+\cite{shene-johnstone:1991b} (Figure~\ref{fig:three-lines}).
+Note that $S$ may be at infinity.  
+Let $X\in\stackrel{\longleftrightarrow}{RS}$ and 
+$X\not\in\stackrel{\longleftrightarrow}{V_1V_2}$.\footnote{If $X$ lies on
+$\stackrel{\longleftrightarrow}{V_1V_2}$, the blending surface is the common
+inscribed sphere.}
+
+We construct the cyclide in a similar way to Lemma~\ref{lemma:int-cyclide},
+but we now want to define a principal circle and a principal line rather
+than two principal circles.
+Through $X$, construct 
+a line perpendicular to $\ell_1$ (resp., $\ell_2$) meeting
+$\stackrel{\longleftrightarrow}{V_1R}$ and
+$\stackrel{\longleftrightarrow}{V_1S}$ (resp.,
+$\stackrel{\longleftrightarrow}{V_2R}$ and
+$\stackrel{\longleftrightarrow}{V_2S}$) at $A$ and $B$ (resp., $C$ and $D$)
+respectively (Figure~\ref{fig:parabolic-construct}).  
+Let $O$ be the circumscribed circle of $\bigtriangleup BDX$.  
+We claim that $O$ (as principal circle), 
+$\stackrel{\longleftrightarrow}{V_1V_2}$ (as principal line), 
+and $X$ define a blending
+parabolic cyclide ${\cal Z}_P(\stackrel{\longleftrightarrow}{V_1V_2},O,X)$.
+
+% use both figures (to show S at infinity case too)
+\begin{figure}
+\vspace{5.5cm}
+\caption{The Construction of a Blending Parabolic Cyclide}
+\label{fig:parabolic-construct}
+\end{figure}
+
+It can be shown that this cyclide is well defined ({\it i.e.}, the line 
+joining $X$ and the center of $O$ is perpendicular to
+$\stackrel{\longleftrightarrow}{V_1V_2}$).
+We need to show that \mbox{${\cal Z}_P(\stackrel{\longleftrightarrow}{V_1V_2},O,X)$}
+blends the cones.
+Let $M$ and $N$ be the tangent points of the common inscribed 
+sphere on $\stackrel{\longleftrightarrow}{V_1S}$ and
+$\stackrel{\longleftrightarrow}{V_2S}$, respectively.
+Consider the circumscribed circle of $\bigtriangleup RMN$, which is the
+intersection circle of the common inscribed sphere and the axial plane.
+Since $\stackrel{\longleftrightarrow}{V_1S}$ is tangent to it at $M$, a
+geometry theorem gives $\angle V_1MR=\angle MNR$.  Therefore, in
+$\bigtriangleup XBD$, since the corresponding sides are parallel to each other,
+we have $\angle V_1BX=\angle V_1MR=\angle MNR=\angle BDX$. 
+Hence, $\stackrel{\longleftrightarrow}{V_1S}$ is tangent to circle $O$ at $B$.
+
+Since $|\overline{V_1A}|=|\overline{V_1B}|$ (by construction),
+there is a circle tangent to 
+$\stackrel{\longleftrightarrow}{V_1V_2}$ and 
+$\stackrel{\longleftrightarrow}{V_1S}$ at $A$ and $B$,
+which is thus tangent to the circle $O$.
+Therefore, the cone ${\cal C}_1$ is tangent
+to the parabolic cyclide along the circle with diameter $\overline{AB}$ and
+perpendicular to the axial plane: the cyclide and cone both contain this circle
+and, by Lemma~\ref{lemma:on-principal-line}, 
+the cyclide is tangent to the cone along the circle.
+Similarly, the cone ${\cal C}_2$ is
+also tangent to the cyclide along the circle with diameter $\overline{CD}$
+and perpendicular to the axial plane.  Hence, the parabolic cyclide
+${\cal Z}_P(\stackrel{\longleftrightarrow}{V_1V_2},O,X)$
+is a blending surface of ${\cal C}_1$ and ${\cal C}_2$.
+\QED
+
+\begin{definition}
+The parabolic cyclide ${\cal Z}_P(\stackrel{\longleftrightarrow}{V_1V_2},O,X)$
+constructed from $X$ on the diagonal $\stackrel{\longleftrightarrow}{RS}$, 
+as defined in the proof of Lemma~\ref{lemma:three-line-cyclide},
+will be denoted 
+\mbox{${\cal Z}_P[\stackrel{\longleftrightarrow}{RS}|X]$},
+and the family of cyclides on this diagonal will be denoted\\
+${\cal Z}_P[\stackrel{\longleftrightarrow}{RS}] =$
+\mbox{$\{ {\cal Z}_P[\stackrel{\longleftrightarrow}{RS}|X]: X \in 
+\stackrel{\longleftrightarrow}{RS}\}$}.
+\end{definition}
+
+\begin{lemma}
+\label{lemma:1-parabolic}
+     Each blending cyclide of two cones with intersecting
+axes and degenerate conic intersection is a member of the family
+${\cal Z}_P[\stackrel{\longleftrightarrow}{RS}]$,
+where $\stackrel{\longleftrightarrow}{RS}$ is the unique diagonal.
+\end{lemma}
+{\bf Proof:} 
+See \cite[Lemma~5.19]{shenethesis}.
+\QED
+
+\subsection{Linear Intersection}
+\label{section:cyc-linear}
+
+For the linear intersection case, we simply state the result.
+A technique similar to Boehm's \cite{boehm:1990} is used.
+
+\begin{lemma}
+\label{thm:linear-inter-blending}
+     Two cones with linear intersection always have a blending cyclide.
+Any blending cyclide is a member of one of four (resp., three or two) families
+of cyclides if the intersection contains zero (resp., one or two) double
+lines.  These cyclides may be nondegenerate or parabolic.
+\end{lemma}
+{\bf Proof:} See \cite[Section~5.9]{shenethesis}.
+\QED
+
+We have now fully established our necessary and sufficient condition.
+
+\begin{theorem}\ 
+\begin{enumerate}
+\item
+Two cones with planar intersection
+that consists of a double line and a conic, and parallel axes, 
+cannot be blended by any Dupin cyclide.
+\item
+Otherwise, two cones can be blended by a Dupin cyclide if and only if 
+they have planar intersection.
+\item
+The blending Dupin cyclide is nondegenerate if the planar
+intersection is nondegenerate (two conics).
+It is parabolic if the planar 
+intersection contains a double line and a conic.
+\item
+With the exception of the linear intersection case,
+there are one or two families of blending cyclides, each family 
+controlled by one of the diagonals in the axial plane. 
+\end{enumerate}
+\end{theorem}
+
+\section{Examples}
+\label{section:eg}
+
+We now give some examples of cones blended by cyclides.
+Figure~\ref{fig:1} shows two typical cone-cone blends.
+Figure~\ref{fig:2} is important, since it illustrates
+a configuration of the blend that cannot be achieved by a blending quadric.
+The blending Dupin cyclide can reside in the interior of one cone and
+in the exterior of the other.
+This configuration is impossible for quadric blending surfaces, since
+the blending surface must have a hole.
+Figure~\ref{fig:3} shows two parabolic cyclide blends, and Figure~\ref{fig:4}
+shows a typical pipe blend.
+
+\section{Conclusions}
+\label{section:cyc-concl}
+
+In this paper, we have successfully presented a complete investigation
+of the existence, use and organization of blending cyclides of two cones.  
+The main contributions are a new 
+construction algorithm for blending cyclides, a complete and new proof that 
+for almost all cases, two cones have planar intersection 
+if and only if they have a blending cyclide, and a thorough study of how all 
+of these blending cyclides are organized into families.
+The necessary and sufficient conditions show
+when and how we can use Dupin cyclides as blending surfaces.
+
+\begin{figure}
+\vspace{3.5in}
+\caption{Two typical cone-cone blends}
+\label{fig:1}
+\end{figure}
+
+\begin{figure}
+\vspace{3.5in}
+\caption{A blend that cannot be achieved by a quadric}
+\label{fig:2}
+\end{figure}
+
+\begin{figure}
+\vspace{3.5in}
+\caption{Two parabolic cyclide blends}
+\label{fig:3}
+\end{figure}
+
+\begin{figure}
+\vspace{3.5in}
+\caption{A pipe blend}
+\label{fig:4}
+\end{figure}
+
+\clearpage
+
+\section{Acknowledgements}
+
+This work was supported in part by NSF Grant \#IRI-8910366.
+
+\begin{thebibliography}{999}
+
+\bibitem{boehm:1990}
+     Wolfgang Boehm,
+     On Cyclides in Geometric Modeling,
+     {\em Computer Aided Geometric Design},
+     Vol. 7 (1990), pp. 243--255.
+
+\bibitem{cayley:1873}
+     Arthur Cayley,
+     On the Cyclide,
+     {\em Quarterly Journal of Pure and Applied Mathematics},
+     Vol. 12 (1873), pp. 148--165.
+
+\bibitem{chandru-dutta-hoffmann:1989}
+     Vijaya Chandru, Debasish Dutta and Christoph M. Hoffmann,
+     On the Geometry of Dupin Cyclides,
+     {\em The Visual Computer},
+     Vol. 5 (1989), pp. 277--290.
+
+\bibitem{chandru-dutta-hoffmann:1990}
+     Vijaya Chandru, Debasish Dutta and Christoph M. Hoffmann,
+     Variable Radius Blending Using Dupin Cyclides,
+     in {\em Geometric Modeling for Product Engineering},
+     edited by M. J. Wozny, J. U. Turner and K. Preiss,
+     Elsevier Science Publishers B. V., 1990, pp. 39--57.
+
+\bibitem{depont:1984}
+     John James de Pont,
+     Essays on the Cyclide Patch,
+     Ph.D. Thesis,
+     Engineering Department, Cambridge University, 1984.
+
+\bibitem{degen:1990}
+     W. Degen,
+     Generalized Cyclides for Use in {\em CAGD},
+     Mathematisches Institut B, Universit\"{a}t Stuttgart,
+     preprint, 1990.
+
+\bibitem{dupin:1822}
+     Charles Dupin,
+     {\em Applications de G\'{e}om\'{e}trie et de M\'{e}chanique},
+     Bachelier, Paris, 1822.
+     
+\bibitem{dutta:1989}
+     Debasish Dutta,
+     {\em Variable Radius Blends and Dupin Cyclides},
+     Ph. D. Dissertation,
+     School of Industrial Engineering, Purdue University, 1989.
+
+\bibitem{fischer:1986}
+     Gerd Fischer, editor,
+     {\em Mathematical Models}, two volumes,
+     Friedr. Vieweg \& Sohn,
+     Braunschweig/Wiesbaden, Germany, 1986.
+
+\bibitem{hilbert-vossen:1952}
+     David Hilbert and S. Cohn-Vossen,
+     {\em Geometry and the Imagination},
+     translated from the German edition {\em Anschauliche Geometrie} by
+          P. Nemenyi,
+     Chelsea, New York, 1952.
+
+\bibitem{hoffmann-hopcroft:1986}
+     Christoph M. Hoffmann and John Hopcroft,
+     Quadratic Blending Surfaces,
+     {\em Computer Aided Design},
+     Vol. 18 (1986), pp. 301--307.
+
+\bibitem{hoffmann-hopcroft:1987}
+     Christoph M. Hoffmann and John Hopcroft,
+     The Potential Method for Blending Surfaces and Cornors,
+     in {\em Geometric Modeling}, edited by G. Farin,
+     SIAM, Philadelphia, 1987.
+
+\bibitem{hoffmann-hopcroft:1988}
+     Christoph M. Hoffmann and John Hopcroft,
+     The Geometry of Projective Blending Surfaces,
+     {\em Artificial Intelligence},
+     Vol. 37 (1988), pp. 357--376.
+
+\bibitem{humbert:1885}
+     G. Humbert,
+     Sur Les Surfaces Cyclides,
+     {\em Journal de L'\'{e}cole Polytechnique},
+     Vol. 55 (1885), pp. 127--252.
+
+\bibitem{jessop:1916}
+     Charles Jessop,
+     {\em Quartic Surfaces with Singular Points},
+     Cambridge University Press, Cambridge, England, 1916.
+
+\bibitem{johnson:1929}
+     Roger A. Johnson,
+     {\em Modern Geometry},
+     Houghton Mifflin, Boston, 1929.
+
+\bibitem{jj92}
+     John K. Johnstone,
+     {\em A New Intersection Algorithm for Cyclides and
+	Swept Surfaces using Circle Decomposition},
+     Computer Aided Geometric Design, to appear.
+
+\bibitem{martin:1982}
+     R. R. Martin,
+     Principal Patches for Computational Geometry,
+     Ph.D. Thesis,
+     Cambridge University, Engineering Department, 1982.
+
+\bibitem{maxwell:1868}
+     J. Clerk Maxwell,
+     On the Cyclide,
+     {\em Quarterly Journal of Pure and Applied Mathematics},
+     Vol. 8 (1868), pp. 111-126.
+
+\bibitem{nutbourne-martin:1988}
+     Anthony W. Nutbourne and Ralph R. Martin,
+     {\em Differential Geometry Applied to Curve and Surface Design, 
+          Volume 1: Foundations},
+     Ellis Horwood Limited, Chichester, West Sussex, England, 1988.
+
+\bibitem{pratt:1989}
+     M. J. Pratt,
+     Application of Cyclide Surfaces in Geometric Modeling,
+     in {\em The Mathematics of Surfaces III},
+     edited by D. C. Handscomb,
+     Clarendon Press, Oxford, England, 1989, pp. 405--428.
+
+\bibitem{pratt:1990}
+     M. J. Pratt,
+     Cyclides in Computer Aided Geometric Design,
+     {\em Computer Aided Geometric Design},
+     Vol. 7 (1990), pp. 221-242.
+
+\bibitem{sharrock:1985}
+     Timothy John Sharrock,
+     Surface Design with Cyclide Patches,
+     Ph.D. Thesis,
+     Engineering Department, Cambridge University, 1985.
+
+\bibitem{shenethesis}
+     Ching-Kuang Shene,
+     Planar Intersection and Blending of Natural Quadrics,
+     Ph.D. thesis, Department of Computer Science, The Johns Hopkins
+     University, 1992.
+
+\bibitem{shene-johnstone:1991a}
+     Ching-Kuang Shene and John K. Johnstone,
+     On the Planar Intersection of Natural Quadrics,
+     {\em ACM Symposium on Solid Modeling Foundations and
+     CAD/CAM Applications}, 
+     June 1991, pp. 233--242.
+
+\bibitem{shene-johnstone:1991b}
+     Ching-Kuang Shene and John K. Johnstone,
+     On the Lower Degree Intersections of Two Natural Quadrics I: Algorithms,
+     Technical Report JHU-91/15, Department of Computer Science,
+     Johns Hopkins University, September 1991.
+
+\bibitem{warren:1986}
+     Joe Warren,
+     On Algebraic Surfaces Meeting with Geometric Continuity,
+     Ph.D. thesis, 
+     Department of Computer Science, Cornell University, 1986.
+
+\bibitem{warren:1987}
+     Joe Warren,
+     Blending Quadric Surfaces with Quadric and Cubic Surfaces,
+     {\em Proceedings of the Third Annual Symposium on Computational Geometry},
+     Waterloo, Ontario, Canada 1987, pp. 341--347.
+
+\bibitem{warren:1989}
+     Joe Warren,
+     Blending Algebraic Surfaces,
+     {\em ACM Transactions on Graphics},
+     Vol. 8 (1989), No. 4 (October), pp. 263--278.
+
+\end{thebibliography}
+
+\end{document}
+
+\begin{figure}
+\vspace{18.5cm}
+\caption{Dupin Cyclides (taken from [39] with permission)}
+\label{fig:cyclides}
+\end{figure}
+
+\begin{figure}
+\vspace{12cm}
+\caption{Parabolic Dupin Cyclides (taken from [39] with permission)}
+\label{fig:den-cyclides}
+\end{figure}
+
+\begin{figure}
+\vspace{2in}
+\caption{Skeletal lines and diagonals}
+\label{fig3.1}
+\end{figure}
+
+\begin{figure}
+\vspace{2in}
+\caption{The Radical Axis Lies in Both Interiors or Both Exteriors}
+\label{fig:int-ext}
+\end{figure}
+
+\begin{figure}
+\vspace{3cm}
+\caption{The six possible placements of $\stackrel{\longleftrightarrow}{V_1V_2}$}
+\label{fig:configs}
+\end{figure}
+
+\begin{figure}
+\vspace{6.5cm}
+\caption{The Axial Plane, with Principal Circles}
+\label{fig:Q-RS}
+\end{figure}
+
+\begin{figure}
+\vspace{4.5cm}
+\caption{Specifying a Dupin Cyclide}
+\label{fig:specification-nondegen}
+\end{figure}
+
+\begin{figure}
+\vspace{5.5cm}
+\caption{No Cyclide Contains These Three Circles}
+\label{fig:wrong-example}
+\end{figure}
+
+\begin{figure}
+\vspace{6.5cm}
+\caption{Basic Configuration in the Axial Plane}
+\label{fig:int-config}
+\end{figure}
+
+\begin{figure}
+\vspace{14cm}
+\caption{Any Blending Cyclide Belongs to One of the Two Families}
+\label{fig:concurrent}
+\end{figure}
+
+\begin{figure}
+\vspace{7.5cm}
+\caption{There is Only One Diagonal in the Line-Conic Case}
+\label{fig:three-lines}
+\end{figure}
+
+\begin{figure}
+\vspace{5.5cm}
+\caption{The Construction of a Blending Parabolic Cyclide}
+\label{fig:parabolic-construct}
+\end{figure}
+
+% ***************
+
+\begin{figure}
+\vspace{3.5in}
+\special{psfile=/users/cogito/jj/Research/blend/figs/---
+	hscale= vscale= hoffset= voffset=}
+\caption{Two typical cone-cone blends}
+\label{fig:1}
+\end{figure}
+
+\begin{figure}
+\vspace{3.5in}
+\special{psfile=/users/cogito/jj/Research/blend/figs/---
+	hscale= vscale= hoffset= voffset=}
+\caption{A blend that cannot be achieved by a quadric}
+\label{fig:2}
+\end{figure}
+
+\begin{figure}
+\vspace{3.5in}
+\special{psfile=/users/cogito/jj/Research/blend/figs/---
+	hscale= vscale= hoffset= voffset=}
+\caption{Two parabolic cyclide blends}
+\label{fig:3}
+\end{figure}
+
+\begin{figure}
+\vspace{3.5in}
+\special{psfile=/users/cogito/jj/Research/blend/figs/---
+	hscale= vscale= hoffset= voffset=}
+\caption{A pipe blend}
+\label{fig:4}
+\end{figure}
+
+
+\end{document}
+

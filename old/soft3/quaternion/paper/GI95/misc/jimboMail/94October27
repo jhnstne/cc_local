@@ -1,0 +1,38 @@
+From jimbo@blaze.cs.jhu.edu Thu Oct 27 13:17 CDT 1994
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from blaze.cs.jhu.edu by cis.uab.edu (5.0/SMI-SVR4)
+	id AA20929; Thu, 27 Oct 1994 13:17:29 -0500
+Received: from mail-client (peregrine.cs.jhu.edu)
+           by blaze.cs.jhu.edu; Thu, 27 Oct 94 14:17:21 EDT
+Received: by mail-client (4.1) id AA02396; Thu, 27 Oct 94 14:15:13 EDT
+Message-Id: <9410271817.AA20929@cis.uab.edu>
+From: jimbo@blaze.cs.jhu.edu (Jim Williams)
+Sender: jimbo@blaze.cs.jhu.edu
+Subject: a few edits
+To: jj@redmont1.cis.uab.edu (John Johnstone)
+Date: Thu, 27 Oct 1994 14:15:12 -0400 (EDT)
+Cc: jimbo@blaze.cs.jhu.edu (Jim Williams)
+In-Reply-To: <9410271603.AA20078@cis.uab.edu> from "John Johnstone" at Oct 27, 94 11:03:45 am
+X-Mailer: ELM [version 2.4 PL13]
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Length: 470
+Status: OR
+
+EDIT	PAGE
+
+1	8		FOOTNOTE 5: "is the line through (...) in ..."
+			Is this "the line through (...) and the origin"
+			or is it implicit by the fact k=0 implies origin
+
+2	15		The caption for figure 1 appears in the middle
+			of the bibliography in my printout.
+
+
+P.S.  I was thinking about those extra degrees of freedom, and I think
+they might be better employed to improve some quality of the curve like
+"closeness of this curve to an arc-length parameterization".
+
+Jim
+

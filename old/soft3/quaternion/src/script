@@ -1,0 +1,6 @@
+quaternionSpline -l -a -m 100 -v ../data/object/largeBowl ../data/pos/pos.in-evenspeed ../data/ori/quaternion.in1
+quaternionSpline -l -v -r 1000 ../data/object/largeBowl NEED A LARGE RANDOM POSITION SET
+animation -l -b data/teapot 
+	        data/pos.in-evenspeed 
+	        data/quaternion.in1
+quaternionSpline -c -a -d 20 data/quaternion.in2 > foobar

@@ -1,0 +1,11 @@
+Illegal orientations from data/teapot in xyz Euler angles.
+315 0 0
+315 0 5
+315 0 18
+315 0 34
+270 15 355
+270 15 7
+270 15 18
+270 15 43
+270 15 61
+270 346 179

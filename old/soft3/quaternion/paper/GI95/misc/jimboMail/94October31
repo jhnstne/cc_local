@@ -1,0 +1,48 @@
+From jimbo@blaze.cs.jhu.edu Mon Oct 31 14:57 CST 1994
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from blaze.cs.jhu.edu by cis.uab.edu (5.0/SMI-SVR4)
+	id AA10930; Mon, 31 Oct 1994 14:57:08 -0600
+Received: from mail-client (peregrine.cs.jhu.edu)
+           by blaze.cs.jhu.edu; Mon, 31 Oct 94 15:57:00 EST
+Received: by mail-client (4.1) id AA05544; Mon, 31 Oct 94 15:54:10 EST
+Message-Id: <9410312057.AA10930@cis.uab.edu>
+From: jimbo@blaze.cs.jhu.edu (Jim Williams)
+Sender: jimbo@blaze.cs.jhu.edu
+Subject: Re: Next paper
+To: jj@redmont1.cis.uab.edu (John Johnstone)
+Date: Mon, 31 Oct 1994 15:54:09 -0500 (EST)
+In-Reply-To: <9410311956.AA10474@cis.uab.edu> from "John Johnstone" at Oct 31, 94 01:56:00 pm
+X-Mailer: ELM [version 2.4 PL13]
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Length: 880
+Status: OR
+
+> 
+> Jim, I think that we can write a paper related to swept surfaces,
+> for submission to a conference soon.
+> I've been thinking about this paper over the weekend though,
+> and feel that there are some loose ends that need to be thought
+> about, such as the final Bezier form of this surface
+> and an implementation of some of the ideas to give us confidence
+> in their efficacy.   So I think one of the graphics conferences
+> with January deadlines, such as Eurographics, would be the
+> appropriate timeframe.
+> 
+> I've got some other things to work on in the immediate future,
+> such as a grant proposal, but I'll start bouncing ideas off
+> of you soon.
+> 
+> John
+> 
+
+
+I'm going to see if I can come up with a problem that will
+"showcase" some of the advantages of the rational rotation 
+technique in surface design. I'll probably look through some
+past EG's for ideas.
+
+Jim
+
+

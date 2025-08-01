@@ -1,0 +1,1540 @@
+\documentstyle[times]{article} 
+
+\newif\ifFull
+\Fullfalse
+
+\makeatletter
+\def\@maketitle{\newpage
+ \null
+ \vskip 2em                   % Vertical space above title.
+ \begin{center}
+       {\Large\bf \@title \par}  % Title set in \Large size. 
+       \vskip .5em               % Vertical space after title.
+       {\lineskip .5em           %  each author set in a tabular environment
+        \begin{tabular}[t]{c}\@author 
+        \end{tabular}\par}                   
+  \end{center}
+ \par
+ \vskip .5em}                 % Vertical space after author
+\makeatother
+
+% default values are 
+% \parskip=0pt plus1pt
+% \parindent=20pt
+\parskip=.2in
+\parindent=0pt
+
+\newcommand{\SingleSpace}{\edef\baselinestretch{0.9}\Large\normalsize}
+\newcommand{\DoubleSpace}{\edef\baselinestretch{1.4}\Large\normalsize}
+\newcommand{\Comment}[1]{\relax}  % makes a "comment" (not expanded)
+\newcommand{\Heading}[1]{\par\noindent{\bf#1}\nobreak}
+\newcommand{\Tail}[1]{\nobreak\par\noindent{\bf#1}}
+\newcommand{\QED}{\vrule height 1.4ex width 1.0ex depth -.1ex\ } % square box
+\newcommand{\arc}[1]{\mbox{$\stackrel{\frown}{#1}$}}
+\newcommand{\lyne}[1]{\mbox{$\stackrel{\leftrightarrow}{#1}$}}
+\newcommand{\ray}[1]{\mbox{$\vec{#1}$}}          
+\newcommand{\seg}[1]{\mbox{$\overline{#1}$}}
+\newcommand{\tab}{\hspace*{.2in}}
+\newcommand{\se}{\mbox{$_{\epsilon}$}}  % subscript epsilon
+\newcommand{\ie}{\mbox{i.e.}}
+\newcommand{\eg}{\mbox{e.\ g.\ }}
+\newcommand{\figg}[3]{\begin{figure}[htbp]\vspace{#3}\caption{#2}\label{#1}\end{figure}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\prf}{\noindent{{\bf Proof}:\ \ \ }}
+\newcommand{\choice}[2]{\mbox{\footnotesize{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}      
+\newcommand{\scriptchoice}[2]{\mbox{\scriptsize{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}
+\newcommand{\tinychoice}[2]{\mbox{\tiny{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}
+\newcommand{\ddt}{\frac{\partial}{\partial t}}
+
+\newtheorem{rmk}{Remark}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{conjecture}{Conjecture}[section]
+\newtheorem{claim}{Claim}[section]
+\newtheorem{notation}{Notation}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[section]
+\newtheorem{defn2}{Definition}
+
+% \font\timesr10
+% \newfont{\timesroman}{timesr10}
+% \timesroman
+
+\DoubleSpace
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{-.25in}	% technically should be 0pt for 1in
+\setlength{\headsep}{0pt}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+\setlength{\columnsep}{5mm}		% width of gutter between columns
+
+\title{Rational interpolating curves on the 3-sphere}
+% (ignoring the context of `pt on 3-sphere = unit quaternion = orientation')
+	% CAGD is best since this is a followup to Dietz et. al. in CAGD
+	% and since this deals with design of curves on surfaces, a CAGD topic
+\author{John K. Johnstone\\
+	Department of Computer and Information Sciences\\
+	The University of Alabama at Birmingham\\
+	Birmingham, Alabama, USA 35294\\
+	johnstone@cis.uab.edu\\
+	205-934-2213
+	\and 
+	James P. Williams\\
+	Department of Computer Science\\
+	The Johns Hopkins University\\
+	Baltimore, Maryland, USA 21218\\
+	jimbo@cs.jhu.edu\\
+	410-516-7784}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+The design of interpolating curves on the 3-sphere, an important problem
+in animation, has been approached in the literature using nonrational
+curves or rational curves considerably limited in degree and continuity,
+both requiring the implementation of a new curve system.
+In this paper, we develop a general method for the design of any rational
+interpolating curve on the 3-sphere,
+% of arbitrary even degree and continuity
+which relies on the existing machinery of rational interpolating curves 
+and only requires the implementation of a rational map and its inverse.
+We prove a completeness result establishing that any rational curve on the
+3-sphere can be built with this method.
+Using a technique originated by Dietz, Hoschek and J\"{u}ttler for the design
+of curves on quadrics in 3-space, we design curves in an image space rather than
+the 3-sphere, effectively removing the constraint to the 3-sphere, and
+then map these curves back to the 3-sphere.
+The use of Euler's Four Squares Theorem is explored for the generation
+of rational maps to the sphere.
+We elaborate on the example of the design of a $C^2$ continuous sextic rational
+Bezier interpolating spline on the 3-sphere using this method.
+\end{abstract}
+
+Keywords: Rational curves, interpolation, curves on surfaces, curve design,
+	  3-sphere, quaternion, Pythagorean tuple, Euler's Four Squares Theorem.
+
+\section{Introduction}
+
+The design of curves on surfaces has received considerable study
+and the design of curves on quadrics \cite{boehmHansford91,dietz93}, 
+especially the sphere \cite{hoschekSeemann92}, has been of particular interest.
+% Curves on surfaces can be used, for example, in trimming surfaces (?)
+% and in motion planning on configuration space obstacles.
+In this paper, we consider the design of curves on the 3-sphere $S^3$ in 4-space.
+This problem is of interest as a higher-dimensional variant of the traditional
+problem.  
+% For example, configuration space obstacles are usually higher-dimensional
+% surfaces \cite{}.
+It is also of considerable practical interest because
+a curve on the 3-sphere can define the orientation of a moving object
+(such as an object in a computer animation \cite{shoemake85}, a camera, 
+a swept surface \cite{jjjw95b}, a docking spacecraft \cite{junkins86}, 
+or a robotic device),
+through identification of a point on the 3-sphere with a quaternion.
+
+Our problem is to construct a rational curve on the 3-sphere
+that interpolates a finite set of points.
+We insist upon a rational curve in the interests of computational efficiency,
+compatibility with rational curve modeling systems,
+and for simple manipulation of the resulting curve.
+The curve must not only interpolate the points, but is also constrained
+to lie on the surface.
+This makes the design of curves on surfaces a more challenging version
+of point interpolation.
+However, our approach is very similar to traditional point interpolation,
+much more so than previous solutions to the problem.
+
+A preliminary version of this paper is Johnstone and Williams \cite{jjjw95}.
+The following notation is used in this paper.
+%
+\begin{itemize}
+\item
+$\Re[t]$ is the ring of polynomials over the real numbers $\Re$.
+\item
+$P_A^{n}$ is projective $n$-space over $A$.
+$P_A^{n} = \{(x_1,\ldots,x_{n+1}) \neq 0 : x_i \in A, 1 \leq i \leq n+1\}$.\\
+$(x_1,\ldots,x_{n+1}) \in P_A^{n}$
+is equivalent to the point $(\frac{x_1}{x_{n+1}}, \ldots, \frac{x_n}{x_{n+1}})$
+in affine $n$-space.\\
+We will be primarily interested in $P_{\Re}^4$, projective 4-space over the reals.
+\item
+$S^i$ is the $i$-sphere, the unit sphere in ($i+1$)-space.
+\end{itemize}
+
+\section{Related work}
+
+There is a substantial literature on the design of interpolating curves on $S^3$
+(often called quaternion curves),
+because of the applications of these curves in computer animation.
+All of the previous methods require the introduction of a new curve type
+and most yield nonrational curves.
+
+% don't mention: not a candidate since interactive: essentially `build it yourself'
+% simply normalizing the curve \cite{nielson93}
+% can use tension and nu-spline to remove kinks but only interactively
+
+The most popular method is to use spherical linear interpolation 
+(also called slerping) 
+\cite{shoemake85,duff85,pletinckx89,schlag91,nielson92,nielson93,kim95,nam95}.
+The spherical linear interpolation between the points $P_0$ and $P_1$ on $S^3$ is:
+\[ P(t) = \frac{\sin((1-t)\theta) P_0 + \sin(t \theta) P_1}{\sin \theta}
+\]
+where $\cos \theta = P_0 \cdot P_1$, which is the great circle between $P_0$ and $P_1$.
+A spherical analog to the de Casteljau algorithm based upon this
+spherical linear interpolation is used to build curves,
+mimicking Bezier \cite{shoemake85,kim95}, B-spline 
+\cite{duff85,nielson92,nielson93,kim95}, Hermite \cite{kim95,nam95},
+cardinal spline \cite{pletinckx89}, and Catmull-Rom \cite{schlag91} curves.
+Since slerping is a nonrational operation,
+all of the methods based on slerping generate nonrational curves.
+Most of these curves are defined only by a geometric construction, and have
+no closed form algebraic definition.
+Computation of derivatives of these curves is complicated,
+as is the imposition of $C^2$ continuity, and
+Kim et. al. \cite{kim95} go to considerable trouble to solve these two problems.
+The use of conventional Bezier curves completely removes 
+these problems with continuity or derivative calculation.
+
+The work of Wang \cite{wang93, wang95} and Nielson \cite{nielson93}
+is closest in spirit to this paper, since it designs rational curves on $S^3$.
+However, these curves are limited in scope.
+Wang \cite{wang93,wang95} (using spherical biarcs) 
+and Nielson \cite{nielson93} develop quadratic curves
+with $G^1$ continuity, and Wang \cite{wang95} develops sextic curves
+with $C^1$ continuity.
+% $C^2$ continuity is desirable, especially for animation.
+In Wang \cite{wang93,wang95}, the input points must be augmented with 
+tangents, since the problem is posed as a Hermite interpolation problem.
+Both Wang and Nielson's methods also involve heuristic, input-dependent choices 
+% (such as the choice of a spherical biarc from
+% a one-parameter family of valid spherical biarcs, or a center of projection)
+that can be difficult to make.
+Neither of the methods has any completeness result about the
+coverage of rational curves by their method.
+Our method subsumes the work of Wang and Nielson, 
+by creating rational curves of arbitrary
+even degree (all rational curves on $S^3$ have even degree \cite{wang95}) 
+and arbitrary continuity, using a single data-independent map that is provably complete.
+
+The above methods require implementation of new curves,
+such as slerped curves or spherical biarcs.
+In our method, no new curves must be implemented, just two maps:
+a map to the 3-sphere and its inverse.
+Consequently, the implementation of our method and its incorporation
+into any modeling software is much simpler.
+
+Barr et.\ al.\ \cite{barr92} design interpolating curves on $S^3$ 
+through constrained optimization: the constraint to the 3-sphere 
+is realized through its introduction into an optimization problem.
+This yields a nonrational curve again, indeed with no closed-form expression
+and approximate.
+The numerical optimization is also expensive.
+The method does have the advantage of allowing extra constraints 
+to be incorporated into the optimization (they choose to design a curve
+that minimizes tangential acceleration).
+
+\section{A new approach}
+\label{sec:general}
+
+All of the previous methods are restricted and dictated to by the constraint 
+to the 3-sphere,
+either in the primitives they use for interpolation (biarcs or slerped curves)
+or in the method (optimization).
+The key to our method is to remove this constraint, by mapping to an image space.
+
+We are motivated by a paper of Dietz, Hoschek and J\"{u}ttler \cite{dietz93}
+on the design of rational interpolating curves on the 2-sphere $S^2$ 
+% (which can be extended to rational interpolating curves on other quadrics) 
+\cite{dietz93}.
+Dietz et.\ al.\ design curves constrained to a surface in $n$-space by 
+designing a map $M$ from an arbitrary point of $n$-space to the surface.
+This allows the free design of a curve (unconstrained to the surface)
+followed by a mapping of the curve to the surface using $M$.
+In this way, the two steps in the design of curves on surfaces,
+interpolation and constraint to the surface, are separated:
+the surface constraint is applied independently using $M$, 
+after the interpolation.
+This is an ingenious divide-and-conquer strategy: other methods
+struggle with the two problems of constrained interpolation together.
+
+A formal statement of this approach is as follows.
+Also see Figures~\ref{fig1}-\ref{fig6} for the application of this
+approach to our problem.
+Let $S$ be the surface in $n$-space (to which the curve must be constrained), 
+let $\{P_i\}$ be the given points on $S$ (which must be interpolated), 
+and let $M$ be a map from $n$-space to $S$.
+
+\vspace{.2in}
+
+\centerline{\underline{The image space construction method for curves on surfaces}}
+\begin{enumerate}
+\item Map the points $\{P_i\}$ to the image space, $\{M^{-1}(P_i)\}$.
+\item Design an interpolating curve $C(t)$ in the image space.
+\item Map $C(t)$ back to $S$ using $M$, yielding an interpolating curve on 
+	the surface, $M(C(t))$.
+\end{enumerate}
+
+There are two main steps to the design of a curve on a surface using
+this method: the construction of the map $M$ from $n$-space to 
+the surface and its inverse, and the definition of the image of a {\em curve} 
+under $M$,
+since it is impossible to apply the map to each of the infinite
+points of the curve in step 3 of the method.
+
+We apply this approach to our problem of the design of rational 
+curves on the 3-sphere.
+The design of a rational map to the 3-sphere and its inverse
+is covered in Sections~\ref{sec:M} and \ref{sec:invM}, respectively.
+The image of a curve is defined in Section~\ref{sec:curveimage}.
+In Section~\ref{sec:complete}, we establish a completeness result,
+that all rational curves
+on the 3-sphere can be constructed using our method.
+Examples of the method (to augment Figures~\ref{fig1}-\ref{fig6})
+are presented in Section~\ref{sec:eg} and we close the paper
+with some remarks in Section~\ref{sec:conclude}.
+In the next section, we begin by looking at related material 
+on Pythagorean $i$-tuples and Euler's Four Squares Theorem.
+
+\twocolumn
+
+\begin{figure}[h]
+\vspace{2.5in}
+\special{psfile=/rb/jj/Research/S3curve/img/fig1.ps}
+\caption{Input points}
+\label{fig1}
+\end{figure}
+% figures 1-6: GLUTS3curve < data/S3.in
+% tops fig1.rgb -eps -m 8.5 2 > fig1.ps
+
+\begin{figure}[h]
+\vspace{2.5in}
+\special{psfile=/rb/jj/Research/S3curve/img/fig2.ps}
+\caption{Input and image points}
+\label{fig2}
+\end{figure}
+
+\begin{figure}[h]
+\vspace{2.5in}
+\special{psfile=/rb/jj/Research/S3curve/img/fig3.ps}
+\caption{Interpolating curve in image space}
+\label{fig3}
+\end{figure}
+
+\begin{figure}[h]
+\vspace{2.5in}
+\special{psfile=/rb/jj/Research/S3curve/img/fig4.ps}
+\caption{Interpolating curves on 3-sphere and in image space}
+\label{fig4}
+\end{figure}
+
+\begin{figure}[h]
+\vspace{2.5in}
+\special{psfile=/rb/jj/Research/S3curve/img/fig5.ps}
+\caption{Curves and control polygons}
+\label{fig5}
+\end{figure}
+
+\begin{figure}[h]
+\vspace{2.5in}
+\special{psfile=/rb/jj/Research/S3curve/img/fig6.ps}
+\caption{A rational solution}
+\label{fig6}
+\end{figure}
+
+\onecolumn
+
+\section{Euler's Four Squares Theorem}
+
+\begin{defn2}
+A {\em Pythagorean $i$-tuple} over F, $i \geq 3$, is an $i$-tuple 
+$(x_1,\ldots,x_i)$, $x_i \in F$, that satisfies \\
+$x_1^2 + \ldots + x_{i-1}^2 = x_{i}^2$.
+\end{defn2}
+
+The study of curves on spheres is deeply related to the study of Pythagorean 
+$i$-tuples, since a point \\
+$x = (x_1,\ldots,x_{i+2}) \in P^{i+1}$ lies on the sphere $S^i$ if and only if
+\[
+     \|x\| = (\frac{x_1}{x_{i+2}})^2 + \ldots + (\frac{x_{i+1}}{x_{i+2}})^2 = 1
+\mbox{\ \ \  or \ \ \ }  
+      x_1^2 + \ldots + x_{i+1}^2 = x_{i+2}^2
+\]
+\begin{description}
+\item[(Rule 1)]
+A point $x \in P_{\Re}^{i+1}$ lies on $S^i$ if and only if
+$x$ is a Pythagorean ($i+2$)-tuple over $\Re$.
+\item[(Rule 2)]
+A rational curve 
+$x(t) = (x_1(t),\ldots,x_{i+2}(t)) \in P_{\Re[t]}^{i+1}$ lies on $S^i$
+if and only if $x(t)$ is a Pythagorean $(i+2)$-tuple over $\Re[t]$.
+\end{description}
+
+Thus, the study of curves on the 3-sphere leads to the study of Pythagorean
+5-tuples over $\Re[t]$.
+Since Pythagorean $i$-tuples involve sums of squares, we are
+interested in number-theoretical formulae concerning sums of squares.
+This section presents results concerning one such formula,
+Euler's Four Squares Theorem.
+This is a fundamental formula from number theory
+on the sum of four squares \cite{dickson52, ebbinghaus90}.
+
+\begin{theorem}[Euler's Four Squares Theorem, 1748]
+
+% p. 277 of Dickson, Vol. 2
+\[
+(a^2 + b^2 + c^2 + d^2) (a'^2 + b'^2 + c'^2 + d'^2) = \hfill
+\]
+\begin{equation}
+\label{eqn:euler1}
+(aa' + bb' + cc' + dd')^2 +
+(ab' - ba' \pm cd' \mp dc')^2 +
+(ac' \mp bd' - ca' \pm db')^2 +
+(ad' \pm bc' \mp cb' - da')^2
+\end{equation}
+or
+%
+%
+% p. 209, Ebbinghaus
+\[
+(a^2 + b^2 + c^2 + d^2) (a'^2 + b'^2 + c'^2 + d'^2) = \hfill
+\]
+\begin{equation}
+\label{eqn:euler2}
+(aa' - bb' - cc' - dd')^2 +
+(ab' + ba' + cd' - dc')^2 +
+(ac' - bd' + ca' + db')^2 +
+(ad' + bc' - cb' + da')^2
+\end{equation}
+where $a,b,c,d,a',b',c',d'$ are elements of any commutative ring 
+(such as the integers, the rationals, the reals, or 
+polynomials over the integers, rationals, or reals).
+% p. 210, Ebbinghaus for any commutative ring
+\end{theorem}
+
+\begin{corollary}
+\label{cor:specialEuler}
+Two special cases of Euler's Four Squares Theorem are: 
+\begin{equation}
+\label{eq:euler1}
+(a^2 + b^2 + c^2 + d^2)^2 = 
+(2ad-2bc)^2 + (2ac+2bd)^2 + (a^2 + b^2 - c^2 - d^2)^2
+\end{equation}
+%
+% dickson52, p. 318
+\begin{equation}
+\label{eq:aida}
+(a^2 + b^2 + c^2 + d^2)^2 = 
+(a^2 + b^2 + c^2 - d^2)^2 + (2ad)^2 + (2bd)^2 + (2cd)^2
+\end{equation}
+\end{corollary}
+\prf
+Let $a'=a, b'=b, c'=-c, d'=-d$ in (\ref{eqn:euler1}) for (\ref{eq:euler1}),
+and $a'=-a, b'=b, c'=c, d'=d$ in (\ref{eqn:euler1}) for (\ref{eq:aida}).
+(\ref{eq:aida}) was independently established by Aida \cite{dickson52}. % p. 318
+% (c. 1810) 
+\QED
+
+Both of these formulae can be interpreted as Pythagorean tuples.
+Indeed, we can view these formulae as recipes for generating
+Pythagorean 4- and 5-tuples.
+In the next section, we will use these formulae to build maps to the 2-
+and 3-sphere.
+
+\begin{rmk}
+Euler's Four Squares Theorem is a generalization of 
+Diophantus' Two Squares Theorem \cite{dickson52}:
+% Dickson, p. 225; Ebbinghaus, p. 75
+\begin{equation}
+(a^2 + b^2)(a'^2 + b'^2) = (aa' - bb')^2 + (ab' + ba')^2
+\end{equation}
+where $a,b,a',b'$ are again elements of any commutative ring.
+Moreover, just as the Two Squares Theorem encodes the product rule 
+of complex numbers:
+\[
+| a+ib |^2 | a'+ib' |^2 = | (a+ib)(a'+ib') |^2 
+\]
+% or \[ |A| |B| = |AB| \ \ \ (A,B \in {\cal C})\] 
+the Four Squares Theorem, as expressed in (\ref{eqn:euler2}),
+encodes the product formula of quaternions
+(although it predates the discovery of quaternions 
+by Hamilton in 1843 by a century!):
+
+\begin{equation}
+\begin{array}{lll}
+(a,b,c,d) * (a',b',c',d') & = & (a + bi + cj + dk) * (a' + b'i + c'j + d'k) \\
+& = & (aa' - bb' - cc' - dd') + (ab' + ba' + cd' - dc')i \\
+& & + (ac' - bd' + ca' + db')j + (ad' + bc' - cb' + da')k
+\end{array}
+\end{equation}
+
+This relationship between the Four Squares Theorem and quaternions is
+serendipitous, since the Four Squares Theorem will be
+used to design curves on the 3-sphere, whose main application is the
+control of orientation via quaternions in computer animation.
+\end{rmk}
+
+\section{A rational map to the 3-sphere}
+\label{sec:M}
+
+We have noted the equivalence of points on the 3-sphere and Pythagorean
+5-tuples.
+Consequently, we can use the Pythagorean 5-tuple `generator' formula
+of Corollary~\ref{cor:specialEuler} to build a map to the 3-sphere.
+
+\begin{lemma}
+\label{lem:M}
+The map
+\begin{equation}
+\label{eq:M}
+	M(a,b,c,d,1) = \left( \begin{array}{c}
+		a^2+b^2+c^2-d^2 \\
+		2ad \\
+		2bd \\
+		2cd \\
+		a^2+b^2+c^2+d^2
+		\end{array} \right)
+\end{equation}
+is a rational map from projective 4-space $P^4_{\Re} \setminus \{0\}$ 
+onto the 3-sphere $S^3 \subset P^4_{\Re}$.
+\end{lemma}
+\prf
+$M(a,b,c,d,1)$ is a point on the 3-sphere $S^3$,
+using (\ref{eq:aida}) and Rule 1.
+The image of the origin is undefined because 
+the point $(0,0,0,0,0)$ is undefined in projective 4-space.
+We will show below that $M$ has an inverse map that is well defined over the
+entire sphere (Lemma~\ref{lem:invM}), 
+which establishes that $M$ is onto the sphere.
+\QED
+
+For historical purposes, we observe that the map to the 2-sphere
+used in Dietz \cite{dietz93} can also be derived from 
+Corollary~\ref{cor:specialEuler}, using the other formula, as follows
+(although they derive it from a result of Lebesgue).
+
+\begin{lemma}
+\label{lem:delta}
+The map 
+\begin{equation}
+\label{eq:delta}
+\delta(a,b,c,d) = \left( \begin{array}{c}
+		2ad - 2bc \\
+		2ac + 2bd \\
+		a^2 + b^2 - c^2 - d^2 \\
+		a^2 + b^2 + c^2 + d^2
+		\end{array} \right)
+\end{equation}
+is a rational map from projective 3-space $P^3_{\Re} \setminus \{0\}$
+onto the 2-sphere $S^2 \subset P^3_{\Re}$.
+\end{lemma}
+\prf
+$\delta(a,b,c,d)$ is a point on the 2-sphere $S^2$,
+using (\ref{eq:euler1}) and Rule 1.
+The image of the origin is undefined because 
+the point $(0,0,0,0)$ is undefined in projective 3-space.
+Finally, let $s = (s_1,s_2,s_3,s_4)$ be a point of $S^2$.
+If $s$ is not the north pole ($s \neq (0,0,1,1)$),
+$\delta(s_1,s_2,0,s_4-s_3)=s$
+otherwise $\delta(a,b,0,0)=s$ ($a$ and $b$ arbitrary except $ab \neq 0$).
+Thus, $\delta$ is onto the entire 2-sphere.
+Notice that the inverse image of the north pole, $(a,b,0,0)$, 
+is a point at infinity in the $z=0$ plane, just as in stereographic projection.
+\QED
+
+A classical map to the sphere is stereographic projection \cite{levinson70},
+% p. 29,43 Levinson
+which maps the $x_{n+1} = 0$ plane to the $n$-sphere in $n+1$-space.
+In 4-space, this is a map to the 3-sphere:
+%
+\begin{equation}
+\label{eq:stereo}
+	P(a,b,c,0) = \frac{1}{a^2+b^2+c^2+1}(2a,2b,2c,a^2+b^2+c^2-1)
+\end{equation}
+%
+Unfortunately, $(0,0,0,1)$ is a pole of stereographic projection (it is only attained in the limit as $(a,b,c,0)$
+goes to infinity), which causes problems in using this map for the design of
+curves on $S^3$, as noted by Wang \cite{wang95}.
+Both (\ref{eq:M}) and (\ref{eq:delta}) are related to stereographic 
+projection---$\delta$ is the composition of stereographic projection with 
+hyperbolic projection \cite{dietz93}, and $M$ is visibly similar---,
+but $M$ does not suffer from this problem with poles.
+The point that would be expected to be a pole of $M$ in analogy to stereographic
+projection is the point $(1,0,0,0) \in S^3$.
+This point is still special, but in the opposite way to a pole:
+the entire $x_4=0$ hyperplane maps to $(1,0,0,0)$ under $M$, so it is 
+over-represented rather than under-represented.
+See Lemma~\ref{lem:invM} and Remark~\ref{rmk:1000}.
+
+We end this section with a lemma on sphere parameterization,
+which is closely related to maps to the sphere.
+This lemma is used in the next section and also clarifies stereographic projection.
+
+\begin{lemma}
+\label{lem:sphereparam}
+The $n$-sphere $S^n$ has a parameterization
+\begin{equation}
+\label{eq:param1}
+	(\frac{t_1^2+\ldots+t_n^2-1}{t_1^2+\ldots+t_n^2+1},
+	 \frac{2t_1}{t_1^2+\ldots+t_n^2+1},
+	 \ldots, 
+	 \frac{2t_n}{t_1^2+\ldots+t_n^2+1})
+\end{equation}
+% or
+% \begin{equation}
+% \label{eq:param2}
+% 	(\frac{1-t_1^2-\ldots-t_n^2}{t_1^2+\ldots+t_n^2+1},
+% 	 \frac{2t_1}{t_1^2+\ldots+t_n^2+1},
+% 	 \ldots, 
+% 	 \frac{2t_n}{t_1^2+\ldots+t_n^2+1})
+% \end{equation}
+$t_i\in(-\infty,\infty)$.
+$(1,0,\ldots,0)$ is the only pole of this parameterization.
+% All points of (\ref{eq:param2}) except $(-1,0,\ldots,0)$ 
+% have finite parameter values.
+\end{lemma}
+\prf
+A sphere can be parameterized by inheriting the natural 
+parameterization of a hyperplane.
+% eg., \cite{sommerville34}
+Let $P$ be a point of the sphere and $H$ be a hyperplane, $P \not \in H$.
+Any line through $P$ intersects the sphere in exactly one other point $s$ 
+(counting properly, by Bezout's Theorem)
+and the hyperplane $H$ in one point $h$.
+Thus, lines through $P$ establish a 1-1 correspondence between points
+of the sphere and points of the hyperplane, and it is well defined to
+assign the parameters of $h$ to $s$.
+In effect, the parameters of the hyperplane are splatted onto the quadric.
+Stereographic projection is a special case of this general idea.
+
+The obvious choices for $P$ and $H$, the two degrees of freedom, 
+are $P=\pm e_i$ and $H: x_i=0$.
+For (\ref{eq:param1}), let $P=(1,0,\ldots,0)$ and $H$ be $x_1=0$.
+The line through $P$ and $(0,t_1,t_2,\ldots,t_n)$ on $H$
+is \mbox{$(1-\alpha, \alpha t_1, \alpha t_2, \ldots, \alpha t_n)$}, 
+which intersects the sphere $S_n$ when
+\[
+	(1-\alpha)^2 + (\alpha t_1)^2 + \ldots + (\alpha t_n)^2 - 1
+	= \alpha^2 (1 + t_1^2 + \ldots + t_n^2) - 2 \alpha = 0
+\] 
+or $\alpha=0,\frac{2}{1 + t_1^2 + \ldots + t_n^2}$.
+These two intersections are the points $P$ and (\ref{eq:param1}).
+% For (\ref{eq:param2}), let $P=(-1,0,\ldots,0)$ and $H$ be $x_1=0$.
+For stereographic projection, $P = (0,\ldots,0,1)$ and $H$ is $x_n=0$.
+% which is (\ref{eq:param1}) with $x_1$ and $x_n$ interchanged.
+\QED
+
+% For example, the unit circle has the parameterization 
+% \[ (x,y) = (\frac{1-t^2}{1+t^2}, \frac{2t}{1+t^2}) \]
+% and $S^3$ has the parameterization 
+% \[
+% (\frac{t_1^2+t_2^2+t_3^2-1}{t_1^2+t_2^2+t_3^2+1},
+% 		     \frac{2t_1}{t_1^2+t_2^2+t_3^2+1},
+% 		     \frac{2t_2}{t_1^2+t_2^2+t_3^2+1},
+%		     \frac{2t_3}{t_1^2+t_2^2+t_3^2+1})
+% \]
+
+% \begin{rmk}
+% To get a map from 4-space to the unit sphere,
+% we are looking for a formula of the form $A^2+B^2+C^2+D^2=E^2$
+% % (a Pythagorean 5-tuple)
+% where $A$, $B$, $C$, $D$ and $E$ are functions of at most four variables
+% and at least one is a function of exactly four variables.
+% Then a point in 4-space can be
+% mapped to $(A,B,C,D,E)$ where $\|(A,B,C,D,E)\| = 1$.
+% % (\ref{eq:aida}) is the only one we have been able to find.
+% \end{rmk}
+
+% Every positive integer is the sum of four squares,
+% and coincidentally, this fact can be proved using quaternions (Hardy,
+% An introduction to the theory of numbers, Oxford (1960), 4th edition).
+
+\section{Completeness of $M$}
+\label{sec:complete}
+
+$M$ is an excellent choice for our purpose---the design of curves on
+the 3-sphere---since it is not only onto all {\em points} on the 3-sphere 
+(Lemma~\ref{lem:M}),
+it is also onto all {\em curves} on the 3-sphere.
+That is, any rational curve on $S^3$
+can be generated as the image of some polynomial curve under $M$.
+We call a map with this property {\em complete}.
+The completeness property guarantees that the design of curves on the 3-sphere 
+using $M$ is not restricted.
+
+We prove this result by proving the equivalent statement for Pythagorean
+5-tuples over the ring of real polynomials (Rule 2).
+We begin with a weaker statement: a characterization over the integers
+rather than the polynomial ring.
+Although this is not the desired result,
+the proof is illuminating, as it clarifies the relationship between
+the map $M$ and the sphere parameterization (\ref{eq:param1}).
+
+\begin{theorem}
+\label{thm:ntuples}
+Any Pythagorean $n$-tuple over {\cal Z}
+\[
+	x_1^2 + \ldots + x_{n-1}^2 = x_n^2
+\]
+can be generated by 
+\[
+	x_1 = \alpha (a_1^2+\ldots+a_{n-2}^2-d^2)
+\]
+\[
+	x_2 = \alpha (2a_1d)
+\]
+\[
+	\ldots
+\]
+\[
+	x_{n-1} = \alpha (2a_{n-2}d)
+\]
+\[
+	x_n = \alpha (a_1^2+\ldots+a_{n-2}^2+d^2)
+\]
+where $a_1,\ldots,a_{n-2},d \in {\cal Z}$ and $\alpha \in {\cal Q}$.
+\end{theorem}
+\prf
+% See p. 88 of Ebbinghaus as motivation.
+Let $(x_1,\ldots,x_n)$ be a Pythagorean $n$-tuple over {\cal Z}.
+Then $(\frac{x_1}{x_n},\ldots,\frac{x_{n-1}}{x_n}) \in {\cal Q}^{n-1}$ 
+is a point on the ($n-2$)-sphere, by Rule 1.
+Assume $(x_1,\ldots,x_n) \neq (1,0,\ldots,0)$
+(otherwise let $d=0, \alpha = x_1, a_1=1, \mbox{ and } a_i = 0$ for $i\neq 1$).
+Since it is a rational point, $(\frac{x_1}{x_n},\ldots,\frac{x_{n-1}}{x_n})$
+has a rational parameter value in the sphere parameterization (\ref{eq:param1}),
+say $(t_1,\ldots,t_n) = (\frac{a_1}{d},\ldots,\frac{a_{n-2}}{d})$
+where $a_1,\ldots,a_{n-2},d \in {\cal Z}$.
+That is,
+\[
+ (\frac{x_1}{x_n},\ldots,\frac{x_{n-1}}{x_n})
+ = (\frac{(\frac{a_1}{d})^2 + \ldots + (\frac{a_{n-2}}{d})^2 - 1}
+         {(\frac{a_1}{d})^2 + \ldots + (\frac{a_{n-2}}{d})^2 + 1},
+    \frac{\frac{2a_1}{d}}
+         {(\frac{a_1}{d})^2 + \ldots + (\frac{a_{n-2}}{d})^2 + 1},
+    \ldots,
+    \frac{\frac{2a_{n-2}}{d}}
+         {(\frac{a_1}{d})^2 + \ldots + (\frac{a_{n-2}}{d})^2 + 1},
+\]
+or
+\[
+(x_1,\ldots,x_{n-1}) = 
+(\frac{x_n}{a_1^2 + \ldots + a_{n-2}^2 + d^2})
+(a_1^2 + \ldots + a_{n-2}^2 - d^2, 2a_1 d, \ldots, 2a_{n-2} d).
+\]
+Let $\alpha = \frac{x_n}{a_1^2 + \ldots + a_{n-2}^2 + d^2}$.
+\QED
+
+\begin{corollary}
+Any Pythagorean 5-tuple $(x_1,\ldots,x_5)$ over {\cal Z} can be generated
+by $(x_1,\ldots,x_5) = \alpha M(a,b,c,d)$,
+where $a,b,c,d \in {\cal Z}$ and $\alpha \in {\cal Q}$.
+\end{corollary}
+
+
+% \subsection{Characterizations of Pythagorean tuples over polynomial rings}
+
+Unfortunately, the proof technique of Theorem~\ref{thm:ntuples} 
+does not generalize to polynomial rings,
+since the use of rational numbers no longer applies, as we are working
+with polynomials with real coefficients.
+We use a different proof technique in the following theorem, motivated
+by Kubota \cite{kubota72}.
+
+% \begin{theorem}[Kubota 1972]
+% \label{thm:kubota}
+% Any Pythagorean triple over $D$
+% \[
+% 	x_1^2 + x_2^2 = x_3^2
+% \]
+% can be generated by
+% \[
+% 	x_1 = \alpha (a^2 - b^2)
+% \]
+% \[
+% 	x_2 = \alpha (2ab)
+% \]
+% \[
+% 	x_3 = \alpha (a^2 + b^2)
+% \]
+% where $\alpha, a,b \in D$ and $D$ is 
+% any unique factorization domain of characteristic $d\neq2$
+% such that the element 2 is prime or invertible (such as $\Re$ or $\Re[t]$).
+% \end{theorem}
+
+\begin{theorem}
+\label{thm:complete}
+Any Pythagorean $n$-tuple over $\Re[t]$
+\[
+	x_1^2 + \ldots + x_{n-1}^2 = x_n^2
+\]
+can be generated by 
+\begin{equation}
+\label{eq:pythn2}
+	x_1 = \alpha (a_1^2+\ldots+a_{n-2}^2-d^2)
+\end{equation}
+\[
+	x_2 = \alpha (2a_1d)
+\]
+\[
+	\ldots
+\]
+\[
+	x_{n-1} = \alpha (2a_{n-2}d)
+\]
+\[
+	x_n = \alpha (a_1^2+\ldots+a_{n-2}^2+d^2)
+\]
+where $a_1,\ldots,a_{n-2},d,\frac{1}{\alpha} \in \Re[t]$.
+% Alternate version:
+% where $\alpha,d \in \Re[t]$ 
+% and $a_1,\ldots,a_{n-2} \in \frac{\Re[t]}{\Re[t]}$.
+% {\bf (We would prefer all in $\Re[t]$ but cannot yet use Kubota's 
+% technique---or any other--- to establish this for this more general case.)}
+\end{theorem}
+\prf
+Kubota \cite{kubota72} proved a version of this result for $n=3$ 
+(and also extended $\Re[t]$ to more general unique factorization domains).
+We use a proof technique motivated by Kubota.
+% (We relax the restriction on $\alpha$ to make $a_i$ polynomial).
+Let $(x_1,\ldots,x_n)$ be a Pythagorean $n$-tuple over $\Re[t]$.
+Assume $x_n - x_1 \neq 0$ (otherwise the result is trivial).
+Factor $x_n - x_1$ into a square component and a square-free component:
+$x_n - x_1 = gh^2$ where $g,h \in \Re[t]$ and $g$ and $h$ are both square-free.
+This factorization is always possible.
+Let 
+\[
+\begin{array}{lll}
+\hspace{2in} & a_i = hx_{i+1} & \hspace{1in} i=1,\ldots,n-2 \\
+& d = h(x_n - x_1) \\
+& \alpha = \frac{g}{2(x_n - x_1)^2}
+\end{array}
+\]
+% Alternate version: 
+% Let 
+% \[
+% \begin{array}{lll}
+% \hspace{2in} & a_i = \frac{hx_{i+1}}{x_n - x_1} & \hspace{1in} i=1,\ldots,n-2 \\
+% & d = h \\
+% & \alpha = \frac{g}{2} 
+% \end{array}
+% \]
+Then $a_1,\ldots,a_{n-2},d,\alpha$ generate the Pythagorean $n$-tuple
+$(x_1,\ldots,x_n)$ as in (\ref{eq:pythn2}).
+For example,
+\[
+\alpha (a_1^2 + \ldots + a_{n-2}^2 - d^2)
+= \frac{g}{2} 
+  (\frac{h^2(x_2^2 + \ldots + x_{n-1}^2) - h^2(x_n - x_1)^2}{(x_n-x_1)^2})
+\]
+and applying $x_1^2 + \ldots + x_{n-1}^2 = x_n^2$ and $x_n - x_1 = gh^2$,
+\[
+= \frac{1}{2} (\frac{-2x_1^2 + 2x_1x_n}{gh^2})
+= \frac{x_1(x_n - x_1)}{x_n - x_1} = x_1.
+\]
+Or, as another example,
+\[
+\alpha (2a_1 d) = \frac{g}{2(x_n - x_1)^2} (2h^2 x_2) (x_n - x_1)
+		= \frac{gh^2 x_2}{x_n - x_1} = x_2.
+\]
+Finally, $\alpha = \frac{g}{2(x_n - x_1)^2} = \frac{g}{2(gh^2)^2} 
+= \frac{1}{2gh^4}$, so $\frac{1}{\alpha} \in \Re[t]$.
+\QED
+
+\begin{corollary}
+\label{thm:quintuplecondition}
+Any Pythagorean quintuple over $\Re[t]$
+can be generated by $\alpha M(a,b,c,d)$
+for some $a,b,c,d,\frac{1}{\alpha} \in \Re[t]$.
+%\[
+%	x_1 = \alpha (a^2+b^2+c^2-d^2)
+%\]
+%\[
+%	x_2 = \alpha (2ad)
+%\]
+%\[
+%	x_3 = \alpha (2bd)
+%\]
+%\[
+%	x_4 = \alpha (2cd)
+%\]
+%\[
+%	x_5 = \alpha (a^2+b^2+c^2+d^2)
+%\]
+\end{corollary}
+
+This finally yields the desired result.
+
+\begin{corollary}
+Any rational curve $C$ on the 3-sphere can be generated as the
+image under $M$ of some polynomial curve $D$ in 4-space: $C = M(D)$.
+\end{corollary}
+\prf
+Let $C = (x_1(t),\ldots,x_5(t))$ be a rational curve on $S^3$.
+Since $(x_1,\ldots,x_5)$ is a Pythagorean quintuple,
+$(x_1,\ldots,x_5) = \alpha M(a,b,c,d)$ 
+for some $a,b,c,d,\frac{1}{\alpha} \in \Re[t]$,
+or $\frac{1}{\alpha}(x_1,\ldots,x_5) = M(a,b,c,d)$.
+But $\frac{1}{\alpha}(x_1,\ldots,x_5)$ is the same rational curve 
+as $(x_1,\ldots,x_5)$, since points in projective space are invariant
+under multiplication by a constant.
+% since $(x_1,x_2,x_3,x_4,x_5) = 
+% (\frac{x_1}{x_5},\ldots,\frac{x_4}{x_5}) = 
+% (\frac{kx_1}{kx_5},\ldots,\frac{kx_4}{kx_5})$ (expressed first in projective
+% space and then in affine space) for any $k \in \Re[t]$.
+Thus, $C = M(a,b,c,d) = M(D)$ for some polynomial curve $D$ in 4-space.
+\QED
+
+Dietz et. al. \cite{dietz93} establish an analogous but slightly weaker
+result for curves on the 2-sphere:
+any rational curve on the 2-sphere can be generated as
+the image under $\delta$ of some {\em rational} curve in 3-space.
+It is important that we need only images of {\em polynomial} curves for
+completeness, since we will design polynomial curves in the image space.
+
+% \begin{theorem}[Dietz et. al. 1993]
+% Any Pythagorean quadruple over $\Re[t]$
+% \[
+% 	x_1^2 + x_2^2 + x_3^2 = x_4^2
+% \]
+% can be generated by 
+% \[
+% 	x_1 = \alpha (2ad - 2bc)
+% \]
+% \[
+% 	x_2 = \alpha (2ac + 2bd)
+% \]
+% \[
+% 	x_3 = \alpha (a^2 + b^2 - c^2 - d^2)
+% \]
+% \[
+% 	x_4 = \pm \alpha (a^2 + b^2 + c^2 + d^2)
+% \]
+% where $\alpha,a,b,c,d \in \Re[t]$.
+% \end{theorem}
+
+% \begin{corollary}[Dietz et. al. 1993]
+% "Any irreducible rational Bezier curve of degree $2n$ on the [2-sphere]
+% can be obtained as the image of a rational Bezier curve of degree $n$
+% under $\delta$" \cite[p. 216]{dietz93}.
+% \end{corollary}
+
+\section{The inverse map}
+\label{sec:invM}
+
+The inverse map $M^{-1}$ is also needed,
+to map input points from the 3-sphere to image space (Figure~\ref{fig2}).
+Note that this map need not be rational, since it is only applied to
+a finite number of points.
+Lemma~\ref{lem:invM} defines the inverse image of a point in projective 4-space,
+and Corollary~\ref{cor:inverseline}
+defines the inverse image of a point in affine 4-space.
+
+\begin{lemma}
+\label{lem:invM}
+The inverse of $M$, $M^{-1}:S^3 \rightarrow P^4$, is
+\begin{equation}
+\label{eq:invM}
+M^{-1} (x_1,x_2,x_3,x_4,x_5) = 
+\left\{ \begin{array}{ll}
+\mbox{\footnotesize{$(x_2,x_3,x_4,x_5-x_1,\sqrt[+]{2(x_5-x_1)})$}}
+	& \mbox{if } x_1 \neq x_5 \\
+\mbox{the hyperplane } x_4 = 0 
+	& \mbox{if } x_1 = x_5
+\end{array} \right.
+\end{equation}
+where $x_5 > 0$.
+\end{lemma}
+\prf
+%
+% DIRECT, LONG PROOF:
+% Let $X = M(1,p,q,r,s)$, $X := (x_0,x_1,x_2,x_3,x_4)$.
+% Then $M^{-1}(X) = (1,p,q,r,s)$.
+% Suppose $s \neq 0$.
+% From $X = (p^2+q^2+r^2+s^2, p^2+q^2+r^2-s^2, 2ps, 2qs, 2rs)$,
+% $p = \frac{x_2}{2s}$, $q = \frac{x_3}{2s}$, $r = \frac{x_4}{2s}$.
+% Substituting into $x_0$ and $x_1$, we get 
+% $ 4s^4 - (4x_0)s^2 + (x_2^2 + x_3^2 + x_4^2) = 0
+% 4s^4 + (4x_1)s^2 - (x_2^2 + x_3^2 + x_4^2)$,
+% or $4s^2(2s^2+ x_1 - x_0) = 0$.
+% Thus, $s=0$ or $s = \pm \sqrt{\frac{x_0 -x_1}{2}}$.
+%
+If $x_1 \neq x_5$, $M^{-1}(M(p,q,r,s,1)) = 
+ M^{-1}(p^2+q^2+r^2-s^2,2ps,2qs,2rs,p^2+q^2+r^2+s^2) = 
+ (2ps,2qs,2rs,2s^2,2s) = (p,q,r,s,1)$.
+%
+$(x_1,x_2,x_3,x_4,x_5) \in S^3$ and $x_1 = x_5$ implies that
+$(x_1,x_2,x_3,x_4,x_5) = (1,0,0,0,1)$.
+Since $M(x_1,x_2,x_3,0,1) = (1,0,0,0,1)$, the inverse image
+of $(1,0,0,0,1)$ contains the entire hyperplane $x_4=0$.
+It is easy to see that it only contains this hyperplane.
+%
+Finally, notice that there are no problems with square roots of negative
+numbers in (\ref{eq:invM}), since $x_5-x_1 \geq 0$ whenever $x_5 > 0$ and
+$(x_1,x_2,x_3,x_4,x_5) \in S^3$.
+\QED
+
+\begin{corollary}
+\label{cor:inverseline}
+The inverse image of the affine point $(x_1,x_2,x_3,x_4) \in S^3 \subset \Re^4$,
+$(x_1,x_2,x_3,x_4) \neq (1,0,0,0)$,
+is the ray from the origin through $(x_2,x_3,x_4,1-x_1)$.
+The inverse image of $(1,0,0,0)$ is still the hyperplane $x_4=0$.
+\end{corollary}
+\prf
+The affine point $(x_1,x_2,x_3,x_4) \in S^3$ is equivalent to the points
+$\{ (kx_1,kx_2,kx_3,kx_4,k): k \neq 0 \}$ in projective space,
+and we restrict to $k>0$.
+$M^{-1}(kx_{1},kx_{2},kx_{3},kx_{4},k) =$ 
+$(kx_{2},kx_{3},kx_{4},k(1-x_{1}),\sqrt{2(1-x_{1})} \sqrt{k})$, 
+or in affine space 
+$\frac{\sqrt{k}}{\sqrt{2(1-x_{1})}} (x_{2},x_{3},x_{4},1-x_{1})$,
+so $M^{-1}\{(kx_{1},kx_{2},kx_{3},kx_{4},k): k > 0 \}$
+is the ray from the origin through $(x_{2},x_{3},x_{4},1-x_{1})$.
+The affine point $(1,0,0,0)$ is equivalent to the points
+$(x_1,x_2,x_3,x_4,x_5)$ with $x_1=x_5 \neq 0$ in projective space.
+\QED
+
+The input points on the 3-sphere are therefore mapped to lines in image space.
+We could interpolate these lines with a curve.
+However, we prefer to use point interpolation rather than line interpolation,
+since this allows
+any number of simple, classical point interpolation methods to be inherited
+from 3-space to 4-space.
+These point interpolation methods are inexpensive, well understood
+by designers, and already available in systems.
+Put another way, the interpolation of lines rather than points offers
+more degrees of freedom to the interpolation, but more difficulty.
+For the present problem, there is sufficient freedom in the interpolation of points
+to generate a good curve, without the added expense of line interpolation.
+
+% also lose automatic C^2 continuity of image curve with lines
+
+In the 2-sphere case, Dietz et. al. \cite{dietz93}
+use inverse image lines, which they interpolate by a single Bezier curve
+by solving a linear system.
+The degree of the Bezier curve is high: at least $d-1$ where $d$ is
+the number of input points.
+The added freedom of line interpolation has intriguing
+potential for the design of curves with more optimality criteria, 
+such as curves on the 3-sphere with minimal tangential acceleration \cite{barr92}.
+% angular velocity?
+It may simplify this optimization in image space to add the freedom
+of interpolating a curve through lines rather than points.
+This is a topic for future study.
+
+To enable point interpolation, we need to
+choose a single point on the inverse image
+line $M^{-1}(X)$ to act as the inverse image of $X$.
+We make the natural choice:
+\[
+M^{-1} (x_1,x_2,x_3,x_4) := M^{-1} (x_1,x_2,x_3,x_4,1) 
+\]
+Serendipitously,  
+$M^{-1} (x_1,x_2,x_3,x_4)$ now lies on the sphere $S^3$!
+($\frac{x_2^2+x_3^2+x_4^2 + (1-x_1)^2}{2(1-x_1)} = \frac{2-2x_1}{2-2x_1} = 1$.)
+This is an added advantage,
+since the interpolating curve in image space will lie close
+to the 3-sphere and thus avoid the origin,
+which it must do since $M$ is undefined at the origin.\footnote{The 
+	interpolating curve could still approach the origin if
+	consecutive $M^{-1}(P_i)$ lie on opposite sides of the sphere,
+	but it is implicitly understood that consecutive input points $P_i$,
+	and thus consecutive $M^{-1}(P_i)$ using Lemma~\ref{lem:invM},
+	lie relatively close together on $S^3$ and, in particular, 
+	are far from antipodal.
+	This is certainly the case when the points are
+	quaternions, since antipodal quaternions represent the same
+	orientation.}
+It is also useful for interactive design and manipulation of the curve.
+Since the inverse image is still a point on the 3-sphere,
+one may ask what we have accomplished by mapping to image space.
+The benefit is that we can now freely interpolate these new points,
+rather than restricting the interpolation to the sphere.
+
+It still remains to define the inverse image of the special point $(1,0,0,0)$.
+We choose to define $M^{-1}(1,0,0,0)$ so that it too lies on the 3-sphere,
+and we choose the first three coordinates equal since $M^{-1}_{y \neq 0}(x,y,y,y)$
+is a point whose first three coordinates are equal:
+\[ M^{-1}(1,0,0,0) := (\frac{\sqrt{3}}{3},\frac{\sqrt{3}}{3},\frac{\sqrt{3}}{3}, 0)
+\]
+
+We now know how to map input points on the 3-sphere to points in 
+image space using $M^{-1}$.
+This is the first step of our algorithm (Section~\ref{sec:general}).
+The second step is to interpolate these points in image space by a curve
+(Figure~\ref{fig3}).
+This can be done using any number of classical methods.
+The most natural choice is probably a cubic B-spline interpolating curve \cite{farin93},
+and this is the curve that we use in all of our examples.
+
+\begin{rmk}
+\label{rmk:1000}
+Since all points on the $x_4=0$ plane map under $M$ to the same point
+on the 3-sphere, $(1,0,0,0)$, it is important that our curve in image space
+not have components on the $x_4=0$ plane.
+This is true since an interpolating curve will only have a component in a plane
+$P$ if at least two consecutive data points lie in $P$;
+but the only $X \in S^3$ with $M^{-1}(X)$ in $x_4=0$ is $(1,0,0,0)$.
+\end{rmk}
+
+% Does restricting to point on image line affect completeness result? No.
+% Incidentally, by collapsing lines to points in the image space,
+% we have not affected the completeness result: since every point on a line
+% of Corollary~\ref{cor:inverseline} maps to the same point on $S^3$,
+% choosing one specific point on the line is immaterial to the final curve
+% on $S^3$.
+
+\section{The image of a curve}
+\label{sec:curveimage}
+
+The final step is to map the interpolating curve in image space 
+back to an interpolating curve on the 3-sphere using $M$ (Figure~\ref{fig4}).
+The following theorem shows how this mapping is done, segment by segment,
+for the important case of a cubic polynomial curve in image space,
+expressed as a Bezier curve.
+
+\begin{theorem}
+\label{sextic}
+Let $c(t)$ be a polynomial cubic Bezier curve in 4-space with
+control points $b_i = (b_{i1},b_{i2},b_{i3},b_{i4})$, ($i=0,\ldots,3$).
+The image of $c(t)$ under $M$ is a rational sextic Bezier curve with 
+control points $c_k$ ($k = 0, \ldots, 6$):
+\begin{equation}
+\label{eq:control-pts}
+c_k = \frac{1}{w_k} 
+      \sum_{\begin{array}{c} \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}} 
+        \frac{\choice{3}{i} * \choice{3}{j}}{\choice{6}{k}}
+	\left( \begin{array}{c}
+            b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} - b_{i4} b_{j4} \\
+            2b_{i1} b_{j4} \\
+            2b_{i2} b_{j4} \\
+            2b_{i3} b_{j4} 
+	\end{array} \right)
+\end{equation}
+and weights $w_k$:
+\begin{equation}
+\label{eq:weights}
+w_k = \sum_{\begin{array}{c} \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}}
+        \frac{\choice{3}{i} * \choice{3}{j}}{\choice{6}{k}}
+	(b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} + b_{i4} b_{j4})
+\end{equation}
+\end{theorem}
+\prf
+Let $M(c(t)) = M(\sum_{i=0}^3 B_i^3(t) b_{i}) 
+:= (m_1(t),m_2(t),m_3(t),m_4(t),m_5(t))$, 
+where $B_i^n(t)$ is the $i^{\mbox{th}}$ Bernstein polynomial of degree $n$.
+Consider the coordinate
+\[ m_5(t) =  [\sum_{i=0}^3 B_i^3(t) b_{i1}]^2 + 
+	\ldots + [\sum_{i=0}^3 B_i^3(t) b_{i4}]^2
+     =   \sum_{i=0}^3 \sum_{j=0}^3 
+	\frac{\choice{3}{i} * \choice{3}{j}}{\choice{6}{i+j}}
+       B^6_{i+j}(t) (b_{i1} b_{j1} + \ldots + b_{i4} b_{j4})
+\]
+by the product rule of Bernstein polynomials \cite{farin93}.
+Letting $k=i+j$, this becomes
+\[ \sum_{k=0}^6 B_k^6(t) 
+	\sum_{\begin{array}{c}  \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}} 
+	\frac{\scriptchoice{3}{i} * \scriptchoice{3}{j}}{\scriptchoice{6}{k}}
+	(b_{i1} b_{j1} + \ldots + b_{i4} b_{j4}) \]
+Computing the other coordinates analogously yields
+\[ M(c(t)) = 
+   \sum_{k=0}^6 B_k^6(t)
+	\sum \frac{\choice{3}{i} * \choice{3}{j}}{\choice{6}{k}}
+	\left( \begin{array}{c}
+            b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} - b_{i4} b_{j4} \\
+            2b_{i1} b_{j4} \\
+            2b_{i2} b_{j4} \\
+            2b_{i3} b_{j4} \\
+            b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} + b_{i4} b_{j4}
+	\end{array} \right) \]
+% \[         = \sum_{k=0}^6 B_k^6(t) 
+%	\sum_{\begin{array}{c} 0 \leq i \leq 3 \\ 
+%			     0 \leq j \leq 3 \\ 
+%			     i+j=k
+%			     \end{array}} 
+%       \frac{\choice{3}{i} * \choice{3}{j}}{\choice{6}{k}}
+%	\left( \begin{array}{c}
+%           b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} + b_{i4} b_{j4} \\
+%            w_k (\frac{b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} - b_{i4} b_{j4}}{w_k}) \\
+%            w_k (\frac{2b_{i1} b_{j4}}{w_k}) \\
+%            w_k (\frac{2b_{i2} b_{j4}}{w_k}) \\
+%            w_k (\frac{2b_{i3} b_{j4}}{w_k})
+%	\end{array} \right) \]
+%
+which is a sextic rational Bezier curve with 
+control points (\ref{eq:control-pts}) and weights (\ref{eq:weights}).
+\QED
+
+Notice how the map $M$ is hidden in the formula for the control points 
+and weights (compare (\ref{eq:control-pts})-(\ref{eq:weights}) and (\ref{eq:M})).
+
+Since $M$ is a rational map,
+the curve on the 3-sphere inherits the continuity of the curve in image space.
+Consequently, since it is simple to define interpolating curves
+in image space with $C^2$ continuity, or curves of higher degree with
+even higher continuity, 
+the curve on $S^3$ can easily have $C^2$ continuity
+and indeed arbitrary continuity.
+Other interpolation methods (e.g., slerping methods, spherical biarc methods)
+have considerable difficulty with continuity.
+
+\section{Examples}
+\label{sec:eg}
+
+We present more examples of the method in Figures~\ref{fig7}-\ref{fig8}.
+The image curve is again a cubic B-spline interpolating curve.
+Notice how well-behaved the curves are, inheriting the quality
+of the image curves.
+We have experimented with many other examples, with excellent results.
+
+To visualize this four-dimensional problem in 3-space,
+we use a standard trick.
+We use input points with $x_3=0$, which can be visualized by removing
+the $x_3$ component.
+Fortunately, points on $S^3$ with $x_3=0$ map under $M^{-1}$ to points in 4-space with $x_2=0$,
+and points in 4-space with $x_2=0$ map under $M$ to points on $S^3$ with $x_3=0$.
+Thus, we can visualize points in the original space (on $S^3$) by removing
+the $x_3$ component, and points in image space by removing the $x_2$ 
+component.\footnote{The special case
+$M^{-1}(1,0,0,0) = (\frac{\sqrt{3}}{3}, \frac{\sqrt{3}}{3}, \frac{\sqrt{3}}{3}, 0)$
+is a problem for this visualization technique, 
+since $x_2 \neq 0$ for this point in image space.
+We use $M^{-1}(1,0,0,0) = (\frac{\sqrt{2}}{2}, 0, \frac{\sqrt{2}}{2}, 0)$
+for purposes of visualization.}
+Of course, all computations are still performed in 4-space and projection to 3-space
+is only used for visualization.
+
+\begin{figure}
+\vspace{2.4in}
+\special{psfile=/rb/jj/Research/S3curve/img/fig7.ps hoffset=150}
+\caption{Another S3 curve}
+\label{fig7}
+\end{figure}
+% GLUTS3curve -i < data/input3
+
+\begin{figure}
+\vspace{2.4in}
+\special{psfile=/rb/jj/Research/S3curve/img/fig8.ps hoffset=150}
+\caption{And another}
+\label{fig8}
+\end{figure}
+% GLUTS3curve -i < data/input6
+
+% \begin{figure}[h]
+% \vspace{2.4in}
+% \special{psfile=/rb/jj/Research/S3curve/img/fig9.ps}
+% \caption{Yet another}
+% \label{fig9}
+% \end{figure}
+% GLUTS3curve < data/wavyinput
+
+\section{Conclusions}
+\label{sec:conclude}
+
+This paper has explored a new approach to the design of curves
+on the 3-sphere that is capable of building any rational curve on the 3-sphere.
+Using Euler's Four Squares Theorem, a rational map to the 3-sphere was developed 
+that is onto all points and all curves on the 3-sphere.
+The inverse of this map was used to map points on $S^3$ into an image space,
+where the design of an interpolating curve is no longer constrained to
+the 3-sphere and can thus be approached using known classical techniques.
+This polynomial curve in image space is then mapped back to the sphere using the 
+rational map to the 3-sphere.
+
+Our curve inherits all of the favourable properties of rational curves,
+as well as many favourable properties of the specific curve or curve type
+(e.g., Bezier) in image space, such as continuity and Bezier structure.
+For example, if Bezier curves are designed as in Section~\ref{sec:curveimage},
+the curve on the 3-sphere enjoys all of the advantages of Bezier curves, such as
+efficient computation, subdivision, local control, affine invariance, 
+variation diminution, as well as a predictable behaviour and ease of 
+implementation because of the rich understanding of Bezier curves.
+Since the curve has a complete analytic description, it allows
+simple manipulation and complete control.
+This construction answers many of the challenges for future work
+outlined by Shoemake in his paper \cite{shoemake85}.
+
+% A topic for future study is the design of curves with more explicit optimality
+% criteria, such as the minimal tangential acceleration of Barr et.\ al.\ \cite{barr92},
+% using our method.
+% Since the curve is designed in an image space,
+% this must be approached differently.
+
+\parindent=-20mm
+
+\section{Acknowledgements}
+
+This work was supported in part
+by the National Science Foundation under grant CCR-9213918.
+
+%\bibliographystyle{unsrt}
+\bibliographystyle{plain}
+\begin{thebibliography}{99}
+
+\bibitem{barr92}
+Barr, A.H., B. Currin, S. Gabriel and J.F. Hughes (1992)
+Smooth interpolation of orientations with angular velocity
+constraints using quaternions.  SIGGRAPH '92, Chicago, 26(2), 313--320.
+
+\bibitem{boehmHansford91}
+Boehm, W. and D. Hansford (1991)
+Bezier Patches on Quadrics.
+In {\em NURBS for Curve and Surface Design}, edited by G. Farin,
+SIAM, Philadelphia, 1--14.
+
+\bibitem{dickson52}
+Dickson, L.E. (1952) History of the theory of numbers: Volume II,
+Diophantine analysis.  Chelsea (New York).
+
+\bibitem{dietz93}
+Dietz, R., J. Hoschek and B. J\"{u}ttler (1993)
+An algebraic approach to curves and surfaces on the sphere and on other
+quadrics.  Computer Aided Geometric Design 10, 211--229.
+
+\bibitem{duff85}
+Duff, T. (1985)
+Quaternion splines for animating orientation.
+1985 Monterey Computer Graphics Workshop, 54--62.
+
+\bibitem{ebbinghaus90}
+Ebbinghaus, H.-D., H. Hermes, F. Hirzebruch, M. Koecher, K. Mainzer,
+J. Neukirch, A. Prestel and R. Remmert (1990)
+Numbers.
+Springer-Verlag (New York).
+
+\bibitem{farin93}
+Farin, G. (1993) Curves and surfaces for computer aided geometric design.
+Academic Press (New York), third edition.
+
+\bibitem{hoschekSeemann92}
+Hoschek, J. and G. Seemann (1992)
+Spherical splines.
+Mathematical Modeling and Numerical Analysis, 26(1), 1--22.
+
+\bibitem{jjjw95}
+Johnstone, J. and J. Williams (1995)
+Rational Control of Orientation for Animation.
+{\em Graphics Interface '95}, Quebec City, 179--186.
+
+\bibitem{jjjw95b}
+Johnstone, J.K. and J. Williams (1995)
+A Rational Model of the Surface Swept by a Curve.
+{\em Computer Graphics Forum}, 14(3), Proceedings of Eurographics '95,
+Maastricht, 77--88.
+
+\bibitem{junkins86}
+Junkins, J. and J. Turner (1986)
+Optimal Spacecraft Rotational Maneuvers.
+Elsevier, New York.
+
+\bibitem{kim95}
+Kim, M.-J., M.-S. Kim and S. Shin (1995)
+A general construction scheme for unit quaternion curves with simple
+high order derivatives.
+SIGGRAPH '95, Los Angeles, 369--376. 
+
+\bibitem{kubota72}
+Kubota, K.K. (1972) Pythagorean triples in unique factorization domains.
+American Mathematical Monthly 79, 503--505.
+
+\bibitem{levinson70}
+Levinson, N. and R.M. Redheffer (1970)
+Complex Variables.
+Holden-Day (San Francisco).
+
+\bibitem{nam95}
+Nam, K.-W. and M.-S. Kim (1995)
+Hermite interpolation of solid orientations based on a smooth blending
+of two great circular arcs on SO(3).
+Proc. of CG International '95.
+
+\bibitem{nielson92}
+Nielson, G. and R. Heiland (1992)
+Animated rotations using quaternions and splines on a 4D sphere.
+Programming and Computer Software, 145--154.
+
+\bibitem{nielson93}
+Nielson, G. (1993)
+Smooth interpolation of orientations.
+In Models and Techniques in Computer Animation, Springer-Verlag (New York),
+75--93.
+
+\bibitem{pletinckx89}
+Pletinckx, D. (1989) 
+Quaternion calculus as a basic tool in computer graphics.
+The Visual Computer 5, 2--13.
+
+\bibitem{schlag91}
+Schlag, J. (1991) Using geometric constructions to interpolate
+orientation with quaternions.  In Graphics Gems II, Academic Press (New York),
+377--380.
+
+\bibitem{shoemake85}
+Shoemake, K. (1985) Animating rotation with quaternion curves.
+SIGGRAPH '85, San Francisco, 19(3), 245--254.
+
+\bibitem{wang93}
+Wang, W. and B. Joe (1993)
+Orientation interpolation in quaternion space using spherical biarcs.
+{\em Graphics Interface '93}, 24--32.
+
+\bibitem{wang95}
+Wang, W. (1995) 
+Rational spherical curves.  Technical Report, Dept. of Computer Science,
+University of Hong Kong.
+
+\end{thebibliography}
+
+\end{document}
+
+% Problems of Shoemake solved by our method:
+% (1) trigonometric slerping (Slerp(p,q,u) = $(p:q)_u$) replaced by fully polynomial
+% interpolation (added speed, robustness, compatibility);
+% (2) can add new points on interpolating curve trivially since curve is Bezier,
+% whereas not with Shoemake: "there are simple algorithms for adding new sequence
+% points to ordinary splines without altering the original curve; they do not
+% work for this interpolant" (p. 251);
+% (3) answers Shoemake's query "is there is some related interpolant [to Shoemake's
+% spherical `Bezier' curves] that is well-characterized?":
+% our curves are true Bezier curves in 4-space not pseudo-Bezier curves;
+% (4) Cannot achieve  Shoemake's goal of a spherical curve parameterized by
+% arc length (p. 251) using arguments of Farouki, but we will try to control
+% the speed by knot sequences (and possibly by PH-curve techniques?)
+
+% Conclusion: an improvement of Shoemake's spherical interpolation technique
+% (moreover addressing all of the issues that Shoemake left open for improvement).
+% and without resorting to costly and nonpolynomial optimization techniques.
+
+Future work:
+
+1) How can we use the added freedom of line interpolation to design
+	curves with more optimal behaviour on the sphere?
+
+2) Can our method be extended to interpolating curves on quadrics in 4-space, using
+ideas analogous to pp. 215,228 of Dietz et. al.?
+
+\bibitem{boehmHansford91}
+Boehm, W. and D. Hansford (1991)
+Bezier Patches on Quadrics.
+In {\em NURBS for Curve and Surface Design}, edited by G. Farin,
+SIAM, Philadelphia, 1--14.
+
+\bibitem{dietz93}
+Dietz, R., J. Hoschek and B. J\"{u}ttler (1993)
+An algebraic approach to curves and surfaces on the sphere and on other
+quadrics.  Computer Aided Geometric Design 10, 211--229.
+
+\bibitem{hoschekSeemann92}
+Hoschek, J. and G. Seemann (1992)
+Spherical splines.
+Mathematical Modeling and Numerical Analysis, 26(1), 1--22.
+
+\bibitem{shoemake85}
+Shoemake, K. (1985) Animating rotation with quaternion curves.
+SIGGRAPH '85, San Francisco, 19(3), 245--254.
+
+\bibitem{jjjw95b}
+Johnstone, J.K. and J. Williams (1995)
+A Rational Model of the Surface Swept by a Curve.
+{\em Computer Graphics Forum}, 14(3), Proceedings of Eurographics '95,
+Maastricht, 77--88.
+
+\bibitem{junkins86}
+Junkins, J. and J. Turner (1986)
+Optimal Spacecraft Rotational Maneuvers.
+Elsevier, New York.
+
+\bibitem{jjjw95}
+Johnstone, J. and J. Williams (1995)
+Rational Control of Orientation for Animation.
+{\em Graphics Interface '95}, Quebec City, 179--186.
+
+\bibitem{duff85}
+Duff, T. (1985)
+Quaternion splines for animating orientation.
+1985 Monterey Computer Graphics Workshop, 54--62.
+
+\bibitem{pletinckx89}
+Pletinckx, D. (1989) 
+Quaternion calculus as a basic tool in computer graphics.
+The Visual Computer 5, 2--13.
+
+\bibitem{schlag91}
+Schlag, J. (1991) Using geometric constructions to interpolate
+orientation with quaternions.  In Graphics Gems II, Academic Press (New York),
+377--380.
+
+\bibitem{nielson92}
+Nielson, G. and R. Heiland (1992)
+Animated rotations using quaternions and splines on a 4D sphere.
+Programming and Computer Software, 145--154.
+
+\bibitem{nielson93}
+Nielson, G. (1993)
+Smooth interpolation of orientations.
+In Models and Techniques in Computer Animation, Springer-Verlag (New York),
+75--93.
+
+\bibitem{kim95}
+Kim, M.-J., M.-S. Kim and S. Shin (1995)
+A general construction scheme for unit quaternion curves with simple
+high order derivatives.
+SIGGRAPH '95, Los Angeles, 369--376. 
+
+\bibitem{nam95}
+Nam, K.-W. and M.-S. Kim (1995)
+Hermite interpolation of solid orientations based on a smooth blending
+of two great circular arcs on SO(3).
+Proc. of CG International '95.
+
+\bibitem{wang93}
+Wang, W. and B. Joe (1993)
+Orientation interpolation in quaternion space using spherical biarcs.
+{\em Graphics Interface '93}, 24--32.
+
+\bibitem{wang95}
+Wang, W. (1995) 
+Rational spherical curves.  Technical Report, Dept. of Computer Science,
+University of Hong Kong.
+
+\bibitem{barr92}
+Barr, A.H., B. Currin, S. Gabriel and J.F. Hughes (1992)
+Smooth interpolation of orientations with angular velocity
+constraints using quaternions.  SIGGRAPH '92, Chicago, 26(2), 313--320.
+
+\bibitem{dickson52}
+Dickson, L.E. (1952) History of the theory of numbers: Volume II,
+Diophantine analysis.  Chelsea (New York).
+
+\bibitem{ebbinghaus90}
+Ebbinghaus, H.-D., H. Hermes, F. Hirzebruch, M. Koecher, K. Mainzer,
+J. Neukirch, A. Prestel and R. Remmert (1990)
+Numbers.
+Springer-Verlag (New York).
+
+\bibitem{levinson70}
+Levinson, N. and R.M. Redheffer (1970)
+Complex Variables.
+Holden-Day (San Francisco).
+
+\bibitem{kubota72}
+Kubota, K.K. (1972) Pythagorean triples in unique factorization domains.
+American Mathematical Monthly 79, 503--505.
+
+\bibitem{farin93}
+Farin, G. (1993) Curves and surfaces for computer aided geometric design.
+Academic Press (New York), third edition.
+

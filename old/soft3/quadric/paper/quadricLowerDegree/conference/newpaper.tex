@@ -1,0 +1,1126 @@
+% *********************************************************************
+% *  Revision History :                                               *
+% *           Mar/01/91 - Many changes, including the following       *
+% *                       (1) Lemma 2.1 for perpendicular stuff is    *
+% *                           added.                                  *
+% *                       (2) Section for Linear Intersection has been*
+% *                           rewritten.                              *
+% *                       (3) Dandelin sphere, inscribed circle and   *
+% *                           so on are added to the characterization  *
+% *                           section.  The Goldman-Miller criteria   *
+% *                           has been removed to save space.         *
+% *                       (4) Robustness added in Conclusion.         *
+% *                                                                   *
+% *           Mar/02/91 - (1) Author field is changed since many ACM  *
+% *                           has the new style and, by the way, I am *
+% *                           not supported by NSF grant.             *
+% *                       (2) Citation of the Figure 10 has been      *
+% *                           replaced with a direct citation to      *
+% *                           Hilbert's book.  Hence, if any item is  *
+% *                           changed, this direct citation has to be *
+% *                           changed accordingly.                    *
+% *           Mar/04/91 - (1) Change to 10pt.                         *
+% *                       (2) Second revision.                        *
+% *********************************************************************
+
+\documentstyle [twocolumn]{article}
+
+\input{table}                 % include TaBlE macros
+
+\newtheorem{example}{Example}[section]
+\newtheorem{property}{Property}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{corollary}{Corollary}[section]
+
+\newcommand{\DoubleSpace}{\edef\baselinestretch{1.4}\Large\normalsize}
+\newcommand{\QED}{\rule{2mm}{3mm}}
+
+%\DoubleSpace
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\topmargin}{0pt}
+\setlength{\textheight}{9.35in}
+\setlength{\textwidth}{7in}
+\setlength{\columnsep}{0.33in}
+
+\addtolength{\oddsidemargin}{-6mm}
+\addtolength{\topmargin}{-1cm}
+
+\def\thefootnote{\fnsymbol{footnote}}        %%%%%% CHANGE TO footnote SYMBOL 
+
+\title{\bf On the Planar Intersection of Natural Quadrics\footnotemark[1]}
+
+\author{Ching-Kuang Shene\ \ \ \ \ \ \ John K. Johnstone\\ \\
+        Department of Computer Science, \\
+        The Johns Hopkins University,   \\
+        Baltimore, Maryland 21218.}
+
+\date{\ }
+
+\pagestyle{empty}
+
+\begin{document}
+
+\maketitle
+
+
+\footnotetext[1]{This work was supported by National Science Foundation grant 
+                 IRI--8910366.\vspace{0.9in}}
+
+\def\thefootnote{\arabic{footnote}} %%%%%%%%%% CHANGE to NUMBER
+\setcounter{footnote}{0}            %%%%%%%%%% Reset the footnote counter
+
+% #####################################################################
+%                        ABSTRACT
+% #####################################################################
+
+\begin{abstract}
+     In general, two quadric surfaces intersect in a space quartic curve.
+However, the intersection curve frequently degenerates to  a collection of 
+plane curves.  These degenerate cases
+introduce problems into the general intersection algorithms and are difficult 
+to implement in a reliable way.  In this paper, we investigate this problem 
+for natural quadrics.  Three algorithms are presented: to detect and compute
+1) conic intersections,
+2) linear intersections and 3) tangency and disjointedness.
+The techniques we present are considerably
+different from traditional methods in that only elementary geometric arguments
+are used.  Therefore these algorithms are easily implementable and can be 
+understood easily without any algebraic geometry background.
+\end{abstract}
+
+% ######################################################################
+%                       INTRODUCTION
+% ######################################################################
+
+\section{Introduction}
+\label{section:introduction}
+     In general, two quadric surfaces intersect in a space quartic curve.
+However, the intersection curve frequently degenerates to a collection of
+plane curves.  These degenerate cases
+introduce problems into the general intersection algorithms and are difficult 
+to implement in a reliable way.  In this paper, we will investigate this 
+problem for natural quadrics, using fully geometric methods. 
+
+     Natural quadrics consist of the spheres, the circular cylinders and 
+the right cones.  Ever since Hakala's 1980 paper~\cite{hakala:1980}, many 
+papers have been dedicated to this restricted class because, in most CAD 
+systems, they are still the most useful and natural objects to model 
+mechanical parts.  During the past decade, starting with 
+Levin~\cite{levin:1976,levin:1979}, algebraic methods based on the pencil of 
+two quadrics have been used successfully to attack the intersection problem.  
+Other examples are Farouki--Neff--O'Connor~\cite{farouki:1989},
+Miller~\cite{miller:1987}, 
+Ocken--Schwartz--Sharir~\cite{ocken:1987} and Sarraga~\cite{sarraga:1983}.  
+Only recently people have started to look at the conditions that cause 
+degenerate intersection curves.  Farouki--Neff--O'Connor~\cite{farouki:1989}
+is the first complete study using the pencil technique.  Their paper deals 
+with general quadric surfaces.  To the best of 
+our knowledge, Goldman--Miller~\cite{goldman:1990} is the only paper 
+concerning the conditions that cause the intersection of two natural quadrics 
+to degenerate to a conic.  Knowing if two natural quadrics have conic
+intersection is useful since, in this case, as M. A. Sabin has pointed out,
+the two surfaces can be blended using a family of cyclides 
+(Pratt~\cite{pratt:1990}).  Moreover, if two quadrics intersect in conics, 
+their blending surface can be a quadric or cubic surface, rather than a
+quartic (Warren~\cite{warren:1987}).
+
+
+     In the Goldman--Miller paper~\cite{goldman:1990}, the pencil method is 
+used to establish some simple conditions for conic intersections.  
+However, methods based on pencil theory are usually involved which lack 
+geometric intuition.  This may be necessary for the general case,
+but simpler methods are possible with natural quadrics.  Because of this and 
+our belief that geometric methods usually uncover geometric insight, we will 
+use elementary geometry to handle the intersection problem.
+
+    Goldman and Miller focus on the detection of planar 
+intersections,\footnote{Computation will be discussed in an upcoming paper 
+of Goldman and Miller.} whereas detection and computation are done at
+the same time with our method.   We also consider the detection and computation
+of one point tangency and disjoint quadrics.  Since our approach is completely
+geometric (only geometric arguments are used), 
+it does not depend on the representation 
+(e.g., parametric or implicit).  This provides an advantage over the algebraic
+pencil method since it can be adapted to any representation as long as that 
+representation is capable of calculating the intersection of lines and planes,
+determining whether a point lies inside a surface, and computing the distance 
+from a point to a surface along a specific direction.
+
+     Using the pencil technique, Goldman--Warren~\cite{goldman-warren:1990}
+generalizes Goldman--Miller's idea to revolutionary quadrics.  They found that
+if the axes of two quadrics of revolution intersect at a point equidistant
+from the two surfaces, then the intersection between the two quadric surfaces
+is degenerate.  Note that this is only a sufficient condition.  The height
+test to be discussed in Section~\ref{section:algorithm} can be modified
+easily to handle this type of quadric surface and thus provides a necessary
+and sufficient condition for conic intersection of two revolutionary quadrics.
+
+     Finally, Piegl~\cite{piegl:1989} uses
+a geometric method to distinguish eight cases for cylinder--cone intersection,
+in which two of them give conic intersection.  However, from Piegl's
+enumeration, it is not  clear how to devise an extension to handle
+the cone--cone case, which is more general and more subtle than the 
+cylinder--cone case, since conic intersection can be obtained even if the 
+vertex of the cone lies inside the other surface.
+
+     This paper is divided into seven sections.  
+In Section~\ref{section:algorithm}, our algorithm for detecting and 
+calculating conic intersections is presented in its most general form without 
+concern for degenerate cases.  Section~\ref{section:special-degenerate} 
+discusses how to handle the degenerate cases so that the presentation of our 
+algorithm is complete.  Sections~\ref{section:linear} 
+and~\ref{section:tangency-disjoint} present simple algorithms for detecting
+and computing linear intersections, tangency and disjointedness.  
+In Section~\ref{section:characterization}, some characterization 
+theorems are presented, which give more geometric insights into the 
+intersection problem.  Section~\ref{section:conclusion} gives our conclusion 
+and an overview of the method.
+
+     For simplicity, we concentrate on the intersection of two cones.  The 
+intersection of a sphere with another surface is very simple; and results for 
+the cylinder can be obtained easily from the cone algorithms, since a cylinder
+is a cone with vertex at infinity.  
+\begin{table}
+\caption{Possible Intersection Types of Two Natural Quadrics}
+\label{tbl:intersection-type}
+$$
+\BeginTable
+     \BeginFormat
+     |5 c              | c                    | c             |5
+     \EndFormat
+     \_5
+     | \it Number of | \it Number of | \it Number of | \\
+     | \it Conics    | \it Lines     | \it Points    | \\ \_4
+     |      2        |       0       |       0       | \\ \_
+     |      1        |       1       |       0       | \\ \_
+     |      0        | 1 (tangent line), 2 | 0       | \\ \_
+     |      0        |       0       |      1,2      | \\
+     \_5
+\EndTable
+$$
+\end{table}
+
+     Since we are concerned with planar intersections, the case of a line and 
+a space cubic, as well as all quartic space curves, will not be considered.  
+With a simple geometric argument, it can be shown that the planar intersections
+in Table~\ref{tbl:intersection-type} are the only possibilities.
+
+     In the rest of this paper, we will use the following notations.
+\begin{itemize}
+     \item A {\em natural} quadric is a sphere, a circular cylinder, or a 
+          right cone.
+     \item An {\em axial} quadric is a natural quadric with an axis, namely 
+          a cylinder or a cone.
+     \item ${\cal C}(V,\ell,\alpha)$ is the cone with vertex $V$, axis $\ell$
+          and half angle $\alpha$.
+     \item ${\cal Z}(\ell,r)$ is the cylinder with axis $\ell$ and radius $r$.
+     \item $\stackrel{\longleftrightarrow}{AB},
+          \stackrel{\longrightarrow}{AB},\overline{AB}$ and
+          $|\overline{AB}|$ are the line, the half ray, the segment, and the 
+          length of the segment determined by two points $A$ and $B$.
+     \item A {\em conic} intersection is a composite intersection curve such
+          that the highest degree among all component curves is two (Cases 1 
+          and 2 in Table~\ref{tbl:intersection-type}).
+     \item A {\em linear} intersection is a composite intersection curve such
+          that the highest degree among all component curves is one (Case 3 
+          of Table~\ref{tbl:intersection-type}).
+     \item A {\em point} intersection is a composite intersection such that the
+          components are all isolated points (Case 4 of 
+          Table~\ref{tbl:intersection-type}).
+     \item {\em Tangency} means a point intersection.  Hence a common tangent
+          line is a linear intersection.
+     \item Two surfaces are {\em congruent} if and only if there exists a 
+          rigid motion transforming one into the other.
+\end{itemize}
+
+% #########################################################################
+%                          MAIN ALGORITHM
+% #########################################################################
+
+
+\section{The Main Algorithm}
+\label{section:algorithm}
+     In this section, we present our conic intersection algorithm in a
+generic form, ignoring degenerate cases.  The idea is to  reduce the surface 
+intersection problem to a simple planar line intersection problem, determine 
+whether the intersection curve is a conic via some simple inside-outside and 
+on-surface tests and, if so, compute the equation of the intersection conic.
+The following technical lemma is needed in later work.
+
+\begin{lemma}
+\label{lemma:perpendicular-stuff}
+     Let $P$ be a plane cutting a revolutionary quadric in a conic $C$.
+Then the plane $E$ determined by the major axis of $C$ and the axis of 
+revolution of the quadric is perpendicular to $P$.
+\end{lemma}
+{\bf Proof:} We will establish this lemma for a 
+cone ${\cal C}(V,\ell,\alpha)$.
+The same proof holds for other revolutionary quadrics, by replacing $V$
+by the center of the quadric and $\ell$ by the axis of revolution.
+Let $D$ be the plane
+perpendicular to $\ell$ through $V$ (Figure~\ref{fig:perpendicular-stuff}).
+In general, $P$ intersects $D$ in a line $d$.  Drop a perpendicular $e$ from
+$V$ to $d$.  The plane determined by $e$ and $\ell$ is clearly perpendicular
+to $P$, and contains the major axis of the conic.  In fact, it is exactly the
+plane $E$. \ \ \ \ \QED
+\begin{figure}
+\vspace{5.5cm}
+\caption{Relation of Plane $E$ and Plane $P$}
+\label{fig:perpendicular-stuff}
+\end{figure}
+
+We can immediately use this lemma to develop a necessary condition for
+conic intersection.
+
+\begin{lemma}
+\label{lemma:non-skew}
+     If two axial natural quadrics have a conic intersection component, their 
+axes are coplanar.  
+\end{lemma}
+{\bf Proof:}  Let $Q_1$ and $Q_2$ be two cones
+with a conic intersection.  
+(The proof for cylinders is analogous.)
+Let $P$ be the plane containing one of the 
+intersection conics.
+By Lemma~\ref{lemma:perpendicular-stuff},  the plane determined by the major 
+axis of the intersection  conic and the axis of $Q_1$ is perpendicular to $P$.
+Hence, the axis of $Q_1$ lies on the plane through the axis of the 
+intersection conic and perpendicular to $P$.  By the same argument, the axis
+of $Q_2$ lies in this plane.\ \ \ \QED
+
+     If the axes of two axial quadrics are distinct and coplanar,
+they determine a plane called the {\em axial plane}.  
+This plane cuts each surface in a pair of straight lines, called the 
+{\em skeletal pair}.  In general, these two 
+pairs of lines intersect each other in four points, and this is the 
+non-degenerate case that will be discussed in this section.  The lines joining
+these four points that do not coincide to the original lines are called the 
+{\em diagonals} (Figure~\ref{fig:potential-seg}).  We restrict to diagonals
+that do not contain the vertex of either cone.
+The collection of diagonals and skeletal pairs are called the
+{\em skeletal lines} on the axial plane.\footnote{More precisely, the four
+lines of the two skeletal pairs form a {\em complete quadrilateral} with 
+three diagonal lines.  However, the diagonal containing the
+two vertices of the two given cones will not be used in this paper.}  
+Each diagonal is cut by the
+two intersection points into three parts, one {\em finite} and two 
+{\em infinite segments}.  If either finite or infinite segment lies entirely 
+in the interior of both surfaces, it is called a {\em potential segment}.  
+Note that, since the end points of a potential segment lie on the intersection 
+of the two skeletal pairs and thus on the intersection of the two surfaces, 
+and the cylinder and half cone are convex, if any point of the segment lies 
+in the interior of both surfaces, so do all interior points of the segment.  
+Hence, in order to test whether any one of the segments lies in the interior 
+of the intersection, simply test an arbitrary interior point of the segment.
+
+% \vspace{5mm}
+\begin{figure}
+\vspace{7cm}
+\caption{Several Examples of Potential Segments}
+\label{fig:potential-seg}
+\end{figure}
+
+     In general, we have one or two potential segments; however, a potential
+segment may not exist at all.  Furthermore, the number of potential segments,
+in some degenerate cases, could be infinite.   
+In Figure~\ref{fig:potential-seg} we show some skeletal lines of two cones,
+with potential segments indicated by thick lines.
+
+     Suppose two axial quadrics have a conic  intersection.  
+For convenience, let it be an ellipse $E$ (see 
+Figure~\ref{fig:cone-cone-example}).  
+By Lemma~\ref{lemma:perpendicular-stuff}, the plane containing
+$E$, $E_P$, is perpendicular to the axial plane ${\cal H}$.
+Note that the two intersecting quadrics,
+and thus the intersection curve, are symmetric about the axial plane 
+${\cal H}$.  Therefore $E$ is cut by ${\cal H}$ into two congruent halves.
+Let us consider the vertical projection of $E$ onto ${\cal H}$.  Obviously, 
+this vertical projection lies in the line $E_P\cap{\cal H}$.  Furthermore,
+the two points $E\cap{\cal H}$ lie on both surfaces and thus are the 
+intersection points of the skeletal lines.  $E_P\cap{\cal H}$ must be a 
+diagonal, since it is a skeletal line and it does not lie on either surface.
+However, since the vertical projection of $E$ 
+onto ${\cal H}$ lies in the interior of both surfaces,
+it is a potential segment.  If the 
+intersection curve $E$ is a hyperbola or a parabola, its projection onto 
+${\cal H}$ would be an infinite interval with either one or two components.
+These observations allow us to develop an efficient conic 
+intersection algorithm.
+
+     Let us find a diagonal and the potential segment on it.  If no potential 
+segment can be found, the above observation tells us that there cannot be any 
+conic intersection.  If we do find a potential segment, pick any point on it 
+and let it be $X$.  The {\em height} from $X$ to either surface is the 
+distance from $X$ to that surface, measured along the line perpendicular to 
+${\cal H}$ and through $X$ (see Figure~\ref{fig:cone-cone-example}).  This is 
+well-defined, because both surfaces are symmetric about ${\cal H}$ and the 
+components of the interior of the surface containing $X$ are both convex.  
+Hence the perpendicular to ${\cal H}$ through $X$ hits either surface in two 
+points and no matter which point is chosen, the height is the same.  
+\begin{figure}
+\vspace{2.5cm}
+\caption{The Conic Intersection of Two Cones}
+\label{fig:cone-cone-example}
+\end{figure}
+
+\begin{definition}
+     $X$ passes the {\em height test} if and only if the heights to both 
+surfaces from $X$ are equal.
+\end{definition}
+
+     We claim that if the chosen point $X$ passes the height test, then the two
+surfaces have a conic intersection.   On the plane through the potential 
+segment and perpendicular to ${\cal H}$, there are two conics, one from each 
+axial surface.  Let these conics be called $E_1$ and $E_2$.  Note that these 
+two conics project onto the same potential segment (see 
+Figure~\ref{fig:height-test}).  Let the heights from $X$ to the surfaces be 
+$h_1$ and $h_2$.  Recall from elementary geometry that if we know the type of a
+central conic, the two end points of its major axis and one more point on the 
+conic, then the conic is uniquely determined.\footnote{This can be easily seen
+using some algebra.  The distance between the two end points is $2a$, where $a$
+is the length of the major axis.  Then the central conic has equation 
+$x^2/a^2\pm y^2/b^2=1$, where $b$ is the unknown length of the minor axis.  
+Plugging the third point into this equation and solving for $b$, we have the 
+complete equation.}  Thus, if $X$ passes the height test, the two ellipses 
+$E_1$ and $E_2$ must coincide.  Note that the major axis of this ellipse is
+the potential segment, and the minor axis is the line perpendicular to the 
+axial plane at the midpoint of the potential segment.  
+In summary, we have a simple method of detecting conic intersection.
+\begin{figure}[h]
+\vspace{5.5cm}
+\caption{A Height Test}
+\label{fig:height-test}
+\end{figure}
+
+\begin{theorem}
+\label{theorem:conic-conditions-using-height-test}
+     Two axial natural quadrics have a conic 
+intersection component if and only if there exists a potential segment such 
+that any point of it passes the height test.
+\end{theorem}
+
+     We also have a simple method of computing the conic.  It is an ellipse
+if the potential segment is finite, a parabola if the potential segment is
+one infinite segment, and a hyperbola if it is two infinite segments.
+Knowing its type, the conic can be determined by 2 or 3 points: the end points
+of its potential segment and the point of the height test.
+
+     If two quadric surfaces intersect in a conic, then the residue curve (the
+other component of the intersection) must be a conic also, perhaps a 
+degenerate one (in which case see Section~\ref{section:one-coincide-line}).  
+If we have exactly two potential segments and both of them 
+pass the height test, it is easily seen that the intersection curve consists 
+of two conic components.  Because there are at most two diagonals,
+with at most two interior tests,
+we can find the two needed potential segments.  Then with at most
+two height tests, the two conics can be determined, if the two cones
+have conic intersection.
+
+% ######################################################################
+%                       DEGENERATE CASES
+% ######################################################################
+
+\section{Degenerate Conic Intersections}
+\label{section:special-degenerate}
+     In the last section, our algorithm was presented based on the assumption 
+that the two skeletal pairs have exactly four intersection points.  However, 
+the number of intersection points could be three, two, or even infinity.  In 
+the next three sections, we consider these cases in turn.
+
+% -------------------------------------------------------------------------
+%                       Three Point Intersection
+% -------------------------------------------------------------------------
+
+\subsection{Three Point Intersection}
+\label{section:three-point}
+     There are two ways to get three points of intersection.  In the simplest 
+case, one of the points is a vertex of a cone.  In this case, there are no
+diagonals, and therefore no potential segment and no conic intersection.  In 
+the other case, one line of a skeletal pair is parallel to a line from the 
+other pair (see Figure~\ref{fig:three-point}).  We will call these parallel 
+lines a {\em parallel pair}.  In effect, we still have four intersection 
+points, with one point at infinity on the parallel pair.  One of the diagonal 
+lines is parallel to the parallel pair, and the potential segment, if it 
+exists, on this diagonal consists of only one infinite interval.  If a 
+parallel pair is detected, one inside--outside test can determine which 
+infinite interval is the desired potential segment.  
+If the two surfaces have conic intersection, one of them must be a parabola
+since it lies on a plane through the potential segment parallel to one of the
+skeletal lines.  Since the major axis is known and the end point of the 
+potential segment is the vertex of the parabola, one more point is enough to 
+determine the parabola.  Pick any point on the potential segment for the 
+height test.  The computation is the same as the four point case.
+\begin{figure}
+\vspace{7cm}
+\caption{Several Examples of Three Point Intersection}
+\label{fig:three-point}
+\end{figure}
+
+% -----------------------------------------------------------------------
+%                         Two Point Intersection
+% -----------------------------------------------------------------------
+
+\subsection{Two Point Intersection}
+\label{section:two-point}
+     If the two skeletal pairs intersect in exactly two points, it is not
+difficult to see that we must have two parallel pairs. (See two figures in
+Figure~\ref{fig:potential-seg}.)  Since the axis is the
+angle bisector of the cone angle, parallel skeletal lines imply that the axes
+are also parallel and the half angles of the cones are equal, 
+so the two cones are congruent.
+Two cases can be distinguished: one of the vertices lies 
+in the interior of the other cone (case 1), 
+and no vertex lies in the interior of the other cone (case 2).  Note that 
+since we have only two intersection points, no vertex can lie on the surface of
+the other cone.  Using Figure~\ref{fig:potential-seg}, 
+we see that there is exactly one potential segment.
+In fact, the other two intersection points of the two parallel pairs are at 
+infinity and thus the corresponding diagonal is a line at infinity.  We can 
+prove, using the characterization theorem in 
+Section~\ref{section:characterization}, that the conic intersection is an 
+ellipse in case 1 above, and a hyperbola in case 2.  Based on
+this fact, the  intersection conic curves can be computed using the two 
+intersection points and the height of some point of the potential segment.  
+
+% -----------------------------------------------------------------------
+%                           One Coincide Line
+% -----------------------------------------------------------------------
+
+\subsection{One Common Tangent and an Isolated Point}
+\label{section:one-coincide-line}
+     If the intersection of skeletal lines has exactly one isolated point, we
+must have a line in common and this is the common tangent of the two cones
+(see Figure~\ref{fig:infinite}).  Note that this common tangent is counted 
+twice and thus, using B\'{e}zout's
+theorem, the residue curve must be a conic.  Therefore, if two lines, one from
+each skeletal pair, coincide and the other two lines intersect at an isolated 
+point, the intersection curves consist of the common tangent and a conic.
+
+     In Figure~\ref{fig:infinite}, $P$ is the isolated point and the thick line
+is the common tangent.  Some segments with $P$ at one end and a point on the 
+common tangent at the other end are shown in the figure.  These segments lie in
+the interior of both cones and hence are potential segments.  Therefore, the 
+height test cannot be applied since there are infinite number of such segments.
+In what follows we will illustrate a method to isolate the appropriate 
+potential segment and compute the intersection conic upon it.
+\begin{figure}
+\vspace{4.5cm}
+\caption{An Infinite Number of Potential Segments}
+\label{fig:infinite}
+\end{figure}
+
+     The idea is simple.  Let ${\cal K}$ be a plane perpendicular to the axial
+plane ${\cal H}$, parallel to the common tangent $C$, and intersecting both 
+cones (see Figure~\ref{fig:proof-idea}).  Since ${\cal K}$ is parallel to a 
+common tangent, it cuts the cones in two intersecting parabolas.  Since both 
+parabolas are symmetric about ${\cal H}$, the projection of these intersection
+points onto ${\cal H}$ gives a unique point $X$ with common height to both 
+cones.  Since ${\cal K}\cap{\cal H}$ is parallel to the
+common tangent $C$ and $X$ lies on ${\cal K}\cap{\cal H}$, the line 
+$\stackrel{\longleftrightarrow}{PX}$ (recall that $P$ is the isolated point)
+cannot be parallel to $C$ and must intersect $C$ at some point $P^\prime$.
+Since $P$ and $P^\prime\in C$ lie on both surfaces, 
+and $X$ has common height, if we know the type 
+of the intersection conic, this conic is determined uniquely.  Therefore the 
+plane through $P$ and $X$, and perpendicular to ${\cal H}$ cuts both cones in 
+a common conic.  If the plane ${\cal K}$ is chosen carefully, the computation 
+is straightforward.
+\begin{figure}
+\vspace{5cm}
+\caption{Two Cones with a Common Tangent and an Isolated Point}
+\label{fig:proof-idea}
+\end{figure}
+
+     The position of ${\cal K}$ and the type of the intersection conic are
+determined by the relative positions of the cones. Suppose two 
+non-congruent cones, ${\cal C}_1(V_1,\ell_1,\alpha_1)$ and
+${\cal C}_2(V_2,\ell_2,\alpha_2)$, have a common tangent $C$, and
+the two skeletal pairs intersect at an isolated point $P$.
+Based on the location of the triangle $\bigtriangleup V_1V_2P$, we can
+distinguish three cases: $\bigtriangleup V_1V_2P$ lies in the interiors of both
+cones, $\bigtriangleup V_1V_2P$ lies in the exteriors of both cones, and
+only one cone contains $\bigtriangleup V_1V_2P$ in its interior
+(see Figure~\ref{fig:three-case}).  For the first and the third cases, 
+${\cal K}$ can be any plane (satisfying the conditions mentioned at the 
+beginning of the last paragraph) that has an intersection point in the segment
+$\overline{PV_1}$.  The intersection conic is an ellipse.  For the second 
+case, ${\cal K}$ must cut the ray $\stackrel{\longrightarrow}{PV_1}$ at a point
+not in the segment $\overline{PV_1}$, and the intersection conic is a 
+hyperbola.
+\begin{figure}
+\vspace{4cm}
+\caption{The Positions of the Triangle $\bigtriangleup V_1V_2P$}
+\label{fig:three-case}
+\end{figure}
+
+% #######################################################################
+%                         LINEAR INTERSECTION
+% #######################################################################
+
+\section{Linear Intersections}
+\label{section:linear}
+
+     In this section, we show how to detect and compute linear intersections.
+(Recall that under our definition, a linear intersection is an intersection 
+whose components are all linear.)  Two cones can have at most two intersecting
+lines or a common tangent. (It is interesting to note that a cylinder and a
+cone can never have a linear intersection.)
+
+\begin{lemma}
+\label{lemma:cone-cone-linear}
+     Two distinct cones intersect in two lines if and only if they have a
+common vertex and one of the following propositions holds:
+\begin{enumerate}
+     \item On the axial plane, the two skeletal pairs coincide.
+     \item On the axial plane, the two cone angles bounded by skeletal pairs
+          overlap.
+\end{enumerate}
+\end{lemma}
+{\bf Proof:} Suppose two cones have two lines in common.
+The intersection point of these lines must be the common vertex, and hence
+the axial plane is well-defined.  The axial plane intersects the cones in four
+lines with a common point.  If the cones have no common interior point, we have
+the first proposition; otherwise, the second proposition holds.
+
+     For the converse, the first proposition is easy.  Consider the 
+second proposition.  Assume the two cone angles overlap.  
+Then the two cones must intersect in a curve.
+Let $X$ be a point of this intersection, other
+than the common vertex.  Let the cones be
+${\cal C}_1(V,\ell_1,\alpha_1)$ and ${\cal C}_2(V,\ell_2,\alpha_2)$.
+From $X$ drop 
+perpendiculars to $\ell_1$ and $\ell_2$ meeting them at $F_1$ and $F_2$
+respectively.  Let $d_1=|\overline{VF_1}|$ and $d_2=|\overline{VF_2}|$.
+We have $|\overline{XV}|=d_1/\cos\alpha_1$ from cone ${\cal C}_1$,
+and $|\overline{XV}|=d_2/\cos\alpha_2$ from cone ${\cal C}_2$.  Therefore
+$d_2=\frac{\cos\alpha_2}{\cos\alpha_1}d_1$ holds.  Now it is not difficult
+to see that the projection of $X$ lies on the intersection of the line
+perpendicular to $\ell_1$ at $F_1$, and the line perpendicular to $\ell_2$ at
+$F_2$.  This implies that the projection is determined by a linear relation of 
+$d_1$ and hence the curve of intersection must be a line.  
+Finally, the plane though this line and 
+perpendicular to the axial plane cuts both cones in two common lines.  Note 
+that this proof also provides a computation of the intersection 
+lines.\ \ \ \QED
+
+\begin{lemma}
+\label{lemma:cone-cone-linear1}
+     Two distinct cones intersect in one line if and only if one of the 
+following holds.
+\begin{enumerate}
+     \item They have a common vertex and they are tangent along a common
+          tangent line.
+     \item They do not have a common vertex but one vertex lies on the other
+          cone, they are congruent, and they
+          have parallel axes.
+\end{enumerate}
+\end{lemma}
+{\bf Proof:}  If two cones have a single line in common, they must be tangent 
+to each other and therefore their axes are coplanar.  Let ${\cal H}$ be the 
+axial plane which cuts the two cones in two pairs of lines.  Since the two 
+cones are tangent, they share a skeletal line $T$, leaving three skeletal 
+lines $T,L_1,L_2$.  If $L_1$ and $L_2$ intersect at the common vertex, we 
+have one line intersection.  If they intersect, but not at the vertex, we have
+the conic--line intersection that we have studied in
+Section~\ref{section:one-coincide-line}.  If $L_1$ and $L_2$
+are parallel, then the two cones are congruent.  The converse is not difficult
+to see.\ \ \ \QED
+
+     Using these two lemmas, we have a simple algorithm to test whether two 
+cones have linear intersections.
+\begin{enumerate}
+     \item If the cones have a common vertex, the two lines of intersection
+          lie in a plane perpendicular to the axial plane, and this plane
+          can be found as has been discussed in 
+          Lemma~\ref{lemma:cone-cone-linear}.  
+          Figure~\ref{fig:two-lines-and-one-line} displays all possibilities.
+     \item If the two cones are congruent with parallel axes, then
+     \begin{itemize}
+          \item If the vertex of ${\cal C}_1$ does not lie on ${\cal C}_2$, and
+               vice versa, then ${\cal C}_1$ intersects ${\cal C}_2$ in a conic
+               and see Section~\ref{section:two-point}.
+          \item If the vertex of one cone lies on the other cone, then they
+               are tangent along the line joining the two vertices.
+     \end{itemize}
+\end{enumerate}
+\begin{figure}[h]
+\vspace{10cm}
+\caption{All Possibilities of Cone Intersections with A Common Vertex}
+\label{fig:two-lines-and-one-line}
+\end{figure}
+
+% #########################################################################
+%                    TANGENCY and DISJOINTEDNESS
+% #########################################################################
+
+\section{Tangency and Disjointedness}
+\label{section:tangency-disjoint}
+     In this section, we will study when two given cones are tangent to each
+other in a finite number of points.  Let ${\cal C}_1(V_1,\ell_1,\alpha_1)$ and
+${\cal C}_2(V_2,\ell_2,\alpha_2)$ be the two given cones.  The following 
+establishes the necessary condition.
+
+\begin{lemma}
+\label{lemma:point-tangent-has-skew-axes}
+     If two cones are tangent at an isolated point, their axes are skew.
+\end{lemma}
+{\bf Proof:}  If two cones, with vertices $V_1$ and $V_2$, are tangent at an
+isolated point $P$, then the common tangent plane intersects the first and the
+second cone at $\stackrel{\longleftrightarrow}{V_1P}$ and
+$\stackrel{\longleftrightarrow}{V_2P}$, respectively.  Since $P$ is an isolated
+point of tangency, the two half cones lie on different sides of the common
+tangent plane.  Therefore their axes must be skew.\ \ \ \QED
+
+     Without loss of generality, we will assume that $\ell_1$ and $\ell_2$ are 
+skew and none of the two 
+vertices lies in the other cone.  We shall find two planes that bound one cone
+tightly and use the other cone to test the tangency against the two bounding 
+planes.  From $V_2$, construct the two tangent planes to the cone 
+${\cal C}_1$, $T_1$ and $T_2$ (see Figure~\ref{fig:cone-tangent}).  Note that 
+since $T_i\ (i=1,2)$ is tangent to the cone ${\cal C}_1$ in a line, $T_i$ 
+passes through $V_1$.  Thus $\stackrel{\longleftrightarrow}{V_1V_2}
+=T_1\cap T_2$.  The two tangent planes divide the space into four quadrants.
+Let the two quadrants containing ${\cal C}_1$ be ${\cal R}$.
+\begin{figure}
+\vspace{6cm}
+\caption{The Construction for Testing Tangency}
+\label{fig:cone-tangent}
+\end{figure}
+
+\begin{lemma}
+\label{lemma:cone-in-region}
+     If the axis of the cone ${\cal C}_2$ lies in region ${\cal R}$, the cones
+intersect transversally.
+\end{lemma}
+{\bf Proof:}  Consider the plane containing $V_1$ and the axis of ${\cal C}_2$.
+This plane lies in region ${\cal R}$, since the axis of ${\cal C}_2$ does.
+Since this plane passes through both vertices, it cuts the two cones
+in two pairs of intersecting lines.  If none of the four lines are parallel,
+the two cones will intersect transversally.  If one line from each pair are 
+parallel, the two remaining lines intersect both parallel lines.  Thus the 
+two cones again intersect transversally.\ \ \ \QED
+
+     Using the above lemma, we can assume that the axis $\ell_2$ does not lie 
+in the region ${\cal R}$.  Pick any point $S$ from $\ell_2$, 
+different from the vertex $V_2$.  From $S$ drop perpendiculars to planes $T_1$
+and $T_2$ yielding $S_1\in T_1$ and $S_2\in T_2$.  Let $d_1=|\overline{SS_1}|,
+d_2=|\overline{SS_2}|$ and $d=|\overline{SV_2}|$.  The following theorem 
+characterizes the disjointedness and tangency of two cones using $d_1,d_2,d$ 
+and the half angle $\alpha_2$.
+
+\begin{theorem}[Tangency and Disjointedness]
+\label{theorem:tangent-disjoint}
+     Suppose ${\cal C}_1$ is tangent to $T_1$ and $T_2$ in two lines $t_1$ and
+$t_2$ respectively.  We have the following characterizations for 
+disjointedness and tangency for the cone--cone case.
+\begin{enumerate}
+     \item\label{case:disjoint} $d_1, d_2>d\sin\alpha_2$ : Two cones are 
+          disjoint.
+     \item\label{case:tangent-1} $d_1>d_2=d\sin\alpha_2$  : If 
+          $t_2\cap\!\stackrel{\longleftrightarrow}{V_2S_2}\neq\emptyset$, the 
+          two cones are tangent at exactly one point, 
+          $t_2\cap\!\stackrel{\longleftrightarrow}{V_2S_2}$.  
+          Otherwise, the cones are disjoint.
+     \item\label{case:tangent-2} $d_2>d_1=d\sin\alpha_2$  : If 
+          $t_1\cap\!\stackrel{\longleftrightarrow}{V_2S_1}\neq\emptyset$, the 
+          two cones are tangent at exactly one point,
+          $t_1\cap\!\stackrel{\longleftrightarrow}{V_2S_1}$.  
+          Otherwise, the cones are disjoint.
+     \item\label{case:two-point-tangent} $d_1=d_2=d\sin\alpha_2$ :  The two 
+         cones are tangent at $t_1\cap\!\stackrel{\longleftrightarrow}{V_2S_1}$
+         and $t_2\cap\!\stackrel{\longleftrightarrow}{V_2S_2}$.  One or both of
+          these may not exist.  If both do not exist, the cones are disjoint.
+     \item\label{case:intersect} $d_1,d_2< d\sin\alpha_2$ :
+          Two cones intersect transversally.
+\end{enumerate}
+\end{theorem}
+{\bf Proof:} The idea behind the proof is a sphere centered at $S$ with radius
+$d\sin\alpha_2$.  This sphere is tangent to the cone ${\cal C}_2$.  If the
+distances from $S$ to the two planes $T_1$ and $T_2$ are both greater than the
+radius of the sphere, the cone lies in the interior of the regions that do not
+contain the cone ${\cal C}_1$. Therefore proposition~\ref{case:disjoint} holds.
+
+     Note that the cone ${\cal C}_2$ is tangent to $T_2$ if and only if 
+$d\sin\alpha_2=d_2$.  $d_1>d_2=d\sin\alpha_2$ implies that 
+${\cal C}_2$ does not intersect $T_1$, except at $V_2$.  Therefore, 
+${\cal C}_2$ intersects $T_2$ in one line.  If this line, 
+$\stackrel{\longleftrightarrow}{V_2S_2}$, intersects $t_2$, then ${\cal C}_1$ 
+and ${\cal C}_2$ is tangent there since this is the only point at which they
+intersect.  If these two lines do not intersect at all, the two cones do not 
+intersect since they lie in different regions in space.  Therefore 
+proposition~\ref{case:tangent-1} holds.  Similar arguments can prove 
+proposition~\ref{case:tangent-2} and proposition~\ref{case:two-point-tangent}.
+
+     For proposition~\ref{case:intersect}, the plane $T_2$ intersects the cone
+${\cal C}_2$ in two lines.  They cannot both be parallel to $t_2$, which is
+the common tangent line of ${\cal C}_1$ and $T_2$.  That is, one of these lines
+must intersect $t_2$ and therefore the two cones cannot be tangent to each
+other.\ \ \ \QED
+
+% #########################################################################
+%                     CHARACTERIZATION THEOREMS
+% #########################################################################
+
+\section{Characterization Theorems}
+\label{section:characterization}
+     In this section, we will present some characterization results for conic
+intersection.  Characterization theorems provide necessary and sufficient
+conditions for conic intersection.  
+Recall that a conic is the intersection of a cone with a plane.
+If a sphere, called the Dandelin sphere or the focal sphere, is inscribed in 
+the cone tangent to the plane, the tangent point of the inscribed sphere and 
+the plane is a focus of the conic (see 
+Figure~\ref{fig:dandelin-sphere}).\footnote{It
+was Germinal P. Dandelin~\cite{dandelin:1822}, a Belgian mathematician, who
+discovered the relationship of the inscribed sphere and the focus of the
+conic section.  Dandelin's beautiful idea is covered in 
+Hilbert and Cohn--Vossen~\cite{hilbert:1983}.  However, the complete 
+foci-directrix relation was found by Pierce Morton~\cite{morton:1830} a few 
+years later.  Refer to Drew~\cite{drew:1875} and Macaulay~\cite{macaulay:1895}
+for geometric development, and Taylor~\cite{taylor:1881} for historical
+material along this line.}  Two spheres can be found, yielding the two foci of
+the conic. (In the case of the parabola, only one sphere can be found.)   
+If two cones have a conic intersection, this conic lies on a plane, which is 
+the plane defining the conic for both cones.  Therefore, in general, we can 
+find two pairs of Dandelin spheres tangent to the plane at the same point,
+one pair for each focus.  If one of the two cones is replaced by a cylinder, 
+the same conclusion is true, but the intersection conic can only be an 
+ellipse (Figure~\ref{fig:dandelin-sphere}).  
+In summary, we have the following theorem.
+% ############################################################################
+% #   The following figure using a direct citation, Hilbert and Cohn-Vossen   #
+% #   [8].  This '[8]' should be replaced with some other number if bib.     #
+% #   items are changed.                          Mar/02/1991  C.-K. Shene   #
+% ############################################################################
+
+\begin{figure}
+\vspace{6cm}
+\caption{The Dandelin Spheres (Taken from Hilbert and Cohn--Vossen [8])}
+\label{fig:dandelin-sphere}
+\end{figure}
+
+\begin{theorem}[General Characterization]
+\label{theorem:general-characterization}
+     If two axial natural quadrics have distinct and coplanar axes, the
+following propositions are equivalent:
+\begin{itemize}
+     \item These two surfaces have conic intersection.
+     \item There exists a potential segment passing the height test.
+     \item There exists a plane and a sphere inscribed in each 
+          surface such that both spheres and the plane are tangent 
+          at the same point.
+\end{itemize}
+\end{theorem}
+
+     If the Dandelin spheres and the plane are projected to the axial plane, 
+they become circles and a line and the above theorem can be restated as 
+follows.
+
+\begin{corollary}
+\label{corollary:planar-dandelin-sphere}
+     If two axial natural quadrics have distinct and coplanar axes,  the
+following propositions are equivalent:
+\begin{itemize}
+     \item These two surfaces have conic intersection.
+     \item There exists a line and a circle inscribed in each skeletal pair
+          such that both circles and the line are tangent at the same point.
+\end{itemize}
+\end{corollary}
+
+     If the two axes intersect, Theorem~\ref{theorem:general-characterization}
+and Corollary~\ref{corollary:planar-dandelin-sphere} can be simplified further.
+We can always find a sphere inscribed in {\em both} surfaces, or a circle 
+inscribed in {\em both} skeletal pairs.  
+
+\begin{theorem}[Intersecting Axes]
+\label{theorem:intersecting-axes-characterization}
+     Suppose the two axes intersect.  The following propositions are
+equivalent:
+\begin{itemize}
+     \item The two surfaces have conic intersection.
+     \item There exists a sphere inscribed in both surfaces.
+     \item There exists a circle inscribed in both pairs of the skeletal lines.
+\end{itemize}
+\end{theorem}
+{\bf Proof:} We give a proof for the simplest case.
+Proofs for the other cases are similar.
+Let ${\cal C}_1(V_1,\ell_1,\alpha_1)$ and ${\cal C}_2(V_2,\ell_2,\alpha_2)$
+be two cones, with intersecting axes, that have conic intersection.
+Corollary~\ref{corollary:planar-dandelin-sphere} guarantees that, on the axial
+plane, there exists a line and a circle inscribed in each skeletal pair such
+that both circles and the line are tangent at the same 
+point (Figure~\ref{fig:inscribed-circle}).  For simplicity,
+we will assume 1) the intersection curve upon the potential segment
+$\overline{RS}$ is an ellipse, 2) $V_1$ and $V_2$ lie on different sides of 
+$\stackrel{\longleftrightarrow}{RS}$, 3) the two circles are tangent at some 
+point of $\overline{RS}$ and hence they are the inscribed circles of 
+$\bigtriangleup V_1RS$ and $\bigtriangleup V_2RS$, and 4) $V_1RV_2S$ is a
+convex quadrangle.  Now we have
+$|\overline{V_1R}|+|\overline{V_2S}|=|\overline{V_1S}|+|\overline{V_2R}|$ and
+this relation implies, in turn, that there exists a circle inscribed in the
+quadrangle $V_1RV_2S$.
+(See, for example, Henrici--Treutlein~\cite{henrici:1897},
+p. 73.)  
+
+     Conversely, suppose convex quadrangle $V_1RV_2S$ has an inscribed
+circle.  It is easily seen that $|\overline{V_1R}|+|\overline{V_2S}|=
+|\overline{V_1S}|+|\overline{V_2R}|$ holds.  Let the inscribed circle of
+$\bigtriangleup V_1RS$ (resp., $\bigtriangleup V_2RS$) be tangent to
+$\overline{RS}$ at $T_1$ (resp., $T_2$).  Then for $\bigtriangleup V_1RS$ 
+(resp.,
+$\bigtriangleup V_2RS$) we have $|\overline{RT_1}|=
+\frac{1}{2}(|\overline{V_1R}|+|\overline{V_1S}|+|\overline{RS}|)-
+|\overline{V_1S}|$ (resp., $|\overline{RT_2}|=
+\frac{1}{2}(|\overline{V_2R}|+|\overline{V_2S}|+|\overline{RS}|)-
+|\overline{V_2S}|$).  Hence $|\overline{RT_1}|=|\overline{RT_2}|$ holds and 
+the two inscribed circles are tangent at the same point $T_1=T_2$.  However,
+the inscribed circle of the quadrangle $V_1RV_2S$ is no more than the great
+circle of the common inscribed sphere of the two given cones cut by the 
+axial plane.  Therefore, having a pair of
+tangent Dandelin spheres is equivalent to having a common inscribed sphere for
+both cones.\ \ \ \QED
+\begin{figure}[h]
+\vspace{4cm}
+\caption{The Inscribed Circles of $\bigtriangleup V_1RS$ and $\bigtriangleup V_2RS$,
+and the Common Inscribed Circle of the Quadrangle $V_1RV_2S$}
+\label{fig:inscribed-circle}
+\end{figure}
+     
+     The inscribed sphere gives the Goldman--Miller 
+criteria~\cite{goldman:1990} immediately.
+
+% ====================================================================
+% Comment out to save space (Mar/01/1991)
+% ====================================================================
+%
+%\begin{corollary}\ \                            % ***** ADD SPACE
+%\begin{enumerate}
+%     \item Given two cones ${\cal C}_1(V_1,\ell_1,\alpha_1)$ and 
+%          ${\cal C}_2(V_2,\ell_2,\alpha_2)$ with 
+%          $\ell_1\cap\ell_2\neq \emptyset$,
+%          they have conic intersection if and only if
+%          $d_1\sin\alpha_1=d_2\sin\alpha_2$ holds, where $d_i$ is the distance
+%          from $\ell_1\cap\ell_2$ to $V_i$.
+%     \item Given a cone ${\cal C}(V,\ell_1,\alpha)$ and a cylinder 
+%          ${\cal Z}(\ell_2,r)$ with $\ell_1\cap\ell_2\neq \emptyset$,
+%          they have conic intersection if and only if $d\sin\alpha=r$ 
+%          holds, where $d$ is the distance from $\ell_1\cap\ell_2$ to $V$.
+%     \item Given two cylinders ${\cal Z}_1(\ell_1,r_1)$ and
+%          ${\cal Z}_2(\ell_2,r_2)$ with $\ell_1\cap\ell_2\neq \emptyset$,
+%          they have conic intersection if and only if $r_1=r_2$ holds.
+%\end{enumerate}
+%\end{corollary}
+
+     The common inscribed sphere criteria are very useful.  Let us examine a
+limiting case of these 
+criteria. If two cones ${\cal C}_1(V_1,\ell_1,\alpha_1)$ 
+and ${\cal C}_2(V_2,\ell_2,\alpha_2)$ have conic intersection, they have a 
+common inscribed sphere.  Let us fix ${\cal C}_1$ and the vertex $V_2$ of
+${\cal C}_2$, and move the inscribed sphere along $\ell_1$.  Then the center
+goes to infinity, the length of the radius approaches infinity, 
+and ${\cal C}_2$ rotates about $V_2$.  On the axial plane, eventually, the two
+skeletal pairs become parallel to each other as a limiting case.  Hence, the
+two cones become congruent to each other.  This intuition shows that, for two
+cones with parallel axes, they have conic intersection if and only if they
+have an inscribed sphere with center at infinity and infinite length radius,
+if and only if they are congruent.  We have mentioned this fact in
+Section~\ref{section:two-point}.
+
+% #######################################################################
+%                          CONCLUSIONS
+% #######################################################################
+
+\section{Conclusions}
+\label{section:conclusion}
+     In order to establish the structure of the method and the interaction
+of the sections, we give an outline of the algorithm in Figure~\ref{fig:algo}.
+\begin{figure}
+{\small
+\begin{tabbing}
+     xxxxx\=xxxxx\=xxxxx\=xxxxx\=xxxxx\=xxxxx\=\kill
+     {\bf PROCEDURE} PlanarIntersection; \\
+     \\
+     {\bf BEGIN} \\
+     \> {\bf IF} axes are coplanar {\bf THEN} \\
+     \>\> {\bf CASE} skeletal lines intersection type {\bf OF} \\
+     \>\>\>  4 points : see Section 2; \\
+     \>\>\>  3 points : see Section 3.1; \\
+     \>\>\>  2 points : see Section 3.2; \\
+     \>\>\>  1 point and a line : see Section 3.3; \\
+     \>\>\>  2 lines : see Section 4; \\
+     \>\>\>  1 line  : see Section 4; \\
+     \>\>\>  1 point : see Section 4; \\
+     \>\> {\bf END} \\
+     \> {\bf ELSE} \\
+     \>\>  see Section 5 \\
+     {\bf END} \\
+\end{tabbing}
+}
+\caption{The Structure of the Method and the Interaction of the Sections}
+\label{fig:algo}
+\end{figure}
+
+     Using only elementary geometry, this paper has successfully developed a 
+fully geometric technique for detecting and computing the planar intersections
+of two natural quadric surfaces.  The fundamental method involves a height
+test from a segment in the axial plane.
+
+     We include a word about the robustness of the methods in this paper.
+The basic method of Section~\ref{section:algorithm} is very robust: the more 
+accurately the potential segment and height are computed, the better the 
+accuracy of the conic intersection.
+The computation degrades gracefully as these are computed less accurately.
+The degenerate cases and linear intersections of 
+Sections~\ref{section:special-degenerate} and~\ref{section:linear} involve
+some fragile conditions: parallel skeletal lines and common vertices.
+However, these degrade gracefully into other cases (of Section 2): for example,
+if the lines are not parallel, then the conic is a very large ellipse
+rather than a parabola, where the parabola is the limit case of the ellipse.
+By definition, the tangency conditions of 
+Section~\ref{section:tangency-disjoint} are limit conditions
+between intersections and disjointedness, and our methods reflect this.
+
+     The techniques of this paper can be generalized to cover more general 
+quadric surfaces, and we are working on this problem.  The height test theorem 
+(Theorem~\ref{theorem:conic-conditions-using-height-test}) holds for 
+revolutionary quadrics.  However, some lemmas presented here will not hold for
+more general surfaces; for example, tangency need not imply skew axes, and 
+planar intersection need not imply coplanar axes.
+Another interesting question is whether one can compute the higher degree
+intersection curves of natural quadrics using the techniques presented in this
+paper.
+
+% ######################################################################
+%                             REFERENCES
+% ######################################################################
+
+
+\begin{thebibliography}{999}
+
+\bibitem{dandelin:1822}
+     G. P. Dandelin,
+     M\'{e}moire sur quelques propri\'{e}t\'{e}s remarquables de la Focal
+     Parabolique,
+     {\em Nouveaux M\'{e}moires de l'Acad\'{e}mie Royale des Sciences et
+     Belles--lettres de Bruxelles},
+     Vol. 2 (1822), pp. 171--202.
+
+\bibitem{drew:1875}
+     William H. Drew,
+     {\em A Geometrical Treatise on Conic Sections},
+     fifth edition,
+     Macmillan and Co., 1875.
+
+\bibitem{farouki:1989}
+     R. T. Farouki, C. A. Neff and M. A. O'Connor,
+     Automatic Parsing of Degenerate Quadric-Surface Intersection,
+     {\em ACM Transaction on Graphics},
+     Vol. 8 (1989), No. 3, pp. 174--203.
+
+\bibitem{goldman:1990}
+     Ronald N. Goldman and James R. Miller,
+     Detecting and Calculating Conic Sections in the Intersection of Two
+     Natural Quadric Surfaces, Part I: Detection,
+     Draft, October 1990.
+
+\bibitem{goldman-warren:1990}
+     Ronald N. Goldman and Joe D. Warren,
+     A Sufficient Condition for the Intersection of Two Quadrics of 
+     Revolution to Degenerate into a Pair of Conic Sections,
+     Technical Report, Rice University, December 1990.
+
+\bibitem{hakala:1980}
+     D. G. Hakala, R. C. Hillyard, B. E. Nourse and P. J. Malraison,
+     Natural Quadrics in Mechanical Design,
+     {\em Proceedings of Autofact West 1}, 
+     Anaheim, CA., Nov. 1980, pp. 363--378.
+
+\bibitem{henrici:1897}
+     J. Henrici and P. Treutlein,
+     {\em Lehrbuch der Elementar--Geometrie}, Vol. I,
+     Teubner, Leipzig, 1897.
+
+\bibitem{hilbert:1983}
+     D. Hilbert and S. Cohn--Vossen,
+     {\em Geometry and the Imagination},
+     translated by P. Nememyi,
+     Chelsea, New York, 1983.
+
+\bibitem{levin:1976}
+     Joshua Zev Levin,
+     A Parametric Algorithm for Drawing Pictures of Solid Objects Composed
+          of Quadric Surfaces,
+     {\em Communications of ACM},
+     Vol. 19(1976), No. 10, pp. 555--563.
+
+\bibitem{levin:1979}
+     Joshua Zev Levin,
+     Mathematical Models for Determining the Intersections of Quadric Surfaces,
+     {\em Computer Graphics and Image Processing},
+     Vol. 11(1979), pp. 73--87.
+
+\bibitem{macaulay:1895}
+     Francis S. Macaulay,
+     {\em Geometrical Conics},
+     Cambridge University Press, London, 1895.
+
+\bibitem{miller:1987}
+     James R. Miller,
+     Geometric Approaches to Nonplanar Quadric Surface Intersection Curves,
+     {\em ACM Transactions on Graphics},
+     Vol. 6(1987), No. 4, pp. 274--307.
+
+\bibitem{morton:1830}
+     Pierce Morton,
+     On the Focus of a Conic Section,
+     {\em Transactions of the Cambridge Philosophical Society},
+     Vol. 3 (1827--1830), pp. 185--191.
+
+\bibitem{ocken:1987}
+     S. Ocken, Jacob T. Schwartz and Micha Sharir,
+     Precise Implementation of CAD Primitives Using Rational Parameterizations
+     of Standard Surfaces,
+     in {\em Planning, Geometry, and Complexity of Robot Motion}, edited by
+     Jacob T. Schwartz, Micha Sharir and John Hopcroft,
+     Ablex Publishing Co., Norwood, New Jersey, 1987, pp. 245--266.
+
+\bibitem{piegl:1989}
+     Les Piegl,
+     Geometric Method of Intersecting Natural Quadrics Represented in
+     Trimmed Surface Form,
+     {\em Computer Aided Design}, Vol. 21 (1989), No. 4, pp. 201--212.
+
+\bibitem{pratt:1990}
+     M. J. Pratt,
+     Cyclides in Computer Aided Geometric Design,
+     {\em Computer Aided Geometric Design},
+     Vol. 7 (1990), pp. 221-242.
+
+\bibitem{sarraga:1983}
+     Ramon F. Sarraga,
+     Algebraic Methods for Intersections of Quadric Surfaces in GMSOLID,
+     {\em Computer Vision, Graphics, and Image Processing},
+     Vol. 22(1983), pp. 222--238.
+
+\bibitem{taylor:1881}
+     Charles Taylor,
+     {\em An Introduction to Ancient and Modern Geometry of Conics},
+     Cambridge University Press, London, 1881.
+
+\bibitem{warren:1987}
+     Joe Warren,
+     Blending Quadric Surfaces with Quadric and Cubic Surfaces,
+     {\em Proceedings of the Third Annual Symposium on Computational Geometry},
+     Waterloo, Ontario, Canada 1987, pp. 341--347.
+
+\end{thebibliography}
+
+% ##############################################################
+%                       THE END
+% ##############################################################
+
+\end{document}

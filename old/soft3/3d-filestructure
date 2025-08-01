@@ -1,0 +1,302 @@
+architecture
+	languageOfShape
+	thoughts
+bidev
+	paper
+		bitangDev.tex
+	bidevsrc
+		bidev.cpp			*
+cyclide
+	cyclidesrc
+		h-blend.c
+		h-blend-demo
+		ring2.c
+		ring4.c
+		ring.c
+		ring-demo
+		shape.c
+		showring.c
+		torus.c
+		v-blend.c
+		v-blend-demo
+		92code
+			ring.c
+			showring.c
+demoScript
+directory
+flythru
+	flysrc
+		flythru.cpp			***
+		interpolate3d.cpp
+	data
+		helix.path
+intersect
+	surfintersectsrc
+		surfintersect.cpp		*
+	data
+		2CYL4.pts3
+		2PearPear.pts3
+		...
+		PairBasicPatch.cpt3
+		...
+		UtahHandleLidUnified.cpt3
+		...
+kernelsurf
+	paper
+		surfKernel.tex
+		...
+quadric
+	paper
+		flexibleQuadric
+			paper.tex
+		planeNatural
+		planeRevolute
+		quadricLowerDegree
+quaternion
+	EurographicsCodeOnNavy
+		src
+			design.c
+			keyframe.c
+			main.c
+			sweep.c
+			test.c
+		data
+			curve.canoe
+			curve.robot
+			POS.canoe
+			POS.coke
+			...
+	GIcodeOnNavy
+		src				***
+			animation.c
+			animation-slow.c
+			bez.c
+			display.c
+			drw.c
+			fit.c
+			keyframe.c
+			sphereDrawing.c
+			dietz-hoschek-maple (Maple code for Pyth hodog curves)
+			README
+			GI-script
+		data
+			obj.mapleleaf
+			pos.in-hockey
+			quaternion.in-leaf
+			spherebez.input
+			...
+	paper
+		1-char
+			characterization.tex
+			shortchar.tex
+		2-most
+			comp.tex
+			nonrational.tex
+		3b-splineWithDerivData
+			spline2part.tex
+			img
+				spiralIn.ps
+		3-spline			***
+			src
+				qspl.cpp		
+				qspline.c  [THIS IS THE GOLDMINE] ***
+				qspline-tangByDifferentiation.c
+				qsplsupport.c++
+				s3spline.c
+				animation
+					animation.cpp		*** START HERE
+					orientationPlan.cpp	***
+			paper
+				spline.tex
+			data
+				data100-1
+				data5-1
+				...
+		4-obstacle			*
+			jowersProject
+			obstacle.tex		*
+		5-riemannian
+			riemod.tex
+		Euro95
+			earlySweep
+			swept
+				design.c
+				keyframe.c
+				main.c
+				sweep.c
+				test.c
+			swept-old
+			swept-paper
+				animation-paper.tex
+				envelope.tex
+				paper.tex
+				modeling.bib		*
+		GI95
+			animation-paper
+				GI-final-copy.tex
+				ori.tex
+				paper.tex
+				final-paper.tex
+				modeling.bib (see above)*
+				quaternions.html	*
+				img
+			animation			***
+				animation.c
+				GLanimation.c
+				GLS3curve.c
+				keyframe.c
+				quaternion.c
+				sphereDrawing.c
+				drw.c
+				display.c
+			earlyQspline
+				PH-curve.tex
+				c-r-o.tex
+			misc
+				jimboMail  (check for discussions of quat sphere)
+				Ori
+					ori.tex
+					quaternions-sidebar
+				gc
+					jimboMail (re rational gen cyl)
+					software
+						GLUTgc.c
+		gc
+			gc.tex
+			rationalgc.tex
+		jimthesis+CVPR
+		S3curve
+			3sphere.tex
+			M.tex
+			looks like old directory w. all 1-char/2-most/3-spline
+ringed
+ruled
+	ruledsrc
+		draw.c
+		...
+		loft.c
+		...
+		ru.c				*
+		ru_demo.c
+		...
+	paper
+		paper2.tex
+		paper.tex
+		ruled-CAD-paper.tex
+		...
+	data
+		ru_cayley-dir.in
+		ru_cayley_gen.in
+		ru_cycloid.in
+		ru_folium.in
+		ru_tschirnhausen.in
+		...
+silhouette
+	silhsrc
+		silhouette.cpp			*
+		silhouette.tex
+	paper
+		silhouette.tex
+	data
+		silhimg
+subdiv
+surfbuild					*
+	src
+		extrude.cpp
+		orientationPlan.cpp		***
+		revosurf.cpp
+		scene.cpp
+		surfinterpolate.cpp
+		scene3dScript
+	data
+		bezierSurf
+		extrude
+		quadric
+		revosurf
+		scene
+		img
+tangsurf
+	paper
+		tangsurf.tex
+	tangsurfsrc
+		completeTangSurf.cpp
+		tangdsurf.cpp
+		tangentialSurf.cpp
+		tangSurfScript
+tube
+	tubesrc
+		tube1.cpp
+		...
+
+quaternion spline structure:
+
+Best to start with s3spline.c as the foundation, as it includes all of the theoretical
+	issues of singularity-avoidance
+Building Cbin/quaternion/Quaternion class now.
+
+Quaternion spline code in projectSmooth/3d/n-quaternion/GIcodeOnNavy
+-------------------------------------------------------------------
+
+pi.c: input quaternions as angle axis(?)
+
+drw.c: drawing routines (sphere, curve on sphere)
+
+fit.c: Philip Schneider's curve fitting routine
+
+keyframe.c: old animation.c (I'm not sure what's old about it)
+
+display.c: GL display routines
+
+sphereDrawing.c: version of qspline interpolation (3/95)
+
+animation.c: full version of qspline interpolation, most recent (5/95)
+
+code in EurographicsCodeOnNavy is older
+
+code in n-quaternion/paper/GI95/animation is similar
+----------------------------------------------------------
+
+quaternion classes in Cbin/quaternion
+-------------------------------------
+
+CurveOnSn: interpolation (and draw tangent circle) for quaternion splines
+	       - primitive versions; not the sophistication of earlier C versions
+	         (e.g., no perturbation)
+
+Quaternion.cpp: extracts from Beziercurve.cpp and RatBezierCurve.cpp related to qsplines:
+	createByS3Mapping and mapToSn
+
+n-quaternion/paper/3-spline/soft
+--------------------------------
+
+ravani.c:   Park and Ravani's implementation of quaternion splines
+texture.c:  texture maps that visualize different maps to the sphere
+qspline.c:  our quaternion spline interpolation, vintage 1998
+s3spline.c: our quaternion spline interpolation, vintage 1999, newer version?
+qspl.cpp:   C++ version
+
+
+----------------------------------------------------------------------------------------
+
+new qspline software sources:
+
+quaternion/paper/3-spline/animation/animation.cpp
+	                            orientationPlan.cpp
+surfbuild/src/orientationPlan.cpp
+
+flythru/flysrc/flythru.cpp?
+
+----------------------------------------------------------------------------------------
+
+bib sources:
+
+quaternion/paper/Euro95/swept-paper/modeling.bib
+quaternion/paper/GI95/animation-paper/modeling.bib
+
+----------------------------------------------------------------------------------------
+
+data:
+
+quaternion/GIcodeOnNavy/data
+quaternion/paper/3-spline/data
+

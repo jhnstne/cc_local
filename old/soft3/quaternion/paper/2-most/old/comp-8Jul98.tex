@@ -1,0 +1,471 @@
+\documentstyle[11pt]{article}
+\newif\ifFull
+\Fullfalse
+\input{header}
+\SingleSpace
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{-.25in}	% technically should be 0pt for 1in
+\setlength{\headsep}{3em}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+\setlength{\columnsep}{5mm}		% width of gutter between columns
+
+\markright{The most natural map: \today \hfill}
+\pagestyle{myheadings}
+
+% -----------------------------------------------------------------------------
+
+\title{The most natural map to a sphere}
+\author{J.K. Johnstone}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We have recently developed a characterization of all rational maps
+from $\Re^{n+1}$ to the sphere \Sn{n}.
+Using this characterization, 
+the most natural map to the sphere is
+\[ (x_1,\ldots,x_{n+1}) \mapsto 
+	(\frac{x_1^2 + \cdots + x_{n}^2 - x_{n+1}^2}{x_1^2 + \cdots + x_{n+1}^2},
+	 \frac{2x_1x_{n+1}}{x_1^2 + \cdots + x_{n+1}^2},\ldots,
+	 \frac{2x_{n}x_{n+1}}{x_1^2 + \cdots + x_{n+1}^2}).
+\]
+This map initially appears similar to stereographic projection,
+but this is misleading.
+We explore the properties of this map, especially its essential difference
+from stereographic projection.
+We develop a tool for visualizing a map, called a map texture,
+that allows us to better compare two maps to a surface.
+\end{abstract}
+
+\noindent Keywords: Map visualization, map texture,
+		rational maps to the sphere, stereographic projection.
+
+\clearpage
+
+\section{Introduction}
+
+In a recent paper, we developed 
+a full characterization of the rational maps of $\Re^{n+1}$ to the 
+unit sphere in $\Re^{n+1}$, \Sn{n}.
+
+\begin{theorem}
+\label{thm:nn}
+A map is a rational map of $\Re^{n+1}$ to \Sn{n}, $n \geq 1$, if and only if
+it is of the form:
+\begin{equation}
+\label{eq:normalform}
+	(x_{\pi(1)},\ldots,x_{\pi(n+1)}) \mapsto 
+	(\frac{a_1^2 + \cdots + a_{n}^2 - a_{n+1}^2}{a_1^2 + \cdots + a_{n+1}^2},
+	 \frac{2a_1a_{n+1}}{a_1^2 + \cdots + a_{n+1}^2},
+	 \ldots,
+	 \frac{2a_{n}a_{n+1}}{a_1^2 + \cdots + a_{n+1}^2})
+\end{equation}
+where $a_1,\ldots,a_{n+1} \in \Re[x_1,\ldots,x_{n+1}]$
+and $\pi: \{1,\ldots,n+1\} \rightarrow \{1,\ldots,n+1\}$ is a permutation.
+\end{theorem}
+
+The most natural choice for the polynomials $a_1,\ldots,a_{n+1}$
+is $(a_1,\ldots,a_{n+1}) = (x_1,\ldots,x_{n+1})$
+and the most natural choice for the permutation is the identity permutation,
+leading to the map
+\begin{equation}
+\label{eq:Mmap}
+	M(x_1,\ldots,x_{n+1}) = 
+	(\frac{x_1^2 + \cdots + x_{n}^2 - x_{n+1}^2}{x_1^2 + \cdots + x_{n+1}^2},
+	 \frac{2x_1x_{n+1}}{x_1^2 + \cdots + x_{n+1}^2},\ldots,
+	 \frac{2x_{n}x_{n+1}}{x_1^2 + \cdots + x_{n+1}^2})
+\end{equation}
+which we consider the most natural rational map of $\Re^{n+1}$ to \Sn{n}.
+In this paper, we will analyze this map $M$, especially its apparent
+relationship to stereographic projection.
+
+In Section~\ref{sec:stereo}, we review stereographic projection and its inverse,
+which we call stereographic injection.
+A related map is presented in Section~\ref{sec1}.
+A comparison of $M$ and stereographic projection is given in Section~\ref{sec:M}.
+To further this comparison, 
+we introduce the map texture in Section~\ref{sec:maptexture}, 
+a technique for the visualization of maps to a surface.
+We end with some conclusions.
+
+% ------
+
+\section{Stereographic projection and injection}
+\label{sec:stereo}
+
+The most well-known map involving the sphere is
+stereographic projection (Figure~\ref{fig:stereo}).
+It leads to a rational map from $\Re^n$, a hyperplane in $\Re^{n+1}$,
+to \Sn{n}, the unit sphere in $\Re^{n+1}$.
+
+\begin{defn2}
+{\bf Stereographic projection} is the map from \Sn{n}\ 
+to the hyperplane $x_{n+1}=0$,
+in which a point of \Sn{n}\ is perspectively projected from 
+the north pole of \Sn{n}\ to $x_{n+1}=0$ \cite{thorpe79}.	% or kreyszig59
+It is fruitful to view the range of stereographic projection, $x_{n+1}=0$, 
+as an embedding of $n$-space in $\Re^{n+1}$, so that stereographic projection
+is a map from \Sn{n}\ to $\Re^n$.\footnote{Although the image of the north 
+	pole is undefined, the north pole may be interpreted
+	as mapping to the line at infinity of the $\Re^n$ embedding.}
+\end{defn2}
+
+\begin{lemma}
+Stereographic projection is the map from 
+$\Sn{n} - (0,\ldots,0,1)$ to $x_{n+1}=0$ defined by:
+\[ (x_1,\ldots,x_{n+1}) \mapsto \frac{1}{1-x_{n+1}} (x_1,\ldots,x_n,0) \]
+\end{lemma}
+\prf
+The projector line $tp + (1-t)q$ through $p = (x_1,\ldots,x_{n+1})$ 
+and $q = (0,\ldots,0,1)$ intersects $x_{n+1}=0$ 
+when $tx_{n+1} + (1-t) = 0$ or $t = \frac{1}{1-x_{n+1}}$.
+\QED
+
+\begin{figure}[ht]
+\vspace{3in}
+\special{psfile=/usr/people/jj/modelTR/3-spline/img/fig:stereo.ps}
+% /ca/jj/Orientation/S3curve/paper/img/fig:stereo.ps}
+\caption{Stereographic projection in 3-space}
+\label{fig:stereo}
+\end{figure}
+
+
+Since stereographic projection is one-to-one and onto,
+it has a well-defined inverse.
+This is a map to the sphere.
+%
+\begin{lemma}
+The inverse of stereographic projection is the map from the hyperplane
+$x_{n+1}=0$ to $\Sn{n} - (0,\ldots,0,1)$ defined by:
+\[ (x_1,\ldots,x_n,0) \mapsto
+	\frac{1}{x_1^2 + \cdots + x_n^2 + 1} 
+	(2x_1, \ldots, 2x_n, x_1^2 + \cdots + x_n^2 - 1)
+\]	% see thorpe79, p. 125
+\end{lemma}
+\prf
+The projector line through $(r,0)$ and $q = (0,\ldots,0,1)$, $t(r,0) + (1-t)q$,
+intersects \Sn{n} at $t=0$ and $t=\frac{2}{\|r\|^2 + 1}$.
+\QED
+
+This inverse is a map to \Sn{n}\ without the north pole.
+We can easily generalize it to a map to \Sn{n}\ 
+without the arbitrary point $q \in \Sn{n}$, through rotation.
+% by choosing a different center of
+% projection on \Sn{n}, say $q$, and projecting onto the associated hyperplane:
+% the hyperplane through the origin and parallel to $q$'s tangent plane.
+% This is simply a rotation of the conventional stereographic projection map.
+Thus, stereographic projection and its inverse are 
+maps $\sigma_q: \Sn{n} - \{q\} \rightarrow \Re^n$
+and $\sigma_q^{-1}: \Re^n \rightarrow \Sn{n} - \{q\}$,
+where the choice of $q \in \Sn{n}$ dictates the hyperplane
+embedding of $\Re^n$ in $\Re^{n+1}$.
+For example, moving the pole to $(1,0,\ldots,0)$ and the projection
+plane to $x_1=0$ yields our preferred version of the map.
+
+\begin{defn2}
+{\rm 
+{\bf Stereographic injection} is the map 
+$\sigma^{-1}_{(1,0,\ldots,0)}: x_{1}=0 \rightarrow \Sn{n} - (1,0,\ldots,0)$:
+\begin{equation}
+\label{eq:injection}
+(0,x_1,\ldots,x_n) \mapsto
+	\frac{1}{x_1^2 + \cdots + x_n^2 + 1} 
+	(x_1^2 + \cdots + x_n^2 - 1, 2x_1, \ldots, 2x_n)
+\end{equation}
+}
+\end{defn2}
+
+\section{Embedded stereographic injection}
+\label{sec1}
+
+Consider the general form for rational maps of $\Re^{n+1}$ to the sphere
+(Theorem~\ref{thm:nn}).
+With $(a_1,\ldots,a_{n+1}) = (x_1,\ldots,x_{n},1)$ and the identity permutation,
+the rational map to the sphere $\Re^{n+1} \rightarrow \Sn{n}$ is
+\begin{equation}
+\label{eq:rat1}
+(x_1,\ldots,x_{n+1}) \mapsto 
+	\frac{1}{x_1^2 + \cdots + x_{n}^2 + 1}
+	(x_1^2 + \cdots + x_{n}^2 - 1,
+	 2x_1, \ldots, 2x_{n})
+\end{equation}
+This is very similar to stereographic injection 
+$\Re^n \rightarrow \Sn{n}$:
+\begin{equation}
+\label{eq:si}
+(x_1,\ldots,x_n) \mapsto
+	\frac{1}{x_1^2 + \cdots + x_n^2 + 1} 
+	(x_1^2 + \cdots + x_n^2 - 1, 2x_1, \ldots, 2x_n)
+\end{equation}
+Every hyperplane $x_{n+1}=k$ of (\ref{eq:rat1}) gets mapped like stereographic injection.
+Thus, this is a many-to-one map, with many embedded copies of stereographic injection.
+Consequently, we call the map (\ref{eq:rat1}) 
+{\bf embedded stereographic injection}.
+
+\section{The most natural map $M$}
+\label{sec:M}
+
+Now consider $M$:
+\begin{equation}
+\label{eq:M}
+	(x_{1},\ldots,x_{n+1}) \rightarrow
+	\frac{1}{x_1^2 + \cdots + x_{n+1}^2}
+	(x_1^2 + \cdots + x_{n}^2 - x_{n+1}^2,
+	 2x_1x_{n+1}, \ldots, 2x_{n}x_{n+1})
+\end{equation}
+%
+Clearly, $M: \Re^{n+1} \rightarrow \Sn{n}$ maps the entire space to the sphere,
+while stereographic injection $\sigma^{-1}:\Re^n \rightarrow \Sn{n}$ only maps
+a hyperplane to the sphere.
+$M$ does contain an embedding of stereographic injection:
+the restriction of $M$ to the hyperplane $x_{n+1}=1$
+is stereographic injection.
+However, this is the only hyperplane that is equivalent
+to stereographic injection, in contrast to embedded stereographic injection
+(\ref{eq:rat1}).
+%  where the behaviour of the map on every $x_{n+1}=k$ hyperplane 
+% is equivalent to stereographic injection.
+Thus, $M$ can be characterized as a superset of stereographic injection 
+$\sigma^{-1}$,
+where the hyperplane restriction $M_{x_{n+1}=1}$ is equivalent to $\sigma^{-1}$
+and the rest of the map $M$ is different than stereographic injection.
+For example, the restriction of $M$ to the hyperplane $x_{n+1}=5$ is
+\[
+	(x_{1},\ldots,x_n) \rightarrow
+	\frac{1}{x_1^2 + \cdots + x_n^2 + 25}
+	(x_1^2 + \cdots + x_{n}^2 - 25, 10x_1, \ldots, 10x_n).
+\]
+
+A comparison of $M$ and stereographic injection in projective space seems
+to reveal a deeper relationship between the two maps,
+but this is also misleading, 
+as one would expect from the previous discussion.
+Translating $M$ to projective space (with projective coordinate $x_{n+2}$), 
+we have
+% where little changes since the terms are already homogeneous of degree 2:
+\begin{equation}
+\label{eq:projM}
+(x_1,\ldots,x_{n+1},x_{n+2}) \mapsto 
+	(x_1^2 + \cdots + x_{n}^2 - x_{n+1}^2,
+	 2x_1x_{n+1}, \ldots, 2x_nx_{n+1}, x_1^2 + \cdots + x_{n+1}^2)
+\end{equation}
+Compare this to stereographic injection in projective space (with projective
+coordinate $x_{n+1}$)
+\begin{equation}
+\label{eq:projsi}
+	(x_1,\ldots,x_{n+1}) \mapsto
+	(x_1^2 + \cdots + x_n^2 - x_{n+1}^2,\ 2x_{1}x_{n+1}, \ldots,\ 2x_{n}x_{n+1},\ 
+	x_1^2 + \cdots + x_{n+1}^2)
+\end{equation}
+These look virtually identical!
+Indeed, they seem to have the same relationship as embedded stereographic
+injection and stereographic injection,
+as every `hyperplane' $x_{n+2}=k$ gets mapped 
+like stereographic injection.
+However, we are now dealing with the very different case of 
+hyperplanes in the projective coordinate $x_{n+2}$.
+Even more importantly, $x_{n+1}$ is a typical affine coordinate 
+in (\ref{eq:projM}),
+while $x_{n+1}$ is the projective coordinate in (\ref{eq:projsi}).
+The interchange of projective and affine coordinates is a significant
+change to a map, unlike the minor effect of interchanging two
+affine coordinates.
+We again conclude that $M$ is substantially different from stereographic
+injection.
+
+\section{A map texture}
+\label{sec:maptexture}
+
+As an aid to establishing the difference between $M$ and stereographic injection,
+we would like to visualize these two maps.
+In this section, we introduce a map visualization tool called the map texture.
+Since we have already established the fundamental difference
+between the maps, this is largely an experiment or proof-of-concept
+in the use of visualization for map comparison.
+It may also offer an alternative method for developing interesting texture
+maps on surfaces.
+
+Consider the visualization of an injective map $f: A \rightarrow A$,
+where $A$ is a surface in $\Re^3$.
+An injective map $f:A \rightarrow \Re^3$ can usually be visualized by
+displaying the image of $A$, which is another surface in $\Re^3$.
+However, this is not effective for the map $f$, since the image of $A$
+is simply $A$ again.
+We not only need to display the image of $A$, but colorcode it in some way.
+We propose to visualize $f:A \rightarrow A$ by colorcoding each point $P \in A$
+by:
+\[
+\mbox{greyscale}(P) = \frac{\mbox{dist}(P,f(P))}{\mbox{max}_{\footnotesize{P \in A}} 
+				\{ \mbox{dist}(P,f(P))\}}
+\]
+and call this a {\bf map texture}.
+Map textures can also be used to gain insight into
+the behaviour of maps $f:\Re^{3} \rightarrow A$, by visualizing
+the restriction of $f$ to the surface $A$.
+
+% \begin{example}
+% Figure~\ref{fig:injection} shows the map texture of the inversion map.
+% Inversion of a point in the unit circle centered at the origin
+% is the map \cite{jjnewintalg}
+% \[
+% 	(x_1,x_2) \rightarrow \frac{1}{x_1^2 + x_2^2}(x_1,x_2)
+% \]
+% To visualize this map, we embed it in $\Re^3$ as a map from a hyperplane $A$ to $A$:
+% \[
+% 	(x_1,x_2,0) \rightarrow \frac{1}{x_1^2 + x_2^2}(x_1,x_2,0)
+% \] 
+% \end{example}
+%
+% \begin{example}
+%  Vector map in Lang.
+% \end{example}
+%
+% \begin{example}
+% Dietz map (Example 5.3).
+% \end{example}
+
+Let us now compare the map textures of $M$ and stereographic injection.
+We consider the 3-space versions of the maps:
+$M: \Re^3 \rightarrow \Sn{2}$ and 
+$\sigma^{-1}_{(1,0,0)}:\Re^2 \rightarrow \Sn{2}$.
+We cannot visualize stereographic injection directly,
+since it is a map from only a hyperplane of $\Re^3$ to the sphere.
+However, we can visualize the related map of Section~\ref{sec1},
+embedded stereographic injection (\ref{eq:rat1}),
+whose strong relationship with stereographic injection
+will reveal differences between stereographic injection and $M$.
+Figures~\ref{fig:textureperfect} and \ref{fig:texturestereo} show the 
+map textures of the most natural map to the sphere, $M$, and
+embedded stereographic injection, respectively.
+These reveal some interesting `poles' of higher movement in $M$,
+and the essentially higher complexity of $M$.
+An interactive visualization of the map texture gives an even better sense 
+of the map behaviour.
+This is available at www.cis.uab.edu/~jj/javaapplet.
+
+\section{Conclusions} 
+
+$M$, the most natural rational map from $\Re^{n+1}$ to \Sn{n}\ 
+based on the normal form (\ref{eq:normalform}),
+is a much more complex map than stereographic injection,
+despite the similarity of the formulae (\ref{eq:Mmap}) and (\ref{eq:injection}).
+The difference between the two maps
+is also vividly revealed when the two maps are used
+in an application, such as the design of curves on \Sn{n}.
+See \cite{jj+jimbo98}.
+
+% \cite{dietz93} shows the relationship of the rational map -- to 
+% stereographic projection and hyperbolic projection.
+
+The map texture shows some promise as a tool for evaluating a map to a surface.
+It is also a mechanism for creating texture maps.
+
+\section{Acknowledgements}
+
+I appreciate discussions with Ken Sloan about the map texture.
+
+\bibliographystyle{plain}
+\begin{thebibliography}{Ebbinghaus 90}
+
+\bibitem[Johnstone 98b]{jj+jimbo98}
+Johnstone, J. and J. Williams (1995)
+Rational Quaternion Splines,
+Technical Report 98-03, CIS Dept., UAB.
+
+\bibitem[Kreyszig 59]{kreyszig59}
+Kreyszig, E. (1959) Differential Geometry.
+Dover (New York).
+
+\bibitem[Thorpe 79]{thorpe79}
+Thorpe, J.A. (1979) Elementary Topics in Differential Geometry.
+Springer-Verlag (New York), p. 124.
+
+\end{thebibliography}
+
+\clearpage
+
+\begin{figure}
+\vspace{3.5in}
+\special{psfile=/usr/people/jj/modelTR/2-most/img/texture-perfect.ps
+% Orientation/S3curve/paper/img/texture-perfect.ps
+	hoffset = 100}
+\caption{Map texture of the most natural map}
+\label{fig:textureperfect}
+\end{figure}
+
+\begin{figure}
+\vspace{3.5in}
+\special{psfile=/usr/people/jj/modelTR/2-most/img/texture-stereo.ps
+% /ca/jj/Orientation/S3curve/paper/img/texture-stereo.ps
+	hoffset = 100}
+\caption{Map texture of embedded stereographic injection}
+\label{fig:texturestereo}
+\end{figure}
+
+Another version of stereographic projection definition from quaternion splines paper:
+
+\subsection{A rational parameterization of \Sn{3}}
+
+The standard rational parameterization of \Sn{n}\ 
+can be developed from stereographic projection,
+the well-known conformal map of a sphere to a plane (Figure~\ref{fig:stereo}). 
+% initially used in cartography.
+
+\begin{defn2}
+{\bf Stereographic projection} in $(n+1)$-space is the map from \Sn{n}\ 
+to the hyperplane $x_{n+1}=0$,
+in which a point of \Sn{n}\ is perspectively projected from 
+the north pole of \Sn{n}\ to $x_{n+1}=0$. % \cite{thorpe79} or kreyszig63
+That is, stereographic projection is the map:
+\[ \Sn{n} - (0,\ldots,0,1) \rightarrow x_{n+1}=0 \]
+\[ (x_1,\ldots,x_{n+1}) \mapsto \frac{1}{1-x_{n+1}} (x_1,\ldots,x_n,0) \]
+since the projector line $tp + (1-t)q$ through $p = (x_1,\ldots,x_{n+1})$ 
+and $q = (0,\ldots,0,1)$ intersects $x_{n+1}=0$ 
+when $tx_{n+1} + (1-t) = 0$ or $t = \frac{1}{1-x_{n+1}}$.
+\end{defn2}
+
+It is fruitful to view the range of stereographic projection, $x_{n+1}=0$, 
+as an embedding of $n$-space in $\Re^{n+1}$, so that stereographic projection
+is a map from \Sn{n}\ to $\Re^n$.
+(Although the image of the north pole is undefined, 
+the north pole may be interpreted
+as mapping to the line at infinity of the $\Re^n$ embedding.)
+
+Since stereographic projection is one-to-one and onto,
+it has a well-defined inverse.
+This is a map to the sphere.
+%
+\begin{lemma}
+The inverse of stereographic projection is the map from the hyperplane
+$x_{n+1}=0$ to $\Sn{n} - (0,\ldots,0,1)$ defined by:
+\[ (x_1,\ldots,x_n,0) \mapsto
+	\frac{1}{x_1^2 + \cdots + x_n^2 + 1} 
+	(2x_1, \ldots, 2x_n, x_1^2 + \cdots + x_n^2 - 1)
+\]	% see thorpe79, p. 125
+\end{lemma}
+\prf
+The projector line through $(r,0)$ and $q = (0,\ldots,0,1)$, $t(r,0) + (1-t)q$,
+intersects \Sn{n} at $t=0$ and $t=\frac{2}{\|r\|^2 + 1}$.
+\QED
+
+Since the inverse of stereographic projection is a one-to-one, 
+(almost) onto map from an $n$-dimensional
+hyperplane to the $n$-dimensional sphere, 
+it induces a parameterization of the sphere.
+For example, in the case of \Sn{3}, this parameterization is:
+\begin{equation}
+	S(t_1,t_2,t_3) = 
+	\frac{1}{t_1^2 + t_2^2 + t_3^2 + 1} 
+	(2t_1, 2t_2, 2t_3, t_1^2 + t_2^2 + t_3^2 - 1) \ \ \ \ t_i \in (-\infty,\infty)
+\end{equation}
+For the circle \Sn{1}, this parameterization is a variant of the
+classical $(\frac{1-t^2}{1+t^2}, \frac{2t}{1+t^2})$.
+
+
+
+\end{document}
+
+

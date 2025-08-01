@@ -1,0 +1,7 @@
+[ angle and axis pairs, defining orientations; Source: GI95's quaternion.in-hockey]
+{
+0 0 1 0
+80 0 1 0
+0 0 1 0
+340 0 1 0
+}

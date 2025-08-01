@@ -1,0 +1,226 @@
+% paper on general Riemannian modeling
+
+\section{Introduction}
+\label{sec:intro}
+
+The design of curves on surfaces is an important problem,
+with applications ranging from the trimming of surfaces in solid modeling,
+to the design of splines on the quaternion sphere for orientation control
+in computer animation, to the design of shortest paths on configuration
+space obstacles in robot motion planning.
+%  \footnote{Shortest paths amongst obstacles must inherently hug the obstacles.}
+The design of a curve on a surface is more challenging than the 
+conventional design of a curve in Euclidean space.
+First, a surface constraint is added to the more typical constraints
+such as interpolation of data points and preservation of smoothness criteria.
+Second, surfaces are Riemannian spaces and 
+Riemannian geometry is significantly different from Euclidean geometry.
+% \cite{kreyszig63}.
+For example, in moving from Euclidean to Riemannian geometry,
+straight lines are replaced by geodesics.
+% (\eg, a helix on a cylinder).
+
+In this paper, we shall present a new general approach to the design of curves
+on surfaces and discuss its implementation and advantages.
+A single case study of this theory will be presented in detail:
+the design of curves on \Sn{3}.
+
+Since the modeling of curves in Euclidean space is much better understood, 
+a promising approach to the
+design of a curve on a surface is to somehow reduce the problem to the 
+design of a curve in Euclidean space, not restricted to any surface.
+% `Doctor, it hurts when I do this!'  `Well, then don't do it.'
+% This reduction of an unknown problem to a known problem is a time-honored
+% classical mathematical technique.
+This allows the Riemannian problem to be solved as an extension
+of the well-studied Euclidean problem, rather than as an entirely new
+problem domain.
+An approach for achieving this reduction to an Euclidean problem is as follows.
+
+Suppose that we are designing a curve on the hypersurface\footnote{A
+	hypersurface in $n$-space is a manifold of dimension $n-1$.}
+$S$ in $n$-space.
+Let $f:\Re^m \rightarrow S$ be a map to the surface.
+Then any curve $C$ in $m$-space yields a curve $f(C)$ on the surface.
+(See Figure~\ref{fig:reduce}.)
+Consequently, we can now concentrate on designing the curve $C$, 
+an Euclidean problem.
+Although this is the simplest statement of the approach (the approach becomes
+much more interesting when we add constraints on the type of map $f$ and 
+the type of curve on the surface),
+it reveals the essence of the approach most clearly:
+the problem of constraining the curve to the surface is reduced to the
+problem of developing a map to the surface.
+The design of a curve on a surface through the design of a curve in $m$-space
+and a map from $m$-space to the surface will be called the {\bf Euclidean-space
+	% image-space, surface-map
+approach} to curve design on a surface.
+The resulting curves will be called {\bf Euclidean curves} on the surface.
+
+\begin{figure}
+\vspace{2.5in}
+\special{psfile=/usr/people/jj/modelTR/3-spline/img/fig1.ps
+	 hoffset=100}
+\caption{The Euclidean-space approach to curve design on a surface}
+% file: fig1.showcase
+% tops fig1.rgb -m 6.5 1.5 > fig1.ps
+% a simple picture of S, C, f(C), and f (as an arrow) for a generic surface S
+\label{fig:reduce}
+\end{figure}
+
+Not surprisingly, the Euclidean-space approach has been used before.
+% \cite{dietz93,wang94}.
+% Given its simplicity and elegance, this is not surprising.
+The classical solution to the design of trim curves on a surface 
+is an example:
+the trim curve is designed in the parameter space of the surface \cite{foley96}.
+The surface parameterization is used as the map to the surface, % ($m=n-1$), 
+which has the advantage that no map to the surface needs to be
+developed.
+However, a different map to the surface using the full power of
+the Euclidean-space approach can improve the quality of the curve.
+One can use added control in both steps of the Euclidean approach to optimize
+the curve: the map can be directly controlled and, by choosing the
+correct map, the design of the curve in Euclidean space is given more
+flexibility (see below), which can be used to incorporate design optimizations.
+Another reason to look beyond the trim-curve solution is the design of 
+interpolating curves on a surface.
+We shall now explore the rational interpolating curve on a surface,
+which is the main focus of the paper.
+
+	% Interpolating curves are perhaps the most important class of curves
+	% in practical applications of curve design.
+The interpolation of data points is necessary in many applications:
+for example, in the design of quaternion 
+splines for computer animation, where the data points are the orientations of 
+the known keyframes; or in the design of paths on configuration-space
+obstacles for robot motion, where the data points are the source, destination,
+and rendezvous points of the path.
+The design of rational curves is also highly desirable:
+the rational curve is the most efficient of curves, because of the efficiency
+of polynomial computations and the elegant theory of rational Bezier
+and B-spline curves.
+As a result, the rational curve is the defacto standard in modeling systems, 
+with a large, established suite of algorithms for its manipulation.
+Thus, the design of a rational curve will allow the curve to be incorporated 
+immediately into existing software, and subsequent computations with the curve
+will be simple and efficient.
+Finally, we note that we are interested in curve design on
+hypersurfaces in arbitrary dimensions.
+For applications in animation and robotics, 
+curves on surfaces in 4-space and 6-space are of just as much
+interest as curves on surfaces in 3-space.
+
+Consider the design of a rational
+curve on the hypersurface $S$ that interpolates the set of points 
+$\{p_i\}_{i=1,\ldots,k} \subset S$, using the Euclidean-space approach.
+The algorithm is as follows.
+Notice that (1a-b) are preprocessing steps.
+%
+\begin{description}
+\item[(1a)] Design a rational map to the surface, $f:\Re^m \rightarrow S$ (preferably $m=n$).
+\item[(1b)] Compute the inverse map $f^{-1}:S \rightarrow \Re^m$.
+\item[(2a)] Map the data points to Euclidean space, by computing $\{f^{-1}(p_i)\}_{i=1,\ldots,k}$.
+\item[(2b)] Design a rational curve $C$ in Euclidean space, interpolating $\{f^{-1}(p_i)\}_{i=1,\ldots,k}$.
+\item[(2c)] Map the curve back to the surface, by computing $f(C)$.
+\end{description}
+
+We prefer maps to the surface of the form $f:\Re^n \rightarrow S$ (i.e., $m=n$).
+Since $\Re^n$ is one dimension larger than $S$,
+if $m=n$ then $f^{-1}(p_i)$, the inverse image of a point on $S$, is a curve.
+This leads to a useful flexibility in the interpolation step (2b),
+since one is interpolating curves, not points.
+This can be used to design better curves on the surface.
+This is a further disadvantage of the use of the surface
+parameterization $f:\Re^{n-1} \rightarrow S$ as the map to the surface,
+which yields points $f^{-1}(p_i)$ in Euclidean space.
+
+Note that the inverse map $f^{-1}$ need not be rational.
+Only the map $f$ and the curve $C$ must be rational.
+Later in the paper, we shall consider the addition of derivative data
+for the curve to interpolate.
+% We postpone this discussion in order to avoid overcomplicating the issue
+% at the outset.
+
+As a case study of the proposed method,
+we will consider in detail the design of rational interpolating curves 
+on the 3-sphere \Sn{3}, also called quaternion splines.
+We will show that this design is efficient and yields curves of superior
+quality.
+Quaternion splines arise in computer animation in the control of
+orientation: the points on \Sn{3}\ are unit quaternions representing
+discrete orientations of an object in a series of keyframes,
+and the problem is to design a smooth motion of the object through
+these keyframes,
+which reduces to the design of a curve on \Sn{3}
+interpolating the quaternions.
+The application of quaternion 
+splines is not restricted to computer animation, although they were
+first developed in this context.  
+Any application involving motion control,
+such as robot motion or spacecraft control, 
+can make good use of quaternion splines for orientation control.
+
+A major advantage of the Euclidean-space approach is that it is easily
+implemented and integrated into existing modelers,
+since the heart of the algorithm is the design
+of a curve in Euclidean space (step 2b).
+The resulting curve can also be easily integrated into existing
+geometric models, since it is a true rational curve.
+Previous quaternion splines, for example, have required entirely new
+weaponry (such as slerping or constrained optimization)
+for the design of the curve;
+and the resulting curve was highly nonrational so it could not be
+directly handled by a NURBS modeling system.
+
+%
+% Advantages of native-space approach: move to Rational quaternion splines paper.
+%
+{\bf From `characterization paper':}
+
+The native-space approach allows some added freedom in the design of the curve.
+In general, the inverse image $f^{-1}(p)$ of a point on $A$ is a curve,
+while $\rho^{-1}(p)$ is typically a point.
+Consequently, the design of a curve on $A$ interpolating the points $\{p_i\}$
+with the native-space approach
+only requires the design of a curve interpolating the curves
+$\{f^{-1}(p_i)\}$, as opposed to a curve interpolating
+the points $\{\rho^{-1}(p_i)$.
+The added freedom in the native-space approach can allow the design
+of more optimal curves.
+This is illustrated in \cite{dietz93}. (Where is the optimality?)
+A second advantage of the native-space approach is more freedom
+in the choice of map back to the surface.
+Not being limited to the surface parameterization,
+the native-space approach can use any rational map of $\Re^n$ to the surface.
+This freedom can lead to superior curves on the surface, as illustrated
+in \cite{jj+jimbo99}.
+
+
+Another paper (on general Riemannian modeling):
+The design of interpolating curves 
+(curves that interpolate a set of data points) 
+is a fundamental problem in geometric modeling.
+A general approach to the design of rational interpolating curves on a surface
+is proposed.
+The curves constructed by the new method are of superior quality
+and the method is highly efficient.
+The curve's rationality allows smooth integration into existing
+geometric models.
+The design process relies on classical techniques for curve
+interpolation in Euclidean space (unconstrained to a surface).
+Thus, little new software needs to be written, and the design is simple
+and efficient.
+The default choice is to design curves with $C^2$ continuity,
+but continuity can be controlled and is not bounded.
+{\bf Check that \Sn{3}\ curve are $C^2$ continuous.}
+The method is coordinate-frame invariant.
+There is flexibility in the design of the curve that is lacking from 
+earlier techniques.
+The essence of the method is to map the data points to Euclidean space,
+% choose a collection of points from the resulting collection of 
+% data curves in Euclidean space, 
+design the curve through selected points in unconstrained Euclidean space, 
+and map the curve back to the surface.
+
+

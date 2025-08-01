@@ -1,0 +1,21 @@
+Mesh
+
+Directories:
+	Mesh	- basic mesh code
+	Operators - operators for modifying the mesh
+	UserData  - tagging the mesh with basic user data geometry
+	U2	  - a varient of UserData
+
+You'll find documentation in the Doc directory.
+
+Simple programs live in the TestPrograms directory.  This
+includes io.c, icosahedron.c, path.c, and t.c.
+
+Programs of interest in the the Apps directory include:
+
+    4Color	- a program to 4 color a triangular mesh
+    FlipMesh	- a program to reverse the orientation of a mesh
+    Smooth	- a program to "smooth" a mesh.
+    Stellate	- a program to stellate a mesh.
+    Normal	- Several normal tagging programs 
+

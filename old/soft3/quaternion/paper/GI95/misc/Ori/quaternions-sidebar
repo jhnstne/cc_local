@@ -1,0 +1,76 @@
+Introduction
+Position has 3 degrees of freedom
+Orientation has 3 degrees of freedom
+Canonical orientation (orientations are specified in terms of this)
+Euler angles as representation of orientation; gimbal lock; spacecraft; robotics; nonuniqueness; difficult combination
+	Reference?
+Rotation matrix as representation of orientation; verbosity; easy combination; matrix advantages; SO(3) metric
+
+
+
+
+
+
+
+
+The orientation of a rigid object can be specified by a {\bf rotation matrix} $M$:
+each point $x$ on the object in canonical position is transformed to the point $Mx$.
+Let $c_i$ and $r_i$ be the $ith$ column and row, respectively, of the rotation matrix.
+Note that $c_i$ and $r_i$ can be interpreted as vectors in 3-space.
+Let $e_i$ be the unit vector along the $ith$ coordinate axis.
+A rotation matrix is a 3x3 matrix with the following properties.
+\begin{itemize}
+\item
+	The rows of $M$ are orthonormal (i.e., $r_i \cdot r_j = \delta_{ij}$; i.e., mutually orthogonal and unit vectors)
+\item
+	The columns of $M$ are orthonormal.
+\item
+	Under the rotation $M$, the row vector $r_i$ is transformed into $e_i$.
+\item
+	Under the rotation $M$, $e_i$ is transformed into the column vector $c_i$.
+\end{itemize}
+
+\begin{example}
+
+\end{example}
+
+-------------------------------------------------
+
+Goals: 
+	1) Incorporate physical optimizations of orientation functions.
+	OR
+	2) Compare the physical behaviour of my animations as opposed
+		to other animation techniques.
+
+
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+------------------------------------------------------------------------------
+- Quaternion as representation of orientation; succinctness; elegant algebra;-
+- Unit quaternion as representation of orientation; same as SO(3) metric     -
+------------------------------------------------------------------------------
+Frenet frame as representation of orientation
+Desirable properties for change of orientation: constant (arc length param);
+		minimizes tangential acceleration on quaternion sphere;
+		physical optimizations of Cohen (minimizes torque although can theoretically minimize anything)
+
+
+Can we integrate physical optimization automatically into geometric interpolation
+That is, interpolate points subject to minimizing some functional
+	 ideally, define a class of splines that automatically minimize a specifi
+		functional such as tangential acceleration (like cubic splines minimize change of curvature)
+
+Holli: quaternion calculus; GUI; incorporating optimization into geometry

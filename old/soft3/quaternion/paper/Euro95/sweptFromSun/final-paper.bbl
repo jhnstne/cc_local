@@ -1,0 +1,115 @@
+\begin{thebibliography}{10}
+
+\bibitem{bloom91}
+M.~Bloomenthal and R.~Riesenfeld.
+\newblock Approximation of sweep surfaces by tensor product {N}{U}{R}{B}{S}.
+\newblock {\em SPIE Proceedings}, 1610:132--144, 1991.
+
+\bibitem{bronsklok85}
+W.~Bronsvoort and F.~Klok.
+\newblock Ray tracing generalized cylinders.
+\newblock {\em {ACM} Transactions on Graphics}, 4(4):291--303, October 1985.
+
+\bibitem{bronswaart92}
+W.F. Bronsvoort and J.J. Waarts.
+\newblock A method for converting the surface of a generalized cylinder into a
+  {B}-spline surface.
+\newblock {\em Computers \& Graphics}, 16(2):175--178, 1992.
+
+\bibitem{coquillart87}
+S.~Coquillart.
+\newblock A control-point-based sweeping technique.
+\newblock {\em {IEEE} Computer Graphics \& Applications}, pages 36--45,
+  November 1987.
+
+\bibitem{Dickson52}
+L.~Dickson.
+\newblock {\em History of the Theory of Numbers: Vol. II}.
+\newblock Chelsea, New York, 1952.
+
+\bibitem{Dietz93}
+R.~Dietz, J.~Hoschek, and B.~Juttler.
+\newblock An algebraic approach to curves and surfaces on the sphere and on
+  other quadrics.
+\newblock {\em Computer Aided Geometric Design}, 10:211--229, 1993.
+
+\bibitem{farin93}
+G.~Farin.
+\newblock {\em Curves and Surfaces for Computer Aided Geometric Design}.
+\newblock Academic Press, New York, third edition, 1993.
+
+\bibitem{farouki94}
+R.~Farouki.
+\newblock Pythagorean-hodograph space curves.
+\newblock {\em Adv. in Comp. Math.}, 2:41--66, 1994.
+
+\bibitem{Flaquer92}
+J.~Flaquer, G.~Garate, and M.~Pargada.
+\newblock Envelopes of moving quadric surfaces.
+\newblock {\em Computer Aided Geometric Design}, 9:299--312, 1992.
+
+\bibitem{hoschek+lasser93}
+J.~Hoschek and D.~Lasser.
+\newblock {\em Fundamentals of computer aided geometric design}.
+\newblock A.K. Peters, Wellesley, Massachusetts, 1993.
+
+\bibitem{jjjimbo94a}
+J.K. Johnstone and J.P. Williams.
+\newblock Rational control of orientation for animation.
+\newblock In {\em Proceedings of Graphics Interface '95}, Quebec City, May
+  1995.
+
+\bibitem{martinsteph90}
+R.~Martin and P.~Stephenson.
+\newblock Sweeping of three-dimensional objects.
+\newblock {\em Computer Aided Design}, 22:223--234, 1990.
+
+\bibitem{misner73}
+C.~Misner, K.~Thorne, and J.~Wheeler.
+\newblock {\em Gravitation}.
+\newblock W.H. Freeman, San Francisco, 1973.
+
+\bibitem{parkkim93}
+E.-J. Park and M.-S. Kim.
+\newblock Modeling generalized cylinders with variable radius offset space
+  curves.
+\newblock In {\em Proc. Pacific Graphics '93}, volume~1, pages 20--34. World
+  Scientific, 1993.
+
+\bibitem{Pegna88}
+J.~Pegna.
+\newblock {\em Variable Sweep Geometric Modeling}.
+\newblock PhD thesis, Stanford University, 1988.
+
+\bibitem{rossignac85}
+J.~Rossignac.
+\newblock {\em Blending and Offsetting Solid Models}.
+\newblock PhD thesis, U. of Rochester, 1985.
+
+\bibitem{rossrequicha84}
+J.~Rossignac and A.~Requicha.
+\newblock Constant-radius blending in solid modeling.
+\newblock {\em Computers in Mechanical Engineering}, pages 65--73, July 1984.
+
+\bibitem{shoemake85}
+K.~Shoemake.
+\newblock Animating rotation with quaternion curves.
+\newblock In {\em SIGGRAPH '85}, volume 19(3), pages 245--254, San Francisco,
+  1985.
+
+\bibitem{vanwijk84euro}
+J.J. van Wijk.
+\newblock Ray tracing objects defined by sweeping a sphere.
+\newblock {\em Eurographics 1984}, pages 73--82, 1984.
+
+\bibitem{vanwijk84tog}
+J.J. van Wijk.
+\newblock Ray tracing objects defined by sweeping planar cubic splines.
+\newblock {\em {ACM} Transactions on Graphics}, 3(3):223--237, July 1984.
+
+\bibitem{WangWang86}
+W.~P. Wang and K.~K. Wang.
+\newblock Geometric modeling for swept volume of moving solids.
+\newblock {\em {IEEE} Computer Graphics \& Applications}, pages 8--17, 1986.
+
+\end{thebibliography}

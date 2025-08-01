@@ -1,0 +1,6 @@
+a := p^2 + q^2 + r^2 + s^2;
+A := 2*p*P + 2*q*Q + 2*r*R + 2*s*S;
+eqns := {a*(p*S + P*s) - A*p*s,
+	 a*(q*S + Q*s) - A*q*s,
+	 a*(r*S + R*s) - A*r*s};
+solve(eqns,{p,q,r,s});

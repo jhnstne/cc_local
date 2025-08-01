@@ -1,0 +1,2116 @@
+\documentclass[11pt]{article} 
+\usepackage{times}
+\usepackage[pdftex]{graphicx}
+\input{header-consecutive}
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{0in}
+\setlength{\textheight}{8.6in}
+\setlength{\textwidth}{6.875in}
+\setlength{\columnsep}{5mm}
+% \markright{Orientation control (\today) \hfill}
+% \pagestyle{myheadings}
+
+% -----------------------------------------------------------------------------
+\title{Tech report 0: Rational maps to the [quaternion] sphere for motion\\January-February 2005}
+% Johnstone and Williams
+% ask Ian Knowles for a suggestion of a mathematical journal
+\begin{document}
+\maketitle
+
+Keywords: sphere, Pythagorean tuples, Euler's four squares theorem, (quaternion spline?).
+
+This report studies rational maps from Euclidean space to the sphere,
+in arbitrary dimensions,
+including a complete % an exhaustive (but hopefully not exhausting)
+characterization of these maps, a complete characterization of the 
+related Pythagorean tuples, examples of these maps and a consideration
+of classical maps to the sphere, 
+% an analysis of the inverse maps % from the sphere to Euclidean space 
+% (which are typically not rational), 
+and an analysis of the
+% inevitable 
+poles of the inverse maps.
+% [We could include the image of a rational Bezier curve under these maps, 
+% if more is needed.  But I think that this is more natural in the paper on quaternion 
+% splines, which also addresses avoidance of the poles, divide and conquer, and hence
+% derivatives. Delay discussion of stereographic projection to this second paper too,
+% since only its inverse is a map to the sphere and we heavily use s.p. in building'
+% rational quaternion splines]
+%
+In particular, this paper studies rational maps from $\Re^m$ to \Sn{n}.
+
+\begin{defn2}
+\Sn{n}\ is the unit sphere in $(n+1)$-space $x_1^2 + \ldots + x_{n+1}^2 - 1 = 0$,
+a manifold of dimension $n$.
+\end{defn2}
+
+\begin{defn2}
+A map $(x_1,\ldots,x_n) \mapsto (f_1 (x_1,\ldots,x_n),\ldots,f_m (x_1,\ldots,x_n))$
+is {\bf rational} if 
+the $f_i$ are all rational polynomials in $x_1,\ldots,x_n$, $i=1,\ldots,m$.
+A {\bf rational polynomial} is a quotient of polynomials.
+\end{defn2}
+
+The study of rational maps to the sphere is motivated by a problem in motion design.
+% Consider motion, % of a rigid object, or of a rigid component of a nonrigid object,
+% which is change in position and orientation.
+A common task in motion design is the interpolation of a collection of quaternions
+by a quaternion spline, which then represents the orientation component of a motion.
+The unit quaternion is a preferred representation for orientation
+in computer graphics, physics \cite{misner}, and robotics.
+Since unit quaternions are points on the unit sphere $S^3$ in 4-space, 
+the orientation component of a motion may be captured by a curve on $S^3$, called
+a quaternion spline.
+The design of a quaternion spline is made particularly challenging because 
+the curve is constrained to remain on the sphere $S^3$.
+This awkward constrained interpolation problem may be reduced to 
+a classical free interpolation problem through the use of a map from Euclidean space 
+to the sphere, as follows.
+Let $f$ be a map from Euclidean space (typically 3-space or 4-space) to $S^3$,
+and let $Q$ be a set of quaternions.
+
+\begin{itemize}
+% \item Map the quaternions $Q$ under $f^{-1}$.
+\item Build a curve C that interpolates the points $f^{-1}(Q)$, a classical
+      interpolation problem.
+\item Map the curve C under $f$, yielding a quaternion spline $f(C)$ 
+      that interpolates $Q$, embedded in $S^3$.
+\end{itemize}
+
+In this solution, the two challenges of point interpolation and
+constraint to the sphere are separated,
+unlike other solutions that handle both challenges together \cite{animationtext}.
+The first step concentrates solely on point interpolation,
+while the constraint to the sphere is handled by the spherical map.
+Another advantage of this solution is its potential for rationality.
+The quaternion spline's constraint to $S^3$ has typically led to nonrational solutions.
+If $f$ is a rational map to the sphere
+and the interpolating curve $C$ is rational (as it will be in the 
+classical construction \cite{farin}),
+the quaternion spline $f(C)$ will also be rational, with all of the 
+attendant advantages of rational curves.
+% (based on constrained optimization, trigonometric slerping, or Lie exponential maps.)
+Rational quaternion splines are particularly attractive for analysis of the 
+resulting motion, such as collision detection.
+A third advantage is that the above construction of rational quaternion splines 
+is more efficient than some other nonrational solutions \cite{barr92,barrafter92}.
+
+[{\em Figure of a quaternion spline and its associated motion.
+Figure of algorithm's solution, step by step (perhaps using stereographic projection).}]
+
+\clearpage
+
+\section{Rational maps to the sphere and Pythagorean tuples}
+\label{sec:ratpy}
+
+The key observation in the characterization of rational maps to the sphere is their
+equivalence to Pythagorean tuples.
+A Pythagorean tuple is a tuple that satisfies a sum of squares relationship,
+generalizing the sum of squares relationship between the sides of a right triangle
+in the Pythagorean Theorem.
+
+\begin{defn2}
+A {\bf Pythagorean tuple over $K$} % n+1-tuple is clear from context
+is a tuple $(f_1,\ldots,f_{n+1}) \in K^{n+1}$
+where $f_1^2 + \ldots + f_n^2 = f_{n+1}^2$.
+\end{defn2}
+
+% n --> m
+Consider a rational map to the sphere $f: \Re^m \rightarrow \Sn{n-1}$:
+\[
+	f(x_1,\ldots,x_m) =
+	(\frac{f_1(x_1,\ldots,x_m)}{f_{n+1}(x_1,\ldots,x_m)}, \ldots,
+	 \frac{f_n(x_1,\ldots,x_m)}{f_{n+1}(x_1,\ldots,x_m)})
+\]
+where $f_1,\ldots,f_{n+1}$ are polynomials.
+Since $f$ maps to the unit sphere at the origin,
+\begin{eqnarray}
+       (\frac{f_1}{f_{n+1}})^2 + \cdots + (\frac{f_n}{f_{n+1}})^2 & = & 1 \\
+	f_1^2 + \cdots + f_n^2 & = & f_{n+1}^2
+\end{eqnarray}
+and the components of the rational map define a Pythagorean $(n+1)$-tuple
+over the ring of polynomials $\Re[x_1,\ldots,x_m]$.
+In short, rational maps to \Sn{n-1} are identified with Pythagorean $(n+1)$-tuples.
+
+\Comment{
+\begin{defn2}
+$\Re[x_1,\ldots,x_n]$ is the ring of polynomials in the $n$ variables
+$x_1,\ldots,x_n$ with real coefficients.
+\end{defn2}
+}
+
+% This reduces the study of rational maps from $\Re^{n}$ to \Sn{m-1}\ 
+% to the study of Pythagorean $(m+1)$-tuples over polynomials $\Re[x_1,\ldots,x_n]$.
+
+% \begin{lemma}
+% \label{lem:iffpyth}
+% A rational map $f: \Re^n \rightarrow \Re^m$ defined by 
+% $f(x_1,\ldots,x_n) = (\frac{f_1(x_1,\ldots,x_n)}{f_{m+1}(x_1,\ldots,x_n)}, \ldots,
+%	 \frac{f_m(x_1,\ldots,x_n)}{f_{m+1}(x_1,\ldots,x_n)})$,
+% where $f_1,\ldots,f_{m+1} \in \Re[x_1,\ldots,x_n]$, is a rational map from $\Re^n$
+% to the sphere \Sn{m-1}\ if and only if $(f_1,\ldots,f_{m+1})$ is a Pythagorean
+% $(m+1)$-tuple over polynomials $\Re[x_1,\ldots,x_n]$.
+% \end{lemma}
+
+% notice that m+1-tuples map to m-1-sphere
+
+Pythagorean tuples and sums of squares have been heavily studied in number theory.
+An examination of this literature will lead us to a characterization of rational maps
+to the sphere.
+We begin with a review of Pythagorean triples and Pythagorean quadruples,
+which are well known, and the related maps to \Sn{1} and \Sn{2}.
+We then consider Euler's fundamental work on the sum of four squares,
+which can be related to Pythagorean quintuples.
+Although this work does not yield a full characterization of Pythagorean quintuples,
+it is sufficient to characterize rational maps to \Sn{3}.
+Finally, we develop a characterization of rational maps to \Sn{n}
+by generalizing the technique for Pythagorean quintuples, 
+using Ammei's generalization of Euler's result.
+
+% The rest of the paper is structured as follows.
+
+% Since there is flexibility in which Euclidean space is involved, we consider a general
+% Euclidean space.
+
+\section{Previous work on maps to the sphere}
+
+Maps from the 2-sphere to the plane, whose inverses are maps to the 2-sphere,
+have long been of interest because of their application to cartography.
+There are many well-known examples, such as the mapping of Sanson,
+the mapping of Bonne, and the Lambert projection \cite{kreyszig59}.
+The most famous is the Mercator projection, which maps the point
+$(\cos u \cos v,\ \cos u \sin v,\ \sin u)$ on the 2-sphere 
+to the point $(v,\ \log \tan (\frac{u}{2} + \frac{\pi}{4}))$ on the plane.
+However, none of these classical maps are rational,
+since properties such as conformality (preservation of angles between 
+intersecting curves) and equiareality (preservation of area) are more important than
+rationality (the ability to express the map in terms of quotients of polynomials)
+in the design of cartographic maps.
+Stereographic projection is the rare exception: a rational 
+map from the sphere to Euclidean space, whose inverse is also rational.
+We shall fully explore this inverse map in another paper \cite{jj}.
+
+% stereographic projection: no, see above
+
+Rational parameterizations of the sphere are rational maps to the sphere.
+% since the parameterization of a surface is a map of the parameter space 
+% (an Euclidean space) to the surface.
+For example, the classical rational parameterization of \Sn{2}, constructed using the
+spherical product \cite{barr81} of a semi-circle and a circle,
+% $(a(u),b(u)) \times (c_1(v_1,...,v_{n-1}),\ldots,c_n(v_1,\ldots,v_{n-1}) 
+% = (a c_1, \ldots, a c_{n-1}, b c_n)$.
+% The spherical product is a general scheme for sweeping one curve along another,
+% while modulating its size.
+is the following rational map of 2-space to the sphere:\footnote{The 
+  restriction of $u$ to $[-1,1]$
+  can be removed without problem: the map then double covers the sphere.}
+\begin{equation}
+\label{eq:s2param}
+S(u,v) = (\frac{1-u^2}{1+u^2}(\frac{1-v^2}{1+v^2}),\  
+          \frac{1-u^2}{1+u^2}(\frac{2v}{1+v^2}),\  \frac{2u}{1+u^2}),\ 
+u \in [-1,1],\ v \in (-\infty,+\infty)
+\end{equation}
+% Rational parameterizations are of interest for the development of rational Bezier or
+% NURBS representations of the sphere.
+
+{\bf 
+Reduction to Pythagorean tuples (done).
+Euler characterization of Pythagorean tuples (done).
+Full characterization (done).
+Visualization (removed).
+Poles (done).
+}
+
+\section{Pythagorean tuples}
+
+\subsection{Pythagorean triples}
+
+It is a classical result for K = integers, 
+generalized to K = polynomials by Kubota \cite{kubota72},
+that a triple over K is a Pythagorean triple if and only if
+it is of the form 
+$\alpha(a_1^2 - a_2^2, 2a_1a_2, a_1^2 + a_2^2)$
+for some $a_1,a_2,\alpha \in K$.\footnote{Whenever
+	we give a normal form for a Pythagorean $(n+1)$-tuple,
+	it is understood that the first $n$ elements are free to undergo
+	a permutation.}
+  % p. 89, Ebbinghaus, Numbers
+Farouki and Sakkalis \cite{farouki90} have used
+Kubota's result to define Pythagorean hodograph curves, 
+which have attractive arc length and offset properties.
+The hodographs of these curves are components of a Pythagorean triple
+of polynomials.
+  % which among other things have polynomial arc length (in the curve parameter).
+To illustrate the association between Pythagorean triples and rational maps to \Sn{1},
+note that the standard rational parameterization for \Sn{1} (a rational map to \Sn{1})
+may be developed from the normal form for Pythagorean triples 
+using $(a_1,a_2,\alpha) = (1,t,1)$:
+$(\frac{1-t^2}{1+t^2}, \frac{2t}{1+t^2})$.
+
+\subsection{Pythagorean quadruples}
+
+Catalan \cite{catalan85} established the normal form for Pythagorean quadruples over
+K = integers, generalized by Dietz et. al. \cite{dietz93} to K = polynomials in 
+$\Re[x_1]$, $\Re[x_1,x_2]$ or $\Re[x_1,x_2,x_3]/<x_1+x_2+x_3-1>$:
+a quadruple over $K$ is a Pythagorean quadruple if and only if it is of the form
+\begin{equation}
+\label{eq:quad}
+\alpha (a_1^2+a_2^2-a_3^2-a_4^2,\ 2a_1a_3+2a_2a_4,\ 2a_1a_4-2a_2a_3,
+\ a_1^2+a_2^2+a_3^2+a_4^2)
+\end{equation}
+for some $a_1,a_2,a_3,a_4,\alpha \in K$.
+The rational map to \Sn{2}\ 
+resulting from the choice $(a_1,a_2,a_3,a_4) = (x_1,x_2,x_3,1)$ 
+% (with a permutation (1,2,3) to (3,2,1)) 
+was used by Dietz et. al. \cite{dietz93}.
+The standard rational parameterization (\ref{eq:s2param}) of \Sn{2}
+may be developed from the normal form
+for Pythagorean quadruples using $(a_1,a_2,a_3,a_4,\alpha) = (1,uv,u,v,1)$.
+% and a permutation.
+% $\frac{1}{1+u^2+v^2+u^2v^2}(1-u^2-v^2+u^2v^2, 2v - 2u^2v,2u+2uv^2)$.
+
+\subsection{Pythagorean quintuples}
+
+We are not aware of any specific study of Pythagorean quintuples.
+However, there is an extensive study of the sum of four squares in the 
+number theory literature, which may be related to Pythagorean quintuples.
+Moreover, this development can be generalized to arbitrary Pythagorean tuples.
+
+The study of four squares in the eighteenth century
+was driven by the elusive search for a proof that
+every positive integer is the sum of the squares of four integers.
+This famous result was apparently known to Diophantus in the third century,
+since he assumes it implicitly in his writings \cite{dickson52}, % p. 275
+and Fermat % (in characteristic fashion!) 
+claimed that he had a proof.\footnote{"I can
+	not give the proof here, which depends upon numerous and abstruse
+	mysteries of numbers; for I intend to devote an entire book
+	to this subject" \cite[p. 6]{dickson52}.}
+However, the first published proof was by Lagrange in 1770 \cite{herstein75}, % p. 375
+over a century later,
+during which time many mathematicians worked on the problem.
+One of the mathematicians who was intensely interested in this problem was Euler, 
+and he established the following crucial result in 1748 \cite{weil84}.   
+        % p. 226 of Weil
+        % p. 209 of Ebbing, p. 373 of Herstein herstein75
+	% p. 210, Ebbinghaus for any commutative ring and Gauss' proof
+	% another bulky version in \cite[p. 277]{dickson52}.
+
+\begin{theorem}[Euler's Four Squares Theorem]
+\label{thm:euler}
+\[
+\begin{array}{ll}
+& (a_1^2 + a_2^2 + a_3^2 + a_4^2) 
+(\hat{a}^2_1 + \hat{a}^2_2 + \hat{a}^2_3 + \hat{a}^2_4) = \\
+& (a_1 \hat{a}_1 + a_2\hat{a}_2 + a_3\hat{a}_3 + a_4\hat{a}_4)^2 +
+  (a_1 \hat{a}_2 - a_2\hat{a}_1 - a_3\hat{a}_4 + a_4\hat{a}_3)^2 + \\
+& (a_1\hat{a}_3 + a_2\hat{a}_4 - a_3\hat{a}_1 - a_4\hat{a}_2)^2 +
+  (a_1\hat{a}_4 - a_2\hat{a}_3 + a_3\hat{a}_2 - a_4\hat{a}_1)^2
+\end{array}
+\]
+for any integers $a_1,a_2,a_3,a_4,\hat{a}_1,\hat{a}_2,\hat{a}_3,\hat{a}_4$.
+%(but it can easily be generalized to polynomials, or any elements of a commutative ring).
+% \footnote{The original statement was for integers, but it easily generalizes.}
+% see p. 210 of Ebbinghaus
+\end{theorem}
+%
+\Comment{
+% version in Herstein (called Lagrange's identity) and Ebbinghaus
+% the version directly attributed to Euler in Dickson and Weil is cleaner, so we use it
+USING THE DICKSON FORM:
+\begin{theorem}[Euler's Four Squares Theorem]
+\label{thm:euler}
+\[
+\begin{array}{ll}
+& (a_1^2 + a_2^2 + a_3^2 + a_4^2) 
+(\hat{a}^2_1 + \hat{a}^2_2 + \hat{a}^2_3 + \hat{a}^2_4) = \\
+& (a_1 \hat{a}_1 - a_2\hat{a}_2 - a_3\hat{a}_3 - a_4\hat{a}_4)^2 +
+   (a_1\hat{a}_2 + a_2\hat{a}_1 + a_3\hat{a}_4 - a_4\hat{a}_3)^2 + \\
+& (a_1\hat{a}_3 - a_2\hat{a}_4 + a_3\hat{a}_1 + a_4\hat{a}_2)^2 +
+   (a_1\hat{a}_4 + a_2\hat{a}_3 - a_3\hat{a}_2 + a_4\hat{a}_1)^2
+\end{array}
+\]
+for integers $a_1,a_2,a_3,a_4,\hat{a}_1,\hat{a}_2,\hat{a}_3,\hat{a}_4$.
+% \footnote{The original statement was for integers, but it easily generalizes.}
+% see p. 210 of Ebbinghaus
+\end{theorem}
+}
+%
+This result, which is also called Lagrange's identity \cite{herstein75}, % p. 373
+establishes that the product of two sums of four squares is another sum of four squares,
+reducing the problem of showing that every integer is the sum of four squares to 
+the simpler problem of showing that every prime is the sum of four squares.
+  % since every integer may be expressed as the product of primes.
+However, for our purposes, 
+Euler's Four Squares Theorem is a Pythagorean quintuple generator.
+
+\begin{corollary}
+\label{cor:euler}
+\begin{equation}
+\label{eq:aida}
+(a_1^2 + a_2^2 + a_3^2 - a_4^2)^2 + (2a_1a_4)^2 + (2a_2a_4)^2 + (2a_3a_4)^2
+= (a_1^2 + a_2^2 + a_3^2 + a_4^2)^2
+\end{equation}
+for any rational numbers or rational polynomials $a_1,a_2,a_3,a_4$.
+  % where $a_1,a_2,a_3,a_4$ are elements of any commutative ring.
+\end{corollary}
+\prf
+(\ref{eq:aida}) is generated by substituting 
+$(\hat{a}_1,\hat{a}_2,\hat{a}_3,\hat{a}_4) = (a_1,a_2,a_3,-a_4)$.
+This is the next obvious choice after 
+$(\hat{a}_1,\hat{a}_2,\hat{a}_3,\hat{a}_4) = (a_1,a_2,a_3,a_4)$,
+which yields a tautology.
+This proves the result for integers.
+The Four Squares Theorem may easily be generalized to polynomials, 
+or any elements of a commutative ring (see Definition~ref{defn:commring} below), 
+such as the rationals and rational polynomials.
+% It can be further generalized to rational numbers or rational polynomials
+% by placing these numbers or polynomials over a least common multiple,
+% which then factors out.
+\QED
+
+\Comment{
+    \section{A Characterization of Rational Maps of $\Re^4$ to \Sn{3}}
+
+    Euler's Four Squares Theorem may be used to develop
+    a weak\footnote{It is weak in the sense of its relaxed restriction on $\alpha$,
+    as discussed below.} 
+    normal form for Pythagorean quintuples.
+
+    % VERSION FOR DICKSON FORM OF 4-SQUARE THEOREM  
+    We get the following formula by letting 
+    $(\hat{a}_1,\hat{a}_2,\hat{a}_3,\hat{a}_4) = (a_1,-a_2,-a_3,a_4)$
+    in the Four Squares Theorem:
+    % \label{lem:corEuler4square}
+    \begin{equation}
+    \label{eq:aida}
+    (a_1^2 + a_2^2 + a_3^2 - a_4^2)^2 + (2a_1a_4)^2 + (2a_2a_4)^2 + (2a_3a_4)^2
+    = (a_1^2 + a_2^2 + a_3^2 + a_4^2)^2
+    \end{equation}
+    % where $a_1,a_2,a_3,a_4$ are elements of any commutative ring.
+}
+
+This leads to a normal form for Pythagorean quintuples.
+
+\begin{theorem}
+\label{thm:quint}
+A quintuple over K is a Pythagorean quintuple if and only it is of the form
+\begin{equation}
+\label{eq:pythquint}
+	\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+		\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+		\ a_1^2 + a_2^2 + a_3^2 + a_4^2)
+\end{equation}
+for some $a_1,a_2,a_3,a_4,\alpha\neq 0 \in K$, 
+where $K$ is the field of rational numbers
+or rational polynomials over $\Re[x_1,x_2,\ldots,x_n]$.
+\end{theorem}
+\prf
+(If:)
+Suppose that $Q = \alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+		\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+		\ a_1^2 + a_2^2 + a_3^2 + a_4^2)$ is a quintuple over $K$.
+By Corollary~\ref{cor:euler}, $\frac{1}{\alpha} Q$ is a Pythagorean quintuple.
+But any nonzero multiple of a Pythagorean tuple is also a Pythagorean tuple,
+so $Q$ is a Pythagorean quintuple.
+
+(Only if:) 
+Let $Q = (p_1,p_2,p_3,p_4,p_5)$ be a Pythagorean quintuple over $K$.
+% and let $f(a_1,a_2,a_3,a_4,\alpha)$ be a shorthand for the normal form
+% $\frac{1}{\alpha} (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+%		 \ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+%		 \ a_1^2 + a_2^2 + a_3^2 + a_4^2)$.
+If $p_1 = p_5$, then $Q = (p_1,0,0,0,p_1)$
+and the substitution $(a_1,a_2,a_3,a_4,\alpha) = (p_1,0,0,0,\frac{1}{p_1})$ into the
+normal form yields $Q$.
+If $p_1 \neq p_5$, then the substitution 
+$(a_1,a_2,a_3,a_4,\alpha) = 
+ (\frac{p_2}{2(p_5-p_1)},
+  \frac{p_3}{2(p_5-p_1)},
+  \frac{p_4}{2(p_5-p_1)},
+  \frac{1}{2}, 2(p_5-p_1))$ into the normal form yields $Q$.
+To see this, note that
+\[
+  \alpha(a_1^2 + a_2^2 + a_3^2 - a_4^2)
+= 2(p_5-p_1) \frac{p_2^2 + p_3^2 + p_4^2 - (p_5 - p_1)^2}{(2(p_5-p_1))^2}
+= \frac{(p_5^2 - p_1^2) - (p_5 - p_1)^2}{2(p_5 - p_1)}
+= \frac{-2p_1^2 + 2p_1p_5}{2(p_5 - p_1)} 
+= p_1
+\]
+where we use the Pythagorean property in the second equation.
+Secondly, note that
+\[
+\alpha (2a_i a_4) = \frac{2p_{i+1}(p_5 - p_1)}{2(p_5 - p_1)} = p_{i+1}
+\]
+for $i=1,2,3$.
+Finally, note that 
+\[
+\alpha(a_1^2 + a_2^2 + a_3^2 + a_4^2)
+= \frac{p_2^2 + p_3^2 + p_4^2 + (p_5 - p_1)^2}{2(p_5-p_1)} 
+= \frac{(p_1^2 + p_2^2 + p_3^2 + p_4^2) + p_5^2 -2p_1p_5}{2(p_5-p_1)} 
+= \frac{2p_5^2 - 2p_1p_5}{2(p_5-p_1)} 
+= p_5
+\]
+\QED
+
+\Comment{
+  OTHER VERSION:
+  This formula is very close to a normal form for Pythagorean quintuples.
+
+  \begin{theorem}
+    \label{thm:necessary4}
+    A quintuple over K is a Pythagorean quintuple if and only it is of the form
+    \begin{equation}
+      \label{eq:pythquint}
+      \frac{1}{\alpha} (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+      \ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+      \ a_1^2 + a_2^2 + a_3^2 + a_4^2)
+    \end{equation}
+    for some $a_1,a_2,a_3,a_4,\alpha\neq 0 \in K$, 
+    where $K$ is the ring of integers
+    or polynomials over $\Re[x_1,x_2,\ldots,x_n]$.
+    % NB: proof not valid for comm. ring, since comm. ring may not have unit elt 1, 
+    % which is needed immediately
+  \end{theorem}
+  \prf
+  (If:)
+   Suppose that $Q = \frac{1}{\alpha} (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+		\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+		\ a_1^2 + a_2^2 + a_3^2 + a_4^2)$ is a quintuple over $K$.
+   By Corollary~\ref{cor:euler}, $\alpha Q$ is a Pythagorean quintuple.
+   But any nonzero multiple of a Pythagorean tuple is also a Pythagorean tuple,
+   so $Q$ is a Pythagorean quintuple.
+
+   (Only if:) 
+   Let $Q = (p_1,p_2,p_3,p_4,p_5)$ be a Pythagorean quintuple over $K$.
+   % and let $f(a_1,a_2,a_3,a_4,\alpha)$ be a shorthand for the normal form
+   % $\frac{1}{\alpha} (a_1^2 + a_2^2 + a_3^2 - a_4^2,  
+   %		 \ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+   %		 \ a_1^2 + a_2^2 + a_3^2 + a_4^2)$.
+   If $p_1 = p_5$, then $Q = (p_1,0,0,0,p_1)$
+   and the substitution $(a_1,a_2,a_3,a_4,\alpha) = (p_1,0,0,0,p_1)$ into the
+   normal form yields $Q$.
+   If $p_1 \neq p_5$, then the substitution 
+   $(a_1,a_2,a_3,a_4,\alpha) = (p_2,p_3,p_4,p_5 - p_1, 2(p_5 - p_1))$ into the normal
+   form yields $Q$.
+   To see this, note that
+   \[
+   \frac{a_1^2 + a_2^2 + a_3^2 - a_4^2}{\alpha}
+   = \frac{p_2^2 + p_3^2 + p_4^2 - (p_5 - p_1)^2}{2(p_5-p_1)}
+   = \frac{(p_5^2 - p_1^2) - (p_5 - p_1)^2}{2(p_5 - p_1)}
+   = \frac{-2p_1^2 + 2p_1p_5}{2(p_5 - p_1)} 
+   = p_1
+   \]
+   where we use the Pythagorean property in the second equation.
+   Secondly, note that
+   \[
+   \frac{2a_i a_4}{\alpha} = \frac{2p_{i+1}(p_5 - p_1)}{2(p_5 - p_1)} = p_{i+1}
+   \]
+   for $i=1,2,3$.
+   Finally, note that 
+   \[
+   \frac{a_1^2 + a_2^2 + a_3^2 + a_4^2}{\alpha}
+   = \frac{p_2^2 + p_3^2 + p_4^2 + (p_5 - p_1)^2}{2(p_5-p_1)} 
+   = \frac{(p_1^2 + p_2^2 + p_3^2 + p_4^2) + p_5^2 -2p_1p_5}{2(p_5-p_1)} 
+   = \frac{2p_5^2 - 2p_1p_5}{2(p_5-p_1)} 
+   = p_5
+   \]
+   \QED
+
+   Unfortunately, 
+   (\ref{eq:pythquint}) is not a sufficient condition for Pythagorean quintuples
+   over $\Re[x_1,x_2,\ldots,x_n]$, since
+   a quintuple in the form (\ref{eq:pythquint}) is not necessarily
+   even a quintuple over $\Re[x_1,x_2,x_3,x_4]$.
+   For example, $(a_1,a_2,a_3,a_4,\alpha) = (1,1,1,1,x_1)$ yields the
+   quintuple $(\frac{2}{x_1}, \frac{2}{x_1}, \frac{2}{x_1}, \frac{2}{x_1}, \frac{4}{x_1})$,
+   which is not ---.
+   However, it successfully yields a characterization
+   of the rational maps of $\Re^4$ to \Sn{3}.\footnote{The weaker restriction on $\alpha$
+     suffices because of the cancellation of $\alpha$ as we translate from Pythagorean
+     tuples to rational maps, as illustrated in the proof.}
+
+   It suffices to establish a weaker version,
+   with a relaxed restriction on $\alpha$,
+   since our goal is not a characterization of Pythagorean tuples {\em per se},
+   but a characterization of rational maps to the sphere.
+} % \Comment
+
+This leads directly to a characterization of rational maps to \Sn{3}, through the
+identification of Pythagorean $n$-tuples and rational maps to the sphere \Sn{n-2}
+(Section~\ref{sec:ratpy}).
+
+\begin{corollary}
+\label{thm:map4}
+The map $f: \Re^m \rightarrow \Sn{3}$ to the 3-sphere is rational if and only if
+it is of the following form (up to coordinate permutation):
+\begin{equation}
+\label{eq:re4s3}
+% \footnotesize{(x_{\pi(1)},x_{\pi(2)},x_{\pi(3)},x_{\pi(4)})} \mapsto 
+f(x_1,\ldots,x_m) = 
+\footnotesize{(\frac{a_1^2 + a_2^2 + a_3^2 - a_4^2}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+	 \frac{2a_1a_4}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+	 \frac{2a_2a_4}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+	 \frac{2a_3a_4}{a_1^2 + a_2^2 + a_3^2 + a_4^2})}
+\end{equation}
+where $a_1,a_2,a_3,a_4 \in \Re[x_1,\ldots,x_m]$.
+% and $\pi : \{1,2,3,4\} \rightarrow \{1,2,3,4\}$ is a permutation.
+\end{corollary}
+\Comment{
+\prf
+(Only if): Consider a rational map
+of $\Re^m$ to \Sn{3}, $f(x_1,\ldots,x_m) \mapsto 
+(\frac{f_1}{f_5},\frac{f_2}{f_5},\frac{f_3}{f_5},\frac{f_4}{f_5})$,
+where $f_1,\ldots,f_5 \in \Re[x_1,\ldots,x_m]$.
+Then $(f_1,\ldots,f_5)$ is a Pythagorean quintuple and 
+can be expressed as some permutation of
+$\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+2a_1a_4,2a_2a_4,2a_3a_4,$ $a_1^2 + a_2^2 + a_3^2 + a_4^2)$
+for some rational polynomials $a_1,a_2,a_3,a_4,\alpha \neq 0$.
+}
+% Thus, $(x_{\pi(1)},x_{\pi(2)},x_{\pi(3)},x_{\pi(4)}) \mapsto$
+% \[
+%	(\frac{\alpha(a_1^2 + a_2^2 + a_3^2 - a_4^2)}{\alpha(a_1^2 + a_2^2 + a_3^2 + a_4^2)},
+%	 \frac{\alpha(2a_1a_4)}{\alpha(a_1^2 + a_2^2 + a_3^2 + a_4^2)},
+%	 \frac{\alpha(2a_2a_4)}{\alpha(a_1^2 + a_2^2 + a_3^2 + a_4^2)},
+%	 \frac{\alpha(2a_3a_4)}{\alpha(a_1^2 + a_2^2 + a_3^2 + a_4^2)})
+% \]
+% \[
+% = 	(\frac{a_1^2 + a_2^2 + a_3^2 - a_4^2}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+%	 \frac{2a_1a_4}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+%	 \frac{2a_2a_4}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+%	 \frac{2a_3a_4}{a_1^2 + a_2^2 + a_3^2 + a_4^2})
+% \]
+% Notice that it is legal to cancel the $\alpha$, since
+% $\alpha = \frac{1}{\beta}$ for some $\beta \in \Re[x_1,x_2,x_3,x_4]$
+% which implies that $\alpha$ is never zero.\\
+% (If): Consider a map of the form (\ref{eq:re4s3}).
+% This is a rational map of $\Re^4$ to \Sn{3}\ by (\ref{eq:suff4})
+% and Lemma~\ref{lem:iffpyth}.
+% \QED
+
+\subsection{Pythagorean n-tuples}
+
+Circa 1817, Ammei \cite{dickson52} % p. 318
+generalized Corollary~\ref{cor:euler}.
+We can use Ammei's result 
+to generalize the characterization of Pythagorean tuples and rational maps to the sphere.
+
+\begin{defn2}
+\label{defn:commring}
+A {\bf commutative ring} is a ring in which multiplication is commutative.
+\end{defn2}
+%
+Examples of commutative rings are the integers, the rationals, the reals,
+and polynomials in $n$ variables over the integers, rationals, or reals.
+
+\begin{lemma}[Ammei]	% c. 1817
+\label{lem:ammei}
+\begin{equation}
+\label{eq:ammei}
+(a_1^2 + \cdots + a_{n-1}^2 - a_n^2)^2 + (2a_1a_n)^2 + \ldots + (2a_{n-1}a_n)^2 
+= (a_1^2 + \cdots + a_n^2)^2
+\end{equation}
+where $a_1,\ldots,a_n$ are elements of any commutative ring, $n \geq 2$.
+\end{lemma}
+
+\begin{theorem}
+\label{thm:general}
+An $n+1$-tuple over K, $n \geq 2$, is a Pythagorean $n+1$-tuple if and only if 
+it is of the form 
+\begin{equation}
+\label{eq:pyth2}
+	\alpha (a_1^2 + \ldots + a_{n-1}^2 - a_n^2,
+		\ 2a_1a_n,\ldots,\ 2a_{n-1}a_n,
+		\ a_1^2 + \ldots + a_n^2)
+\end{equation}
+for some $a_1,\ldots,a_n,\alpha \neq 0 \in K$,
+where $K$ is any commutative ring, such as the field of rational numbers
+or rational polynomials.
+\end{theorem}
+\prf
+This proof is completely analogous to the proof of Theorem~\ref{thm:quint},
+replacing quintuple by $n+1$-tuple and 5 by $n+1$.
+\QED
+
+\begin{corollary}
+\label{cor:ratmap}
+The map $f: \Re^m \rightarrow \Sn{n-1}$ to the $n-1$-sphere is rational if and only if
+it is of the following form (up to coordinate permutation):
+\begin{equation}
+\label{eq:re4s3}
+% \footnotesize{(x_{\pi(1)},x_{\pi(2)},x_{\pi(3)},x_{\pi(4)})} \mapsto 
+f(x_1,\ldots,x_m) = 
+\footnotesize{(\frac{a_1^2 + \cdots + a_{n-1}^2 - a_n^2}{a_1^2 + \cdots + a_n^2},
+	 \frac{2a_1a_n}{a_1^2 + \cdots + a_n^2},
+	 \ldots, 
+	 \frac{2a_{n-1}a_n}{a_1^2 + \cdots + a_n^2})}
+\end{equation}
+where $a_1,\ldots,a_n \in \Re[x_1,\ldots,x_m]$.
+% and $\pi : \{1,2,3,4\} \rightarrow \{1,2,3,4\}$ is a permutation.
+\end{corollary}
+
+\Comment{
+This provides a sufficient condition for Pythagorean $(n+1)$-tuples.
+We can again establish a necessary condition with a weaker restriction on
+$\alpha$.
+
+\begin{theorem}
+\label{thm:necessaryn}
+Let $n \geq 2$ and $D$ be the integers or the polynomials 
+over $\Re[x_1,\ldots,x_n]$.
+A Pythagorean $(n+1)$-tuple over $D$ can be expressed in the form
+\begin{equation}
+\label{eq:pyth2}
+	\alpha (a_1^2 + \ldots + a_{n-1}^2 - a_n^2,
+		\ 2a_1a_n,\ldots,\ 2a_{n-1}a_n,
+		\ a_1^2 + \ldots + a_n^2)
+\end{equation}
+for some $a_1,\ldots,a_n,\frac{1}{\alpha} \in D$.
+\end{theorem}
+\prf
+This proof is analogous to that of Theorem~\ref{thm:necessary4}.
+Let $(p_1,\ldots,p_{n+1})$ be a Pythagorean $(n+1)$-tuple over $D$.
+If $p_1 = p_{n+1}$, let 
+$(a_1,\ldots,a_n,\alpha) = (p_1,0,\ldots,0,\frac{1}{p_1})$.
+Assume without loss of generality that $p_1 \neq p_{n+1}$.
+Let 
+\[
+(a_1,\ldots,a_n,\alpha) = (p_2,\ldots,p_n,p_{n+1}-p_1,
+	\frac{1}{2(p_{n+1}-p_1)})
+\]
+Then $a_1,\ldots,a_n,\alpha$ generate the Pythagorean $(n+1)$-tuple
+$(p_1,\ldots,p_{n+1})$ as in (\ref{eq:pyth2}).
+In particular,
+\[
+\alpha (a_1^2 + \ldots + a_{n-1}^2 - a_n^2)
+= \frac{p_2^2 + \cdots + p_n^2 - (p_{n+1}-p_1)^2}{2(p_{n+1}-p_1)}
+\]
+and applying $p_1^2 + \ldots + p_n^2 = p_{n+1}^2$,
+\[
+= \frac{-2p_1^2 + 2p_1p_{n+1}}{2(p_{n+1} - p_1)}
+= p_1
+\]
+And
+\[
+\alpha (2a_i a_n) 
+= \frac{2p_{i+1}(p_{n+1}-p_1)}{2(p_{n+1}-p_1)}
+= p_{i+1}
+\]
+for $i=1,\ldots,n-1$.
+Finally, 
+\[ 
+\alpha (a_1^2 + \ldots + a_n^2)
+= \frac{p_2^2 + \cdots + p_n^2 + (p_{n+1}-p_1)^2}{2(p_{n+1}-p_1)}
+= p_{n+1}.
+\]
+\QED
+
+This leads to our most general result: 
+a full characterization of the rational maps of $\Re^n$ to \Sn{n-1}.
+
+\begin{theorem}
+\label{thm:nn}
+A map is a rational map of $\Re^n$ to \Sn{n-1}, $n \geq 2$, if and only if
+it is of the form:
+\[
+	(x_{\pi(1)},\ldots,x_{\pi(n)}) \mapsto 
+	(\frac{a_1^2 + \cdots + a_{n-1}^2 - a_n^2}{a_1^2 + \cdots + a_n^2},
+	 \frac{2a_1a_n}{a_1^2 + \cdots + a_n^2},
+	 \ldots,
+	 \frac{2a_{n-1}a_n}{a_1^2 + \cdots + a_n^2})
+\]
+where $a_1,\ldots,a_n \in \Re[x_1,\ldots,x_n]$
+and $\pi: \{1,\ldots,n\} \rightarrow \{1,\ldots,n\}$ is a permutation.
+\end{theorem}
+\prf
+Identical to Theorem~\ref{thm:map4}'s proof.
+\QED
+}
+
+Theorem~\ref{thm:general} applies to all $n \geq 2$ and thus represents 
+a characterization of the Pythagorean triples, quadruples, and quintuples
+that have already been considered.
+It agrees with our previous characterizations for $n=2,4$ (Pythagorean triples
+and quintuples),
+but it yields a different characterization for $n=3$, as can be seen 
+by comparing with (\ref{eq:quad}).
+This is not a contradiction: any Pythagorean quadruple
+may be expressed either in the form of (\ref{eq:quad})
+or in the form of Theorem~\ref{thm:general} with $n=3$.
+%
+It turns out that if we set 
+$(a_1,a_2,a_3,a_4) = (\hat{a}_2, \hat{a}_1, 0, \hat{a}_3)$
+in the characterization (\ref{eq:quad}),
+the characterization of Theorem~\ref{thm:general} for $n=3$ is produced.
+Thus, the characterization of Theorem~\ref{thm:general} is stronger than
+(\ref{eq:quad}): not only can a Pythagorean quadruple
+be put in the form of (\ref{eq:quad}), it can be put in the form
+of (\ref{eq:quad}) with $a_3=0$.
+
+\Comment{
+We now have a characterization of all rational maps from $\Re^n$ to \Sn{n-1}.
+The related findings on Pythagorean $(n+1)$-tuples are reviewed 
+in Table~\ref{tab:pyth}.
+The second column of this table gives the normal form for Pythagorean
+$(n+1)$-tuples for various $n$.
+The third column indicates when this normal form was shown to be a sufficient 
+condition for an $(n+1)$-tuple to be a Pythagorean $(n+1)$-tuple 
+over the integers.
+The fourth column indicates when this normal form was shown to be a necessary 
+condition for an $(n+1)$-tuple to be a Pythagorean $(n+1)$-tuple 
+over the integers.
+The fifth column indicates when this normal form was shown to be a necessary
+condition for an $(n+1)$-tuple to be a Pythagorean $(n+1)$-tuple 
+over polynomial rings.
+The results from this paper are not full proofs (and are thus marked
+by stars), since $\frac{1}{\alpha} \in D$, not $\alpha \in D$.
+
+\begin{table}[h]
+\label{tab:pyth}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+$n$ & normal form for Pythagorean $(n+1)$-tuples & suff {\cal Z} & nec {\cal Z} & 
+\footnotesize{nec $\Re[x_1,\ldots,x_n]$} \\
+\hline
+$2$ & \tiny{$\alpha(a_1^2 - a_2^2, 2a_1a_2, a_1^2 + a_2^2)$} &
+\footnotesize{classical} & 
+\footnotesize{classical} & 
+\footnotesize{Kubota 1972} \\ 
+\hline
+$3$ & \tiny{$\alpha (a_1^2+a_2^2-a_3^2-a_4^2, 2(a_1a_3+a_2a_4), 
+    2(a_1a_4-a_2a_3), a_1^2+a_2^2+a_3^2+a_4^2)$} &
+\footnotesize{Euler 1748} & 
+\footnotesize{Catalan 1885} & 
+\footnotesize{Dietz 1993} \\ 
+\hline
+$4$ & \tiny{$\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+		2a_1a_4, 2a_2a_4, 2a_3a_4,
+		a_1^2 + a_2^2 + a_3^2 + a_4^2)$} &
+\footnotesize{Euler 1748} & 
+\footnotesize{$^*$Johnstone 1998} & 
+\footnotesize{$^*$Johnstone 1998} \\
+\hline
+$n$ & \tiny{$\alpha (a_1^2 + \ldots + a_{n-1}^2 - a_n^2,
+	2a_1a_n, \ldots, 2a_{n-1}a_n,
+	a_1^2 + \ldots + a_n^2)$} & 
+\footnotesize{Ammei 1817} & 
+\footnotesize{$^*$Johnstone 1998} & 
+\footnotesize{$^*$Johnstone 1998} \\ \hline
+\end{tabular}
+\end{table}
+}
+
+\section{Examples}
+\label{sec:eg}
+
+Consider some examples of rational maps to the sphere created by the normal form
+of Corollary~\ref{cor:ratmap}.
+The natural choice of polynomials $(a_1,\ldots,a_n) = (x_1,\ldots,x_n)$ yields a map from
+$n$-space to \Sn{n-1}, which we call Euler's map to the sphere:
+\begin{equation}
+\label{eq:euler}
+  M(x_1,\ldots,x_n) = \frac{1}{x_1^2 + \cdots + x_n^2} 
+  (x_1^2 + \cdots + x_{n-1}^2 - x_n^2, 2x_1x_n, \ldots, 2x_{n-1}x_n)
+\end{equation}
+%
+%
+The map $f: \Re^n \rightarrow \Sn{n}$ defined by the assignment 
+$(a_1,\ldots,a_n) = (x_1,\ldots,x_{n-1},1)$ and a permutation:
+\[
+f(x_1,\ldots,x_n) = \frac{1}{x_1^2 + \cdots + x_{n-1}^2 + 1}
+   (2x_1, \ldots, 2x_{n-1}, x_1^2 + \cdots + x_{n-1}^2 - 1)
+\]
+yields the inverse of the stereographic projection map.
+%
+Some maps require sophisticated choices for the polynomials in the normal form.
+For example, the standard rational parameterization of the 2-sphere \Sn{2}, 
+as shown in (\ref{eq:s2param}),
+is equivalent to the assignment 
+$(a_1,a_2,a_3) = (\frac{2v(1-u^2)}{4u^2+4v^2},
+                  \frac{2u(1+v^2)}{4u^2+4v^2},
+                  \frac{1}{2})$.
+% \alpha = 4u^2+4v^2
+These difficult choices for substitution into the normal form may be developed using
+the proof of Theorem~\ref{thm:quint} and its generalization.
+The following lemma elaborates.
+
+\begin{lemma}
+Given a Pythagorean $(n+1)$-tuple $(p_1,\ldots,p_{n+1})$,
+the assignment to the normal form of Theorem~\ref{thm:general} that realizes this tuple 
+is $(a_1,\ldots,a_n,\alpha) = 
+    (\frac{p_2}{2(p_{n+1}-p_1)},\ldots,
+     \frac{p_n}{2(p_{n+1}-p_1)},
+     \frac{1}{2},
+                2(p_{n+1}-p_1) )$
+if $p_1 \neq p_{n+1}$,
+and $(a_1,\ldots,a_n,\alpha) = (p_1,0,\ldots,0,\frac{1}{p_1})$ if $p_1 = p_{n+1}$.
+\end{lemma}
+\prf
+See the proof of Theorem~\ref{thm:quint}.
+\QED
+
+For the rational parameterization of the sphere, the associated Pythagorean tuple is
+$(p_1,p_2,p_3,p_4) = (1-u^2-v^2+u^2v^2,\ 2v(1-u^2),\ 2u(1+v^2),\ 1+u^2+v^2+u^2v^2)$.
+Notice that the parameter range of the sphere parameterization is not indicated
+by the normal form, so the map will be many-to-one.
+Examination of the assignment of parameter intervals to the normal form is a topic
+for future study.
+
+% \section{Inverse maps}
+% Development of general inverse will be very difficult.
+% See comment in section on development of inverse of M.
+% Practically, we should do it for specific maps only.
+% It suffices to establish the poles, which can be done without the inverse maps.
+
+\section{Poles}
+\label{sec:pole}
+
+For a rational map from $\Re^m$ to \Sn{n}, 
+we expect a manifold of dimension $m-n$ to map to each point of the sphere,
+since the Euclidean space simply has more points.
+For example, with a map from $\Re^n$ to \Sn{n-1}, the preimage of a typical point
+of the sphere is a line.
+However, for some anomalous points of the sphere, the dimension of the preimages
+is larger than expected, resulting in a poorly defined inverse at this point.
+For example, with the Euler map (\ref{eq:euler}) from $\Re^n$ to \Sn{n-1},
+the entire hyperplane $x_n=0$ maps to $(1,0,\ldots,0)$:
+the preimage of $(1,0,\ldots,0)$ is a hyperplane of dimension $n-1$ rather than a line
+of dimension one.
+This is not a vagary of the Euler map: it is a general property of these
+rational maps to the sphere.
+If we consider the normal form (\ref{cor:ratmap}) for rational maps to the sphere,
+the entire hypersurface $a_n(x_1,\ldots,x_m)=0$ will map to the same point,
+$(1,0,\ldots,0)$.
+This is a manifold of dimension $m-1$ rather than the expected manifold of dimension
+$m-n+1$.
+These points lead to poles in the associated inverse map that maps from the sphere
+to Euclidean space.
+
+Points of the sphere that have more preimages than they should are present even in maps
+built from the normal form with $a_n = k \neq 0$.
+For example, consider the map (\ref{eq:s2param})
+associated with the rational parameterization of \Sn{2},
+where the normal form for this rational map has $a_n = \frac{1}{2}$
+(see Section~\ref{sec:eg}).
+This map has an anomaly at $(0,0,1)$:
+the entire hyperplane $u=1$ maps to (0,0,1),\footnote{This 
+  is the part of the parameterization associated with the circle of radius 0 in 
+  the sweeping of a circle using the spherical product.  
+  Alternatively, it is the degenerate line of latitude.
+  There is another pole at the other end of the sphere.}
+a manifold of dimension one rather than the expected manifold of dimension zero 
+for this map of $\Re^2$ to \Sn{2}.
+
+The accumulation of preimages at certain points is not surprising.
+It is an artifact of wrapping a Euclidean space about the sphere.
+It is well known that mappings of the sphere to Euclidean space have these poles,
+which have long been the bane of cartographers as they map the spherical earth to
+the flat page.
+
+\Comment{
+\section{Visualization}
+\label{sec:viz}
+
+The rational maps to the sphere generated by our characterization may be compared
+using a visualization technique that measures how they spread Euclidean space
+across the sphere.
+This is most easily done for \Sn{2}, so we will concentrate the visualization there.
+However, the visualization of higher dimensions \cite{brown mathematician}
+could be used to consider other rational maps.
+
+There are two techniques.
+In the first, we sample some region of Euclidean m-space uniformly 
+and visualize the number of samples that are mapped to each area of \Sn{n}
+(the more samples, the lighter).
+Recall that typically many points of Euclidean space will map to a given point of 
+the sphere (Section~\ref{sec:pole}).
+This technique is particularly useful if it is known how an application restricts 
+the domain,
+which may be used to choose the region of Euclidean space that is considered.
+We do this for 3-space and 2-space (the hyperplane $z=0$ in 3-space).
+Some applications are only interested in mapping the n-sphere back to itself: 
+the domain is restricted to \Sn{n}.
+(For example, the application of these maps to quaternion splines is sometimes
+restricted to maps of \Sn{3} to \Sn{3}.)
+In the second visualization, we sample \Sn{n} and visualize the distance that 
+each sample moves.
+This is a local measure of the map, but still evocative of distinctions between
+the maps.
+
+RESURRECT MAP TEXTURES AND IMPORT PROSE, IMAGES AND SOFTWARE.
+
+The maps that we consider are the following classical products of the characterization:
+1) Euler spherical map
+2) inverse of stereographic projection
+3) standard rational parameterization of sphere
+4) fancier one
+5) Dietz map?
+}
+
+\section{Conclusions}
+
+START HERE
+
+An essential observation in the characterization of rational maps to the sphere 
+is the equivalence between rational maps to the sphere and Pythagorean tuples.
+
+Pythagorean quintuples are not as well understood as Pythagorean triples
+and quadruples, and our study leads to some new characterizations.
+% (Theorems~\ref{thm:necessary4} and \ref{thm:map4}).
+
+\begin{rmk}
+Euler's Four Squares Theorem also anticipates the normal form
+for Pythagorean quadruples (Section~{sec:prevwork}):
+\begin{equation}
+\label{eq:euler1}
+(a_1^2 + a_2^2 + a_3^2 + a_4^2)^2 = 
+(a_1^2 + a_2^2 - a_3^2 - a_4^2)^2 + (2a_1a_3+2a_2a_4)^2 + (2a_1a_4-2a_2a_3)^2
+\end{equation}
+using $(a_1,a_2,a_3,a_4) = (\hat{a}_1,-\hat{a}_2,\hat{a}_3,\hat{a}_4)$ in 
+Theorem~\ref{thm:euler}.
+\end{rmk}
+
+Euler's 4 squares theorem anticipates the quaternion ({\bf elaborate})...,
+which is the subject of the natural follow-on to this paper, 
+to the application of rational maps in the design of quaternion splines
+for motion control.
+
+\begin{rmk}
+Euler's Four Squares Theorem anticipates
+the quaternion (a century in advance of its invention by Hamilton),
+in the sense that it encodes the product formula for quaternions,
+perhaps the most defining characteristic of the quaternion:
+% (compare Lemma~\ref{lem:euler}):
+\[
+\begin{array}{ll}
+& (a_1 + a_2 i + a_3 j + a_4 k) 
+(\hat{a}_1 + \hat{a}_2 i + \hat{a}_3 j + \hat{a}_4 k) = \\
+& (a_1 \hat{a}_1 - a_2\hat{a}_2 - a_3\hat{a}_3 - a_4\hat{a}_4) +
+   (a_1\hat{a}_2 + a_2\hat{a}_1 + a_3\hat{a}_4 - a_4\hat{a}_3) i + \\
+&  (a_1\hat{a}_3 - a_2\hat{a}_4 + a_3\hat{a}_1 + a_4\hat{a}_2) j +
+   (a_1\hat{a}_4 + a_2\hat{a}_3 - a_3\hat{a}_2 + a_4\hat{a}_1) k
+\end{array}
+\]
+Thus, it is quite natural to use Euler's Four Squares Theorem
+to characterize Pythagorean tuples (through generalization) and rational maps, 
+which are then used to build quaternion splines.
+\end{rmk}
+
+\bibliographystyle{plain}
+\begin{thebibliography}{99}
+
+\bibitem{barr81}
+Barr, A. (1981) Superquadrics and Angle-Preserving Transformations.
+IEEE Computer Graphics and Applications.
+
+\bibitem{barr92}
+Barr, A. and B. Currin and S. Gabriel and J. Hughes (1992)
+Smooth Interpolation of Orientations with Angular Velocity Constraints
+using Quaternions.
+SIGGRAPH '92, 313--320.
+
+\bibitem{catalan85}
+Catalan, E. (1885) Bull. Acad. Roy. Belgique 3(9), p. 531.
+Referenced in Dickson, L.E. (1952) History of the Theory of Numbers: Volume II,
+Diophantine Analysis.  Chelsea (New York), p. 269.
+
+\bibitem{dickson52}
+Dickson, L.E. (1952) History of the Theory of Numbers: Volume II,
+Diophantine Analysis.  Chelsea (New York).
+
+\bibitem{dietz93}
+Dietz, R. and J. Hoschek and B. Juttler (1993)
+An algebraic approach to curves and surfaces on the sphere and
+on other quadrics.
+Computer Aided Geometric Design 10, 211-229.
+
+\bibitem{euler48}
+Fuss, P., editor (1843) Corresp. Math. et Phys.,
+`Correspondance entre Leonhard Euler et C. Goldbach 1729-1763',
+St. Petersburg, Vol. 1, p. 452.  
+Referenced in Dickson, L.E. (1952) History of the Theory of Numbers: Volume II,
+Diophantine Analysis.  Chelsea (New York), p. 277.
+% see p. 209, Ebbinghaus, Numbers
+
+\bibitem{farouki90}
+Farouki, R. and T. Sakkalis (1990)
+Pythagorean Hodographs.
+IBM J. Res. Develop. 34, 736--752.
+
+\bibitem{herstein75}
+Herstein, I. (1975) Topics in Algebra.
+2nd edition, John Wiley (New York).
+
+\bibitem{kreyszig59}
+Kreyszig, E. (1959) Differential Geometry.
+Dover (New York).
+
+\bibitem{kubota72}
+Kubota, K. (1972) Pythagorean triples in unique factorization domains.
+American Mathematical Monthly 79, 503--505.
+
+\bibitem{weil84}
+Weil, A. (1984) Number Theory.
+Birkh\"auser (Boston).
+
+\end{thebibliography}
+
+In technical report version, we could add my proof of Kubota's result, 
+as in Appendix of characterization.ps.
+
+\clearpage
+
+We can characterize ALL of the rational maps to the sphere from first principles.
+(BUT FROM WHAT N-SPACE? WE HAVE CHARACTERIZED N-SPACE BUT WHAT ABOUT N-1-SPACE 
+FOR STEREOGRAPHIC PROJECTION?)
+
+See 'A Characterization of Rational Maps of Rn to $S^{n-1}$ for Riemannian Modeling'
+and its file characterization.tex in 1-char.  (print it out, and the short version)
+
+See 'The most natural map to the sphere' for stereographic projection.
+
+See nonrational.ps for nonrational maps to the sphere and 
+related quadratic spherical maps.
+
+% from hermiteQ.tex
+{\bf Exposure sheet}
+
+Maps to the sphere.
+\[
+	M(x_1,x_2,x_3,x_4) =
+	\frac{1}{x_1^2 + x_2^2 + x_3^2 + x_4^2}
+	(x_1^2 + x_2^2 + x_3^2 - x_4^2, 2x_1x_4, 2x_2x_4, 2x_3x_4)
+\]
+\[
+SP^{-1}(x_1,x_2,x_3) = \frac{1}{x_1^2 + x_2^2 + x_3^2 + 1} 
+                       (2x_1, 2x_2, 2x_3, x_1^2+x_2^2+x_3^2 - 1)
+\]
+
+Maps away from the sphere.
+\[
+M^{-1}|_{S3}(x_1,x_2,x_3,x_4) = \frac{1}{\sqrt{2(1-x_1)}}(x_2,x_3,x_4,1-x_1)
+\]
+\[
+SP(x_1,x_2,x_3,x_4) = \frac{1}{1-x_4} (x_1,x_2,x_3)
+\]
+
+\section{Spherical introduction}
+
+In the classic 'Flatland',
+Edwin Abbott Abbott (sic!) related the ominous appearance of The Sphere in the
+cosy confines of two-space.
+This was Abbott's way to introduce the concept of higher dimensions.
+We will discuss the sphere one dimension higher, the 3-sphere in 4-space.
+Cartographers have long wrestled with the problem of mapping the spherical earth
+to a flat page.
+{\bf The sphere has long been a Platonic ideal for shape.
+Indeed, all of the Platonic solids\footnote{The Platonic solids are the tetrahedron,
+  cube, octahedron, dodecahedron and icosahedron.}
+aspire to the sphere, with differing levels of success.\footnote{Geodesation can
+  help them to achieve this aspiration.}
+}
+We are interested in maps to and from the sphere, 
+for reasons both mundane (their application to the design of quaternion splines)
+and aesthetic.
+One of the most burning questions is: why must they always have poles?
+
+A surface's parameterization may be interpreted as a map to the surface,
+since it maps some parameter space to the surface.
+For example, the parameterization of a 2-manifold S is a map from $\Re^2$ to S.
+The inverse of this parameterization yields a map from the surface.
+
+\subsection{Sphere}
+
+In the case of the sphere, the classical parameterization is
+\[
+   () x () = 
+\]
+which can be viewed as a spherical product of a circle and half-circle \cite{barr}.
+Unfortunately, this map is not rational.
+A rational parameterization is 
+\[
+   () x () = 
+\]
+Both of these parameterizations have poles, since the circle shrinks to a point
+at the endpoint of the half-circle.
+This is reflected in the earth's lines of latitude: the 90th line of latitude at the
+North (or South) Pole is degenerate.
+Other choices of map to the sphere, such as the Euler map or 
+stereographic projection, suffer from poles, as one maps away from the sphere.
+This suggests that poles may be an inherent property of maps from the sphere,
+certainly of rational maps.
+But are they?
+
+\section{Preamble to 'Rational maps to the sphere' for Orientation control paper}
+
+A key component of the proposed solution is a rational map to the sphere
+and its companion map off of the sphere.
+The latter map, from $S^3$ to some Euclidean $n$-space, frees the quaternions from
+their surface constraint, while the former map reimposes this constraint.
+Since the map from the sphere is applied to a finite pointset, while the map
+to the sphere is applied to a polynomial curve, rationality is only necessary for the
+map to the sphere, to preserve rationality of the curve, yielding a rational
+quaternion spline.
+If the user is willing to settle for nonrational curves,
+a nonrational map could be used,
+but rational Bezier curves offer many advantages, including simplicity,
+efficiency, and pleasant properties such as the variation-diminishing and convex-hull
+properties.
+
+A map between $S^3$ and $\Re^3$ is more appropriate than a map between $S^3$ and $\Re^4$
+for the inverse map.
+The inverse will be unique, while in the latter case the map from $S^3$ to $\Re^4$ is
+inherently one-to-many, since we are moving from a 3-manifold to a 4-manifold.
+
+\section{Rational maps to the sphere}
+% $S^3$ maps, to and fro
+
+[Note: The only published paper is GI and Eurographics.
+We have moved beyond these papers by at least the 30\% guideline.
+This material is valid for a journal publication, but regardless we want a resolution
+of this issue in a technical report.
+Additional material: stereographic projection, image of rational Bezier,
+generalized construction, visualization.]
+
+In this paper, we consider rational maps to the 3-sphere and their inverses.
+Since the inverse maps often (always?) have poles, we explore this issue as well.
+Derivatives are computed when the maps are applied to a parametric curve on 
+the 3-sphere.
+[It is hard to motivate the interest in this derivative result, so this should
+be delayed to another paper.]
+The image of a Bezier curve under these maps, expressed as a rational Bezier curve,
+is computed, which allows any Bezier curve to be projected onto the sphere.
+(Can we compute the image of a rational Bezier curve too? This would be additional.)
+We discuss the generalization to construction of maps to other surfaces.
+
+\subsection{Stereographic projection}
+\label{sec:stereo}
+
+The most well-known map involving the sphere is stereographic projection.
+It has been used at least since Hipparch in 160 B.C. \cite{kreyszig59}. % p. 205
+% probably discovered by Hipparch too
+Stereographic projection maps from \Sn{n}\ to the hyperplane $x_{n+1}=0$ in $(n+1)$-space.
+A point of \Sn{n}\ is perspectively projected from 
+the north pole of \Sn{n}\ to $x_{n+1}=0$  % \cite{thorpe79}. % or kreyszig59
+(Figure~\ref{fig:stereo}).
+% Note that there is a variant of stereographic projection where
+% the projection plane $z=0$ is replaced by the tangent plane opposite the pole
+% $z=-1$ \cite{kreyszig59}.
+The image of the north pole $(0,\ldots,0,1)$ is undefined.\footnote{It is well defined
+  in projective space, where the pole maps to the line at infinity of the hyperplane.}
+Stereographic projection is a map away from the sphere, 
+but its inverse is a rational map to the sphere.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[scale=.25]{img/fig:stereo.jpg}
+\end{center}
+\caption{Stereographic projection in 3-space}
+\label{fig:stereo}
+\end{figure}
+
+\begin{lemma}
+Stereographic projection 
+$f_{SP}: \Sn{n} - (0,\ldots,0,1) \rightarrow x_{n+1}=0 \subset \Re^{n+1}$ 
+from the sphere
+and its inverse $f_{SP}^{-1}: x_{n+1}=0 \rightarrow \Sn{n} - (0,\ldots,0,1)$ 
+to the sphere
+are defined by:
+\begin{eqnarray*}
+f_{SP}(x_1,\ldots,x_{n+1}) & = & \frac{1}{1-x_{n+1}} (x_1,\ldots,x_n,0) \\
+f_{SP}^{-1}(x_1,\ldots,x_n,0) & = &
+	\frac{1}{x_1^2 + \cdots + x_n^2 + 1} 
+	(2x_1, \ldots, 2x_n, x_1^2 + \cdots + x_n^2 - 1)
+\end{eqnarray*}	% see thorpe79, p. 125
+\end{lemma}
+\vspace{.1in}
+\prf
+The projector line $(1-t)p + tq$ through $p = (0,\ldots,0,1)$ and 
+$q = (x_1,\ldots,x_{n+1})$ intersects $x_{n+1}=0$ 
+when $1-t + tx_{n+1} = 0$ or $t = \frac{1}{1-x_{n+1}}$.
+This defines the forward map.
+Since stereographic projection is one-to-one and onto,
+it has an inverse that is also one-to-one.
+The projector line $(1-t)p + t(r,0)$ through $p = (0,\ldots,0,1)$ and $(r,0)$
+intersects \Sn{n} when $\|(1-t)(0,\ldots,0,1) + t(r,0)\|_2^2 = 1$,
+or $(1-t)^2 + t^2\|r\|_2^2 = 1$, or $t^2(\|r\|^2 + 1) = 2t$, or 
+$t=0$ and $t=\frac{2}{\|r\|^2 + 1}$.
+The second root yields the inverse point.
+\QED
+
+Some other properties of the stereographic projection are interesting, although
+more relevant to cartography than to our study.
+It is a conformal map and, like any conformal map of \Sn{2}\ to the plane,
+it maps loxodromes (curves of constant direction on the sphere) to straight lines.
+It is the only conformal map from $S^2$ to a plane that preserves
+circles (circles are mapped to circles or straight lines).
+
+\begin{lemma}
+Let $C(t) = (x_1(t),x_2(t),x_3(t),x_4(t))$ be a parametric curve that lies on $S^3$.
+The first derivative of the stereographic projection of the curve $C(t)$ is 
+\[
+(\frac{x^{'2}_1(1-x_4) + x_1x'_1x'_4}{(1-x_4)^2},\ 
+                \frac{x^{'2}_2(1-x_4) + x_2x'_2x'_4}{(1-x_4)^2},\  
+                  \frac{x^{'2}_3(1-x_4) + x_3x'_3x'_4}{(1-x_4)^2}, 0)
+\]
+\end{lemma}
+\prf
+\begin{eqnarray*}
+(f_{SP}(C(t))' & = & f_{SP}'(C(t)) \cdot C'(t) \\
+           & = & (\frac{x'_1(1-x_4) + x_1x'_4}{(1-x_4)^2},\ 
+                  \frac{x'_2(1-x_4) + x_2x'_4}{(1-x_4)^2},\  
+                  \frac{x'_3(1-x_4) + x_3x'_4}{(1-x_4)^2}, 0) 
+		  \cdot (x'_1, x'_2, x'_3, x'_4) \\
+           & = & (\frac{x^{'2}_1(1-x_4) + x_1x'_1x'_4}{(1-x_4)^2},\ 
+                  \frac{x^{'2}_2(1-x_4) + x_2x'_2x'_4}{(1-x_4)^2},\  
+                  \frac{x^{'2}_3(1-x_4) + x_3x'_3x'_4}{(1-x_4)^2}, 0)
+\end{eqnarray*}
+\QED
+
+Higher derivatives are found simply by repeating this process.
+
+Since $x_{n+1}=0$ is an embedding of $n$-space in $\Re^{n+1}$,
+stereographic projection and its inverse may be interpreted as maps between 
+$\Sn{n}$ and $\Re^n$.
+
+DEFINE BEZIER CURVE, BERNSTEIN POLYNOMIALS, PROJECTIVE SPACE.
+REVIEW RATIONAL BEZIER CURVE AND BEZIER CURVE IN PROJECTIVE SPACE,
+PRODUCT RULE FOR BERNSTEIN POLYNOMIALS.
+
+HOW ABOUT ARBITRARY BEZIER CURVE?
+
+\begin{theorem}
+\label{thm:imagecurve}
+The image under inverse stereographic projection 
+of a cubic Bezier curve with control points $b_i = (b_{i1},\ldots,b_{i4})$
+is a sextic rational Bezier curve 
+with control points $\breve{b}_i = $ 
+and weights $w_i = $.
+This maps an arbitrary cubic curve to a curve on \Sn{3}.
+\end{theorem}
+\prf
+Let $c(t) = \sum_{i=0}^3 b_i B_i^3(t)$ be the cubic Bezier curve.
+Since the image of $c(t)$ is a rational Bezier curve,
+it is easier to work in projective space.
+% When $c(t)$ is expressed in projective space, it becomes
+% \[
+% \sum_{i=0}^3 (b_{i1},b_{i2},b_{i3},b_{i4}, 1) B_i^3(t)
+% \]
+In projective space, inverse perspective projection becomes
+\[
+f^{-1}_{SP}(x_1,x_2,x_3,0,1) = (2x_1, 2x_2, 2x_3,\ x_1^2 + x_2^2 + x_3^2 - 1, 
+                                \ x_1^2 + x_2^2 + x_3^2 + 1)
+\]
+The fourth coordinate of the image curve may be expanded using the product rule
+for Bernstein polynomials:
+\begin{eqnarray*}
+& [\sum_{i=0}^3 B_i^3(t) b_{i1}]^2 + 
+[\sum_{i=0}^3 B_i^3(t) b_{i2}]^2 + 
+[\sum_{i=0}^3 B_i^3(t) b_{i3}]^2 - 1 \\
+= & \sum_{i=0}^3 \sum_{j=0}^3 
+	\frac{\choice{3}{i} \choice{3}{j}}{\choice{6}{i+j}}
+       B^6_{i+j}(t) (b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} - 1) 
+\end{eqnarray*}
+Letting $k=i+j$, this becomes
+\[ \sum_{k=0}^6 B_k^6(t) 
+	\sum_{\begin{array}{c}  \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+	                        \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			        \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}} 
+	\frac{\scriptchoice{3}{i} \scriptchoice{3}{j}}{\scriptchoice{6}{k}}
+	(b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} - 1) 
+\]
+The fifth coordinate may be expanded analogously, yielding the weights
+\[
+	\sum_{\begin{array}{c}  \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+	                        \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			        \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}} 
+	\frac{\scriptchoice{3}{i} \scriptchoice{3}{j}}{\scriptchoice{6}{k}}
+	(b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} + 1) 
+\]
+The first, second, and third coordinates must be degree elevated,
+from degree 3 to 6.
+START HERE BY ADDRESSING DEGREE ELEVATION
+\QED
+
+% image under stereographic projection
+\Comment{
+\prf
+Let $c(t) = \sum_{i=0}^3 b_i B_i^3(t)$ be the cubic Bezier curve.
+Since the image of $c(t)$ is a rational Bezier curve,
+it is easier to work in projective space.
+% When $c(t)$ is expressed in projective space, it becomes
+% \[
+% \sum_{i=0}^3 (b_{i1},b_{i2},b_{i3},b_{i4}, 1) B_i^3(t)
+% \]
+Perspective projection becomes
+\[
+f_{SP}(x_1,x_2,x_3,x_4,1) = (x_1,x_2,x_3,0,1-x_4)
+\]
+% Let the image curve in projective space be $f_{SP}(c(t)) = (f_1(t),\ldots,f_5(t))$.
+Note that 
+\[
+1 - \sum_{i=0}^3 b_{i4} B_i^3(t) = \sum_{i=0}^3 B_i^3(t) - \sum_{i=0}^3 b_{i4} B_i^3(t)
+= \sum_{i=0}^3 (1-b_{i4})B_i^3(t)
+\]
+using the partition of unity property of Bernstein polynomials.
+Therefore, 
+\[
+f_{SP}(c(t)) = \sum_{i=0}^3 (b_{i1}, b_{i2}, b_{i3}, 0, 1-b_{i4}) B_i^3(t)
+\]
+This is a cubic rational Bezier curve with weights $w_i = 1-b_{i4}$
+and control points $\frac{1}{w_i} (b_{i1}, b_{i2}, b_{i3}, 0)$.
+\QED
+}
+
+[Be careful using stereographic projection, since the conclusions of comp.tex are that
+stereographic projection leads to an inferior quaternion spline.
+Doesn't this imply that we have implemented the map of a Bezier curve under
+stereographic projection too?]
+
+CREATE BIB FILE.
+
+\subsection{Development of Euler's map}
+
+Develop from first principles using 4 squares theorem.
+See ratqspline.tex and characterization.tex(?).
+Show that all maps to sphere are versions of 4 squares (but then what about stereographic
+projection?).
+
+\subsection{Euler's map}
+
+\begin{defn2}
+The Euler map $M: \Re^4 - \{0\} \rightarrow \Sn{3}$ to the sphere is defined by:
+\begin{equation}
+\label{eqM}
+	M(x_1,x_2,x_3,x_4) =
+	\frac{1}{x_1^2 + x_2^2 + x_3^2 + x_4^2}
+	(x_1^2 + x_2^2 + x_3^2 - x_4^2, 2x_1x_4, 2x_2x_4, 2x_3x_4)
+\end{equation}
+%
+If we let 
+${\cal M}(p,q): = (p_1q_1 + p_2q_2 + p_3q_3 - p_4q_4, 2p_1q_4, 2p_2q_4, 2p_3q_4)$,
+the Euler map may be re-expressed as:
+\begin{equation}
+\label{eq:calM}
+M(P) = \frac{{\cal M}(P,P)}{P \cdot P}
+\end{equation}
+which is valuable in Theorem~\ref{thm:imagecurve} on the image of a Bezier curve
+under the Euler map.
+\end{defn2}
+
+The Euler map has both bilinear and quadratic characteristics.
+In Euclidean space, every coordinate of ${\cal M}$ is a bilinear map,
+while in projective space, every coordinate of $M$ is a quadratic form.
+
+Since the Euler map transforms a 4-space into a 3-manifold, losing a dimension,
+the inverse of a point is a 1-manifold.
+
+\begin{lemma}
+\label{lem:inverse}
+The inverse Euler map $M^{-1}: \Sn{3} - (1,0,0,0) \rightarrow \Re^4$ from the sphere
+is defined by:
+\begin{equation}
+M^{-1}(x_1,x_2,x_3,x_4) = (1-t)(0,0,0,0) + t(x_2,x_3,x_4,1-x_1), t \neq 0
+\end{equation}
+In other words, the image of a point is a line through the origin.
+The map has a special behaviour at the pole $(1,0,0,0)$:
+\begin{equation}
+M^{-1}(1,0,0,0) = \mbox{ the hyperplane $x_4=0$ without the origin}
+\end{equation}
+\end{lemma}
+\prf
+\QED
+
+It is often desirable for the inverse of a point to be a unique point.
+In this case, it is possible to choose a particular point on the inverse line.
+A natural choice is to choose the point on \Sn{3}, since every inverse line must intersect
+\Sn{3} and the choice of \Sn{3} adds a certain symmetry.
+This leads to the following restricted inverse map.
+
+\begin{lemma}
+The restricted inverse Euler map $M^{-1}_{S3}: S^3 - \{(1,0,0,0)\} \rightarrow S^3$,
+defined by $M^{-1}_{S3}(P) = M^{-1}(P) \cap S^3$, has the form
+\begin{equation}
+(x_1,x_2,x_3,x_4) \mapsto \frac{1}{\sqrt{2-2x_1}}(x_2,x_3,x_4,1-x_1)
+\end{equation}
+\end{lemma}
+\prf
+An intersection of the inverse line with $S^3$
+is the point $\frac{(x_2,x_3,x_4,1-x_1)}{\|x_2,x_3,x_4,1-x_1\|_2}$.
+\[
+\|(x_2,x_3,x_4,1-x_1)\|_2^2 = x_2^2 + x_3^2 + x_4^2 + (1-x_1)^2
+= x_1^2 + x_2^2 + x_3^2 + x_4^2 + 1 - 2x_1
+\]
+Since $(x_1,x_2,x_3,x_4) \in S^3$,
+\[
+\|(x_2,x_3,x_4,1-x_1)\|_2^2 = 2 - 2x_1
+\]
+\QED
+
+% It is a map from $S^3$ to $S^3$.
+% This is not a rational map, but it need not be.
+
+\begin{lemma}
+Let $C(t) = (x_1(t),x_2(t),x_3(t),x_4(t))$ be a parametric curve that lies on \Sn{3}.
+The restricted inverse Euler map of $C(t)$ is another curve on \Sn{3}.
+The first derivative of this curve $M^{-1}|_{S3}(C(t))$ is:
+\[
+(\frac{x'_2}{(2-2x_1)^{1/2}} + \frac{x'_1x_2}{(2-2x_1)^{3/2}}, 
+ \frac{x'_3}{(2-2x_1)^{1/2}} + \frac{x'_1x_3}{(2-2x_1)^{3/2}},
+ \frac{x'_4}{(2-2x_1)^{1/2}} + \frac{x'_1x_4}{(2-2x_1)^{3/2}},
+ \frac{-x'_1}{2\sqrt{2-2x_1}})
+\]
+\end{lemma}
+\prf
+\begin{eqnarray*}
+(M^{-1}(C(t))' & = & (M^{-1})'(C(t)) \cdot C'(t)
+\end{eqnarray*}
+Consider the first coordinate of $(M^{-1})'(C(t))$.
+The second and third coordinates are computed analogously.
+Recall that the restricted inverse of the Euler map is
+\[
+M^{-1}|_{S3}(C(t)) = \frac{(x_2,x_3,x_4,1-x_1)}{\sqrt{2-2x_1}}
+\]
+If we let $g(t) = (2-2x_1(t))^{\frac{1}{2}}$, then
+\[
+g'(t) = \frac{-x'_1}{\sqrt{2-2x_1}}
+\]
+and it is clear that the first coordinate of $(M^{-1})'(C(t))$ is:
+\[
+\frac{x'_2 \sqrt{2-2x_1} + \frac{x'_1 x_2}{\sqrt{2-2x_1}}}{2-2x_1}
+= \frac{x'_2}{(2-2x_1)^{1/2}} + \frac{x'_1x_2}{(2-2x_1)^{3/2}}
+% = \frac{x'_2(2-2x_1) + x'_1x_2}{(2-2x_1)^{3/2}}
+% = \frac{x'_1x_2 - 2x_1x'_2 + 2x'_2}{(2-2x_1)^{3/2}}
+\]
+The fourth coordinate of $M^{-1}(C(t))$ is 
+$\frac{1-x_1}{\sqrt{2-2x_1}} = (\frac{1-x_1}{2})^{1/2}$
+and its derivative is:
+\[
+\frac{1}{2} (\frac{1-x_1}{2})^{-1/2}(\frac{-x'_1}{2})
+= \frac{-x'_1}{2\sqrt{2-2x_1}}
+\]
+This yields the stated derivative.
+% Collecting, the derivative of the inverse Euler map is:
+% \[
+% \frac{1}{\sqrt{2-2x_1}} 
+% (\frac{x'_1x_2 - 2x_1x'_2 + 2x'_2}{2-2x_1},
+%  \frac{x'_1x_3 - 2x_1x'_3 + 2x'_3}{2-2x_1},
+%  \frac{x'_1x_4 - 2x_1x'_4 + 2x'_4}{2-2x_1},
+% -\frac{x'_1}{2})
+% \]
+\QED
+
+Higher derivatives are found simply by repeating this process. 
+DO SO IN MAPLE.
+
+\begin{theorem}
+\label{thm:imagecurve}
+The image of the cubic Bezier curve $\sum_{i=0}^3 b_i B_i^3(t)$ under M 
+is the sextic rational Bezier curve $\frac{\sum_{i=0}^6 w_i \breve{b}_i B_i^6(t)}
+                                          {\sum_{i=0}^6 w_i B_i^6(t)}$ 
+with control points:
+\begin{eqnarray}
+\breve{b}_0 & = & \frac{{\cal M}(b_0,b_0)}{b_0 \cdot b_0} \nonumber \\
+\breve{b}_1 & = & \frac{{\cal M}(b_0,b_1) + {\cal M}(b_1,b_0)}{2b_0\cdot b_1} \nonumber \\
+\breve{b}_2 & = & \frac{{\cal M}(b_0,b_2) + 3{\cal M}(b_1,b_1) + {\cal M}(b_2,b_0)}{2b_0 \cdot b_2 + 3b_1 \cdot b_1} \nonumber \\
+\breve{b}_3 & = & \frac{{\cal M}(b_0,b_3) + 9{\cal M}(b_1,b_2) + 9{\cal M}(b_2,b_1) + {\cal M}(b_3,b_0)}{2b_0 \cdot b_3 + 18 b_1 \cdot b_2} \nonumber \\
+\breve{b}_4 & = & \frac{{\cal M}(b_1,b_3) + 3{\cal M}(b_2,b_2) + {\cal M}(b_3,b_1)}{2b_1 \cdot b_3 + 3 b_2 \cdot b_2} \nonumber \\
+\breve{b}_5 & = & \frac{{\cal M}(b_2,b_3) + {\cal M}(b_3,b_2)}{2b_2 \cdot b_3} \nonumber \\
+\breve{b}_6 & = & \frac{{\cal M}(b_3,b_3)}{b_3 \cdot b_3} \nonumber
+\end{eqnarray}
+and weights:
+\begin{eqnarray}
+w_0 & = & b_0 \cdot b_0 \nonumber \\
+w_1 & = & b_0 \cdot b_1 \nonumber \\
+w_2 & = & \frac{2b_0 \cdot b_2 + 3b_1 \cdot b_1}{5} \nonumber \\
+w_3 & = & \frac{b_0 \cdot b_3 + 9b_1 \cdot b_2}{10} \nonumber \\
+w_4 & = & \frac{2b_3 \cdot b_1 + 3b_2 \cdot b_2}{5} \nonumber \\
+w_5 & = & b_3 \cdot b_2 \nonumber \\
+w_6 & = & b_3 \cdot b_3 \nonumber
+\end{eqnarray}
+Notice that ${\cal M}$ is the bilinear map of (\ref{eq:calM}).
+\end{theorem}
+\prf See the appendix.
+\QED
+
+\subsection{Appendix: proof of Euler map's image of a Bezier curve}
+\label{sec:appendix}
+
+\subsubsection{Bezier derivatives}
+
+If $b(t)$ is a rational Bezier curve of degree $n$ 
+with control points $\{b_i\}_{i=0}^n$ and 
+weights $\{w_i\}_{i=0}^n$ defined over $t \in [0,1]$, then 
+\begin{eqnarray}
+\label{eqn:firstderiv}
+b'(0) & = & n \frac{w_1}{w_0} (b_1 - b_0) \\
+\label{eqn:secondderiv}
+b''(0) & = & \frac{n-1}{n} \frac{w_0 w_2}{w_1^2} 
+             \frac{\triangle b_0 \times \triangle b_1}{\| \triangle b_0\|^3}
+\end{eqnarray}
+where $\triangle b_i = b_{i+1} - b_i$.
+See Farin \cite{farin02} and Hoschek/Lasser \cite{hoschekLasser0?}. 
+% p. 244 of HL has conditions for curvature continuity
+Notice the relationship of second derivative to curvature $\kappa$:
+\[
+    \kappa = \|b''\|
+\]
+if $b$ is arc-length parameterized, and in general,
+\[
+    \kappa = \frac{\| b' \times b'' \|}{\| b' \|^3}
+\]
+$C^2$ continuity guarantees curvature continuity.
+See Farin \cite{farin02} or a differential geometry text.
+% the formula for curvature of a rational Bezier curve is 
+% k = \frac{n-1}{n} \frac{w_0 w_2}{w_1^2} 
+%     \frac{\mbox{dist}(b_0,\lyne{b_1 - b_0}}{\mbox{dist}(b_0,b_1)^2}
+
+The product rule of Bernstein polynomials \cite{farin02} states:
+\[
+B_i^m(t) B_j^n(t) = \frac{\choice{m}{i} \choice{n}{j}}{\choice{m+n}{i+j}} B_{i+j}^{m+n}(t)
+\]
+
+\subsubsection{Proof of Theorem~\ref{thm:imagecurve}}
+
+\prf
+Let $c(t)$ be the cubic Bezier curve.
+Since the image of $c(t)$ is a rational Bezier curve, it is easier 
+to work in projective space.
+In projective space, the map $M$ becomes
+\[
+	 (x_1,x_2,x_3,x_4,x_5) \rightarrow
+	 (x_1^2 + x_2^2 + x_3^2 - x_4^2,\ 
+	 2x_1 x_4,\ 2x_2 x_4,\ 2x_3 x_4,\ 
+	 x_1^2 + x_2^2 + x_3^2 + x_4^2).
+\]
+Let the image curve be expressed in projective space: 
+$M(c(t)) = (m_1(t),m_2(t),m_3(t),m_4(t),m_5(t))$.
+Each coordinate $m_i(t)$ may be simplified using the product rule 
+of Bernstein polynomials \cite{farin02};
+consider $m_5(t)$ as an example.
+\begin{eqnarray}
+m_5(t) & = & [\sum_{i=0}^3 B_i^3(t) b_{i1}]^2 + 
+	\ldots + [\sum_{i=0}^3 B_i^3(t) b_{i4}]^2 \nonumber \\
+     & = &  \sum_{i=0}^3 \sum_{j=0}^3 
+	\frac{\choice{3}{i} \choice{3}{j}}{\choice{6}{i+j}}
+       B^6_{i+j}(t) (b_{i1} b_{j1} + \ldots + b_{i4} b_{j4}) \nonumber
+\end{eqnarray}
+Letting $k=i+j$, 
+\[ m_5(t) = \sum_{k=0}^6 B_k^6(t) 
+	\sum_{\begin{array}{c}  \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}} 
+	\frac{\scriptchoice{3}{i} \scriptchoice{3}{j}}{\scriptchoice{6}{k}}
+	(b_{i1} b_{j1} + \ldots + b_{i4} b_{j4}) \]
+The other coordinates can be computed analogously to yield:
+\[ M(c(t)) = 
+   \sum_{k=0}^6 B_k^6(t)
+	\sum_{\begin{array}{c}  \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}} 
+	\frac{\choice{3}{i} \choice{3}{j}}{\choice{6}{k}}
+	\left( \begin{array}{c}
+            b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} - b_{i4} b_{j4} \\
+            2b_{i1} b_{j4} \\
+            2b_{i2} b_{j4} \\
+            2b_{i3} b_{j4} \\
+            b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} + b_{i4} b_{j4}
+	\end{array} \right) \]
+This is a sextic rational Bezier curve with weights 
+\begin{eqnarray}
+\label{eq:weights}
+w_k & = & \sum_{\begin{array}{c} \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}}
+        \frac{\choice{3}{i} \choice{3}{j}}{\choice{6}{k}}
+	\ (b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} + b_{i4} b_{j4}) \nonumber \\
+& = & \sum_{\begin{array}{c} \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}}
+        \frac{\choice{3}{i} \choice{3}{j}}{\choice{6}{k}}
+	\ b_i \cdot b_j
+\end{eqnarray}
+and control points 
+\begin{eqnarray}
+\label{eq:control-pts}
+\breve{b}_k & = & \frac{1}{w_k} 
+      \sum_{\begin{array}{c} \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}} 
+        \frac{\choice{3}{i} \choice{3}{j}}{\choice{6}{k}}
+	\left( \begin{array}{c}
+            b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} - b_{i4} b_{j4} \\
+            2b_{i1} b_{j4} \\
+            2b_{i2} b_{j4} \\
+            2b_{i3} b_{j4} 
+	\end{array} \right) \nonumber \\
+& = & \frac{1}{w_k} 
+      \sum_{\begin{array}{c} \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}} 
+        \frac{\choice{3}{i} \choice{3}{j}}{\choice{6}{k}}
+{\cal M}(b_i, b_j)
+\end{eqnarray}
+for $k = 0, \ldots, 6$.
+
+By evaluating (\ref{eq:weights}), $w_0$ through $w_3$ can be simplified to
+\begin{eqnarray}
+(w_0,w_1,w_2,w_3) & = & 
+% (b_0 \cdot b_0, 
+% \frac{3b_0 \cdot b_1 + 3b_1 \cdot b_0}{6}, 
+% \frac{3b_0 \cdot b_2 + 9b_1 \cdot b_1 + 3b_2 \cdot b_0}{15}, 
+% \frac{b_0 \cdot b_3 + 9b_1 \cdot b_2 + 9b_2 \cdot b_1 + b3 \cdot b_0}{20}) \nonumber \\
+% & = &
+(b_0 \cdot b_0, b_0 \cdot b_1, \frac{2b_0 \cdot b_2 + 3b_1 \cdot b_1}{5}, 
+\frac{b_0 \cdot b_3 + 9b_1 \cdot b_2}{10}) \nonumber 
+\end{eqnarray}
+
+Similarly, by evaluating (\ref{eq:control-pts}), $\breve{b}_0$ through $\breve{b}_3$ 
+can be simplified to 
+\begin{eqnarray}
+\breve{b}_0 & = & % \frac{{\cal M}(b_0,b_0)}{w_0} =
+                    \frac{{\cal M}(b_0,b_0)}{b_0 \cdot b_0} \nonumber \\
+\breve{b}_1 & = & % \frac{{\cal M}(b_0,b_1) + {\cal M}(b_1,b_0)}{2w_1} =
+                    \frac{{\cal M}(b_0,b_1) + {\cal M}(b_1,b_0)}{2b_0\cdot b_1} \nonumber \\
+\breve{b}_2 & = & % \frac{{\cal M}(b_0,b_2) + 3{\cal M}(b_1,b_1) + {\cal M}(b_2,b_0)}{5w_2} = 
+                    \frac{{\cal M}(b_0,b_2) + 3{\cal M}(b_1,b_1) + {\cal M}(b_2,b_0)}
+	                 {2b_0 \cdot b_2 + 3b_1 \cdot b_1} \nonumber \\
+\breve{b}_3 & = & % \frac{{\cal M}(b_0,b_3) + 9{\cal M}(b_1,b_2) + 9{\cal M}(b_2,b_1) + {\cal M}(b_3,b_0)}{20w_3} =
+                    \frac{{\cal M}(b_0,b_3) + 9{\cal M}(b_1,b_2) + 9{\cal M}(b_2,b_1) + {\cal M}(b_3,b_0)}{2b_0 \cdot b_3 + 18b_1 \cdot b_2} \nonumber
+\end{eqnarray}
+
+$\breve{b}_4$ through $\breve{b}_6$ and $w_4$ through $w_6$ can then be determined 
+through the symmetry of Bezier curves: 
+since the geometry of the cubic Bezier curve does not change 
+under reversal of the control points, neither does the algebra of its image.
+The leverage of symmetry also generates more efficient formulae.\footnote{For example,
+  $w_6$ and $\breve{b}_6$ are both expressed originally as sums of 7 terms.
+  Using symmetry, they are now expressed by one term.}
+\begin{eqnarray}
+w_4 & = & \frac{2b_3 \cdot b_1 + 3b_2 \cdot b_2}{5} \nonumber \\
+w_5 & = & b_3 \cdot b_2 \nonumber \\
+w_6 & = & b_3 \cdot b_3 \nonumber \\
+\breve{b}_4 & = & \frac{{\cal M}(b_3,b_1) + 3{\cal M}(b_2,b_2) + {\cal M}(b_1,b_3)}
+	                 {2b_3 \cdot b_1 + 3b_2 \cdot b_2} \nonumber \\
+\breve{b}_5 & = & \frac{{\cal M}(b_3,b_2) + {\cal M}(b_2,b_3)}{2b_3\cdot b_2} \nonumber \\
+\breve{b}_6 & = & \frac{{\cal M}(b_3,b_3)}{b_3 \cdot b_3} \nonumber
+\end{eqnarray}
+\QED
+
+\section{Poles}
+
+The special behaviour of $M^{-1}$ at the pole $(1,0,0,0)$
+is not unusual with maps from the sphere.
+Consider the classical problem in cartography: how to portray the earth
+on a 2-dimensional page.
+A conformal map from $S^3$ to $\Re^2$ is desired.
+Also consider the latitude/longitude parameterization of the sphere, with its two poles.
+A parameterization is a map between the surface and $\Re^2$.
+
+\subsection{Postamble to rational maps to the sphere}
+
+The inverse image $M^{-1}(P)$ is a line or plane.
+By perturbing the data away from the pole (Section~\ref{sec:perturb}), 
+we may assume that $P \neq (1,0,0,0)$ and $M^{-1}(P)$ is a line.
+Therefore, the interpolation of $\{M^{-1}(P_i)\}$ is the design of a curve through a
+collection of lines.
+Rather than directly attacking this non-traditional problem (see the future problems in
+Section~\ref{sec:future}), we will reduce it to a traditional point
+interpolation problem by choosing a point on each line.
+Which point should be chosen on each line?
+One solution is to always choose $M^{-1}(P)$ on $S^3$.
+This solution (seems to?) promote short curves, a good thing, 
+and avoids collapse into the origin, a bad thing.
+Note that this is a well-defined choice, since $M^{-1}(P)$ is a line through the origin.
+Another advantage of this choice is that it yields a simple inverse.
+
+% From 'A rational quaternion spline of arbitrary continuity'
+
+\section{A map to and from \Sn{3}}
+\label{sec:map}
+
+The first step in our algorithm for the design of a rational quaternion
+spline is to design a good rational map from 4-space to the surface \Sn{3}.
+Recall that we prefer a map with domain $\Re^4$, so that the data points will be
+mapped to one-dimensional curves in Euclidean space and the 
+curve design in Euclidean space will enjoy more flexibility.
+
+Our approach is as follows.
+We shall first develop a normal form for all rational maps of $\Re^4$ to \Sn{3}.
+We will then choose a particular map.
+Finally, we will compute the inverse of this map.
+
+\subsection{Rational maps of $\Re^4$ to \Sn{3}}
+
+Consider a rational map from $\Re^4$ to \Sn{3}:
+\[
+	(x_1,\ldots,x_4) \mapsto
+	(\frac{f_1(x_1,\ldots,x_4)}{f_{5}(x_1,\ldots,x_4)}, \ldots,
+	 \frac{f_4(x_1,\ldots,x_4)}{f_{5}(x_1,\ldots,x_4)})
+\]
+where $f_1,\ldots,f_{5}$ are polynomials.
+Since the image lies on \Sn{3}, $f_1^2 + \cdots + f_4^2 = f_{5}^2$
+and $(f_1,f_2,f_3,f_4,f_5)$ is a Pythagorean quintuple.\footnote{This term derives
+	from the Pythagorean Theorem on right triangles,
+	which involves Pythagorean triples.}
+\begin{defn2}
+$(a_1,\ldots,a_{5}) \in K^{n+1}$
+is a {\bf Pythagorean quintuple over $K$} 
+if $a_1^2 + \ldots + a_4^2 = a_5^2$.
+\end{defn2}
+%
+Thus, the study of rational maps from $\Re^{4}$ to \Sn{3}\ 
+is equivalent to the study of Pythagorean quintuples of polynomials.
+Pythagorean quintuples involve the sum of four squares.
+In the number theory literature, there is an extensive study of the
+sum of four squares (driven by the search for a proof that
+every positive integer is the sum of the squares of four integers \cite{dickson52}).
+An important result was developed by Euler,\footnote{This result shows that the product of a sum of four squares and a sum of four
+	squares is another sum of four squares.
+	This reduces the problem of showing that every integer is the sum
+	of four squares to the simpler problem
+	of showing that every prime is the sum of four squares,
+	since every integer can be expressed as the product of primes.}
+which we can use to build Pythagorean quintuples, 
+and then a characterization of maps to \Sn{3}.
+
+\begin{lemma}[Euler's Four Squares Theorem \cite{herstein75}]
+\label{lem:euler}
+% p. 373 of Herstein
+\[
+\begin{array}{ll}
+& (a_1^2 + a_2^2 + a_3^2 + a_4^2) 
+(\hat{a}^2_1 + \hat{a}^2_2 + \hat{a}^2_3 + \hat{a}^2_4) = \\
+& (a_1 \hat{a}_1 - a_2\hat{a}_2 - a_3\hat{a}_3 - a_4\hat{a}_4)^2 +
+   (a_1\hat{a}_2 + a_2\hat{a}_1 + a_3\hat{a}_4 - a_4\hat{a}_3)^2 + \\
+& (a_1\hat{a}_3 - a_2\hat{a}_4 + a_3\hat{a}_1 + a_4\hat{a}_2)^2 +
+   (a_1\hat{a}_4 + a_2\hat{a}_3 - a_3\hat{a}_2 + a_4\hat{a}_1)^2
+\end{array}
+\]
+where $a_1,a_2,a_3,a_4,\hat{a}_1,\hat{a}_2,\hat{a}_3,\hat{a}_4$ are elements of a
+commutative ring.
+% \footnote{The original statement was for integers, but it easily generalizes.}
+% see p. 210 of Ebbinghaus
+\end{lemma}
+
+\begin{corollary}
+\label{lem:suff4}
+$(a_1^2 + a_2^2 + a_3^2 - a_4^2,\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,\ 
+ a_1^2 + a_2^2 + a_3^2 + a_4^2)$
+is a Pythagorean quintuple for any polynomials $a_1,a_2,a_3,a_4$.
+\end{corollary}
+\prf
+Let $(\hat{a}_1,\hat{a}_2,\hat{a}_3,\hat{a}_4) = (a_1,-a_2,-a_3,a_4)$. 
+\QED
+
+\noindent The following lemma establishes a weaker version of the necessary condition
+associated with Corollary~\ref{lem:suff4}.
+This in turn leads to the desired necessary and sufficient condition for rational maps
+of $\Re^4$ to \Sn{3}.
+
+\begin{lemma}
+\label{thm:necessary4}
+A quintuple of polynomials is Pythagorean only if it can be expressed in the form
+\begin{equation}
+\label{eq:pyth}
+	\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+		\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+		\ a_1^2 + a_2^2 + a_3^2 + a_4^2)
+\end{equation}
+for some polynomials $a_1,a_2,a_3,a_4,\frac{1}{\alpha}$.
+\end{lemma}
+\prf
+Let $(p_1,p_2,p_3,p_4,p_5)$ be a Pythagorean quintuple of polynomials.
+If $p_1 = p_5$, let\\
+$(a_1,a_2,a_3,a_4,\alpha) = (p_1,0,0,0,\frac{1}{p_1})$.
+Thus, we may assume without loss of generality that $p_1 \neq p_5$.
+Let $(a_1,a_2,a_3,a_4,\alpha) = (p_2,p_3,p_4,p_5-p_1,\frac{1}{2(p_5 - p_1)})$.
+Then $a_1,a_2,a_3,a_4,\alpha$ generate the Pythagorean quintuple
+$(p_1,\ldots,p_5)$ as in (\ref{eq:pyth}).
+In particular,
+\[
+\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2)
+= \frac{p_2^2 + p_3^2 + p_4^2 - (p_5 - p_1)^2}{2(p_5-p_1)}
+\]
+and applying $p_1^2 + p_2^2 + p_3^2 + p_4^2 = p_5^2$,
+\[
+\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2) = \frac{-2p_1^2 + 2p_1p_5}{2(p_5 - p_1)} = p_1.
+\]
+Also, 
+\[
+\alpha (2a_i a_4) = \frac{2p_{i+1}(p_5 - p_1)}{2(p_5 - p_1)} = p_{i+1}
+\]
+for $i=1,2,3$.
+Finally, 
+\[
+\alpha(a_1^2 + a_2^2 + a_3^2 + a_4^2) 
+= \frac{p_2^2 + p_3^2 + p_4^2 + (p_5 - p_1)^2}{2(p_5-p_1)} = p_5
+\]
+Thus, $(p_1,p_2,p_3,p_4,p_5) = \alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+		\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+		\ a_1^2 + a_2^2 + a_3^2 + a_4^2)$.
+\QED
+
+\begin{corollary}
+\label{thm:map4}
+A map is a rational map of $\Re^4$ to \Sn{3}\ if and only if
+it is of the form:
+\begin{equation}
+\label{eq:re4s3}
+\small{(x_1,x_2,x_3,x_4)} \mapsto 
+\small{\frac{1}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+	(a_1^2 + a_2^2 + a_3^2 - a_4^2, 2a_1a_4, 2a_2a_4, 2a_3a_4)}
+\end{equation}
+where $a_1,a_2,a_3,a_4$ are polynomials over $x_1,x_2,x_3,x_4$
+(or some permutation of this form).\footnote{This result generalizes
+	to rational maps from $\Re^n$ to \Sn{n-1}, $n \geq 2$,
+	using an identical proof.
+	That is, a map is a rational map of $\Re^n$ to \Sn{n-1}, $n \geq 2$, 
+	if and only if it is of the form:
+\[
+	(x_1,\ldots,x_n) \mapsto
+	(\frac{a_1^2 + \cdots + a_{n-1}^2 - a_n^2}{a_1^2 + \cdots + a_n^2},
+	 \frac{2a_1a_n}{a_1^2 + \cdots + a_n^2},
+	 \ldots,
+	 \frac{2a_{n-1}a_n}{a_1^2 + \cdots + a_n^2})
+\]
+where $a_1,\ldots,a_n$ are polynomials over $x_1,\ldots,x_n$.}
+\end{corollary}
+\prf
+Consider a rational map
+of $\Re^4$ to \Sn{3}, $(x_1,x_2,x_3,x_4) \mapsto 
+(\frac{f_1}{f_5},\frac{f_2}{f_5},\frac{f_3}{f_5},\frac{f_4}{f_5})$,
+where $f_1,\ldots,f_5$ are polynomials over $x_1,\ldots,x_4$.
+Then $(f_1,\ldots,f_5)$ is a Pythagorean quintuple
+so it can be expressed in the normal form
+$(f_1,\ldots,f_5) = \alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+2a_1a_4,2a_2a_4,2a_3a_4,$ $a_1^2 + a_2^2 + a_3^2 + a_4^2)$
+for some polynomials $a_1,a_2,a_3,a_4,\frac{1}{\alpha}$
+by Lemma~\ref{thm:necessary4}.
+Thus, the map is of the form (\ref{eq:re4s3}), since the leading $\alpha$
+cancels when expressed in 
+$(\frac{f_1}{f_5},\frac{f_2}{f_5},\frac{f_3}{f_5},\frac{f_4}{f_5})$.
+Notice that it is legal to cancel the $\alpha$, since
+$\alpha = \frac{1}{\beta}$ for some polynomial $\beta$,
+which implies that $\alpha$ is never zero.
+
+Now consider a map of the form (\ref{eq:re4s3}).
+This is a rational map of $\Re^4$ to \Sn{3}\ by Corollary~\ref{lem:suff4}.
+\QED
+
+\noindent The most natural choice for the polynomials $a_i$ 
+in Corollary~\ref{thm:map4} is $a_i = x_i$ and the identity permutation.
+%
+\begin{defn2}
+The {\bf most natural} map to \Sn{3}\ is 
+$M: \Re^4 - \{0\} \rightarrow \Sn{3}$ defined by:
+\begin{equation}
+\label{eqM}
+\footnotesize{
+	M(x_1,x_2,x_3,x_4) =
+	\frac{1}{x_1^2 + x_2^2 + x_3^2 + x_4^2}
+	(x_1^2 + x_2^2 + x_3^2 - x_4^2, 2x_1x_4, 2x_2x_4, 2x_3x_4)
+	 }
+\end{equation}
+\end{defn2}
+%
+We fully analyze this map in \cite{jj98b}.
+For example, we show that it is a powerful extension of
+the inverse map of stereographic projection.
+(We also further explain the title `most natural'.)
+We shall use the map $M$ as our rational map to \Sn{3}.
+
+START HERE
+
+\subsection{The inverse map}
+
+To map the quaternions to Euclidean space,
+the inverse of our map to \Sn{3}\ is needed (step 1b of the algorithm
+in Section~\ref{subsec:design}).
+Since the manifold $\Re^4$ is one dimension larger than \Sn{3}, 
+one would expect the preimage of a point of \Sn{3}\ to be 
+a curve in $\Re^4$.
+This is indeed the case.
+In fact, the inverse of a point is simply a line.
+The proof of the following theorem is simplified by working in projective space.
+%
+\begin{defn2}
+\label{defn:projspace}
+% We shall make use of projective space in some of the proofs in this paper.
+Real {\bf projective $n$-space} $P^n$ is the space 
+$\{ (x_1,x_2,\ldots,x_{n+1}) : x_i \in \Re, \mbox{not all zero} \}$
+under the equivalence relation 
+\begin{equation}
+\label{eq:projequivalence}
+(x_1,\ldots,x_{n+1}) = k(x_1,\ldots,x_{n+1}),\ \ k \neq 0 \in \Re.
+\end{equation}
+The point $(x_1,\ldots,x_{n+1})$ in projective $n$-space, $x_{n+1} \neq 0$,
+is equivalent to the point $(\frac{x_1}{x_{n+1}},\ldots,\frac{x_n}{x_{n+1}})$
+in $n$-space.
+The point $(x_1,\ldots,x_n,0)$ in projective $n$-space represents the point
+at infinity in the direction $(x_1,\ldots,x_n)$.
+To translate from $n$-space to projective $n$-space, the point 
+$(x_1,\ldots,x_n)$ is typically transformed into the point $(x_1,\ldots,x_n,1)$.
+See \cite{harris92} for more details on projective space.
+\end{defn2}
+
+\begin{theorem}
+\label{thm:inverse}
+$M^{-1}: S^3 \rightarrow \Re^4$ is defined as follows:
+\[ 
+\footnotesize{
+	M^{-1}(x_1,x_2,x_3,x_4) =
+	\left\{ 
+	\begin{tabular}{ll}
+		$t(x_2,x_3,x_4,1-x_1),\ t \in \Re,\ t \neq 0 \hspace{.2in}$
+		  & $\mbox{if } (x_1,x_2,x_3,x_4) \neq (1,0,0,0)$\\
+		$H$ & $\mbox{if } (x_1,x_2,x_3,x_4) = (1,0,0,0)$
+	\end{tabular}
+	\right.
+}
+\]
+where $H$ is the hyperplane $x_4 = 0$ minus the origin.
+That is, the preimage of $(x_1,x_2,x_3,x_4) \neq (1,0,0,0)$ on \Sn{3}
+is a line through the origin, minus the origin.
+\end{theorem}
+\prf 
+We work in projective space, where the map $M$ becomes
+\begin{equation}
+\label{eq:proj}
+	 (x_1,x_2,x_3,x_4,x_5) \rightarrow
+	 (x_1^2 + x_2^2 + x_3^2 - x_4^2,\ 
+	 2x_1 x_4,\ 2x_2 x_4,\ 2x_3 x_4,\ 
+	 x_1^2 + x_2^2 + x_3^2 + x_4^2).
+\end{equation}
+Let $p = (p_1,p_2,p_3,p_4,1) \in S^3 \subset P^4$.
+We want to determine the conditions on $q = (q_1,q_2,q_3,q_4,q_5)$
+so that $M(q_1,q_2,q_3,q_4,q_5) = p$.
+Suppose that $M(q_1,q_2,q_3,q_4,q_5) = p$.
+Using (\ref{eq:projequivalence}), we have
+\begin{equation}
+\label{eq1}
+	q_1^2 + q_2^2 + q_3^2 - q_4^2 = kp_1
+\end{equation}
+\begin{equation}
+\label{eq2}
+	2q_1q_4	= kp_2
+\end{equation}
+\begin{equation}
+\label{eq3}
+	2q_2q_4	= kp_3
+\end{equation}
+\begin{equation}
+\label{eq4}
+	2q_3q_4	= kp_4
+\end{equation}
+\begin{equation}
+\label{eq5}
+	q_1^2 + q_2^2 + q_3^2 + q_4^2 = k
+\end{equation}
+for some $k \neq 0$.
+$q_5$ is arbitrary, since it does not appear in these equations.
+Subtracting (\ref{eq1}) from (\ref{eq5}), 
+we have $2q_4^2 = k(1 - p_1)$
+or 
+\begin{equation}
+\label{eq:q4}
+q_4 = \pm \sqrt{\frac{k(1-p_1)}{2}}
+\end{equation}
+%
+{\bf Case 1:\ }
+Suppose $p_1 = 1$. Then $p = (1,0,0,0,1)$ since $p \in \Sn{3}$.
+$q_4 = 0$ by (\ref{eq:q4})
+and $M(q) = (q_1^2 + q_2^2 + q_3^2, 0, 0, 0, q_1^2 + q_2^2 + q_3^2)
+       = (1,0,0,0,1)$ for any values of $q_1,q_2,q_3$, not all zero.
+That is, $M(q) = p$ if and only if $q \in H$ where $H$ is 
+the hyperplane $x_4 = 0$ minus the origin.
+Equivalently, $M^{-1}(p) = H$.\\
+%
+{\bf Case 2:\ }
+Suppose $p_1 \neq 1$.
+Then $p_1 < 1$ since $p \in \Sn{3}$. 
+From (\ref{eq:q4}), $q_4 \neq 0$ and $q_4$ is a real number.
+From (\ref{eq2}-\ref{eq4}), $q_i = \frac{kp_{i+1}}{2q_4}$ for $i=1,2,3$:
+\[
+	q = (\frac{kp_2}{2q_4}, \frac{kp_3}{2q_4}, \frac{kp_4}{2q_4}, q_4, q_5)
+\]
+Using (\ref{eq:projequivalence}), 
+\[
+	q = \frac{2q_4}{k} q
+	  = (p_2, p_3, p_4, \frac{2q_4^2}{k},\frac{2q_4q_5}{k})
+\]
+and then (\ref{eq:q4}),
+\[
+	q = (p_2,p_3,p_4,1-p_1, \pm \sqrt{\frac{2(1-p_1)}{k}} q_5)
+\]
+Since $q_5$ and $k$ are arbitrary,
+\[
+	q = (p_2,p_3,p_4,1-p_1, k') \hspace{1in} k' \in \Re
+\]
+We have shown that $M(q) = p$ only if 
+$q = (p_2,p_3,p_4,1 - p_1,k')$.
+
+On the other hand, if $q = (p_2,p_3,p_4,1 - p_1,k')$, $k' \in \Re$
+and $p_1 \neq 1$,
+then 
+\[
+\scriptsize{M(q) = (p_2^2 + p_3^2 + p_4^2 - (1 - p_1)^2,\ 
+	2p_2 (1 - p_1),\ 2p_3 (1 - p_1),\ 2p_4 (1 - p_1),\ 
+	p_2^2 + p_3^2 + p_4^2 + (1 - p_1)^2).}
+\]
+Using $p_1^2 + p_2^2 + p_3^2 + p_4^2 = 1$ ($p \in \Sn{3}$),
+\[
+M(q) = (2p_1(1 - p_1),\ 2p_2 (1 - p_1),\ 2p_3 (1 - p_1),\ 2p_4 (1 - p_1),\ 
+2(1 - p_1))
+\]
+or $M(q) = (p_1,p_2,p_3,p_4,1)$ using (\ref{eq:projequivalence}).
+Thus, $M(q) = p$ if and only if 
+$q = (p_2,p_3,p_4,1 - p_1,k')$, $k' \in \Re$.
+Translating back from projective space,
+$M(q) = p$ if and only if 
+$q = t(p_2,p_3,p_4, 1-p_1)$, $t \neq 0 \in \Re$.
+Equivalently, $M^{-1}(p) = t(p_2,p_3,p_4, 1-p_1)$, $t \neq 0 \in \Re$.
+It is understandable that the preimage does not contain the origin, 
+since $M$ is undefined there.
+\QED
+% $q \in M^{-1}(p)$ if and only if $M(q) = p$.
+
+\begin{defn2}
+\label{defn:pole}
+The special point $(1,0,0,0)$ is called the {\bf pole} of the map $M^{-1}$.
+$(x_2,x_3,x_4,1-x_1)$ is called the {\bf defining point} of the preimage 
+$M^{-1}(x_1,x_2,x_3,x_4)$.
+\end{defn2}
+
+\noindent Notice the beautiful simplicity of the defining point.
+
+\begin{rmk}
+Although the proof technique of Theorem~\ref{thm:inverse}
+works for any individual map,
+we cannot apply it to the abstract general map (\ref{eq:re4s3})
+to reveal the general inverse map.
+The above proof requires working in projective space, to take 
+advantage of the extra equation it offers;
+this would require getting inside the arbitrary polynomials
+$a_i$ of (\ref{eq:re4s3}) to translate them into projective space,
+an unfeasible task
+since these polynomials are of unknown and varying degree.
+\end{rmk}
+
+% Example of another map: using $a_1=x_1 - 1$, $a_2 = x_2^2$, $a_3=0$, 
+% and $a_4=x_4$,
+% let $M(q_1,q_2,q_3,q_4,q_5) = (q_1^2 - 2q_1 + 1 + q_2^4 - q_4^2,
+% 				2q_1q_4 - 2q_4, 2q_2^2 q_4, 0, 
+% 				q_1^2 - 2q_1 + 1 + q_2^4 + q_4^2)$.
+
+\end{document}

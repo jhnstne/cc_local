@@ -1,0 +1,5 @@
+[ FILE: woodenvase
+]
+{
+REVOSURF ../data/object/woodenvase.pts .5 0 0 0
+}

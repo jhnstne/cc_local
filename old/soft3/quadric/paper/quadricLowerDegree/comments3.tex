@@ -1,0 +1,119 @@
+CK, here are my comments.
+I have decided that we should wait until tomorrow before we 
+consider the paper finished, so that I can take a final look at the entire
+paper and address the small remaining questions below.
+We've waited long enough that one day won't make any difference.
+
+
+p. 5, footnote: I have slightly moved the position of the footnote.
+	
+p. 5, proof: I have removed the bars on top of the axis l in the last
+	sentences of the proof.  The rest of the proof does not use
+	bars so this is for consistency.
+
+p. 11, algorithm, step 4: I changed the wording to `(but $X$ not on
+	any skeletal line)'.
+	I changed the ordering of the cases: intersecting diagonals
+	is the primary case so it should go first.
+	I changed the wording of footnote b.
+
+p. 11, I made the Goldman reference explicitly refer to Goldman.
+
+p. 17, line 6 of proof of Thm 6.1: Magically it appeared again 
+	although I have not touched any neighbourhood of it in the file!!
+	There must be something funny going on.
+
+I think we should comment somewhere that material on Tangency and 
+Disjointedness is available in ACM paper.  I'm not sure where.
+
+end of Section 2, from 'Robustness also motivates our use
+	of geometric representations' to end of paragraph:
+	Should we remove this statement, since
+	there are no obvious transformations in our method,
+	(especially in view of our comments that will now immediately
+	follow this paragraph, in which we say that the method
+	of Referee 2 is not appropriate, because it involves
+	transformations: that is, we do not need to guard against
+	transformations since our method will not have any).
+
+Section 2 addition: This new remark would be put at the end of Section 2.
+
+\begin{remark}
+To better appreciate our approach, it is illuminating to investigate
+the shortcomings of a conceptually simple algorithm that appears to
+solve the problem:
+
+\begin{enumerate}
+\item
+	\ [Reduce to a simple case] Map the cones to cylinders,
+	(by a projective transformation 
+	that maps a plane through both cone vertices to the plane at
+	infinity, and thus both vertices to infinity).
+	Then map the cylinders (simultaneously) to circular cylinders.
+	(One way to map a cylinder to a circular cylinder is to use
+	the Gram-Schmidt diagonalization technique on the matrix
+	representing the cylinder.)
+\item
+	The quadric intersection of two cylinders can only be
+	degenerate if the cylinders' axes intersect: if the axes
+	intersect at infinity, the quadric intersection consists
+	of four lines; if the axes intersect at a finite point,
+	the quadric intersection is irreducible when the cylinders'
+	radii are not the same, but it is two conics when the radii 
+	are the same.
+\item
+	Transform the lines or conics
+	computed in the last step (if they exist)
+	back to the original coordinate system.
+\end{enumerate}
+
+\noindent The problem with this method lies in the use of transformed quadrics,
+rather than working directly with the original quadrics.
+In step (2), the axes of the transformed cylinders have to be extracted 
+and tested for intersection, and the radii must be extracted and tested 
+for equality.  
+However, the transformations of step (1) 
+distort information such as axes and radii,
+as discussed in Goldman \cite{goldman:1983b} and Wilson \cite{wilson:1987}.
+For example, `[if] we initially select two cylinders of equal radii
+[represented by matrices], \ldots
+the more manipulations we perform on the cylinders, the more dissimilar
+the radii will become because of accumulated floating point inaccuracies'
+\cite[p. 22]{goldman:1983b}.
+Due to the effect of transformations, we are not sure whether a pair
+of non-intersecting axes are indeed intersecting in the original
+coordinate system, or whether two radii are truly equal.
+This is a particularly important problem in the context of the detection
+of degenerate intersection, because degenerate intersection is inherently
+a fragile condition: a small perturbation of the quadrics will change a
+degenerate intersection into an irreducible intersection.
+We wish to work with the purest data, which is the original data.
+
+Another problem is that the inverse transformation of step (3) 
+may distort the type of the intersection
+conic, because of numerical inaccuracy (Wilson \cite{wilson:1987}).
+There is also a problem in the transformations themselves,
+which require complex arithmetic.\footnote{For example, 
+	if one cone's vertex is contained in the other cone's
+	interior, any plane through both vertices intersects the cone
+	in two intersecting lines, and if this plane is mapped to the plane
+	at infinity, then the cone becomes a {\em hyperbolic} cylinder.
+	Complex arithmetic is required to transform this hyperbolic cylinder
+	to a circular one.}
+	% i.e., to map $x^2+y^2$ to $x^2-y^2$
+Complex arithmetic is not only more expensive than real arithmetic,
+but one must check if the lines and conics detected in step (2) 
+are still real after the inverse transformation of step (3).
+IS THIS SO HARD?
+A final drawback of the method is that it forces the use of an algebraic
+representation rather than a geometric representation.
+ELABORATE ON THIS IF WE REMOVE DISCUSSION OF GEOMETRIC REPRESENTATION ABOVE.
+
+Our method works directly with the original quadrics without using
+any transformations, it uses only real arithmetic, and it uses geometric
+representations of the quadrics.
+The predominant calculation is line intersection, which can be implemented
+robustly.
+\end{remark}
+
+

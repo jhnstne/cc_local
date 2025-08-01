@@ -1,0 +1,184 @@
+head	1.1;
+access;
+symbols;
+locks
+	smann:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	95.06.19.18.11.04;	author smann;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+ * Copyright (c) 1990, Graphics and AI Laboratory, University of Washington
+ * Copying, use and development for non-commercial purposes permitted.
+ *                  All rights for commercial use reserved.
+ */
+
+/*
+ *----------------------------------------------------------------------
+ *  mat0.c
+ *----------------------------------------------------------------------
+ */
+
+#include <stdio.h>
+#include <math.h>
+#include "all.h"
+
+char* matName="RedPlastic";
+Material m;
+
+#define MAT_NAME 1
+#define MAT_RGB 2
+#define MAT_HSV 4
+#define MAT_TRI 8
+
+int matFlag=MAT_NAME;
+
+
+#define NUM_COLORS 14
+
+static char* colorTable[NUM_COLORS] = {
+	"RedPlastic",
+	"NewBlue",
+	"NewPurple",
+	"NewGreen",
+	"DarkGreenPlastic",
+	"YellowPlastic",
+	"PurplePlastic",
+	"RedMatte",
+	"GreenPlastic",
+	"GreenMatte",
+	"BluePlastic",
+	"BlueMatte",
+	"YellowMatte",
+	"PurpleMatte"
+  };
+
+static numMaterials = NUM_COLORS;
+static Material colorMaterial[NUM_COLORS];
+static short colorUsedTable[NUM_COLORS];
+
+AddMaterial(mark, type)
+int mark;
+int type;
+{
+	if ( mark < numMaterials ) {
+		colorUsedTable[mark] = 1;
+		if ( type == MAT_NAME ) {
+			SetMaterialName("Triangle.vertex1", colorTable[mark]);
+			SetMaterialName("Triangle.vertex2", colorTable[mark]);
+			SetMaterialName("Triangle.vertex3", colorTable[mark]);
+		} else if ( type == MAT_RGB ) {
+			SetRGBMaterial("Triangle.vertex1", 
+				       &colorMaterial[mark]);
+			SetRGBMaterial("Triangle.vertex2", 
+				       &colorMaterial[mark]);
+			SetRGBMaterial("Triangle.vertex3", 
+				       &colorMaterial[mark]);
+		} else {
+			fprintf(stderr, "matFlag = %d not imp.\n", matFlag);
+			exit(1);
+		}
+	} else {
+		SetMaterialName("Triangle.vertex1", "NullMaterial");
+		SetMaterialName("Triangle.vertex2", "NullMaterial");
+		SetMaterialName("Triangle.vertex3", "NullMaterial");
+	}
+}
+
+PrintColorsUsed()
+{
+	int i;
+
+	for(i=0; i<NUM_COLORS; i++){
+		if ( colorUsedTable[i] ) {
+			switch (matFlag) {
+			      case MAT_NAME:
+				fprintf(stderr, "Color %d = %s\n", i, 
+					colorTable[i]);
+				break;
+			      case MAT_RGB:
+				fprintf(stderr, "Color %d\n", i);
+				break;
+			}
+		}
+	}	
+}
+
+main(argc, argv)
+int argc;
+char* argv[];
+{
+	int mark;
+	Scalar fmark;
+	
+	ParseCommandLine(argc, argv);
+	
+	while( ReadDstruct() != EOF ){
+		if ( !QueryDstructPath( "Triangle" ) ) {
+			fprintf(stderr, "\
+%s: dstruct not Triangle.  Exiting.\n", argv[0]);
+			exit(1);
+		}
+		CopyDstructFields("Triangle", "Triangle");
+		
+		GetScalar("Triangle.mark", &fmark);
+		mark = fmark;
+		AddMaterial(mark, matFlag);
+		FlushDstruct();
+	}
+	PrintColorsUsed();
+	exit(0);
+}
+
+
+#define MAX_LINE 1000
+
+void SetColorTable(arg)
+char* arg[];
+{
+	char* file = arg[0];
+	FILE* fp;
+	char buf[MAX_LINE];
+	int i;
+
+	matFlag = MAT_RGB;
+	if ( ! (fp = fopen(file, "r")) ) {
+		fprintf(stderr, "SetColorTable: can't open file '%s'.\n",
+			file);
+		exit(1);
+	}
+
+	for ( i=0; i<NUM_COLORS; i++ ) {
+		if ( !MaterialRead(fp, &(colorMaterial[i])) ) {
+			break;
+		}
+	}
+	numMaterials = i;
+
+	fclose(fp);
+}
+
+
+char* Banner="MarkMat";
+char* UsageString = "MarkMat [options] < triangle-stream";
+Option Options[]={
+	"h", Usage, 0, ": print available options.",
+	"ct", SetColorTable, 1, "file: read the color table from 'file'",
+
+	NULL,NULL,     0, NULL
+  };
+@

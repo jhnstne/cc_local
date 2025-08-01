@@ -1,0 +1,69 @@
+# quaternion multiplication
+# q1 = [s1,v1] q2 = [s2,v2]
+qmultiply := proc(q1,q2)
+	result_scalar := q1[1]*q2[1] - dotprod(q1[2],q2[2]);
+	result_vector := add(scalarmul(q2[2],q1[1]),
+			  add(scalarmul(q1[2],q2[1]),crossprod(q1[2],q2[2])));
+	result := [eval(result_scalar),map(eval,result_vector)];
+	end;
+
+
+# given a unit quaternion q=[w,[x,y,z]]
+# and a vector v=[v1,v2,v3]
+# perform the multiplication q-1 [0,v] q
+qrotate := proc(v,q)
+	vtemp := [0,eval(v)];
+	qinverse := [q[1],scalarmul(q[2],-1)];
+	result := qmultiply(qmultiply(qinverse,vtemp),q);
+	end;
+
+#convert euler angles [yaw,pitch,roll] to a quaternion
+#input angles should be given in radians
+euler2quaternion := proc(yaw,pitch,roll)
+	qroll := [cos(roll/2),vector([sin(roll/2),0,0])];
+	qpitch:= [cos(pitch/2),vector([0,sin(pitch/2),0])];
+	qyaw  := [cos(yaw/2),vector([0,0,sin(yaw/2)])];
+	qresult := qmultiply(qmultiply(qyaw,qpitch),qroll);
+	map(eval,qresult);
+	end;
+
+
+# convert a quaternion to a flat 4-vector [w,[x,y,z]] -> [w,x,y,z]
+quaternion2vector := proc(q)
+	result := vector(4);
+	result[1] := q[1];
+	result[2] := q[2][1];
+	result[3] := q[2][2];
+	result[4] := q[2][3];
+	map(eval,result);
+	end;
+
+# convert a quaternion to a homg  5-vector [w,[x,y,z]] -> [1,w,x,y,z]
+quaternion25vector := proc(q)
+	result := vector(5);
+	result[1] := 1;
+	result[2] := q[1];
+	result[3] := q[2][1];
+	result[4] := q[2][2];
+	result[5] := q[2][3];
+	map(eval,result);
+	end;
+
+# convert a homog 5-vector to a quaternion
+h5vect2quaternion := proc(v)
+	result := vector(2);
+	vpart := vector(3);
+	vhomo := homog4D(v);
+	result[1] := vhomo[1];
+	vpart[1] := vhomo[2];
+	vpart[2] := vhomo[3];
+	vpart[3] := vhomo[4];
+	result[2] := eval(vpart);
+	eval(result);
+	end;
+
+
+	
+
+
+

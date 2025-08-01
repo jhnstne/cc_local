@@ -1,0 +1,97 @@
+From jj Thu Jul 15 10:45:00 1999
+Date: Thu, 15 Jul 1999 10:44:59 -0500 (CDT)
+From: John Johnstone <jj>
+To: jimbo@scr.siemens.com
+Subject: Paper done!
+Cc: jj
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-MD5: x7/3LCDg3zP4fDl5P+uRAA==
+
+Jim,
+
+3 cheers!  I finally have a final version of our quaternion spline paper
+for you to read.  Then we can submit this baby.
+I think that Transactions on Graphics is the most appropriate forum:
+it is the best journal for graphics and caters to a more theoretically
+based paper.  Also they published a quaternion spline paper recently
+(Park and Ravani's in '97).  TOG should get us the type of referee
+that we want.
+
+This has been a real labour of love.
+I have been refining the paper for the past couple of years,
+off and on, interspersed between other research and dropping it for a
+while quite often when there was a problem I couldn't solve to my satisfaction.
+It was a bit like putting a box A into another box B that is only just a little
+bit larger than A, the solution kept jamming in one corner when I succeeded
+to get it fit properly in another corner.
+It took a long while to realize what exactly was going on and make
+the correct choice for several issues in the right permutation.
+In my humble opinion, it now holds together real well
+and has some good motivation for each decision.
+
+There are some definite changes/additions/improvements from the conference paper
+and last version of the journal paper, so read carefully.
+Here are the highlights:
+
+- have a more cohesive motivation of the overall approach
+	 of designing in Euclidean space.
+
+- have coordinate-frame invariance
+
+- have full comparison with other quaternion splines,
+	with excellent results
+
+- have three methods for perturbing the data away from the pole (1,0,0,0),
+	ranging from very simple to heuristic to optimal
+	
+- have characterization of all maps of R4 to S3
+
+- now choose closest point on inverse image line (Section 5)
+	(this has a more natural motivation, and leads to better results
+	 when comparing to other quaternion splines in Section 9)
+	 
+- have different title, emphasizing the traits that distinguish this
+	paper from the previous work on quaternion splines
+	I wrote the entire paper with a focus on introducing a better
+	rational quaternion spline.  I think it works better keeping this 
+	uppermost throughout the paper.
+	
+	
+I have thought (and tried) every conceivable other approach to writing
+or implementing this method.
+So I think this is a keeper.
+For example, I don't introduce derivative data, since the choice of closest
+point in Section 5 (which we want for its superior performance in the results,
+and its more natural motivation) has trouble with derivatives.
+(I can give you details if you are interested.)
+I may want to pursue this issue in a future paper.
+For now though, it is better to separate the best rational quaternion spline
+without derivative data from the best rational quaternion splines
+with derivative data.
+It also overcomplicates the presentation (which is already pretty dense)
+to introduce derivatives.
+
+I have placed a copy of the paper on my web site
+(see http://www.cis.uab.edu/info/faculty/jj/cos.html)
+It is in acrobat format.
+If you have any trouble getting it, let me know.
+There is also a short companion paper that I wrote to address
+the claim that one of Hoschek's group had that the map M is nothing
+but stereographic projection.
+You may want to take a look at this paper too, although
+it is not necessary for a full reading of the main paper.
+
+Would you let me know when you have successfully downloaded the paper?
+I think I'll take the paper offline after that, at least until 
+you've sent in comments and we've submitted the paper.
+
+Would it be possible for you to read the paper and get me comments by the 
+end of July?
+Thanks a lot.
+
+How's everything at Siemens and the GRASP lab?
+
+Best regards,
+John
+

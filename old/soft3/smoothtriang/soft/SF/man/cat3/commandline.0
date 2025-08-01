@@ -1,0 +1,132 @@
+
+
+
+C Library Functions                                commandline(3)
+
+
+
+NNNNAAAAMMMMEEEE
+     commandline
+
+
+SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
+     A package for parsing a C program command line.
+
+
+SSSSYYYYNNNNTTTTAAAAXXXX
+     ####iiiinnnncccclllluuuuddddeeee ccccoooommmmmmmmaaaannnnddddlllliiiinnnneeee....hhhh
+
+
+DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN::::
+     This package provides support for command line options  with
+     relatively automatic help.
+
+     TO ADD AN OPTION:
+
+     Create a handling function defined such as SetX below,  for-
+     ward declare it, then add a line to the Options table.
+
+     The handling function can expect to find its first  argument
+     in  argv[0],  the  second in argv[1], and so on.  An example
+     handler expecting one numeric argument:
+
+           void SetX(argv)
+           char **argv;
+           {
+               int x;
+
+               x = atoi( argv[0]);
+            }
+
+     A program should then declare an array Options to be of type
+     Option, and initialize.  The array should be terminated by a
+     null entry.  Example:
+
+     Option Options[] = {
+     /*  Name     Handler     #args   helpstring  */
+     "X",      SetX,      1,   "Set x.",
+     0,        0,         0,   0
+     };
+
+     Two other external variables must be declared and set:
+     cccchhhhaaaarrrr ****BBBBaaaannnnnnnneeeerrrr;;;;
+     cccchhhhaaaarrrr ****UUUUssssaaaaggggeeeeSSSSttttrrrriiiinnnngggg;;;;
+     Banner should be  the  name  of  the  program.   UsageString
+     should give a synopsis on how to use the command.
+
+     To parse the arguments,  a  call  to  ParseCommandLine()  is
+     made.
+
+
+
+
+SunOS 5.6                 Last change:                          1
+
+
+
+
+
+
+C Library Functions                                commandline(3)
+
+
+
+     PPPPaaaarrrrsssseeeeCCCCoooommmmmmmmaaaannnnddddLLLLiiiinnnneeee((((aaaarrrrggggcccc,,,, aaaarrrrggggvvvv))))
+     iiiinnnntttt aaaarrrrggggcccc;;;;
+     cccchhhhaaaarrrr**** aaaarrrrggggvvvv[[[[]]]];;;;
+
+     Parse the command line argv.
+
+
+DDDDAAAATTTTEEEE
+     January 3, 1992
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SunOS 5.6                 Last change:                          2
+
+
+

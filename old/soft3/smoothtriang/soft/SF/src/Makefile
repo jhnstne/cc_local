@@ -1,0 +1,22 @@
+install: 
+	( cd geometry; make install )
+	( cd Dstruct/dstruct ; make install )
+	( cd Dstruct/lib ; make install )
+	( cd Mesh ; make install )
+	( cd lib ; make install )
+	( cd lib/KCurve ; make install )
+	( cd lib/Function ; make install )
+	( cd Apps ; make install )
+	( cd PSchemes/Fitter0 ; make install )
+
+clean:
+	( cd geometry; make clean )
+	( cd Dstruct/dstruct ; make clean )
+	( cd Dstruct/lib ; make clean )
+	( cd Mesh ; make clean )
+	( cd Mesh/TestPrograms ; make clean )
+	( cd lib ; make clean )
+	( cd lib/KCurve ; make clean )
+	( cd lib/Function ; make clean )
+	( cd Apps ; make clean )
+	( cd PSchemes/Fitter0 ; make clean )

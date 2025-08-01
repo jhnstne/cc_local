@@ -1,0 +1,23 @@
+From jj Tue Aug 16 12:54:51 1994
+Return-Path: <jj>
+Received: by cis.uab.edu (4.1/SMI-4.1)
+	id AA26072; Tue, 16 Aug 94 12:54:49 CDT
+Date: Tue, 16 Aug 94 12:54:49 CDT
+From: jj (John Johnstone)
+Message-Id: <9408161754.AA26072@cis.uab.edu>
+To: jimbo@blaze.cs.jhu.edu
+Subject: inverse map
+Cc: jj
+Status: OR
+
+Jim, my calculations yield that the inverse of my M map
+is 
+M^{-1}(x0,x1,x2,x3,x4) = (+-2 \sqrt{(x0-x1)/2}, x2,x3,x4,x0-x1)
+
+expressing the RHS in projective space for brevity.
+This is a map from the unit 4-sphere to 4-space, note
+(the fact that x1^2 + x2^2 + x3^2 + x4^2 = x0^2 is used in the
+derivation). 
+This is a nice simple inverse map.
+jj
+

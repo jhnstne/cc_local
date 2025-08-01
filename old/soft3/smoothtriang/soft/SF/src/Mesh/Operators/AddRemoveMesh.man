@@ -1,0 +1,132 @@
+
+
+
+                                                 addremovemesh(3)
+
+
+
+NAME
+     AddRemoveMesh - A set of routines for adding and removing
+     mesh objects
+
+SYNTAX
+     #include mesh.h
+
+DESCRIPTION
+     _A_d_d_R_e_m_o_v_e_M_e_s_h are routines designed to simplify the addition
+     / removal  of mesh objects. Remove operators free the data
+     structures. These routines are meant for use by the routines
+     described in the _o_p_e_r_a_t_o_r_s (_3) manpages.
+
+ROUTINES
+     BOOLEAN AddMeshVertex( m, v )
+     Mesh *m;
+     Vertex *v;
+
+     Adds a Vertex to the mesh iff the vertex is not on the mesh
+     lists already.  Returns TRUE if the vertex was added, FALSE
+     if not added.
+
+     BOOLEAN AddMeshEdge( m, e )
+     Mesh *m;
+     Edge *e;
+
+     Adds an Edge to the mesh iff the edge (and its sym edge) is
+     not on the mesh lists already.  Returns TRUE if the edge was
+     added, FALSE if not added.
+
+     BOOLEAN AddMeshFace( m, f )
+     Mesh *m;
+     Face *f;
+
+     Adds a Face to the mesh iff the face is not on the mesh
+     lists already.  Returns TRUE if the face was added, FALSE if
+     not added.
+
+     BOOLEAN RemoveMeshVertex( m, v )
+     Mesh *m;
+     Vertex *v;
+
+     Removes a Vertex from the mesh iff the vertex is on the mesh
+     lists.  Uses _f_r_e_e() to reclaim storage used by the Vertex.
+     Returns TRUE if the vertex was removed, FALSE if not
+     removed.
+
+     BOOLEAN RemoveMeshEdge( m, e )
+     Mesh *m;
+     Edge *e;
+
+
+
+
+
+                                                                1
+
+
+
+
+
+
+addremovemesh(3)
+
+
+
+     Removes an Edge from the mesh iff the edge is on the mesh
+     lists.  Uses _f_r_e_e() to reclaim storage used by the Edge.
+     Returns TRUE if the edge was removed, FALSE if not removed.
+
+     BOOLEAN RemoveMeshFace( m, f )
+     Mesh *m;
+     Face *f;
+
+     Removes a Face from the mesh iff the face is on the mesh
+     lists.  Uses _f_r_e_e() to reclaim storage used by the Face.
+     Returns TRUE if the face was removed, FALSE if not removed.
+
+SEE ALSO
+     operators (3)
+
+AUTHORS
+     Richard Schulte
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2
+
+
+

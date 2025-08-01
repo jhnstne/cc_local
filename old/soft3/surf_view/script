@@ -1,0 +1,9 @@
+only BSPLINE and E3:
+
+surf_view ~/Data/surf/irit/cup.itd
+                           eggbase.itd
+			   knots.itd
+			   teapot2.itd	   
+			   wiggle.itd
+
+BSPLINE, E3 and P3:

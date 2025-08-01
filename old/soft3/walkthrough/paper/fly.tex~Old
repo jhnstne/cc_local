@@ -1,0 +1,163 @@
+\documentclass[12pt]{article}
+\usepackage{times}
+\usepackage[pdftex]{graphicx}
+\input{header-consecutive}
+
+\newif\ifComment                % large-scale comments
+\Commentfalse
+
+\setlength{\headsep}{.5in}
+\markright{\today \hfill}
+\pagestyle{myheadings}
+
+\DoubleSpace
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{0in}	% should be 0pt for 1in
+\setlength{\textheight}{8.6in}
+\setlength{\textwidth}{6.875in}
+\setlength{\columnsep}{5mm}	% width of gutter between columns
+
+% -----------------------------------------------------------------------------
+
+\title{Controlling the entire path of a virtual camera}
+% Rational camera control with collision detection}
+\author{Ross Ptacek and J.K. Johnstone\thanks{Department of Computer and 
+    Information Sciences, UAB, Birmingham, AL 35294-1170.  This work
+    was partially supported by the National Science Foundation under grant CCR-0203586.
+    Ross Ptacek was supported by a Research Experience for Undergraduates supplement
+    to this award.}}
+
+\begin{document}
+\maketitle
+
+Title for shorter lecture (Gatlinburg): 'Controlling a virtual camera' or
+'Avoiding collisions with a virtual camera'
+
+\begin{abstract}
+This paper considers the design of a camera path through a scene.
+   % problem of camera control through a polyhedral scene.
+Given a set of keyframes for the camera, we want to build a camera path that avoids
+collisions with the scene.
+Each keyframe is assumed to be collision-free.
+The first problem is to define a camera path that interpolates the keyframes.
+We build a rational interpolating motion using rational interpolation
+of both position and orientation.
+The orientation component of the motion is represented by a rational quaternion spline.
+The second problem is to detect collisions of the planned path with the scene.
+This is a simplified task for camera control: collisions are associated with
+an intersection of one of the four corner paths of the 
+virtual camera with the scene.
+The third problem is to correct the path to avoid the detected collisions.
+The present solution is to add, and replace, keyframes in the neighbourhood 
+of the collision in an attempt to correct the collision.
+  % In the development of a computer animation, camera control is a fundamental problem.
+\end{abstract}
+
+\section{Introduction}
+
+A virtual camera is often controlled interactively, through a GUI in a game
+or by an animator.
+% through a cinematographer in a movie.
+But suppose that we instead define the entire desired camera path by some keyframes
+that the camera must pass through.
+This is a reasonable model in an architectural walkthrough, for example,
+where a tour of the building is desired, which could be predefined.
+(This is a familiar model since camera paths in Maya are controlled in this way.)
+The keyframes could even be generated automatically by a higher level motion planner,
+given a description of the goal of the motion.
+The entire camera path is generated from the keyframes by interpolation, a classical
+animation problem.
+An issue that immediately arises is that the resulting camera path may collide with
+the scene that it is flying through, resulting in unattractive and unrealistic
+cutthroughs of walls and furniture.  
+This is similar to the classical collision detection problem in interactive camera
+or character control, but with important differences.
+In interactive control, there is little or no way to anticipate a collision 
+because the future motion is unknown.
+This leads to issues of constant polling for collisions and an emphasis on efficient
+techniques to preserve interactivity.
+However, in the keyframe approach, the entire motion is fully known and
+controllable before the animation is begun 
+(before the camera actually flies along its path),
+so collisions should be avoidable a priori.
+Our approach is twofold: find the collisions (in this paper, by simulation of the motion)
+{\bf [in future, could build a model for the motion rather than simulating, as in
+a swept surface of the camera]}, and then correct the collisions (in this paper,
+by adding new keyframes in the neighbourhood of the collision) {\bf [in future, could perturb
+the motion envelope directly rather than indirectly through keyframes]}.
+
+There are several advantages to the proposed model for camera control,
+and in general the proposed model for motion planning (where the camera is replaced
+by an arbitrary moving object in the scene).
+A major advantage is that optimal motions can be planned.
+This optimality can be introduced at both local and global levels.
+Globally, the keyframes can be defined using an intelligent motion planner that
+optimizes the high level structure of the motion.  % (e.g., shortest path)
+Locally, the motion can be designed to honour many optimality criteria, since the
+motion is entirely controllable: examples of optimality criteria (or guidelines) are
+shortest path, safest path, smoothest path, or preservation of orientation constraints 
+in the camera or animated object (e.g., don't turn camera upside down).
+The motion could even be built to satisfy stylistic goals: move the camera like
+a steadycam, like a handheld camera, or like a camera on a gantry.
+The proposed model is appropriate when the essential nature of the desired motion 
+can be known beforehand, since it does not depend on unknown future events.
+For example, it is appropriate when building an animation or when planning the path
+of a robot to a goal point, and less appropriate when controlling a character in a
+gun battle or a robot in a cleaning task, where the motion must adapt to unforeseeable
+circumstances.
+However, even in the latter interactive applications, local movements could be optimized
+using the proposed model.
+
+% additional issues that can be addressed in this model:
+% high level motion planning;
+% moving the camera to match good stylistic concerns 
+%        (a style to the camera path that you build);
+% building a swept surface representing the motion (but why?);
+% internal (object-based, not free-space) orientation constraints  can be incorporated
+% into the planned motion;
+% ***optimal motions can be planned***
+
+outline of paper
+
+\section{The setup}
+
+keyframes as points and quaternions
+model as polyhedral mesh
+virtual camera setup
+
+orientation;
+quaternion spline
+
+\section{Camera model}
+
+See view volume circa p. 240 of Foley and van Dam.
+See view frustrum on p. 449 of Hearn and Baker.
+View frustrum.
+Back frustrum.
+Corner of back frustrum.
+Corner path.
+Corner path as rational Bezier.
+
+Camera specification: we don't specify it in the intuitive way.
+Define the intuitive way: lookat point, tilt, field of view.
+We instead use a point for position and a quaternion for orientation.
+See view coordinates on p. 433ff. of Hearn and Baker.
+See OpenGL gluLookAt function.
+
+\section{Collision detection}
+
+*need to clarify how you feed camera path triangles in to the intersection algorithm*
+
+and try to abstract this as swept envelope intersection with scene.
+
+\section{Collision correction}
+
+*describe your collision correction algorithm to me* (starting from end of (6) in writeup)
+
+issues that arise: fast lookup of scene geometry for collision detection 
+during a simulation
+
+% ROSS: DOCUMENT THE SOFTWARE ADDITIONS (BOTH INTERNALLY AND EXTERNALLY)
+
+\end{document}

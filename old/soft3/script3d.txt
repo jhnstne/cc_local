@@ -1,0 +1,60 @@
+interpolating surfaces
+	surfbuild/src/surfinterpolate -m 
+	surfbuild/data/bezierSurf/UtahTeapot.cpt3
+
+surface of revolution
+	surfbuild/src/revosurf surfbuild/data/revosurf/apple.pts
+	surfbuild/src/revosurf surfbuild/data/revosurf/candlestick.pts
+	surfbuild/src/revosurf surfbuild/data/revosurf/cokeDetailed.pts
+	surfbuild/src/revosurf surfbuild/data/revosurf/handbell.pts
+	surfbuild/src/revosurf surfbuild/data/revosurf/snifter.pts
+	surfbuild/src/revosurf surfbuild/data/revosurf/woodenvase.pts
+
+scene construction
+	surfbuild/src/scene 
+	surfbuild/data/scene/appleScene
+
+mesh visualization
+        ~/softmesh/quadEdge/QEviewer ~/data/obj/venusBody.obj
+
+mesh analysis
+	~/software/project/pothole/potholesrc/pothole -f 12 -P 0 
+	~/software/project/pothole/data/venus.tmesh 
+	~/software/project/pothole/data/venusHull.tmesh
+
+contour reconstruction:
+	~/software/project/contour/src/recon 
+	~/software/project/contour/src/dataset/hip_fu00/hip_fu00.bridgectr > foobar
+
+	or ThreeTowers/ThreeTowers.bridgectr
+
+flythrough with collision correction:
+
+	~/software/projectSmooth/3d/walkthrough/flythrough-ross ~/motion/walkthrough/data/csb5.macro.ug 
+	~/software/projectSmooth/3d/walkthrough/key/keyframe18short > foobar
+
+Amenta scattered data reconstruction
+
+tangential surface
+
+quaternion spline
+
+bitangent developable
+
+silhouette
+
+ruled surface
+
+cyclide
+
+surface intersection
+
+ru_demo [need to recompile]
+
+quadric/ringed surface (as union of circles)
+
+[quaternion spline (perhaps s3spline) although this is not a model, but a motion control mechanism]
+
+-----------------
+
+contour

@@ -1,0 +1,283 @@
+\documentclass[12pt]{article} 
+\usepackage{times}
+\usepackage[pdftex]{graphicx}
+\input{header-consecutive}
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{0in}
+\setlength{\textheight}{8.6in}
+\setlength{\textwidth}{6.875in}
+\setlength{\columnsep}{5mm}
+\markright{\hfill \today \hfill}
+\pagestyle{myheadings}
+
+% -----------------------------------------------------------------------------
+
+\title{Finding an empty point on \Sn{3}\\[5pt]{\small UAB Technical Report\\
+       February-March 2005}}
+\author{John K. Johnstone\thanks{Supported in part by the National Science Foundation
+        under grant CCR0203586.}\ and James Williams}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+An algorithm to find the emptiest point, or the largest empty circle, on $S^3$.
+That is, given a point sample on $S^3$, what is the point furthest from this point
+sample?  This is a classical problem in the plane, where optimal(?) 
+solutions have long been known.  It has also been studied on $S^2$ by Renka.
+The $S^3$ problem is particularly interesting, since it combines a search on
+a surface with a search in a 3-dimensional space.
+\end{abstract}
+
+\section{Related work}
+
+Review the literature on empty points in 2-space, 3-space, on a surface.
+Review the literature on Voronoi diagrams.
+Note that $S^3$ is a 3-manifold, complicating matters.
+An algorithm for points on $S^2$ is available from 
+Renka(?).  
+Explore 3D Voronoi diagrams for hints.
+
+\section{Bisectors}
+
+Discuss bisectors in Euclidean space and on the sphere. (See assignment I gave
+to Ross.)
+
+\section{Solutions}
+
+The optimal solution is to find
+the point in the middle of the largest empty region.
+{\bf Janardan claims to have a solution to this in his LM (layered manufacturing) work.}
+This is a generalization of the classical largest empty circle
+problem for points in a plane \cite{shamos85}, 
+and a similar technique using the Voronoi diagram may be used.\footnote{Renka \cite{renka}
+  has developed an algorithm for the Voronoi diagram of points on the lower-dimensional
+  $S^2$.}
+Let $f(p)$ be the distance of $p \in \Sn{3}$ from the nearest quaternion.
+(Note that distance must be measured on the surface.)
+The maximum of $f(p)$ 
+is attained at some vertex of the Voronoi diagram of the quaternions on \Sn{3},
+which is the desired optimal empty point.
+The Voronoi diagram must be built on the surface \Sn{3}, which 
+is itself an interesting problem.
+Luckily, only the Voronoi vertices need to be computed,
+not the entire Voronoi diagram.
+A Voronoi diagram is built out of point bisectors, and
+the bisector of two points on \Sn{3}\ is a great circle of \Sn{3}.
+A simplistic approach is to compute a superset of the Voronoi vertices
+by intersecting all bisectors of two quaternions, and then 
+choose the one furthest from all quaternions.
+	% O(n choose 2) = O(n^2) circles; 
+	% O(n^4) intersections
+	% O(n^5) distance calculations, but can abort early on many
+{\bf Implement this (good student project).}
+
+One approach is to compute the Voronoi diagram of the point set and choose
+one of the Voronoi vertices, but this requires quite a bit of work
+and no algorithm has presently been developed for Voronoi diagrams 
+of points on $S^3$.
+
+An heuristic approach can be used to find a point of an
+empty region, which is not guaranteed to find an empty point, 
+but usually finds a very good empty point.
+The idea is to move the data far from the pole by moving the best-fitting plane
+of the data as far as possible from the pole.
+In particular, the unit normal of the best-fitting hyperplane 
+is chosen as the empty point (FIGURE OF DATASET, ITS BESTFITTING PLANE, AND ITS NORMAL AS POINT ON SPHERE).
+Since the best-fitting plane is a good representative of most of the
+points, the points tend to move far away from the pole.
+Of course, outliers may be moved close to the pole.
+This method is efficient, since the best-fitting plane may be computed
+easily using principal component analysis:
+the normal of the best-fitting plane is the eigenvector associated with the
+smallest eigenvalue of the covariance matrix of the data \cite{ballard82}.
+% The normal of the best-fitting plane is equivalent to the vector 
+% such that the projection of the data points onto this vector has minimal variance,
+% i.e., the vector a that minimizes a^t \Sigma a.
+
+A simple randomized method is also worthy of mention.
+Since there are so many empty regions on \Sn{3} (see below),
+even a random choice of point on \Sn{3}\ is often effective.
+A point on \Sn{3}\ is chosen at random until a point in an empty region 
+is found.\footnote{To find a random point on \Sn{3}, find four random numbers 
+  in [-1,1] defining a 4-vector, and then normalize this vector.}
+   % A random number in [-1,1] can be generated in C/C++ using the 'rand' function
+   % as follows:
+   % (float) (rand() \% 32767) / 16383 - 1.0.
+	% That is, we could randomly choose a point on \Sn{3}, test if it is
+	% sufficiently far away from all data points, and if not then randomly choose
+	% another point, and so on, until a valid point in an empty region is found.
+	% The density of empty regions ensures the efficiency of this method.
+		% The results in Section~\ref{sec:results} support the effectiveness
+		% of a random choice of empty region \ref{}.
+	% How many attempts before success? on all6: 1,1,1,1,4,56
+This is a very simple method.
+Care must be taken with repeatability.
+If given the same data twice, we would like to choose the same point in an empty region
+to rotate to the pole.
+Fortunately, we can take advantage of the predictability 
+of pseudo-random number generators.
+If a pseudo-random number generator is used with the same seed
+(such as the C 'rand' function), exactly the same sequence of `random' points will be 
+generated each time it is called,
+leading to the same quaternion spline if the method is repeated.
+
+EVALUATE THESE THREE METHODS EXPERIMENTALLY.
+
+\subsection{Existence of an empty region}
+\label{sec:empty}
+
+The very existence of an empty region is a question worthy of examination.
+Is there an empty region whose center is at least $20^{\circ}$ from the
+nearest quaternion?
+It is theoretically possible that the data points are so densely packed
+on the sphere that there is no empty region.
+However, the requisite number of data points is huge.
+	% large in theory, and
+\Comment{
+The 'surface area' of \Sn{3} is $2\pi^2$ \cite{kendall61}
+while a region 30 degrees wide about a point has area $\pi/6$.
+	% A point covers a region 30 degrees wide about it, which has
+	% a surface area of $\pi/6$ on the sphere \Sn{3}\ of area $2\pi^2$
+	% \cite{kendall61}.
+Thus, theoretically only about $12\pi \approx 38$ points are needed to
+cover the sphere, leaving no empty region.\footnote{Actually, quite
+	a few more points are needed, since the discs about the 38 points
+	do not abut perfectly.}
+However, this requires a gap of at least 60 degrees between 
+consecutive quaternions, a very large change of orientation.
+The typical gap between consecutive quaternions for reasonable
+motion control is about 20 degrees.
+	% independent of the method used to construct the quaternion spline.
+}
+If there is a maximum gap of $20^{\circ}$ between a quaternion and its
+closest neighbour, 434,783 points\footnote{The surface area 
+	of \Sn{2}\ is $4\pi$, while the surface area
+	of a region on \Sn{2}\ 10 degrees wide centered about a point is 
+	$\int_{0}^{2\pi} \int_0^{\frac{\pi}{18}}  \sin \phi \ d\phi \ d\theta
+	= .0000289$.} % \cite{lang79}
+	% Lang, Calculus of several variables, p. 228
+	% p. 208 for parameterization, p. 224-5 for ||dx/dphi x dx/dtheta||
+	% integral of sin is -cos
+are needed to cover \Sn{2}, and even more to cover \Sn{3}.
+	% In the examples of Section~\ref{sec:results}, 
+	% the distance between quaternions is about --- \ref{}.
+Moreover, in order to leave no empty region, the quaternions
+must be spread across the entire sphere.
+It is far more common for the data to be restricted to a small region
+of the sphere.
+Thus, there will be a valid empty region on \Sn{3} in all but the most
+pathological cases (over 400,000 quaternions uniformly scattered across \Sn{3}).
+
+% We need a data point covering every empty region of the sphere.
+% Consider the number of points needed to cover just the 2-sphere \Sn{2}.
+% A point on \Sn{2}\ covers a region 30 degrees wide about it,
+% which has the following surface area:
+% \[
+%  \int_{0}^{2\pi} \int_0^{\frac{\pi}{6}}  \sin \phi \ d\phi \ d\theta
+%	= .841787
+% \]
+% using 10 degrees or \pi/18, area is only .0000289
+% which leads to 431,073 points.
+% Therefore, for data sets of size 15,
+% it is possible to find a point $p$ with no data points within 30
+% degrees of $p$.
+
+\Comment{
+% It is certainly more difficult to find an empty region for larger datasets, and
+% may even be impossible in theory (although in practice, a huge dataset is required
+% for $S^3$ to have no sufficiently large empty region).
+One approach is to compute the Voronoi diagram of the point set and choose
+one of the Voronoi vertices, but this requires quite a bit of work
+and no algorithm has presently been developed for Voronoi diagrams 
+of points on $S^3$.
+However, empty regions are easy to find among small point sets.
+}
+
+\subsection{A divide and conquer technique for empty point (Building the quaternion spline up from smaller pieces)}
+\label{sec:divide}
+
+A simpler technique for finding an empty point is available if the dataset is small,
+or if we can divide the dataset up into subsets and find an empty point for each subset
+rather than an empty point for the entire set.
+This approach is particularly important for very large datasets,
+since empty points may not even exist for huge datasets.
+(That is, the emptiest point is still too close to the data for our purposes.)
+
+{\bf Adjust the following writeup for the purity of finding empty points, not embedded within
+a quaternion spline paper.}
+A robust and simple method may be designed if we are willing to build many
+quaternion splines independently, each using only a subset of the quaternions.
+Notice that, if the dataset is partitioned into subsets $\{q_i\}_{i=0}^n$ such that
+the angle between $q_0$ and every quaternion $q_i$, $i \geq 1$ is less than $\theta$
+degrees (i.e., every quaternion lies in a disk of radius $\theta$ about $q_0$),
+then every quaternion $q_i$ of this dataset lies at a distance of at least 180 - $\theta$
+degrees from $q_0$'s antipodal point.
+This means that it is simple to find an empty point:
+$q_0$'s antipodal point is an empty point of a subset $\{q_i\}_{i=0}^n$ that varies
+by at most 160 (150?) degrees from $q_0$.\footnote{We measure distance
+  from $q_0$ so that the subset may be designed trivially.  Larger subsets
+  might be built if an arbitrary quaternion was used as the pivot.}
+This suggests a divide-and-conquer strategy in which the dataset is partitioned
+into small sets, and a quaternion spline is built for each small set.
+% assumes a maximal distance between consecutive samples
+The advantage of this divide and conquer approach is that it is guaranteed yet simple.
+The second and third approaches above are simple but not guaranteed.
+The first approach above is guaranteed but not simple.
+
+Here is the algorithm in a C-like syntax.
+This algorithm is called recursively, but the opening call is qSpline (n, q, NIL, NIL).
+
+IN LIGHT OF THE ALGORITHM IN THE NEXT SECTION (when in the quaternion spline paper), 
+THIS ALGORITHM CAN BE SHORTENED TO DEAL WITH SUBSET DEFINITION.
+
+\begin{verbatim}
+void qSpline (int n, Quaternion *q, float openingDeriv[NDERIV][3], qSpline &QS)
+{
+  i=1;
+  subset = {q_0};
+  nSubset = 1;
+  while (angle(q[0],q[i]) < 160)
+   {
+     subset = subset $\cup$ \{q_i\};
+     i++; nSubset++;
+   }
+  rotate subset and derivatives so that -q[0] is moved to the pole (1,0,0,0) (or whatever the pole of the inverse map is)
+  if (openingDeriv == NIL)
+       design a quaternion spline S through this rotated subset
+  else design a quaternion spline S through this rotated subset with these rotated opening derivatives
+  
+  rotate the quaternion spline back
+  measure the end derivatives of S
+  if (nSubset < n)
+   {
+    qSpline (n-nSubset, q + nSubset, end derivatives of S, QSnext)
+    QS = S spliced with QSnext
+   }
+  if (n - nSubset == 1)
+    split the last two subsets into equal sizes
+}
+\end{verbatim}
+
+We assume that object orientations (quaternions) are sampled frequently enough
+so that consecutive quaternions span less than 160 degrees
+(so subsets are of nontrivial size).
+Note that quaternions at 180 degrees represent the same orientation (Section~\ref{sec:quaternionTheory}),
+so no pair of consecutive quaternions need to be more than 90 degrees apart:
+if they are, the second quaternion may be replaced by its antipode.
+
+This method does require some additional theoretical development,
+since the quaternion splines for each subset will need to be spliced 
+together smoothly.
+In particular, we must consider the control of derivatives at the endpoints of a
+quaternion spline.
+
+\bibliographystyle{plain}
+\begin{thebibliography}{99}
+
+\bibitem{renka}
+Renka.
+
+\end{thebibliography}
+
+\end{document}

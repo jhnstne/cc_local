@@ -1,0 +1,71 @@
+\documentclass[12pt]{article}
+\usepackage{times}
+\usepackage[pdftex]{graphicx}
+
+\newcommand{\Comment}[1]{\relax}  % makes a "comment" (not expanded)
+\newcommand{\prf}{\noindent{{\bf Proof}:\ \ \ }}
+\newcommand{\QED}{\vrule height 1.4ex width 1.0ex depth -.1ex\ \vspace{.1in}} %square box
+\newcommand{\choice}[2]{\mbox{\footnotesize{$\left( \begin{array}{c} #1 \\ #2 \nd{array} \right)$}}}
+\newcommand{\tinychoice}[2]{\mbox{\tiny{$\left( \begin{array}{c} #1 \\ #2 \end{rray} \right)$}}}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{defn2}[theorem]{Definition}
+
+\title{Smooth silhouettes}
+\author{John K. Johnstone\thanks{Computer and Information Sciences,
+University of Alabama at Birmingham,
+University Station, Birmingham, AL 35294, jj@cis.uab.edu.
+This work was supported in part by the National Science Foundation
+under grant CCR-0203586.}}
+
+% \date{}
+
+\begin{document}
+\maketitle
+
+Examine the silhouette bibliography at Calgary.
+
+Silhouettes of smooth surfaces have received far less attention than silhouettes of polyhedral
+meshes in the recent NPR literature.
+Nevertheless, there are some advantages to a smooth silhouette algorithm:
+\begin{itemize}
+\item If the input surface is a smooth surface, there is no need to mesh it to find its silhouette.
+\item The accuracy of the silhouette is controlled by the silhouette algorithm, and is 
+      independent of the underlying surface/mesh,
+      rather than requiring a remeshing (which will be impossible if a finer remeshing is required,
+      unless the mesh is a subdivision surface that can be subdivided again)
+\item The smooth surface is a perfect representation of the shape, and the silhouette curve can
+      be computed in an adaptive fashion, using less points in areas of lower curvature.
+      Unless the mesh sampling is adaptive to curvature (which most meshes are not),
+      the silhouette will not be adaptive either.
+\end{itemize}
+The best example of a smooth silhouette algorithm is Elber and Cohen's.
+Just as there are many polyhedral silhouette algorithms, it is desirable to have more than one
+smooth silhouette algorithm to choose from.
+In this paper, we propose another smooth silhouette algorithm based on dual space.
+It can be viewed as a smooth analogue to the silhouette algorithm of Hertzmann and Zorin.
+
+The challenges that must be overcome by this algorithm are:
+\begin{itemize}
+\item efficiency (dealt with by precomputing tangential surface systems and possibly by octrees)
+\item 
+\end{itemize}
+
+We recently introduced a robust dual representation for the tangent space of a rational surface,
+in which the tangent space is encoded by a collection of surfaces.
+The dual relationship between the tangent space of a surface and a surface is classical,
+but a practical and robust treatment of this relationship has been lacking.
+A practical implementation of this dual relationship has been achieved for polyhedral meshes
+by Hertzmann and Zorin.
+Lifting this result to smooth surfaces presents some new challenges.
+
+Working with smooth surfaces, 
+This surface representation of the tangent space 
+sharing the tangent space across three clipped Bezier surfaces.
+This representation allows a tangent space to be treated as a surface
+The strength of this construct is its application to problems in visibility analysis, 
+most of which involve relationships between the tangent spaces of the objects in the scene.
+A classical example of this type of visibility problem is the silhouette.
+This construct was designed for the computation of visibility 
+
+\end{document}

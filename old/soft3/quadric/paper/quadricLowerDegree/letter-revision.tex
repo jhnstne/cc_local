@@ -1,0 +1,220 @@
+\documentstyle[11pt,letterhead]{bletter}
+\signature{John K. Johnstone\\jj@cs.jhu.edu}
+\begin{document}
+\begin{letter}
+{Dr. Jaroslaw R. Rossignac\\
+IBM Research, J2-C03\\
+P.O. Box 704\\
+Yorktown Heights, NY  10598
+}
+
+\noindent \opening{Dear Dr. Rossignac:}
+
+I am enclosing 5 copies of a revised version of the paper
+`On the Lower Degree Intersections of Two Natural Quadrics'
+by C.-K. Shene and myself (TOG 92-1),
+along with 5 copies of this letter explaining how we have
+handled the referees' requests.
+I apologize for the tardiness of this reply.
+The addition of material from Part II took extra time,
+and communication between the two authors was complicated
+when the first author moved to a different university
+without access to electronic mail for a long time.
+
+%*****************************************
+
+First to your comments.
+We have followed your request to condense the paper.
+The section `Tangency and Disjointness', 
+the first lemma of Section 4.2, %(not crucial to development)
+and the case of parallel diagonals in Section 4.3 (with steps 6 and 10
+of the ensuing Algorithm) 
+have all been removed, the latter because of a new observation.
+We have generally cleaned up the paper, such as making explicit 
+Definitions and annotating algorithms and figures, mostly in Section 4.
+The rest of the paper was carefully perused for possible condensation,
+but none was possible.
+Although the topic is similar to the conference paper
+`On the Planar Intersection of Natural Quadrics', 
+the presentation of this journal paper is very different,
+using clearer terminology, more rigorous proofs, and 
+substantially different methods of developing results
+that are both more rigorous and more clear.
+Moreover, all proofs are either crucial to
+understanding or necessary for future proofs.
+
+% Theorem 7.1 (Common Inscribed Sphere section)
+% although there exist other proofs, this is the only published proof
+% moreover, it is shorter than the others and very different from any others.
+
+%the proof of Lemma 4.1 is necessary for the development
+%	and is a much better proof than the one in the ACM paper.
+%	The proof of Lemma 4.2 is necessary for intuition and understanding,
+%	although it exists in the ACM paper.
+%	The proof of Lemma 4.4 is not even in the ACM paper.
+	
+% 	Condensations: Proof of Thm 5.1 has been sketched and a reference
+%	to the technical report substituted for most of the proof.
+
+% *******************************************************
+
+We have also followed your request to extract
+results from our proposed `Part II' of this paper, and put them into
+this paper.
+We have added a section, Section~8 on `Enumerating all Conic Intersection
+Types' from this material.
+We will not be publishing `Part II' of this paper.
+
+%*****************************************
+
+On to the referees' comments.
+To address the sole concern of Referee 1,
+we have added a footnote to the proof of Lemma 4.1 that
+explains why the Dandelin sphere is cut symmetrically.
+
+One of the two concerns of Referee 3 was that the algorithm detected 
+degenerate intersection, but did not compute it.
+In order to clarify that the algorithm does indeed compute the intersection,
+we have added the explicit characteristics of the computed conics
+into step 6 of the Algorithm at the end of Section 4.
+The other concern of Referee 3 was that the paper does not consistently
+use geometric arguments.
+The two theorems with algebraic proofs are Theorems~5.1 and 7.1.
+An algebraic proof was used in Theorem~7.1 because
+the intent of the proof was to show how the axial plane
+could shorten the proof, and a geometric proof would be much longer.
+Similarly, a geometric proof of Theorem~5.1 would be much longer.
+Also, the initial parts of this proof are geometric
+and the remaining algebraic part of the proof is needed for the proof 
+of Theorem~7.1.
+I hope this explains our occasional use of algebraic arguments.
+
+The concerns of Referee 2 require a longer reply.
+First, we have included a remark in the paper (Remark~2.1) addressing
+this referee's suggestions.
+I shall repeat these arguments and elaborate on them here.
+
+Referee 2 suggests the following algorithm to replace ours:
+\begin{enumerate}
+\item
+	\ [Reduce to a simple case] Map the cones to 
+	cylinders.\footnote{By a projective transformation 
+	that maps a plane through both cone vertices to the plane at
+	infinity, and thus both vertices to infinity.}
+	Then map the cylinders (simultaneously) to circular 
+	cylinders.\footnote{One way to map a single cylinder 
+	to a circular cylinder is to use
+	the Gram-Schmidt diagonalization technique on the matrix
+	representing the cylinder.}
+\item
+	If the cylinders' axes intersect at a finite point and the 
+	cylinders' radii are equal, the quadric intersection consists
+	of two conics.
+	If the cylinders' axes intersect at infinity, 
+	the quadric intersection consists
+	of four lines.
+	In all other cases, the intersection is not degenerate.
+%
+%	The quadric intersection of two cylinders can only be
+%	degenerate if the cylinders' axes intersect: if the axes
+%	intersect at infinity, the quadric intersection consists
+%	of four lines; if the axes intersect at a finite point,
+%	the quadric intersection is irreducible when the cylinders'
+%	radii are not the same, but it is two conics when the radii 
+%	are the same.
+\item
+	Transform the lines or conics
+	computed in the last step (if they exist)
+	back to the original coordinate system.
+\end{enumerate}
+
+\noindent The main problem with this method lies in the use of transformed 
+quadrics, rather than working directly with the original quadrics.
+In step (2), the axes of the transformed cylinders have to be extracted 
+and tested for intersection, and the radii must be extracted and tested 
+for equality.  
+However, the transformations of step (1) 
+distort information such as axes and radii,
+as discussed in Goldman and Wilson (references 8 and 44 of the bibliography).
+% For example, `[if] we initially select two cylinders of equal radii
+% [represented by matrices], \ldots
+% the more manipulations we perform on the cylinders, the more dissimilar
+% the radii will become because of accumulated floating point inaccuracies'
+% \cite[p. 22]{goldman:1983b}.
+Due to the effect of transformations, we are not sure whether a pair
+of non-intersecting axes are indeed intersecting in the original
+coordinate system, or whether two radii are truly equal.
+This is a particularly important problem in the context of the detection
+of degenerate intersection, because degenerate intersection is inherently
+a fragile condition: a small perturbation of the quadrics will change a
+degenerate intersection into an irreducible intersection.
+We wish to work with the purest data, which is the original data.
+
+Other problems exist as well.
+
+\begin{itemize}
+\item
+	Step 1 is expensive.  
+	A Gram-Schmidt diagonalization method can be used to transform
+	one cylinder to a circular cylinder, but we need to simultaneously
+	transform {\em two} cylinders to circular cylinders, using the 
+	same transform.  We are not clear how this would be done.
+	However, assuming that it can be done (as it probably can),
+	the cost will necessarily be considerable.
+\item
+	The inverse transformation of step (3) 
+	may distort the type of the intersection
+	conic, because of numerical inaccuracy (see Wilson).
+\item
+The transformations require complex arithmetic.
+(For example, if one cone's vertex is contained in the other cone's
+ 	interior, any plane through both vertices intersects the cone
+ 	in two intersecting lines, and if this plane is mapped to the plane
+ 	at infinity, then the cone becomes a {\em hyperbolic} cylinder.
+ 	Complex arithmetic is required to transform this hyperbolic cylinder
+ 	to a circular one.)
+% i.e., to map $x^2+y^2$ to $x^2-y^2$
+ Complex arithmetic is not only more expensive than real arithmetic,
+ but one must check if the lines and conics detected in step (2) 
+ are still real after the inverse transformation of step (3).
+\item
+ The above method forces the use of an algebraic
+ representation of the quadrics rather than a geometric representation.
+\end{itemize}
+
+In conclusion, referee 2's suggestion is mathematically a good
+procedure, but it has problems with robustness and performance.
+In general, a mathematically correct procedure is not a good 
+computational algorithm.
+Other algorithms for general intersection exist in the literature
+that transform any pair of
+quadric surfaces to some normal forms, compute the intersection and
+then transform the curve back (Ocken, Schwartz and Sharir, or Bromwich), 
+but we do not use these procedures
+for degenerate intersection or natural quadrics because their computation
+cost is higher and their robustness is worse than algorithms
+such as the one presented in our paper.
+% It is well-known that we can transform any pair of
+% quadric surfaces to some normal forms, compute the intersection and
+% then transform the curve back (see T. J. I'A Bromwich,
+% {\em Quadric Forms and Their Classification by Means of Invariant
+% Factors}, Cambridge University Press,
+% or S. Ocken, J. T. Schwartz and M. Sharir,
+% {\em Precise Implementation of CAD Primitives Using Rational
+% Parameterizations of Standard Surfaces}, in {\em Planning,
+% Geometry, and Complexity of Robot Motion}, edited by Jacob T.
+% Schwartz, Micha Sharir and John Hopcroft, Ablex Publishing Co.,
+% 1987, pp. 245--266 for a modern formulation.)
+% However, we do not use these ``simple'' procedures for natural quadrics
+% and degenerate intersection
+% because their computation cost is higher and robustness is worse
+% than specially designed algorithms such as ours.
+
+%*****************************************
+
+Please do not hesitate to call me at (410) 516-5560 if you have any questions.
+
+\closing{Sincerely,}
+\end{letter}
+\end{document}
+

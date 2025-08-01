@@ -1,0 +1,553 @@
+\documentstyle[12pt]{article} 
+\input{macros}
+\SingleSpace
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\topmargin}{0pt}
+\setlength{\textheight}{9in}
+\setlength{\textwidth}{6.5in}
+\setlength{\parindent}{0in}
+\setlength{\parskip}{.1in}
+
+\newtheorem{rmk}{Remark}[section]
+\newtheorem{dfn}{Definition}[section]
+\newtheorem{prop}{Property}[section]
+\newtheorem{propn}{Proposition}[section]
+
+% -------------------------------------------------------------
+
+\begin{document}
+
+\section{Plane curve definitions}
+
+\begin{dfn}
+\label{def-plane}
+[Original definition \cite{FS90}] \\
+A {\bf plane polynomial} curve $c(t) = (x(t),y(t))$
+is a {\em Pythagorean-hodograph curve}
+if the components of its hodograph $c'(t) = (x'(t),y'(t))$
+are members of a Pythagorean triple $(x'(t),y'(t),\sigma(t))$,
+{\em i.e.}, $x'^2(t) + y'^2(t) = \sigma^2(t)$ for some
+polynomial $\sigma(t) \in R[t]$.
+\end{dfn}
+
+The following two equivalent definitions of a 
+Pythagorean-hodograph curve are more suggestive for our 
+applications.
+
+\begin{dfn}
+\label{def:alt}
+[Alternate definitions]
+\begin{description}
+\item[(a)]
+A polynomial curve $c(t)$
+is a {\em Pythagorean-hodograph curve} if
+the length $\sigma(t) = \| c'(t) \|$ of its tangent
+is a polynomial in $t$.
+
+\item[(b)]
+A polynomial curve $c(t)$
+is a {\em Pythagorean-hodograph curve} if
+the distance $\| c'(t) \|$ of its hodograph from the origin
+is a polynomial in $t$.
+\end{description}
+\end{dfn}
+
+\begin{dfn}
+Since the term `Pythagorean-hodograph curve' is unwieldy,
+and since we will appeal more to the polynomial tangent-length
+and polynomial-distance properties of these curves from
+Definition~\ref{def:alt}
+than to the Pythagorean triple property of Definition~\ref{def-plane},
+we will use the term {\bf Farouki curve} for the curve
+of Definitions~\ref{def-plane} and \ref{def:alt}.
+This also has the attraction of consistency with other terminology
+within CAGD, such as Bezier curves, Coons patches, and Hermite
+interpolants.
+\end{dfn}
+
+\section{Applications}
+
+Definition~\ref{def:alt}(a) immediately suggests an attraction of these curves:
+they can be easily measured.
+
+\begin{propn}
+\label{arclength}
+Consider the arc length $L(t)$ of a segment $\{c(t):t\in [0,t]\}$ of a Farouki 
+curve $c(t)$.
+Since $\| c'(t) \|$ is the integrand of the arc length formula:
+\[ \label{eq1}
+L(t) = \int_0^t \| c'(t) \| dt  = \int_0^t \mbox{length of tangent} 
+\]
+and $\| c'(t) \|$ is a polynomial in $t$ for Farouki curves,
+the arc length $L(t)$ of Farouki curves is also a polynomial in $t$.
+Thus, it can be easily computed.
+We call this polynomial arc-length property 
+the {\em mensuration property} of Farouki curves.
+\end{propn}
+
+For general polynomial curves, arc length must be 
+computed numerically using quadrature algorithms (e.g., Simpson's
+algorithm), which is less efficient and less robust.
+
+%\begin{example}
+%\end{example}
+
+\begin{rmk}
+\label{mens-destroy}
+The mensuration property of Farouki curves (Proposition~\ref{arclength})
+is lost even if the restriction $\| c'(t) \| \in R[t]$ 
+($\| c'(t) \|$ is a polynomial) is relaxed to 
+$\| c'(t) \| \in R(t)$ ($\| c'(t) \|$ is a rational
+polynomial):
+the integral of a rational polynomial
+is not an (integral or rational) polynomial 
+({\em e.g.}, $\int \frac{1}{t} = ln |x|$).
+\end{rmk}
+
+We shall be interested in exploring Farouki curves
+because of another advantageous property, related to sweeping.
+
+\begin{rmk}
+Suppose that we sweep a plane object along a curve $c(t)$,
+and wish to orient the plane of the object always perpendicular
+to the tangent $c'(t)$ of the curve (for example, in our sweeping of a
+circle to mimic the sweeping of a sphere).
+The parameterization of the resulting swept surface is
+\[ X(s,t) = \mbox{Trans}(c(t)) * \mbox{Rot}(z \rightarrow c'(t)) * \mbox{obj}(s)
+\]
+where Trans$(c(t))$ is the matrix for translation by $c(t)$,
+Rot$(z \rightarrow c'(t))$ is the matrix for rotation of the $z$-axis
+into $c'(t)$, and obj$(s)$ is a parameterization of the object 
+in canonical position (centered at the origin in the $xy$-plane).
+We want this parameterization to be rational, so that it is tractable
+and can be represented in Bezier form.
+If the plane object and $c(t)$ are both rational, then 
+$\mbox{Trans}(c(t))$ and obj$(s)$ will be rational.
+The challenge lies in making the rotation matrix rational.
+
+Since the $z$-axis is rotated into the third column of the rotation matrix,
+and the columns of the rotation matrix are orthonormal,
+\begin{equation}
+\label{eq:rot}
+\mbox{Rot}(z \rightarrow c'(t)) = 
+\left( \begin{array}{ccc} a & \frac{a \times c'(t)}{\|a \times c'(t)\|}
+			    & \frac{c'(t)}{\|c'(t)\|} \end{array} \right)
+\end{equation}
+where $a$ is a unit vector orthogonal to $c'(t)$ (say 
+$\frac{c'(t) \times A}{\|c'(t) \times A\|}$ for some vector A).
+Note: need to choose A appropriately (e.g., to make $x$-axis of object 
+plane's coordinate system sweep smoothly through space).
+
+(Note: we must also be concerned about the twist of the object's plane
+about its normal $c'(t)$, especially for nonsymmetric objects $obj(s)$.
+THIS IS CONTROLLED BY THE CHOICE OF $A$ ABOVE.
+It might seem that we could ignore this twist for circles, since
+they are symmetric about the origin, but even here the isoparametric
+lines will be strange unless we solve this problem, which is undesirable
+and inelegant.  Investigate Frenet frames (to control the twist) to
+solve this problem.)
+
+If $c(t)$ is a Farouki curve,
+then both $c'(t)$ and $\| c'(t) \|$ will be polynomial,
+and the rotation matrix will be rational.
+IF $\|c'(t)\|$ IS POLYNOMIAL, WE MUST SHOW THAT THIS GUARANTEES
+THAT $\|c'(t) \times A\|$ and $\|c'(t) \times a\|$ ARE ALSO POLYNOMIAL
+OR RATIONAL.  THIS IS IMMEDIATELY CLEAR.
+
+More generally, if we sweep an arbitrary object along a curve $c(t)$
+such that the orientation of the object is controlled by the
+Frenet frame of the curve ({\em i.e.}, the local coordinate system 
+of the object at position $c(t_0)$ is equivalent to the Frenet frame 
+coordinate system of $c(t)$ at $c(t_0)$, defined by tangent, normal,
+and binormal),
+then I hypothesize that the rotation of the local coordinate system 
+into its position
+at any point $c(t_0)$ of the sweep will involve rational polynomials.
+
+The property that sweeping a rational curve along a Farouki curve
+(with its orientation controlled by the Farouki curve)
+yields a rational swept surface will be called the {\em sweeping
+property} of Farouki curves.
+\end{rmk}
+
+\clearpage
+
+\begin{rmk}
+Farouki and Sakkalis \cite{FS90} are also motivated by an offset property:
+the offset of a plane polynomial Pythagorean-hodograph curve is
+always rational, unlike general plane polynomial curves.
+We will not pursue this offset property further.
+\end{rmk}
+
+\begin{rmk}
+\label{stillrat}
+Note that the rotation matrix (\ref{eq:rot}) is still rational if both
+$c'(t)$ and $\| c'(t) \|$ are rational.
+Therefore, as far as the sweeping property is concerned,
+it is possible to relax the definition of Farouki curves 
+(to rational $\| c'(t) \|$).
+We will explore this extension below in the context of rational curves.
+It is meaningless to explore it now for polynomial curves,
+since `$c(t)$ is polynomial' implies $\| c'(t) \|^2$ is also polynomial,
+so $\| c'(t) \|$ cannot be rational.
+\end{rmk}
+
+We wish to sweep objects along space curves, not plane curves,
+and so we want to define space Farouki curves.
+Our definitions of Farouki curves extend directly to space curves.
+The only change is from `Pythagorean triple' to `Pythagorean quadruple'
+in Definition~\ref{def-plane}.
+
+% ------------------------------------------
+
+\begin{dfn}
+\label{def-space}
+A {\bf space polynomial} curve $c(t) = (x(t),y(t),z(t))$
+is a {\em Farouki curve} if the following three equivalent conditions hold:
+\begin{description}
+\item[(a)]
+	the components of its hodograph $c'(t) = (x'(t),y'(t),z'(t))$
+	are members of a Pythagorean quadruple $(x'(t),y'(t),z'(t),\sigma(t))$,
+	{\em i.e.}, $x'^2(t) + y'^2(t) + z'^2(t) = \sigma^2(t)$ for some
+	polynomial $\sigma(t) \in R[t]$.
+\item[(b)]
+	the length $\sigma(t) = \| c'(t) \|$ of its tangent
+	is a polynomial in $t$.
+\item[(c)]
+	the distance $\| c'(t) \|$ of its hodograph from the origin
+	is a polynomial in $t$.
+\end{description}
+\end{dfn}
+
+The mensuration and sweeping properties extend straightforwardly to
+space curves.
+
+\begin{rmk}
+A spherical curve (a curve that lies on a fixed sphere)
+{\em that is also polynomial}
+is a special case of a hodograph with the properties of 
+Definition~\ref{def-space}(c).
+Thus, the integral of such a curve is a space polynomial Farouki curve.
+\end{rmk}
+
+The more interesting extension is to rational curves.
+We want to define the rational version of the Farouki curve so that it
+preserves the mensuration and sweeping properties.
+
+\begin{dfn}
+A {\bf plane rational} curve $c(t) = (x(t),y(t),w(t))$
+is a Farouki curve if the following three equivalent conditions hold:
+\begin{description}
+\item[(a)]
+	the first two components of its hodograph (in projective space)\\
+	$c'(t) = (x'w - xw', y'w - yw', w^2)$
+	are members of a Pythagorean triple \\
+	$(x'w - xw', y'w - yw', w^2 \sigma)$
+	for some polynomial $\sigma(t) \in R[t]$.
+\item[(b)]
+	the length $\| c'(t) \|$ of its tangent is a polynomial in $t$.
+\item[(c)]
+	the distance $\| c'(t) \|$ of its hodograph from the origin
+	is a polynomial in $t$.
+\end{description}
+\end{dfn}
+\Heading{Proof:}
+$\| c'(t) \| = \frac{\sqrt{(x'w - xw')^2 + (y'w - yw')^2}}{w^2}
+	     = \frac{\sqrt{(w^2 \sigma)^2}}{w^2} = \sigma$.
+\QED
+
+Note that the third member of the Pythagorean triple must contain
+a $w^2$ factor.
+This preserves the polynomial property of $\|c'(t)\|$,
+and thus the mensuration and sweeping properties.
+
+\begin{rmk}
+We can guarantee that the third member of the Pythagorean triple 
+contains a $w^2$ factor simply by assuring that, in Kubota's scheme,
+either ${\cal W}(t)$ contains a $w^2$ factor or both ${\cal U}(t)$
+and ${\cal V}(t)$ contain a $w$ factor.
+% $\mu,\nu,\omega$.
+\end{rmk}
+
+There is another possible extension of the Farouki curve definition 
+to rational curves, which we call an r-Farouki curve to distinguish
+it and highlight the {\bf r}ational nature of the tangent length
+$\| c'(t) \|$.
+
+\begin{dfn}
+\label{r-plane-rat}
+A {\bf plane rational} curve $c(t) = (x(t),y(t),w(t))$
+is an {\bf r-Farouki} curve if the following three equivalent conditions hold:
+\begin{description}
+\item[(a)]
+	the first two components of its hodograph (in projective space)\\
+	$c'(t) = (x'w - xw', y'w - yw', w^2)$
+	are members of a Pythagorean triple \\
+	$(x'w - xw', y'w - yw', \sigma)$
+	for some polynomial $\sigma(t) \in R[t]$.
+\item[(b)]
+	the length $\| c'(t) \|$ of its tangent is a rational polynomial 
+	$\frac{\sigma(t)}{w^2(t)}$ for some polynomial $\sigma(t) \in R[t]$.
+\item[(c)]
+	the distance $\| c'(t) \|$ of its hodograph from the origin
+	is a rational polynomial $\frac{\sigma(t)}{w^2(t)}$.
+\end{description}
+\end{dfn}
+
+This is the definition for rational curves adopted by Farouki and Sakkalis.
+It is more natural for property (a) but loses the polynomial property
+for (b) and (c).
+Therefore, these r-Farouki curves lose the mensuration property (see 
+Remark~\ref{mens-destroy} above).
+However, the sweeping property is preserved: recall that the rotation matrix
+(\ref{eq:rot}) remains rational if both $c'(t)$ and $\|c'(t)\|$ are rational
+(Remark~\ref{stillrat}).
+
+It is tempting to extend the definition still further,
+and allow the tangent length $\| c'(t) \|$ to be an arbitrary rational
+polynomial $\frac{\sigma_1(t)}{\sigma_2(t)}$.
+After all, the sweeping property is preserved as long as $\| c'(t) \|$
+is rational.
+However, this is an equivalent class of curves, as shown by 
+the following remark.
+
+\begin{rmk}
+If $\| c'(t) \|$ is rational,
+then its denominator {\em must} be the square of the rational component
+of the curve $c(t)$:
+	$\| c'(t) \| = \frac{\sigma_1(t)}{\sigma_2(t)}$
+	$\Rightarrow \| c'(t) \|^2 = \frac{\sigma_1^2(t)}{\sigma_2^2(t)}$
+	$\Rightarrow (\frac{x(t)}{w(t)})'^2 + (\frac{y(t)}{w(t)})'^2 
+				   = \frac{\sigma_1^2(t)}{\sigma_2^2(t)}$
+	$\Rightarrow \frac{(x'w - xw')^2 + (y'w - yw')^2}{w^4}
+				   = \frac{\sigma_1^2(t)}{\sigma_2^2(t)}$
+	$\Rightarrow \sigma_2 = w^2$,
+	since $x$, $y$, $w$, $\sigma_1$ and $\sigma_2$ are all polynomial.
+\end{rmk}
+
+Thus, the following definition of r-Farouki curve is equivalent
+to Definition~\ref{r-plane-rat} (and perhaps more intuitively clean).
+
+\begin{dfn}
+\label{r-plane-rat-alt}
+[Alternate definition] \\
+A plane rational curve $c(t) = (x(t),y(t),w(t))$
+is an {\em r-Farouki} curve if the following (equivalent) conditions hold:
+\begin{description}
+\item[(a)]
+	the first two components of its hodograph (in projective space)\\
+	$c'(t) = (x'w - xw', y'w - yw', w^2)$
+	are members of a Pythagorean triple \\
+	$(x'w - xw', y'w - yw', \sigma)$
+	for some polynomial $\sigma(t) \in R[t]$.
+\item[(b)]
+	the length $\| c'(t) \|$ of its tangent is a rational polynomial 
+	$\frac{\sigma_1(t)}{\sigma_2(t)}$ for some polynomials
+	$\sigma_1(t),\sigma_2(t) \in R[t]$.
+\item[(c)]
+	the distance $\| c'(t) \|$ of its hodograph from the origin
+	is a rational polynomial $\frac{\sigma_1(t)}{\sigma_2(t)}$. 
+\end{description}
+\end{dfn}
+
+The extension of these definitions to space curves is trivial.
+
+\begin{dfn}
+A {\bf space rational} curve $c(t) = (x(t),y(t),z(t),w(t))$
+is a Farouki curve if the following three equivalent conditions hold:
+\begin{description}
+\item[(a)]
+	the first three components of its hodograph (in projective space)\\
+	$c'(t) = (x'w - xw', y'w - yw', z'w - zw', w^2)$
+	are members of a Pythagorean quadruple \\
+	$(x'w - xw', y'w - yw', z'w - zw', w^2 \sigma)$
+	for some polynomial $\sigma(t) \in R[t]$.
+\item[(b)]
+	the length $\| c'(t) \|$ of its tangent is a polynomial in $t$.
+\item[(c)]
+	the distance $\| c'(t) \|$ of its hodograph from the origin
+	is a polynomial in $t$.
+\end{description}
+\end{dfn}
+
+\begin{dfn}
+A {\bf space rational} curve $c(t) = (x(t),y(t),z(t),w(t))$
+is an {\bf r-Farouki} curve if the following three equivalent conditions hold:
+\begin{description}
+\item[(a)]
+	the first three components of its hodograph (in projective space)\\
+	$c'(t) = (x'w - xw', y'w - yw', z'w - zw', w^2)$
+	are members of a Pythagorean triple \\
+	$(x'w - xw', y'w - yw', z'w - zw', \sigma)$
+	for some polynomial $\sigma(t) \in R[t]$.
+\item[(b)]
+	the length $\| c'(t) \|$ of its tangent 
+	(or the distance $\| c'(t) \|$ of its hodograph from the origin)
+	is a rational polynomial 
+	$\frac{\sigma(t)}{w^2(t)}$ for some polynomial $\sigma(t) \in R[t]$.
+\item[(c)]
+	the length $\| c'(t) \|$ of its tangent 
+	(or the distance $\| c'(t) \|$ of its hodograph from the origin)
+	is a rational polynomial 
+	$\frac{\sigma_1(t)}{\sigma_2(t)}$ for some polynomials 
+	$\sigma_1(t),\sigma_2(t) \in R[t]$.
+\end{description}
+\end{dfn}
+
+\clearpage
+
+\section{Kubota results}
+
+The following two results on Pythagorean triples and quadruples
+by Kubota \cite{} add useful structure to our Farouki curves.
+
+\begin{lemma}
+\label{kubota1}
+The components of the hodograph of a plane polynomial Farouki
+curve must be in the following form:
+\begin{eqnarray*}
+	x'(t) & = & {\cal W}(t) [{\cal U}^2(t) - {\cal V}^2(t)] \\
+	y'(t) & = & 2{\cal W}(t){\cal U}(t){\cal V}(t)
+\end{eqnarray*}
+where ${\cal U}(t), {\cal V}(t), {\cal W}(t) \in R[t]$.
+The resulting third member
+of the Pythagorean triple, the tangent length $\|c'(t)\|$, is 
+\[
+	\| c'(t) \| = {\cal W}(t) [{\cal U}^2(t) + {\cal V}^2(t)]
+\]
+\end{lemma}
+
+Without loss of generality ({\em i.e.}, by removing Farouki curves
+that are points and lines),
+we can assume ${\cal U}(t),{\cal V}(t),{\cal W}(t) \not\equiv 0$,
+either ${\cal U}(t)$ or ${\cal V}(t)$ is not a constant, and
+GCD({\cal U}(t),{\cal V}(t))=1 \cite{FS90}.
+
+\begin{lemma}
+The components of the hodograph of a space polynomial Farouki
+curve must be in the following form:
+\begin{eqnarray*}
+	x'(t) & = &   \\
+	y'(t) & = &   \\
+	z'(t) & = &   \\
+\end{eqnarray*}
+\end{lemma}
+
+
+\section{Future}
+
+\begin{rmk}
+An expression similar to (\ref{eq1}) 
+appears in the formula for the surface area A
+of a surface patch $\{X(s,t):s\in [a,b], t \in [c,d] \}$:
+\[ A = \int_a^b \int_c^d \| \frac{dX}{ds} \times \frac{dX}{dt} \| ds dt 
+     = \int \int \mbox{length of normal} \]
+Thus, surfaces $X(s,t)$
+whose area is a polynomial in $s$ and $t$ 
+might be developed in an analogous fashion to PH-curves.
+\end{rmk}
+
+\begin{rmk}
+$\ X'(t) \|$ also appears in the curvature formula:
+$\mbox{curvature} = \kappa = \frac{\| X' \times X'' \|}{\| X' \|^3}$
+	% Kreyszig, p. 35
+Moreover, $\| X' \times X'' \| = |x'y'' - x''y'|$,
+which is also polynomial.
+Thus, it would appear that the curvature of PH-curves is also
+easily computable.
+\end{rmk}
+
+
+\section{Appendix: Properties of plane polynomial Farouki curves}
+
+This appendix lists a number of properties of plane 
+polynomial Farouki curves, especially cubics.
+All of these properties are from Farouki and Sakkalis \cite{FS90}.
+
+\begin{prop} 
+\label{prop:f1}
+Plane polynomial Farouki curves of degree $n$ have at most
+$n+3$ degrees of freedom: {\em $n-2$ affect the shape
+of the curve} and 5 only affect the curve through rigid motion
+or reparameterization (which leave the shape unchanged).
+In contrast, general plane polynomial curves of degree $n$
+have at most $2n+2$ degrees of freedom, {\em $2n-3$ of which 
+affect the shape}.
+\end{prop}
+
+\begin{prop}
+\label{prop:f2}
+Real irregular points of plane polynomial Farouki curves 
+are found exactly at the real roots of $w(t)$ 
+(where $w(t)$ is as in Lemma~\ref{kubota1}).
+(An irregular point is a point c(t) where $x'(t) = y'(t) = 0$, such as at cusps.)
+Therefore, a plane polynomial Farouki curve will be guaranteed
+not to have any real irregular points if we choose $w(t) = 1$.
+\end{prop}
+
+\subsection{Cubics}
+
+\begin{prop}
+\label{prop:f3}
+A plane Bezier cubic curve is Farouki if and only if its
+control polygon satisfies:
+\begin{eqnarray*}
+L_2 & = & \sqrt{L_1 L_3} \\
+\theta_1 & = & \theta_2
+\end{eqnarray*}
+where $L_1$, $L_2$, $L_3$ are the lengths of the edges of the control polygon
+and $\theta_i = \angle (L_i,L_{i+1})$.
+\end{prop}
+
+\begin{prop}
+\label{prop:f4}
+Plane polynomial Farouki curves have no real inflection points.
+\end{prop}
+
+\begin{prop}
+\label{prop:f5}
+Every plane polynomial cubic Farouki curve has a crunode (a self-intersection),
+and the two parameter values associated with this crunode can be calculated
+exactly in terms of the polynomials $u(t)$ and $v(t)$ of Lemma~\ref{kubota1}
+(and thus it is easy to avoid the crunode on a plane cubic Farouki curve 
+by eliminating one of these values from the parameter range).
+\end{prop}
+
+\begin{prop}
+\label{prop:f6}
+Plane cubic Farouki curves are equivalent to Tschirnhausen's (or l'Hopital's)
+cubic.
+This cubic is also called the trisectrix of Catalan.
+\end{prop}
+
+\clearpage
+
+\subsection{Quintics}
+
+\begin{prop} 
+(FS90)
+\\
+\begin{itemize}
+\item
+``Pythagorean-hodograph cubics cannot interpolate with curvature continuity
+discrete data whose `shape' implies inflections.''
+\item
+``The non-cuspidal quintics are the lowest-order Pythagorean-hodograph
+curves that exhibit real inflections.''
+\end{itemize}
+\end{prop}
+
+\subsection{Hermite interpolation by Pythagorean-hodograph quintics}
+
+Farouki gives formulae for the control points of a PH-quintic
+that interpolates two points and two tangents:
+the collection (24), (26) and (28) in Section 4 of \cite{PHpractical}.
+Given the two points and tangents, there are four choices for the
+quintic, one clearly superior to the others.
+
+\bibliographystyle{alpha}
+\bibliography{/users/cogito/jj/bib/modeling}
+
+\end{document}

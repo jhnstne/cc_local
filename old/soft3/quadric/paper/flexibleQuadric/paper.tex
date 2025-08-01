@@ -1,0 +1,683 @@
+\documentstyle[12pt]{article} 
+
+\newif\ifFull
+\Fulltrue
+
+\makeatletter
+\def\@maketitle{\newpage
+ \null
+ %\vskip 2em                   % Vertical space above title.
+ \begin{center}
+       {\Large\bf \@title \par}  % Title set in \Large size. 
+       \vskip .5em               % Vertical space after title.
+       {\lineskip .5em           %  each author set in a tabular environment
+	\begin{tabular}[t]{c}\@author 
+	\end{tabular}\par}                   
+  \end{center}
+ \par
+ \vskip .5em}                 % Vertical space after author
+\makeatother
+
+% non-indented paragraphs with xtra space
+% set the indentation to 0, and increase the paragraph spacing:
+\parskip=8pt plus1pt
+\parindent=0pt
+% default values are 
+% \parskip=0pt plus1pt
+% \parindent=20pt
+% for plain tex.
+
+\newenvironment{summary}[1]{\if@twocolumn
+\section*{#1} \else
+\begin{center}
+{\bf #1\vspace{-.5em}\vspace{0pt}} 
+\end{center}
+\quotation
+\fi}{\if@twocolumn\else\endquotation\fi}
+
+% \renewenvironment{abstract}{\begin{summary}{Abstract}}{\end{summary}}
+
+\newcommand{\SingleSpace}{\edef\baselinestretch{0.9}\Large\normalsize}
+\newcommand{\DoubleSpace}{\edef\baselinestretch{1.4}\Large\normalsize}
+\newcommand{\Comment}[1]{\relax}  % makes a "comment" (not expanded)
+\newcommand{\Heading}[1]{\par\noindent{\bf#1}\nobreak}
+\newcommand{\Tail}[1]{\nobreak\par\noindent{\bf#1}}
+\newcommand{\QED}{\vrule height 1.4ex width 1.0ex depth -.1ex\ } % square box
+\newcommand{\arc}[1]{\mbox{$\stackrel{\frown}{#1}$}}
+\newcommand{\lyne}[1]{\mbox{$\stackrel{\leftrightarrow}{#1}$}}
+\newcommand{\ray}[1]{\mbox{$\vec{#1}$}}
+\newcommand{\seg}[1]{\mbox{$\overline{#1}$}}
+\newcommand{\tab}{\hspace*{.2in}}
+\newcommand{\se}{\mbox{$_{\epsilon}$}}  % subscript epsilon
+\newcommand{\ie}{\mbox{i.e.}}
+\newcommand{\eg}{\mbox{e.\ g.\ }}
+\newcommand{\figg}[3]{\begin{figure}[htbp]\vspace{#3}\caption{#2}\label{#1}\end{figure}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\prf}{\noindent{{\bf Proof} :\ }}
+
+\newtheorem{rmk}{Remark}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{conjecture}{Conjecture}[section]
+\newtheorem{claim}{Claim}[section]
+\newtheorem{notation}{Notation}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[section]
+\newtheorem{defn2}{Definition}
+
+\ifFull
+\SingleSpace
+\else
+\DoubleSpace
+\fi
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+\setlength{\headsep}{0in}
+\setlength{\topmargin}{0pt}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+
+% \input{clock}
+% \setclock
+
+\title{Quadric control nets}
+\author{John K. Johnstone}
+%\date{Version: \today \clock}
+
+\begin{document}
+
+% HEADER ON EACH PAGE
+\markright{\today \hfill}
+%	% 	   \fbox{{\bf Johnstone, \today}} \hrulefill}
+\setlength{\headsep}{.5in}
+\pagestyle{myheadings}
+
+\maketitle
+
+% \title
+% `Flexible models through constrained control nets' OR
+% `Placing constraints on control nets to achieve tractable surfaces that also
+% incorporate flexibility'.
+
+\begin{abstract}
+Goal: define the constraints on a control net for it to define a patch of a
+	quadric surface (or some other well understood and tractable surface
+	like the cyclide or torus or ruled).
+	Then the surface will be guaranteed to be locally (i.e., within
+	each of its patches) tractable (e.g., for analysis operations such as
+	intersection).
+	It will also be possible to relax an arbitrary control net onto
+	an approximating quadric, or series of quadric patches, by relaxing
+	onto a nearby grid that satisfies the constraints for a quadric surface.
+	Finally, it will be possible to make flexible surfaces that maintain
+	some rigidity (and possibly later some volume preserving properties)
+	by moving one or a few of the points of the control net and 
+	letting the rest of the control net readjust to maintain the quadric
+	constraints.
+
+{\bf Series of papers from this topic}
+
+Part 1: `What is a quadric?  An answer from a CAGD point of view'
+	or `A Geometric Characterization of Quadric Control Nets'
+	(constraints that are necessary and hopefully sufficient for a quadric)
+
+Part 2: `Relaxing an arbitrary control net onto a quadric'
+
+Part 3: `Flexible surfaces: relaxing a quadric control net to a nearby quadric
+	net after movement of a point'
+
+Part 4: `Translation to and from a quadric control net and its implicit/parametric
+	equation'
+	(given the implicit or parametric equation of a quadric, we would like
+	to be able to efficiently determine its control net; and vice versa,
+	given a quadric control net, we would like to determine
+	its equation for analysis)
+
+Part 5: `Joining constrained patches of the same and different type'
+	(how to connect up a quadric patch with another quadric patch, or
+	with a constrained patch of another type)
+
+	We would also want the underlying constraints to be flexible enough
+	to change over the surface, so that on one patch the surface would relax
+	to a quadric while on a neighbouring patch it relaxes to a cyclide.
+	This latter property is akin to uniformly shaped beta-splines (same bias
+	and tension over entire spline) and continuously shaped beta-splines
+	(varying bias and tension over spline), except that the relationships
+	would be constant over one patch, then a different constant over the
+	next patch, possibly with a `blending' patch in between to smoothly
+	join one set of relationships to the next set of relationships.
+\end{abstract}
+
+\clearpage
+
+\section{Introduction}
+
+A quadric surface can be represented in many different 
+ways. Three popular representations are by an implicit surface, 
+by a parametric surface, and by a control net. 
+As implicit surfaces, quadrics have a complete algebraic characterization:
+they are the surfaces defined by the zero set of a trivariate polynomial 
+of degree 2; that is, $\{Z(f) | f = f(x,y,z) = ax^2 + \ldots + iz + j = 0\}$.
+As parametric surfaces, they also have a complete algebraic characterization:
+they are the surfaces with biquadratic parameterizations with two base points
+(assuming a proper parameterization)
+\cite{Seder90a,Seder90b,Seder85}.
+[There is a difficulty in identifying surfaces by parameterizations, because
+of reparameterization.]
+Thus, looking at a surface's implicit equation or parametric equation, 
+it is (easily) possible to determine whether or not the surface is a quadric.
+However, as Bezier control nets, quadrics do not have a geometric 
+characterization: that is, `when does a Bezier control net represent a quadric?'
+What are the special internal relationships between control points that exist
+when a control net represents a quadric?
+
+This would be useful in various contexts.
+\begin{itemize}
+\item 
+One would like to recognize a quadric when represented as a control net,
+so that one can take advantage of its quadric-ness.
+\item
+A typical CAGD operation is to massage a surface
+by moving some of its control points.
+Suppose that you start with a quadric control net because computations on it
+are very efficient (e.g., intersection and other analysis operations are 
+much better understood on quadrics than arbitrary NURBS surfaces).
+Upon massaging the surface by moving one of its control points,
+we would like to preserve its quadric-ness.
+This requires an understanding of the 
+relationships (constraints) between control points in a quadric,
+so that one can determine the necessary movements of other control points in order
+to preserve a quadric surface.
+\end{itemize}
+
+We might also like to determine the constraints on control nets for
+even more special classes, the seven subclasses of quadrics:
+cylinder (elliptic, parabolic, and hyperbolic), ellipsoid, cone,
+hyperbolic paraboloid, hyperboloid of one sheet, hyperboloid of two sheets,
+and elliptic paraboloid.
+
+
+
+
+% ***************************************************
+
+
+\section{What type of control net?}
+
+What type of control net is 
+the most appropriate for the representation of quadrics?
+The options are Bezier or NURBS, triangular or tensor product,
+and the degree of the patch.
+We start with Bezier control nets for simplicity,
+and with triangular patches because of their more universal
+usefulness.
+We need rational patches because most quadrics are not polynomial.
+Thus, we are considering rational triangular Bezier control nets
+of degree $n$.
+Is there a natural choice for the degree $n$?
+We could allow variable degree.
+Suppose that however, for simplicity, we consider patches of a fixed degree.
+We clearly cannot represent quadric patches with arbitrary boundaries
+using a control net of fixed degree.\footnote{A
+	rational triangular Bezier patch of degree $n$ has degree $n$
+	boundary curves.}
+Nevertheless, using a control net of fixed degree $d$, we would hope that
+we could represent any quadric patch with boundaries of degree $d$.
+Unfortunately this is not true for degree 2 control nets:
+any quadric {\em surface} can be expressed as a triangular rational quadratic
+Bezier surface (also called a Steiner surface) \cite[p. 84]{Seder83},
+but not every triangular {\em patch} of a quadric with conic boundaries
+can be expressed as a
+Steiner patch \cite[p. 347]{FAR93}.\footnote{A Steiner patch is a 
+	triangular rational quadratic Bezier patch.
+	A Steiner surface is the unbounded surface defined by this 
+	parameterization.}
+In order to be represented as a Steiner patch, the three boundary curves
+of the triangular quadric patch must meet
+at a point of the quadric, and the tangents at this common point must 
+be coplanar \cite[p. 34]{Seder85}, \cite[p. 7]{Boehm91}.
+
+In order to represent {\em all} triangular quadric patches,
+one can use triangular rational {\em quartic} Bezier patches
+\cite[p. 347]{FAR93}.
+However, in general these will not be proper (or faithful) parameterizations
+\cite[p. 34]{Sed87}.
+
+Warren and Lodha's characterization is excellent: they can represent
+any quadric patch that is the image of a triangle.
+This is a natural restriction on the type of boundaries.
+
+I feel that degenerate Steiner patches are
+uninteresting as representation of quadric surface patches, 
+because of their unnatural restriction on the boundary curves.
+They are the best choice for entire quadric surfaces, however,
+because of their low degree.
+
+\section{What type of constraints?}
+
+What type of constraints do we want to find?
+They should be low level, telling us directly about the geometry of
+control points, otherwise it will be impossible to make
+local changes to correct local perturbations.
+For example, consider some known constraints on rational quadratic
+triangular Bezier patches that are not useful:
+it is known that `a necessary condition [for such a patch to parametrize
+a quadric] is that the planes containing the 3 boundary curves of
+the patch must meet in a point lying on the quadric, [and that]
+a sufficient condition is that the boundary curves, when extended,
+also contain this point.' \cite{Teller91}
+Therefore, a constraint could be to ensure that the extended boundary
+curves all contain the point of intersection of the three planes
+of the boundary curves.
+But how could you maintain this constraint after a perturbation
+of the control net?
+Moving a control point would change one (or more, if it is a corner
+point) of the boundary planes, and thus move the point of intersection
+of the three boundary planes: we want to correct the 3 boundary curves
+(with a small local movement) to go through this new point.
+How?
+One can see that the problem with the constraint is that it is too
+indirect: it deals with high-level concepts such as boundary curves 
+and `containing a point', rather than in the direct geometry of
+the control net.
+
+Therefore, messy and inelegant as it may be,
+we actually prefer down-and-dirty low-level characterizations
+that may not contain any geometric significance or elegance.
+
+Two preliminary low-level approaches:
+\begin{itemize}
+\item
+	{[implicitization]}
+	Bezier control points $\rightarrow$
+	rational parameterization $\rightarrow$
+	implicitized polynomial;
+	analyze the conditions that make the higher-level terms
+	(cubic, quartic, ...) disappear and how these relate back
+	to the control points.
+\item
+	{[base points]}
+	Bezier control points $\rightarrow$
+	rational parameterization;
+	analyze the conditions that force base points and
+	how these relate back to the control points.
+\end{itemize}
+
+\section{Applications of the constraints}
+
+Suppose that we know the constraints for a control net to represent a quadric.
+We must immediately ask how we will use this information to achieve flexibility.
+Upon the motion of a control point, there are an infinite number of motions
+of the other control points that will maintain the constraints.
+Which motion should be chosen?
+How can we avoid an infinite rippling effect, i.e., 
+in order to satisfy the original patch we move one of its other control points,
+which upsets another quadric patch, which needs to be corrected, ad infinitum?
+
+If we discover the constraints and we discover how to mend a patch
+upon disruption of those constraints, then we must ask where this
+quadric-preserving collection of patches will be used.
+Is our initial motivation of a flexible surface realistic?
+For instance, how could it be used in the context of brain-atlas `morphing'?
+
+% ***************************************************
+
+\section{\fbox{Burning question and next step}}
+
+You move one of the six control points of a rational quadratic
+triangular Bezier patch of a quadric.
+Where are the other control points pulled 
+to preserve the quadric patch?
+
+Eventually want a GL package showing the coordinated movement of
+the six control points.
+
+Let's show these bastards that they're wrong to write me off.
+And let's have some fun doing it. Hockey is now my life, but I need
+to do something to keep me entertained during the day.
+
+Let's first consider rational quadric
+parameterizations rather than Bezier reps of quadrics:
+given a parameterization of a quadric (say $(u,v,uv)$ of a hyperbolic
+paraboloid), how can it be perturbed while remaining quadric
+(i.e., with same number of base points)?
+
+\section{Previous knowledge on constraints}
+
+There are some examples of how certain curves or surfaces
+place structure on a Bezier net.
+
+{\em Pythagorean-triple hodograph cubic curves}:
+	their control polygons satisfy the relationship
+	$L_2 = \sqrt{L_1L_3}$ and $\theta_1 = \theta_2$ 
+	($L$ for length of an edge, $\theta$ for angle between edges).
+	(Farouki/Sakkalis 1990).
+
+{\em Cyclides}
+	A rational biquadratic Bezier surface represents a generalized
+	cyclide (a projective image of a Dupin cyclide) if and only if
+	(Degen, Generalized cyclides for use in CAGD):
+\begin{itemize}
+\item
+	the three planes spanned by the control points from a column
+	(resp., row) belong to a pencil with the axis a (resp., b),
+	and a and b are skew lines; and
+\item	
+	for each pair of triples from two columns (resp., rows),
+	there exists a perspectivity with center on the axis b (resp., a)
+	mapping these triples of control points onto each other.
+\end{itemize}
+
+	A sufficient condition for a Dupin cyclide net is given in 
+	(Zhou and Strasser, A NURBS representation for cyclides, 1991):
+	the NURBS control net for an entire cyclide (p. 87)
+	and the knot vectors for defining subparts bounded by parametric lines
+	are given.
+
+	The control points and weights for a Bezier rational
+	biquadratic patch of a cyclide with parametric-line boundaries
+	is given in (Pratt, Cyclides in CAGD).
+
+	A basic Bezier patch on a cyclide (from which other patches
+	can be determined by de Casteljau) is given in 
+	(Boehm, On cyclides in geometric modeling).
+
+{\em Quadrics}
+
+There are several papers on this topic: \cite{Dietz93,Boehm93,Hoschek-Seemann92,Boehm-Hansford92,Hoschek92,Wang92,Teller91,Boehm91,Lodha90,Dahmen89,Cobb88,Farin87,Piegl87,Piegl85,Seder85,Goldman83}.
+
+\begin{enumerate}
+\item
+	`A necessary condition for a Steiner surface to be a quadric
+	is that the planes on which the three boundary curves lie must
+	intersect in a point on the surface -- namely, the center of projection.'
+	\cite[p. 34]{Seder85}
+\item
+	(The same result stated another way.)
+	`A rational triangular quadratic patch lies on a quadric if
+	the three boundaries meet in one point, q, where their three tangents 
+	are coplanar, and q corresponds three times to the parameter value
+	$\infty$.' \cite[p. 7]{Boehm91}
+\item
+	Paraboloid patches are simpler to characterize, in terms of relationships
+	on their control points \cite[p. 5]{Boehm91}:
+	`[For an elliptic paraboloid, hyperbolic paraboloid, parabolic cylinder],
+	the projections of the B-points along the axis into the tangent plane
+	$\tau$ form a regular triangular net and a, b, c are relative distances 
+	from $\tau$ in the direction of the axis....
+	[For a parabolic cylinder], the B-net is projected into the figure
+	of the de Casteljau algorithm.'
+\item
+	`In order to represent an arbitrary triangular patch of a quadric,
+	rational quartic triangular patches are necessary.' \cite[p. 14]{Boehm91}
+	That is, rational quadratic and biquadratic patches are not enough.
+\item
+	\cite{Lodha90}
+	use a tetrahedron and a projective transformation of a functional
+	representation to represent quadrics.
+	Because the boundary curves of the quadric lie on the tetrahedral faces,
+	the apex of the tetrahedron (which they call the focal vertex)
+	must be a point of the quadric surface (by Sederberg's observation).
+	When they connect up quadric patches, they do so by connecting up
+	tetrahedra along mutual faces (which seems to be an artificial constraint)
+	and thereby get into the restriction that neighbouring patches must
+	share the same focal vertex, and thus only represent star-shaped objects.
+\end{enumerate}
+
+\section{Constraints imposed by quadrics}
+
+Suppose that you have a Bezier patch that 
+represents a quadric: what must it look like?
+What properties make a quadric: 
+	(1) any line intersects 
+the surface in at most two real points.
+Is this a sufficient condition?  
+That is, are there nonalgebraic surfaces for which 
+any line intersects them at most twice?
+	(2) parallel circles (or lines)
+	    circles sweeping through space along a line,
+	    quadratic radius fn, same orientation.
+
+	    doesn't apply to sphere or hyperbolic paraboloid
+
+Quadrics have two base points: what property
+forces two base points?
+
+\section{Base points}
+
+For a conic, there are practically no 
+constraints on the control net:
+A conic is generated by any Bezier curve with 
+3 control points, in arbitrary position and with
+arbitrary weights.
+The simple structure of the Bezier 
+control net of a conic is a result of 
+the equivalence of conics and rational
+quadratic parameterizations.
+However, there is no such equivalence
+for quadrics: quadrics form a strict
+subset of rational quadratic triangular 
+Bezier patches (Steiner patches \cite{Seder85}) [in
+barycentric coordinates] and of
+rational biquadratic (tensor product)
+parameterizations [in Cartesian coordinates].
+In particular, Steiner patches are generally
+of degree 4 (=$n^2$) and biquadratic 
+parameterizations are generally of degree 
+8 (=$2mn$) \cite{Seder83}.  Specifically, they are of
+degree $n^2 - b$ (resp., $2mn - b$?) where $b$	
+is the number of base points (counted with	
+appropriate multiplicity) on the entire parametric
+surface, each of which reduces the implicit	
+degree by one \cite{Warren90a}.\footnote{This result assumes
+	that the parameterization is in barycentric
+	coordinates: x(s,t,u),y(s,t,u),....
+	This must be important, since it is simple to
+	create examples where a Cartesian parameterization
+	of a quadric does not have any w=0 components and thus
+	no base points: the ellipsoid 
+	$(a(1-u^2-v^2),2bu,2cv,1+u^2+v^2)$, for example		
+	\cite[p. 217]{Gray93}.  Unless parameter values
+	can be complex, which is true: a rational surface param should
+	be viewed as a mapping $P^2 \rightarrow P^3$ 
+	\cite[Section 3.2]{Manocha92}.}
+Thus, quadrics are 
+Steiner patches with two base points (or
+biquadratic patches with six base points?).	
+
+\cite{Seder90a} shows that the two base points of a sphere
+with parameterization (x,y,z,w) = 
+$(2s,1-s^2-t^2,2t,1+s^2+t^2)$ are (1,i,0) and
+(i,1,0).  Note that these base points are both
+complex and infinite.
+
+\cite{Seder90a} also observes that although Steiner patches 
+with one base point are cubic surfaces, they
+cannot express general cubic surfaces, only ruled
+ones.  This suggests that care be taken to ensure
+that any final method gives {\em complete} coverage
+of quadrics.
+
+There are techniques that are sufficient
+to enforce base points on a patch.
+However, these are not necessary conditions
+and therefore do not lead to a characterization
+of quadric control nets.
+For example, a Steiner patch has six control points.
+Using a zero weight at a corner (interior?)
+control point induces a base point \cite{Warren92}??
+Thus, as a Steiner patch with two base points,
+the quadric can be viewed as a Steiner patch
+with two zero weights.
+The most basic way to enforce base points is through
+the method of undetermined coefficients, specifying
+that the parametric equations evaluate to 0 at the
+base points (and filling out the sufficient number
+of linear equations, that is the number of coefficients
+in the parameterization, by forcing the surface 
+through certain other points).
+
+The area of the Newton polygon of a patch
+is related to its implicit degree \cite{Warren92}.
+So in changing a quadric patch, we want to
+retain the area of its Newton polygon, which
+might be related to maintaining the same number
+of zero weights.
+
+Cyclides have base points, since they are quartic
+although they have a biquadratic parameterization \cite{Zhou91}.
+(Thus, cyclides lead to the examination
+of surfaces with base points too.)
+
+Given the control points of a patch (e.g.,
+Steiner patch), is there any elegant way of 
+determining how many base points it has
+(i.e., the infinite surface that contains the patch)?
+In other words, is there an elegant relationship
+between the number of base points and the
+weighted control polyhedron of a patch?
+For a flexible quadric, this would be the 
+invariant to maintain as the control points 
+and weights change.
+
+\section{Doodles}
+
+What does the algebraic form of the triangular
+Bezier surface mean, since it is in barycentric
+coordinates?  For example, what does it mean
+to evaluate x(s,t,u) (so that we can check if 
+it is 0)?  
+Answer: Just plug in some values of s,t,u=1-s-t,
+like you plug in some values of s and t for
+tensor product Bezier surfaces.
+
+Note: a base point is a parameter value, not 
+a point of the surface, of course (this
+parameter value is associated with curves on
+the surface, not a point).
+
+Do the number of base points of a Bezier surface
+increase as it is degree-elevated, or is
+the number of base points calculated based
+on the minimal degree of the surface?
+If the former, then where are base points
+introduced during degree elevation?
+
+At a base point, all of x,y,z,w evaluate to 0.
+So we are looking for common solutions of 
+the equations x(s,t,u)=0 (in barycentric coords,
+or x(s,t)=0 in Cartesian), y(s,t,u)=0,
+z(s,t,u)=0 and w(s,t,u)=0.  
+For a base point, we need w=0, which is the
+denominator in the rational Bezier representation:
+$\sum w_{ijk} B_{ijk}(u,v,w)$.
+Since the weights $w_{ijk}$ are nonnegative, as are
+the Bernstein polynomials over the interval of		
+interest (NOT TRUE: IT IS INVALID TO RESTRICT TO THE INTERVAL OF 
+INTEREST: THE BASE POINTS MAY BE OUTSIDE THE PATCH), 
+each term $w_{ijk} B_{ijk}(u,v,w)$ must be zero.
+The Bernstein polynomials are only zero on 
+the sides of the triangle (u=0, v=0 or w=0).
+Thus, base points only occur on the boundaries 
+of the patch or when all weights are zero.
+Indeed, $B_{ijk}$ with one of i,j,k zero (i.e., $B_{00n}$,
+$B_{0n0}$ and $B_{n00}$) are only zero on one of the sides 
+of the triangle.
+Thus, unless all of the weights are zero,
+the only way to simultaneously zero the
+terms $w_{00n} B_{00n}$, $w_{0n0} B_{0n0}$, and $w_{n00} B_{n00}$
+is for the base point to lie at one of the vertices
+of the triangle (thus zeroing two of the Bernsteins)
+and the weight associated with the other corner Bernstein
+to be zero.
+We conclude that {\em in order for a triangular Bezier patch
+to have a base point, it must have at least one zero
+weight; and if not all weights are zero, it must lie
+at a corner of the patch}.
+In particular, all Steiner patches (and in general
+all triangular Bezier patches of degree 2 or higher)
+that represent a quadric must have this form.
+
+\section{Collected facts about base points}
+
+\begin{itemize}
+\item
+(Existence) A parameterization has base points iff
+its auxiliary resultant (resultant of its auxiliary
+eqns) is identically zero \cite{Chionh92a,Chionh92c}.
+
+\item
+(Identification) It is claimed that Chionh's Ph.D. thesis contains
+algorithms to identify base points.
+\cite{Manocha92} contains an algorithm using u-resultants 
+and factorization for computing base points,
+and a faster but probabilistic algorithm that 
+uses resultants and gcd.
+\end{itemize}
+
+\section{Bibliography for base points}
+
+[1] T. Sederberg, Steiner patches. [Seder85]
+
+[2] T. Sederberg, Ph.D. thesis. [Seder83]
+
+[3] J. Warren, Creating multisided rational
+	Bezier surfaces using base points. [Warren92]
+
+[4] J. Warren, A bound on the implicit degree
+	of polygonal Bezier surfaces.  [Warren90a]
+
+[5] Zhou and Strasser, A NURBS representation of 
+	cyclides.	[Zhou91]
+
+[6] Chionh and Goldman, Using multivariate resultants
+	to find the implicit equation of a rational
+	surface. [Chionh92a]
+
+[7] Chionh and Goldman, Implicitizing rational
+	surfaces with base points by applying
+	perturbations and the factors of zero theorem. [Chionh92c]
+
+[8] Chionh, Ph.D. thesis, Base points, resultants,
+	and the implicit representation of rational
+	surfaces.	
+
+[9] D. Manocha, Ph.D. thesis, Algebraic and numeric
+	techniques in modeling and robotics.  [Manocha92]
+
+[10] T. Sederberg, IEEE CG+A, July 1990,
+	Techniques for cubic algebraic surfaces, part one. [Seder90a]
+
+\section{Rational parameterizations of quadric surfaces}
+
+We need to consider the parameterizations of quadrics,
+both to analyze base points, and to consider translation
+to and from parametric form and control net.
+
+\begin{itemize}
+\item
+Sphere:	$(1-s^2-t^2,2s,2t,1+s^2+t^2)$
+	[Manocha Ph.D. thesis, p. 51]
+\item
+Cylinder:
+\item
+Hyperbolic paraboloid: $(u,v,uv)$ 	[p. 211+350, Gray, 
+			 Modern Diff Geom of Curves and Surfaces]
+\item
+Cone:
+\item
+Ellipsoid: $(a(1-u^2-v^2),2bu,2cv,1+u^2+v^2)$  [p. 217, Gray]
+\item
+Elliptic paraboloid: $(u,v,a(u^2+v^2))$	  [p. 221, Gray]
+\item
+Hyperboloid of one sheet:
+\item
+Hyperboloid of two sheets:
+\end{itemize}
+
+\bibliographystyle{plain}
+\bibliography{/users/cogito/jj/bib/modeling}
+
+\end{document}

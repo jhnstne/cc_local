@@ -1,0 +1,2 @@
+emacsleft rq1.tex furthest.tex rotation4d.tex &
+xpdf rotation4d.tex &

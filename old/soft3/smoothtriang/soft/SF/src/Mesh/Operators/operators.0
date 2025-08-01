@@ -1,0 +1,264 @@
+
+
+
+                                                               operators(3)
+
+
+
+     NAME
+          Operators - A set of routines to create mesh objects
+
+     SYNTAX
+          #include mesh.h
+
+     DESCRIPTION
+          _O_p_e_r_a_t_o_r_s are routines designed to simplify the creation of mesh
+          objects.  The operators don't create _i_n_t_e_r_n_a_l or _e_x_t_e_r_n_a_l data
+          fields.
+
+          Note: some of the operators don't preserve the mesh property.
+          This is noted in the operators below.  Such operators should be
+          avoided and will dissappear/be modified in the future.
+
+
+     ROUTINES
+
+          Vertex *AddVertexEdge( m, e )
+          Mesh *m;
+          Edge *e;
+
+          Creates and returns vertex which splits edge e.  Works for half
+          edges also.
+
+
+          Vertex* CenterSplitFace(m, f)
+          Mesh* m;
+          Face* f;
+
+          Split the face f by introducing a new vertex at the center of the
+          face and forming triangules from the edges of the orignal face
+          joined to the center vertex.  Thus, an n sided face will be split
+          into n triangles.  The center vertex is returned.
+
+
+          Face *CreateFace( m )
+          Mesh *m;
+
+          Creates a new face, 3 half edges, 3 vertices.  Sets internalData,
+          externalData, name pointers to NULL.  Returns the face created.
+
+
+          Face *CreateOpposingTriFace( m, e1, e2 )
+          Mesh *m;
+          Edge *e1;
+          Edge *e2;
+
+          Create a new triangular face opposing the consecutive boundary
+          edge e1 and e2.  If e2 is NULL, the face merely bounds e1 and a
+          newly created vertex.  The newly created face is returned.  If e1
+          or e2 aren't boundary edges, or if the head of e1 isn't the tail
+          of e2, then NULL is returned.
+
+
+                                                                          1
+
+
+
+
+
+
+     operators(3)
+
+
+
+          BOOLEAN DestroyFace( m, f )
+          Mesh *m;
+          Face *f;
+
+          Removes a face from existence.  Any boundary vertex of such a
+          face must also be along a boundary edge of the face.  Returns
+          TRUE if face remove, FALSE if face not removed.
+
+
+          BOOLEAN DestroyVertex( m, v )
+          Mesh *m;
+          Vertex *v;
+
+          Remove the vertex v from the mesh.  v can not be removed if any
+          edges point to it.
+
+
+          int FixVertices(m, f)
+          Mesh* m;
+          void (*f)(vo, vn);
+
+          A mesh that is read from a file can contain vertices that have
+          more than one boundary.  Such a mesh is invalid.  This procedure
+          finds all such vertices and splits them into multiple vertices,
+          each having one boundary.  At each new vertex, the user supplied
+          function, f, is called with the old and new vertices as argu-
+          ments.  The return value is the number of vertices created.
+
+
+          BOOLEAN JoinHalfEdge( m, he1, he2 )
+          Mesh *m;
+          Edge *he1, *he2;
+
+          Joins two half edges; they must point to two different faces.
+          Uses the first edge's vertices; discards the second edge's ver-
+          tices if they are not the same as the first.
+
+          WARNING: as described/implemented, this may destroy the mesh pro-
+          perty.
+
+
+          BOOLEAN JoinFaces( m, f1, f2, flg )
+          Mesh *m;
+          Face *f1;
+          Face *f2;
+
+          Removes face f2 by removing edge e between f1 and f2.  f1 and f2
+          must be neighbors.  Will not create an f1 such that there is a
+          duplicate vertex in a path of f1's edge.  If flg is non-zero, the
+          vertices that bounded e will be removed if they only have 2
+          neighbors.
+
+          NOTE: In the current implementation, flg must be zero.
+
+
+     2
+
+
+
+
+
+
+                                                               operators(3)
+
+
+
+          BOOLEAN JoinVertices( m, v1, v2, flg )
+          Mesh *m;
+          Vertex *v1;
+          Vertex *v2;
+
+          Remove vertex v2 by removing the edge between v1 and v2.  The
+          faces neighboring the edge will have one less edge.  This may
+          result in faces having only two edges.  Such faces will be
+          removed if flg is non-zero.  An edge can not be collapsed if both
+          v1 and v2 are boundary vertices.
+
+          Certain vertices can not be joined.  In particular, if the edge
+          between the vertices lies on a triangle, and the other two edges
+          of the triangle bound the same two faces, then the vertices can
+          not be joined (joining such vertices would create an edge that is
+          bounded on both sides by the same face).
+
+          TRUE is returned if the join was performed, FALSE if the join was
+          not performed.
+
+
+          Edge *RemoveVertexEdge( m, v )
+          Mesh *m;
+          Vertex *v;
+
+          Removes vertex v from the mesh.  v must have degree 2; faces
+          around v must have > 3 vertices.  Joins the edges incident on v
+          into one edge.  Returns the resulting edge, NULL if could not
+          remove v.
+
+
+          Edge *SplitEdge( m, e1 )
+          Mesh *m;
+          Edge *e1;
+
+          Splits edge into two distinct half edges; if a vertex of the edge
+          is already on a boundary, then the vertex is split into two ver-
+          tices, one for each half edge.  Returns a pointer to the previous
+          sym edge of the input edge, NULL if the edge is not a full edge.
+
+
+          Face *SplitFace( m, f1, v1, v2 )
+          Mesh *m;
+          Face *f1;
+          Vertex *v1, *v2;
+
+          Splits f1 by creating edge between vertices v1 & v2, creates new
+          face.  v1 & v2 must lie on the boundary of f1 Returns new face,
+          NULL  if not created.
+
+
+          Vertex* SplitTriFace3to1(m, f)
+          Mesh* m;
+
+
+                                                                          3
+
+
+
+
+
+
+     operators(3)
+
+
+          Face* f;
+
+          Do a three to one split of the triangular face f.  The newly
+          created center vertex is returned.  If f is not triangular, no
+          split is made and NULL is returned.  This is routine is just a
+          special case of CenterSplitFace().
+
+
+     AUTHORS
+          Richard Schulte, Stephen Mann
+
+
+     DATE
+          October 18, 1991
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     4
+
+
+99

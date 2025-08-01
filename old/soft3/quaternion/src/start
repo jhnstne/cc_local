@@ -1,0 +1,2 @@
+emacs -geometry 91x72+0+0 quaternionSpline.cpp ~/software/projectSmooth/3d/n-quaternion/GIcodeOnNavy/animation.c &
+

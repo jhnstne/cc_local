@@ -1,0 +1,8 @@
+tops fig1.rgb -eps -m 8.5 2 > fig1.ps
+tops fig2.rgb -eps -m 8.5 2 > fig2.ps
+tops fig3.rgb -eps -m 8.5 2 > fig3.ps
+tops fig4.rgb -eps -m 8.5 2 > fig4.ps
+tops fig5.rgb -eps -m 8.5 2 > fig5.ps
+tops fig6.rgb -eps -m 8.5 2 > fig6.ps
+tops fig7.rgb -eps -m 8.5 2 > fig7.ps
+tops fig8.rgb -eps -m 8.5 2 > fig8.ps

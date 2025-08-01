@@ -1,0 +1,14 @@
+display of the six control points and weights of a rational triangular Bezier
+patch of degree 2 (where do the weights come in?)
+
+initial input of points: file
+
+motion control over at least one of the points: since motion must be in 3d,
+	we do not want to explicitly move the control point on the 2d screen;
+	we can explicitly ask for new cartesian coordinates; 
+	we can use widgets with +x, -x, +y, -y, +z, -z arrows with associated
+		increments of small delta
+
+automatic rendering of Bezier patch after each perturbation of the control net
+
+start with ellipses rather than quadrics: 3 control points and curve

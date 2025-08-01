@@ -1,0 +1,43 @@
+From jj Mon Aug 15 11:40:10 1994
+Return-Path: <jj>
+Received: by cis.uab.edu (4.1/SMI-4.1)
+	id AA05788; Mon, 15 Aug 94 11:40:08 CDT
+Date: Mon, 15 Aug 94 11:40:08 CDT
+From: jj (John Johnstone)
+Message-Id: <9408151640.AA05788@cis.uab.edu>
+To: jimbo@blaze.cs.jhu.edu
+Cc: jj
+Status: OR
+
+Jim,  
+
+Arrived safely and are settled in at home and office, so I can
+turn back to research.
+In your message, you say that:
+
+	`For canal surfaces, we can specify the path as an arbitrary
+	Bezier curve and then create a Dietz-Hoschek curve that will
+	serve as the pseudo-derivative of the path.'
+
+Can you elaborate on the exact (formal) meaning of this statement?
+(path = orientation curve on sphere, not the directrix of the sweep?
+pseudo-derivative = ?)
+
+Also, can you motivate this approximation for practical use?
+
+Would the resulting curve have to undergo the integration process,
+(of x' to x) or the Dietz-Hoschek inverse-image process (inverse
+image of point is line, which are interpolated rather than points)?
+
+In other words, can you give me a full page of overview on this
+strategy (without math at this point), ignoring the extensions
+to splines or 4-sphere for the moment.
+
+The system here is going to be flaky for the next couple of weeks,
+because they are taking down machines to install a new operating
+system.  I hope to remain in contact, but I may have to revert
+to phoning cogito.cs.jhu.edu, so please cc any correspondence to
+my Hopkins jj account too.
+
+John
+

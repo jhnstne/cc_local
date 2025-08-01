@@ -1,0 +1,13 @@
+This scheme is a simple C^0 scheme created to get a feel for how
+bad it is to fit a single cubic patch to each triangular facet.
+Each cubic interpolates the position and normal at each corner
+of the triangle of data.  The boundary curves are constructed
+so that neighboring patches share boundary curves.  However,
+along these boundaries, the patches only meet C^0.
+
+The steps of the construction are:
+	1. Construct boundary curves.
+		A variety of possibilities exist here.  One
+		simple method is to construct a plane for the
+		boundary curve to lie in (take for example, the
+		plane defined 

@@ -1,0 +1,184 @@
+head	1.5;
+access;
+symbols;
+locks
+	saggarwa:1.5; strict;
+comment	@ * @;
+
+
+1.5
+date	99.10.25.22.34.17;	author saggarwa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	99.01.13.04.20.17;	author saggarwa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	98.12.12.04.01.23;	author saggarwa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	98.12.05.02.43.44;	author saggarwa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	98.11.30.00.25.44;	author saggarwa;	state Exp;
+branches;
+next	;
+
+
+desc
+@General functions for A-patch operations.  Includes read/write and evaluation.
+@
+
+
+1.5
+log
+@handed-in
+@
+text
+@/******************************************************************/
+/* Module: apatch.h                                               */
+/* $Date: 1999/01/13 04:20:17 $                                   */
+/* $Revision: 1.4 $                                               */
+/* $Source: /p/SurfaceFitting/SF/src/Apps/ATess/RCS/apatch.h,v $  */
+/******************************************************************/
+/*
+** Purpose: Interface module for A-patches.
+*/
+
+#ifndef _APATCH_H_
+#define _APATCH_H_
+
+#include "vertex.h"
+#include "material.h"
+
+extern Material
+   APColor1,
+   APColor2,
+   APColor3;
+
+enum {FACE_COLOR = 0, EDGE1_COLOR = 1, EDGE2_COLOR = 2};
+enum {RIGHT_ORIENTED = 0, LEFT_ORIENTED = 1};
+
+typedef struct {
+   int degree;             /* The degree of the patch. */
+   VERTEX tetrahedron[4];
+   Space wspace;           /* Containing space of control vertices.*/
+   int netSize;
+   Scalar* net;		   /* The control net. */
+   Material* netMat;
+   Frame apFrame;
+   int apColor;
+} Apatch;
+
+typedef struct {
+   Apatch ap1;
+   Apatch ap2;
+} ApatchPair;
+
+int ReadSingleApatch(Apatch* apatch, Space wspace);
+int ReadApatchPair(ApatchPair* apPair, Space wspace);
+Apatch CreateApatch(int degree, VERTEX* tetra, Space wspace, int color);
+void WriteSingleApatch(Apatch apatch);
+void WriteApatchPair(ApatchPair apPair);
+void FreeApatch(Apatch apatch);
+void FreeApatchPair(ApatchPair apPair);
+int NetSize(int deg, int dim);
+int CPIndex(int deg, int dim, int mi[]);
+int CPIndexDim3(int deg, int i0, int i1, int i2, int i3);
+Scalar EvalApatch(Apatch apatch, VERTEX* v);
+Scalar EvalApatchGivenBCoords(Apatch apatch, VERTEX* v, Scalar u0,
+                              Scalar u1, Scalar u2, Scalar u3);
+Normal EvalApatchNormal(Apatch apatch, Scalar i0, Scalar i1, Scalar i2,
+                        Scalar i3);
+int CheckApatchOrientation(Apatch apatch);
+void ConvertApatchToRightHandedOrientation(Apatch* apatch);
+Material GetApatchMaterial(int apColor);
+
+#endif /* _APATCH_H_ */
+
+@
+
+
+1.4
+log
+@orientation stuff.
+@
+text
+@d1 6
+a6 7
+/****************************************************************/
+/* Module: apatch.h                                             */
+/* $Date: 1998/12/12 04:01:23 $                                 */
+/* $Revision: 1.3 $                                             */
+/* $Source: /p/SurfaceFitting/SF/src/Apps/ATess/RCS/apatch.h,v $                 */
+/****************************************************************/
+
+d17 7
+a23 10
+enum {
+   FACE_COLOR   = 0,
+   EDGE1_COLOR  = 1,
+   EDGE2_COLOR  = 2
+};
+
+enum {
+   RIGHT_ORIENTED = 0,
+   LEFT_ORIENTED  = 1
+};
+a40 1
+
+d56 3
+a58 1
+
+@
+
+
+1.3
+log
+@color field added to the apatch dstruct.
+@
+text
+@d3 2
+a4 2
+/* $Date: 1998/12/05 02:43:44 $                                 */
+/* $Revision: 1.2 $                                             */
+d22 5
+@
+
+
+1.2
+log
+@nothing changed.
+@
+text
+@d3 2
+a4 2
+/* $Date: 1998/11/30 00:25:44 $                                 */
+/* $Revision: 1.1 $                                             */
+d18 6
+d32 1
+d43 1
+a43 1
+Apatch CreateApatch(int degree, VERTEX* tetra, Space wspace);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d3 3
+a5 3
+/* $Date: 1998/08/06 18:51:24 $                                 */
+/* $Revision: $                                             */
+/* $Source: /u/saggarwal/cs788/RCS/apatch.h,v $                 */
+d49 1
+@

@@ -1,0 +1,11 @@
+read `cubic.maple`;
+
+sys1 := topsys;
+sys2 := midsys;
+sys3 := {eqall[2],eqall[5],eqall[8]};
+
+
+sol1 := solve(sys1,{p10,p20,p30});
+sol2 := solve(sys2,{p11,p21,p31});
+sol3 := solve(sys3,{x2,y2,z2});
+

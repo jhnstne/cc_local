@@ -1,0 +1,3 @@
+open(`derf`);
+write(3,4,5);
+close();

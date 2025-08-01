@@ -1,0 +1,55 @@
+From jimbo@blaze.cs.jhu.edu Fri Oct 28 11:17 CDT 1994
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from blaze.cs.jhu.edu by cis.uab.edu (5.0/SMI-SVR4)
+	id AA26756; Fri, 28 Oct 1994 11:17:39 -0500
+Received: from mail-client (peregrine.cs.jhu.edu)
+           by blaze.cs.jhu.edu; Fri, 28 Oct 94 12:17:32 EDT
+Received: by mail-client (4.1) id AA11352; Fri, 28 Oct 94 12:15:14 EDT
+Message-Id: <9410281617.AA26756@cis.uab.edu>
+From: jimbo@blaze.cs.jhu.edu (Jim Williams)
+Sender: jimbo@blaze.cs.jhu.edu
+Subject: Re: Speed via arc length
+To: jj@redmont1.cis.uab.edu (John Johnstone)
+Date: Fri, 28 Oct 1994 12:15:14 -0400 (EDT)
+In-Reply-To: <9410281303.AA25600@cis.uab.edu> from "John Johnstone" at Oct 28, 94 08:03:01 am
+X-Mailer: ELM [version 2.4 PL13]
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Length: 1279
+Status: OR
+
+> 
+> Jim, does the following small change make the section
+> on `Choice of frames based on arc length' more understandable?
+> 
+> \subsection{Choice of frames based on arc length}
+> 
+> Another simple mechanism for effective speed control in the animation
+> is to choose intermediate frames based on arc-length.
+> Suppose that, for example, we wish to simulate constant speed along
+> the orientation curve (i.e., arc length parameterization).
+> Based on computation of arc length, the orientation of intermediate frames
+> can be chosen at approximately equal spacing along the orientation curve.
+> The length of a segment should be computed by subdivision
+> (until an acceptable degree of accuracy is achieved)
+> rather than by exact computation via the integral 
+> $\int_a^b \|c'(t)\| dt$ (for the segment $c(t)$).
+> This method is possible since we have a closed form Bezier representation
+> of the spherical curve.  Other methods, which do not have
+> direct representation of the entire curve cannot perform
+> this type of arc-length based choice of intermediate frames.
+> 
+> I won't have the time to make a figure about this.
+> So I hope the text gives a reasonable clue to the idea.
+> 
+> 
+> John
+> 
+
+
+Yes, this clarifies the k-times... statement that I had
+trouble with.
+
+Jim
+

@@ -1,0 +1,57 @@
+.TH tess 3
+
+.SH NAME
+tess
+
+.SH SYNOPSIS
+Routines for evaluating rational and polynomial Bezier curves and
+their derivatives.
+
+.SH SYNTAX
+
+.B #include "bezier.h"
+
+.SH DESCRIPTION:
+
+.nf
+.B void SetTessEps(e)
+.B double e;
+.fi
+
+Set the epsilon used for estimating the surface normal.
+
+.nf
+.B void TessPatch(patch, eval, samples, frame)
+.B void* patch;
+.B Point (*eval)();
+.B int samples;
+.B Frame frame;
+.fi
+
+Tesselate the given surface patch.  eval is a routine that takes a
+pointer to a triangular patch and an array of Scalars, and returns a Point.
+patch should be a pointer to the patch structure that eval expects.
+samples is the number of desired samples along an edge.  frame is
+a coordinate frame used to extract the output coordinates.
+
+The surface normal is estimated for each point.
+
+.nf
+.B gkTessPatch(patch, eval, samples, frame)
+.B void* patch;
+.B Point (*eval)();
+.B int samples;
+.B Frame frame;
+.fi
+
+Tesselate the given surface patch.  eval is a routine that takes a
+pointer to a triangular patch and an array of Scalars, and returns a Point.
+patch should be a pointer to the patch structure that eval expects.
+samples is the number of desired samples along an edge.  frame is
+a coordinate frame used to extract the output coordinates.
+
+The surface normal and Gaussian curvature is estimated for each point.
+
+
+.SH DATE
+January 4, 1992

@@ -1,0 +1,66 @@
+The following changes address reviewer comment 3:
+
+title: changed to 'The kernel of a freeform surface and its duality
+	with a certain convex hull'
+	
+	This is a bit awkward, but I think it works.
+
+p. 2: change to first line of 2nd paragraph, and last paragraph of Section 1
+
+p. 3: last two sentences of Section 2 about dual relationship moved down 
+	to preamble of Section 3
+
+first sentence of Section 3.1 changed
+
+last sentence of Conclusion changed
+
+--------------------------------
+
+To address comment 5, the images of Figure 5 must be scaled up.
+I'm having trouble Latex'ing the document with the ps images: would you mind
+adjust them to the right scale (something like scale=.5 or higher); 
+this will undoubtedly push the second image onto a second row and so 
+require adjustment of the spacing of (a) and (b) captions.  Thanks!
+
+--------------------------------
+
+the following change addresses comment 6:
+
+immediately before Definition 2: added an explanatory sentence 
+	about P and P^* (and S/S^*) 
+
+--------------------------------
+
+the following change addresses comment 7:
+
+the definition of bitangent plane is moved up early in Section 3.2
+(the definition of 'conventional bitangent plane' remains in the original place)
+
+--------------------------------
+
+the following change addresses comment 8:
+
+The captions to Figure 5 and 6 are expanded.
+
+--------------------------------
+
+I added some discussion of complexity to address comment 9, immediately
+before the conclusions.
+
+Comment about other methods: I'm not aware of competing algorithms 
+for computing kernels of *freeform* surfaces.
+
+--------------------------------
+
+added another grant to acknowledgements
+
+--------------------------------
+
+Comments 1, 2, and 4 address issues in the earlier part of the paper
+(inflection points and gamma kernel) so you and Gershon can answer them
+better.
+
+I hope that covers it.  Please let me know if you have any followup
+questions.  Would you please send me a copy of the paper when you have
+incorporated your changes?  Thanks.
+

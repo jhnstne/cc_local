@@ -1,0 +1,12 @@
+Volume
+------
+
+{\bf Volume} Integrate radius function along axis? (p. 234ff. Thomas/Finney)
+	Cylinder = $\pi r^{2} h$; Torus = $\pi r^{2}$ (circumference of axis)
+	Cyclide =? integral from $[0,1] \pi r(t)^{2}$ (length of axis)
+		(where axis is parameterized from [0,1]: probably more
+		 likely to be parameterized from $[-\infty,\infty]$ or 
+		$[0,2\pi]$
+	Probably need explicit radius function and exact description of axis.
+	Ensure that we have this.**
+{\bf Medial axis}  Is curve of centers of cyclide its medial axis?

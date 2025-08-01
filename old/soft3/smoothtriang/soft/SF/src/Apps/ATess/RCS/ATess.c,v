@@ -1,0 +1,250 @@
+head	1.5;
+access;
+symbols;
+locks
+	saggarwa:1.5; strict;
+comment	@ * @;
+
+
+1.5
+date	99.10.25.22.33.06;	author saggarwa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	98.12.22.02.09.34;	author saggarwa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	98.12.12.03.58.45;	author saggarwa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	98.12.05.02.41.10;	author saggarwa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	98.11.30.00.24.47;	author saggarwa;	state Exp;
+branches;
+next	;
+
+
+desc
+@Main program for tessellating A-patches.
+@
+
+
+1.5
+log
+@handed-in
+@
+text
+@/*****************************************************************/
+/* Module: ATess.c						 */
+/* $Date: 1998/12/22 02:09:34 $                                  */
+/* $Revision: 1.4 $                                              */
+/* $Source: /p/SurfaceFitting/SF/src/Apps/ATess/RCS/ATess.c,v $  */
+/*****************************************************************/
+/*
+ * Copyright (c) 1998, Graphics Laboratory, University of Waterloo
+ * Copying, use and development for non-commercial purposes permitted.
+ *                  All rights for commercial use reserved.
+ */
+
+/*
+ *----------------------------------------------------------------------
+ *  File:  ATess.c
+ *	A simple reader/writer of A-patches
+ *----------------------------------------------------------------------
+ */
+
+#include <stdio.h>
+#include <math.h>
+#include "all.h"
+#include "apatch.h"
+#include "aptessellate.h"
+
+Space World;
+Frame WorldF;
+int EdgeSamples = 0;
+int GetRootFindingInfo = 0;
+int DoPatchColoring = 0;
+
+main(int argc, char* argv[])
+{
+   ParseCommandLine(argc, argv);
+   World = SCreate("World", 3);
+   WorldF = StdFrame(World);
+
+   while (ReadDstruct() != EOF) {
+      if (QueryDstructPath("Apatch")) {
+         Apatch anApatch;
+         ReadSingleApatch(&anApatch, World);
+         TessellateApatch(anApatch);
+         FreeApatch(anApatch);
+      }
+      else if (QueryDstructPath("ApatchPair")) {
+         ApatchPair apPair;
+         ReadApatchPair(&apPair, World);
+         TessellateApatchPair(apPair);
+         FreeApatch(apPair.ap1);
+         FreeApatch(apPair.ap2);
+      }
+      else {
+         fprintf(stderr, "%s: Unknown patch type - Exiting.\n", argv[0]);
+         exit(1);
+      }
+   }
+  exit(0);
+}
+
+/*------------------------------------------------------------*/
+/*                   Command Line Handlers                    */
+/*------------------------------------------------------------*/
+void SetSamples(char *num[])
+{
+   EdgeSamples = atoi(num[0]);
+   if (EdgeSamples < 0) {
+      fprintf(stderr, "EdgeSamples must be greater than or equal to zero; defaulting to zero (the control scalar net will be output).\n");
+      EdgeSamples = 0;
+   }
+}
+
+void SetGetRootInfo()
+{
+   GetRootFindingInfo = 1;
+}
+
+void SetPatchColoring()
+{
+   DoPatchColoring = 1;
+}
+
+/* Table of available options -- register new options here */
+Option Options[] = {
+/* Name   Handler        #Args  HelpString */
+   "h",   Usage,            0,  ": Print available options.",
+   "s",   SetSamples,       1,  "<EdgeSamples> : Specify the number of samples along edge of the sample net; default of zero outputs the control scalar net.",
+   "i",   SetGetRootInfo,   0,   ": Output mean and std. dev. for the # of steps taken to find the root on the surface.",
+   "c",   SetPatchColoring, 0,   ": Output the A-patches using a coloring scheme to distinguish face and edge patches.",
+
+/*  DO not delete the next line */
+    NULL,    NULL,       0,      NULL,      NULL
+  };
+
+/* Global variables go here */
+char *Banner  = "";
+char *CommandName;
+char* UsageString = "ATess < apatch-stream";
+
+@
+
+
+1.4
+log
+@added coloring on/off of patches option.
+@
+text
+@d1 6
+a6 6
+/****************************************************************/
+/* Module: ATess.c						*/
+/* $Date: 1998/12/12 03:58:45 $                                 */
+/* $Revision: 1.3 $                                             */
+/* $Source: /p/SurfaceFitting/SF/src/Apps/ATess/RCS/ATess.c,v $                    */
+/****************************************************************/
+d8 1
+a8 1
+ * Copyright (c) 1998, Graphics and AI Laboratory, University of Waterloo
+a34 1
+
+a37 1
+/*   fprintf(stderr, "Edge Samples = %i \n", EdgeSamples); */
+a38 1
+/*      fprintf(stderr,"Read Dstruct successful.\n"); */
+a41 1
+/*         WriteSingleApatch(anApatch); */
+a47 1
+/*         WriteApatchPair(apPair); */
+a56 1
+
+a59 1
+
+a62 1
+
+d66 2
+a67 1
+   if (EdgeSamples < 0)
+d69 1
+d86 1
+a86 1
+   "s",   SetSamples,       1,  "<edgeSamples> : Specify the number of samples along edge of the sample net; default of zero outputs the control scalar net.",
+a93 1
+
+d97 1
+a98 1
+char* UsageString = "ATess < apatch-stream";
+@
+
+
+1.3
+log
+@no significant changes.
+@
+text
+@d3 2
+a4 2
+/* $Date: 1998/12/05 02:41:10 $                                 */
+/* $Revision: 1.2 $                                             */
+d30 1
+d74 2
+d83 4
+d90 5
+a94 4
+/* Name     Handler      #Args  HelpString */
+   "h",     Usage,          0,  ": Print available options.",
+   "s",     SetSamples,     1,  "<edgeSamples> : Specify the number of samples along edge of the sample net; default of zero outputs the control scalar net, and a negative value outputs the tetrahedral simplex.",
+   "i",     SetGetRootInfo, 0,   ": Output mean and std. dev. for the # of steps taken to find the root on the surface.",
+@
+
+
+1.2
+log
+@Added simplicial hull option.
+@
+text
+@d3 2
+a4 2
+/* $Date: 1998/11/30 00:24:47 $                                 */
+/* $Revision: 1.1 $                                             */
+d85 1
+a85 1
+   "s",     SetSamples,     1,  "<edgeSamples> : Specify the number of samples along edge of the sample net; default of zero outputs the tetrahedral simplex, and a negative value outputs the control scalar net.",
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d3 3
+a5 3
+/* $Date: $                                 */
+/* $Revision: $                                             */
+/* $Source: $                    */
+d38 1
+a38 2
+   fprintf(stderr, "Edge Samples = %i \n", EdgeSamples);
+
+d40 1
+a40 1
+      fprintf(stderr,"Read Dstruct successful.\n");
+d84 2
+a85 2
+   "help",  Usage,          0,  ": Print available options.",
+   "s",     SetSamples,     1,  "<edgeSamples> : Specify the number of samples along edge of the sample net; default of zero outputs the scalar net.",
+@

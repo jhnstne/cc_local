@@ -1,0 +1,177 @@
+# Test programs for finding cubic pyth. hodograph
+# bezier curves
+
+# P0,P1,P2,P3 will be linear bezier curves
+
+P0 := vector([p00,p01]);
+P1 := vector([p10,p11]);
+P2 := vector([p20,p21]);
+P3 := vector([p30,p31]);
+
+# XT, YT, ZT will be cubic bezier curves
+
+XT := vector([x0,x1,x2,x3]);
+YT := vector([y0,y1,y2,y3]);
+ZT := vector([z0,z1,z2,z3]);
+
+
+# compute the first derivatives of the primary curves
+
+XTprime := bezdiff(XT,3);
+YTprime := bezdiff(YT,3);
+ZTprime := bezdiff(ZT,3);
+
+
+# impose the restrictions
+
+x1 := add(scalarmul(bezproduct(P0,1,P1,1),2),
+	  scalarmul(bezproduct(P2,1,P3,1),-2));
+
+
+x2 := add(scalarmul(bezproduct(P1,1,P3,1),2),
+	  scalarmul(bezproduct(P0,1,P2,1),2));
+
+
+x3 := add(
+	add(bezproduct(P1,1,P1,1),bezproduct(P2,1,P2,1)),
+	scalarmul(	
+		add(bezproduct(P0,1,P0,1),bezproduct(P3,1,P3,1)),-1));
+
+
+xtp := gen_bernstein(2,t,x1);
+ytp := gen_bernstein(2,t,x2);
+ztp := gen_bernstein(2,t,x3);
+
+
+
+
+#Conditions := 	{
+#		xp0=1,yp0=1,zp0=1,
+#		xp1=1,yp1=1,zp1=-1,
+#		x0=A,y0=B,z0=C,
+#		x1=D,y1=E,z1=F
+#		};
+
+
+Conditions := 	{
+		x0=A,y0=B,z0=C,
+		x1=D,y1=E,z1=F
+		};
+
+
+Tan0System := 	{
+		xtp - xp0,
+		ytp - yp0,
+		ztp - zp0
+		};
+
+# Stipulate Tangent Vector for t=0
+Tan0System := subs(t=0,Tan0System);
+
+
+Tan1System := 	{
+		xtp - xp1,
+		ytp - yp1,
+		ztp - zp1
+		};
+# Stipulate Tangent Vector for t=1
+Tan1System := subs(t=1,Tan1System);
+
+PEqns	:= 
+		{
+		int(xtp,t),
+		int(ytp,t),
+		int(ztp,t)
+		};
+
+PEvector := [
+			int(expand(xtp),t),
+			int(expand(ytp),t),
+			int(expand(ztp),t)
+		   ];
+
+
+PSystem :=
+		{
+		int(expand(xtp),t) + KX - (x0*(1-t) + x1*t),
+		int(expand(ytp),t) + KY - (y0*(1-t) + y1*t),
+		int(expand(ztp),t) + KZ - (z0*(1-t) + z1*t)
+		};
+
+P0System := subs(t=0,PSystem);
+P1System := subs(t=1,PSystem);
+
+
+Tsol0 	:= solve(Tan0System,{p10,p20,p30});
+Tsol1 	:= solve(Tan1System,{p01,p21,p31});
+Tav0	:= allvalues(Tsol0,d);
+Tav1	:= allvalues(Tsol1,d);
+Tav01	:= Tav0[1];
+Tav11	:= Tav1[1];
+Tav02	:= Tav0[2];
+Tav12	:= Tav1[2];
+
+S11	:=	Tav01 union Tav11;
+S12	:=	Tav01 union Tav12;
+S21	:=	Tav02 union Tav11;
+S22	:=	Tav02 union Tav12;
+
+
+per3 :=  zp1 - 2* p11^2  + (zp1^2  + xp1^2  + yp1^2 ) ^(1/2);
+per7 :=  - 2* p00^2  - zp0 + (zp0^2  + xp0^2  + yp0^2 ) ^(1/2);
+maxP11 	:=(solve(subs(Conditions,per3),p11)[1]);
+maxP00 	:=(solve(subs(Conditions,per7),p00)[1]);
+
+#maxP11	:=evalf(solve(subs(Conditions,per3),p11)[1]);
+#maxP00 :=evalf(solve(subs(Conditions,per7),p00)[1]);
+
+Psol1 	:= subs(S11,Conditions,eval(PEvector));
+Psol2 	:= subs(S12,Conditions,eval(PEvector));
+Psol3 	:= subs(S21,Conditions,eval(PEvector));
+Psol4 	:= subs(S22,Conditions,eval(PEvector));
+
+C1min := subs(p00=0,p11=0,eval(Psol1));
+C1max := subs(p00=maxP00,p11=maxP11,eval(Psol1));
+#tubeplot({C1min,C1max},t=0..1,radius=.01);
+
+C2min := subs(p00=0,p11=0,eval(Psol2));
+C2max := subs(p00=maxP00,p11=maxP11,eval(Psol2));
+#tubeplot({C2min,C2max},t=0..1,radius=.01);
+
+C3min := subs(p00=0,p11=0,eval(Psol3));
+C3max := subs(p00=maxP00,p11=maxP11,eval(Psol3));
+#tubeplot({C3min,C3max},t=0..1,radius=.01);
+
+C4min := subs(p00=0,p11=0,eval(Psol4));
+C4max := subs(p00=maxP00,p11=maxP11,eval(Psol4));
+#tubeplot({C4min,C4max},t=0..1,radius=.01);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

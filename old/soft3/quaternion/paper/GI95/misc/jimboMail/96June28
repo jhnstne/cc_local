@@ -1,0 +1,48 @@
+From jj@cerulean.cis.uab.edu Fri Jun 28 11:23 CDT 1996
+Return-Path: <jj@cerulean.cis.uab.edu>
+Received: from cerulean.cis.uab.edu by cis.uab.edu (5.x/SMI-SVR4)
+	id AA14539; Fri, 28 Jun 1996 11:23:41 -0500
+Received: by cerulean.cis.uab.edu (940816.SGI.8.6.9/940406.SGI)
+	 id LAA12745; Fri, 28 Jun 1996 11:19:02 -0700
+From: "John K. Johnstone" <jj@cerulean.cis.uab.edu>
+Message-Id: <9606281119.ZM12743@cerulean.cis.uab.edu>
+Date: Fri, 28 Jun 1996 11:19:02 -0500
+In-Reply-To: jimbo@blaze.cs.jhu.edu (Jim Williams)
+        "Re: Update" (Jun 27,  8:33pm)
+References: <9606280033.AA10649@cis.uab.edu>
+X-Mailer: Z-Mail (3.2.0 26oct94 MediaMail)
+To: jimbo@blaze.cs.jhu.edu (Jim Williams)
+Subject: Re: Update
+Cc: jj@redmont1.cis.uab.edu
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Length: 1011
+Status: OR
+
+Angular velocity is a good candidate.
+I seem to recall that this is one of the few criteria emphasized
+in the ME literature, e.g., in spacecraft control, when talking about
+orientation control.  I'll look this up again.
+And spreading the angular velocity over the entire path sounds optimal.
+Note that this is equivalent to zero acceleration, which relates
+to the optimization in Barr et. al.'s animation paper
+(they minimize tangential acceleration).
+
+I'll have to think more about whether I believe that the derivative
+of the rotation matrix is exactly angular velocity, but it sounds right.
+
+In other words, full speed ahead.
+
+> The way I have been trying to go about this mathematically is to look at the
+> position function in the quaternion world QipQ and show that if Q' is a unit
+> quaternion then d/dt(QipQ) is constant.
+
+This sort of argument is the key.
+Let me know any breakthroughs.
+
+I have been working on the first challenge (the coverage of quaternion curves
+by our map) and the writeup.
+
+John
+
+

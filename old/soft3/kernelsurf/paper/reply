@@ -1,0 +1,35 @@
+Gershon and Myung-Soo,
+
+Let me first address the reviewers' comments.
+One of the reviewers had a problem with references.
+It is integral to the kernel construction that we build
+a (Bezier) surface in dual space, with a typical primal control structure.
+The references they cite on developables use a curve in dual space to
+represent a developable surface, which is not what we do.
+Yes, this is a use of duality but otherwise different.
+We need a surface in dual space (so that the hull can be computed) not a curve,
+and a representation for arbitrary surfaces, not just developables.
+I am not aware of any dual connection to the hull using a curve in dual space.
+The most relevant reference is Hoschek's, which I would be glad to add
+as background material (and do in the tangential surface paper), although
+this again does not generate a primal control structure in dual space.
+I am not aware of any previous work on the hull/kernel duality so I cannot
+cite any suitable reference.  The only pointer to this fact was 
+Wenping's observation after the Dagstuhl talk.
+Finally, the reviewer wants an implementation of this work, 
+which I do not presently have and couldn't complete before October 31.
+
+Since the paper is too long by 13 pages, I offer to drop my section (7 pages).
+I would appreciate it if you communicated the above comments to Stefanie
+when you return the paper.
+
+Myung-Soo, just read your email.
+Your suggestion seems fine, given the hard page counts.
+I'd be happy to submit the rest elsewhere, perhaps in 
+the journals where you earlier submitted your recent intersection papers.
+
+Best regards,
+John
+
+
+

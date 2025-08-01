@@ -1,0 +1,65 @@
+From jimbo@blaze.cs.jhu.edu Thu Sep  1 10:50 CDT 1994
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from blaze.cs.jhu.edu by cis.uab.edu (5.0/SMI-SVR4)
+	id AA08304; Thu, 1 Sep 1994 10:50:12 -0500
+Received: from mail-client (peregrine.cs.jhu.edu)
+           by blaze.cs.jhu.edu; Thu, 1 Sep 94 11:51:20 EDT
+Received: by mail-client (4.1) id AA17874; Thu, 1 Sep 94 11:51:20 EDT
+Message-Id: <9409011550.AA08304@cis.uab.edu>
+From: jimbo@blaze.cs.jhu.edu (James P. Williams)
+Sender: jimbo@blaze.cs.jhu.edu
+Subject: Cusps
+To: jj@blaze.cs.jhu.edu (Dr. John Johnstone)
+Date: Thu, 1 Sep 1994 11:51:19 -0400 (EDT)
+Cc: jimbo@blaze.cs.jhu.edu (James P. Williams)
+In-Reply-To: <no.id> from "Dr. John Johnstone" at Sep 1, 94 09:40:51 am
+X-Mailer: ELM [version 2.4 PL13]
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Length: 792
+Status: OR
+
+A neat result about cusps:
+
+Let us consider the mapping M to be the composition of
+two mappings.
+
+M1: [p,q,r,s] -> [p^2 + q^2 + r^2 -s^2 , 2ps,2qs,2rs]
+
+and
+
+M2: V -> V/||V|| -- normalization
+
+
+We would like to see if M1 introduces any new cusps.  Let us
+assume that [p,q,r,s] has no cusps:
+
+M1[p,q,r,s] has a cusp iff d/dt(M1[p,q,r,s]) = [0,0,0,0]
+
+d/dt(M1[p,q,r,s]) = 	[	2pp' + 2qq' + 2rr'  - 2ss',
+				2p's + 2ps',
+				2q's + 2qs',
+				2r's + 2rs'	]
+
+d/dt(M1[p,q,r,s]) = [0,0,0,0] implies
+
+	p' = -p(s'/s)
+	q' = -q(s'/s)
+	r' = -r(s'/s)
+
+substituting into {2pp' + 2qq' + 2rr'  - 2ss'} we get :
+
+	-2p^2(s'/s)-2q^2(s'/s)-2r^2(s'/s) -2s's = 0
+
+multiply through by -(s/s')/2 to yield :
+
+	p^2 + q^2 + r^2 + s^2 = 0
+
+
+THEREFORE : M1 introduces a cusp IFF [p,q,r,s] passes through [0,0,0,0]
+
+
+
+Jim
+

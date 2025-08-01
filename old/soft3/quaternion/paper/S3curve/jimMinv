@@ -1,0 +1,36 @@
+> 
+> Did I remember to send you the mail about
+> 
+> Minv(kq) = sqrt(k)Minv(q) and all the stuff about
+> how we could have used a linear system and bought 
+> a few more degrees of freedom?
+> 
+> 	No, I haven't received anything about that.
+> 
+> 	Thanks for the notes: I'll look them over 
+> 	and incorporate them.
+> 
+> John
+> 
+
+
+This was the gist of the mail. We are actually making
+a simplifying assumption in choosing the projective 
+point  (1,q) for the quaternion q
+
+Note that:
+
+Minv(1,q) != Minv(k,kq)
+
+but Minv(k*(1,q)) = sqrt(k)*Minv(1,q)
+and
+M(kx) = k^2*M(x) so
+
+M(Minv(k*(1,q))) = M(sqrt(k)*Minv(1,q)) = k^2 * M(Minv(1,q))
+
+so, for every qi we interpolate we actually have a choice
+of any k*(1,qi), so we are just choosing k=1 to simplify it
+to an interpolation problem, otherwise it would be a line 
+interpolation problem and more similar to Dietz et al.
+
+Jim

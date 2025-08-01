@@ -1,0 +1,14 @@
+There is a dependency between the various software packages
+in this directory:
+        geometry
+            Dstruct
+                Mesh
+                    lib
+Note, however, that the dependency on geometry can be removed
+from both Dstruct and Mesh (the Dstruct dependency is in a
+utility library, and the Mesh dependency is in the UserData).
+
+There are three Schemes directories:
+	FSchemes 	- some functional data fitting schemes
+	PSchemes	- some parametetric data fitting schemes
+	RSchemes	- some research data fitting schemes

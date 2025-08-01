@@ -1,0 +1,24 @@
+#! /bin/csh -f
+# File: swept/Script
+# Author: John K. Johnstone
+# Last Modified: 5 April 1995
+# Purpose: demo script
+
+cd /usr/people/jj/swept;
+cp POS.coke POS.input; cp curve.circle curve.input
+
+./sweep -s > sweep.out;
+./sweep -i > sweep.out
+set Pause = ($<)
+
+cp POS.canoe POS.input; cp curve.canoe curve.input
+
+./sweep -s > sweep.out;
+./sweep -i > sweep.out
+set Pause = ($<)
+
+cp POS.snake POS.input; cp curve.robot curve.input
+
+./sweep -s > sweep.out;
+./sweep -i > sweep.out
+set Pause = ($<)

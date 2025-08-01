@@ -1,0 +1,123 @@
+.TH meshformat 5
+.SH NAME
+Mesh Format
+\- the format of a mesh file.
+
+.SH DESCRIPTION
+A mesh is a topological data structure for representing 2-manifolds.
+The mesh library, mesh 3, provides a procedural interface for
+traversing a mesh.  This document describes the external format
+of a mesh.
+
+
+The CNF format of a mesh is:
+
+.EX
+meshfile 	:	pointfacelist mesh
+	 	|	mesh
+		;
+
+pointfacelist	:	pointfacelist point
+		|	pointfacelist face
+		|	point
+		|	face
+		;
+
+point		:	ident '=' dstruct
+		| 	ident ';'
+		;
+pointdata	:	STRING_TOKEN
+		;
+
+face		:	ident '=' facedata
+		;
+facedata	:	'[' namedPointList ']' dstruct
+		|	'[' namedPointList ']' ';'
+		;
+
+namedPointList	:	pointName
+		|	namedPointList ',' pointName
+		;
+
+pointName	:	IDENT
+		|	pointdata
+		;
+
+mesh		:	ident '=' '{' namedFaceList '}'  dstruct
+		|	ident '=' '{' namedFaceList '}' ';'
+		;
+
+namedFaceList	:	faceName
+		|	vertexName
+		|	namedFaceList ',' faceName
+		|	namedFaceList ',' vertexName
+		;
+
+faceName	:	IDENT
+		|	facedata
+		;
+ 
+ident		:	IDENT
+		;
+
+.EE
+
+NOTE -- "dstruct" above is a dstruct.  See the documentation
+on dstructs for their format.  In particular, note that a
+dstruct is terminated by a ';'.  The userdata 3 package expects
+a particular dstruct format for geometry at the vertices.
+
+Implicit in the above are edges.  Edges are formed from adjacent
+vertices in a face.  A future release should allow for explicit
+representation of edges.  This would only be useful for associating
+data with an edge; any edge listed would also need to appear in a
+face.
+
+Note that there are several restrictions on a mesh not imposed by the
+above grammar.  First, each face must have three or more
+edges/vertices.  Second, only two faces may share an edge, and these
+edge must have opposite orientation in these faces (i.e., [a,b,c] and
+[b,a,d] are legal but [a,b,c] and [a,b,d] is illegal).  A third
+restriction concerns bounary edges.  An edge which occurs in only one
+face is a boundary edge.  There may be at most two boundary edges
+incident to a vertex.
+
+Only the faces listed in the mesh will be part of the mesh.  
+The vertices of the mesh will be those vertices that are part of
+a face that is listed in the mesh and the vertices explicitly listed
+in the mesh.
+
+.SH Example
+.EX
+
+%
+% Author: Charles Loop
+% Purpose: An octahedron
+%
+%	-e 3 3 3 -o -1 -1 -1 -u 0 1 0
+
+px = (Point . (pos . [1,0,0]) (norm . [1,0,0]));
+py = (Point . (pos . [0,1,0]) (norm . [0,1,0]));
+pz = (Point . (pos . [0,0,1]) (norm . [0,0,1]));
+mx = (Point . (pos . [-1,0,0]) (norm . [-1,0,0]));
+my = (Point . (pos . [0,-1,0]) (norm . [0,-1,0]));
+mz = (Point . (pos . [0,0,-1]) (norm . [0,0,-1]));
+
+PPP = [px,py,pz];
+PPM = [py,px,mz];
+PMP = [pz,my,px];
+PMM = [px,my,mz];
+MPP = [mx,pz,py];
+MPM = [mx,py,mz];
+MMP = [mx,my,pz];
+MMM = [mz,my,mx];
+
+mesh = {PPP,PMP,MPP,MMP,PPM,PMM,MPM,MMM};
+
+.EE
+
+.SH SEE ALSO
+dstruct(3), mesh(3), operators(3), userdata(3)
+
+.SH DATE
+November 12, 1991

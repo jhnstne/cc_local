@@ -1,0 +1,106 @@
+From jimbo@blaze.cs.jhu.edu Mon Aug 29 13:56:25 1994
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from blaze.cs.jhu.edu by cis.uab.edu (4.1/SMI-4.1)
+	id AA29266; Mon, 29 Aug 94 13:56:23 CDT
+Message-Id: <9408291856.AA29266@cis.uab.edu>
+Received: from mail-client (peregrine.cs.jhu.edu)
+           by blaze.cs.jhu.edu; Mon, 29 Aug 94 14:56:21 EDT
+From: jimbo@blaze.cs.jhu.edu (James P. Williams)
+Sender: jimbo@blaze.cs.jhu.edu
+Received: by mail-client (4.1) id AA06292; Mon, 29 Aug 94 14:56:21 EDT
+Subject: Status
+To: jj@cis.uab.edu (John Johnstone)
+Date: Mon, 29 Aug 1994 14:56:20 -0400 (EDT)
+Cc: jimbo@blaze.cs.jhu.edu (James P. Williams)
+In-Reply-To: <9408241448.AA19757@cis.uab.edu> from "John Johnstone" at Aug 24, 94 09:48:40 am
+X-Mailer: ELM [version 2.4 PL13]
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Content-Length: 3168
+Status: OR
+
+This is where we seem to be at so far:
+
+We have a well defined, simple method of constructing rational curves
+on the 4-sphere.  This is not entirely a new thing. Earlier, you gave
+me a chapter of a thesis titled "Chapter 4: Interpolation on Quadric
+Surfaces by Rational Quadratic Spline Curves" in which the 4-sphere
+problem and Shoemake are cited, but the technique is complex, and somewhat
+limited and unapproachable.
+
+Our advantage is that any interpolation/approximation method can be 
+plugged into our inverse mapping technique.  Here are some applications:
+
+I.	Q : I have a curve for which I know the differential geometry.
+	I would like to sweep an oriented cross-section along this
+	curve that follows the orientation of the moving trihedral.
+
+	A : 	Derive non-rational expressions for the euler angles of
+	the moving trihedral with respect to the base frame, t=0.  
+	
+		Use Shoemake's euler -> quaternion mapping to create a 
+	non-rational quaternion curve Q.  
+
+		Apply Minverse to Q to get a non-rational 
+	4-space curve --  Qinverse.  
+
+		Approximate Qinverse with a rational
+	curve Qinverse_approx.  There is much work in the literature
+	devoted to approximating a non-rational curve with a BSpline,
+	any technique will work.  We need not develop our own method 
+	or even specify what we would recommend.
+
+		Apply M to Qinverse_approx yielding a unit quaternion
+	curve Qapprox.
+
+		Construct a parametric rotation matrix using Qapprox.
+
+		Generate the surface.
+
+
+II.	Q: I  have a planar hole H1 in surface A, and a planar
+		 hole H2 in surface B.  
+	H1 is described by the function F1 and the orientation O1, likewise
+	H2 is described by F2 and O2.  I want to create a closed surface
+	to join A and B at H1 and H2. Assume that F1 and F2 are Bezier curves
+	or Bsplines.
+
+
+	A :  First, connect the centers of H1 and H2 with a spine curve S.
+		Assume the user will specify this spine curve S. 
+	What we have is and inital cross section & orientation [F1,01]
+		and a final [F2,O2].  It would be nice if we could use
+		the diff. geom. of S to guide our construction of the blend.
+		We would want to twist the cross section at about the same
+		rate as the trihedral of S.  The problem is that the 
+		Osculating plane may not match what we want it to be 
+		when the curve intersects H2.  We need to apply some twist
+		T to force the match.
+	Follow the method in I, but instead of using just the trihedral,
+		use a corrected trihedral derived by applying a percentage
+		of the twist T to the true trihedral.  The percentage of
+		T applied should be based on the arc length of the curve
+		traversed.  Interpolation between F1 and F2 should also be
+		linear interpolation based on arc length traversed.
+
+
+These were given to illustrate some possible surface-oriented problems.
+
+
+What we should create:
+
+	We should be able to specify a curve of infinite precision, but
+	unknown representation that lies on the quaternion sphere and
+	be able to generate a rational approximation to it based on some
+	desired precision.
+
+	We should also be able to specify a number of points on the
+	quaternion sphere and generate a rational interpolate for them.
+
+
+
+Any thoughts?
+
+Jim
+

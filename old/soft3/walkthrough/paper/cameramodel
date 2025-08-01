@@ -1,0 +1,18 @@
+\section{Camera Model}
+We need more than just the path of the camera to determine collisions.
+The virtual camera is just a point, but the visible volume is a rectangular
+frustum defined by certain camera parameters.
+These camera parameters are field of view along both the x and y axis ($fovx$
+and $fovy$) and the distance from the point camera that define the front and
+back of the frustum ($near$ and $far$).
+The planes used to make the front and back of the frustum are called the near
+and far clipping planes.
+The diagram below shows how these four parameters define the visible volume.
+
+%insert figure here
+
+When trying to determine collisions, the near clipping plane is what interests
+us.
+It is like the ``lens'' of the virtual camera.
+If any scene geometry collides with the near clipping plane (NCP from now on)
+then it is like the lens of the camera is running into that scene geometry.

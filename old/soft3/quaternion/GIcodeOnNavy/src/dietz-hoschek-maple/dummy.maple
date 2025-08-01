@@ -1,0 +1,37 @@
+
+
+
+# cutting curve
+CUD := [CUX,CUY,CUZ,CUW/RADIUS];
+
+# rotation curve
+RTHD := [RTW,RTX,RTY,RTZ];
+
+# homogenize rotation curve
+RTD := htoc(RTHD);
+
+MR1 := vector(RTD);
+MR2 := vector([-RTD[3],0,RTD[1]]);
+MR3 := crossprod(MR1,MR2);
+
+
+DRMATRIX := matrix(4,4,
+			[
+			MR1[1],MR1[2],MR1[3],0,
+			MR2[1],MR2[2],MR2[3],0,
+			MR3[1],MR3[2],MR3[3],0,		
+			0,0,0,1
+			]);	
+DOFFSET := [DIRX/DIRW,DIRY/DIRW,DIRZ/DIRW];
+
+DU1 := multiply(DRMATRIX,CUD);
+DU2 := vector([DU1[1]/DU1[4],DU1[2]/DU1[4],DU1[3]/DU1[4]]);
+DU3 := add(vector(DOFFSET),DU2);
+
+
+
+
+
+
+
+

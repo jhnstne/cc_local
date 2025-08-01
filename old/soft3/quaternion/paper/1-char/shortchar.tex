@@ -1,0 +1,220 @@
+\documentstyle[11pt]{article}
+\newif\ifFull
+\Fullfalse
+% use Fulltrue for technical report version, with 1) proof of Kubota's
+% version of necessary condition, and 2) footnote about path planning and
+% configuration space on page 1
+\input{header}
+\SingleSpace
+
+\setlength{\oddsidemargin}{0pt}
+%\setlength{\topmargin}{-.25in}	% technically should be 0pt for 1in
+\setlength{\headsep}{3em}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+\setlength{\columnsep}{5mm}		% width of gutter between columns
+
+\markright{Maps to the sphere: \today \hfill}
+\pagestyle{myheadings}
+
+% -----------------------------------------------------------------------------
+
+\title{A Characterization of Rational Maps of $\Re^n$ to \Sn{n-1}\\for Riemannian Modeling}
+% : A Tool for Modeling upon a Surface}
+%\title{A Characterization of Rational Maps to the Sphere}
+\author{J.K. Johnstone}
+
+\begin{document}
+\maketitle
+
+\clearpage
+
+\noindent Consider a rational map from $\Re^4$ to \Sn{3}:
+\[
+	(x_1,\ldots,x_4) \mapsto
+	(\frac{f_1(x_1,\ldots,x_4)}{f_{5}(x_1,\ldots,x_4)}, \ldots,
+	 \frac{f_4(x_1,\ldots,x_4)}{f_{5}(x_1,\ldots,x_4)})
+\]
+where $f_1,\ldots,f_{5}$ are polynomials.
+Since the image lies on \Sn{3}, $f_1^2 + \cdots + f_4^2 = f_{5}^2$.
+This is called a Pythagorean quintuple.\footnote{This term derives
+	from the Pythagorean Theorem on right triangles,
+	which involves Pythagorean triples.}
+\begin{defn2}
+$(a_1,\ldots,a_{5}) \in K^{n+1}$
+is a {\bf Pythagorean quintuple over $K$} 
+if $a_1^2 + \ldots + a_4^2 = a_5^2$.
+\end{defn2}
+%
+Thus, the study of rational maps from $\Re^{4}$ to \Sn{3}\ 
+is equivalent to the study of Pythagorean quintuples of polynomials.
+Pythagorean quintuples involve the sum of four squares.
+In the number theory literature, there is an extensive study of the
+sum of four squares (driven by the search for a proof that
+every positive integer is the sum of the squares of four integers \cite{dickson52}).
+An important result was developed by Euler,\footnote{This result shows that the product of a sum of four squares and a sum of four
+	squares is another sum of four squares.
+	This reduces the problem of showing that every {\em integer} is the sum
+	of four squares to the simpler problem
+	of showing that every {\em prime} is the sum of four squares,
+	since every integer can be expressed as the product of primes.}
+which we can use to build Pythagorean quintuples, 
+and then a characterization of maps to \Sn{3}.
+
+\begin{lemma}[Euler's Four Squares Theorem \cite{herstein75}]	
+% p. 373 of Herstein
+\[
+\begin{array}{ll}
+& (a_1^2 + a_2^2 + a_3^2 + a_4^2) 
+(\hat{a}^2_1 + \hat{a}^2_2 + \hat{a}^2_3 + \hat{a}^2_4) = \\
+& (a_1 \hat{a}_1 - a_2\hat{a}_2 - a_3\hat{a}_3 - a_4\hat{a}_4)^2 +
+   (a_1\hat{a}_2 + a_2\hat{a}_1 + a_3\hat{a}_4 - a_4\hat{a}_3)^2 + \\
+& (a_1\hat{a}_3 - a_2\hat{a}_4 + a_3\hat{a}_1 + a_4\hat{a}_2)^2 +
+   (a_1\hat{a}_4 + a_2\hat{a}_3 - a_3\hat{a}_2 + a_4\hat{a}_1)^2
+\end{array}
+\]
+where $a_1,a_2,a_3,a_4,\hat{a}_1,\hat{a}_2,\hat{a}_3,\hat{a}_4$ are elements of a
+commutative ring.
+% \footnote{The original statement was for integers, but it easily generalizes.}
+% see p. 210 of Ebbinghaus
+\end{lemma}
+
+\begin{corollary}
+\label{lem:suff4}
+$(a_1^2 + a_2^2 + a_3^2 - a_4^2,\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,\ 
+ a_1^2 + a_2^2 + a_3^2 + a_4^2)$
+is a Pythagorean quintuple for any polynomials $a_1,a_2,a_3,a_4$.
+\end{corollary}
+\prf
+Let $(\hat{a}_1,\hat{a}_2,\hat{a}_3,\hat{a}_4) = (a_1,-a_2,-a_3,a_4)$. 
+\QED
+
+\noindent The following lemma establishes a weaker version of the necessary condition
+associated with Corollary~\ref{lem:suff4}.
+This in turn leads to the desired necessary and sufficient condition for rational maps
+of $\Re^4$ to \Sn{3}.
+
+\begin{lemma}
+\label{thm:necessary4}
+A quintuple of polynomials is Pythagorean only if it can be expressed in the form
+\begin{equation}
+\label{eq:pyth}
+	\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+		\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+		\ a_1^2 + a_2^2 + a_3^2 + a_4^2)
+\end{equation}
+for some polynomials $a_1,a_2,a_3,a_4,\frac{1}{\alpha}$.
+\end{lemma}
+\prf
+Let $(p_1,p_2,p_3,p_4,p_5)$ be a Pythagorean quintuple of polynomials.
+If $p_1 = p_5$, let\\
+$(a_1,a_2,a_3,a_4,\alpha) = (p_1,0,0,0,\frac{1}{p_1})$.
+Thus, we may assume without loss of generality that $p_1 \neq p_5$.
+Let $(a_1,a_2,a_3,a_4,\alpha) = (p_2,p_3,p_4,p_5-p_1,\frac{1}{2(p_5 - p_1)})$.
+Then $a_1,a_2,a_3,a_4,\alpha$ generate the Pythagorean quintuple
+$(p_1,\ldots,p_5)$ as in (\ref{eq:pyth}).
+In particular,
+\[
+\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2)
+= \frac{p_2^2 + p_3^2 + p_4^2 - (p_5 - p_1)^2}{2(p_5-p_1)}
+\]
+and applying $p_1^2 + p_2^2 + p_3^2 + p_4^2 = p_5^2$,
+\[
+\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2) = \frac{-2p_1^2 + 2p_1p_5}{2(p_5 - p_1)} = p_1.
+\]
+Also, 
+\[
+\alpha (2a_i a_4) = \frac{2p_{i+1}(p_5 - p_1)}{2(p_5 - p_1)} = p_{i+1}
+\]
+for $i=1,2,3$.
+Finally, 
+\[
+\alpha(a_1^2 + a_2^2 + a_3^2 + a_4^2) 
+= \frac{p_2^2 + p_3^2 + p_4^2 + (p_5 - p_1)^2}{2(p_5-p_1)} = p_5
+\]
+Thus, $(p_1,p_2,p_3,p_4,p_5) = \alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+		\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+		\ a_1^2 + a_2^2 + a_3^2 + a_4^2)$.
+\QED
+
+\begin{corollary}
+\label{thm:map4}
+A map is a rational map of $\Re^4$ to \Sn{3}\ if and only if
+it is of the form:
+\begin{equation}
+\label{eq:re4s3}
+\small{(x_1,x_2,x_3,x_4)} \mapsto 
+\small{(\frac{a_1^2 + a_2^2 + a_3^2 - a_4^2}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+	 \frac{2a_1a_4}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+	 \frac{2a_2a_4}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+	 \frac{2a_3a_4}{a_1^2 + a_2^2 + a_3^2 + a_4^2})}
+\end{equation}
+where $a_1,a_2,a_3,a_4$ are polynomials over $x_1,x_2,x_3,x_4$
+(or some permutation of this form).\footnote{This result generalizes
+	to rational maps from $\Re^n$ to \Sn{n-1}, $n \geq 2$,
+	using an identical proof.
+	That is, a map is a rational map of $\Re^n$ to \Sn{n-1}, $n \geq 2$, 
+	if and only if it is of the form:
+\[
+	(x_1,\ldots,x_n) \mapsto
+	(\frac{a_1^2 + \cdots + a_{n-1}^2 - a_n^2}{a_1^2 + \cdots + a_n^2},
+	 \frac{2a_1a_n}{a_1^2 + \cdots + a_n^2},
+	 \ldots,
+	 \frac{2a_{n-1}a_n}{a_1^2 + \cdots + a_n^2})
+\]
+where $a_1,\ldots,a_n$ are polynomials over $x_1,\ldots,x_n$.}
+\end{corollary}
+\prf
+Consider a rational map
+of $\Re^4$ to \Sn{3}, $(x_1,x_2,x_3,x_4) \mapsto 
+(\frac{f_1}{f_5},\frac{f_2}{f_5},\frac{f_3}{f_5},\frac{f_4}{f_5})$,
+where $f_1,\ldots,f_5$ are polynomials over $x_1,\ldots,x_4$.
+Then $(f_1,\ldots,f_5)$ is a Pythagorean quintuple
+so it can be expressed in the normal form
+$(f_1,\ldots,f_4,f_5) = \alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+2a_1a_4,2a_2a_4,2a_3a_4,$ $a_1^2 + a_2^2 + a_3^2 + a_4^2)$
+for some polynomials $a_1,a_2,a_3,a_4,\frac{1}{\alpha}$
+by Lemma~\ref{thm:necessary4}.
+Thus, the map is of the form (\ref{eq:re4s3}), since the leading $\alpha$
+cancels when expressed in 
+$(\frac{f_1}{f_5},\frac{f_2}{f_5},\frac{f_3}{f_5},\frac{f_4}{f_5})$.
+Notice that it is legal to cancel the $\alpha$, since
+$\alpha = \frac{1}{\beta}$ for some polynomial $\beta$,
+which implies that $\alpha$ is never zero.
+
+Now consider a map of the form (\ref{eq:re4s3}).
+This is a rational map of $\Re^4$ to \Sn{3}\ by Corollary~\ref{lem:suff4}.
+\QED
+
+The most natural choice for $a_i$ ($a_i=x_i$) and the identity permutation
+yields the rational map
+\[
+(x_1,x_2,x_3,x_4) \mapsto 
+	(\frac{x_1^2 + x_2^2 + x_3^2 - x_4^2}{x_1^2 + x_2^2 + x_3^2 + x_4^2},
+	 \frac{2x_1x_4}{x_1^2 + x_2^2 + x_3^2 + x_4^2}, 
+	 \frac{2x_2x_4}{x_1^2 + x_2^2 + x_3^2 + x_4^2}, 
+	 \frac{2x_3x_4}{x_1^2 + x_2^2 + x_3^2 + x_4^2})
+\]
+of $\Re^4$ to \Sn{3}.
+We call this the {\bf most natural} map from $\Re^4$ to \Sn{3}.
+It is discussed further in \cite{jj98}.
+
+\bibliographystyle{plain}
+\begin{thebibliography}{Johnstone 98}
+
+\bibitem[Dickson 52]{dickson52}
+Dickson, L.E. (1952) History of the Theory of Numbers: Volume II,
+Diophantine Analysis.  Chelsea (New York).
+
+\bibitem[Herstein 75]{herstein75}
+Herstein, I. (1975) Topics in Algebra.
+2nd edition, John Wiley (New York).
+
+\bibitem[Johnstone 98]{jj98}
+Johnstone, J. (1998)
+The Most Natural Map to the Sphere.
+Technical Report 98-02, CIS Dept., UAB.
+
+\end{thebibliography}
+
+\end{document}

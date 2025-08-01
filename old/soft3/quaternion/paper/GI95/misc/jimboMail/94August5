@@ -1,0 +1,64 @@
+From jimbo@blaze.cs.jhu.edu Fri Aug  5 12:35:23 1994
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from blaze.cs.jhu.edu by cis.uab.edu (4.1/SMI-4.1)
+	id AA07691; Fri, 5 Aug 94 12:35:20 CDT
+Message-Id: <9408051735.AA07691@cis.uab.edu>
+Received: from mail-client (peregrine.cs.jhu.edu)
+           by blaze.cs.jhu.edu; Fri, 5 Aug 94 13:35:19 EDT
+From: jimbo@blaze.cs.jhu.edu (James P. Williams)
+Sender: jimbo@blaze.cs.jhu.edu
+Received: by mail-client (4.1) id AA14465; Fri, 5 Aug 94 13:35:18 EDT
+Date: Fri, 5 Aug 94 13:35:18 EDT
+To: johnstone@cis.uab.edu
+Subject: status
+Cc: jimbo@blaze.cs.jhu.edu
+Status: OR
+
+This is what we have to work with:
+
+
+For canal surfaces -- those surfaces for which we wish to sweep a 
+circular cross section -- we can specify the path as an arbitrary
+Bezier curve and then create a Dietz-Hoschek curve that will serve
+as the pseudo-derivative of the path.  The handwritten sheet of
+calculations that I gave you allows me to extract an otrhonormal
+system from a DH curve.
+
+Extension of this to splines:
+
+Section 4, page 227 of the DH paper gives an extension of the technique
+for generating Bezier curves on the sphere to B-Splines on the sphere.
+Since DH treats this fairly abstractly, I would probably want to do the
+same in a writeup, concentrating on the case of a single Bezier curve.
+
+Non-Circular cross sections:
+
+Oriented systems require us to create curves on the 4-sphere.  This
+extends things to pythagorean quintuples (a^2+b^2+c^2+d^2=e^2) and 
+we have the following sufficient condition detailing the restrictions
+on the coefficients of a-e:
+
+We will use 4 "generating polynomials" of degree K named p,q,r,s.
+
+a = p^2 + q^2 + r^2 -s^2
+b = 2*p*s
+c = 2*q*s
+d = 2*r*s
+e = p^2 + q^2 + r^2 + s^2
+
+We must find a general symbolic solution to this system in order for this
+to be useful AND prove that this solution is always real.
+
+QUATERNION to MATRIX and back
+
+Conversion from quaternions to matrices require only additions and multiplications.
+The curves on the 4 sphere are quaternion curves.  Conversion to matrix curves
+is given in (Shoemake, SIGGRAPH '85 p 253)
+
+Conversion from matrix to Quaternion involves irrational operations, but this
+is ok, since such conversions would take place prior to constructing the
+curve on the 4-sphere.
+
+Jim
+
+

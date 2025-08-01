@@ -1,0 +1,59 @@
+From jimbo@blaze.cs.jhu.edu Thu Oct 20 12:56 CDT 1994
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from blaze.cs.jhu.edu by cis.uab.edu (5.0/SMI-SVR4)
+	id AA13794; Thu, 20 Oct 1994 12:56:51 -0500
+Received: from mail-client (peregrine.cs.jhu.edu)
+           by blaze.cs.jhu.edu; Thu, 20 Oct 94 13:56:46 EDT
+Received: by mail-client (4.1) id AA12476; Thu, 20 Oct 94 13:55:48 EDT
+Message-Id: <9410201756.AA13794@cis.uab.edu>
+From: jimbo@blaze.cs.jhu.edu (James P. Williams)
+Sender: jimbo@blaze.cs.jhu.edu
+Subject: Re: Cusp proof
+To: jj@redmont1.cis.uab.edu (John Johnstone)
+Date: Thu, 20 Oct 1994 13:55:47 -0400 (EDT)
+Cc: jimbo@blaze.cs.jhu.edu (James P. Williams)
+In-Reply-To: <9410192142.AA07964@cis.uab.edu> from "John Johnstone" at Oct 19, 94 04:42:41 pm
+X-Mailer: ELM [version 2.4 PL13]
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Length: 981
+Status: OR
+
+> 
+> I like your new proof of the second half.
+> Now the only potential problem is that origin avoidance
+> doesn't quite avoid introduction of cusps by M1:
+> M1 also introduces cusps if (s=0,s'\neq 0)
+> or (s'=0,s \neq 0) or (s=0,s'=0,pp'+qq'+rr'=0).
+> (Be careful with division by 0.)
+> I'm trying to figure out an elegant way of classifying
+> those types, or maybe some of them disappear...
+> 
+> John
+> 
+
+I can't say too much for elegance, but here is another
+way of looking at the problem:
+
+	| s 0 0 p | | p' |   	
+	| 0 s 0 q | | q' |       
+	| 0 0 s r | | r' |    =   | 0 0 0 0 |
+	| p q r s | | s' |
+
+What can we say about this system of first order ODE's?
+I am woefully deficient in ODE-system solving knowlege.
+
+What is nifty is that if s=s'=0, then we get the geometric
+condition <V,V'> != 0.
+
+Also consider, in order for this system to have a non-trivial
+solution, the matrix on the lhs must have det = 0, or more simply,
+the rows may NOT be linearly independent.
+
+Jim
+
+
+
+
+

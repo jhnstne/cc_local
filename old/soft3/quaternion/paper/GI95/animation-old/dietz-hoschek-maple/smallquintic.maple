@@ -1,0 +1,79 @@
+
+# Test programs for finding quintic pyth. hodograph
+# bezier curves
+
+# P0,P1,P2,P3 will be quadratic bezier curves
+
+
+read `genutils.maple`;
+read `bezutils.maple`;
+
+P0 := vector([p00,p01,p02]);
+P1 := vector([p10,p11,p12]);
+P2 := vector([p20,p21,p22]);
+P3 := vector([p30,p31,p32]);
+
+# XT, YT, ZT will be quintic bezier curves
+
+XT := vector([x0,x1,x2,x3,x4,x5]);
+YT := vector([y0,y1,y2,y3,y4,y5]);
+ZT := vector([z0,z1,z2,z3,z4,z5]);
+
+
+# compute the first derivatives of the primary curves
+
+XTprime := bezdiff(XT,5);
+YTprime := bezdiff(YT,5);
+ZTprime := bezdiff(ZT,5);
+
+
+# impose the restrictions
+
+x1 := add(scalarmul(bezproduct(P0,2,P1,2),2),
+	  scalarmul(bezproduct(P2,2,P3,2),-2));
+
+
+x2 := add(scalarmul(bezproduct(P1,2,P3,2),2),
+	  scalarmul(bezproduct(P0,2,P2,2),2));
+
+
+x3 := add(
+	add(bezproduct(P1,2,P1,2),bezproduct(P2,2,P2,2)),
+	scalarmul(	
+		add(bezproduct(P0,2,P0,2),bezproduct(P3,2,P3,2)),-1));
+
+eqX := vector(5);
+eqY := vector(5);
+eqZ := vector(5);
+eqall := vector(15);
+
+for i from 1 to 5 do
+	eqX[i] := (x1[i] - XTprime[i]);
+	eqY[i] := (x2[i] - YTprime[i]);
+	eqZ[i] := (x3[i] - ZTprime[i]);
+	eqall[i] := eqX[i];
+	eqall[i+5] := eqY[i];
+	eqall[i+10] := eqZ[i];
+od;
+
+esys1 := {eqall[1],eqall[2],eqall[3],eqall[4],eqall[5],
+	eqall[6],eqall[7],eqall[8],eqall[9],eqall[10],
+	eqall[11],eqall[12],eqall[13],eqall[14],eqall[15]};
+
+sys1 := {eqall[1],eqall[6],eqall[11]};
+sys2 := {eqall[5],eqall[10],eqall[15]};
+sys3 := {eqall[2]+eqall[3]+eqall[4],eqall[7]+eqall[8]+eqall[9],
+	eqall[12]+eqall[13]+eqall[14]};
+
+
+
+
+subrules := {x0=0,y0=0,z0=0,x5=0,y5=0,z5=1,x1=0};
+
+#subrules := {x0=0,y0=0,z0=0,x1=1,y1=1,z1=1,x4=0,y4=3,z4=2,x5=1,y5=4,z5=3};
+#subrules := {x0=0,y0=0,z0=0};
+
+sys1a := subs(subrules,sys1);
+sys2a := subs(subrules,sys2);
+sys3a := subs(subrules,sys3);
+

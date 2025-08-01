@@ -1,0 +1,68 @@
+.TH commandline 3
+
+.SH NAME
+commandline
+
+.SH SYNOPSIS
+A package for parsing a C program command line.
+
+.SH SYNTAX
+
+.B #include "commandline.h"
+
+.SH DESCRIPTION:
+
+This package provides support for command line options
+with relatively automatic help.
+
+TO ADD AN OPTION:
+
+Create a handling function defined such as SetX below, forward declare
+it, then add a line to the Options table.
+
+The handling function can expect to find its first argument in
+argv[0], the second in argv[1], and so on.
+An example handler expecting one numeric argument:
+
+.nf
+      void SetX(argv)
+      char **argv;
+      {
+          int x;
+
+          x = atoi( argv[0]);
+       }
+.fi
+
+A program should then declare an array Options to be of type Option,
+and initialize.  The array should be terminated by a null entry.
+Example:
+
+.nf
+Option Options[] = {
+/*  Name     Handler     #args   helpstring  */
+"X",	     SetX,	 1,	 "Set x.",
+0,	     0,	 	 0,	 0
+};
+.fi
+
+Two other external variables must be declared and set:
+.nf
+.B char *Banner;
+.B char *UsageString;
+.fi
+Banner should be the name of the program.
+UsageString should give a synopsis on how to use the command.
+
+To parse the arguments, a call to ParseCommandLine() is made.
+
+.nf
+.B ParseCommandLine(argc, argv)
+.B int argc;
+.B char* argv[];
+.fi
+
+Parse the command line argv.
+
+.SH DATE
+January 3, 1992

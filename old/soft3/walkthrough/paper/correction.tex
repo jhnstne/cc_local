@@ -1,0 +1,144 @@
+\section{Collision correction}
+Our strategy for correcting collsions is to repeatedly insert new keyframes in
+parts of the curve where collisions occur.
+Since the position curve is constrained to go through the keyframes, if we 
+continue to insert new keyframes that do not intersect the scene in parts of
+the curve where there are collisions, then we will eventually push that part
+of the curve away from the intersections.
+
+First we calculate parameter intervals of $c_{i}(t)$ where collisions exist.
+We will choose the middle of this parameter interval as the place to insert
+the new keyframe.
+As already stated, there are two components to a keyframe, position and 
+orientation.
+Then we must compute $P_{k}$ and $O_{k}$, the position and orientation of the
+new keyframe.
+So the main steps of the collision correction algorithm are calculating
+parameter intervals where collisions occur, computing $O_{k}$, and computing
+$P_{k}$.
+
+\subsection{Computing Parameter Intervals}
+The goal is to find parameter values $t_{i}$ and $t_{f}$ that mark the initial
+and final parameter values of $c_{i}(t)$ where a collision occurs.
+We use the corner curves rather than $P(t)$ because our triangles are
+generated from the corner curves as shown previously.
+This is important because we want to identify and correct collisions in order.
+Correction of one interval may introduce another problem later, so we would
+like detect and correct in order.
+Realizing that each vertex of each triangle in $T_{p}$ has an associated
+parameter value, we can sort them by lowest parameter value vertex.
+We will then intersect each triangle with the scene in this sorted order.
+While intersecting, we want to keep track of two parameter values, $t_{a}$ and
+$t_{b}$.
+$t_{a}$ is the lowest parameter value associated with a vertex of the most
+recent triangle that was found to have no intersections with the scene.
+It provides a lower bound on the value of $t_{i}$.
+$t_{b}$ is the highest parameter value associated with a vertex of the first
+triangle found to have an intersection with the scene.
+So as we intersect each triangle with the scene in sorted order, if the
+triangle has no intersections with the scene, $t_{a}$ is updated to the
+lowest parameter value associated with a vertex of that triangle.
+If there is an intersection, then $t_{b}$ is updated to the highest parameter
+value associated with a vertex of that triangle.
+The figure below illustrates this process.
+
+%figure
+
+With $t_{a}$ and $t_{b}$ providing a lower and upper bound for the value of
+$t_{i}$, we perform a type of binary search over this interval.
+We choose $t_{mid} = (t_{a} + t{b}) / 2$ and calculate the point at $t_mid$ of
+each of the corner curves.
+Break the rectangle formed by connectiong those points into two triangles and
+intersect them with the scene.
+If neither triangle interesects the scene geometry, then recursively search
+along the interval from $t_{a}$ to $t_{mid}$.
+Otherwise, recursively search on the interval from $t_{mid}$ to $t_{b}$.
+Eventually the bounds of the search will converge to a number.
+This number is $t_{i}$, the intial point of the parameter interval.
+The same process can be applied to find the end point of the parameter
+interval.
+
+\subsection{Computing $O_{k}$}
+At the moment, we do not pay much attention to the calculation of $O_{k}$.
+We now take $t_{mid} = (t_{i} + t{f}) / 2$ and want to figure out what $Q(t)$
+is at this parameter value.
+A problem emerges because $t_{mid}$ is a parameter value on the corner curves,
+which are not parameterized the same as $Q_{t}$.
+Although they have different parameteriziations, they are guaranteed to have
+the same number of curve segments.
+So we can find the parameter value that corresponds to $t_{mid}$ for $Q(t)$ 
+by using linear interpolation.
+We will call this value $t_{mid}'$
+We find the knot values corresponding to the endpoints of the curve segment
+that contains $t_{mid}$ and use linear interpolation to find a parameter value
+along the interval for $t_{mid}$.
+Use this parameter value to linearly interpolate between the knots of the
+corresponding curve segment of $Q(t)$ to get $t_{mid}'$.
+We choose $O_{k} =  Q(t_{mid}')$.
+
+The math is shown below.
+
+Let $k_{0}$ and $k_{1}$ be knots around the curve segment that $t_{mid}$ lies
+in.
+Let $k_{0}'$ and $k_{1}'$ be knots around the corresponding curve segment of
+Q(t).
+
+\[  (1-s)k_{0} + sk_{1} = t_{mid} \]
+\[  s = (t_{mid} - k_{0})/(k_{1} - k_{0}) \]
+\[ t_{mid}' = k_{0}'(1-s) + k_{1}'s \]
+
+\subsection{Computing $P_{k}$}
+The compuation of $P_{k}$ is a bit more complicated.
+In general, we want to start at $P(t_{mid}')$, find where the NCP intersects
+the scene there, and move away from those intersections.
+The NCP at $P(t_{mid}')$ can be calculated by finding each of the corner curves
+at $t_{mid}$.
+So the NCP has corners $c_{1}(t_{mid})$, $c_{2}(t_{mid})$, $c_{3}(t_{mid})$, 
+and $c_{3}(t_{mid})$.
+Since this is inside the interval of intersection, we know that there are
+intersections somewhere on the NCP.
+We want to find out generally where these are so that we have a guideline to 
+use for moving $P_{k}$ away from $P(t_{mid})$.
+The vector that we will move $P_{k}$ along will be called $v$.
+So we take line segments from the center of the NCP to each corner and
+classify each corner by whether there are intersections along that segment.
+If there are intersections, that corner is classified as bad otherwise it is
+good.
+We say that $v$ is the normalized sum of vectors from the center to each good
+corner.
+
+%put the math in here
+
+
+However, just that vector is not enough.
+Depending on how deep the collision is, how far the NCP protrudes through the
+scene geometry, we want to move either more or less.
+So we need to estimate some sort of depth of the collision, $d$, and use that
+to scale $v$.
+To do this, we assign a depth to each bad vertex and take the maximum vertex
+depth to be $d$.
+For each bad vertex, we intersect the adjacent edges of the NCP with the
+scene, and we record where the intersections occur.
+We take the maximum of the closest intersection on each edge as $d$.  The
+figure below illustrates this procedure.
+
+%figure here ... the one from the PPT slides
+
+Note that this procedure is not guaranteed to completely move the keyframe
+out of the scene geometry.
+It is only guaranteed that in some sense it is moving away from the problem
+areas.
+The above procedure is applied iteratively until the keyframe no longer
+intersects the scene.
+It is possible that the scene simply does not allow a path that the camera
+can fit through in the area that the user has specified.
+In that case, the iteration will continue infinitely.
+At the moment, we simply cut off the iteration after a certain number of
+steps.
+This is somewhat unsatisfactory since it may still be possible that a path
+through the given region exists, and we are investigating other conditions
+for stopping the iteration.
+
+When the new keyframe has been inserted, we also rescan the interval from
+$t_{i}$ to $t_{f}$ to make sure that the path is corrected. If needed,
+additional keyframes are recursively added over the interval.

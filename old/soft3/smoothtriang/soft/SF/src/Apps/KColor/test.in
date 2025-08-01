@@ -1,0 +1,144 @@
+
+(BezierTriangle . 
+ (degree . 1)
+ (normaldim . 3)
+ (net . 
+  [
+   (pos . 
+    [0, -1, 0])
+   (norm . 
+    [0, -1, 0]), 
+   (pos . 
+    [0, 0, 1])
+   (norm . 
+    [0, 0, 1]), 
+   (pos . 
+    [1, 0, 0])
+   (norm . 
+    [1, 0, 0])]));
+
+(BezierTriangle . 
+ (degree . 1)
+ (normaldim . 3)
+ (net . 
+  [
+   (pos . 
+    [-1, 0, 0])
+   (norm . 
+    [-1, 0, 0]), 
+   (pos . 
+    [0, 0, 1])
+   (norm . 
+    [0, 0, 1]), 
+   (pos . 
+    [0, -1, 0])
+   (norm . 
+    [0, -1, 0])]));
+
+(BezierTriangle . 
+ (degree . 1)
+ (normaldim . 3)
+ (net . 
+  [
+   (pos . 
+    [0, 1, 0])
+   (norm . 
+    [0, 1, 0]), 
+   (pos . 
+    [0, 0, 1])
+   (norm . 
+    [0, 0, 1]), 
+   (pos . 
+    [-1, 0, 0])
+   (norm . 
+    [-1, 0, 0])]));
+
+(BezierTriangle . 
+ (degree . 1)
+ (normaldim . 3)
+ (net . 
+  [
+   (pos . 
+    [1, 0, 0])
+   (norm . 
+    [1, 0, 0]), 
+   (pos . 
+    [0, 0, 1])
+   (norm . 
+    [0, 0, 1]), 
+   (pos . 
+    [0, 1, 0])
+   (norm . 
+    [0, 1, 0])]));
+
+(BezierTriangle . 
+ (degree . 1)
+ (normaldim . 3)
+ (net . 
+  [
+   (pos . 
+    [1, 0, 0])
+   (norm . 
+    [1, 0, 0]), 
+   (pos . 
+    [0, 0, -1])
+   (norm . 
+    [0, 0, -1]), 
+   (pos . 
+    [0, -1, 0])
+   (norm . 
+    [0, -1, 0])]));
+
+(BezierTriangle . 
+ (degree . 1)
+ (normaldim . 3)
+ (net . 
+  [
+   (pos . 
+    [0, -1, 0])
+   (norm . 
+    [0, -1, 0]), 
+   (pos . 
+    [0, 0, -1])
+   (norm . 
+    [0, 0, -1]), 
+   (pos . 
+    [-1, 0, 0])
+   (norm . 
+    [-1, 0, 0])]));
+
+(BezierTriangle . 
+ (degree . 1)
+ (normaldim . 3)
+ (net . 
+  [
+   (pos . 
+    [-1, 0, 0])
+   (norm . 
+    [-1, 0, 0]), 
+   (pos . 
+    [0, 0, -1])
+   (norm . 
+    [0, 0, -1]), 
+   (pos . 
+    [0, 1, 0])
+   (norm . 
+    [0, 1, 0])]));
+
+(BezierTriangle . 
+ (degree . 1)
+ (normaldim . 3)
+ (net . 
+  [
+   (pos . 
+    [0, 1, 0])
+   (norm . 
+    [0, 1, 0]), 
+   (pos . 
+    [0, 0, -1])
+   (norm . 
+    [0, 0, -1]), 
+   (pos . 
+    [1, 0, 0])
+   (norm . 
+    [1, 0, 0])]));

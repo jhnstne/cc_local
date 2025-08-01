@@ -1,0 +1,122 @@
+From spiff@redhot.graphics.cs.cmu.edu Wed Aug 18 14:27:13 1999
+From: spiff@redhot.graphics.cs.cmu.edu
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+To: jj@cis.uab.edu
+Subject: Re: Rational quaternion spline paper
+Date: Wed, 18 Aug 99 15:26:34 EDT
+Source-Info: Sender is really spiff+@redhot.graphics.cs.cmu.edu
+
+Hi John,
+	I enjoyed reading your paper.  I can definitely see the advantages
+over Kim et. al or the exp map for interpolating rotations.  I have one
+comment about the paper, and one about the approach.
+
+	I would have liked to see mention of how you choose the tangent
+control points for your Bezier curves.
+
+	If you're interested in the application of your splines to spacetime
+optimization, the following issues came to mind:
+	1) Since the control points move around during the optimization, you
+can't guarantee that they'll remain outside the initially computed empty
+region, so you'd have to check every iteration or so and potentially have to
+compute a new empty region.
+	2) If you're using euclidean interpolants in 4-space, whether you use
+your approach or the more traditional "auto-normalizing" formulae for R4->S3
+(a la Gleicher SIGGRAPH 92), you run into problems if your control points
+approach the origin in R4.  In the traditional approach, you generally put a
+constraint or penalty on each control point to maintain its unit magnitude.
+But using your preferred inverse-mapping heuristic, you actually *want* to
+allow your control points to have non-unit length - in this case, I'm not
+sure how you would prevent them from approaching the origin under numerical
+optimization. Maybe the best you can do is to use your second heuristic, thus
+applying the same constraint/penalty to keep them near S3.
+
+Again, thanks for pointing the paper out to me; it's very interesting stuff!
+(I also enjoyed the historical perspective on Euler - what a guy!)
+
+--Sebastian
+
+
+From jj Thu Aug 19 08:25:02 1999
+Date: Thu, 19 Aug 1999 08:25:01 -0500
+From: jj (John Johnstone)
+To: spiff@cs.cmu.edu
+Subject: Re: Rational quaternion spline paper
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-MD5: EChIPJLqFrdaJDyCQ3Kcnw==
+
+Sebastian,
+
+Thanks very much for your comments.
+Motivated by your course, looking into applications to spacetime
+optimization and motion editing is definitely something I want to do.
+Your comments will help direct that.  You are right that the second
+heuristic, keeping the inverse points on S3, will successfully avoid
+the origin when working in Euclidean space.  There is a formal argument
+of this fact using the convex hull property.  This on-S3 heuristic was used
+in the conference paper, but the quality of the quaternion splines
+for animation work turns out to be better with the closest heuristic so we used
+it in this paper.  There are other reasons to use the on-S3 choice,
+relating to specifying derivative information in the data (your other
+point below) and I am going to discuss these issues in a separate paper
+that I am working on now.
+
+Glad you enjoyed the discussion of Euler.
+You may be entertained by another tidbit from the mathematical lore
+associated with this problem.
+In the search for a proof that every positive integer is the sum of the squares
+of four integers (which Euler's 4-squares Theorem was attacking),
+Fermat claimed that he had a proof but `I can not give the proof here,
+which depends upon numerous and abstruse mysteries of numbers;  for I intend
+to devote an entire book to this subject.'
+Of course, he never published anything more on the subject.
+Pretty classic Fermat!  Shows that Fermat's Last Theorem was not an isolated
+case of his proof by intimidation approach.
+
+Thanks for taking the time to read the paper.
+
+Cheers,
+John
+
+From spiff@redhot.graphics.cs.cmu.edu Thu Aug 19 14:17:56 1999
+From: spiff@redhot.graphics.cs.cmu.edu
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+To: jj@cis.uab.edu
+Subject: Re: Rational quaternion spline paper
+Date: Thu, 19 Aug 99 15:17:48 EDT
+Source-Info: Sender is really spiff+@redhot.graphics.cs.cmu.edu
+
+John,
+	Thought of one more thing that would aid anyone trying to use your
+splines for spacetime: in an appendix or something, if you could present the
+formulae for b-splines, which are by far the most commonly used, due to their
+C2 continuity.
+
+Regards,
+Sebastian
+
+
+From jj Thu Aug 19 15:02:50 1999
+Date: Thu, 19 Aug 1999 15:02:49 -0500
+From: jj (John Johnstone)
+To: spiff@cs.cmu.edu
+Subject: Re: Rational quaternion spline paper
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-MD5: tl+DgZREbJGp+TrJcHBImA==
+
+OK, I'll address the issue of B-splines in a comment.
+The natural choice of interpolating curve in Euclidean space
+is the cubic B-spline, which can then be (and usually is) 
+translated to a cubic Bezier for ease of expression.
+I state the formula for the Bezier translation since it becomes
+a much simpler statement, but all of the implementation and examples
+have C^2 continuity since they actually are cubic Bsplines masquerading
+as cubic Beziers.  
+Thanks for the tip.
+
+jj
+

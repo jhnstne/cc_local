@@ -1,0 +1,45 @@
+Best to start with s3spline.c as the foundation, as it includes all of the theoretical
+	issues of singularity-avoidance
+Building Cbin/quaternion/Quaternion class now.
+
+Quaternion spline code in projectSmooth/3d/n-quaternion/GIcodeOnNavy
+-------------------------------------------------------------------
+
+pi.c: input quaternions as angle axis(?)
+
+drw.c: drawing routines (sphere, curve on sphere)
+
+fit.c: Philip Schneider's curve fitting routine
+
+keyframe.c: old animation.c (I'm not sure what's old about it)
+
+display.c: GL display routines
+
+sphereDrawing.c: version of qspline interpolation (3/95)
+
+animation.c: full version of qspline interpolation, most recent (5/95)
+
+code in EurographicsCodeOnNavy is older
+
+code in n-quaternion/paper/GI95/animation is similar
+----------------------------------------------------------
+
+quaternion classes in Cbin/quaternion
+-------------------------------------
+
+CurveOnSn: interpolation (and draw tangent circle) for quaternion splines
+	       - primitive versions; not the sophistication of earlier C versions
+	         (e.g., no perturbation)
+
+Quaternion.cpp: extracts from Beziercurve.cpp and RatBezierCurve.cpp related to qsplines:
+	createByS3Mapping and mapToSn
+
+n-quaternion/paper/3-spline/soft
+--------------------------------
+
+ravani.c:   Park and Ravani's implementation of quaternion splines
+texture.c:  texture maps that visualize different maps to the sphere
+qspline.c:  our quaternion spline interpolation, vintage 1998
+s3spline.c: our quaternion spline interpolation, vintage 1999, newer version?
+qspl.cpp:   C++ version
+

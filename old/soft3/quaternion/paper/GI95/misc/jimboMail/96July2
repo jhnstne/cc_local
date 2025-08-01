@@ -1,0 +1,46 @@
+From jj@cerulean.cis.uab.edu Tue Jul  2 09:33 CDT 1996
+Return-Path: <jj@cerulean.cis.uab.edu>
+Received: from cerulean.cis.uab.edu by cis.uab.edu (5.x/SMI-SVR4)
+	id AA03741; Tue, 2 Jul 1996 09:33:21 -0500
+Received: by cerulean.cis.uab.edu (940816.SGI.8.6.9/940406.SGI)
+	 id JAA27452; Tue, 2 Jul 1996 09:20:40 -0700
+From: "John K. Johnstone" <jj@cerulean.cis.uab.edu>
+Message-Id: <9607020920.ZM27450@cerulean.cis.uab.edu>
+Date: Tue, 2 Jul 1996 09:20:39 -0500
+In-Reply-To: jimbo@blaze.cs.jhu.edu (Jim Williams)
+        "Result On Angular Velocity" (Jun 28,  5:16pm)
+References: <9606282117.AA16081@cis.uab.edu>
+X-Mailer: Z-Mail (3.2.0 26oct94 MediaMail)
+To: jimbo@blaze.cs.jhu.edu (Jim Williams)
+Subject: Re: Result On Angular Velocity
+Cc: jj@redmont1.cis.uab.edu
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Length: 1045
+Status: OR
+
+That's a good proof that arc-length parameterized quaternion curves
+yield constant velocity of the actual object.
+Another way to see this is that the metrics of the quaternion sphere
+and rotation matrices are equivalent, so a constant speed along the
+quaternion sphere (arc-length param) yields a constant speed of rotation.
+
+I am particularly interested in proving some properties of *our M map*
+related to velocity or tangential acceleration,
+and thus properties of our quaternion curve rather than general quaternion
+curves.
+While you're in the groove, why don't you think about this issue?
+
+I am tantalizingly close to establishing that our M map is related to
+the nec and suff condition for Pythagorean quintuples in the same way
+that Dietz et. al.'s map is for Pyth quadruples
+(and thus that M is onto all rational quaternion curves).
+
+John
+
+P.S. I have found a useful book re quaternions: `Numbers' by
+H.D. Ebbinghaus et. al. (Springer 1990).
+For example, it has a statement of the length-preserving rule you prove
+(|q1q2| = |q1| |q2|).
+
+

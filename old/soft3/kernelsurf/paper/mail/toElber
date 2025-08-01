@@ -1,0 +1,13 @@
+Gershon and Myung-Soo,
+
+Here is a draft of a section on the construction of kernels from hulls.
+The development is a bit longer than anticipated, since
+it is crucial to understand the degenerate structure of the hull
+in dual space, in order to describe precisely 
+(algorithmically) the kernel-hull dual relationship.
+You might already have a (better) proof of 
+Lemma 1.5, since this is based on an observation you made, Gershon,
+in your Dagstuhl talk.  If so, please discard mine.
+
+Best regards,
+John

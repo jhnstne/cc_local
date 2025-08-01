@@ -1,0 +1,917 @@
+\documentclass[9pt,twocolumn]{article}
+\usepackage{times}
+\usepackage[pdftex]{graphicx}
+\input{header-consecutive}
+
+\newif\ifComment                % large-scale comments
+\Commentfalse
+\newif\ifJournal
+\Journalfalse
+
+% \setlength{\headsep}{.5in}
+% \markright{\today \hfill}
+% \pagestyle{myheadings}
+
+% \DoubleSpace
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{0in}	% should be 0pt for 1in
+\setlength{\textheight}{8.6in}
+\setlength{\textwidth}{6.875in}
+\setlength{\columnsep}{5mm}	% width of gutter between columns
+
+% -----------------------------------------------------------------------------
+
+\title{Controlling the entire path of a virtual camera}
+% Rational camera control with collision detection}
+\ifJournal
+\author{Ross Ptacek and J.K. Johnstone\thanks{Department of Computer and 
+    Information Sciences, UAB, Birmingham, AL 35294-1170.  This work
+    was partially supported by the National Science Foundation under grant CCR-0203586.
+    Ross Ptacek was supported by a Research Experience for Undergraduates supplement
+    to this award.}}
+\fi
+
+\begin{document}
+\maketitle
+
+% Title for shorter lecture (Gatlinburg): 'Controlling a virtual camera' or
+% 'Avoiding collisions with a virtual camera'
+
+\begin{abstract}
+This paper considers the design of a camera path through a scene.
+   % problem of camera control through a polyhedral scene.
+Given a set of keyframes for the camera, we want to build a camera path that avoids
+collisions with the scene.
+Each keyframe is assumed to be collision-free.
+The first problem is to define a camera path that interpolates the keyframes.
+We build a rational interpolating motion using rational interpolation
+of both position and orientation.
+% The orientation component of the motion is represented by a rational quaternion spline.
+The second problem is to detect collisions of the planned path with the scene.
+A spatial decomposition is used to accelerate this detection.
+\ifJournal
+This is a simplified task for camera control.
+\fi
+% Collisions are associated with an intersection of one of the four corner paths of the 
+% virtual camera with the scene.
+The third problem is to correct the path to avoid the detected collisions.
+Keyframes are added 
+\ifJournal 
+and replaced 
+\fi
+in the neighbourhood 
+of the collision to correct the collision.
+  % In the development of a computer animation, camera control is a fundamental problem.
+\end{abstract}
+
+\section{Introduction}
+
+\ifJournal
+% {\bf Perhaps incorporate into introduction.}
+Flythroughs are useful in many computer graphics applications.  
+Perhaps a model of a building has been created and the user wants to navigate 
+through the building's halls.  
+Or possibly a complex model has been developed and the user just wants to fly around 
+outside of the model to view it from various angles to see certain features.  
+The two major issues in flythrough construction are how to represent the motion 
+of the camera and how to make sure that the motion of the camera does not intersect 
+the scene that you are flying around.  
+% To ensure that the motion is valid with respect to the scene, 
+% we use an iterative correction algorithm that is accelerated by a spatial decomposition.
+% These will be explained and discussed in the following sections.
+\fi
+
+The path of a virtual camera through a scene is often controlled interactively, 
+either through a GUI in a game or by an animator.
+% through a cinematographer in a movie.
+However, it is also reasonable to define the desired camera path by some keyframes
+that the camera must pass through.
+This is a reasonable model in an architectural walkthrough, for example,
+where a tour of the building is desired, which could be predefined.
+This is actually a familiar model for animation, since camera paths in Maya
+(respected 3D graphics software from Alias Wavefront) are controlled in this way.
+The keyframes could be generated automatically by a higher level motion planner,
+given a description of the goal of the motion, or they could be designed by hand.
+
+The camera path is generated from the keyframes by interpolation, a classical
+animation problem \cite{barr92,jjjw95,kim95,shoemake85}.
+An issue that immediately arises is that the resulting camera path may collide with
+the scene that it is flying through, resulting in unattractive and unrealistic
+cutthroughs of walls, furniture, and other objects.
+This is similar to the classical collision detection problem in interactive camera
+or character control \cite{collide95,cullide03} (say in a game), 
+but with important differences.
+In interactive control, there is little or no way to anticipate a collision 
+because the future motion is unknown.
+This leads to constant polling for collisions and an emphasis on efficient
+techniques to preserve interactivity.
+With the keyframe approach, the entire motion is fully known and
+controllable before the animation is begun 
+(before the camera actually flies along its path),
+so collisions are avoidable {\em a priori}.
+Our approach is twofold: find the collisions of the camera with the scene,
+by building the surface swept out by the camera and intersecting it with the scene,
+and then correct the collisions by adding new keyframes in the neighbourhood 
+of the collision.
+\ifJournal
+[in future, we could perturb
+the motion envelope directly rather than indirectly through keyframes]
+\fi
+
+There are several advantages to the proposed model for camera control,
+and in general the proposed model for motion planning (where the camera is replaced
+by an arbitrary moving object in the scene).
+A major advantage is that optimal motions can be planned.
+This optimality can be introduced at both local and global levels.
+Globally, the keyframes can be defined using an intelligent motion planner that
+optimizes the high level structure of the motion.  % (e.g., shortest path)
+Locally, the motion can be designed to honour many optimality criteria, since the
+motion is entirely controllable: examples of optimality criteria are
+shortest path, safest path, smoothest path, or preservation of orientation constraints 
+in the camera or animated object.
+\ifJournal
+(e.g., don't turn camera upside down).
+\fi
+\ifJournal
+The motion could even be built to satisfy stylistic goals: move the camera like
+a steadycam, like a handheld camera, or like a camera on a gantry.
+\fi
+The proposed model is appropriate when the essential nature of the desired motion 
+can be known beforehand, since it does not depend on unknown future events.
+For example, it is appropriate when building an animation or when planning the path
+of a robot to a goal point, and less appropriate when controlling a character in a
+battle or a robot in a cleaning task, where the motion must adapt to unforeseeable
+circumstances.
+Even in the latter interactive applications, local movements can be optimized
+using the proposed model.
+
+% additional issues that can be addressed in this model:
+% high level motion planning;
+% moving the camera to match good stylistic concerns 
+%        (a style to the camera path that you build);
+% internal (object-based, not free-space) orientation constraints  can be incorporated
+% into the planned motion;
+% ***optimal motions can be planned***
+
+The rest of the paper is structured as follows.
+Section~\ref{sec:camera} discusses camera control, eventually reducing the 
+motion of the camera to a swept surface.
+Collision detection of the camera with the scene is solved in Section~\ref{sec:collision},
+including the introduction of a spatial decomposition to accelerate this detection.
+The detected collisions are corrected in Section~\ref{sec:correction} by adding
+new keyframes.
+Results of our implementation are presented in Section~\ref{sec:results}
+and conclusions are presented in Section~\ref{sec:conclusions}.
+
+\section{Camera control}
+\label{sec:camera}
+
+Motion is described by two components, position and orientation.  
+Position says where you are, while orientation says what you are looking at.  
+One method of controlling the camera motion in computer graphics is 
+to allow the user to control the camera's position and orientation in real time, 
+in a manner similar to that employed by 3D games.
+However, this depends greatly on the user's manual dexterity to produce smooth motions.  
+Often a better approach is to allow the user to specify keyframes.  
+Each keyframe represents a position and orientation (as a quaternion \cite{hearnBaker})
+that the camera will move through.
+The motion between key frames is built using interpolation.
+For position, we use cubic interpolating B-splines \cite{farin02}.
+For orientation, we use rational interpolating quaternion splines \cite{jjjw95}.
+This can be used to define the path of any point of the camera from a set of keyframes.
+
+However, we want to define the motion of the entire camera, not just a single point.
+Consider the standard model for a camera \cite{hearnBaker}.
+The visible volume is a rectangular frustum defined by certain camera parameters:
+field of view along the $x$ and $y$ axis ($fovx$ and $fovy$) 
+% and the distance from the point camera that define the front and
+% back of the frustum ($near$ and $far$).
+% The planes used to make the front and back of the frustum are called 
+and the near and far clipping planes.
+Figure~\ref{fig:viewfrustum} shows how these four parameters define the visible volume.
+When trying to determine collisions, 
+the quadrilateral of intersection of the near clipping plane with the view frustum,
+which we call the {\em near quadrilateral}, is what interests us.
+It is the ``lens'' of the virtual camera.
+If any scene geometry collides with the near quadrilateral,
+it is as if the lens of the camera is running into that scene geometry.
+%
+% mainly important to talk about image plane as the area of interest for collision 
+% with the camera, the camera parameters, the math that finds the corners, 
+% and the glfrustum command for setting the parameters
+%
+% See view volume circa p. 240 of Foley and van Dam.
+% See view frustrum on p. 449 of Hearn and Baker.
+% Camera specification: we don't specify it in the intuitive way.
+% Define the intuitive way: lookat point, tilt, field of view.
+% See view coordinates on p. 433ff. of Hearn and Baker.
+% See OpenGL gluLookAt function.
+%
+% DEFINITION OF 4 CORNERS (5): To define the 4 corners of the near (clipping plane) quadriteral at any point along the motion
+%
+% \subsection{Geometric definition of the 4 corners of the near plane of the view frustum}
+%
+% We have constructed position and orientation curves corresponding to the camera as it 
+% moves through the scene.
+% What concerns us is that the user's view does not penetrate the walls of the scene.  
+% The userí°«s view is defined by the near clipping plane of the view frustum.  
+% However, rather than a point following the path, we are concerned with a quadrilateral, 
+% the near clipping plane's intersection with the view frustum, as it flies along the 
+% position and orientation curves.
+If we want to follow this quadrilateral through space, it is sufficient to track its 
+vertices.
+From the geometry of the view frustum (in OpenGL's glFrustum command \cite{opengl04}),
+we can readily determine the offset vector from the center of the camera to a
+corner of the near quadrilateral.
+Given a frame of the camera motion (a position and orientation), 
+we can extract an orientation (a quaternion), 
+translate it into a rotation matrix, and apply it to each of the corner vectors to get the
+offset position of the corners of the near quadrilateral.
+This offset position is then added to the frame's position to define the near
+quadrilateral in this frame.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=3in]{img/ViewFrustum.png}
+\end{center}
+\caption{The view frustum, which determines what part of the scene is viewed.
+	 Notice how the intersection of the near clipping plane with the rectangular
+	 pyramid produces the near quadrilateral.}
+\label{fig:viewfrustum}
+\end{figure}
+
+% For easy manipulation of the corner vertices, we used glFrustum().  
+% The glFrustum function allows the user to specify the frustum directly.  
+% To compute the frustum vertices at any parameter value t, we can extract the quaternion 
+% at t, transform the vertices by that rotation, and then translate them by the position 
+% curve at t.
+% While this allows us to compute the corner vertices at given parameter values of the 
+% motion, we would prefer to have a curve that defines the path of each corner vertex.
+
+% DEFINITION OF ENTIRE PATH OF EACH CORNER (6)
+
+% \subsection{Definition of the entire path of each corner of the camera near frustum as a rational Bezier curve}
+
+We want to define the entire motion of the near quadrilateral, not just one frame at
+a time.
+Fortunately, the entire (B-spline) curve defining the motion of a corner of the near 
+quadrilateral can be
+defined using methods from \cite{jjeuro95}.
+% overkill since this paper deals with a surface
+\Comment{
+In general, we have four vectors, one from the center of the near clipping plane 
+to each of the four corners.  
+We want to transform the end points of these vectors according to the quaternion spline.  
+First the quaternion spline is transformed into a spline that interpolates rotation 
+matrices. 
+Then each control matrix of this new spline is multiplied by one of the vectors to 
+one of the corners.  
+This turns the spline that interpolated rotation matrices into a rational Bezier spline 
+that represents the vector as oriented by the quaternion.  
+Then we add this curve to the position curve to get a new position curve that represents 
+the point oriented by the quaternion.
+At this stage, we have four curves that show the path of the four corners of the near 
+clipping plane.  
+At any parameter value, we can evaluate these four curves, get the four corner points, 
+and draw the near clipping plane.  
+}
+Finally, the four corner curves can be translated into a swept surface,
+consisting of the four ruled surfaces that 
+loft between pairs of adjacent corner curves \cite{farin02},
+that represents the envelope of the entire path of the near quadrilateral 
+(Figure~\ref{fig:swept}).
+\ifJournal
+formula for the final swept surface, from the keyframes
+\fi
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=3in]{img/RuledSurface3.jpg}
+\end{center}
+\caption{A swept camera surface, sampled down to triangles.}
+\label{fig:swept}
+\end{figure}
+
+\section{Collision detection}
+\label{sec:collision}
+
+% *need to clarify how you feed camera path triangles in to the intersection algorithm*
+
+Collisions of the camera with the scene are detected by intersecting
+the swept surface of the camera (its four component ruled surfaces) with the scene.
+In this paper, we consider camera control through scenes that are defined by 
+triangular meshes, and the swept surface is sampled down to triangles
+for the purposes of intersection.
+%
+% \subsection{Constructing the surface swept by the near clipping plane}
+%
+\Comment{
+We want to intersect the whole surface swept out by the near clipping plane with the 
+scene.  
+Constructing this surface is just a matter of lofting between curves corresponding to 
+adjacent points on the near clipping plane.  
+We sample the curves at a constant rate and build triangles between the curves.
+This does present a problem.  
+We doní°«t have any idea what happens in between the sample points.  
+Most scenes will not have sharp jutting regions that can penetrate the surface in 
+between sample points.  
+Two possible ways of fixing, or at least ameliorating, this problem are first, 
+sampling based on curvature rather than constant sampling, and second, 
+identifying regions that have sharp features and dealing with them separately.  
+}
+% At this point, we have the scene geometry and the geometry of the swept surface of
+% the near quadrilateral (camera) as it sweeps through the scene.
+To find intersections, we break the scene and swept camera into triangles 
+and intersect every scene triangle with every surface triangle.
+Obviously, this is far too slow to work for scenes with many triangles
+if done brute force.
+However, a spatial decomposition of the scene and the camera geometry will make
+the intersection efficient, using the fact that 
+triangles that are far apart cannot intersect.  
+We decompose the scene and camera surface into cells, using an octree \cite{hearnBaker},
+and only intersect scene and camera triangles that lie in the same cell.  
+
+The octree data structure provides a spatial decomposition, as follows.
+Each node represents a volume of the scene,
+the root node represents the entire volume,
+and each leaf node contains the scene data for that part of the scene's space.  
+Scene triangles are inserted into the root node until a certain threshold number is met.  
+This threshold number is user-controlled and provides a limit to how many triangles can exist in a node.  
+When the threshold is met, the node is divided into 8 child nodes, each corresponding to an octant of the parent node.  
+Each triangle that is stored in the parent node is sent to the proper octant.  
+If a triangle lies in multiple octants, it is sent to each octant that it lies in.  
+New triangles are passed down to the leaf nodes based on which octant they lie in.  
+So the leaf nodes always comprise the original volume and only triangles that 
+lie in the region of space associated with a leaf are in the leaf's list of triangles.  
+We input every triangle of the scene's geometry into the tree in this fashion.
+
+\ifJournal
+Get the octree software cleaned up and generally available.
+\fi
+
+We then input the camera surface's geometry into the tree.  
+However, this camera geometry is stored in a different list to keep it separate
+from the scene geometry.  
+The other difference with this insertion is that nodes will not subdivide from 
+these insertions.  
+Camera triangles will be sent down to the appropriate leaf nodes and stop.  
+At this point we can compute intersections between the swept camera surface 
+and the scene, within each cell, 
+with a vast reduction in how many intersections must be performed per 
+surface triangle.  
+It should be noted that when triangles lie in multiple octants there is some duplicate 
+data in the tree.  
+This increases the amount of computation needed, but even with this extra burden, 
+the octree greatly accelerates the intersection calculation.
+
+\section{Collision correction}
+\label{sec:correction}
+
+\ifJournal
+Document the software additions (both internally and externally).
+\fi
+
+Our strategy for correcting collisions is to insert new keyframes at
+parts of the motion where collisions occur.
+Since the motion is constrained to go through the keyframes, if we 
+continue to insert new keyframes (that do not intersect the scene)
+wherever there are collisions, then we will eventually push that part
+of the motion away from the intersections.
+In the following discussion, let $P(t)$ and $O(t)$ be the position curve 
+and quaternion spline defining the camera motion,
+and let $C(t)$ be the near quadrilateral at position $P(t)$ and orientation $O(t)$.
+Let $T_c$ be the set of camera surface triangles, and 
+note that its vertices can be annotated with a parameter value from the motion.
+
+First we calculate parameter intervals of the camera motion $C(t)$ where collisions exist.
+%
+\ifJournal
+Develop a more sophisticated strategy to correct collisions, 
+taking into account orientation changes and the global structure of the scene.
+\fi
+%
+% \subsection{Computing Parameter Intervals}
+%
+The goal is to find, for each interval of collision, 
+parameter values $t_{i}$ and $t_{f}$ that mark the initial
+and final parameter values of $C(t)$ where a collision occurs.
+We need to detect and correct collisions in order.
+This is important because correction of one interval may introduce a later collision.
+
+The general strategy is to test $T_C$ triangles in order against the scene.
+When a triangle causes an intersection, we note its position.
+We also note the position of the previous triangle that was intersected
+without causing an intersection.
+We can search between these two values to find the exact point where
+the interval begins.
+The same procedure can be followed to find the endpoint except that
+we look for when the intersections stop rather than when they begin.
+We now provide the details.
+
+We can sort the vertices of each triangle in $T_c$ by lowest parameter value vertex.
+We will then intersect each triangle with the scene in this sorted order.
+While intersecting, we want to keep track of two parameter values, $t_{a}$ and
+$t_{b}$.
+$t_{a}$ is the lowest parameter value associated with a vertex of the most
+recent triangle that was found to have no intersections with the scene.
+It provides a lower bound on the value of $t_{i}$.
+$t_{b}$ is the highest parameter value associated with a vertex of the first
+triangle found to have an intersection with the scene.
+So as we intersect each triangle with the scene in sorted order
+if the triangle has no intersections with the scene, $t_{a}$ is updated to the
+lowest parameter value associated with a vertex of that triangle.
+If there is an intersection, then $t_{b}$ is updated to the highest parameter
+value associated with a vertex of that triangle.
+Figure~\ref{fig:paraminterval} illustrates this process.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=3in]{img/ParmInterval.png}
+\end{center}
+\caption{Red lines indicate scene geometry that intersects.
+  In this case, s0 and s1 would be interpolated to find $t_i$ and s2
+  and s3 would be interpolated to find $t_f$.
+  Numbers indicate the order in which surface triangles are tested against the scene.}
+\label{fig:paraminterval}
+\end{figure}
+
+With $t_{a}$ and $t_{b}$ providing a lower and upper bound for the value of
+$t_{i}$, we perform a type of binary search over this interval.
+We choose $t_{mid} = (t_{a} + t_{b}) / 2$ and calculate the point at $t_{mid}$ of
+each of the corner curves.
+The near quadrilateral $C(t_{mid})$ is broken into two triangles and
+intersected with the scene.
+If neither triangle intersects the scene geometry, then recursively search
+along the interval from $t_{a}$ to $t_{mid}$.
+Otherwise, recursively search on the interval from $t_{mid}$ to $t_{b}$.
+Eventually the bounds of the search will converge to 
+$t_{i}$, the intial point of the parameter interval.
+The same process can be applied to find the end point of the parameter interval.
+
+% {\bf This will find {\em an} interval but not the earliest one.}
+
+% \subsection{Computing $O_{k}$}
+
+Our strategy is to add a keyframe at parameter value $t_{mid} = \frac{t_{i} + t_{f}}{2}$,
+the middle of the collision interval, to make progress in correcting the collision.
+We need to define the position and orientation of the new keyframe.
+The orientation is defined as $O(t_{mid})$.
+\Comment{
+Consider orientation first.
+A problem emerges because $t_{mid}$ is a parameter value on the corner curves,
+which are not necessarily parameterized the same as the quaternion spline.
+Although they may have different parameterizations, the corner curves
+and quaternion spline are guaranteed to have the same number of curve segments,
+since they are built from the same keyframes.
+Therefore, we can find the parameter value $t_{mid}'$ 
+that corresponds to $t_{mid}$ for the quaternion spline, using linear interpolation.
+The new keyframe is assigned the orientation $O(t'_{mid})$.
+{\bf The same issue of parameter incompatibility must have been solved
+in finding the corner curve by combining P(t) and O(t).  Also in animating
+the motion.  Not worth mentioning.}
+% We find the knot values corresponding to the endpoints of the curve segment
+% that contains $t_{mid}$ and use linear interpolation to find a parameter value
+% along the interval for $t_{mid}$.
+% Use this parameter value to linearly interpolate between the knots of the
+% corresponding curve segment of $Q(t)$ to get $t_{mid}'$.
+% We choose $O_{k} =  Q(t_{mid}')$.
+}
+\Comment{
+Let $k_{0}$ and $k_{1}$ be knots around the curve segment that $t_{mid}$ lies
+in.
+Let $k_{0}'$ and $k_{1}'$ be knots around the corresponding curve segment of
+Q(t).
+
+\[  (1-s)k_{0} + sk_{1} = t_{mid} \]
+\[  s = (t_{mid} - k_{0})/(k_{1} - k_{0}) \]
+\[ t_{mid}' = k_{0}'(1-s) + k_{1}'s \]
+}
+%
+% \subsection{Computing $P_{k}$}
+%
+The computation of the position of the new keyframe is more complicated.
+We want to start at $C(t_{mid})$, find where the near quadrilateral 
+intersects the scene, and move away from those intersections.
+The near quadrilateral at $C(t_{mid})$ has four corners.
+Since $t_{mid}$ is inside the interval of intersection, we know that there are
+intersections somewhere on this near quadrilateral.
+We take line segments from the center of the near quadrilateral to each corner, and
+determine if there are intersections along that segment.
+If there are intersections, that corner is classified as bad, otherwise it is good.
+The direction of motion of the new quadrilateral is 
+the sum of vectors from the center to each good corner.
+
+Next for the length of the step in that direction.
+Depending on how deep the collision is, 
+% how far the near quadrilateral protrudes through the scene geometry, 
+we want to move either more or less.
+So we need to estimate some sort of depth of the collision, $d$.
+To do this, we assign a depth to each bad vertex, as follows, and assign 
+the maximum vertex depth as the step size $d$.
+For each bad vertex, we intersect the two adjacent edges of the near 
+quadrilateral with the scene and record where the closest intersections occur.
+The depth of a bad vertex is the maximum distance from the bad vertex
+of these closest intersections.
+Figure~\ref{fig:depth} illustrates this procedure.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=3in]{img/IntersectionDepth.jpg}
+\end{center}
+\caption{A sample near-quadrilateral where the upper left, lower right,and upper right
+  vertices protrude through the scene, illustrated by grey lines.
+  Each protruding "bad" vertex defines its approximate depth as the maximum distance
+  of the intersections closest to it on adjacent edges.
+  The depth of the intersection is taken as the maximum of these vertex depths.}
+\label{fig:depth}
+\end{figure}
+
+\Comment{
+\begin{figure}
+\begin{center}
+\includegraphics[width=2in]{img/}
+\end{center}
+\caption{}
+\label{}
+\end{figure}
+}
+
+Note that this procedure is not guaranteed to completely move the keyframe
+away from the scene geometry.
+It is only guaranteed to make progress in moving away from the problem areas.
+The above procedure is applied iteratively until the keyframe no longer
+intersects the scene.
+When the new keyframe has been inserted, we rescan the interval from
+$t_{i}$ to $t_{f}$ to make sure that the path is corrected. If needed,
+additional keyframes are recursively added over the interval.
+Typically, we have found that fewer than 3 passes are necessary to correct the collisions.
+
+It is possible that the scene simply does not allow a path that the camera
+can fit through in the area that the user has specified.
+In that case, the iteration will not be able to converge to a solution,
+since none exists.
+At the moment, we simply cut off the iteration after a certain number of
+steps.
+This is somewhat unsatisfactory since it may still be possible that a path
+through the given region exists, and we are investigating other conditions
+for stopping the iteration.
+Another future solution is to shrink the camera when no correction can
+be found quickly.
+
+
+\section{Results}
+\label{sec:results}
+
+We have implemented, in C++, a flythrough of the U.C. Berkeley Soda Hall WALKTHRU Model
+developed by the UC Berkeley Walkthrough Group (Figure~\ref{fig:scene})
+using the ideas of this paper.
+This model is a quadrilateral mesh in Berkeley's UniGrafix format.
+Other mesh formats work equally well (e.g., Maya's obj, Inventor's iv, Princeton's off).
+Some frames from this flythrough are captured in Figure~\ref{fig:frames}.
+Frames that illustrate the correction phase are shown in Figure~\ref{fig:intersection}.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=3in]{img/csb5.jpg}
+\end{center}
+\caption{The scene (the entry path into the building is also visible).}
+\label{fig:scene}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=2.5in]{img/flythroughApproach.jpg}
+\includegraphics[width=3in]{img/FlythroughHall.jpg}
+\end{center}
+\caption{Two frames from the flythrough. (a) As the flythrough enters the building.
+         (b) The center of the camera is moving down the hall along the red curve.
+             The green lines mark the paths of the corners of the near quadrilateral.}
+\label{fig:frames}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=3in]{img/Intersection.jpg}
+\includegraphics[width=3in]{img/Collision1.jpg}
+\end{center}
+\caption{(a) Black lines are corner curves before correction.
+  Green curves are corner curves after correction.
+  The black rectangles represent the parameter interval over which the collision
+  took place.
+  Notice that after the change is made to correct the collision, the green
+  and black lines coincide.
+  (b) A keyframe placed around the corner pulls the path through the wall.
+  The back pair of black rectangles shows the collision interval for the original
+  collision.
+  However the correction algorithm pushes too far out and creates a new collision
+  as shown by the front pair of black rectangles.
+  In the end, a third keyframe is added to fix the collision.}
+\label{fig:intersection}
+\end{figure}
+
+% Ross will send captioned images tonight; collision-detection/flythrough/camera-control 
+% citations by tomorrow noon.
+% Figures:
+% 1. view frustum
+% 2. collision correction diagram
+% 3. ruled surface
+% 4. entire Soda Hall (for context of dataset)
+% 5. 2 flythrough screenshots
+% 6. 2 collision screenshots
+
+\section{Conclusions}
+\label{sec:conclusions}
+
+ In this paper we have presented a method to precompute collision-free motion through
+ a scene.
+ The method consists of three steps.
+ First, a smooth path is built through user-defined keyframes without considering the
+ scene geometry.
+ Second, parts of that path that collide with the scene are identified.
+ Finally, an iterative keyframe insertion process is performed to correct the parts
+ that have collisions.
+ The procedure is reasonably fast in practice.
+ 
+ To refine this work we would like to explore different spatial decompositions such as
+ KD trees or BSP trees.
+ We also would like to investigate different choices for collision depth.
+ The scheme used to calculate the depths can have a large impact on the number
+ of iterations required to place a new keyframe.
+ Additionally, we want to allow arbitrary polygonal meshes rather than decomposing
+ into triangle meshes.
+ A more challenging generalization is to scenes defined by smooth surfaces (unless they
+ are handled approximately and sampled down to triangular meshes).
+ 
+ In future work, we look mainly to orientation based correction methods.
+ Currently, orientation is more or less ignored in the correction phase.
+ Some hallways that the correction algorithm deems impossible to pass through
+ could be traversed if the near quadrilateral were turned slightly to the side.
+ We also want to be able to impose orientation constraints on the camera as
+ it moves.
+% These will be modeled as obstacles on the quaternion sphere.
+
+% In future, we would like to set the orientation of the new keyframe in
+% a more sophisticated way to correct the collision.
+
+% In future, we would like to explore other spatial decompositions to accelerate
+% the collision detection, such as KD trees and BSP trees,
+% and allow general polygon meshes (rather than translating them into triangular meshes).
+% A more challenging generalization is to smooth surfaces (unless they are handled
+% approximately and sampled down to triangular meshes).
+
+\ifJournal
+The octree data structure could be enhanced to support general polygons rather than just triangles.  This would save a bit of precomputing time needed to divide non-trimeshes into triangles.  It would also allow clipping to be performed on polygons that lie in multiple octants so that only the part of the polygon that lies in a given octant will be sent to that octant.  At the moment, a copy of the triangle is sent to each octant.  This shouldní°«t affect performance much at all, but it would be cleaner.
+\fi
+
+\section{Acknowledgements}
+
+We thank the U.C. Berkeley Walkthrough Group for the U.C. Berkeley Soda Hall
+WALKTHRU Model.
+
+\bibliographystyle{latex8}
+% \bibliographystyle{plain}
+\begin{thebibliography}{}
+
+\bibitem{barr92}
+Barr, A. and B. Currin and S. Gabriel and J. Hughes (1992)
+Smooth Interpolation of Orientations with Angular Velocity Constraints
+using Quaternions.
+SIGGRAPH '92, 313--320.
+
+\bibitem{collide95}
+Cohen, J. and M. Lin and D. Manocha and M. Ponamgi (1995)
+I-COLLIDE: an interactive and exact collision detection system for large-scale environments.
+Symposium on Interactive 3D Graphics.
+
+\bibitem{farin02}
+Farin, G. (2002)
+Curves and Surfaces for CAGD: A Practical Guide (5th edition).
+Morgan Kaufmann (San Francisco).
+
+\bibitem{cullide03}
+Govindaraju, N. and S. Redon and M. Lin and D. Manocha (2003)
+CULLIDE: interactive collision detection between complex models in large environments
+using graphics hardware.
+SIGGRAPH/Eurographics Conference on Graphics Hardware, 25--32.
+
+\bibitem{hearnBaker}
+Hearn, D. and M. Baker (2003)
+Computer Graphics (3rd edition).
+Prentice Hall (Upper Saddle River, NJ).
+
+\bibitem{jjjw95}
+Anonymous 1.
+
+\bibitem{jjeuro95}
+Anonymous 2.
+
+\ifJournal
+\bibitem{jjjw95}
+Johnstone, J. and J.P. Williams (1995)
+Rational Control of Orientation for Animation.
+Graphics Interface '95, 179--186.
+
+\bibitem{jjeuro05}
+Johnstone, J. and J.P. Williams (1995)
+A Rational Model of the Surface Swept by a Curve.
+Eurographics '95, {\em Computer Graphics Forum} 14(3), 77--88.
+\fi
+
+\bibitem{kim95}
+Kim, M.-J. and M.-S. Kim and S. Shin (1995)
+A General Construction Scheme for Unit Quaternion Curves
+with Simple Higher Order Derivatives.
+SIGGRAPH '95, 369--376.
+
+\bibitem{opengl04}
+Shreiner, D. and J. Neider and M. Woo and T. Davis (2004)
+OpenGL Programming Guide (4th edition).
+Addison-Wesley (Boston).
+
+\bibitem{shoemake85}
+Shoemake, K. (1985) Animating rotation with quaternion curves.
+SIGGRAPH '85, San Francisco, 19(3), 245--254.
+
+\end{thebibliography}
+
+\end{document}
+\clearpage
+
+% In the unigraphix format, only vertices and faces are specified; the edges are implicit.
+
+\subsection{The iterative search method}
+
+OLD
+
+Inserting all of the surface triangles will allow us to find all of the intersections.  
+However, we are really more concerned about the first intersection.  
+Since we want to correct the path, we want to find the first interval 
+over which intersections occur, correct it, and then move on.  
+So instead of inserting all of the triangles at once, we will insert them ordered 
+by parameter value on the corner curves.  
+When an intersection is found, we note the parameter value where the intersection 
+occurred.  
+We then search between a previous parameter value when we found no intersection 
+and the parameter value where we did find an intersection using a binary search.  
+The search will end with the actual parameter value where the intersection first 
+occurred.  
+We then continue inserting surface triangles until there is no more intersection.  
+We use the same binary search to pinpoint the end of the interval over which 
+intersections occur.  
+Now having a parameter interval over which intersections occur, we take the 
+midpoint of this interval and compute the rear clipping plane at that parameter.  
+We then determine which of the corners are inside of the scene by finding 
+intersections along line segments from the center to each corner.  
+We take vectors from the center to the corners that are not inside the scene, 
+average them and normalize the vector.  
+This vector will be used to move the curve.  
+However, we would like to be able to determine how deep the intersections 
+are and scale the vector accordingly so that we move farther away from the wall 
+when we need to.  
+We compute the distances from the corners to the intersection with an edge of the near 
+clipping plane and use the maximum such distance to scale the vector.  
+We then insert a new keyframe at the center of the frustrum with the vector 
+added to it with same orientation as before.
+
+The above procedure does not guarantee that the path will be fixed along that interval.  
+However, it is fast and if it is repeated, it will eventually fix the path.  
+So we repeat this procedure over the intersection interval until the path is correct.  
+In tests, it usually only took one pass to fix the path.  
+It rarely took more than 3 passes.
+
+\section{11/02/05 draft}
+
+The path of the camera has two separate parts, position and orientation.  Both of these parts are specified by keyframes.  Each keyframe is a point in space with an attached orientation.  We choose to represent the orientations as quaternions.  Typically, orientaion would be represented by a rotation matrix, however, quaternions are more robust and more natural to interpolate between than rotation matrices.   To review, a quaternion is defined as an ordered pair (s,v) where s is a scalar and v is a 3-vector and s2+v.v = 1.  Because of the second condition, it follows that quaternions are also points on S3.  Quaternions encode rotation around an arbitrary axis.
+	The model that we will be moving the virtual camera around is a general polyhedral mesh.  For simplicity in the intersection algorithm, the mesh will be reduced to a triangular mesh.  The set of triangles in the scene will be referred to as $T_s$.
+	An initial path for the camera is constructed by building a bezier, B(t), spline through the positions of the positions specified by the keyframes and a quaternion spline, Q(t), through the orientations specified by the keyframes.  At any parameter value t, B(t) and Q(t) completely describe the location of the camera in space.
+
+\subsection{Collision Detection}
+
+As the camera moves along B(t) with orientation Q(t), what constitutes a collision?  At any parameter value, if a triangle intersects the image plane, also called the near clipping plane, then it is in essence poking through the lens of our camera and is a collision that must be avoided.  So as the camera flies along this path, the image plane sweeps out a volume.  Any scene geometry that intersects with this volume collides with the camera and must be avoided.
+
+At a high level, there are two types of intersections that must be dealt with.  The first and most common type of intersection is one that pokes through a side of the volume.  The second type of intersection is an object that is completely enclosed by the volume.  Finding the first type of collision only requires intersecting the scene with the surface of the volume.  We can construct this surface by developing curves for the four corners of the image plane as it sweeps along B(t) with orientation Q(t) and lofting surfaces between adjacent corner curves.   Using methods described in (Johnstone and Williams paper), these four corner curves can be constructed.
+
+Some discussion of the techniques?  Talk about knots of corner curves for reference later...call curves $C_1 \ldots C_4$.  $C_1$ = upper left, rest are ccw order.
+
+With the corner curves constructed, we now triangulate between adjacent curves to make the surface.  By adjacent we mean curves that correspond to adjacent vertices on the image plane.  Triangles are constructed by sampling along the curves at a constant rate and putting a triangle strip between the samples.  Since we have the entire curve at hand, we have considered curvature based sampling for the most accurate representation of the surface.  This can become difficult because adjacent curves do not necessarily have similar curvatures.  For future work we consider finding a set of parameter values based on curvature to sample on for each curve.  When lofting a surface between two curves, the union of the sets of parameter values is used to sample each curve.  The triangles that compose the surface are stored.  We will refer to  this set of triangles as $T_p$.
+
+The second type of collision, when an object is completely inside of the volume is more difficult to test for collisions.  To do so, we compute the image plane at some constant sampling rate by forming quadrilaterals with vertices $C_1(t), C_2(t), C_3(t), and C_4(t)$.   Any geometry that intersects these quadrilaterals collides with the image plane.  These quadrilaterals are then broken into triangles that are added to the set  $T_p$.  Finding collisions is now just a matter of intersecting $T_p$ with $T_s$.  Even simple scenes will likely have thousands of triangles.
+
+To discuss the collision detection, first the octree data structure must be explained.  In general it is an 8-ary tree.  Each node of the tree represents some part of the space.  The root node represents the entire space.  For our case, scene vertices are scaled down to the unit cube, so the root node represents the entire cube.  Each node also has two lists of triangles.  One is the list of triangles from the scene ($O_s$) and the other  contains triangles from the ruled surface of the path ($O_p$).  $O_s$ has a fixed size that is set by the user (the optimal size for this is difficult to determine), but $O_p$ does not.  The general Idea is that we want to limit the number of intersection calculations to perform per triangle in $T_s$.  When a triangle is inserted into $O_s$, the triangle is simply inserted into the first open spot of the array.  If the result of inserting into $O_s$ causes $O_s$ to be full, then 8 child nodes are attached to the current node.  Each of these 8 child nodes correspond to an octant of the parent node.  Triangles from $O_s$ and $O_p$ of the parent node are distributed to the proper child nodes.  If a triangle lies in multiple octants, then the complete triangle is sent to multiple child nodes.  This does cause some duplication of data, but it is unavoidable.  Note that there is no subdivision when triangles are inserted into $O_p$.  When new triangles are inserted into the tree, if the root node has been subdivided, then the triangle is recursively inserted into the child nodes whose space the triangle exists in.  The effect of this data structure is that we greatly reduce the number of triangles that each triangle in $T_s$ must be compared to.
+
+In general, we want to isolate intervals, I, of B(t) over which there is a collision.  The first step in finding the interval is inserting all of $T_s$ into $O_s$.  Now, the triangles of $T_p$ are inserted into $O_p$.  However, the order in which $T_p$ are inserted is important.  We want to find the first collision and correct it before moving on to the rest of the path.  To accomplish this, we insert the triangles in order of their parameter value on the corner curves.  Each vertex of each triangle of $T_p$ is a point on one of the corner curves.  So we can insert the triangles in order of the minimum parameter value vertex of the triangle.  Rather than actually performing a sort, we just generate the triangles in the proper order and insert a triangle once it is calculated.  It is then tested for intersection with every element of $O_s$ in that node.  This insertion in order of parameter continues until an intersection occurs.
+
+When we find an intersection at some value $s=s_1$, we now have a parameter value that is in I.  We also know that the previous parameter value we tested at, $s_0$, had no intersection.  We want to find the exact parameter value where the collision begins.  So we perform a binary search between $s_0$ and $s_1$.  Like the standard binary search, we want to see what side of the mid point the intersection lies on.  We calculate the image plane at $s_mid = (s_0 + s_1) / 2$ and test for intersections with the scene.  If the test returns no intersection, then we recursively search on the interval from $s_mid$ to $s_1$.  Otherwise we search from $s_0$ to $s_mid$.  When the bounds become close, within some epsilon, we stop the computation.  The result of the search is the true initial parameter value.
+
+We then continue inserting triangles into the octree until there is no longer an intersection.  Then we have the same condition as above.  We have one value where there is an intersection, one value where there is none, and we need to find the exact value where the collision ends.  We repeat the above binary search to find the value.  With the parameter interval at hand, we can move on to correcting the path over that interval.
+
+
+\subsection{Correction}
+
+Our method for correcting the path over the computed interval will be to introduce some number of new keyframes over this interval to push the curve into the proper region.  We know by the specifications of the problem, that each currently existing keyframe is in a valid position and orientation.  So by introducing more valid keyframes into the problematic interval, we ought to be able to correct the path.  Remember that to define a new keyframe, we have to consider both a new position and a new orientation.
+
+The general strategy for computing a new position is to choose a point on the original curve, compute the image plane at that point on the curve, find where it intersects the scene geometry, and then move it away from those intersections.  
+The point that we choose is at the midpoint of the intersection interval, I.  
+So we compute $m=(I_0 + I_1)/2$  as the midpoint. 
+A minor problem arises here. 
+The intersection interval is calculated in the parameter of the corner curves.  
+To find the point on the position curve, we need a value in its parameter.  
+Even though the corner curves are parameterized differently, we can use the fact that they have the same number of knots as the original position curve to find the corresponding parameter using linear interpolation.  
+First find the knot values $k_i$ and $k_{i+1}$ that the parameter lies between.  
+Then solve $s = (m-k_i+1) / (k_i ? k_i+1)$ to find the parameter of the value along that interval.  
+Then we can take the corresponding knots on the B(t) and use linear interpolation to find the parameter value, $t_{mid}$, which we in turn can use to find the position $P_{mid} = B(t_{mid})$.
+
+Now we need to find the image plane when the camera is at B($t_{mid}$).  Even though we just went through that trouble to get $t_{mid}$, the image plane is most easily calculated by connecting the points at 
+$c_1(s_mid)...c_4(s_mid)$.  We intersect line segments from the center of the image plane to each of the corners with the scene.  If there is an intersection along that segment, then we consider that vertex to be inside the scene and store it in a list ,IN.  We take vectors from the center of the image plane to the corners not in IN and average them, giving them the direction we ought to move the keyframe, V.
+
+But how much do we need to move the keyframe?  
+If the collision is shallow, then we should not move much at all, but if the collision is 
+deep then we will need to move quite a bit.  
+We need to calculate some sort of depth of collision, D, to scale V by.  To do this, we intersect the edges of the image plane with the scene and record the parameter value on the line segment that each intersection occurs at.  Using these parameter values we can calculate the distance from each vertex to its closest intersection.  We take the maximum such distance and use that to approximate the depth of the intersection, d.  So then the position of our new keyframe is at $P_mid + dV$.  Note that this approximation for the d and the somewhat imprecise direction to push the keyframe along means that the new keyframe may still be intersecting the screen.  The only thing that we can guarantee is that in some sense it is moving away from the collision in a direction proportional to the depth of the intersection.  In tight hallways, we may be forced to repeat this procedure to make sure that the new keyframe does not introduce new collisions.
+
+We also must compute an orientation for the new keyframe.  We just use $Q(t_{mid})$ at the moment.
+
+When the new keyframe has been inserted into the curve, that section of the curve is recomputed.  Again there is no guarantee that the curve is valid over that interval.  We have to scan over the interval again and repeat the process.
+
+\clearpage
+
+\section{Appendix}
+
+\section{Ross blah.doc from 9/12/05}
+
+\subsection{Definition of the scene and definition of the camera keyframes}
+
+The scene is originally defined as a unigrafix (.ug) file.  
+Each face specified by the file is then divided into triangles.
+Currently, faces with more than 4 vertices are divided in a basic way.  
+If the need arises, this will be upgraded to Delauney triangulation.  
+Alternatively, I may update the data structure, an octree, that stores the scene to allow 
+any polygon rather than just triangles.  
+Updating the octree to use generic polygons rather than only triangles also would address a 
+clipping problem that will be discussed later.
+
+The camera keyframes are defined by a separate program that allows the user to navigate through the scene and place keyframes.  
+When the user decides to place a keyframe, the position and orientation of the camera is recorded to a file that can then be loaded into the flythrough program.  
+A cubic Bezier spline is built through the positions of the keyframes, and a rational quaternion spline is built through the orientations.
+
+\subsection{Geometric definition of the four corners of the near plane of the view frustum}
+
+This step was more of a sanity check than anything.  
+The goal is to develop Bezier curves for the four corners of the near clipping plane from only the keyframes as specified above.  
+The Bezier and quaternion splines built through the keyframes are sampled at some constant rate to provide new frames between the keyframes.  
+At each of these interpolated frames, the rotation matrix that represents the quaternion is extracted.  
+That transformation is applied to the corner points to get the position of the corners of the frustum.  
+By drawing these corner points, I had something to compare the curves that I was going to generate to.
+
+\subsection{Definition of the entire path of each corner of the camera near frustum as a rational Bezier curve}
+
+Using methods described in (Johnstone and Williamsí°ƒlook up article name when I get there) the Bezier curves that define the motion of the four corners of the near clipping plane are calculated.  
+In general, the quaternion spline is transformed into a spline that interpolates rotation matrices.  
+The resulting spline is multiplied by the vector from the center of the frustum to a given corner vertex.  
+The resulting spline (matrix x vector) interpolates the oriented vector.  
+The resulting spline is a degree 6 rational Bezier spline.
+
+\subsection{Collision detection of the camera path with the scene geometry using an iterative search}
+
+When the four corner curves have been constructed, a ruled surface is lofted between the curves to form the ruled surface that is swept by the near frustum as it moves along the flythrough.  This is achieved by sampling two adjacent curves and making a triangle strip between the two curves.  The triangles of the ruled surface are also entered into the octree data structure.  However, they are added in a different list.  Also, a node will not subdivide due to surface triangle insertion.  Now each node of the octree contains all of the scene triangles that lie in a given suboctant as well as the ruled surface triangles that lie in that same suboctant.  Each ruled surface triangle is intersected to each scene triangle in each node.  Because of the octree decomposition, the number of scene triangles ought to be fairly small.
+
+Surface triangles are entered in order of parameter value on the corner curves.  When a triangle that is inserted that causes an intersection with the scene geometry, the parameter value is stored.  A binary search is done between that parameter value and the previous parameter value that did not show an intersection.  The binary search will end on the parameter value corresponding to exactly where the intersection occurs.  Triangles continue to be entered until there is no longer an intersection at a given parameter value.  The same binary search is performed to find the parameter value for the end of the interval.
+
+\subsection{Correction of the camera path to avoid the computed collisions}
+
+A new keyframe is placed at the midpoint of the parameter interval of the intersection.  Lines from the center of the frustumí°«s near plane to the four corners are intersected with the scene to determine which corners are inside the scene.  The near plane is turned into two triangles and inserted into the octree.  The parameter values where intersections occurred over the 4 edges that are recorded.  Using the parameter values, the largest distance from a corner inside the scene to an intersection point is recorded and stored.  Then the vectors from the center of the frustum to each corner that is not inside the scene are averaged and normalized.  This normalized vector is multiplied by the distance found previously.  The keyframeí°«s position is translated by this vector.  Now the keyframe may or may not be completely outside of the scene geometry, but it is certainly in a better position then before.  The above test is performed again until the keyframe is in a valid position.
+
+The algorithm in step 4 is then reapplied to the interval recursively.  This cycle repeats until the path is correct over that interval.
+
+\subsection{Issues that need refining}
+
+The octree data structure needs a bit of enhancement.  At the moment, I cannot truly clip triangles that lie in multiple octants.  The clipped triangle typically becomes one triangle and one quadrilateral.  Then the quad has to be broken up into triangles again, which creates 3 triangles from the one.  This will create infinite subdivision in the octree.  If the tree is changed to support arbitrary polygons then this problem no longer occurs.
+
+KD trees and BSP trees have also been considered to replace the octree.  Performance comparisons would be done.
+
+In some flythroughs, keyframes are placed in valid positions, but they are still too close to obstacles.  The iterative correction cannot fix this path.  I need to find a way to identify such keframes.  One method would put a box around the keyframe and ensure that no scene geometry is inside the keyframe.
+
+Some flythroughs will crash when constructing the quaternion spline.  Ií°«m not sure what causes this issue.  It may be related to coming too close to the emptiest point.  If I take a flythrough that crashes and simply remove the last keyframe, it will work.
+
+\clearpage
+
+\section{draft.doc from 9/21/05}
+
+Flythroughs are useful in many computer graphics applications.  Perhaps a model of a building has been created and the user wants to navigate through the buildingí°«s halls.  Or possibly a complex model has been developed and the user just wants to fly around outside of the model to view it from various angles see certain features.  The two major issues in flythrough construction are how to represent the motion of the camera and how to make sure that the motion of the camera does not intersect the object that you are flying around.  We decided to represent the motion with Bezier and quaternion splines.  To ensure that the motion is valid with respect to the scene, we use an iterative correction algorithm which is accelerated by using an octree data structure.  These will be explained and discussed in the following sections
+
+\subsection{Definition of the scene and definition of the camera keyframes}
+
+The scene in this case is the 3d model or set of 3d models that we will be flying around.  As with all 3d models, the scene can be defined by vertices VÅ≠s, edges Es, and faces Fs.  In particular, we used the unigraphix format for the model.  In the unigraphix format, only vertices and faces are specified.  The edges are implicit.  Since any format can be reduced to simply vertices and faces, any format is equally suitable.  In the future, we would like to support various other popular 3d model formats.
+
+Motion is described by two separate entities, position and orientation.  The position says where you are while orientation says what you are looking at.  One method of capturing the camera motion could be to allow the user to control the cameraí°«s movement and orientation in real time in a manner similar to that employed by 3d games.  However, this depends greatly on the userí°«s manual dexterity to produce smooth motions.  A better approach is to allow the user to specify key frames.  Each key frame represents a position and orientation that the camera will move through.  In between the key frames, we try to interpolate between the key frames.  For position we use cubic Bezier splines.  There are many ways to represent orientation, but we chose the quaternion spline because it is the most robust.
+
+\subsection{Geometric definition of the four corners of the near plane of the view frustum}
+
+We have constructed position and orientation curves corresponding to the camera as it moves through the scene, however this doesní°«t help us find problems with the path.  Although the camera is an infinitely small point moving along this path, what concerns us is that the userí°«s view does not penetrate the walls of the scene.  The userí°«s view is defined by the near clipping plane of the view frustum.  So rather than the point following the path, we are concerned with a quadrilateral, the near clipping planeí°«s intersection with the view frustum as it flies along the position and orientation curves.  If we want to follow this quadrilateral through space, it is sufficient to track its vertices.  For easy manipulation of the corner vertices, we used glFrustum().  The glFrustum function allows the user to specify the frustum directly.  To compute the frustum vertices at any parameter value t, we can extract the quaternion at t, transform the vertices by that rotation, and then translate them by the position curve at t.  While this allows us to compute the corner vertices at given parameter values of the motion, we would prefer to have a curve that defines the path of each corner vertex.
+
+\subsection{Definition of the entire path of each corner of the camera near frustum as a rational Bezier curve}
+
+Using methods described in (Johnstone and Williamsí°ƒlook up article name when I get there) we can calculate the Bezier curves that define the motion of the four corners of the near clipping plane.  In general, we have four vectors, one from the center of the near clipping plane to each of the four corners.  We want to transform the end points of these vectors according to the quaternion spline.  First the quaternion spline is transformed into a spline that interpolates rotation matrices. Then each control matrix of this new spline is multiplied by one of the vectors to one of the corners.  This turns the spline that interpolated rotation matrices into a rational Bezier spline that represents the vector as oriented by the quaternion.  Then we add this curve the position curve to get a new position curve that represents the point oriented by the quaternion.
+
+\end{document}

@@ -1,0 +1,28 @@
+From jj Tue Aug 16 11:49:07 1994
+Return-Path: <jj>
+Received: by cis.uab.edu (4.1/SMI-4.1)
+	id AA25558; Tue, 16 Aug 94 11:49:05 CDT
+Date: Tue, 16 Aug 94 11:49:05 CDT
+From: jj (John Johnstone)
+Message-Id: <9408161649.AA25558@cis.uab.edu>
+To: jimbo@blaze.cs.jhu.edu
+Subject: M mapping
+Cc: jj
+Status: OR
+
+Question: Have you considered using the mapping
+M[p,q,r,s] = [p^2+q^2+r^2+s^2, p^2+q^2+r^2-s^2, 2ps, 2qs, 2rs]
+instead of your M?  This maps a point from affine 4-space
+(normal 4-space) to projective 4-space, and sends any point
+onto the unit 4-sphere.  This seems more natural and obviates
+the need for step 4, but perhaps you have found your M easier
+to deal with.   Note that since there are only 4 fns p,q,r,s
+we cannot map from projective 4-space (which would require
+five functions) to projective 4-space; Dietz-Hoschek, in
+contrast, can map from proj 3-space to proj 3-space in their
+DELTA map since the number of functions works out correctly.
+
+Comments?
+
+jj
+

@@ -1,0 +1,28 @@
+From jimbo@blaze.cs.jhu.edu Mon Aug 15 18:16:49 1994
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from blaze.cs.jhu.edu by cis.uab.edu (4.1/SMI-4.1)
+	id AA08855; Mon, 15 Aug 94 18:16:48 CDT
+Message-Id: <9408152316.AA08855@cis.uab.edu>
+Received: from mail-client (peregrine.cs.jhu.edu)
+           by blaze.cs.jhu.edu; Mon, 15 Aug 94 19:16:45 EDT
+From: jimbo@blaze.cs.jhu.edu (James P. Williams)
+Sender: jimbo@blaze.cs.jhu.edu
+Received: by mail-client (4.1) id AA08423; Mon, 15 Aug 94 19:16:45 EDT
+Subject: addendum to aug18 report
+To: jj@cis.uab.edu
+Date: Mon, 15 Aug 1994 19:16:44 -0400 (EDT)
+X-Mailer: ELM [version 2.4 PL13]
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Content-Length: 60
+Status: OR
+
+
+
+in step 4 replace DOTPRODUCT(...) with just PRE(t)
+
+
+Jim
+
+

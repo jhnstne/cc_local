@@ -1,0 +1,202 @@
+\begin{thebibliography}{10}
+
+\bibitem{BHHL88}
+C.~L. Bajaj, C.~M. Hoffmann, J.~E. Hopcroft, and R.~E. Lynch.
+\newblock Tracing surface intersections.
+\newblock {\em Computer Aided Geometric Design}, 5:285--307, 1988.
+
+\bibitem{Boehm90}
+W.~Boehm.
+\newblock On cyclides in geometric modeling.
+\newblock {\em Computer Aided Geometric Design}, 7:243--255, 1990.
+
+\bibitem{CAY96}
+A.~Cayley.
+\newblock On the cyclide.
+\newblock In {\em The collected mathematical papers of Arthur Cayley},
+  volume~IX, pages 64--78. Cambridge University Press, Cambridge, 1896.
+
+\bibitem{CDH89a}
+V.~Chandru, D.~Dutta, and C.~Hoffmann.
+\newblock {On the geometry of Dupin cyclides}.
+\newblock {\em Visual Computer}, 5:277--290, 1989.
+
+\bibitem{CDH89b-ifip}
+V.~Chandru, D.~Dutta, and C.~Hoffmann.
+\newblock {Variable radius blending using Dupin cyclides}.
+\newblock In {\em Geometric Modeling for Product Engineering, IFIP
+  Proceedings}. Elsevier Science Publishers, January 1990.
+
+\bibitem{Coo71}
+Julian~Lowell Coolidge.
+\newblock {\em A Treatise on the Circle and the Sphere}.
+\newblock Chelsea, Bronx, NY, 1916.
+
+\bibitem{D49}
+D.~R. Davis.
+\newblock {\em Modern College Geometry}.
+\newblock Addison-Wesley, Cambridge, Mass., 1949.
+
+\bibitem{DEP84}
+J.~J. de~Pont.
+\newblock {\em Essays on the cyclide patch}.
+\newblock PhD thesis, Cambridge University, August 1984.
+
+\bibitem{Degen90}
+W.L.F. Degen.
+\newblock {Generalized cyclides for use in CAGD}.
+\newblock Technical report, Mathematisches Institut B, Universitaet Stuttgart,
+  1990.
+
+\bibitem{Dutta89}
+D.~Dutta.
+\newblock {\em {Variable-radius blends and Dupin cyclides}}.
+\newblock PhD thesis, School of Industrial Engineering, Purdue University,
+  August 1989.
+
+\bibitem{FISCH86}
+Gerd Fischer, editor.
+\newblock {\em Mathematical Models: Commentary}.
+\newblock Vieweg, Braunschweig, Germany, 1986.
+
+\bibitem{F12}
+A.~R. Forsyth.
+\newblock {\em Lectures on the Differential Geometry of Curves and Surfaces}.
+\newblock Cambridge University Press, Cambridge, 1912.
+
+\bibitem{He75}
+I.N. Hernstein.
+\newblock {\em Topics in Algebra}.
+\newblock John Wiley and Sons, New York, 1975.
+
+\bibitem{H52}
+D.~Hilbert and S.~Cohn-Vossen.
+\newblock {\em Geometry and the Imagination}.
+\newblock Chelsea, New York, 1952.
+
+\bibitem{H88}
+C.~Hoffmann.
+\newblock Variable radius blending using cyclides.
+\newblock {\em NSF-IFIP Workshop on Geometric Modeling}, September 1988.
+
+\bibitem{HOF89}
+C.~Hoffmann.
+\newblock {\em Geometric and Solid Modeling}.
+\newblock Morgan Kaufmann, San Mateo, California, 1989.
+
+\bibitem{J29}
+Roger~A. Johnson.
+\newblock {\em Modern Geometry}.
+\newblock Houghton Mifflin, Riverside Press, Boston, 1929.
+
+\bibitem{jj91ru}
+J.K. Johnstone.
+\newblock Finding generators and directrix curves on algebraic ruled surfaces.
+\newblock {\em Computer Aided Design}.
+\newblock to appear.
+
+\bibitem{JOH89}
+J.K. Johnstone.
+\newblock Working with ruled surfaces in solid modeling.
+\newblock In E.~Kaltofen and S.~Watt, editors, {\em Computers and Mathematics
+  `89}, pages 260--268, New York, June 1989. Springer Verlag.
+
+\bibitem{JS90u}
+J.K. Johnstone and C.-K. Shene.
+\newblock The representation of all hyperboloids of one sheet by two lines.
+\newblock Technical report, Technical Report JHU-90-08, Dept. of Computer
+  Science, The Johns Hopkins University, July 1990, revised July 1991.
+
+\bibitem{Shenejj92}
+J.K. Johnstone and C.-K. Shene.
+\newblock {Dupin cyclides as blending surfaces for cones}.
+\newblock In {\em Mathematics of Surfaces V}. Oxford University Press, to
+  appear.
+
+\bibitem{LEVI76}
+J.~Levin.
+\newblock A parametric algorithm for drawing pictures of solid objects composed
+  of quadratic surfaces.
+\newblock {\em Communications of the {ACM}}, 19(10):555--563, October 1976.
+
+\bibitem{MAR82}
+R.~R. Martin.
+\newblock {\em Principal Patches for Computational Geometry}.
+\newblock PhD thesis, Cambridge University, 1982.
+
+\bibitem{MDS86}
+R.~R. Martin, J.~de~Pont, and T.~Sharrock.
+\newblock {Cyclide surfaces in CAD}.
+\newblock In {\em The Mathematics of Surfaces I}, pages 253--267, Oxford, 1986.
+  Clarendon Press.
+
+\bibitem{MAX68}
+J.~Clerk Maxwell.
+\newblock {\em On the cyclide}, volume~9.
+\newblock Quarterly Journal of Pure and Applied Mathematics, 1868.
+
+\bibitem{Mc85}
+David McLean.
+\newblock A method of generating surfaces as a composite of cyclide patches.
+\newblock {\em The Computer Journal}, 28(4):433--438, 1985.
+
+\bibitem{neff90}
+C.~A. Neff.
+\newblock Finding the distance between two circles in three-dimensional space.
+\newblock {\em IBM Journal of Research and Development}, 34(5):770--775,
+  September 1990.
+
+\bibitem{Pedoe57}
+D.~Pedoe.
+\newblock {\em Circles}.
+\newblock Pergamon Press, New York, 1957.
+
+\bibitem{Pedoe70}
+D.~Pedoe.
+\newblock {\em Geometry: A Comprehensive Course}.
+\newblock Dover, New York, 1970.
+
+\bibitem{P89}
+M.~J. Pratt.
+\newblock Applications of cyclide surfaces in geometric modelling.
+\newblock In D.~C. Handscomb, editor, {\em The Mathematics of Surfaces III},
+  pages 405--428, Oxford, 1989. Clarendon Press.
+
+\bibitem{PRA89}
+M.~J. Pratt.
+\newblock Cyclide blending in solid modelling.
+\newblock In W.~Strasser and H.~P. Seidel, editors, {\em Theory and Practice of
+  Geometric Modeling}, pages 235--245. Springer-Verlag, 1989.
+
+\bibitem{Pratt90}
+M.J. Pratt.
+\newblock Cyclides in computer aided geometric design.
+\newblock {\em Computer Aided Geometric Design}, 7:221--242, 1990.
+
+\bibitem{Sabin89}
+Malcolm Sabin.
+\newblock Circles and cyclides --- applying the absolute.
+\newblock In D.C. Handscomb, editor, {\em The Mathematics of Surfaces III},
+  pages 145--151. Oxford University Press, 1989.
+
+\bibitem{SHAR85}
+T.~J. Sharrock.
+\newblock {\em Surface Design with Cyclide Patches}.
+\newblock PhD thesis, Cambridge University, October 1985.
+
+\bibitem{SS14}
+V.~Snyder and C.~Sisam.
+\newblock {\em Analytic Geometry of Space}.
+\newblock Henry Holt, New York, 1914.
+
+\bibitem{SOM47}
+D.M.Y. Sommerville.
+\newblock {\em Analytic Geometry of Three Dimensions}.
+\newblock Cambridge University Press, Cambridge, 1934.
+
+\bibitem{Turn39}
+H.W. Turnbull.
+\newblock {\em Theory of Equations}.
+\newblock Oliver and Boyd, Edinburgh, 1939.
+
+\end{thebibliography}

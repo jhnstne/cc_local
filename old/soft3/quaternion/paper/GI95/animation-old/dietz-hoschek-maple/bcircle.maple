@@ -1,0 +1,58 @@
+bcircle1 := [1,0,0,0];
+bcircle1[2] := gen_bernstein(2,u,[0,evalf(sqrt(2)/2),1]);
+bcircle1[3] := gen_bernstein(2,u,[1,evalf(sqrt(2)/2),0]);
+bcircle1[1] := gen_bernstein(2,u,[1,evalf(sqrt(2)/2),1]);;
+bcircle1[4] :=0;
+
+bc1 := htoc(bcircle1);
+
+
+bcircle2 := [bcircle1[1],bcircle1[2],-bcircle1[3],0];
+bcircle3 := [bcircle1[1],-bcircle1[2],bcircle1[3],0];
+bcircle4 := [bcircle1[1],-bcircle1[2],-bcircle1[3],0];
+
+
+
+
+CU1 := [bcircle1[2],bcircle1[3],0,bcircle1[1]];
+CU2 := [-bcircle1[2],bcircle1[3],0,bcircle1[1]];
+CU3 := [bcircle1[2],-bcircle1[3],0,bcircle1[1]];
+CU4 := [-bcircle1[2],-bcircle1[3],0,bcircle1[1]];
+
+CUT_CONTROL1 := [
+		[1,evalf(sqrt(2)/2),1],
+		[0,evalf(sqrt(2)/2),1],
+		[1,evalf(sqrt(2)/2),0],
+		[0,0,0,0]
+		];
+
+
+
+CUT_CONTROL2 := [
+		[1,evalf(sqrt(2)/2),1],
+		[0,-evalf(sqrt(2)/2),-1],
+		[1,evalf(sqrt(2)/2),0],
+		[0,0,0,0]
+		];
+
+
+CUT_CONTROL3 := [
+		[1,evalf(sqrt(2)/2),1],
+		[0,evalf(sqrt(2)/2),1],
+		[-1,-evalf(sqrt(2)/2),0],
+		[0,0,0,0]
+		];
+
+
+CUT_CONTROL4 := [
+		[1,evalf(sqrt(2)/2),1],
+		[0,-evalf(sqrt(2)/2),-1],
+		[-1,-evalf(sqrt(2)/2),0],
+		[0,0,0,0]
+		];
+
+
+
+RADIUS_CONTROL := [1];
+
+

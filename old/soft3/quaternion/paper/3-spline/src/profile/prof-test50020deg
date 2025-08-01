@@ -1,0 +1,39 @@
+-------------------------------------------------------------------------
+SpeedShop profile listing generated Fri Jul  9 15:07:54 1999
+   prof s3spline.totaltime.m4301
+                s3spline (n32): Target program
+                     totaltime: Experiment name
+                 ut,30000,0:cu: Marching orders
+               R10000 / R10010: CPU / FPU
+                             1: Number of CPUs
+                           225: Clock frequency (MHz.)
+  Experiment notes--
+          From file s3spline.totaltime.m4301:
+        Caliper point 0 at target begin, PID 4301
+                        /usr/people/jj/Orientation/S3curve/soft/s3spline -d -t
+        Caliper point 1 at exit(0)
+-------------------------------------------------------------------------
+Summary of statistical callstack sampling data (totaltime)--
+                             9: Total Samples
+                             0: Samples with incomplete traceback
+                         0.270: Accumulated Time (secs.)
+                          30.0: Sample interval (msecs.)
+-------------------------------------------------------------------------
+Function list, in descending order by exclusive time
+-------------------------------------------------------------------------
+ [index]  excl.secs excl.%   cum.%  incl.secs incl.%    samples  procedure  (dso: file, line)
+
+     [4]      0.180  66.7%   66.7%      0.180  66.7%          6  ratbez (s3spline: RatBez.c, 21)
+     [8]      0.030  11.1%   77.8%      0.030  11.1%          1  Bspline2Bezier (s3spline: Bez.c, 439)
+     [9]      0.030  11.1%   88.9%      0.030  11.1%          1  hornbez (s3spline: Bez.c, 36)
+    [10]      0.030  11.1%  100.0%      0.030  11.1%          1  M_curve (s3spline: Fit3sphere.c, 54)
+     [1]      0.000   0.0%  100.0%      0.270 100.0%          9  __start (s3spline: crt1text.s, 103)
+     [2]      0.000   0.0%  100.0%      0.270 100.0%          9  main (s3spline: s3spline.c, 1205)
+     [7]      0.000   0.0%  100.0%      0.060  22.2%          2  DesignImageCurve (s3spline: s3spline.c, 1136)
+    [11]      0.000   0.0%  100.0%      0.030  11.1%          1  FitCubicBez_4d (s3spline: Fit4d.c, 141)
+    [12]      0.000   0.0%  100.0%      0.030  11.1%          1  Bspline2Bez_4d (s3spline: Bez4d.c, 26)
+    [13]      0.000   0.0%  100.0%      0.030  11.1%          1  PrepareBezDisplay_4d (s3spline: Bez4d.c, 57)
+    [14]      0.000   0.0%  100.0%      0.030  11.1%          1  Bez2Points (s3spline: Bez.c, 243)
+     [3]      0.000   0.0%  100.0%      0.210  77.8%          7  MapCurve (s3spline: s3spline.c, 1159)
+     [5]      0.000   0.0%  100.0%      0.180  66.7%          6  PrepareRatBezDisplay_4d (s3spline: Bez4d.c, 92)
+     [6]      0.000   0.0%  100.0%      0.180  66.7%          6  RatBez2Points (s3spline: RatBez.c, 67)

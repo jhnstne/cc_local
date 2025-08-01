@@ -1,0 +1,100 @@
+Consider a fixed curve sweeping through 3-space and suppose
+that we want a rational Bezier model of the surface that it sweeps out.
+We show how to build a rational swept surface that
+interpolates $n$ frames of a fixed rational space curve 
+({\em i.e.}, $n$ position/orientation pairs) 
+and, more importantly, 
+maintains the shape of the curve at all intermediate points of the sweep.
+Thus, the surface models 
+an exact sweep of the curve, consistent with the given data.
+For added flexibility, we also allow the sweeping curve to change its
+size through the sweep.
+This swept surface models sweeping bodies that do not change shape,
+such as in the applications of robotics and CAD/CAM,
+and the frames can be generated automatically by the moving body.
+For design, it also encompasses the surface of revolution 
+and extruded surface, and extends them to arbitrary sweeps of a curve.
+
+We assume discrete data on the position and orientation
+of the sweeping body for reasons both of application and design.
+For the modeling of a physically sweeping body ({\em e.g.}, a robot), 
+it is simple to gather discrete position/orientation data, 
+but much more difficult to gather it continuously.
+In design also, it is usually appropriate to design the swept surface
+by specifying only a finite number of frames.
+
+The major challenge is to rationally preserve the shape of the curve 
+through the sweep.
+The interpolation of curves that can vary in shape during the sweep
+can already be solved using the traditional tensor product surface.
+And the shape of the curve can be preserved through the sweep
+using Frenet frames if the surface need not be rational.
+However, we want a rational model, for compatibility with 
+present modeling systems.
+We build a rational tensor product Bezier surface, complete with a full
+definition of its control mesh.
+
+There is a rich literature on swept surfaces, but none
+that yields a rational parametric surface
+representing an exact sweep for our large class of surfaces.
+Several papers use the Frenet frame of differential geometry
+to control the sweep of a curve ({\em e.g.}, Pegna \cite{Pegna88},
+Bronsvoort and Klok \cite{bronsklok85}).
+The path of the sweep is specified by a space curve $d(t)$,
+which defines the position of the reference point on the
+sweep curve, and the sweep curve's orientation is defined by
+the Frenet frame of the position curve $d$.
+The rotation defined by the Frenet frame is not rational,
+and thus neither is the swept surface.  % see Pegna, p. 47
+The envelope of swept surfaces ({\em i.e.}, the implicit equation of the surface
+swept out by a sweeping surface) has been the subject of many papers
+({\em e.g.}, Martin and Stephenson \cite{martinsteph90}).
+Coquillart \cite{coquillart87} and Bloomenthal and Riesenfeld 
+\cite{bloom91} construct swept surfaces by approximating offset curves
+of the axis of the sweep, in the latter paper to define translational sweeps,
+surfaces of revolution, and approximations of rotation-minimizing 
+sweeps.
+(The rotation-minimizing frame 
+is an attempt to remove some of the problems of the Frenet frame.)
+The important special class of canal surfaces, 
+surfaces swept by a sphere, are studied by Rossignac and Requicha 
+\cite{rossignac85,rossrequicha84}.
+Farouki shows that rational canal surfaces can be constructed by sweeping
+a sphere along a special Pythagorean hodograph space curve, and gives the
+rational parameterization \cite{farouki94}.
+% only works for rotationally symmetric circle sweep curve
+The ray tracing of swept surfaces (as opposed to their Bezier surface 
+definition) has been studied by van Wijk (both with the sweep of a sphere
+of varying radius \cite{vanwijk84euro} and the rotation, translation,
+and translation with scaling of a planar cubic spline \cite{vanwijk84tog})
+and by Bronsvoort and Klok \cite{bronsklok85} (for generalized cylinders).
+
+Although our method directly models the sweep of a curve,
+the sweep of a surface or a solid can be modeled indirectly
+by using curve frames that represent the intersection of two 
+instantaneously close frames of the surface.
+Although this will not construct an 
+exact model of an actual sweep of the surface,
+it is likely to be a good approximation since the 
+envelope of a surface is computed by such intersections
+of neighbouring positions of the surface.
+
+A curve is defined by its position, orientation, and scale.
+We isolate each of these three components and independently 
+design each of them to interpolate the frames.
+Rational interpolation of position and scale is straightforward, 
+but rational orientation interpolation is challenging.
+The orientation of a curve is represented by a unit quaternion.
+This reduces the problem to interpolation of points on the unit
+sphere in 4-space by a curve constrained to this sphere.
+This can be done using optimization but this will not create
+a rational curve.
+We show how to translate to an equivalent problem of interpolation
+of points in 4-space without any constraints.
+
+
+In the presentation, 
+we will show how to interpolate orientations constrained to the quaternion sphere
+and how to explicitly build the control mesh of the surface from the position,
+orientation, and scaling components of the sweeping curve.
+We will also show pictures of surfaces generated by our method.

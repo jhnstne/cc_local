@@ -1,0 +1,39 @@
+.TH Isophote LOCAL
+.SH NAME
+Isophote \- Compute an isophote line.
+.SH SYNOPSIS
+.B Isophote [options] < dstruct-triangles
+.SH DESCRIPTION
+.I Isophote
+computes an approximate isophote from a set of dstruct triangles.
+The default isophote is actually a set of isophote lines.  The
+direction defaults to [0, 0, 1], and the isophote lines correspond
+to lines on the surface where the surface normal forms one of the
+following angle with this direction: 85, 75, ..., 5, -5, -25, ..., -85.
+.SH Options
+.TP
+.B \-h
+Print a list of current options.
+.TP
+.B \-dir x y z
+Set the fixed direction to be [x, y, z].
+.TP
+.B \-k angle
+Output a single isophote line with the specified surface normal angle.
+.TP
+.B \-k5 a1 ... a5
+Output five isophote lines with the specified surface normal angles.
+.TP
+.B \-k10 a1 ... a10
+Output 10 isophote lines with the specified surface normal angles.
+.TP
+.B \-k20 a1 ... a20
+Output 20 isophote lines with the specified surface normal angles.
+.TP
+.B \-o offset
+Offset the isophotes in the normal direction by the given offset.
+The default offset is 0.01.
+.SH AUTHORS
+.nf
+Stephen Mann
+.fi

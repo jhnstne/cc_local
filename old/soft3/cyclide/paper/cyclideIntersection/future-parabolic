@@ -1,0 +1,42 @@
+FUTURE PROBLEM:
+Deal with parabolic cyclide in a separate paper: too deep a problem
+to tackle in this paper.
+Probably can represent by parabola directrix curve (probably can with 
+parabola).
+
+Our theory can probably handle parabolic cyclides and cylinders/cones, but 
+	(a) the implicit form doesn't include them;
+	(b) the classical definition of dupin cyclide does not include them;
+	(c) a theory for the classic dupin cyclide is rich enough, especially
+		as a first step.
+The inclusion of parabolic cyclides is a topic for further consideration.
+
+\Comment{
+PARABOLIC CYCLIDE'S EQUATION
+\be
+\label{eqparcy}
+parabolic cyclide: p. 328 of Forsyth
+\ee
+
+It is important to note that in this paper we only consider quartic Dupin 
+cyclides:
+we do not consider parabolic cyclides, which are infinite cubic surfaces that 
+are the inversion of a torus such that the center of inversion lies 
+on the torus \cite{F12,FISCH86}.	% p. 328 of Forsyth: cubic surface;
+					% Fischer, p. 
+% 	parabolic cyclides still have circular lines of curvature, see p. 328
+%	of Forsyth where he discusses principal radii of curvature
+% 	BUT ARE THESE EVER 0?
+	% parabolic cyclides contain lines 
+	% because all circles of the torus through the center of inversion  
+	% (parabolic cyclides arise from inversion of a torus where the
+	% center of inversion lies on the torus: see fischer)
+	% get mapped to lines
+	% DOES THIS MEAN THEY CONTAIN LINEAR LINES OF CURVATURE?
+	% are lines of curvature preserved under inversion (since
+	% we know some lines of curvature on the torus get mapped to lines)?
+	% parabolic cyclides are cubic surfaces, too (p. 286, Dutta; 
+	% p. 328, Forsyth)
+SHOULD CONSIDER PARABOLIC CYCLIDES SINCE THEY CAN BE INVERTED TO A TORUS,
+WHICH IS ALL THAT WE REQUIRE OF A SURFACE.
+}

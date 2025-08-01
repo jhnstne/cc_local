@@ -1,0 +1,1006 @@
+\documentclass[12pt]{article}
+\usepackage{latex8}
+\usepackage{times}
+\usepackage{epsfig}
+\input{header}
+
+\newif\ifTalk
+\Talktrue
+\newif\ifJournal
+\Journaltrue
+\newif\ifFuture		% issues that are useful for future papers
+\Futurefalse
+
+\newcommand{\plucker}{Pl\"{u}cker\ }
+\newcommand{\tang}{tangential surface\ }
+\newcommand{\tangs}{tangential surfaces\ }
+\newcommand{\Tang}{Tangential surface\ }
+\newcommand{\atang}{tangential $a$-surface\ }
+\newcommand{\btang}{tangential $b$-surface\ }
+\newcommand{\ctang}{tangential $c$-surface\ }
+\newcommand{\atangs}{tangential $a$-surfaces\ }
+\newcommand{\btangs}{tangential $b$-surfaces\ }
+\newcommand{\ctangs}{tangential $c$-surfaces\ }
+\newcommand{\bisilhouette}{bisilhouette\ }
+\newcommand{\Bisilhouette}{bisilhouette}
+\newcommand{\bisilhouettes}{bisilhouettes\ }
+
+\SingleSpace
+\setlength{\headsep}{.5in}
+	% \setlength{\oddsidemargin}{0pt}
+	% \setlength{\topmargin}{-.2in}	% should be 0pt for 1in
+\setlength{\textheight}{8in}
+	% \setlength{\textwidth}{6.5in}
+	% \setlength{\columnsep}{5mm}	% width of gutter between columns
+\markright{The bitangent developable: \today \hfill}
+\pagestyle{myheadings}
+
+% -----------------------------------------------------------------------------
+
+\title{The bitangent developable}
+\author{John K. Johnstone\\
+	Geometric Modeling Lab\\
+	Computer and Information Sciences\\
+	The University of Alabama at Birmingham\\
+	University Station, Birmingham, AL 35294}
+
+\begin{document}
+\maketitle
+
+% -----------------------------------------------------------------------------
+
+\begin{abstract}
+This paper explores the application of the tangential surface
+to the construction of the bitangent developable,
+a fundamental surface in the analysis of visibility, lighting and motion.
+% The bitangent developable of the surfaces $G$ and $H$ is represented
+% as a lofting between its curves of tangency with $G$ and $H$.
+We also discuss applications of the bitangent developable.
+\end{abstract}
+
+\ifJournal
+\noindent {\bf Keywords}: tangential surface,
+	  bitangent developable, visibility, lighting, motion planning.
+\fi
+
+% \tableofcontents
+% \clearpage
+% \listoffigures
+% \clearpage
+
+% -----------------------------------------------------------------------------
+
+\section{Bitangent developables}
+\label{sec:bitangdev}
+
+A natural application of the tangential surface system
+is the computation of bitangent developables.
+Bitangent developables of surfaces
+are the generalization of bitangent lines of curves.
+They are important in lighting and visibility analysis
+since they bound the umbra and penumbra and, in general, mark a change
+of visibility in a scene.
+% Bitangent developables are necessary for visibility analysis
+% (as they define visual events), lighting from a surface light source,
+% shortest path motion, and other problems in geometric modeling,
+% graphics, robotics, and computational geometry that involve the
+% interaction between surfaces.
+
+\begin{defn2}
+A {\bf bitangent plane} of two surfaces is a plane that is tangent to
+both surfaces.
+The bitangent planes of two surfaces are organized into one-parameter families.
+A {\bf bitangent developable} is the envelope of one of these
+families of bitangent planes.
+\end{defn2}
+
+Each intersection curve of the tangential surface systems of $S_1$ and $S_2$
+corresponds to a bitangent developable of $S_1$ and $S_2$.
+Bitangency in primal space naturally becomes intersection in dual space,
+since a bitangent plane is a tangent plane that is common to two surfaces
+and an intersection point is a point that is common to two surfaces.
+
+Theory of directrix curves and primal/dual relationships.
+
+{\bf The main challenge is splicing the intersection curve together across
+dual spaces.
+To answer this challenge, 
+we need to better understand the transition between dual spaces,
+that is, their shared boundaries.}
+
+% It is also safer to avoid clipping the box exactly,
+% since with numerical precision this will often cut away part of the box too.
+
+\clearpage
+
+\section{Introduction}
+
+The bitangent developable, a structure that interrelates two surfaces,
+acts as a crucial analytical tool for the study of collections
+of surfaces in applications such as visibility analysis, lighting, and motion.
+The bitangent developable can be calculated directly 
+from the intersection curves of tangential surface systems in dual space,
+either from their tangent spaces (Theorem~\ref{thm:bidev})
+or, more simply, using the parametric equivalence between points in primal
+and dual space (Theorem~\ref{thm:bidev2}).
+
+
+The computation of the bitangent developables of a pair of surfaces
+can be reduced to a surface intersection problem in dual space.
+This paper develops a practical implementation of this idea.
+
+Section~\ref{sec:uses} motivates the importance of bitangency, in general,
+and the bitangent developable, in particular.
+A solution for the bitangent developable in primal space is presented
+in Section~\ref{sec:comparison}, exhibiting its inferiority to a solution in dual
+space.
+The heart of the paper is Sections~\ref{sec:bitangdev}-\ref{sec:bitangcompute}.
+Section~\ref{sec:bitangdev} begins to show how the bitangent developable
+is computed in dual space using the tangent spaces of the intersection curves
+of tangential surfaces.
+After suggesting a representation for the bitangent developable in
+Section~\ref{sec:rep},
+the fundamental elements of this representation (the curves of tangency
+that act as directrix curves) are computed in two ways in 
+Section~\ref{sec:curveoftang}, 
+leading to a more efficient computation of the bitangent developable,
+and a final algorithm in Section~\ref{sec:bitangcompute}.
+
+Bitangents between surfaces are necessary for visibility analysis
+(as they define visual events), lighting from a surface light source,
+shortest path motion, and other problems in geometric modeling,
+graphics, robotics, and computational geometry that involve the
+interaction between surfaces.
+
+\clearpage
+
+% -----------------------------------------------------------------------------
+
+\section{Definitions}
+
+\begin{defn2}
+A {\bf bitangent plane} of two surfaces is a plane that is tangent to
+both surfaces.
+\end{defn2}
+
+Each bitangent plane is part of a one-parameter family of bitangent planes.
+
+\begin{defn2}
+The bitangent planes of two surfaces $G$ and $H$ 
+are organized into one-parameter families.
+A {\bf bitangent developable} of $G$ and $H$ is 
+the envelope of one of these families of bitangent planes \cite{koenderink}.
+\end{defn2}
+
+\ifJournal
+\begin{defn2}
+A bitangent plane of $G$ and $H$ is {\bf inner} if 
+$G$ and $H$ lie on opposite sides of the bitangent plane
+(in the local neighbourhood of the points of tangency).
+It is {\bf outer} if 
+$G$ and $H$ (locally) lie on the same side of the bitangent plane.
+
+A bitangent developable of $G$ and $H$ is {\bf inner} (resp., outer) if 
+it is the envelope of a family of inner (resp., outer) bitangent planes
+of $G$ and $H$.
+\end{defn2}
+\fi
+
+\begin{defn2}
+A {\bf bitangent line} of two surfaces is a line that is tangent to both
+surfaces.
+\end{defn2}
+
+\begin{defn2}
+\label{defn:lofting}
+A ruled surface R can be defined by {\bf lofting} between two curves
+$C_1$ and $C_2$:
+\[
+	R(s,t) = (1-s) C_1(t) + sC_2(t)
+\]
+for $s \in \Re,\ t \in I \subset \Re$. % (Figure~\ref{fig:loft}).
+$C_1$ and $C_2$ are called {\bf directrix curves}.
+\end{defn2}
+
+	% hand-drawn symbolic figure
+	% OR loft.rgb (from loft.c++ program)
+\begin{figure}[b]
+\caption{Lofting}
+\label{fig:loft}
+\end{figure}
+	
+Notice that the directrix curves lie on the ruled surface,
+and that the lines 
+\begin{equation}
+\label{eq:generator}
+	\{ L_{\alpha}(s) = (1-s) C_1(\alpha) + s C_2(\alpha) \}_{\alpha \in I}
+\end{equation}
+define the generators of the ruled surface.
+
+\ifJournal
+\begin{example}
+$(1-s)(\cos t, \sin t, 0) + s (\cos t, \sin t, 1)$ is a lofting between
+two circles, defining a cylinder.
+A typical generator is $(1-s)(1,0,0) + s(1,0,1)$.
+\end{example}
+\fi
+
+\clearpage
+
+% -----------------------------------------------------------------------------
+
+\section{Representing a bitangent developable}
+\label{sec:rep}
+
+The bitangent developable is a ruled surface,
+and its representation will reflect this fact.
+We shall use one of the classical representations for a ruled surface.
+
+We will represent the bitangent developable by lofting.
+Which directrix curves should we use?
+Since the defining characteristic of the bitangent developable is 
+its tangency with two surfaces, 
+the most natural choice for its two directrix curves is the two
+curves of tangency.
+%
+\begin{itemize}
+\item A bitangent developable will be represented by lofting between
+      the curves of tangency with its defining surfaces.
+\end{itemize}
+%
+There are many advantages to this representation, aside from its naturalness.
+% This representation of the bitangent developable 
+It provides immediate access to the curves of tangency and,
+if properly parameterized, 
+the bitangent lines generating the bitangent developable
+(through the generators (\ref{eq:generator})).
+The curves of tangency are useful to many
+applications that use the bitangent developable.
+For example, in lighting, the curves of tangency define the boundaries
+of the umbra and penumbra.
+Individual bitangent lines are also useful,
+as we have observed in Section~\ref{sec:uses},
+such as in the definition of shortest paths.
+
+The final advantage of this representation is that it is
+easily computed in dual space, which we now explore.
+In particular, the curves of tangency of a bitangent developable
+have a simple characterization in dual space.
+
+\clearpage
+
+% -----------------------------------------------------------------------------
+
+\section{Dual theory I [The bitangent developable in dual space]}
+\label{sec:bitangdev}
+
+The computation of bitangency is ideally suited to dual space,
+since bitangency in primal space becomes intersection in dual space,
+a well studied operation in geometric modeling.
+In this section, we explore the relationship between bitangency 
+and intersection, in preparation for the computation of the bitangent
+developable in dual space in Section~\ref{sec:bitangcompute}.
+
+For simplicity of presentation, we shall temporarily ignore issues at infinity
+and consider the image of a tangent space to be a single tangential surface.
+We will expand the theory to the multiple surface representation of 
+(\ref{eq:tangspace}) at the end of Section~\ref{sec:bitangcompute}.
+
+Since the bitangent developable is the envelope of a family of
+bitangent planes, we begin by considering the primal-dual relationship
+for a bitangent plane (Lemma~\ref{lem:bitangplane}), 
+then for a family of bitangent planes (Corollary~\ref{cor:family}).
+Since the bitangent developable is composed of bitangent lines,
+we continue with the primal-dual relationship for a bitangent line 
+(Lemma~\ref{lem:biline}).
+Finally, we address the primal-dual relationship for the bitangent developable
+(Theorem~\ref{thm:bidev}).
+
+\begin{lemma}
+\label{lem:bitangplane}
+A bitangent plane of $G$ and $H$ dualizes to an intersection point of
+the tangential surfaces $G^*$ and $H^*$.
+\ifJournal (Figure~\ref{fig:bitangplane}). \fi
+\end{lemma}
+\prf
+A bitangent plane is simultaneously a tangent plane of $G$ and
+a tangent plane of $H$.
+Hence, it dualizes to a point of $G^*$ and $H^*$ (Definition~\ref{defn:tangsurf}).
+\QED
+
+	% hand-drawn symbolic figure
+\ifJournal
+\begin{figure}[b]
+\vspace{1in}
+\caption{A bitangent plane and the associated intersection point in dual space}
+\label{fig:bitangplane}
+\end{figure}
+\fi
+
+\begin{table*}[b]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+primal space & dual space \\
+\hline \hline
+bitangent plane of $G$ and $H$ & intersection point of $G^*$ and $H^*$ \\ \hline
+1-parameter family of bitangent planes of $G$ and $H$ &
+	intersection curve of $G^*$ and $H^*$ \\ \hline
+bitangent line of $G$ and $H$ & tangent of intersection curve \\ \hline
+bitangent developable of $G$ and $H$ & tangent space of intersection curve \\ \hline
+\end{tabular}
+\caption{Bitangency in primal space is intersection in dual space}
+\label{tbl:duality}
+\end{table*}
+
+\begin{corollary}
+\label{cor:family}
+A one-parameter family of bitangent planes of $G$ and $H$ dualizes
+to an intersection curve of $G^*$ and $H^*$.
+\end{corollary}
+\prf
+As the bitangent plane sweeps across the surfaces,
+it traces out a curve in dual space.
+\QED
+
+\begin{lemma}
+\label{lem:biline}
+A bitangent line of $G$ and $H$ dualizes to the tangent of an intersection
+curve of $G^*$ and $H^*$.
+\end{lemma}
+\prf
+A bitangent line is the intersection of two consecutive bitangent planes.
+Moving the bitangent plane infinitesimally in primal space is equivalent to
+moving infinitesimally along the associated intersection curve in dual space.
+By the principle of duality \cite{pedoe70},	% Pedoe, p. 244
+an intersection in primal space becomes a join in dual space.
+Hence, the intersection of two infinitesimally close bitangent planes
+dualizes to the join of two infinitesimally close points of the intersection 
+curve, a tangent.
+\QED
+
+\ifJournal
+\begin{rmk}
+We recall that lines dualize to lines \cite{pedoe70}.\footnote{The
+	% Pedoe, p. 277; Hilbert/Cohn-Vossen, p. 121
+	intersection of 2 planes $P$ and $Q$  
+	in primal space (a line) dualizes to the join of the dual points $P^*$ 
+	and $Q*$ in dual space (also a line).}
+We know then that a bitangent of $A$ and $B$ dualizes to a line.
+\end{rmk}
+\fi
+
+% We are finally ready to consider the dual image of a bitangent developable.
+
+\begin{theorem}
+\label{thm:bidev}
+A bitangent developable of $G$ and $H$ dualizes to the tangent space of
+an intersection curve of $G^*$ and $H^*$.
+\end{theorem}
+\prf
+Suppose the bitangent developable is the envelope of the 
+family of bitangent planes $\alpha(t)$,
+which dualizes to an intersection curve $C$ (Corollary~\ref{cor:family}).
+The envelope of $\alpha(t)$ is generated
+by the intersections of consecutive surfaces 
+$\mbox{lim}_{\epsilon \rightarrow 0} (\alpha(t) \cap \alpha(t + \epsilon))$.
+Since the intersection of consecutive bitangent planes is a bitangent line,
+the bitangent developable is generated by a sweeping bitangent line,
+each of which dualizes to a tangent of the intersection curve $C$
+(Lemma~\ref{lem:biline}).
+Thus, the entire bitangent developable dualizes to the tangent space of $C$.
+\QED
+
+These primal-dual relationships are reviewed in Table~\ref{tbl:duality}.
+Before continuing our discussion of the computation of the bitangent developable
+in dual space, we divert to a discussion of the representation
+for a bitangent developable in the next section.
+This representation will suggest a
+better method for computing the bitangent developable.
+
+\clearpage
+
+% -----------------------------------------------------------------------------
+
+\section{Dual theory II [The curves of tangency in dual space]}
+\label{sec:curveoftang}
+
+A bitangent developable of $G$ and $H$ is associated with
+an intersection curve of $G^*$ and $H^*$.
+We have seen that the tangent lines along the intersection curve define the bitangent
+developable (Theorem~\ref{thm:bidev}).
+Each point of this intersection curve not only has an associated tangent line,
+but also an associated tangent plane on $G^*$
+and an associated tangent plane on $H^*$.
+It will be the tangent {\em planes} along the intersection curve
+that define the curves of tangency.
+
+\begin{defn2}
+Consider an intersection curve $C$ of the surfaces $G^*$ and $H^*$.
+The {\bf $G^*$-tangent space} of $C$ is the set of tangent planes of $G^*$ along 
+$C$ (i.e., the tangent space of $C$ with respect to the surface $G^*$).
+\end{defn2}
+
+\begin{lemma}
+\label{lem:curveoftang}
+% Consider a bitangent developable of $G$ and $H$.
+% Let $C$ be the associated intersection curve of $G^*$ and $H^*$ in dual space.
+The curve of tangency on $G$ of a bitangent developable of $G$ and $H$
+dualizes to
+the $G^*$-tangent space of an intersection curve of $G^*$ and $H^*$
+(the same intersection curve as in Theorem~\ref{thm:bidev}).
+\end{lemma}
+\prf
+Proof omitted for lack of space.
+\QED
+\ifJournal	% result is quickly superseded by Corollary~\ref{cor:curveoftang2}
+\prf
+READ OVER THIS PROOF.
+Consider an intersection curve of $G^*$ and $H^*$ and the associated
+bitangent developable $D$ in primal space.
+Let $P$ be a point of the intersection curve and $T$ the tangent plane of $G^*$
+at $P$.
+We must show that $T^*$ is a point of the bitangent directrix curve on $G$,
+i.e., a point on $G$ and $D$.
+Any tangent plane of $G^*$ dualizes to a point on $G$, by straightforward 
+duality, so $T^* \in G$.
+Since $T$ contains the tangent line of the intersection curve at $P$
+(which is the intersection of the tangent planes of $G^*$ and $H^*$ at $P$),
+$T^*$ lies on a bitangent of $G$ and $H$ (Lemma~\ref{lem:biline})
+and on $D$ (Theorem~\ref{thm:bidev}).
+(We are applying here another aspect of the principle of duality:
+the 'contains' relationship in dual space becomes
+the 'lies-on' relationship in primal space \cite{pedoe70}.) % p. 244
+\QED
+\Comment{
+	Consider a line generator of the developable.
+	We want to isolate its two points of tangency with the primal surfaces.
+	These two points dualize to two planes.
+	The line generator is the dual of a tangent line of the intersection curve.
+	Since both primal points lie on the line generator,
+	both desired dual planes intersect the tangent line at a point of the
+	intersection curve.
+	{\bf Which planes through the line in dual space are associated with the
+	two special points of the line in primal space that lie on the primal surfaces?
+	Naturally, the two planes that are tangent to the dual surfaces,
+	since points dualize to tangent planes.}
+}
+\fi
+
+\ifJournal
+This leads to a subtle reinterpretation of a solution:
+rather than mapping 
+the curve tangent spaces of the intersection curves back to bitangent
+developables, we can map the surface tangent spaces of the intersection curves
+back to curves of tangency, which act as directrix curves that define
+the bitangent developable.
+\fi
+
+Lemma~\ref{lem:curveoftang} is an appealing generalization of 
+Theorem~\ref{thm:bidev},
+replacing a curve tangent space by a surface tangent space.
+However, there turns out to be a more efficient characterization of the curves
+of tangency.
+We begin by reexpressing the relationship between the bitangent
+line and the intersection curve in dual space.
+In Lemma~\ref{lem:biline}, we related the bitangent line to the
+tangent of an intersection point.
+We now leverage the equivalence between the parameter values of a 
+tangent plane and its dual point to relate
+the bitangent line directly to the intersection point.
+
+\begin{lemma}
+\label{lem:bitang2}
+The bitangent line associated with the 
+intersection point $P = G^*(s_1,t_1) = H^*(s_2,t_2)$
+is $\seg{G(s_1,t_1)H(s_2,t_2)}$.
+\end{lemma}
+\prf
+The tangent of the intersection curve at $P$ dualizes to 
+the bitangent line associated with $P$ (Lemma~\ref{lem:biline}).
+We will show that this tangent also dualizes to $\seg{G(s_1,t_1)H(s_2,t_2)}$.
+Using the principle of duality, 
+the tangent planes of $G^*(s_1,t_1)$ and $H^*(s_2,t_2)$ dualize to the points
+$G(s_1,t_1)$ and $H(s_2,t_2)$
+\ifJournal
+THIS STATEMENT NEEDS TO BE PROVEN IN THE JOURNAL VERSION, SINCE IT IS THE
+DUAL OF THE ORIGINAL DUALITY.
+\fi
+and the intersection of these tangent planes
+dualizes to the join of $G(s_1,t_1)$ and $H(s_2,t_2)$, $\seg{G(s_1,t_1)H(s_2,t_2)}$.
+But this intersection of tangent planes is nothing but the tangent of the intersection
+curve at $P$.
+\QED
+
+\ifJournal
+\prf
+The tangent planes at $A^*(s_1,t_1)$ and $B^*(s_2,t_2)$ dualize to the points
+$A(s_1,t_1)$ and $B(s_2,t_2)$.
+Thus, using the principle of duality, the intersection of these tangent planes
+dualizes to the join of $A(s_1,t_1)$ and $B(s_2,t_2)$.
+But the intersection of the tangent planes is the tangent of the intersection
+curve at $A^*(s_1,t_1)$, which dualizes to a bitangent by Lemma~\ref{lem-line}.
+\QED
+\prf
+Let $P$ be an intersection point $A^*(s_1,t_1) = B^*(s_2,t_2)$ in dual space.
+We know that the tangent $T$ of the intersection curve at $P$ dualizes to a
+bitangent (Table~\ref{tbl:duality2}).
+This tangent T of $A^* \cap B^*$ at $P$ is the intersection of the tangent plane 
+$T_A$ of $A^*$ and the tangent plane $T_B$ of $B^*$ at $P$:
+$T = T_A \cap T_B$.
+By the principle of duality (intersection becomes join), 
+$T^* = \mbox{join} (T_A^*, T_B^*)$.
+% the dual of the tangent is the join of these points.
+That is, the associated bitangent is the join of 
+$T_A^*$ and $T_B^*$.
+But the tangent planes $T_A$ and $T_B$ dualize to a point of $A$ 
+and a point of $B$, respectively, with the same parameter values as $P$,
+yielding the desired result.
+% But the parameter values of $T_A^*$ and $T_B^*$ are the same as $P$,
+% yielding the desired result.
+\QED
+\fi
+
+\ifJournal
+This is a surprising result since a point normally dualizes to a plane 
+(by definition!).
+However, a point has an associated tangent line and tangent plane,
+both in primal space and dual space.
+Moreover, a point on $G$ can be associated with a point
+on $G^*$ through identical parameter values.
+It is these associations that allow us to probe beneath the fundamental
+duality between points and planes to relate point with lines (Lemma~\ref{lem:bitang2})
+and points with points (Corollary~\ref{cor:curveoftang2} below).
+\fi
+
+\begin{corollary}
+\label{cor:curveoftang2}
+The curves of tangency of the bitangent developable of $G$ and $H$
+associated with the intersection curve $G^*(\alpha(t)) = H^*(\beta(t))$
+are $G(\alpha(t))$ and $H(\beta(t))$.
+\end{corollary}
+% any explanation (proof) only confuses the issue
+
+This leads directly to a different computation of the bitangent developable
+from Theorem~\ref{thm:bidev}, requiring no calculation
+of curve tangent spaces.
+
+\begin{theorem}
+\label{thm:bidev2}
+The bitangent developable associated with the intersection curve
+$G^*(\alpha(t)) = H^*(\beta(t))$ is 
+\[
+	(1-s) G(\alpha(t)) + s H(\beta(t))
+\]
+\end{theorem}
+\prf
+A bitangent developable is the lofting of its curves of tangency
+with $G$ and $H$.
+\QED
+
+\clearpage
+
+% -----------------------------------------------------------------------------
+
+\section{Computing a bitangent developable}
+\label{sec:bitangcompute}
+
+Theorem~\ref{thm:bidev2} shows that the calculation of bitangent 
+developables is equivalent to 
+the calculation of intersection curves of tangential surfaces.
+There is not even any dualization involved in the translation of 
+the intersection curves in dual space back to bitangent developables in
+primal space.
+\ifJournal
+This is a benefit of the equivalence between parameter values of a tangent plane
+in dual space and a point in primal space.
+\fi
+
+Theorem~\ref{thm:bidev2} suggests the following simple algorithm
+for calculating the bitangent developables of $G$ and $H$:
+\begin{enumerate}
+\item Compute the tangential surfaces $G^*$ and $H^*$.
+\item Intersect $G^*$ and $H^*$.
+\item Each intersection curve $G^*(\alpha(t)) = H^*(\beta(t))$ 
+      defines a bitangent developable $(1-s) G(\alpha(t)) + s H(\beta(t))$.
+\end{enumerate}
+
+Incorporating the triumvirate representation of tangent space (\ref{eq:tangspace})
+using 3 boxed tangential surfaces, this algorithm becomes:
+
+\begin{enumerate}
+\item Compute the dual representation (\ref{eq:tangspace}) of the tangent
+	spaces of $G$ and $H$:
+\[
+	(G^*_{\fbox{a}}, G^*_{\fbox{b}}, G^*_{\fbox{c}}),\ 
+	(H^*_{\fbox{a}}, H^*_{\fbox{b}}, H^*_{\fbox{c}})
+\]
+\item Intersect the tangential surfaces in each of the 3 dual spaces, 
+	passively clipping to each box (Section~\ref{sec:tangsurf}):
+\[
+\begin{tabular}{c}
+	$G^*_{\fbox{a}} \cap H^*_{\fbox{a}}$ \\
+	$G^*_{\fbox{b}} \cap H^*_{\fbox{b}}$ \\
+	$G^*_{\fbox{c}} \cap H^*_{\fbox{c}}$
+\end{tabular}
+\]
+\item Merge the intersection curves from the 3 dual spaces.
+\item Each intersection curve $G^*(\alpha(t)) = H^*(\beta(t))$ 
+      defines a bitangent developable $(1-s) G(\alpha(t)) + s H(\beta(t))$.
+\end{enumerate}
+
+Figure~\ref{fig:intcurve} shows the component of the bitangent developable 
+arising from intersection in one of the dual spaces (c-space).
+The intersection curves are marked in the right figure.
+Figure~\ref{fig:bitangdev} shows the pair of bitangent developables (one cone-like, the
+other cylinder-like) arising from
+all intersection curves in the three dual spaces.
+
+	% 2 tops (shaded); a-envelope, b-envelope, and c-envelope of 2Top.pts3 together, original position
+\begin{figure}[b]
+\caption{Two surfaces and their bitangent developables}
+\label{fig:bitangdev}
+\end{figure}
+
+Since the intersection of step (2) is confined to a small box, it is more 
+efficient.
+We use the classical subdivision algorithm of Lane and Riesenfeld \cite{lane80}
+for surface intersection, 
+with some elements of \cite{nat90}.
+In our implementation, the surfaces in primal space
+are Bezier surfaces and the tangential surfaces in dual space
+are rational Bezier surfaces \cite{jj01b}.
+The merging of step (3) is similar to the merging required in a subdivision
+algorithm for surface intersection.
+
+\clearpage
+
+% -----------------------------------------------------------------------------
+
+\section{Applications [On the many uses of bitangency]}
+\label{sec:uses}
+
+We would now like to explore problems that can be better solved using the
+dual representation (\ref{eq:tangspace}) of the tangent space of a surface
+that we have just introduced.
+One of these problems is bitangency, an important but largely neglected 
+problem related to the tangent space.
+Before we discuss its solution, we explore some of the applications
+of the bitangent to better understand exactly what we want to compute.
+
+% -----------------------------------------------------------------------------
+
+\subsection{Qualitative visibility}
+
+	% Figure 2 of bisilhouette paper
+	% 2sphereAB.rgb, from 2sphere.c++ program
+	% (a) 2sphereA.rgb: general setup
+	% (b) 2sphereB.rgb: looking from a point on the bitangent plane
+\begin{figure}[b]
+\caption{Crossing a bitangent plane may not change visibility: a bitangent plane of 2 spheres (left) and a crossing (right)}
+\label{fig:vis1}
+\end{figure}
+
+	% Figure 3 of bisilhouette paper
+	% 2sphereEnv.rgb, from 2sphere.c++ program
+	% (a) 2sphereEnvANew.rgb: one of the envelopes of 2 spheres
+	% (b) 2sphereEnvB.rgb: looking from a point just left of the envelope
+	% (c) 2sphereEnvC.rgb: looking from a point just right of the envelope
+\begin{figure}[b]
+\caption{But crossing a bitangent developable will change visibility: a bitangent developable (top) and a crossing (bottom)}
+\label{fig:vis2}
+\end{figure}
+
+The bitangent planes of two surfaces define the viewpoints where the line
+of sight grazes both surfaces.
+At these locations, the qualitative visibility (i.e., the objects
+that are visible from the eye) may potentially change.
+Yet most crossings of a bitangent plane do not change the visibility
+(Figure~\ref{fig:vis1}).
+What additional constraint causes such a change?
+For the qualitative visibility to change, the eye must cross the
+envelope of this family (Figure~\ref{fig:vis2}).
+% We conclude that computation of the envelopes of bitangent planes 
+% is important for visibility analysis.
+This relationship of bitangency to visibility analysis is formalized
+in the following lemma.
+
+\begin{defn2}
+The {\bf qualitative visibility} at a point of a scene is 
+the set of objects that are visible when the eye is at that point.
+\end{defn2}
+
+\begin{lemma}
+\label{lem:cross}
+The qualitative visibility of a scene will change only if the 
+the eye crosses a bitangent developable of two surfaces.
+\end{lemma}
+
+This is not a sufficient condition, since
+the visibility will still not change if another object blocks the line
+of sight between the two surfaces or the eye lies between the two surfaces.
+However, Lemma~\ref{lem:cross} is a necessary condition,
+and computation of the bitangent developable is the most difficult
+computation in analyzing qualitative visibility.
+Notice that qualitative visibility is important to efficient rendering, 
+since it defines the objects that we can avoid rendering.
+
+Visibility analysis of smooth surfaces has received far less attention
+than visibility analysis of polyhedral scenes \cite{durand00}.
+The development of the underlying theory has been begun, with work by Petitjean on 
+aspect graphs of algebraic surfaces 
+\cite{petitjean96} and Durand and his colleagues on
+visibility complexes of smooth convex objects \cite{durand97},
+which develop the global structure of the smooth visibility problem.
+However, to make visibility analysis of smooth environments practical, 
+efficient construction of 
+fundamental elements such as the bitangent developable of smooth surfaces
+will be necessary.
+
+% -----------------------------------------------------------------------------
+
+\subsection{Lighting}
+
+Bitangency also impacts lighting.
+% Consider a surface light source, an interesting
+% generalization of the point light source.
+In a scene lit by a surface light source, the umbra and penumbra
+is bounded by bitangent developables of the light and the scene's objects.
+Thus, the accurate simulation of lighting from a surface light source
+also requires the computation of bitangent developables.
+
+\ifJournal
+The umbra is bounded by outer bitangent developables,
+and the penumbra by inner bitangent developables.
+Give pair of spheres example.
+\fi
+
+\ifJournal
+\begin{figure}[b]
+\vspace{1in}
+\caption{Bitangency and lighting}
+\label{fig:lighting}
+\end{figure}
+\fi
+
+% -----------------------------------------------------------------------------
+
+\subsection{Shortest path motion}
+
+The final application of bitangency that we explore
+% although by no means the only remaining application of bitangency, 
+is motion planning.
+Consider a point\footnote{A
+	surface robot can be reduced to a point robot, 
+	by growing the obstacles through Minkowski sum.}
+robot moving among smooth obstacles.
+Shortest paths are composed of straight lines through free space and
+curves on the surface of obstacles.
+One category of straight line in a shortest path
+is a bitangent line between two obstacles.
+
+A bitangent line will skirt past a pair of obstacles in the most efficient
+manner, in a 3D analog of the bitangent lines in the 2D shortest path of
+Figure~\ref{fig:motion}.
+Thus, a knowledge of the bitangent lines of a scene is necessary
+for shortest path motion planning.
+Bitangent lines will be directly available from our representation
+of the bitangent developable (Section~\ref{sec:rep}).
+
+	% Figure 1 of 'A parametric solution to common tangents'
+	% svgraph vg4b.rawctr, path only; jjdush.gif
+\begin{figure}[b]
+\caption{Bitangency and shortest paths in 2D}
+\label{fig:motion}
+\end{figure}
+
+Bitangency arises in a second way in motion planning.
+A common strategy in motion planning is to simplify the problem by replacing
+robots or obstacles by their convex hulls.
+The convex hull of a smooth surface $G$ is composed from parts of
+the original surface and envelopes
+of tangent planes that are tangent at two points of the surface---
+i.e., bitangent developables of $G$ and $G$ (sic).
+Thus, the computation of bitangent developables is important
+to the construction of convex hulls, and hence to motion planning.
+
+These applications indicate the importance of the bitangent developable
+(the envelope of bitangent planes) and the bitangent line.
+We will discover in Section~\ref{sec:rep} that 
+the bitangent lines are directly available from a good representation 
+of the bitangent developable.
+Thus, the rest of the paper will concentrate on the efficient construction
+of the bitangent developable.
+
+\clearpage
+
+% -----------------------------------------------------------------------------
+
+\section{Related work [A solution in primal space]}
+\label{sec:comparison}
+
+% Let us compare our computation of the bitangent developable in dual space
+% using tangential surfaces with a computation in primal space.
+
+The bitangent developable could be computed in primal space,
+without recourse to tangential surfaces, as follows.
+However, this primal solution is much more expensive.
+
+Suppose that $G$ and $H$ are polynomial parametric surfaces of degree $(m,n)$.
+% In a generalization of the standard solution for 
+% the bitangents of two plane curves,
+A bitangent plane of $G$ and $H$ can be associated with a point pair
+$(p,q) = (G(s,t),H(u,v))$, where
+$p$ is one of the points of tangency of the bitangent plane with $G$
+and $q$ is one of the points of tangency with $H$.
+\ifJournal
+\footnote{The normal of this bitangent plane is the normal of $G$ at $p$.}
+\fi
+These point pairs $(p,q)$ are identified by the fact that the line $\lyne{pq}$
+is orthogonal to both the normal at $p$ and the normal at $q$,
+and thus are the solutions of the following system of equations:
+\begin{equation}
+\label{eq:otherbi}
+\begin{tabular}{c}
+$(G(s,t) - H(u,v)) \cdot (\frac{\partial G}{\partial s} \times 
+			 \frac{\partial G}{\partial t}) (s,t) = 0$ \\
+$(G(s,t) - H(u,v)) \cdot (\frac{\partial H}{\partial u} \times 
+			 \frac{\partial H}{\partial v}) (u,v) = 0$ \\
+\end{tabular}			 
+\end{equation}
+or
+\[
+\begin{tabular}{c}
+$f(s,t,u,v) = 0$\\
+$g(s,t,u,v) = 0$
+\end{tabular}
+\]
+This reduces the calculation of bitangent planes to the 
+intersection of implicit surfaces of degree $(3m-1,3n-1)$ in 4-space.
+In contrast, the solution in dual space will involve the 
+simpler intersection of parametric surfaces of degree
+$(3m-1,3n-1)$ in 3-space.
+
+However, the biggest difference lies in the computation of the envelope
+of these bitangent planes.
+The decomposition of the solution set (\ref{eq:otherbi}) into
+1-parameter families and the computation of the envelopes of these families
+is much more difficult than our trivial computation of the envelopes
+directly from the intersection curves in dual space
+(Theorem~\ref{thm:bidev2}).
+% THESE COULD BE THE BITANGENTS DIRECTLY, BUT STILL HARD TO EXTRACT THE BISILHOUETTE
+% Equally importantly, there is no simple way to get the \Bisilhouette,
+% or its directrix curves, from the representation (\ref{eq:otherbi})
+% of the bitangent planes, unlike our algorithm.
+% The explicit computation of the envelope of these two surfaces (\ref{eq:otherbi}) 
+% in 4-space (e.g., \cite{boltyanskii64,martin90}) is much more difficult than
+
+We now begin to consider the solution in dual space in detail.
+
+\section{Silhouette}
+
+\ifJournal
+A closely related construct to the \bisilhouette is the silhouette,
+which is a special case of the \bisilhouette
+where one of the surfaces becomes a point.
+There has been much work on the silhouette of smooth surfaces.
+Schweitzer and Cobb \cite{schweitzer82} use the intersection of a plane with
+Catmull's normal surface to compute the silhouette.
+Sederberg and Zundel \cite{sederberg89}
+compute the silhouette of an algebraic surface using polar surfaces.
+Elber and Cohen \cite{elber90} compute the silhouette of a parametric
+surface using subdivision.
+Krishnan and Manocha \cite{krishnan94} express the silhouette as a determinant.
+There are also many algorithms for silhouettes of polyhedral meshes.
+Of these, \cite{zorin00} is notable since the silhouette is computed 
+in dual space, by intersecting a plane with a dual mesh.
+Points at infinity are dealt with by identifying projective 3-space with
+the boundary of a hypercube in 4-space.
+\fi
+
+% -----------------------------------------------------------------------------
+
+\bibliographystyle{plain}
+\begin{thebibliography}{99}
+
+\bibitem{catmull74}
+Catmull, E. (1974)
+A Subdivision Algorithm for Computer Display of Curved Surfaces.
+Ph.D. thesis, University of Utah.
+
+\bibitem{durand97}
+Durand, F., G. Drettakis and C. Puech (1997)
+The 3D Visibility Complex: a unified data structure for global
+visibility of scenes of polygons and smooth objects.
+9th Canadian Conference on Computational Geometry.
+
+\bibitem{durand00}
+Durand, F. (2000)
+A Multidisciplinary Survey of Visibility.
+SIGGRAPH 2000 Course Notes on Visibility: Problems, Techniques
+and Applications.
+Also available from http://graphics.lcs.mit.edu/~fredo/.
+
+\bibitem{farin97}
+Farin, G. (1997)
+Curves and Surfaces for CAGD: A Practical Guide (4th edition).
+Academic Press (New York).
+
+\bibitem{harris92}
+Harris, J. (1992)
+Algebraic Geometry: A First Course.
+Springer-Verlag (New York).
+
+\bibitem{hartshorne}
+Hartshorne, R. (1977)
+Algebraic Geometry.
+Springer-Verlag (New York).
+
+\bibitem{zorin00}
+Hertzmann, A. and D. Zorin (2000)
+Illustrating Smooth Surfaces.
+SIGGRAPH 2000, 517--526.
+
+\bibitem{hoschek83}
+Hoschek, J. (1983)
+Dual Bezier curves and surfaces.
+In {\em Surfaces in Computer Aided Geometric Design},
+R. Barnhill and W. Boehm, eds.,
+North Holland (Amsterdam), 147--156.
+
+\bibitem{jj01a}
+Johnstone, J. (2001)
+A Parametric Solution to Common Tangents.
+International Conference on Shape Modelling and Applications (SMI2001),
+240--249.
+
+\ifJournal
+\bibitem{jj01c}
+Johnstone, J. (2001)
+Smooth Visibility from a Point.
+39th Annual ACM Southeast Conference, 296--302.
+\fi
+
+\bibitem{jj01b}
+Johnstone, J. (2001)
+Bezier Tangential Surfaces.
+Technical Report.
+
+\bibitem{koenderink}
+Koenderink, J. (1990)
+Solid Shape.
+MIT Press (Cambridge, MA).
+
+\bibitem{lane80}
+Lane, J. and R. Riesenfeld (1980)
+A Theoretical Development for the Computer Generation and Display
+of Piecewise Polynomial Surfaces.
+IEEE Transactions on Pattern Analysis and Machine Intelligence 2(1),
+35--46.
+
+\bibitem{nat90}
+Natarajan, B. (1990)
+On Computing the Intersection of B-Splines.
+Proc. of 6th Annual Symposium on Computational Geometry,
+157--167.
+
+\bibitem{pedoe70}
+Pedoe, D. (1970)
+Geometry: A Comprehensive Course.
+Dover (New York).
+
+\bibitem{petitjean96}
+Petitjean, S. (1996)
+The Enumerative Geometry of Projective Algebraic Surfaces and
+the Complexity of Aspect Graphs.
+International Journal of Computer Vision 19(3), 1--28.
+
+\bibitem{thorpe79}
+Thorpe, J. (1979)
+Elementary Topics in Differential Geometry.
+Springer (New York).
+
+\end{thebibliography}
+
+\end{document}
+ 

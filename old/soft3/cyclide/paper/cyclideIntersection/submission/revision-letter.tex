@@ -1,0 +1,106 @@
+\documentstyle[11pt]{bletter}
+\signature{Prof. John K. Johnstone\\jj@cs.jhu.edu}
+\begin{document}
+\begin{letter}
+{Prof. Gerald Farin\\
+Executive Editor, CAGD\\
+Dept. of Computer Science\\
+Arizona State University\\
+Tempe, AZ 85287-5406
+}
+
+\opening{Dear Prof. Farin:}
+
+I enclose the revised version of the paper `A New Intersection Algorithm using
+Circle Decomposition'.  I have implemented the suggestions of the referees,
+which were very useful. A description of these changes follows.
+
+\noindent In response to the comments of Referee 1.
+\begin{itemize}
+\item
+	The title has been changed.
+\item
+	Section 6, starting with the paragraph `We can now restrict our
+	attention to the intersection of a ringed surface with a ring
+	cyclide', has been altered and augmented,
+	in the interests of clarification.
+	A fuller definition of the two cyclides $c_1(t)$ and $c_2(t)$
+	is included.
+	A discussion of the tracking of the center of inversion
+	as it moves through the torus is provided just above Remark 6.2
+	and in step (4).
+%	Of course, a given interval $(t_i,t_{i+1})$ is inside the torus if
+%	and only if one of one of its points is.
+	A remark at the end of Section 6 about the roots of the original
+	circle/cyclide intersection has been added.
+\item
+	The step-by-step description of the algorithm has been clarified
+	and streamlined.
+\item
+	A discussion of circle-to-line inversion has been added in 
+	Section 10 (Section 10.4).
+\end{itemize}
+
+\noindent In response to the comments of Referee 2,
+\begin{itemize}
+\item
+	The introduction has been changed in two places to 
+	reflect that a parameterization is found (Comment 1).
+\item
+	References to the fact that a quadric is a ringed surface
+	have been added in the last paragraph of Section 2
+	(Comment 2).
+\item
+	The definition of ringed surface has been changed to reflect that
+	the circle can change its radius as it sweeps (Comment 3).
+\item
+	A reference to Properties (1)-(5) of Section 5 has been provided
+	(Comment 4).
+\item
+	I do not understand Comment 5.
+	The notation $c$ has not been used previously in this section
+	(it was used to denote a center of inversion in Section 5, which
+	is consistent); and $k$ is already used to denote the 
+	constant parameter value that defines a point on each circle,
+	$(\mbox{circle}(t))(k)$, for the second center of inversion.
+\item
+	The two typos (Comments 6 and 7) have been corrected.
+\item
+	A definition of center of similitude has been added in Section 11
+	(Comment 8).
+\item
+	Point 4 of Section 12 has been corrected (Comment 9).
+\item
+	Examples of desired extensions have been given in the Conclusions
+	(Comment 10).
+\end{itemize}
+
+\noindent Some other small changes have been made.
+\begin{itemize}
+% \item 
+% 	added adjective `finite' to Sabin remark in Section 3
+\item
+	A sentence has been added to the very end of the abstract.
+\item
+	The cyclide pictures in Figure~1  have been replaced by our own
+	images.  In the final version of the paper, I will provide you with
+	photographic slides to insert here.
+	However, I have inserted black and white postscript versions
+	of these images for this copy.
+\item
+	Some references on cyclides have been added to the penultimate
+	paragraph of Section 3.
+\item
+	Remark 6.3 about numeric computation 
+	has been added at the end of Section 6.
+\item
+	The first two paragraphs of Section 7 have been rearranged for clarity.
+	No material has been added.
+\end{itemize}
+
+I hope that this answers all of the comments of the referees.
+Please contact me at (410) 516-5560 if you have any questions.
+
+\closing{Sincerely,}
+\end{letter}
+\end{document}

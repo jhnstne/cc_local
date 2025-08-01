@@ -1,0 +1,922 @@
+\documentstyle[11pt]{article}
+\thispagestyle{empty}
+\sloppy      
+          
+%        The layout of the page
+%
+\marginparwidth 0pt
+\oddsidemargin  0pt
+\evensidemargin  0pt
+\marginparsep 0pt
+%\leftmargin -0.25in
+
+\topmargin   -0.6in  %0pt
+
+\textwidth   6.5in
+\textheight  9.0in
+
+\renewcommand{\baselinestretch}{1.0}
+
+
+\begin{document}
+\thispagestyle{empty}
+
+\quad~~
+\vfill
+
+\begin{center}
+
+{\Large\bf Abstracts of Talks}
+
+\end{center}
+\vfill
+
+\begin{center}
+{\Large\bf MSI Workshop on}
+
+\vspace{0.5cm}
+ 
+{\LARGE\bf COMPUTATIONAL GEOMETRY }
+
+\end{center}
+
+\vspace{0.2cm}
+
+\begin{center}
+{\Large\bf
+October 25--26, 1991 \\[0.2cm]
+
+SUNY Stony Brook \\
+Stony Brook, NY \\
+}
+
+\vspace{1.5cm}
+
+{\bf Sponsored by the U.S. Army Research Office, and the\\ Mathematical
+Sciences Institute, Stony Brook.}
+
+\end{center}
+
+\vfill
+
+\begin{center} 
+{\bf Organizers:}
+\end{center}
+\bigskip
+
+{\bf
+\begin{tabular}{ll}
+
+\hskip0.6in Joseph S. B. Mitchell & \hskip1.5in Steven S. Skiena\\
+\hskip0.6in Applied Math & \hskip1.5in Computer Science \\
+\hskip0.6in SUNY Stony Brook & \hskip1.5in SUNY Stony Brook\\
+\hskip0.6in Stony Brook, NY 11794 & \hskip1.5in Stony Brook, NY 11794\\
+\hskip0.6in (516) 632-8366 & \hskip1.5in (516) 632-9026/8470\\
+\hskip0.6in jsbm@ams.sunysb.edu & \hskip1.5in skiena@sbcs.sunysb.edu\\
+
+\end{tabular}
+}
+
+\vfill
+
+
+\newpage
+
+\begin{center}
+{\large\bf Separation and Approximation of Polyhedral Surfaces}\\
+\quad\\
+Joseph S. B. Mitchell \\ SUNY Stony Brook\\
+\quad\\
+Subhash Suri \\ Bell Communications Research
+\end{center}
+
+\begin{abstract}
+
+Given a family of pairwise-disjoint polygons $P_1, P_2, \ldots, P_k$
+in the plane, and an integer parameter $m$, it is {\it NP}-complete to
+decide if the $P_i$'s can be {\em separated} by a polygonal family
+consisting of $m$ edges, that is, if there exist disjoint polygons
+$R_1, R_2, \ldots, R_k$ such that $P_i \ss R_i$ and $\sum |R_i| \leq
+m$.  In three dimensions, the problem of separating even two {\em
+nested convex} polyhedra by a $k$-facet polyhedron is {\it
+NP}-complete.  Many other extensions and generalizations of the
+polyhedral separation problem, either to families of polyhedra or to
+higher dimensions, are also intractable.
+
+In this paper, we present efficient approximation algorithms for
+constructing separating families of near-optimal size.  Our main
+results are as follows.  In two dimensions, we give an $O(n \log n)$
+time algorithm for constructing a separating family that has at most
+a constant times the optimal number of edges, where $n$ is the number of
+edges in the original family of polygons.  In three dimensions, we can
+separate a convex polyhedron from a nonconvex polyhedron with a
+polyhedral surface whose {\em facet-complexity} is $O(\log n)$ times
+the optimal, where $n=|P|+|Q|$ is the complexity of the input
+polyhedra.  Our algorithm runs in $O(n^4)$ time, but improves to
+$O(n^3)$ time if the two polyhedra are nested and convex.
+
+Our algorithm for separating a convex polyhedron from a nonconvex
+polyhedron extends to higher dimensions. In $d$ dimensions, for $d
+\geq 4$, the facet-complexity of the approximation polyhedron is $O(d
+\log n)$ times the optimal, and the algorithm runs in $O(n^{d+1})$
+time.  Finally, we also obtain results on separating sets of points, a
+family of convex polyhedra, and separation by non-polyhedral surfaces,
+such as the spherical patches.
+
+\end{abstract}
+
+\vfill
+
+\begin{center}
+{\large\bf Approximate Point Matching}\\
+\quad\\
+Paul Heffernan\\
+William Patterson College
+\end{center}
+
+\begin{abstract}
+ 
+We consider the computer vision problem of testing whether
+two equal cardinality point sets $A$ and $B$ in the plane are
+$\varepsilon$-congruent. We say that $A$ and $B$ are
+$\varepsilon$-congruent if there exists an isometry $I$ and
+bijection $\ell : A \rightarrow B$ such that
+$dist(\ell(a),I(a)) \leq \varepsilon$, for all $a \in A$. 
+Since known methods for this problem are expensive, we develop
+approximate decision
+algorithms that are considerably faster than the known decision
+algorithms, and have bounds on their imprecision. Our approach reduces
+the problem to that of computing maximum flows on a series of graphs
+with integral capacities.
+ 
+\end{abstract}
+
+\vfill
+\newpage
+
+\begin{center}
+{\large\bf Constructing the Convex Hull of a Partially Sorted Set of Points}\\
+\quad\\
+Michael T. Goodrich\\
+Johns Hopkins
+\end{center}
+
+\begin{abstract}
+In this paper we give an optimal algorithm for constructing the convex
+hull of a partially sorted set $S$ of $n$ points in $\Re^2$.
+Specifically, we assume $S$ is represented as the union of a
+collection of nonempty subsets $S_0, S_1,\ldots,S_m$, where the
+$x$-coordinate of each point in $S_i$ is no greater than the
+$x$-coordinate of any point in $S_j$ if $i<j$.  Our method runs in
+time $O(n\log h_{max})$ time, where $h_{max}$ is the maximum number of
+hull edges incident on the points of any single subset $S_i$.  In
+fact, if one is only interested in finding the hull edges that
+``bridge'' different subsets, then our method runs in $O(n)$ time.
+\end{abstract}
+
+\vfill
+
+\begin{center}
+{\large\bf A New Intersection Algorithm using Circle Decomposition}\\
+\quad\\
+John Johnstone\\
+Johns Hopkins
+\end{center}
+
+\begin{abstract}
+
+The present vocabulary of a solid modeler is canonically the plane,
+(some subset of) the quadrics, and the torus.  The class of cyclides
+is also becoming important.  Quadrics and cyclides lie in the more
+general class of ringed surfaces: surfaces that can be swept out by a
+circle.  This class also contains the important class of revolute
+surfaces.  We will present a method for the exact intersection of any
+ringed surface with any quadric or cyclide.  This algorithm shows that
+it is feasible to expand the vocabulary of solid modeling primitives
+to include all ringed surfaces.  (In solid modeling, surface
+intersection is crucial to the design of solids and their subsequent
+analysis.)
+
+Our intersection algorithm is exact: that is, the intersection is
+computed symbolically rather than numerically.  The theme of exact
+intersection is to reduce to degree 4 computations.  We do this by
+concentrating on the decomposition of a surface into simpler
+components (whereas previous algorithmic development has centered
+around the degree of an algebraic surface).  Two keys to our algorithm
+are circle decomposition and inversion.  We will develop the circle
+decomposition of a cyclide (i.e., its description as a union of
+circles).  and results on the inverse of any circle.
+\end{abstract}
+
+\newpage
+
+\begin{center}
+{\large\bf Proximity Searching in 2- and 3-Dimensions:\\
+An Implicit Approach for the $L_{\infty}$ Metric}
+\quad\\
+Hossam ElGindy\\
+School of Computer Science, McGill University\\
+Montr\'eal, Queb\'ec, Canada\\
+Fax:~(514)~398-3883~,~E-mail:~hossam\verb1@1cs.mcgill.ca
+\end{center}
+
+\begin{abstract}
+Since the development of its first {\em time-optimal\/} algorithms,
+the Voronoi Tessellation {\bf VorTes}
+has commanded substantial attention in the field of computational
+geometry -- both as a tool for problem solving, and
+as an object of investigation and generalization.
+However, two issues have handicapped the use of such an elegant
+structure in practice:
+the high time requirement for maintaining the {\bf VorTes}
+through a sequence of insertions and deletions, and
+the large storage requirements for {\bf VorTes} in 3-dimensional
+space and in higher-order tessellation.
+In this talk, 
+we describe a different approach for performing various
+proximity queries without the explicit construction of a
+{\bf VorTes}.
+Our method is based on the fact that the distance-based definition
+of a neighbourhood may be replaced by a combinatorial equivalent.
+Such a description allows for the utilisation of an efficient
+data structure, and associated maintenance procedures, to
+represent a set {\bf S} of $n$ points 
+such that the following proximity queries can be answered efficiently:
+\begin{itemize}
+\item[{\bf Q.1a}]
+	Given a point $q$ in 2-(3-)dimensional space,
+	determine the $k$-nearest neighbours of $q$ in {\bf S}
+	within a poly-logarithmic function of $n$ time, 
+	denoted by $O(polylog(n))$.
+\item[{\bf Q.1b}]
+	Given a point $q$ in 2-(3-)dimensional space,
+	determine the subset of $S$ within a distance $d$ from $q$
+	in $O(polylog(n))$ time.
+\item[{\bf Q.2\ }]
+	Given a set {\bf Q} of $m$ points $q$ in 2-(3-)dimensional 
+	space,
+	determine whether {\bf Q} defines a region in the order-$m$
+	{\bf VorTes} of ${\bf S} \cup {\bf Q}$
+	in $O(m + polylog(n))$ time.
+	Equivalently, determine whether {\bf Q} and {\bf S} are
+	circularly separable.
+\item[{\bf Q.3a}]
+	Given a point $q$ in the plane,
+	determine the relative-neighbourhood neighbours of 
+	$q$ in ${\bf S} \cup \{q\}$ in $O(polylog(n))$ time.
+\item[{\bf Q.3b}]
+	Given a point $q$ in the plane,
+	determine the gabriel-neighbours of $q$ in ${\bf S} \cup \{q\}$
+	in $O(polylog(n))$ time.
+\item[{\bf Q.3c}]
+	Given a point $q$ in the plane,
+	determine the voronoi-neighbours of $q$ in ${\bf S} \cup \{q\}$
+	in $O(polylog(n))$ time.
+\end{itemize}
+
+\bigskip\noindent
+For each of the above problem classes, we present a combinatorial
+characterization of the various neighbourhoods among a set of points.
+The data structures, which utilise such characterization, together
+with the procedures for their manipulation will also be described.  An
+additional useful feature of our approach is that the neighbours of
+the query point in {\bf Q-1 \& 3} are returned as a $O(polylog(n))$
+number of lists.  This can improve the performance of some
+applications.
+\end{abstract}
+
+\newpage
+
+\begin{center}
+{\large\bf 
+Separators and Intersection Detection of Simple Polygons}\\
+\quad\\
+David Mount\\
+University of Maryland
+\end{center}
+
+\begin{abstract}
+A common problem in motion planning, packing, and robotics is that of
+determining whether two shapes represented as simple polygons intersect
+one another.  Given two simple polygons with $n$ vertices their intersection
+can be detected in linear time.  However if we are allowed to preprocess
+each polygon individually, can we answer an intersection detection query
+more efficiently?  We show how to answer such a query efficiently when
+the objects are not tightly interlaced with one another.  Given linear
+preprocessing, we show how to detect the intersection of two simple
+polygons in time $O(k\log^3 n)$ where $k$ is the minimum number of edges
+(links) along a polygonal curve which separates one polygon from
+the other.
+\end{abstract}
+
+\vfill
+
+\begin{center}
+{\large\bf Interactions between Computer Graphics and Computational Geometry}\\
+\quad\\
+David Dobkin\\
+Princeton University
+\end{center}
+
+\begin{abstract}
+Theoreticians often justify their existence by describing all of the
+problems of the real world they have solved to the 90\% level.
+
+Practitioners often complain that a theoreticians 90\% solution only
+solves 10\% of their problem.
+
+My talk will consist of case studies showing how ideas developed in
+theory over time have had positive (i.e., more than 10\% level) impact on
+some real world problems of computer graphics.
+
+Popular misconceptions will be exposed and challenges for the future
+presented.
+\end{abstract}
+\vfill
+\newpage
+
+\begin{center}
+{\large\bf Adaptive Polygonization of Trimmed NURBS Surfaces}\\
+\quad\\
+                            H. Nebi Gursoy\\
+                        Intergraph Corporation\\
+                           Mail Stop IW17C4\\
+                       Huntsville, AL 35894-0001\\
+\quad\\
+                        phone: (205) 730-7051\\
+                         fax: (205) 730-7901\\
+                 E-mail: uunet!ingr!b17c!hng!nebi or\\
+                         nebi@hng.b17c.ingr.com
+\end{center}
+
+\begin{abstract}
+In solid modeling systems, many high level tasks, such as surface
+approximations for rendering, integral property computations, rapid
+prototype creation, visualization, and finite element analysis, involve
+polygonization of faces of solid models. In this work, we present a new
+technique for adaptive triangulation of solid models bounded  by trimmed
+free form parametric surface patches (in particular non-uniform rational
+B-spline (NURBS) surfaces). In this approach, we start the process by
+approximating the bounding surfaces of solid models. In the first step,
+each surface patch of a solid model is approximated in terms of a quasi-
+uniform grid defined in the parameter space of the patch. This approximation
+technique generates a set of tiles which are within a prescribed tolerance
+distance to the surface patch. In the next step, bounding loops of the
+face on the surface patch are imposed onto the tiles generated by the
+approximation technique. Next, part of the surface within the interior
+of the face is identified within each tile. Segments on the bounding loops
+and  boundary edges of the interior tiles constitute a set of constraint
+edges to be used in the triangulation process. In the final step, the
+interior of the face is triangulated using a constrained Delaunay
+triangulation algorithm. In this way, the resulting triangulation is a
+``smooth'' polygonization of the face within the prescribed tolerance, and
+confirms the boundary edges. Applying this method to all bounding faces of
+the solid model, we  cover the solid model with a set of conforming
+triangular facets. Some important features of this technique include smooth
+and adaptive polygonization of free form solids, creation of triangular
+facets with ``good'' shape characteristics, and vertex-vertex and edge-edge
+compatibility of triangles across the boundaries of adjacent faces. Several
+representative examples are also presented to demonstrate some capabilities
+of our implementation of the algorithm.
+\end{abstract}
+
+\newpage
+
+\begin{center}
+{\large\bf Efficient Parallel Algorithms for 
+Minimum Link Path\\
+\smallskip
+and Related Problems}\\
+\quad\\
+Vijay Chandru\\
+School of Industrial Engineering\\
+Purdue University\\
+\quad\\
+Subir K. Ghosh, Anil Maheshwari\\
+Tata Institute of Fundamental Research\\ 
+Bombay\\
+\quad\\
+V.T. Rajan\\
+IBM T.J. Watson Research Center\\
+Yorktown Heights, NY  10598\\
+\quad\\
+S. Saluja\\
+Tata Institute of Fundamental Research\\ 
+Bombay\\
+\end{center}
+
+\begin{abstract}
+The link metric, defined on a constrained region $R$ of the plane,
+sets the distance between a pair of points in $R$ to equal the minimum
+number of line segments or links that are needed to construct a path
+in $R$ between the points. The minimum link path problem is to compute
+the path consisting of the minimum number of links between any pair of
+points in $R$, when $R$ is the inside of a simple polygon. The minimum
+nested polygon problem asks for a minimum link closed path when $R$ is
+an annular region defined by a pair of nested simple polygons.
+Efficient sequential algorithms based on greedy methods have been
+described for both problems. However, neither problem is known to be
+in NC. We will present algorithms that require $O(\log(n)\log\log(n))$
+time and $O(n)$ space using $O(n)$ processors for both problems. The
+approach used involves new results on the parallel (NC$^1$)
+computation of the complete visibility polygon of a simple polygon
+from a set of points inside it, with an algebraic technique based on
+fractional linear transforms that permits effective parallelization of
+the ``greedy'' computations. The complexity results are with respect
+to the CREW-PRAM model of computation.
+\end{abstract}
+
+\newpage
+
+\begin{center}
+{\large\bf Fast Triangulation via Empty Spheres}\\
+\quad\\
+Isabel Beichl and Francis Sullivan\\
+Computing and Applied Mathematics Laboratory\\
+NIST\\
+Gaithersburg, Maryland 20899
+\end{center}
+
+\begin{abstract}
+We describe a new method for constructing the Delaunay triangulation based on
+direct determination of the centers of the empty spheres defined by the 
+Delaunay simplices.  Centers are found by a search technique called 
+``squeezing'' that is based on the fact that {\em non}-Delaunay simplices
+determine non-empty spheres.  Binary search can be used to find the correct 
+center in $O(\log n)$ squeeze steps.  Each such step requires identification 
+of the nearest neighbor of the current center.  The overall complexity of the 
+method is thus $O(T(n)*\log^2 n),$ where $T(n)$ is the number of simplices 
+generated by $n$ input points.  Experiments in {\em Mathematica} indicate that 
+the method is extremely numerically stable.
+
+We will comment briefly on a possible parallel version of the algorithm
+having parallel complexity $O(\log^2 n)$.  The idea here is to use shelling
+order as a key for assembling the triangulation from a concordance of the
+neighborhoods of the input points.
+\end{abstract}
+
+\vfill
+\begin{center}
+{\large\bf 
+Efficiency of Randomly Assigning Grid Cells to Parallel Processors}\\
+\quad\\
+Wm. Randolph Franklin\\
+Rensselaer Polytechnic
+\end{center}
+
+\begin{abstract}
+One advantage of the uniform grid method is that it parallelizes well.
+The obvious strategy is to evenly partition the grid cells among the
+available processors, taking into account that some cells need more time
+than others.  Doing this requires global communication.
+
+I propose, instead, randomly assigning the cells to the processors.  The
+obvious objection, that some processors will by chance be assigned much
+more work than average, almost never occurs.  E.g., suppose we randomly
+and independently assigning 1000 cells, each taking unit time, to 100
+processors.  The expected time until the last processor finishes is
+18.8, compared to the optimal 10, for an efficiency of 53\%.  18.8 is the
+mean of a random variable that is the maximum of 100 random Poisson
+variables of mean~10.
+
+This random assignment strategy appears generally feasible for
+parallelizing geometric problems.  It is especially useful when it is
+not convenient to globally assign the pieces to the processors.  This
+might happen when the pieces are being calculated in a distributed
+manner and communication costs are high.
+\end{abstract}
+
+\vfill
+\newpage
+
+\begin{center}
+{\large\bf 
+Guaranteed-Quality Meshes for Curved Surfaces}\\
+\quad\\
+Paul Chew\\
+Cornell University
+\end{center}
+
+\begin{abstract}
+
+Automatic mesh generation is a useful tool in a variety of
+disciplines, including engineering analysis and computer graphics.  We
+discuss a technique for creating a triangular mesh on a curved
+surface.  The resulting mesh is guaranteed to exhibit the following
+properties: (1) triangles do not cross problem boundaries, (2) there
+are no flat triangles (all angles are between 30 and 120 degrees, with
+the exception small angles that might be required by the boundary),
+and (3) element density can be controlled with small triangles in
+``interesting'' areas and large triangles elsewhere.  The technique is
+based on a type of curved-surface Delaunay triangulation.
+
+\end{abstract}
+
+\vfill
+
+\begin{center}
+{\large\bf 
+Recent Results in Triangulation/Mesh Generation}\\
+\quad\\
+Scott Mitchell\\
+Cornell University
+\end{center}
+
+\begin{abstract}
+A guaranteed quality steiner
+triangulation of a three dimensional polygonal region
+is of interest for finite element analysis.
+Recent work on maximum altitude triangulations
+in two dimensions has made possible an octree based
+algorithm for generating a guaranteed aspect ratio
+triangulation in three dimensions.  I will demonstrate
+a program that generates a guaranteed aspect ratio
+triangulation in two dimensions, and discuss how
+it may be extended to three dimensions.
+
+\end{abstract}
+
+\vfill
+\newpage
+
+\begin{center}
+{\large\bf 
+Coping with Inconsistencies:\\ 
+A New Approach to Produce Quality Triangulations\\ 
+for the Finite Element Method}\\
+\quad\\
+Elefterios Melissaratos and Diane Souvaine\\
+Department of Computer Science\\
+Rutgers Univeristy NJ 08903\\
+e-mail  melissar@paul.rutgers.edu  dls@aramis.rutgers.edu
+\end{center}
+
+\begin{abstract}
+
+There are four main characteristics desirable in an unstructured triangular
+mesh generator:
+
+a) The mesh generator should be automatic (i.e. there is no user
+intervention in the meshing process).
+
+b) The mesh generator should produce elements whose sizes
+vary from one part of the domain to the other (i.e. some regions may have a
+very fine mesh while other regions have a coarser mesh).
+
+c) The mesh generator should produce elements of guaranteed ``quality''.
+The two measures for quality are
+whether the triangulation 1) avoids small angles and/or
+2) avoids obtuse angles.
+
+d) The number of produced elements should be small.
+
+Research over the past several years has produced many mesh generators
+satisfying criteria a) and b), but very few which satisfy criterion c)
+and even fewer which satisfy both c) and d).  The only previous result
+satisfying both measures of quality is due to Baker, Grosse and
+Rafferty (1986), but they do not provide any upper bound on the size
+of the mesh.  Chew (1989) provides an algorithm which produces
+triangles with angles between 30 and 120 degrees.  The sides of all
+triangles produced, however, have lengths between $h$ and $2h$, where
+$h$ is a user-supplied parameter.  The first result which guarantees
+both quality and size of the mesh is that of Bern, Gilbert and
+Eppstein (1990).  Although the triangles produced satisfy only the
+non-small angle condition, the size of the triangulation is In a more
+recent paper, Bern and Eppstein (1991) present an algorithm to
+triangulate non-obtusely a polygonal domain of size $n$ with only
+$O(n^{2})$ triangles.  The triangles produced, however, may have
+arbitrarily small angles.
+
+Our main contribution is a mesh generator which produces a {\it
+Steiner triangulation} of a polygonal domain with holes $P$ such that
+the produced triangles do not have either {\it small angles} or {\it
+obtuse angles} and at the same time the size of the triangulation is
+$O(nA)$ where $n$ is the number of the vertices of $P$ and $A$ is the
+worst aspect ratio of any {\it non-Steiner} triangulation of $P$.  We
+satisfy both measures under criterion c) while achieving the same
+bound on criterion d) achieved by Bern, Eppstein and Gilbert.
+
+\end{abstract}
+
+\vfill
+\newpage
+\begin{center}
+{\large\bf 
+On Reconstructing Polyhedra from Parallel Slices}\\
+\quad\\
+Joseph O'Rourke and Vinita Subramanian\\
+Department of Computer Science\\
+Smith College\\
+Northampton, MA~01063
+\end{center}
+
+\begin{abstract}
+The problem of reconstructing a three-dimensional object from parallel
+slices has application in computer vision and medicine.  Here we
+explore a specific existence question: given two polygons in parallel
+planes, is it always possible to find a polyhedron that has those
+polygons as faces, and whose vertices are precisely the vertices of
+the two polygons?  We answer this question in the negative by
+providing an example of two polygons that cannot be connected to form
+a simple polyhedron.  One polygon is a triangle, the other a somewhat
+complicated shape with spiraling pockets.
+
+\end{abstract}
+
+\vfill
+
+\begin{center}
+{\large\bf 
+Shape from Diameter: On the Recovery of\\
+a Polygon's Shape from its Diameter Function}\\
+\quad\\
+Anil Rao\\  
+Dept. of EE-sytems, EEB 220\\
+USC, Los Angeles, Calif. 90089-2562\\
+email: rao@halcyon.usc.edu
+\end{center}
+
+\begin{abstract}
+
+A geometric probing problem related to robotic inspection is to
+determine the shape of an industrial part from projections due to a
+scanning light beam.  In this paper we consider planar convex
+polygonal parts.  Projecting the part onto an axis in the plane
+produces a scalar measure, the {\em diameter}, which is a function of
+the angle of projection.
+
+Our primary result is that shape cannot be uniquely recovered, {\em i.e.}
+for a given diameter function, there exist infinitely many consistent
+polygons.  Since most of these have parallel edges of varying lengths,
+we consider the problem of identifying a representative polygon with
+no parallel edges.  We show that given a diameter function, deciding
+whether such a polygon exists is {\em NP}-Complete.
+\end{abstract}
+
+\vfill
+\newpage
+
+\begin{center}
+{\large\bf 
+Software Issues in Geometric Algorithms}\\
+\quad\\
+Mike Karasick\\
+IBM T.J. Watson Research Center\\
+Yorktown Heights, NY  10598
+\end{center}
+
+\begin{abstract}
+Implementations of geometric algorithms tend to be complex.  There are
+many interactions between discrete, combinatorial, parts of these
+algorithms and numerical (continuous or floating point) parts.  This
+is often confounded by singular configurations that must be dealt with
+in practical implementations.  We have used an object-oriented
+approach to the design of a large system, called Foxi, that comprises
+a geometric modeller, geometric editor, 2- and 3- dimensional
+automatic finite-element mesh generators, and conversion programs for
+various FEM analysis packages.
+
+I will talk about some of the algorithms and algorithmic design issues
+that arise in such a complex system -- in the large, and in the small.
+
+\end{abstract}
+\vfill
+
+
+\begin{center}
+{\large\bf 
+A Line Sweep Thinning Algorithm}\\
+\quad\\
+Theo Pavlidis\\
+Computer Science\\
+SUNY Stony Brook
+\end{center}
+
+\begin{abstract}
+It is well known that pixel-based thinning has serious weaknesses and
+alterntive approaches have started to appear in the literature, for
+example the paper by Nishida, Suzuki, and Mori. They located mutually
+visible pairs of points on the contour and use the middle of the joing
+lines to create a skeleton. It is possible to use a polygonal
+approximation of the contour and a line sweep algorithm to link pairs
+of sides both in a positive way (mutually visible) and a negative way
+(mutually obscured).  Pairs of lines that have only positive links are
+then examined and if they are nearly parallel and have a relatively
+small distance from each other are used to generate parts of the
+skeleton. The main advantage of the method is that it can be
+programmed very easily if one has a line sweep program available.
+\end{abstract}
+
+\vfill
+\newpage
+
+\begin{center}
+{\large\bf 
+A Pseudo-Output-Sensitive Algorithm for CSG to B-rep Conversion}\\
+\quad\\
+Maged Tawfik\\
+3D/Eye Inc.\\
+2359 N. Triphammer Rd.\\
+Ithaca, NY  14850
+\end{center}
+
+\begin{abstract}
+CSG to {\em b}-rep conversion refers to the process of constructing
+the boundary of a solid model given by a Boolean expression on a set
+of primitives.  This process, also known as {\em boundary evaluation},
+is a fundamental problem in the area of solid modeling.  The
+presentation is limited to the 2-d case.  Therefore, a primitive is a
+polygon with a given {\em b}-rep.  If $m$ denotes the number of
+primitives, $n$ the total number of primitive edges, and $\alpha$ the
+total number of pairwise intersections between primitive edges, an
+algorithm that performs the 2-d boundary evaluation in $O(n\log n +
+\alpha)$ time and $O(\alpha)$ space, is described.  The presented
+algorithm is an $O(\log n)$ improvement over the best currently
+available pseudo-output-sensitive algorithm.  (The exact meaning of
+pseudo-output-sensitivity will be made clear in the discussion.)  This
+makes the algorithm asymptotically optimal in the worst case.
+Moreover, the pseudo-output-sensitivity makes it also an improvement
+over the worst case optimal algorithm which costs $O(n^2)$ in both
+time and space.  The algorithm is simple and, therefore, of practical
+potential.
+\end{abstract}
+
+\vfill
+
+\begin{center}
+{\large\bf 
+The Robot Localization Problem}\\
+\quad\\
+Leonidas Guibas and Rajeev Motwani\\ 
+Computer Science\\
+Stanford University\\
+\quad\\
+Prabhakar Raghavan\\
+IBM T.J. Watson Research Center\\
+Yorktown Heights, NY  10598
+\end{center}
+
+\begin{abstract}
+
+We consider the following problem: given a simple polygon $P$ and a
+star-shaped polygon $V$, find a point (or the set of points) in
+$P$ from which the portion of $P$ that is visible is congruent to
+$V$.  The problem arises in the localization of robots using a
+range-finder --- $P$ is a map of a known environment, $V$ is the
+portion visible from the robot's position, and the robot must use this
+information to determine its position in the map.  We give a scheme
+that preprocesses $P$ so that any subsequent query $V$ is answered
+in optimal time $O(m + \log n + A)$, where $m$ and $n$ are the number
+of vertices in $V$ and $P$, and $A$ is the number of points in
+$P$ that are valid answers (the output size).  Our technique allows
+us to trade-off smoothly between the query time and the preprocessing
+time or space.  We then consider a variant of the basic problem in
+which there is a maximum distance to which the robot can ``see'' ---
+this is motivated by practical considerations, and we outline a
+similar solution for this case.  We also show that a single query
+$V$ can be answered in time $O(mn)$ with no preprocessing.
+
+\end{abstract}
+
+\vfill
+\newpage
+
+\begin{center}
+{\large\bf 
+Placing Guards in Polygons with Holes}\\
+\quad\\
+Iliana Bjorling-Sachs and Diane Souvaine\\
+Department of Computer Science\\
+Rutgers University\\
+New Brunswick, NJ 08903
+\end{center}
+
+\begin{abstract}
+
+To see every part of any simple polygon $P$ of $n$ vertices,
+$\lfloor{n/3}\rfloor$ pointguards are both necessary and sufficient.
+This was established by Chvatal and has become known as the art
+gallery theorem.  When $P$ has $h$ simple polygons or {\it holes}
+inside, Shermer showed that the number of necessary guards increases
+to $\lfloor{(n+h)/3}\rfloor$, where $n$ is the total number of
+vertices of both $P$ and the holes.  Shermer conjectures this bound to
+be tight and has proved the case for $h=1$.  We complete the proof of
+his conjecture by showing that $\lfloor{(n+h)/3}\rfloor$ pointguards
+are sufficient for an arbitrary $h$ and then give an $O(n^2)$
+algorithm for placing the guards.  When $P$ has one hole, it is
+possible by the addition of one vertex, to cut out a channel leading
+from the hole to the exterior, producing a polygon of $n+1$ vertices
+but no holes.  This polygon can be guarded by
+$\lfloor{(n+1)/3}\rfloor$ point guards.  By constructing the channel in
+such a way that one of these guards can see all of the channel, we
+guarantee that these same guards also guard the original polygon with
+its hole.  To extend the proof for $h=1$ to an arbitrary $h$, we
+verify that when several holes are present the channel construction
+can be repeated $h$ times. Each channel results in a polygon with one
+more vertex and one less hole, until finally a polygon of $n+h$
+vertices but no holes remains.  This polygon is guarded by
+$\lfloor{(n+h)/3}\rfloor$ pointguards, sited in such a way that each
+channel is entirely visible to at least one of the guards.  Each time
+we try to construct a channel between an edge of a hole and an edge of
+the exterior boundary, we allow $O(n)$ time.  The $O(n^2)$ time bound
+is achieved by making sure that at most $O(n)$ pairs of edges are
+considered for channel constructions.
+
+\end{abstract}
+
+\vfill
+
+\begin{center}
+{\large\bf 
+The Art Gallery Theorem for Polygons with Holes}\\
+\quad\\
+Frank Hoffmann\\
+Berlin\\
+\quad\\
+Michael Kaufmann\\
+Saarbr\"ucken\\
+\quad\\
+Klaus Kriegel\\
+Berlin
+\end{center}
+
+\begin{abstract}
+
+Art Gallery Problems can be seen as a special class of covering
+problems, where a given polygon has to be covered by a small (minimum)
+number of star polygons.  A star polygon is a simple polygon such that
+a guard inside of it can watch the whole inside. The original Art
+Gallery Problem (raised by V.~Klee) was answered by V.~Chvatal proving
+that $\lfloor n/3 \rfloor$ star polygons (guards) are always
+sufficient to cover (watch) any $n$-sided simply connected polygon.
+The general problem for $n$-sided polygons with $h$ holes was open for
+a long time.  The conjecture that $\lfloor n+h/3 \rfloor$ guards are
+necessary and sufficient, was proved for the special case of one hole
+by A.~Aggarwal and, independently, by T.~Shermer. We present a proof
+for an arbitrary number of holes which transforms the original problem
+to a hypergraph covering problem.  An independent proof has recently
+been found by I.~Bjorling--Sachs and D.~Souvaine.
+
+\end{abstract}
+\vfill
+\newpage
+
+\begin{center}
+{\large\bf 
+Methods for Partitioning the Plane and\\ 
+Building the Associated Trees}\\
+\quad\\
+Donal MacVeigh\\
+St. Peter's College\\
+Jersey City, NJ 07306
+\end{center}
+
+\begin{abstract}
+
+In his book {\it Mathematical Snapshots}, H. Steinhaus noted that the
+pattern of cracks in dried mud or earthenware has two characteristics:
+
+\begin{itemize}
+\item[1)] The cracks intersect at right angles
+\item[2)] 
+The cracks are such as to minimize their length.  Jearl Walker in his
+``Amateur Scientist'' column in {\it Scientific American} explained the
+physical principles underlying these characteristics.
+\end{itemize}
+
+In this talk I compare a partitioning method with these
+characteristics with three simpler ones which partition an area by
+straight lines.
+
+In all the methods I start with an arbitrary two-dimensional figure.
+Then I generate a sequence of points falling within the figure,
+partition the figure through the first point by a line or arc creating
+subfigures. I use the further points in the sequence to partition
+these subfigures and the subsubfigures resulting from this partition.
+I also build a corresponding dynamic search tree, storing the point in
+the node corresponding to the subfigure in which it falls.
+
+The three simpler partitioning methods are:
+
+TRIANGULAR. Start with an arbitrary triangle. Partition the innermost
+triangle within which each point falls into three subtriangles by
+drawing lines from the point to each of the vertices of the triangle.
+
+QUADRILATERAL. Start with an arbitrary quadrilateral.  Partition the
+innermost quadrilateral within which each point falls by lines from
+the point to two opposite vertices.
+
+EQUAL AREA. Start with an arbitrary polygon. Partition the innermost
+polygon within which each point falls by a line through the point that
+divides the area of the polygon exactly in half.
+
+The areas and shapes of the block resulting from the various
+partitioning methods are investigated both empirically and, where
+possible, analytically, as are the lengths of tree searches required
+to find which block is to be partitioned.
+
+
+\end{abstract}
+
+
+\end{document}

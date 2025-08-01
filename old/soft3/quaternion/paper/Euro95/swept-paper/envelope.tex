@@ -1,0 +1,148 @@
+\documentstyle[11pt]{article} 
+
+\newif\ifFull
+\Fullfalse
+
+\makeatletter
+\def\@maketitle{\newpage
+\null
+\begin{center}
+        {\Large\bf \@title \par}  
+        \vskip .5em               
+       {\lineskip .5em           
+        \begin{tabular}[t]{c}\@author 
+        \end{tabular}\par}                   
+\end{center}
+\par
+\vskip .5em}                 
+\makeatother
+
+% non-indented paragraphs with xtra space
+% set the indentation to 0, and increase the paragraph spacing:
+\parskip=8pt plus1pt                             
+\parindent=0pt
+% default values are 
+% \parskip=0pt plus1pt
+% \parindent=20pt
+% for plain tex.
+
+\newenvironment{summary}[1]{\if@twocolumn
+\section*{#1} \else
+\begin{center}
+{\bf #1\vspace{-.5em}\vspace{0pt}} 
+\end{center}
+% \quotation
+\fi}{\if@twocolumn\fi}
+% {\if@twocolumn\else\endquotation\fi}
+
+\renewenvironment{abstract}{\begin{summary}{Abstract}}{\end{summary}}
+
+\newcommand{\SingleSpace}{\edef\baselinestretch{0.9}\Large\normalsize}
+\newcommand{\DoubleSpace}{\edef\baselinestretch{1.4}\Large\normalsize}
+\newcommand{\Comment}[1]{\relax}  % makes a "comment" (not expanded)
+\newcommand{\Heading}[1]{\par\noindent{\bf#1}\nobreak}
+\newcommand{\Tail}[1]{\nobreak\par\noindent{\bf#1}}
+\newcommand{\QED}{\vrule height 1.4ex width 1.0ex depth -.1ex\ } % square box
+\newcommand{\arc}[1]{\mbox{$\stackrel{\frown}{#1}$}}
+\newcommand{\lyne}[1]{\mbox{$\stackrel{\leftrightarrow}{#1}$}}
+\newcommand{\ray}[1]{\mbox{$\vec{#1}$}}          
+\newcommand{\seg}[1]{\mbox{$\overline{#1}$}}
+\newcommand{\tab}{\hspace*{.2in}}
+\newcommand{\se}{\mbox{$_{\epsilon}$}}  % subscript epsilon
+\newcommand{\ie}{\mbox{i.e.}}
+\newcommand{\eg}{\mbox{e.\ g.\ }}
+\newcommand{\figg}[3]{\begin{figure}[htbp]\vspace{#3}\caption{#2}\label{#1}\end{figure}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\prf}{\noindent{{\bf Proof} :\ }}
+\newcommand{\choice}[2]{\left( \begin{array}{c} \mbox{\footnotesize{$#1$}} \\ \mbox{\footnotesize{$#2$}} \end{array} \right)}      
+\newcommand{\ddt}{\frac{\partial}{\partial t}}
+\newcommand{\p}{${\bf P}$}
+\newcommand{\q}{${\bf Q}$}
+\newcommand{\Cone}{\mbox{${\bf C_1}$}}
+\newcommand{\Ctwo}{\mbox{${\bf C_2}$}}
+\newcommand{\Qzero}{\mbox{${\bf Q_0}$}}
+\newcommand{\Qone}{\mbox{${\bf Q_1}$}}
+\newcommand{\Qk}{\mbox{${\bf Q_k}$}}
+\newcommand{\Qkone}{\mbox{${\bf Q_{k+1}}$}}
+\newcommand{\Qi}{\mbox{${\bf Q_i}$}}
+\newcommand{\Qj}{\mbox{${\bf Q_j}$}}
+\newcommand{\A}{\mbox{${\bf A}$}}
+\newcommand{\B}{\mbox{${\bf B}$}}
+
+\newtheorem{rmk}{Remark}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{conjecture}{Conjecture}[section]
+\newtheorem{claim}{Claim}[section]
+\newtheorem{notation}{Notation}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[section]
+\newtheorem{defn2}{Definition}
+
+% \ifFull                                          
+% \SingleSpace
+% \else
+% \DoubleSpace
+% \fi
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+\setlength{\headsep}{.5in}
+\setlength{\headheight}{.5in}
+\setlength{\topmargin}{-.5in}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+
+% ****************************************************************************
+
+\title{Envelopes from finite cues}
+\author{John K. Johnstone\\
+        Computer and Information Sciences\\
+        The University of Alabama at Birmingham\\
+        115A Campbell Hall, 1300 University Boulevard\\
+        Birmingham, AL 35294 USA\\
+        johnstone@cis.uab.edu}
+
+\begin{document}
+
+% HEADER ON EACH PAGE
+% \markright{Dagstuhl '96 Journal \hfill}
+% \pagestyle{myheadings}
+
+% \maketitle
+
+% \begin{abstract}
+% \end{abstract}
+
+% \section{Introduction}
+
+Given $n$ curves, $C_1,\ldots,C_n$, interpreted as $n$ positions of a sweeping object,
+determine a surface that interpolates the $C_i$.
+Abstraction of lofting and contour reconstruction problems.
+
+\begin{enumerate}
+\item
+	Approximate each curve by a simple plane curve, say an ellipse,
+	identical except for size and orientation.
+	(This approximating curve should exhibit enough asymmetry that
+	different orientations of the object are distinguishable.
+	For example, a circle is not a good choice.)
+	This reduces the motion problem to a quaternion curve construction.
+\item
+	Determine an interpolating movement for this simple curve,
+	using quaternion curves.
+	(Note that the movement of the simple curve is fully defined
+	by the position of a reference point, the plane of the curve,
+	and the orientation of the curve within this plane (an angle).)
+\item
+	Associate points of simple curve with points of original curves.
+	Perhaps by vision technique of curvature shrinkage used in morphing
+	papers.
+	`Curve matching'.
+\end{enumerate}
+
+How does this technique differ from Rappoport et. al. morphing method?
+(Other than the addition of step 2's quaternion curves.)
+
+\end{document}

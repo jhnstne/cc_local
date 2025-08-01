@@ -1,0 +1,21 @@
+Can use Kubota to prove general result of Aida:
+
+Suppose true for n: 
+	(a_1^2 + \ldots + a_n^2)^2 = 
+	(a_1^2 + \ldots + a_{n-1}^2 - a_n^2)^2 +
+	(2a_1a_n)^2 + \ldots + (2a_{n-1}a_n)^2
+	
+Then true for n+1:
+
+	(a_1^2 + \ldots + a_n^2 + a_{n+1}^2)^2  = 
+	
+	a_1^4 + 2a_1^2 (a_2^2 + \ldots + a_{n+1}^2) +
+	(a_2^2 + \ldots + a_{n+1}^2)^2		= 
+	
+	a_1^4 + 2a_1^2 (a_2^2 + \ldots + a_{n+1}^2) +
+	(2a_1a_{n+1})^2 - (2a_1a_{n+1})^2 + 
+	(a_2^2 + \ldots + a_n^2 - a_{n+1}^2)^2 + 
+	(2a_2a_{n+1})^2 + \ldots + (2a_na_{n+1})^2 = 
+	
+	(a_1^2 + \ldots + a_n^2 - a_{n+1}^2)^2 +
+	(2a_1a_{n+1})^2 + (2a_2a_{n+1})^2 + \ldots + (2a_na_{n+1})^2

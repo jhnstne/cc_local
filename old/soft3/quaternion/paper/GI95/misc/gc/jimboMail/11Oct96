@@ -1,0 +1,68 @@
+From jimbo@blaze.cs.jhu.edu Fri Oct 11 09:25 CDT 1996
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from cerulean.cis.uab.edu by cis.uab.edu (5.x/SMI-SVR4)
+	id AA21176; Fri, 11 Oct 1996 09:25:03 -0500
+Received: from cis.uab.edu by cerulean.cis.uab.edu via SMTP (940816.SGI.8.6.9/940406.SGI)
+	for <jj@cerulean> id HAA05334; Fri, 11 Oct 1996 07:33:09 -0700
+Received: from blaze.cs.jhu.edu by cis.uab.edu (5.x/SMI-SVR4)
+	id AA21173; Fri, 11 Oct 1996 09:25:00 -0500
+Received: from mail-client
+           by blaze.cs.jhu.edu with SMTP; Fri, 11 Oct 1996 14:24:59 GMT
+Received: by mail-client (4.1) id AA13672; Fri, 11 Oct 96 10:24:58 EDT
+Message-Id: <9610111425.AA21173@cis.uab.edu>
+From: jimbo@blaze.cs.jhu.edu (Jim Williams)
+Sender: jimbo@blaze.cs.jhu.edu
+Subject: Re: Final paper coming
+To: jj@cerulean.cis.uab.edu (John K. Johnstone)
+Date: Fri, 11 Oct 1996 10:24:58 -0400 (EDT)
+Cc: jimbo@blaze.cs.jhu.edu (Jim Williams)
+In-Reply-To: <9610110649.ZM5305@cerulean.cis.uab.edu> from "John K. Johnstone" at Oct 11, 96 06:49:34 am
+X-Mailer: ELM [version 2.4 PL13]
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Length: 1560
+Status: ORr
+
+> 
+> Jim, be prepared for a final version of the paper to come down
+> the pike to you this morning.  I am putting the finishing touches
+> on it now.  I need to fax it to you so
+> that you can see the images.  What is your fax number?
+> 
+
+My FAX # is (410) 516-6134.
+
+
+> My apologies that I was slow with this, but there were several subtle issues
+> that I wanted to make sure were right.  This should help speed it up
+> in the long term, since the editorial process should go smoothly,
+> touch wood.
+
+Sorry I have not been in closer touch.  I had a 1 week revision 
+turnaround for a paper I have in CVIU this November.  I would like to talk
+about an implementation-centric (numerical arc length parameterization
+etc) paper and about a possible submission of a rational GC paper to
+CVPR on Nov 20.  The one thing I would need to put together a 
+vision based paper is a segmented 3D image of thick, non-branching chunk of
+artery or bone.  I will ask Russ Taylor if he has a 3-D femur
+image sitting around.  I thought you might have something available
+from your work with the heart guys.
+
+I believe that given a 3D image of the artery chunk I could do the following
+using stuff from my earlier lung vascular research.
+
+	- Produce a control hull for the axis (directrix) curve
+	- Produce orientation frames for every point on this 
+	control hull
+	- Produce cross-section boundary curves with a regular,
+	corresponding knot sequence
+
+By emphasizing the CAD integration advantages of the rational model,
+I think we could sell this to the vision community.
+
+Jim
+
+
+ 
+

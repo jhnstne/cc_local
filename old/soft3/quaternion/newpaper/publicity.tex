@@ -1,0 +1,363 @@
+\documentclass[12pt]{article} 
+\usepackage{times}
+\usepackage[pdftex]{graphicx}
+\input{header-consecutive}
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{0in}
+\setlength{\textheight}{8.6in}
+\setlength{\textwidth}{6.875in}
+\setlength{\columnsep}{5mm}
+
+\title{Publication goals}
+\begin{document}
+\maketitle
+
+% -------------------------------------------------------------------------------------
+
+\section{Overarching, long-term goals}
+
+\begin{itemize}
+\item Visibility in a smooth scene.
+\item {\bf Motion planning: given a 3D scene filled with objects, to plan a good
+           motion through this scene.  Examples of scenes are architectural buildings
+           and cityscapes.  Good may mean collision-free or it may mean optimizing
+           a visibility criterion.}
+\item (Smooth reconstruction [mostly for scene population].)
+\item Architectural models.
+\item (Game design, as a way of packaging these research topics.)
+\end{itemize}
+
+An attraction of motion planning research is that it allows the construction
+of smooth paths through a polyhedral scene.
+It does not require the development of a smooth scene as testbed for research.
+
+Individual tasks.
+Given a Unigrafix model (or WRL or ...), parse and display it (ugviewerGUI.cpp, wrlviewer.cpp).
+Given a scene, hand-generate keyframes of a motion through it (keyfly.cpp).
+[Given a scene, build a geometric model of it sufficient for motion planning.]
+[Given a scene, automatically generate keyframes for a motion through it, guided by 
+    certain hitpoints, such as go counterclockwise around the outer hall, then down
+    the central hall and fly out the window to the roof.]
+Given keyframes for a motion, generate the motion (flythrough.cpp).
+Given a motion, perturb it into a collision-free motion.
+Given a motion, correct it to avoid illegal orientations.
+Given an object that is to be avoided, build a motion through a scene that 
+hides from this object.
+
+\section{Handling stasis and linearity in curve design}
+
+We will not assume that consecutive orientation keyframes are distinct,
+and we will simply keep the quaternion spline constant over this interval.
+In practice, we will remove the duplicate entries during construction 
+of the quaternion spline, then use bookkeeping to keep track of the 
+trivial segments where the quaternion does not change.
+START HERE
+An issue arises: if the orientation stays constant for a while, do we want
+to build a separate spline for each nonstationary segment, rather than building
+a complete spline that, for example, anticipates future motions as it approaches
+a static segment.
+Should the orientation be moving in this way to anticipate future developments?
+I would argue no.
+Consider the case of a position motion between three points, the first and third on
+the same side of the second point.
+A straight line between A and B, then a pause, then a straight line between B and C
+would seem OK.
+The pause removes the discontinuity of motion normally noticeable in a non-paused motion.
+
+We presently assume that consecutive position keyframes are distinct.
+{\bf We should allow consecutive identical position keyframes in the same way.}
+
+The issue of adding linear segments to a curve interpolation
+(that is, the data is points and linear segments between some of these points),
+which arises in the interpolation of mostly-smooth architectural data,
+has a straightforward solution: the linear segment becomes an endtangent constraint
+on the set of points before the linear segment, and an endtangent constraint
+on the set of points after the linear segment.
+The set of points before and after the linear segment are interpolated independently.
+
+\clearpage
+
+\section{Projects}
+
+\begin{enumerate}
+\item Visibility.
+\begin{itemize}
+\item Smooth bitangency: construction of curve bitangents and 
+      surface bitangent developables [parallel construction, software release]
+\item Visibility analysis of smooth scenes: visual events, cell decomposition, 
+      shadow computation, occlusion culling [paper on 2d visibility next, 
+      then 3d visibility among spheres]
+\item Total characterization of the visibility of every point of a smooth scene.
+\end{itemize}
+\item Motion planning
+\begin{itemize}
+\item {\bf Rational quaternion splines [characterization of rational maps, 
+      furthest point issue, generalized cross product, software release]}
+\item Rational collision detection [camera's frustrum path]
+\item Orientation planning [smooth orientation obstacles, bitangents]
+\item Motion planning in a smooth scene [scene decomposition]
+\end{itemize}
+\item Miscellaneous
+\begin{itemize}
+\item Molecular modeling for Jere Segrest.
+\item Kernels/hulls.
+\item Silhouettes.
+\item Bitangents of subdivision curves.
+\item Ruled surface intersection.
+\end{itemize}
+\end{enumerate}
+
+The goal of our motion research is {\bf rational motion}.
+The first issue is the design of a {\bf rational interpolating quaternion spline},
+for rational orientation control to complement classical techniques for rational position control.
+A rational approach to the design of an interpolating quaternion spline involves the
+{\large {\bf construction of a rational map to the 3-sphere }} and {\bf the construction of an empty circle}
+to avoid robustness breakdown around a pole.
+WHAT IS THE SWEET SPOT OF DATASET SIZE FOR EFFICIENT BRUTE FORCE EMPTY POINT SOLUTION?
+An alternative to the construction of an optimal empty circle is a {\bf divide and conquer 
+approach} to the quaternion spline design, in which care must be taken with 
+{\bf derivative continuity} across the boundary between two quaternion splines.
+Computation in the 4 dimensions of the quaternion spline also involves a 
+{\large {\bf 222 generalized cross product 222}}.
+CAN WE GENERALIZE THE SIN RELATIONSHIP FOR OUR GENERALIZED CROSS PRODUCT?
+To test the method, we would like to extract (position and) 
+{\bf orientation keyframes from mocap libraries} to test the interpolation of 
+realistic motion keyframes.
+GOOD PROJECT FOR AMBER AND ROSS: GIVE THEM THE CMU AND UWISC WEBSITES.
+We now have the capacity for rational interpolating motion.
+
+The next issue is rational interpolating {\bf orientation-constrained} motion.
+Given an object with orientation constraints (e.g., a pitcher of milk),
+the problem is to build a motion that respects these constraints.
+Our approach is first to {\large {\bf 444 formalize the orientation constraints 444}}, 
+then {\bf build orientation obstacles} on the quaternion sphere 
+that represent the constraints;
+then to {\bf build a quaternion spline on the quaternion sphere that avoids these obstacles},
+which is motion planning on a surface.
+A simplified related question is the {\bf interpolation of points in the plane that respect/avoid
+certain obstacles}.  This had a pseudo-answer in SIGGRAPH 2004(?) using optimization of 
+a distance penalty, but we are looking for a non-iterative solution.
+A shortest path motion involves the {\bf computation of bitangents on the 3-sphere}
+and the construction of a visibility graph there.
+A safest path motion involves the {\bf computation of curve bisectors on the 3-sphere}.
+We also want to consider non-optimal solutions (neither shortest nor safest).
+We now have the capacity for rational interpolating orientation-constrained motion.
+
+The next issue is collision-free motion through a polyhedral scene,
+which integrates the free motion with its environment.
+This is subtly different from interactive collision detection under mouse control,
+where local motions that cause collision are disallowed.
+We are considering the global design of a motion that avoids collisions.
+The presence of the rational motion makes collision detection simpler.
+In our case, we consider architectural models as the polyhedral scene.
+(A preprocessing step is the {\bf parsing of polyhedral scenes into triangle data structures}.)
+The first case that we consider is {\bf camera motion} (camera control),
+where collision is simplified since it must only be detected with the backplane of the 
+view frustrum (explain).
+Given a rational camera motion through a polyhedral scene,
+we first {\large {\bf 000 detect collisions 000}} with the scene (using an octree for additional efficiency).
+(Make sure that we are using the full power of the rational representation of the motion
+to add efficiency.)
+Next, the {\bf motion is corrected} to remove the collisions.
+This model assumes a relatively free environment where local changes do not introduce 
+new collisions on the other side of the room, and an initial motion that is close to 
+collision-free so that only minor corrections are necessary.
+For example, the individual keyframes from which the motion is generated should be collision-free.
+
+Rather than building the motion blindly and then testing for collisions,
+a more elegant approach would be design a motion that respects the free space of the scene
+in the first place.
+However, this requires a model of the free space and 6-dimensional path planning through
+configuration space.
+
+Rather than keyframing by hand, keyframes could be generated automatically if a global structure
+of the scene's free space is understood.
+We could {\bf identify rooms} in the scene and generate a graph structure of the scene.
+Then a motion could be specified simply by the desired start and end rooms.
+
+The last major issue is {\bf rational visibility-preserving motion} and
+rational visibility-guided motion.
+The former keeps some object visible throughout the motion.
+The latter plans a motion guided by the desire to see part or all of certain objects in the scene
+at some point during the motion (or perhaps to guarantee that every corner of a room is seen 
+in a surveillance sweep).
+
+The goal of our {\bf visibility research} is the recognition and categorization of visual events
+in a smooth scene.
+Visual events can occur when bitangency occurs, so we first build {\bf tools for the construction
+of bitangent structures}, both in 2-space and 3-space.
+This is tangential curves and surfaces.
+Next we show (trivially) how these tangential curves and surfaces are used to build bitangent
+structures.
+Bitangency is a necessary but not sufficient condition for a visual event, so the next stage
+is to {\large {\bf 222 filter the bitangents down to visual events 222}}.
+We first consider visual events amongst curves in 2-space.
+An extreme case of visibility is the kernel, which sees everything: we consider the construction
+of {\large {\bf 333 kernels in 2-space 333}}, and reduce it to the convex hull.
+We consider the construction of {\bf kernels in 3-space}, which is more difficult to compute.
+The capstone of this work is the computation of visual events amongst surfaces in 3-space.
+
+Review of papers:
+
+\begin{itemize}
+\item construction of a rational map to the 3-sphere
+\item generalized cross product 
+\item detect collisions 
+\item filter the bitangents down to visual events 
+\item kernels in 2-space
+\item formalize the orientation constraints 
+\end{itemize}
+
+\clearpage
+
+\section{Immediate goals}
+
+\begin{enumerate}
+\item Goal: journal paper on spherical map characterization (power of Euler)
+\item {\bf paper on furthest point on S3 and Voronoi diagrams on S3}
+\item Goal: journal papers on building a clean flythrough: 
+\begin{enumerate}
+\item rational camera control (getting the vertex paths of the camera)
+\item collision detection (getting the intersections with the scene)
+\item collision correction (adding keyframes to correct the flythrough 
+          so that it is collision-free)
+\end{enumerate}
+\item Goal: 2d kernel journal paper with Wenping (look over his comments and suggest SIAM talk)
+\item Goal: 2d visual events/smooth soft shadows
+\end{enumerate}
+
+Immediate action item: 
+get the basic quaternion spline writeup and software cleaned up and running, 
+yielding a rational rotation matrix function.
+
+Paper: interpolation of point data with some parts of the curve predefined (e.g., want
+       straight line segments between some points as in reconstruction of architecture)
+
+{\bf Paper: if we have position/orientation keyframes, then we can interpolate this data
+       by a valid position and quaternion spline.
+       What about if we have a predefined position curve and we want to assign some
+       orientation keyframes to it?  For example, the helical curve with orientations
+       known at every 90 degrees.  This is a new problem.
+       An existing spline has existing knots: changing the knots will change the curve 
+       if we are not careful.
+       We want to reparameterize the curve to match the desired orientation spline.
+       The alternative is to force the quaternion spline to inherit the position spline's
+       knots, which is probably not so good.
+
+       Why can't we disentangle the parameterization of the position and orientation?
+       We have two parametric curves and certain parameter values where they must
+       meet.  We could adjust the speed along the paths to force them to reach the
+       meetpoint at the right time.  A problem with this is that there will be an
+       abrupt change of speed at the meetpoint if we aren't careful (we should gradually
+       change the speed along the path).
+       Travel along the position curve at the desired speed (say constant speed).
+       Scale speed along the quaternion spline between each pair of keyframes
+       to arrive at keyframe at the correct time.  If you don't like this, then
+       inherit the knots from the position spline.  Either way, let the position
+       spline dominate, since its curve is predetermined or more important.
+       The only time that exact coordination between the position and orientation
+       must be achieved is for tight motion planning.  Here we really need to
+       plan motion in a combined configuration space that includes both position
+       and orientation.  This is certainly not the problem we are solving in our 
+       interpolation problem.  We simply want a valid motion that does reasonable
+       things with the orientation.
+}
+
+(Get Gavini promo information from phikappaphi.org for vita.)
+
+People assigned to projects:
+Ross: smooth motion
+Doug: meshing (hopefully smooth visibility meshing)
+Conan: motion or visibility: whichever I am being most productive with
+Aqueasha: software release and molecular modeling
+Michael: software release and architectural formats/flythroughs
+Lei: motion or visibility (or GPU coadvised with Puri?)
+who for GPU? Daniel co-advised with Puri?
+
+Offices:
+Conan/Lei: 143
+Doug: ME/143
+Ross: 100/143
+Aqueasha/Michael: 143
+at least 4 people in 143
+
+\clearpage
+
+\section{Challenges}
+
+\begin{itemize}
+\item rational quaternion spline:
+\item canonical rotation (just necessary)
+\item *emptiest point (separate TR, incorporate in quaternion spline paper and software)
+\item full quaternion spline built in pieces, w. derivative control (software release, TR)
+\item 
+\item flythrough with collision detection:
+\item parsing of architectural mesh formats (software release, TR)
+\item Vienna city scene, New Orleans mesh (just fun)
+\item collection/editing tool for orientation keyframes (software release)
+\item *vertex paths
+\item octree spatial decomposition for triangular mesh
+\item (*)curve cast at triangle
+\item intersection of ruled surface with scene?
+\item automatic definition of good keyframes, perhaps based on visibility structure
+\item given a flythrough, painting the parts of the scene that were seen by the flythrough
+\item 
+\item construction of orientation obstacles
+\item bitangents on S3 for shortest path around obstacles
+\item very interesting problem: smooth interpolation of points while avoiding obstacles
+      (examined in SIGGRAPH 2004 paper but punted by using optimization)
+\item 
+\item smooth soft shadows: full construction of 2D visibility structure; software, journal
+\item motion planning through a visibility structure!!
+\end{itemize}
+
+\section{Software release}
+
+\begin{itemize}
+\item Bezier curves
+\item Quaternion splines
+\item Tangential curves
+\item Tangential surfaces
+\end{itemize}
+
+\begin{itemize}
+\item {\bf CVS of Bezier/quaternion/tangential/visibility by March 15}
+\item quaternion spline release by end of March
+\item Bezier curve release by end of April
+\item tangential curve and 2D visibility structure release by end of May
+\end{itemize}
+
+\clearpage
+
+\section{Journal papers (J) and technical reports (TR)}
+
+\begin{enumerate}
+\item {\bf Bitangency}
+\item 2D bitangents/tangents from a point/2D visibility graph (J)
+\item tangential curves of subdivision curves (J)
+\item 3D silhouettes and bitangent developables (J)
+\item 2D kernels (J, with Wenping)                                      *
+\item 3D kernels (J, with Wenping, Myung-Soo, Gershon)
+\item 2D visual events/smooth soft shadows/visibility structure (J)     *
+\item 3D visual events (see Xiao)
+\item first gather existing papers and software: SMI01, Dag04
+\item
+\item {\bf Rational motion}
+\item rational map to sphere characterization (J)                       *
+\item emptiest point (TR or J)
+\item full quaternion spline review (TR)
+\item camera control collision detection with rational vertex paths (J) *
+\item definition of orientation obstacles (J)
+\item bitangents on S3 for avoiding orientation obstacles (J)
+\item interpolating points while avoiding obstacles
+\item
+\item {\bf Contour reconstruction}
+\item is Jill interested? reconstructing the reconstruction method for general topology (J)
+\end{enumerate}
+
+\begin{itemize}
+\item visit tangential curves/surfaces in class
+\end{itemize}
+
+\end{document}

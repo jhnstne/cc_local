@@ -1,0 +1,103 @@
+From jimbo@blaze.cs.jhu.edu Wed Oct 26 10:37 CDT 1994
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from blaze.cs.jhu.edu by cis.uab.edu (5.0/SMI-SVR4)
+	id AA12066; Wed, 26 Oct 1994 10:37:21 -0500
+Received: from mail-client (peregrine.cs.jhu.edu)
+           by blaze.cs.jhu.edu; Wed, 26 Oct 94 11:37:11 EDT
+Received: by mail-client (4.1) id AA22329; Wed, 26 Oct 94 11:35:14 EDT
+Message-Id: <9410261537.AA12066@cis.uab.edu>
+From: jimbo@blaze.cs.jhu.edu (Jim Williams)
+Sender: jimbo@blaze.cs.jhu.edu
+Date: Wed, 26 Oct 94 11:35:14 EDT
+To: jj@redmont1.cis.uab.edu
+Subject: edits
+Content-Type: text
+Content-Length: 2530
+Status: OR
+
+John,  
+
+This is a list of edits I came up with, tell me what you think:
+
+EDIT #	PAGE	
+
+1	3	"...which leads to a system of equations approach..."
+		I believe ours could just as easily be a system of
+		equations based on the mail I sent you about Minv.
+
+2	5	"We want a rational map from 4-space...."
+		Perhaps we should define rational map explicitly
+
+3	5	"Step 1 is well understood.."
+		Point out that there are two choices for each quaternion?
+
+4	5	The result is from number theory, should we point out
+		the work done by Dietz in transferring Lebes. formula
+		to the polynomial ring and mention that our formula also
+		transfers to the polynomial ring in the same way.
+
+5	6	"We are not as lucky in 4-space..."
+		We are not as fortunate with M as it constitutes a
+		sufficient but not necessary condition for forming a
+		pythagorean quintuple (quadruple?).
+
+6	7	Why do we choose positive sqrt?  How can we justify this.
+
+
+7	7	some properties of M and Minv we might mention:
+			Minv(kq) = sqrt(k)Minv(q)
+			M(kx) = k^2*M(x)
+			M(Minv(kq)) = M(sqrt(k)Minv(q)) = kM(Minv(q))
+
+8	8	"...(compare () and ()." 
+		Is there a paren missing here?
+
+9	9	I did not see a close bracket "]" in the first equation
+
+10	10	Section 8.2 is a little unclear to me.  "If a curve segment
+		is k times longer..."  longer than?  I think that a figure
+		might help here, showing subdivision and measuring segments.
+
+11	11	"...defined below and k=CC'/CC."
+		This should actually be CC/CC' because k is on the opposite
+		side as it is in the proof on page 12 (I think)
+
+12	11	when you say C(t) is a cusp, maybe it should be a 
+		definite t like t sub 0 or something to distinguish it 
+		from the general "t"
+
+13	12	I think that this is an optimal place to include a table
+		something like:
+		
+		-------------------------------------------------
+		S	|	=0		|	!=0
+		--------------------------------------------------
+		S'	|			|
+			-----------------------------------------
+		=  0	|			|
+			-----------------------------------------
+		!= 0	|			|
+		-------------------------------------------------
+
+		and fill in the boxes with the relevant conditions.
+
+14	12	"Multiplying by ||C(t)||^2"  
+		this should be cubed I believe
+
+15	12	The eqn: ||C||^2C' - (C dot C')C = 0
+		is a vector equation so it should be = (0,0,0,0)
+
+16	12	General comment:  why use two different representations
+		for || C(t) ||, the radical may make it more confusing
+		to read
+
+
+
+17	14	BIBLIO -- is Pletinckx the actual spelling?
+
+18	14	BIBLIO -- should "PH Space Curves" be included?
+
+
+
+Jim
+

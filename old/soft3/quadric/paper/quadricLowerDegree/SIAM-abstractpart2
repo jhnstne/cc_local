@@ -1,0 +1,25 @@
+In general, two natural quadrics intersect in a space quartic curve.
+However, the intersection frequently degenerates to a collection of plane 
+curves.
+In a previous paper, the present authors have given some geometric algorithms 
+to detect and calculate these planar intersections.
+In this talk, we will explore the problem further.
+Our algorithms will reduce the problem to a plane.
+We begin with a characterization of conic intersection by focal length,
+using the Dandelin sphere.
+We next consider the following problem.
+Suppose that one cone is fixed, as well as one of the intersection conics C.
+Where can the vertex of the other cone lie?
+We will show that the locus of the vertex of the other cone is the
+perpendicular focal conic of C.
+(Two conics are perpendicular focal conics if they lie in perpendicular planes
+and each conic passes through the foci of the other conic.)
+This leads to another simple algorithm for detection and computation of
+conic intersection.
+These methods show promise of providing a method that is extendible to 
+other quadrics.
+We will also give a complete enumeration of the type of the conic 
+intersections, based on the relative positions of the two cone vertices.
+Finally, we shall discuss results on the blending of two 
+natural quadrics with planar intersection.
+

@@ -1,0 +1,28 @@
+BASIC EXAMPLES
+cube: 
+pos.in-evenspeed/quaternion.in1 is a very plain example
+maple leaf:
+pos.in-evenspeed/quaternion.in5 is best overall example (used in GI figures)
+pos.in2/quaternion.in2 is another good example
+pos.in3/quaternion.in3 is a complicated example
+
+WORKING OF ALGORITHM EXAMPLE 
+use pos.in-evenspeed/quaternion.in5: only show left quaternion sphere
+	animation
+	animation -I	(to show inverse images)
+	animation -s -S	(to show interpolation in space)
+	animation -S -m	(to show mapping back of curve)
+
+EXAMPLES OF ANOMALIES/PROBLEMS
+pos.in?/quaternion.in? (see Script on cerulean) with animation-twisted
+	is a good illustration that control polygon lies outside sphere
+	spin the picture
+pos.in-evenspeed/quaternion.in1 with animation-antipodal (2nd quaternion is
+	switched to its antipodal counterpart (-x,-y,-z,-w,1))
+	shows the danger of antipodal choices well
+TRY non-euclidean metric knot sequencing as in Section 8.1 to control speed as example
+example of cusp
+
+FINALE
+pos.in-leaf/quaternion.in-leaf is a fun falling leaf: using -A
+pos.in-hockey2/quaternion.in-hockey2: hockey slapshot: using -A

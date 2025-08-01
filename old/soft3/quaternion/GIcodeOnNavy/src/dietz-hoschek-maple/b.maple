@@ -1,0 +1,14 @@
+
+tryit := proc()
+for i from 1 to 100 do
+Ar := genrand();
+Br := genrand();
+Cr := genrand();
+Dr := genrand();
+Er := genrand();
+Fr := genrand();
+ANS := map(evalf,subs(A=Ar,B=Br,C=Cr,D=Dr,E=Er,F=Fr,C1));
+print(i);
+print(ANS);
+od;
+end;

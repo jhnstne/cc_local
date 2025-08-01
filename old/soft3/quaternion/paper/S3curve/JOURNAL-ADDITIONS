@@ -1,0 +1,20 @@
+put quaternion curve into B-spline form by degree reduction to degree 3?
+
+choose different default point on inverse image line?
+
+observe that M^{-1}(unit quaternion) still lies on the sphere.
+	this obfuscates the development in the conference paper,
+	since it is easier to imagine it being sent off to general 4-space
+
+	this motivates our choice of M^{-1}(p,q,r,s,1) rather
+	than some other point on the projective line:
+	since it lies on the sphere, we guarantee that the space
+	curve is constrained to a reasonable bounded region, without
+	wild fluctuations
+doublecheck that C^2 continuity is preserved by testing C^2 conditions
+	on control polygon of spherical curve
+try out speed control using non-Euclidean metric knot sequencing
+as in Section 8.1
+
+does quaternion.inpathological's problem arise from a cusp?
+	check against Lemma 9.1

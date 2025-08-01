@@ -1,0 +1,17 @@
+We show how to construct a rational Bezier model of a swept
+surface that interpolates
+$n$ positions and orientations of a fixed rational space curve
+and maintains the shape of the curve at all intermediate points
+of the sweep.
+Thus, the surface models
+an exact sweep of the curve, consistent with the given data.
+Through a simple extension, we also allow the sweeping curve to change
+its size through the sweep.
+The position, orientation, and size of the sweeping curve can change with
+arbitrary continuity.
+This surface
+encompasses the surface of revolution and extruded surface, but extends
+them to arbitrary sweeps.
+It can also be used to model the path of a swept object whose shape does not
+change during the sweep, such as in robotics and CAD/CAM, using curves generated
+automatically by the moving object.

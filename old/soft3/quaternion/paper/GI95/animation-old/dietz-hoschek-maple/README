@@ -1,0 +1,32 @@
+John,
+
+This is the almost complete set of the maple programs I wrote
+for this investigation.  I will try to give an overview:
+
+genutils.maple	:	general utilities, norms, homogenization etc
+bezutils.maple	:	I chose to represent bezier curves as 1d vectors
+			of control points, TP bez surfaces as 2d vectors.
+			This code adds, subtracts, multiplies, and 
+			differentiates curves as well as doing Tensor products
+			of curve pairs
+sphere_curves.maple :	definitions of the delta,eta,sigma etc.. functions
+			from the DH paper
+
+ho5+.maple, hoshek.maple : on sphere interpolation programs that set up
+			the linear system and solve it
+
+interpX.maple	:	wrapper program that will perform a X point interpolation
+			on the sphere, and then render the curve
+
+solvecubic, cubic, quintic etc.. : programs directed at solving the PH curve
+				restrictions for various degrees
+
+writehull,writecurve :	i/0 programs that write curves and hulls to files
+			as piecewise linear segments
+
+numX.maple	:	programs to solve the PH restrictions in purely
+			numerical fashion
+
+csplines.maple	:	attempt to solve conditions for C1 continous bezier
+			splines that had PH property
+

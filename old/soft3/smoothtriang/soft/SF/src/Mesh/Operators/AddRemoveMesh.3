@@ -1,0 +1,80 @@
+.TH addremovemesh 3
+.SH NAME
+AddRemoveMesh \- A set of routines for adding and removing mesh objects
+.SH SYNTAX
+.B #\include "mesh.h"
+.SH DESCRIPTION
+.I AddRemoveMesh
+are routines designed to simplify the addition / removal  of mesh objects. 
+Remove operators free the data structures. 
+These routines are meant for use by the routines described in the 
+.I operators (3)
+manpages.
+.SH ROUTINES
+.LP
+.nf
+.B BOOLEAN AddMeshVertex( m, v )
+.B Mesh *m;
+.B Vertex *v;
+.fi
+.PP
+Adds a Vertex to the mesh iff the vertex is not on the mesh lists already.
+Returns TRUE if the vertex was added, FALSE if not added.
+.LP
+.nf
+.B BOOLEAN AddMeshEdge( m, e )
+.B Mesh *m;
+.B Edge *e;
+.fi
+.PP
+Adds an Edge to the mesh iff the edge (and its sym edge) is not on the mesh 
+lists already.  Returns TRUE if the edge was added, FALSE if not added.
+.LP
+.nf
+.B BOOLEAN AddMeshFace( m, f )
+.B Mesh *m;
+.B Face *f;
+.fi
+.PP
+Adds a Face to the mesh iff the face is not on the mesh lists already.
+Returns TRUE if the face was added, FALSE if not added.
+.LP
+.nf
+.B BOOLEAN RemoveMeshVertex( m, v )
+.B Mesh *m;
+.B Vertex *v;
+.fi
+.PP
+Removes a Vertex from the mesh iff the vertex is on the mesh lists.
+Uses
+.I free()
+to reclaim storage used by the Vertex.
+Returns TRUE if the vertex was removed, FALSE if not removed.
+.LP
+.nf
+.B BOOLEAN RemoveMeshEdge( m, e )
+.B Mesh *m;
+.B Edge *e;
+.fi
+.PP
+Removes an Edge from the mesh iff the edge is on the mesh lists.
+Uses
+.I free()
+to reclaim storage used by the Edge.
+Returns TRUE if the edge was removed, FALSE if not removed.
+.LP
+.nf
+.B BOOLEAN RemoveMeshFace( m, f )
+.B Mesh *m;
+.B Face *f;
+.fi
+.PP
+Removes a Face from the mesh iff the face is on the mesh lists.
+Uses
+.I free()
+to reclaim storage used by the Face.
+Returns TRUE if the face was removed, FALSE if not removed.
+.SH SEE ALSO
+operators (3)
+.SH AUTHORS
+Richard Schulte

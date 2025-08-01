@@ -1,0 +1,9 @@
+[ angle and axis pairs, defining orientations; Source: GI95's quaternion.in5opp ]
+{
+180 -1 0 -1
+130 -1.5 0 1.5
+80 -2.5 0 -1.75
+10 -3 0 -2
+}
+
+

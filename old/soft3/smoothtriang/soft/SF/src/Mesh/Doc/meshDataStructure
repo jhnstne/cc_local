@@ -1,0 +1,58 @@
+Mesh Data Structure
+
+
+The mesh data structure is a variant of the winged edge data structure.
+There are edges and nodes.  There are two types of node, vertex nodes
+and face nodes.  In the node data structure there is a tag field which
+denotes the type of the node.
+
+Edges are the primary object.  Each edge is actually composed of two
+half edges.  A half edge has pointers to two nodes and two edges,
+plus the symetric half edge (if it exists).  One of the two nodes
+is the primal node, and can be thought of as a vertex.  The other
+node is the face that the half edge neighbors.  Half edges are
+oriented around a face in the clockwise direction.
+
+Nodes have only one pointer, which points to a "representive" edge
+that neighbors it.
+
+In addition, both nodes and edges have three data fields: an external
+field, an internal data field, and a name field.  The external data
+field is a pointer to an ascii string that is read in when the mesh
+is read from a file, and written out when the mesh is written to a file.
+The internal data field is a user defined structure.  It is intended to
+be used to store information such as geometry, color, etc.  The name
+field is another character string containing the name of the node (edge).
+
+Pictorially, a half-edge looks like:
+
+ 
+               prev edge                next edge
+                   ^          F            ^
+                   |          ^            |
+                   \          |            /
+                    \         |           /
+                   =========================>
+                                 | sym    \-------->V
+                                 v
+
+
+where the name and data fields are not shown.
+
+
+
+Several assumptions are made about the topological structures
+we will be dealing with.  First, it is assumed that all faces
+are complete.  That is, there will be a complete ring of half-
+edges surrounding each vertex.  The second assumption is that
+the boundaries will be "nice".  That is, while a vertex may be
+on a boundary, the incomplete ring of edges around the vertex
+will be connected.
+
+A half-edge is said to be a boundary edge if it has no symmetric
+half-edge.  That is, its 'sym' pointer will be NULL.  A vertex
+is said to be a boundary vertex if the edges adjacent to it do
+not form a complete ring.  A face is said to be a boundary face
+if at least one of its neighboring edges is a boundary edge.
+Note that a face may be formed of boundary vertices but not be
+a boundary face.

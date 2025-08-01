@@ -1,0 +1,71 @@
+.TH intersection 3
+
+.SH NAME
+intersection
+
+.SH SYNOPSIS
+Compute the intersection of planar things.
+
+.SH SYNTAX
+
+.B #include "intersection.h"
+
+.SH DESCRIPTION:
+
+This package computes the intersection of various lines and planes.
+The following intersection structure is returned:
+
+.nf
+typedef struct {
+  int type;
+  Point p;
+  Vector v;
+  Normal n;
+} Intersection;
+.fi
+
+Type will be one of I_EMPTY, I_POINT, I_LINE, or I_PLANE.  A line
+is desribed by a point and a vector; a plane is given by a point
+and a normal.
+
+
+.nf
+.B Intersection IntersectTwoPlanes(p1,n1, p2,n2)
+.B Point p1;
+.B Normal n1;
+.B Point p2;
+.B Normal n2;
+.fi
+
+Intersect two planes.  The intersection may be a line, a plane, or empty.
+
+.nf
+.B Intersection LineIntersectP(p1,v1, p2,n2)
+.B Point p1;
+.B Vector v1;
+.B Point p2;
+.B Normal n2;
+.fi
+
+Intersect a line with a plane.  The intersection may be a point, a line, 
+or empty.
+
+.nf
+.B Intersection IntersectThreePlanes(p1,n1, p2,n2, p3,n3)
+.B Point p1;
+.B Normal n1;
+.B Point p2;
+.B Normal n2;
+.B Point p3;
+.B Normal n3;
+.fi
+
+Intersect three planes.  Depending on how the code is compiled, the
+true intersection will be calculated (and may be a point, a line,
+a plane, or empty) or a best point of "intersection" will be
+calculated (in the case of multiple solutions, one is choosen; if
+no solutions, then a point near p1,p2, and p3 is choosen).
+
+
+.SH DATE
+January 3, 1992

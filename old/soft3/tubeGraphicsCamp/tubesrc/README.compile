@@ -1,0 +1,36 @@
+README for compiling C++ programs that require OpenGL and GLUT in Visual C++
+----------------------------------------------------------------------------
+
+The OpenGL and GLUT libraries are not automatically loaded
+in a C++ program in Visual C++, so you need to add them manually yourself.
+Here are the steps you need to perform before compiling the program.
+These must be done for EACH C++ program that uses OpenGL or GLUT.
+
+1. Click "Start"
+2. Click "Programs"
+3. Click "Microsoft Visual Studio 6.0"
+4. Click "Microsoft Visual C++ 6.0"
+5. Open "File" Menu
+5. Click "Open..."
+6. Find tube.cpp, then click "OK"
+7. Open "Build" Menu
+8. Click "Build"
+9. A Dialog will jump out :
+   This build command requires an active project workspace.Would you like to create a default project workspace?
+   click "yes"
+10. On the main menu, click "Project"
+11. Choose "Settings".
+12. Choose "Link" tab.
+13. Under the field "Object/Library Modules",
+    attach "opengl32.lib glu32.lib glut32.lib" at the end of the string.
+14. Press OK.
+15. Save the project (Ctrl+S).  This saves the environment so that you 
+    don't need to do this the next time you open THIS program.
+16. You may now successfully compile, build, and execute the program,
+    with full access to the OpenGL and GLUT libraries.
+
+James (Xiaqing) Wu
+Dept. of Computer and Information Sciences
+142 Campbell, 1300 Univ. Blvd. UAB
+
+

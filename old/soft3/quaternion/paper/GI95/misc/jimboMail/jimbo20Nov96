@@ -1,0 +1,128 @@
+Jim,
+
+Very nice.  You write very well.
+I particularly like Figures 6 and 7.
+Good job of motivating the rational rep via the reaction diffusion example.
+
+Most of my comments are small points.
+My only larger concern 
+is about the singularity of the rotation function at (1,0,0,0).
+This will occur whenever the axis tangent points along (0,0,1),
+since that corresponds to `no rotation'.
+In practice, this will only occur if one of the discrete frames Fk
+points along the axis tangent, so we should avoid these frames
+(by tweaking them just a bit).
+You could easily work this in on p. 4 at the place where you
+note that the `identity quaternion has a multitude of inverses'.
+Simply note that this non-unique inverse causes a singularity in 
+the orientation curve, so any frame Fk with qk=(1,0,0,0,1)
+should be perturbed slightly, or the orientation function
+in this neighbourhood computed by rotating the frames to a new location,
+computing the orientation function, and rotating back
+[The only problem in the latter solution is making sure
+that the two parts meet with tangent continuity when you splice
+them back together, but I think we can do this by specifying end
+tangent conditions in the interpolation phase in 4-space.]
+
+On to the other points:
+
+p. 2: '(0,0,0) is the reference point':
+	what do you mean by this?  remove it?
+
+p. 3: just above formula (2), should be 
+	`... that rotates \cal{E} into \cal{F}(t) as R(t).'
+	and just after formula (2), no need to redefine R(t), C(s,t)
+	and D(t) (probably a typo)
+
+p. 3: `In this paper, ... as algorithmic black boxes':
+	no need for this sentence
+
+p. 3: Figure 2: oh-oh! origin is not inside the curve C(s,t)!
+	(above, you say that you assume that it is)
+
+p. 3: `Hereinafter when we refer to quaternions we imply unit quaternions
+	*unless otherwise specified*.'
+		you never use non-unit quaternions, so ditch the `unless
+	otherwise specified'.
+
+p. 3: `in the form q=(s,v) where s is ... and $v \in R^3$ as the vector
+	component', just to be crystal clear
+
+p. 3: in the `It is possible' paragraph: change `t' subscripts
+	to 'k'
+
+p. 3: 'indirect' may have some negative connotations?  perhaps just `a method'
+
+p. 4: `For the moment, ...'
+	I don't see anywhere that you change from `uniform' knot sequences,
+	so better remove `For the moment' qualification.
+	And rather than using the term `uniform' which in the context
+	of knot sequences means '0,1,2,3,4,...',
+	don't you mean `we also require the knot sequence of all cross-sections
+	to be identical.'
+	By the way, this isn't an unusual assumption, since
+	all tensor-product Bspline surfaces also assign the same knot sequence
+	to all isoparametric curves.
+
+p. 5: in discussion of Frenet frame problems:
+	`as is the case at inflections or along linear portions of curves'
+	Definitely want to mention inflections, since they are more common.
+	Could remove `entirely linear curves' since that is a special case
+	of `linear portions of curves'.
+
+p. 5: `... it is desirable to keep sequential points interpolated by the
+	orientation as close as possible.'
+	What do you mean by this?
+	Do you mean that `it is desirable to minimize the difference in 
+	orientation between consecutive points'?
+
+p. 5: `The minimal rotation frame sequence that we develop depends
+	only on first-order moments of the main axis and is therefore
+	invariant under rigid transformations'
+	The finite frames, built to minimize twist, will indeed be invariant
+	under rigid transformation, 
+	but remember that the intermediate frames won't be,
+	since the orientation function is not invariant,
+	as it always uses the same stereographic projection (see Dietz letter).
+	So the entire RDGC won't be invariant.
+
+p. 6: `The total rotation ... is ... R1^t R2'
+	Should be R2 R1^t since matrix multiplication is right-to-left.
+
+p. 6: What is A and B in the solution for \theta?
+
+p. 6: Section 6, point 3:
+	To be fair, you should mention that not all cross-sections are 
+	guaranteed to be perpendicular to the main axis, just the
+	cross-sections at the parameter values t1,...tn;
+	but this is inevitable given our goal of defining
+	a rational generalized cylinder, since the only way to define a rational
+	generalized cylinder with the cross-section at every point
+	perpendicular to the axis is to restrict the axis
+	to the special class of Pythagorean hodograph curves (see
+	\cite{Farouki et. al.} for a defn of this class of curves).
+
+p. 6: Why is it so bad for the cross-sections to become non-planar?
+
+p. 7: What page is that incremental interpolation method from an initial
+	estimate in Farin? (My own interest only.)
+
+p. 7: First paragraph of section 7:
+	`... which is dependent on surface curvature *k* at that point'
+	(otherwise takes a while to realize that K means curvature
+	down below)
+
+p. 7: Again for my own interest only: how often does a control point
+	get bonded to the surface (by touching the surface)?
+	I was worried that all control points would eventually converge
+	to the surface and then be bonded, which seems inelegant.
+
+p. 1-8: Make sure to run through a spell checker at the end to 
+	catch the typos.
+
+Again, good job.
+
+John
+	
+	
+

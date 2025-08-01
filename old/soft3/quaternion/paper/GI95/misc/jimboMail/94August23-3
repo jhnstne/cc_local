@@ -1,0 +1,38 @@
+From jimbo@blaze.cs.jhu.edu Tue Aug 23 12:58:25 1994
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from blaze.cs.jhu.edu by cis.uab.edu (4.1/SMI-4.1)
+	id AA12909; Tue, 23 Aug 94 12:58:25 CDT
+Message-Id: <9408231758.AA12909@cis.uab.edu>
+Received: from mail-client (peregrine.cs.jhu.edu)
+           by blaze.cs.jhu.edu; Tue, 23 Aug 94 13:58:14 EDT
+From: jimbo@blaze.cs.jhu.edu (James P. Williams)
+Sender: jimbo@blaze.cs.jhu.edu
+Received: by mail-client (4.1) id AA11627; Tue, 23 Aug 94 13:58:13 EDT
+Subject: Re: your mail
+To: jj@cis.uab.edu (John Johnstone)
+Date: Tue, 23 Aug 1994 13:58:13 -0400 (EDT)
+In-Reply-To: <9408231722.AA12574@cis.uab.edu> from "John Johnstone" at Aug 23, 94 12:22:45 pm
+X-Mailer: ELM [version 2.4 PL13]
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Content-Length: 473
+Status: OR
+
+> 
+> Since our spherical curve on the 4-sphere is the 
+> image of a cubic Bezier under M, which is a Bezier
+> curve of degree 6 (see yesterday's note), don't we
+> get continuity for free using Bezier curve properties?
+> On first blush, I don't think that continuity arguments
+> would change in 4d.
+> jj
+> 
+
+Yes, continuity is free.  We must, however, show that we
+are not introducing cusps into the curve.  I do not think 
+that we will, but I would like to prove it.
+
+Jim
+
+

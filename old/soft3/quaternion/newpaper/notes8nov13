@@ -1,0 +1,58 @@
+juttler article in Handbook of Computer Aided Geometric Design is good answer to rational quaternion splines 
+
+how do they handle the pole problem?  what if a quaternion strays near a pole?
+they are using Euler's 4-squares theorem indirectly (using Euler coordinates),
+so there will still be a pole at (0,0,0,+-1)
+   - 'A characterization of rational maps to the sphere' shows that a pole
+      always exists
+   - which form of the normal form is their map to the sphere?
+   - I expect that they have never implemented their method to see the pole
+     problem
+
+they also do not handle covariant acceleration (Barr, Ramamoorthi)
+or minimizing jerk (Zefran)
+
+there are fundamentally three opposing camps of quaternion spline development:
+exponential map, rational, and slerping
+
+implement:
+
+  - restricted inverse Euler map
+  - derivatives
+  - piecewise quaternion spline
+  - pole avoidance (gather points until too close to antipode, then rotate)
+  - rotation in 4-space (of a point to another point of S^3)
+     - I think Steve Mann's geometric algebra book has a generalized crossproduct
+     - so does XX math text covered in 747
+  - rotation of a point to a plane while preserving other points (for ref frame)
+  - use reference frame to artificially impose coordinate invariance
+     (discuss this with someone)
+     rotation into a reference frame seems to require all the quaternions
+     so what about interactive streaming of the orientations?
+     that's OK: only need first 3 points, others can be streamed
+  - test data: animation of a --- using keyframes developed by --
+  - want as simple an interface as slerping
+
+  issue with repeatedly moving points to the equator (for pole avoidance):
+  - to refine the spline later, a quaternion may be added in the interior;
+    we don't want the spline to change,
+    yet if we nondeterministically move the points away from the pole
+    by moving to equator, this will change if quaternions change
+
+future:
+extend to arbitrary degree Bezier (for arbitrary continuity) 
+          and to rational Bezier
+combine with position spline: do you need to (Unity's slerp does not)
+  
+zefran/kumar 96icra: 
+     there is no metric that is invariant wrt changes in inertial frame
+     combined with changes in body fixed frame, called bi-invariant (p. 2)  
+
+     uses matrix exponential
+     only considers one initial and one goal path
+     does consider minimizing metrics along the path (acceleration and jerk)
+
+kim: uses matrix exponential (not a true Bezier curve)
+
+flash: jerk (3rd derivative, so derivative of accel) and snap (4th derivative)
+       voluntary human arm movements minimize integral of jerk

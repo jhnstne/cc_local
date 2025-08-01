@@ -1,0 +1,132 @@
+
+
+
+C Library Functions                                     bezier(3)
+
+
+
+NNNNAAAAMMMMEEEE
+     bezier
+
+
+SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
+     Routines  for  evaluating  rational  and  polynomial  Bezier
+     curves and their derivatives.
+
+
+SSSSYYYYNNNNTTTTAAAAXXXX
+     ####iiiinnnncccclllluuuuddddeeee bbbbeeeezzzziiiieeeerrrr....hhhh
+
+
+DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN::::
+     PPPPooooiiiinnnntttt EEEEvvvvaaaallllBBBBeeeezzzziiiieeeerrrr((((nnnn,,,, pppptttt,,,, tttt))))
+     iiiinnnntttt nnnn;;;;
+     PPPPooooiiiinnnntttt pppptttt[[[[]]]];;;;
+     SSSSccccaaaallllaaaarrrr tttt;;;;
+
+     Evaluate the nth degree Bezier curve given by control points
+     pt at t.
+
+     VVVVeeeeccccttttoooorrrr EEEEvvvvaaaallllBBBBeeeezzzziiiieeeerrrrDDDDeeeerrrriiiivvvv((((nnnn,,,, pppptttt,,,, tttt))))
+     iiiinnnntttt nnnn;;;;
+     PPPPooooiiiinnnntttt pppptttt[[[[]]]];;;;
+     SSSSccccaaaallllaaaarrrr tttt;;;;
+
+     Evaluate the first derivative of the nth degree Bezier curve
+     given by control points pt at t.
+
+     VVVVeeeeccccttttoooorrrr EEEEvvvvaaaallllBBBBeeeezzzziiiieeeerrrrNNNNtttthhhhDDDDeeeerrrriiiivvvv((((nnnn,,,, pppptttt,,,, tttt,,,, ddddeeeerrrriiiivvvv))))
+     iiiinnnntttt nnnn;;;;
+     PPPPooooiiiinnnntttt pppptttt[[[[]]]];;;;
+     SSSSccccaaaallllaaaarrrr tttt;;;;
+     iiiinnnntttt ddddeeeerrrriiiivvvv;;;;
+
+     Evaluate the deriv derivative of the nth degree Bezier curve
+     given by control points pt at t.
+
+     SSSSccccaaaallllaaaarrrr BBBBeeeezzzziiiieeeerrrrCCCCuuuurrrrvvvvaaaattttuuuurrrreeee((((nnnn,,,, pppptttt,,,, tttt))))
+     iiiinnnntttt nnnn;;;;
+     PPPPooooiiiinnnntttt pppptttt[[[[]]]];;;;
+     SSSSccccaaaallllaaaarrrr tttt;;;;
+
+     Return the curvature of the nth degree Bezier curve given by
+     control points pt at t.
+
+     SSSSccccaaaallllaaaarrrr SSSSccccaaaallllaaaarrrrBBBBeeeezzzziiiieeeerrrr((((nnnn,,,, wwww,,,, tttt))))
+     iiiinnnntttt nnnn;;;;
+     SSSSccccaaaallllaaaarrrr wwww[[[[]]]];;;;
+     SSSSccccaaaallllaaaarrrr tttt;;;;
+
+
+
+
+SunOS 5.6                 Last change:                          1
+
+
+
+
+
+
+C Library Functions                                     bezier(3)
+
+
+
+     Evaluate the nth degree scalar Bezier curve given by  scalar
+     w at parameter value t.
+
+     SSSSccccaaaallllaaaarrrr SSSSccccaaaallllaaaarrrrBBBBeeeezzzziiiieeeerrrrDDDDeeeerrrriiiivvvv((((nnnn,,,, wwww,,,, tttt))))
+     iiiinnnntttt nnnn;;;;
+     SSSSccccaaaallllaaaarrrr wwww[[[[]]]];;;;
+     SSSSccccaaaallllaaaarrrr tttt;;;;
+
+     Evaluate the first derivative of the nth degree scalar  Bez-
+     ier curve given by scalar w at parameter value t.
+
+
+     PPPPooooiiiinnnntttt RRRRaaaattttBBBBeeeezzzziiiieeeerrrr((((nnnn,,,, pppp,,,, wwww,,,, tttt))))
+     iiiinnnntttt nnnn;;;;
+     PPPPooooiiiinnnntttt pppp[[[[]]]];;;;
+     SSSSccccaaaallllaaaarrrr wwww[[[[]]]];;;;
+     SSSSccccaaaallllaaaarrrr tttt;;;;
+
+     Evaluate the nth  degree  rational  Bezier  curve  given  by
+     points p and weights w at parameter value t.
+
+     PPPPooooiiiinnnntttt RRRRaaaattttBBBBeeeezzzziiiieeeerrrrDDDDeeeerrrriiiivvvv((((nnnn,,,, pppp,,,, wwww,,,, tttt))))
+     iiiinnnntttt nnnn;;;;
+     PPPPooooiiiinnnntttt pppp[[[[]]]];;;;
+     SSSSccccaaaallllaaaarrrr wwww[[[[]]]];;;;
+     SSSSccccaaaallllaaaarrrr tttt;;;;
+
+     Evaluate the first derivative of  the  nth  degree  rational
+     Bezier  curve  given  by points p and weights w at parameter
+     value t.
+
+
+
+DDDDAAAATTTTEEEE
+     January 3, 1992
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SunOS 5.6                 Last change:                          2
+
+
+

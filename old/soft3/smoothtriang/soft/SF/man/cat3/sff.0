@@ -1,0 +1,132 @@
+
+
+
+C Library Functions                                        sff(3)
+
+
+
+NNNNAAAAMMMMEEEE
+     sff
+
+
+SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
+     Routines for manipulating second fundemental forms.
+
+
+SSSSYYYYNNNNTTTTAAAAXXXX
+     ####iiiinnnncccclllluuuuddddeeee ssssffffffff....hhhh
+
+
+DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN::::
+     SSSSccccaaaallllaaaarrrr EEEEvvvvaaaallllSSSSFFFFFFFF((((ssssffffffff,,,,vvvv))))
+     SSSSFFFFFFFF ****ssssffffffff;;;;
+     VVVVeeeeccccttttoooorrrr vvvv;;;;
+
+     Evaluate the second fundemental form to extract  the  normal
+     curvature in direction vvvv....
+
+     SSSSccccaaaallllaaaarrrr EEEEvvvvaaaallllSSSSFFFFFFFF2222((((ssssffffffff,,,,vvvv1111,,,,vvvv2222))))
+     SSSSFFFFFFFF ****ssssffffffff;;;;
+     VVVVeeeeccccttttoooorrrr vvvv1111;;;;
+     VVVVeeeeccccttttoooorrrr vvvv2222;;;;
+
+     Evaluate the second fundemental form to get the normal  com-
+     ponent of the mixed partial in directions vvvv1111 and vvvv2222....
+
+
+     BBBBOOOOOOOOLLLLEEEEAAAANNNN ddddGGGGeeeettttSSSSFFFFFFFF((((ddddssss,,,,ppppaaaatttthhhh,,,,ffff,,,,ssssffffffff))))
+     LLLLnnnnooooddddeeee**** ddddssss;;;;
+     cccchhhhaaaarrrr**** ppppaaaatttthhhh;;;;
+     FFFFrrrraaaammmmeeee ffff;;;;
+     SSSSFFFFFFFF**** ssssffffffff;;;;
+
+     Extract a second fundemental form at ppppaaaatttthhhh from  the  dstruct
+     ddddssss relative to frame ffff....
+
+
+     BBBBOOOOOOOOLLLLEEEEAAAANNNN ppppPPPPuuuuttttSSSSFFFFFFFF((((ddddssss,,,,ppppaaaatttthhhh,,,,ssssffffffff))))
+     LLLLnnnnooooddddeeee******** ddddssss;;;;
+     cccchhhhaaaarrrr**** ppppaaaatttthhhh;;;;
+     SSSSFFFFFFFF**** ssssffffffff;;;;
+
+     Write a second fundemental form to a dstruct.
+
+
+     SSSSFFFFFFFF CCCCrrrreeeeaaaatttteeeeCCCCoooonnnnjjjjuuuuggggaaaatttteeeeSSSSFFFFFFFF((((vvvv0000,,,,vvvv1111,,,,kkkk0000,,,,kkkk1111))))
+     VVVVeeeeccccttttoooorrrr vvvv0000;;;;
+     VVVVeeeeccccttttoooorrrr vvvv1111;;;;
+     SSSSccccaaaallllaaaarrrr kkkk0000;;;;
+     SSSSccccaaaallllaaaarrrr kkkk1111;;;;
+
+
+
+SunOS 5.6                 Last change:                          1
+
+
+
+
+
+
+C Library Functions                                        sff(3)
+
+
+
+     Create a second fundemental form from conjugate directions v0 and v1 with
+     curvatures k0 and k1 respectively.
+
+     VVVVeeeeccccttttoooorrrr SSSSFFFFFFFFCCCCoooonnnnjjjjuuuuggggaaaatttteeee((((ssss,,,,vvvv))))
+     SSSSFFFFFFFF**** ssss;;;;
+     VVVVeeeeccccttttoooorrrr vvvv;;;;
+
+     Return the conjugate direction of v relative to s.
+
+     SSSSccccaaaallllaaaarrrr SSSSFFFFFFFFGGGGaaaauuuussssssssiiiiaaaannnnCCCCuuuurrrrvvvvaaaattttuuuurrrreeee((((ssss))))
+     SSSSFFFFFFFF**** ssss;;;;
+
+     Return the Gaussian Curvature determined by a Second Fundemental Form.
+
+
+DDDDAAAATTTTEEEE
+     February 25, 1990
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SunOS 5.6                 Last change:                          2
+
+
+

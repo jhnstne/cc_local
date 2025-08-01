@@ -1,0 +1,534 @@
+%From Ralph.Martin@cf.cm Thu May 14 10:11:58 1992
+%Message-Id: <2932.9205140911@aifh.ed.ac.uk>
+%Received: from cm.cf.ac.uk by aifh.ed.ac.uk; Thu, 14 May 92 10:11:57 BST
+%Received: from ralph.cm.cf.ac.uk by sentinel.cm.cf.ac.uk with SMTP (PP) 
+%          id <12897-0@sentinel.cm.cf.ac.uk>; Thu, 14 May 1992 10:10:59 +0100
+%Date: Thu, 14 May 1992 10:11:00 +0000
+%To: Bob Fisher <rbf@ed.aifh>
+%From: Ralph Martin <Ralph.Martin@cf.cm>
+%Subject: Proceedings Instructions (LaTeX)
+%Status: RO
+%
+\documentstyle[conf]{article}
+ 
+\title{Guidelines for Typing Contributions to\\
+``Mathematics of Surfaces III''}
+ 
+\author{D.~C.~Handscomb \affil University of Oxford}
+ 
+\shortauthor{Handscomb}
+ 
+\numberedbib
+ 
+\begin{document}
+ 
+\maketitle
+ 
+\sloppy
+ 
+\section{General remarks}\label{s1}
+ 
+These guidelines are designed to ensure a degree of uniformity between the
+way contributions appear in print.  I shall go through every \LaTeX\
+sourcefile once it has been typed, and possibly make some amendments, but
+these will be fewer and easier if the guidelines have been adhered to.
+ 
+Follow the \LaTeX\ handbook\footnote{Leslie Lamport, {\em \LaTeX---A
+Document Preparation System: User's Guide \& Reference Manual},
+Addison--Wesley, 1985} closely in all matters not discussed in these notes,
+but do not try anything too clever!  You may, if you like, define a command
+or `box' to represent something that recurs many times during the paper, to
+save typing, as long as you keep such definitions to the beginning of the
+file.
+ 
+Do not try to set pictures.
+ 
+Correct any {\em obvious} misprints in the text ({\em e.g.}
+mis-spell\-ings---but do not necessarily replace U.S. by U.K. spellings);
+draw my attention to anything more dubious.
+ 
+\section{Working environment}\label{s2}
+ 
+I use the standard documentstyle `article' (version dated 23 Sep 1985),
+with modifications which are effected by calling my own documentstyle
+option `conf.sty'.  This will take care of all detailed requirements for
+page layout, and includes some extra facilities described below.  [It can
+be used for other conference proceedings, if modified by changing the
+`booktitle' running heading.]
+ 
+\section{Preliminaries}\label{s3}
+ 
+Each contribution should be set up as a separate sourcefile in ASCII
+format, whose name should be `\verb!author.TEX!', where `\verb!author!'
+will generally be the surname of the first or only author (but may be
+abbreviated if too long) without spaces of hyphens.  Begin the sourcefile
+as follows:
+ 
+\begin{verbatim}
+        \documentstyle[conf]{article}
+\end{verbatim}
+ 
+\begin{verbatim}
+        \title{Title with Important Words Capitalized}
+\end{verbatim}
+ 
+\begin{verbatim}
+        \author{Author \affil Affiliation}
+\end{verbatim}
+or
+\begin{verbatim}
+        \author{Author \and Author \affil Affiliation}
+\end{verbatim}
+or
+\begin{verbatim}
+        \author{Author \affil Affiliation
+          \and Author \and Author \affil Affiliation}
+\end{verbatim}
+\&c.
+ 
+\begin{itemize}
+ 
+\item The name(s) of the author(s) should appear as on the manuscript,
+{\em i.e.} either in full or as initials and surname.  Put a space after
+the `.' after each initial.
+ 
+\item The `affiliation' given for each author or group of authors should
+be very brief, {\em e.g.} the name of a University or a firm.  Do not
+include full addresses, which will appear elsewhere in the book.
+ 
+\item Any other footnotes to the title or author(s) ({\em e.g.}
+acknowledgments) should be moved to the end of the paper, before the
+bibliography, with suitable wording (which I will supply if necessary) such
+as `This work was supported by \ldots' or `One of us (A.~B.~C.) was
+assisted by a grant from \ldots', and enclosed between `\verb!\begin{ackn}!
+\verb!\end{ackn}!' (see page~\pageref{ack} below).
+ 
+\end{itemize}
+ 
+\begin{verbatim}
+        \shortauthor{Surname(s)}
+\end{verbatim}
+\begin{itemize}
+\item The argument to `\verb!\shortauthor!', used to supply a running head,
+should be
+\[\left\{\begin{array}{l}
+\mbox{The author's Surname for a sole author}\\
+\mbox{Surname 1 `\verb! \& !' Surname 2 for two joint authors}\\
+\mbox{Surname 1 ` et al.' for more than two}
+\end{array}\right.\]
+\end{itemize}
+ 
+\noindent\verb!        [\unnumberedbib]!\footnote{include this command only
+if references are all cited by name and date, not by cross-reference; see
+page~\pageref{ss52} below.}
+ 
+\begin{verbatim}
+        \begin{document}
+\end{verbatim}
+ 
+\begin{verbatim}
+        \maketitle
+\end{verbatim}
+ 
+ 
+\section{Body of work}\label{s4}
+ 
+If an abstract, summary or list of keywords has been supplied, ignore it.
+ 
+Follow the author's divisions into sections, sub\-sec\-tions,
+sub\-sub\-sec\-tions---not parts, chapters, paragraphs,
+sub\-para\-graphs---but use \LaTeX's cross-ref\-er\-ence system rather than
+copying the author's numbering; see Section~\ref{s5} below.
+ 
+\subsection{Figures and tables}
+ 
+Where there is a figure to be inserted, include the commands
+\begin{verbatim}
+        \begin{figure}[htbp]
+        \vspace{2cm}
+        \caption[]{...} \label{f...} \end{figure}
+\end{verbatim}
+to leave a token amount (2cm) of vertical space.  This I shall adjust by
+editing the sourcefile later, when the printers have worked out the actual
+sizing of each figure.  Type out the caption if one is supplied; otherwise
+just say
+\begin{verbatim}
+        \caption[]{}
+\end{verbatim}
+ 
+To allow two figures to be inserted side by side, use the commands
+\begin{verbatim}
+        \begin{figure}[htbp]
+        \vspace{2cm}
+        \halfbox{\caption[]{...}\label{f...}}
+        \halfbox{\caption[]{...}\label{f...}}
+        \end{figure}
+\end{verbatim}
+ 
+        For example, Fig.~\ref{f1} and Figs~\ref{f2}
+        and~\ref{f3}, on page~\pageref{f1}, together
+        with this comment, were generated by the
+        instructions:
+ 
+        \begin{figure}[htbp] \vspace{2cm}
+        \caption[]{First figure looks like this}
+        \label{f1} \end{figure}
+        \begin{figure}[htbp] \vspace{2cm}
+        \halfbox{\caption[]{Second figure looks like
+          this} \label{f2}}
+        \halfbox{\caption[]{Third figure looks like
+          this}\label{f3}}
+        \end{figure}
+ 
+\begin{verbatim}
+        For example, Fig.~\ref{f1} and Figs~\ref{f2}
+        and~\ref{f3}, on page~\pageref{f1}, together
+        with this comment, were generated by the
+        instructions:
+\end{verbatim}
+ 
+\begin{verbatim}
+        \begin{figure}[htbp] \vspace{2cm}
+        \caption[]{First figure looks like this}
+        \label{f1} \end{figure}
+        \begin{figure}[htbp] \vspace{2cm}
+        \halfbox{\caption[]{Second figure looks like
+          this} \label{f2}}
+        \halfbox{\caption[]{Third figure looks like
+          this}\label{f3}}
+        \end{figure}
+\end{verbatim}
+ 
+Tables are dealt with similarly, except that you can type them out
+explicitly instead of leaving a space; use `\verb!tabular!'. They should be
+centred on the page. For example, here is Table~\ref{t1}:
+        \begin{table}[htbp]\centering
+        \begin{tabular}{|c|c|}
+          \hline function & derivative\\ \hline
+          $\ee^x$ & $\ee^x$\\ $\log x$ & $1/x$\\
+          $\sin x$ & $\cos x$\\ $\cos x$ & $-\sin x$\\
+          $x^n$ & $nx^{n-1}$\\
+          \hline
+        \end{tabular}
+        \caption[]{Derivatives of simple functions}
+        \label{t1} \end{table}
+It was produced by the instructions
+\begin{verbatim}
+        \begin{table}[htbp]\centering
+        \begin{tabular}{|c|c|}
+          \hline function & derivative\\ \hline
+          $\ee^x$ & $\ee^x$\\ $\log x$ & $1/x$\\
+          $\sin x$ & $\cos x$\\ $\cos x$ & $-\sin x$\\
+          $x^n$ & $nx^{n-1}$\\
+          \hline
+        \end{tabular}
+        \caption[]{Derivatives of simple functions}
+        \label{t1} \end{table}
+\end{verbatim}
+ 
+Both figures and tables should be inserted as early as possible after the
+place where they are first referred to (although you may find it easier to
+type them separately and edit them into position afterwards).   Note that
+you refer to `Fig.~\ref{f1}' just like that, not as `figure' for example.
+ 
+\subsection{Mathematics}
+ 
+Don't forget to enclose any isolated mathematical symbols in the text
+between `\verb!$!~\verb!$!' signs.
+ 
+Any punctuation that is required by the mathematics should come {\em
+outside} `\verb!$!~\verb!$!' signs, but {\em inside} the
+`\verb!\[!~\verb!\]!' or `\verb!\begin{equation}! \verb!\end{equation}!'
+signs that cause the material to be {\em displayed}.
+ 
+Use `\verb!eqnarray!' or `\verb!eqnarray*!' where you can, to line up
+parallel formulae nicely.
+ 
+In displayed equations, use `\verb!\mbox{...}!' round any words like `for',
+`if', `otherwise', `and so on' \&c., so that they appear in roman and not
+italic, {\em e.g.} `\verb!\[i=1 \mbox{ to }n.\]!' (note the spaces either
+side of `to'), which gives
+\[i=1 \mbox{ to }n.\]
+ 
+\subsubsection{Equation groups}
+ 
+A group of equations (to be numbered (1.1a), (1.1b) \&c., for example)
+should be enclosed between corresponding `\verb!\begin{eqngroup}!' and
+`\verb!\end{eqngroup}!' commands; the equations will still need their own
+`\verb!\begin/end{equation}!' or `\verb!\begin/end{eqnarray}!' commands,
+but the group may include intervening text as well.  The group may itself
+be labelled, and can then be referenced as a whole as (1.1), for example,
+instead of (1.1a--c).
+ 
+\begin{itemize}
+\item An `\verb!eqngroup!' must be properly nested with other environments.
+ 
+\item An `\verb!eqngroup!' may contain, but may not be contained in an
+`\verb!eqnarray!'.
+ 
+\item An `\verb!eqngroup!' must lie wholly within one \verb!section!.
+ 
+\end{itemize}
+ 
+\noindent For example:
+        \begin{eqngroup}\label{eq234}
+        \begin{equation}
+        a \frac{\partial u}{\partial t} =
+        \frac{\partial}{\partial x}
+          K \frac{\partial u}{\partial x},
+        \label{eq2}\end{equation}
+        where $u = u(x,t)$,
+        \begin{eqnarray}
+        u(x,0) &=& \phi(x),
+          \quad 0\leq x\leq \pi,\label{eq3}\\
+        u(0,t) = u(\pi,t) &=& 0,
+          \quad t>0.\label{eq4}
+        \end{eqnarray}
+        \end{eqngroup}
+        Here (\ref{eq2}) refers to the differential
+        equation, (\ref{eq3}) to the initial conditions,
+        (\ref{eq4}) to the boundary conditions, and
+        (\ref{eq234}) to the whole problem.
+ 
+This example was produced by the commands:
+\begin{verbatim}
+        \begin{eqngroup}\label{eq234}
+        \begin{equation}
+        a \frac{\partial u}{\partial t} =
+        \frac{\partial}{\partial x}
+          K \frac{\partial u}{\partial x},
+        \label{eq2}\end{equation}
+        where $u = u(x,t)$,
+        \begin{eqnarray}
+        u(x,0) &=& \phi(x),
+          \quad 0\leq x\leq \pi,\label{eq3}\\
+        u(0,t) = u(\pi,t) &=& 0,
+          \quad t>0.\label{eq4}
+        \end{eqnarray}
+        \end{eqngroup}
+        Here (\ref{eq2}) refers to the differential
+        equation, (\ref{eq3}) to the initial conditions,
+        (\ref{eq4}) to the boundary conditions, and
+        (\ref{eq234}) to the whole problem.
+\end{verbatim}
+ 
+\subsubsection{Other useful mathematical commands}
+ 
+The environments `\verb!theorem!', `\verb!definition!', `\verb!lemma!',
+`\verb!proposition!' and `\verb!proof!' are available if required---all
+except `\verb!proof!' will be numbered.
+ 
+Also the additional mathematical `log-like' functions
+\begin{verbatim}
+        `\trace',`\sgn', `\cosec',
+\end{verbatim}
+the commands
+\begin{verbatim}
+        `\dd', `\DD', `\ee',`\ii'
+\end{verbatim}
+for roman\footnote{Use roman $\dd$ in $\dd y/\dd x$ and $\int\cdots\dd x$,
+roman $\DD$ in $\DD_xy$, roman $\ee$ for $2.718\ldots$ and roman $\ii$ for
+$\sqrt{-1}$.}
+$$\dd,\ \DD,\ \ee,\ \ii,$$
+and the commands
+\begin{verbatim}
+        `\binom{.}{.}', `\abs{...}', `\norm{...}'
+\end{verbatim}
+for
+$$\binom{\cdot}{\cdot},\ \abs{\cdots}, \ \norm{\cdots}.$$
+ 
+\subsection{Dashes}
+ 
+In the text, use:
+\begin{itemize}
+\item the single dash `\verb!-!' for a hyphen, to join two words or
+part-words one of which is subordinate to the other, {\em e.g.}
+`multi-index', `camera-ready', `$n$-dimensional';
+ 
+\item the double dash `\verb!--!' for an `en-dash', to join words, names,
+dates or numbers \&c. of equal status, {\em e.g.} `Bernstein--B\'ezier',
+`1--10', `surface--surface intersection';
+ 
+\item the triple dash `\verb!---!' for a punctuation dash---as here.
+\end{itemize}
+In none of the three cases should the dash be preceded or followed by a
+space or carriage return.
+ 
+In mathematics, the `\verb!-!' sign is used for `minus' ($-$) in  the usual
+way, and spaces in the sourcefile are ignored.
+ 
+\section{Cross-references} \label{s5}
+ 
+\subsection{Equations, \&c.}
+ 
+Numbering of sections, equations, figures, \&c. may alter when \LaTeX\ is
+run.
+ 
+\begin{itemize}
+ 
+\item To ensure that the author's cross-references remain correct, replace
+any equation reference in the text, {\em e.g.} `(19)', by a reference, {\em
+e.g.} `\verb!(\ref{e19})!', labelling the corresponding equation by
+`\verb!\begin{equation}! \ldots \verb!\label{e19}! \verb!\end{equation}!'
+(or the corresponding thing with `\verb!eqnarray!').
+ 
+\item Likewise, replace figure references, {\em e.g.} `Figure~1', by
+references, {\em e.g.} `\verb!Fig.~\ref{f1}!', labelling the figure by
+`\verb!\begin{figure}! \verb!\vspace{\ldots}! \verb!\caption[]{...}!
+\verb!\label{f1}! \verb!\end{figure}!'; similarly tables
+(`\verb!Table~\ref{t1}!'), theorems (`\verb!Theorem~\ref{th1}!'), \&c..
+ 
+\item Replace  a section heading such as `Section 1. Introduction' by
+`\verb!\section{Introduction}\label{s1}!'and section references by {\em
+e.g.} `\verb!Section~\ref{s1}!', `\verb!Section~\ref{ss1.3}!'.
+ 
+\end{itemize}
+ 
+\subsection{Bibliography}\label{ss52}
+ 
+I have not attempted to impose a totally uniform style of biliography on
+these proceedings---this could have been done by the universal application
+of {\sc Bib\TeX}, but this would have entailed much conversion work on the
+extensive machine-readable bibliographies supplied by some authors.  It is
+however worth putting all new bibliographic references in something like a
+standard form.
+ 
+\begin{itemize}
+ 
+\item If bibliographical references are cited by number in the manuscript,
+replace [2] in the text by `\verb!\cite{r2}!' and identify the item in the
+bibliography by `\verb!\bibitem{r2}!';
+ 
+\item if cited by label, then replace `[Bloggs82]' in the text by
+`\verb!\cite{Bloggs82}!' and identify the item in the bibliography by
+`\verb!\bibitem{Bloggs82}!';
+ 
+\item if neither (cited explicitly by author and year), then include the
+command `\verb!\unnumberedbib!' in the preamble, and identify the item
+merely by `\verb!\bibitem{}!'.
+ 
+\end{itemize}
+ 
+Items in the bibliography should follow the style of the examples in this
+document (page~\pageref{bib}, in which the original citation is assumed to
+be by label); note that:
+\begin{itemize}
+\item the year follows the name(s) of the author(s);
+\item italics (`\verb!{\it ...}!') are used for the titles of {\em books}
+and
+the names of {\em journals} only;
+\item in titles of articles, capitals are used for first word and proper
+names only;
+\item boldface (`\verb!{\bf ...}!') is used for volume numbers of journals;
+\item page numbers are separated by `en-dashes' (`\verb!--!');
+\item punctuation and spacing is as shown.
+\end{itemize}
+The entries should appear in alphabetical order of the (first-named)
+authors' surnames (\LaTeX\ will automatically (re)number them in that
+order if they do not.)
+ 
+The examples in this document were created with the instructions:
+\begin{verbatim}
+        \begin{thebibliography}{99}
+ 
+        \bibitem{bajaj87} S. S. Abhyankar, C. Bajaj,
+        1987: Automatic parameterization of rational
+        curves and surfaces II: cubics and cubicoids.
+        {\em Computer Aided Design} {\bf 19} 499--502.
+ 
+        \bibitem{buchberger83} B. Buchberger, 1983:
+        Gr\"{o}bner bases: an algorithmic method in
+        polynomial ideal theory. In {\em Recent Trends
+        in Multidimensional Systems}, N. K. Bose, editor,
+        D. Reidel, 16--28.
+ 
+        \bibitem{cameron84} S. Cameron, 1984:
+        Modelling Solids in Motion.
+        Ph. D. Thesis, University of Edinburgh.
+ 
+        \bibitem{walker50} R. J. Walker, 1950;
+        {\em Algebraic Curves}.
+        Princeton University Press.
+ 
+        \end{thebibliography}
+\end{verbatim}
+ 
+\section{Miscellaneous}\label{s6}
+ 
+Do not \underline{underline} for emphasis (or foreign words or phrases,
+booktitles in the text); use {\em italics} instead (`\verb!{\em ...}!').
+In particular, use `\verb!{\em i.e.}!' and `\verb!{\em e.g.}!'.
+ 
+Title, section headings, \&c. should not end with a full stop. In section
+headings and captions, capitalize the first word and proper names only.
+ 
+In text, as distinct from mathematics (where your spacing will be
+disregarded), there should be a space (or equivalently a carriage return)
+after but {\em not} directly before a punctuation mark, and outside but not
+directly inside a bracket $\langle$of any shape\} or quotation mark.  [When
+these rules conflict, because two such marks come together, the space is
+omitted.]
+ 
+Use single rather than double quotes, and distinguish between left and
+right quotes. [If your keyboard has no left quote \{`\} use `\verb!\lq!'
+instead.]
+ 
+\begin{ackn}\label{ack}
+Acknowledgments should be placed after the conclusion and before the
+bibliography, headed by `\verb!\begin{ackn}!' and concluded by
+`\verb!\end{ackn}!'.
+\end{ackn}
+ 
+        \begin{thebibliography}{99}\label{bib}
+ 
+        \bibitem{bajaj87} S. S. Abhyankar, C. Bajaj,
+        1987: Automatic parameterization of rational
+        curves and surfaces II: cubics and cubicoids.
+        {\em Computer Aided Design} {\bf 19} 499--502.
+ 
+        \bibitem{buchberger83} B. Buchberger, 1983:
+        Gr\"{o}bner bases: an algorithmic method in
+        polynomial ideal theory. In {\em Recent Trends
+        in Multidimensional Systems}, N. K. Bose, editor,
+        D. Reidel, 16--28.
+ 
+        \bibitem{cameron84} S. Cameron, 1984:
+        Modelling Solids in Motion.
+        Ph. D. Thesis, University of Edinburgh.
+ 
+        \bibitem{walker50} R. J. Walker, 1950;
+        {\em Algebraic Curves}.
+        Princeton University Press.
+ 
+        \end{thebibliography}
+ 
+\appendix
+ 
+\part{Appendices}\label{aA}
+ 
+If there are any appendices, follow the bibliography by \verb!\appendix!,
+and begin each appendix with a \verb!\part{...}! command, followed
+if necessary by a command like `\verb!\label{aA}!'; thus this appendix
+begins with
+\begin{verbatim}
+        \appendix
+\end{verbatim}
+ 
+\begin{verbatim}
+        \part{Appendices}\label{aA}
+\end{verbatim}
+ 
+\section{Sectioning}\label{sA1}
+ 
+An appendix may, if necessary, be broken down into sections \&c., just as
+the main paper is. Cross-references from the paper to entries in an
+appendix will need to be in a form like `\verb!Appendix~\ref{aA},!
+\verb!equation~\ref{eA1}!'.   Here is an equation (\ref{eA1}) to show what
+happens to the numbering:
+\begin{equation}b^2=4ac.\label{eA1}\end{equation}
+ 
+\begin{flushright}\today\end{flushright}
+ 
+\end{document}
+
+

@@ -1,0 +1,29 @@
+# Test programs for finding quintic pyth. hodograph
+# bezier curves
+
+# P0,P1,P2,P3 will be quadratic bezier curves
+
+P0 := vector([p00,p01,p02]);
+P1 := vector([p10,p11,p12]);
+P2 := vector([p20,p21,p22]);
+P3 := vector([p30,p31,p32]);
+
+# impose the restrictions
+
+x1 := add(scalarmul(bezproduct(P0,2,P1,2),2),
+	  scalarmul(bezproduct(P2,2,P3,2),-2));
+
+
+x2 := add(scalarmul(bezproduct(P1,2,P3,2),2),
+	  scalarmul(bezproduct(P0,2,P2,2),2));
+
+
+x3 := add(
+	add(bezproduct(P1,2,P1,2),bezproduct(P2,2,P2,2)),
+	scalarmul(	
+		add(bezproduct(P0,2,P0,2),bezproduct(P3,2,P3,2)),-1));
+
+xtp := gen_bernstein(4,t,x1);
+ytp := gen_bernstein(4,t,x2);
+ztp := gen_bernstein(4,t,x3);
+

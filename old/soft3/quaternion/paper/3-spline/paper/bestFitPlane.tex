@@ -1,0 +1,34 @@
+\begin{defn2}
+The {\bf best-fitting plane} of a set of points $\{r_i\}_{i=1,\ldots,k}$
+is the plane that minimizes $\sum_{i=1}^k \mbox{dist}^2 (r_i,\mbox{plane})$.
+The dispersion (or {\bf variance}) of a set of scalars
+$\{x_i\}_{i=1,\ldots,k}$ is $\sum_{i=1}^k \frac{(x_i -
+\bar{x})^2}{k-1}$, where $\bar{x} = \sum_{i=1}^k x_i / k$ is the mean.
+This is a measure of the spread of the sample.
+The dispersion of a set of points in the direction $v$ is the dispersion
+of the orthogonal projection of the points onto $v$.
+The {\bf covariance matrix} of a set of points $\{r_i\}_{i=1,\ldots,k}$ 
+is $\sum_{i=1}^k \frac{(r_i - \bar{r})(r_i - \bar{r})^T}{k-1}$,
+where $\bar{r}$ is the sample mean of the points.
+\end{defn2}
+
+The normal of the best-fitting plane of the data points $\{p_i\}_{i=1,\ldots,k}$
+is the direction of minimum dispersion of $\{p_i\}$.
+This is the direction that the plane can best afford to ignore,
+and hence the normal direction.
+The covariance matrix is a generalization of dispersion to many dimensions.
+Not surprisingly, it can be used to compute properties of dispersion.
+In particular, the direction of minimum dispersion of 
+the point set $\{p_i\}$ is the minimum 
+eigenvector (say $v_{min}$) of the covariance matrix of $\{p_i\}$ \cite{ballard82}.
+Hence, the best-fitting plane is the plane through the sample mean
+with normal $v_{min}$.
+
+The rotation matrix that rotates $v_{min}$
+to $(1,0,0,0)$ is computed easily, using the fact that the rows
+of a rotation matrix are mapped to the coordinate axes under the
+rotation.
+Thus, $\frac{v_{min}}{\|v_{min}\|}$ is the first row of the desired rotation matrix,
+and the other rows are chosen orthogonal to $v_{min}$ using
+cross product.
+

@@ -1,0 +1,35 @@
+From jimbo@blaze.cs.jhu.edu Wed Sep  7 10:48 CDT 1994
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from blaze.cs.jhu.edu by cis.uab.edu (5.0/SMI-SVR4)
+	id AA09202; Wed, 7 Sep 1994 10:48:29 -0500
+Received: from mail-client (peregrine.cs.jhu.edu)
+           by blaze.cs.jhu.edu; Wed, 7 Sep 94 11:49:29 EDT
+Received: by mail-client (4.1) id AA15998; Wed, 7 Sep 94 11:49:28 EDT
+Message-Id: <9409071548.AA09202@cis.uab.edu>
+From: jimbo@blaze.cs.jhu.edu (James P. Williams)
+Sender: jimbo@blaze.cs.jhu.edu
+Date: Wed, 7 Sep 94 11:49:28 EDT
+To: jj@blaze.cs.jhu.edu
+Subject: status
+Content-Type: text
+Content-Length: 595
+Status: OR
+
+John,
+
+
+	I have been thinking about some sort of example that would
+	illustrate advantages of the quaternion sphere inverse mapping
+	and it seems to me that animation is not the way to go.  It
+	would not serve as a static illustration in a paper and would
+	probably not look as good as animations produced by people who
+	specialize in it.
+
+	It would probably be best to produce a swept surface of a sort
+	that would be difficult to produce with existing techniques.
+
+	Also, I wanted to find out what the submission guidelines are
+	for CAGD.  Would this be a good place to submit this work?
+
+Jim
+

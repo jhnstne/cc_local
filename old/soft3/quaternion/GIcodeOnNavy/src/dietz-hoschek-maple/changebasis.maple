@@ -1,0 +1,10 @@
+create_cob_matrix := proc(deg)
+	temp := matrix(deg+1,deg+1);
+	for i from 1 to deg+1 do
+		for j from 1 to deg+1 do
+			if (evalb(i<j)) then
+				temp[i,j] :=0
+			else
+				temp[i,j] := 
+			(-1)^(i-j)*numbcomb(deg-
+			

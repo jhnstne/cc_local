@@ -1,0 +1,64 @@
+read `genutils.maple`;
+read `bezutils.maple`;
+
+# Test programs for finding quintic pyth. hodograph
+# bezier curves
+
+# P0,P1,P2,P3 will be quadratic bezier curves
+
+P0 := vector([p00,p01,p02]);
+P1 := vector([p10,p11,p12]);
+
+# XT, YT, ZT will be quintic bezier curves
+
+XT := vector([x0,x1,x2,x3,x4,x5]);
+YT := vector([y0,y1,y2,y3,y4,y5]);
+
+# compute the first derivatives of the primary curves
+
+XTprime := bezdiff(XT,5);
+YTprime := bezdiff(YT,5);
+
+
+# impose the restrictions
+
+x1 := add(scalarmul(bezproduct(P0,2,P0,2),1),
+	  scalarmul(bezproduct(P1,2,P1,2),-1));
+
+
+x2 := scalarmul(bezproduct(P0,2,P1,2),2);
+
+
+eqX := vector(5);
+eqY := vector(5);
+eqall := vector(10);
+eset := {};
+
+for i from 1 to 5 do
+	eqX[i] := (x1[i] - XTprime[i]);
+	eqY[i] := (x2[i] - YTprime[i]);
+	eqall[i] := eqX[i];
+	eqall[i+5] := eqY[i];
+	eset := eset union eqall[i] union eqall[i+5];
+od;
+
+
+quint_tex := proc()
+writeto(`texout`);
+for i from 1 to 5 do
+	latex(eqX[i]);
+od;
+
+
+for i from 1 to 5 do
+	latex(eqY[i]);
+od;
+
+
+for i from 1 to 5 do
+	latex(eqZ[i]);
+od;
+
+writeto(terminal);
+
+end;

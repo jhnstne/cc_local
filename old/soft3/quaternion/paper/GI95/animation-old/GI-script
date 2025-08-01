@@ -1,0 +1,145 @@
+#! /bin/csh -f
+# File: animation/Script
+# Author: John K. Johnstone
+# Last Modified: 2 May 1995
+# Purpose: script for Graphics Interface '95 video
+
+cd ~/animation;
+cp obj.littlemapleleaf object.input;
+
+####  PLAIN EXAMPLE 
+
+cp pos.in-evenspeed pos.input
+cp quaternion.in1 quaternion.input
+
+echo Plain example: input
+echo 10 seconds: introduce problem
+animation
+set Pause = ($<)
+
+echo Plain example: explicit input
+echo Enough to output each frame using right mouse
+animation -D
+set Pause = ($<)
+
+echo Plain example: output
+echo 10 seconds
+animation -m -i
+set Pause = ($<)
+
+echo Plain example: animation
+echo Show it twice
+animation -a
+set Pause = ($<)
+
+#### GOOD EXAMPLE
+
+cp pos.in2 pos.input;
+cp quaternion.in2 quaternion.input;
+
+echo Good example: input
+echo 5 seconds
+animation
+set Pause = ($<)
+
+echo Good example: animation
+echo Show it twice
+animation -a
+set Pause = ($<)
+
+#### BEST EXAMPLE (USED IN GI FIGURES)
+
+cp pos.in-evenspeed pos.input;
+cp quaternion.in5 quaternion.input;
+
+echo Best example: input
+echo 5 seconds
+animation
+set Pause = ($<)
+
+echo Best example: animation
+echo Show it twice
+animation -a
+set Pause = ($<)
+
+#### COMPLICATED EXAMPLE (TO SHOW IT WORKS)
+
+cp pos.in3 pos.input
+cp quaternion.in3 quaternion.input
+
+echo Complicated example: input
+echo 5 seconds, show next one firing up to show efficiency
+animation
+set Pause = ($<)
+
+echo Complicated example: animation
+echo Show it twice
+animation -a
+set Pause = ($<)
+
+#### WORKINGS OF ALGORITHM
+
+cp pos.in-evenspeed pos.input
+cp quaternion.in5 quaternion.input
+
+echo Inner workings of algorithm.
+echo Input.
+echo Enough time to click right mouse four times
+animation -D
+set Pause = ($<)
+
+echo Inverse images.
+echo Click right mouse 4 times, then spin.
+animation -I -D
+set Pause = ($<)
+
+echo Free interpolation in space.
+echo 5 seconds, then spin
+animation -s -S
+set Pause = ($<)
+
+echo Map back to curve.
+echo 5 seconds, then spin
+animation -S -m
+set Pause = ($<)
+
+echo Final output.
+echo One time only. 
+animation -a
+set Pause = ($<)
+
+#### EXAMPLES OF ANOMALIES
+#### SPINNING ALL DURING LAST SEGMENT
+
+echo Antipodal choice: good
+echo One time only.
+cp pos.in-evenspeed pos.input
+cp quaternion.in1 quaternion.input
+animation -a
+set Pause = ($<)
+
+echo Antipodal choice: bad
+echo Just once.
+animation -a -p
+set Pause = ($<)
+
+###### GRAND FINALE
+
+echo Finale 1
+echo 2 times.
+cp pos.in-leaf pos.input
+cp quaternion.in-leaf quaternion.input
+animation-slow -A
+set Pause = ($<)
+animation -A
+set Pause = ($<)
+
+echo Finale 2
+echo 2 times
+cp obj.hockey object.input
+cp pos.in-hockey2 pos.input
+cp quaternion.in-hockey2 quaternion.input
+animation -A
+sfplay Gretzkyscores.aifc
+set Pause = ($<)
+

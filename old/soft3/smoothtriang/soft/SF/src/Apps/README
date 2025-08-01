@@ -1,0 +1,10 @@
+4Color		- 4 color a mesh
+FlipMesh	- Flip the orientation of the faces of a mesh
+KColor		- Gaussian, etc, material properaties
+Materials	- Simple material properties
+Normal		- Add normals to a mesh
+Orientmesh	- ?
+Smooth		- Replace each vertex with the average of its neighbors
+Stellate	- Stellate a mesh
+Tess		- Tessellate a Bezier patch into triangles
+

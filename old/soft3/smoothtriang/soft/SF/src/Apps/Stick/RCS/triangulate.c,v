@@ -1,0 +1,263 @@
+head     1.2;
+branch   ;
+access   ;
+symbols  ;
+locks    smann:1.2; strict;
+comment  @ * @;
+
+
+1.2
+date     91.02.22.10.42.30;  author smann;  state Exp;
+branches ;
+next     1.1;
+
+1.1
+date     91.02.22.08.29.41;  author smann;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+1.2
+log
+@Fixed a bug.
+@
+text
+@/*
+ * Copyright (c) 1990, Graphics and AI Laboratory, University of Washington
+ * Copying, use and development for non-commercial purposes permitted.
+ *                  All rights for commercial use reserved.
+ */
+
+/*
+ *----------------------------------------------------------------------
+ *  File:  triangulate.c
+ *  NOTE:
+ *	The code in this file is translated C++ code.
+ *----------------------------------------------------------------------
+ */
+
+#include <stdio.h>
+#include "all.h"
+#include "stick.h"
+
+
+
+/*
+ *----------------------------------------------------------------------
+ *  Function:  TriangulateSphere
+ *	Print out a triangular approximation (icosohedron) of a
+ *  sphere if it hasn't been seen before.
+ *----------------------------------------------------------------------
+ */
+void TriangulateSphere(s)
+Sphere s;
+{
+  Vector top,bottom,topRow[6],bottomRow[6];
+  Point tp[3];
+  Vector tv[3];
+  Triangle t;
+  int i;
+
+
+  top    = SVMult(s.r, VCreate(worldF, 0.0, 0.0, 1.0));
+  bottom = SVMult(s.r, VCreate(worldF, 0.0, 0.0,-1.0));
+
+  topRow[0] = SVMult(s.r, VCreate(worldF,   .866,     0., .5));
+  topRow[1] = SVMult(s.r, VCreate(worldF,  .2676,   .823, .5));
+  topRow[2] = SVMult(s.r, VCreate(worldF, -.7006,  .5090, .5));
+  topRow[3] = SVMult(s.r, VCreate(worldF, -.7006, -.5090, .5));
+  topRow[4] = SVMult(s.r, VCreate(worldF,  .2676,  -.823, .5));
+  topRow[5] = SVMult(s.r, VCreate(worldF,   .866,     0., .5));
+
+  for(i=0;i<6;i++)
+    bottomRow[i] = SVMult(-1.0, topRow[(i+3)%5]);
+
+  t.m = s.m;
+
+  for(i=0;i<5;i++){
+    t.p[0] = PVAdd( s.c, top );
+    t.n[0] = VDual( top );
+    t.p[1] = PVAdd( s.c, topRow[i] );
+    t.n[1] = VDual( topRow[i] );
+    t.p[2] = PVAdd( s.c, topRow[i+1] );
+    t.n[2] = VDual( topRow[i+1] );
+    PrintTriangle(t);
+
+    t.p[0] = PVAdd( s.c, bottom );
+    t.n[0] = VDual( bottom );
+    t.p[1] = PVAdd( s.c, bottomRow[i] );
+    t.n[1] = VDual( bottomRow[i] );
+    t.p[2] = PVAdd( s.c, bottomRow[i+1] );
+    t.n[2] = VDual( bottomRow[i+1] );
+    PrintTriangle(t);
+  }
+  for(i=0;i<5;i++){
+    t.p[0] = PVAdd( s.c, topRow[i] );
+    t.n[0] = VDual( topRow[i] );
+    t.p[1] = PVAdd( s.c, bottomRow[i] );
+    t.n[1] = VDual( bottomRow[i] );
+    t.p[2] = PVAdd( s.c, topRow[i+1] );
+    t.n[2] = VDual( topRow[i+1] );
+    PrintTriangle(t);
+
+    t.p[0] = PVAdd( s.c, bottomRow[i] );
+    t.n[0] = VDual( bottomRow[i] );
+    t.p[1] = PVAdd( s.c, topRow[i+1] );
+    t.n[1] = VDual( topRow[i+1] );
+    t.p[2] = PVAdd( s.c, bottomRow[i+1] );
+    t.n[2] = VDual( bottomRow[i+1] );
+    PrintTriangle(t);
+  }
+}
+
+
+Vector UnitPerpToVector(v)
+Vector v;
+{
+  /* Find vector perpendicular to v */
+  Vector b1, b2;	/* basis vectors */
+  Vector v1,v2;
+
+  b1 = VCreate( worldF, 1.0, 0.0, 0.0 );
+  b2 = VCreate( worldF, 0.0, 1.0, 0.0 );
+
+
+  /* take cross product of v with two basis vectors; 
+     make v1 be the longer of these two vectors */
+  v1 = VVCross(b1,v);
+  v2 = VVCross(b2,v);
+
+  if ( VMag(v1) < VMag(v2) ){
+    v = SVMult(1.0/VMag(v2), v2);
+  } else {
+    v = SVMult(1.0/VMag(v1), v1);
+  }
+  return VNormalize(v);
+}
+
+
+/*
+ *----------------------------------------------------------------------
+ *  Function:  TriangleNormal
+ *----------------------------------------------------------------------
+ */
+void TriangulateNormal(sq)
+Square sq;
+{
+  Point tp[3];
+  Vector tv[3];
+  Vector v1,v2;
+  Triangle t;
+
+  t.m = sq.m;
+
+  t.n[0] = sq.n;
+  t.n[1] = sq.n;
+  t.n[2] = sq.n;
+
+  v1 = SVMult(sq.r, UnitPerpToVector(NDual(sq.n)));
+  v2 = SVMult( 1.0/VMag(NDual(sq.n)), VVCross( NDual(sq.n), v1));
+
+  t.p[0] = sq.p;
+  t.p[1] = PVAdd( sq.p, v1);
+  t.p[2] = PVAdd( sq.p, v2);
+  PrintTriangle(t);
+
+
+  t.p[1] = PVAdd( sq.p, v2);
+  t.p[2] = PVAdd( sq.p, SVMult(-1.0, v1));
+  PrintTriangle(t);
+
+  t.p[1] = PVAdd( sq.p, SVMult(-1.0, v1));
+  t.p[2] = PVAdd( sq.p, SVMult(-1.0, v2));
+  PrintTriangle(t);
+
+  t.p[1] = PVAdd( sq.p, SVMult(-1.0, v2));
+  t.p[2] = PVAdd( sq.p, v1);
+  PrintTriangle(t);
+}
+
+
+int delta = 1;
+
+/*
+ *----------------------------------------------------------------------
+ *  Function:  TriangulateStick
+ *	Print out a triangular approximation for a stick if it hasn't
+ *  been seen before.
+ *----------------------------------------------------------------------
+ */
+void TriangulateStick(st)
+Stick st;
+{
+  Vector v;
+  Vector v1;
+  double dist;
+  Vector e1[9];
+  int i;
+  Triangle t;
+
+  t.m = st.m;
+
+  /* should check to see that dimension of space is 3 */
+
+  v = PPDiff(st.p1, st.p2);
+  dist = VMag(v);
+  v = SVMult(1.0/dist, v);
+
+  v1 = SVMult(st.r, UnitPerpToVector(v));
+
+
+  /* Make arrays of vectors to form vertices of triangles */
+
+  e1[0] = v1;
+  e1[2] = VVCross(v1,v);
+  e1[4] = SVMult(-1.0, e1[0]);
+  e1[6] = SVMult(-1.0, e1[2]);
+  e1[8] = e1[0];
+  for(i=0; i<4; i++){
+    e1[2*i+1] = SVMult( 0.5, VVAdd(e1[2*i], e1[2*(i+1)]) );
+  }
+
+  /* Print the triangles */
+  for(i=0; i<8; i += 1+delta){
+    t.p[0] = PVAdd( st.p1, e1[i+0] );
+    t.n[0] = VDual( e1[i+0] );
+    t.p[1] = PVAdd( st.p2, e1[i+0] );
+    t.n[1] = VDual( e1[i+0] );
+    t.p[2] = PVAdd( st.p1, e1[i+1+delta] );
+    t.n[2] = VDual( e1[i+1+delta] );
+    PrintTriangle(t);
+
+    t.p[0] = PVAdd( st.p2, e1[i+0] );
+    t.n[0] = VDual( e1[i+0] );
+    t.p[1] = PVAdd( st.p2, e1[i+1+delta] );
+    t.n[1] = VDual( e1[i+1+delta] );
+    t.p[2] = PVAdd( st.p1, e1[i+1+delta] );
+    t.n[2] = VDual( e1[i+1+delta] );
+    PrintTriangle(t);
+  }
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d41 1
+a41 1
+  topRow[0] = SVMult(s.r, VCreate(worldF,   .866,      0, .5));
+d46 1
+a46 1
+  topRow[5] = SVMult(s.r, VCreate(worldF,   .866,      0, .5));
+a69 1
+
+a86 1
+
+@

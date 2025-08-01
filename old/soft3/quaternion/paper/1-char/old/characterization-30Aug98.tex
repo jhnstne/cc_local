@@ -1,0 +1,1362 @@
+\documentstyle[11pt]{article}
+\newif\ifFull
+\Fullfalse
+\input{header}
+\SingleSpace
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{-.25in}	% technically should be 0pt for 1in
+\setlength{\headsep}{3em}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+\setlength{\columnsep}{5mm}		% width of gutter between columns
+
+\markright{Maps to the sphere: \today \hfill}
+\pagestyle{myheadings}
+
+% -----------------------------------------------------------------------------
+
+\title{A Characterization of Rational Maps of $\Re^n$ to \Sn{n-1}}
+%\title{A Characterization of Rational Maps to the Sphere}
+\author{J.K. Johnstone}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We develop a complete characterization of rational
+maps of $\Re^n$ to \Sn{n-1}, the unit sphere in $\Re^n$.
+These maps are useful in the design of rational curves on the sphere.
+The main result of the paper is that
+a map is a rational map of $\Re^n$ to \Sn{n-1}, $n \geq 2$, if and only if
+it is of the form:
+\[
+	(x_1,\ldots,x_n) \mapsto 
+	\pi (\frac{a_1^2 + \cdots + a_{n-1}^2 - a_n^2}{a_1^2 + \cdots + a_n^2},
+	 \frac{2a_1a_n}{a_1^2 + \cdots + a_n^2},
+	 \ldots,
+	 \frac{2a_{n-1}a_n}{a_1^2 + \cdots + a_n^2})
+\]
+where $a_1,\ldots,a_n \in \Re[x_1,\ldots,x_n]$
+and $\pi: \{1,\ldots,n\} \rightarrow \{1,\ldots,n\}$ is a permutation.
+Euler's Four Squares Theorem is central to this result.
+\end{abstract}
+
+\vspace{1in}
+
+\noindent Keywords: 
+Riemannian modeling, curves on surfaces, rational maps, 
+Euler's Four Squares Theorem, Pythagorean tuples.
+
+\clearpage
+
+\section{Introduction}
+
+The design of curves on surfaces is important in several problems,
+such as quaternion splines \cite{barr92,jj95},
+trim curves \cite{hoschek89}, and
+shortest path planning \cite{lozanoperez83,kim88}.
+% \footnote{Path planning 
+% 	of a multiple-degree-of-freedom object amongst obstacles in 3-space
+% 	can be modeled using configuration space (C-space) obstacles.
+% 	These C-space obstacles are surfaces in high
+% 	dimensions---often 6 dimensions or more.
+% 	Shortest paths involve curves on the C-space obstacles.}
+Curve design on surfaces involves modeling in Riemannian space,
+as opposed to the conventional modeling of curves in Euclidean space.
+Surfaces are Riemannian spaces and Riemannian geometry,
+the geometry in a Riemannian space, is significantly different from
+Euclidean geometry \cite{kreyszig59}.
+Consequently, Riemannian modeling poses several interesting challenges.
+% modeling on a surface rather than in free space
+
+A common solution to modeling on a surface is to model in the parameter
+space of the surface.
+For example, this is the typical solution for the design of trim curves.
+This reduces a Riemannian problem to an Euclidean problem.
+Consider the surface $A \subset \Re^n$ with parameterization
+$\rho:\Re^{n-1} \rightarrow A$.
+A curve in parameter space is mapped back to a curve on the 
+surface $A$ using the surface parameterization $\rho$.
+We shall call this method the {\bf parameter-space} approach to Riemannian
+modeling.
+
+Another way of reducing curve design on the surface $A$
+to a simpler Euclidean problem is to model in the native Euclidean space
+of $A$, $\Re^n$, through the design of a map $f: \Re^n \rightarrow A$.
+If $C$ is a curve in $\Re^{n}$, then $f(C)$ is a curve on $A$.
+$f(C)$ can be made to interpolate a set of points $p_i$ 
+(or higher derivatives)
+on $A$ by designing $C$ to interpolate the points $f^{-1}(p_i)$.
+We shall call this method the {\bf native-space} approach to Riemannian 
+modeling.
+
+Rational curves are the preferred curves in current modeling systems,
+due to their simplicity and elegance.
+Consequently, we often want to design {\bf rational} maps 
+$f: \Re^n \rightarrow A$ in the native-space approach to Riemannian modeling,
+so that rational curves can be designed on the surface simply
+by designing rational curves in the native Euclidean space.
+Notice that $f^{-1}$ need {\bf not} be rational.
+
+The native-space approach allows some added freedom in the design of the curve.
+In general, the inverse image $f^{-1}(p)$ of a point on $A$ is a curve,
+while $\rho^{-1}(p)$ is typically a point.
+Consequently, the design of a curve on $A$ interpolating the points $\{p_i\}$
+with the native-space approach
+only requires the design of a curve interpolating the curves
+$\{f^{-1}(p_i)\}$, as opposed to a curve interpolating
+the points $\{\rho^{-1}(p_i)$.
+The added freedom in the native-space approach can allow the design
+of more optimal curves.
+This is illustrated in \cite{dietz93}. (Where is the optimality?)
+A second advantage of the native-space approach is more freedom
+in the choice of map back to the surface.
+Not being limited to the surface parameterization,
+the native-space approach can use any rational map of $\Re^n$ to the surface.
+This freedom can lead to superior curves on the surface, as illustrated
+in \cite{jj+jimbo98}.
+
+Thus, the abstract problem of the design of rational maps 
+of $\Re^{n}$ to a surface $A$ is of considerable interest for the 
+design of rational curves on $A$ and the general problem of
+Riemannian modeling.
+
+Curve design on \Sn{n-1}, the unit sphere in $n$-space,
+is an elegant instance of the design of curves on a surface.
+It offers an excellent example of the problems and possible approaches
+to Riemannian modeling on the simplest and purest surface, 
+the sphere.\footnote{The plane is simpler than the sphere,
+	but design on the plane is still Euclidean modeling, since
+	the plane is equivalent to 2-space.}
+Curve design on \Sn{n-1}\ also has special interest because
+of the important computer animation problem of 
+quaternion spline design for orientation control \cite{barr92,jj95,kim95},
+which is nothing but the design of curves on \Sn{3}.
+Consequently, the design of rational maps of $\Re^n$ to \Sn{n-1}\ 
+is of interest so that the native-space approach can be applied to this
+orientation control problem.
+
+In this paper, we develop a complete characterization of rational
+maps of $\Re^{n}$ to \Sn{n-1}.
+The paper is structured as follows.
+Basic definitions are introduced in Section~\ref{sec:defn}.
+The relationship between rational maps of $\Re^{n}$ to \Sn{n-1}\
+and Pythagorean tuples of polynomials is established in Section~\ref{sec:setup}.
+Sections~\ref{sec:n2}-\ref{sec:nn} characterize rational maps 
+of $\Re^{n}$ to \Sn{n-1}\ for $n=2,3,4$ and general $n$, respectively.
+The cases $n=2,3$ are well understood, but the case $n=4$ 
+in Section~\ref{sec:n4} requires new observations 
+that are generalized to all $n \geq 2$ in Section~\ref{sec:nn}.
+Notice that the case $n=4$, rational maps from $\Re^4$ to \Sn{3},
+is also the crucial case for quaternion splines.
+Section~\ref{sec:commentary} reviews the results
+and the paper ends with some conclusions.
+The appendix contains a full proof of Kubota's characterization of Pythagorean
+triples, an important result for the case $n=2$.
+
+\section{Definitions}
+\label{sec:defn}
+
+\begin{defn2}
+\Sn{n-1}\ is the unit sphere in $n$-space $x_1^2 + \ldots + x_{n}^2 - 1 = 0$.
+The superscript refers to the dimension of the manifold.
+\end{defn2}
+
+\noindent Thus, \Sn{1}\ is a circle and \Sn{2}\ is the canonical sphere in 3-space.
+
+\begin{defn2}
+A {\bf rational polynomial} is a quotient of polynomials.
+A map 
+$(x_1,\ldots,x_n) \mapsto (f_1 (x_1,\ldots,x_n),\ldots,f_m (x_1,\ldots,x_n))$
+is {\bf rational} if 
+its components $f_i$ are all rational polynomials in $x_1,\ldots,x_n$.
+\end{defn2}
+
+\begin{defn2}
+$\Re[x_1,\ldots,x_n]$ is the ring of polynomials in the $n$ variables
+$x_1,\ldots,x_n$ with real coefficients.
+\end{defn2}
+
+\begin{defn2}
+A {\bf commutative ring} is a ring in which multiplication is commutative.
+\end{defn2}
+%
+Examples of commutative rings are the integers, the rationals, the reals,
+and polynomials in $n$ variables over the integers, rationals, or reals.
+Commutative rings subsume all of the domains of interest in this paper.
+
+\begin{defn2}
+Let $K$ be a commutative ring.
+An $(n+1)$-tuple $(a_1,\ldots,a_{n+1}) \in K^{n+1}$
+is a {\bf Pythagorean $(n+1)$-tuple over $K$} 
+if $a_1^2 + \ldots + a_n^2 = a_{n+1}^2$.
+\end{defn2}
+%
+This terminology is derived from Pythagorus' theorem on the lengths
+of the sides of a right triangle, which of course generate
+a Pythagorean triple.
+We record the following obvious result for future reference.
+
+\begin{lemma}
+\label{lem:perm}
+If $(a_1,\ldots,a_{n+1})$ is a Pythagorean $(n+1)$-tuple over $K$,
+$(a_{\pi(1)},\ldots,a_{\pi(n)},a_{n+1})$ is also a Pythagorean 
+$(n+1)$-tuple over $K$ for any permutation 
+$\pi : \{1,\ldots,n\} \rightarrow \{1,\ldots,n\}$.
+\end{lemma}
+
+
+\section{Rational maps from $\Re^{n}$ to \Sn{n-1}}
+\label{sec:setup}
+
+% Rational maps to the sphere are attractive 
+% because of their tractability.
+% Maps to \Sn{n-1}\ (the unit sphere in $n$-space)
+% whose domain is all of $n$-space are also attractive,
+% because any point can be mapped to the sphere
+% and the dimension of the space is preserved in the map.
+% In this section, we study rational maps from $\Re^{n}$ to \Sn{n-1}.
+
+A rational map from $\Re^n$ to \Sn{n-1}\ can be expressed as:
+\[
+	(x_1,\ldots,x_n) \mapsto
+	(\frac{f_1(x_1,\ldots,x_n)}{f_{n+1}(x_1,\ldots,x_n)}, \ldots,
+	 \frac{f_n(x_1,\ldots,x_n)}{f_{n+1}(x_1,\ldots,x_n)})
+\]
+where $f_1,\ldots,f_{n+1}$ are polynomials.
+Since the image lies on \Sn{n-1},
+\[
+	f_1^2 + \cdots + f_n^2 = f_{n+1}^2
+\]
+Thus, $(f_1,\ldots,f_{n+1})$ is a Pythagorean $(n+1)$-tuple of polynomials in
+$\Re[x_1,\ldots,x_n]$.
+This reduces the study of rational maps from $\Re^{n}$ to \Sn{n-1}\ 
+to the study of Pythagorean $(n+1)$-tuples of polynomials in 
+$\Re[x_1,\ldots,x_n]$.
+
+\begin{lemma}
+\label{lem:iffpyth}
+A rational map 
+$(x_1,\ldots,x_n) \mapsto (\frac{f_1}{f_{n+1}},\ldots,\frac{f_n}{f_{n+1}})$,
+where $f_1,\ldots,f_{n+1} \in \Re[x_1,\ldots,x_n]$, is a map from $\Re^n$
+to \Sn{n-1}\ if and only if $(f_1,\ldots,f_{n+1})$ is a Pythagorean
+$(n+1)$-tuple of polynomials in $\Re[x_1,\ldots,x_n]$.
+\end{lemma}
+
+\section{$\Re^{2}$ to \Sn{1}}
+\label{sec:n2}
+
+Consider rational maps from $\Re^2$ to \Sn{1},
+and thus Pythagorean triples of polynomials in $\Re[x_1,x_2]$.
+It is easily seen that 
+\[ (a_1^2 - a_2^2,\ 2a_1a_2,\ a_1^2 + a_2^2)
+\]
+is a Pythagorean triple
+of integers for any choice of integers $a_1$ and $a_2$.
+This condition is also necessary, up to a constant factor.
+% p. 89, Ebbinghaus, Numbers
+%
+\begin{lemma}[Classical]
+\label{lem:classical}
+A triple of integers is a Pythagorean triple if and only if
+it is of the form $\alpha(a_1^2 - a_2^2, 2a_1a_2, a_1^2 + a_2^2)$ 
+for some integers $a_1,a_2,\alpha$.\footnote{Whenever
+	we give a normal form for a Pythagorean $(n+1)$-tuple,
+	it is understood that the first $n$ elements are free to undergo
+	a permutation.}
+\end{lemma}
+%
+\cite{kubota72} generalized this result
+to Pythagorean triples of polynomials in $\Re[x_1,x_2]$.
+% where $K$ is a field of characteristic $p \neq 2$.
+%
+\begin{lemma}[Kubota 1972]
+\label{lem:kubota}
+A triple of polynomials in $\Re[x_1,x_2]$ is a Pythagorean triple 
+if and only if it is of the form 
+\begin{equation}
+\label{eq:triple}
+	\alpha(a_1^2 - a_2^2, 2a_1a_2, a_1^2 + a_2^2)
+\end{equation}
+for some $a_1,a_2,\alpha \in \Re[x_1,x_2]$.
+\end{lemma}
+\prf
+See the appendix.
+\QED
+\Comment{
+\prf
+(If):  A triple of the form (\ref{eq:triple}) is clearly a Pythagorean triple:
+\[
+	(a_1^2 - a_2^2)^2 + (2a_1a_2)^2 = 
+	a_1^4 + a_2^4 + 2a_1^2a_2^2 = (a_1^2 + a_2^2)^2
+\]
+
+(Only if): We present Kubota's proof for completeness and reference.
+His proof holds for a more general class: Pythagorean triples
+over $D$, where $D$ is a unique factorization domain 
+not of characteristic 2, such that 2 is either prime 
+or invertible in $D$.
+$\Re[x_1,x_2]$ is such a unique factorization domain.
+${\cal Z}$ is also such a domain, so this proof also functions
+as a proof of Lemma~\ref{lem:classical}.
+
+Let $(p_1,p_2,p_3)$ be a Pythagorean triple over $D$.
+If $p_1=p_3$, let $(a_1,a_2,\alpha) = (1,0,p_1)$.
+Thus, we can assume $p_1 \neq p_3$.
+Factor $p_3 - p_1$ into a square component and a squarefree component:
+$p_3 - p_1 = gh^2$, where $g,h \in D$ and $g$ and $h$ are both
+squarefree.
+
+If $2 \ | \ g$, let $(a_1,a_2,\alpha) = (\frac{hp_2}{p_3 - p_1}, h, \frac{g}{2}$).
+Then $a_1,a_2,\alpha$ generate the Pythagorean triple $(p_1,p_2,p_3)$
+as in (\ref{eq:triple}).
+In particular,
+\[
+\alpha (a_1^2 - a_2^2)
+= \frac{g}{2} 
+  (\frac{h^2p_2^2 - h^2(p_3 - p_1)^2}{(p_3-p_1)^2})
+\]
+and applying $p_1^2 + p_2^2 = p_3^2$ and $p_3 - p_1 = gh^2$,
+\[
+= \frac{1}{2} (\frac{-2p_1^2 + 2p_1p_3}{p_3 - p_1}) = p_1.
+\]
+And
+\[
+\alpha (2a_1 a_2) = gh^2 \frac{p_2}{p_3 - p_1} = p_2
+\]
+Finally, 
+\[
+\alpha(a_1^2 + a_2^2)
+= \frac{g}{2} 
+  (\frac{h^2p_2^2 + h^2(p_3 - p_1)^2}{(p_3-p_1)^2})
+= \frac{2p_3^2 - 2p_1p_3}{2(p_3-p_1)} = p_3
+\]
+Thus, $\alpha (a_1^2 - a_2^2, 2a_1a_2, a_1^2 + a_2^2) = (p_1,p_2,p_3)$.
+Since $ga_1^2 = 2 \alpha a_1^2 = p_1 + p_3 \in D$, 
+$a_1 \in D$ by Lemma~\ref{lem:applem1} of the appendix.
+Clearly $a_2,\alpha \in D$.
+
+If $2 \not | \ g$, let $(a_1,a_2,\alpha) = 
+((\frac{hp_2}{p_3 - p_1} + h)/2, \ 
+ (\frac{hp_2}{p_3 - p_1} - h)/2, \ g)$.
+Then 
+\[
+\alpha (a_1^2 - a_2^2) = 2g\frac{h^2p_2}{p_3-p_1} = p_2
+\]
+\[
+\alpha (2a_1 a_2) = \frac{g}{2} (\frac{h^2p_2^2}{(p_3-p_1)^2} - h^2) = p_1
+\]
+\[
+\alpha(a_1^2 + a_2^2)
+= \frac{gh^2}{4} \frac{2p_2^2 + 2(p_3 - p_1)^2}{(p_3-p_1)^2} = p_3
+\]
+Thus, $\alpha (a_1^2 - a_2^2, 2a_1a_2, a_1^2 + a_2^2) = (p_2,p_1,p_3)$.
+Since $2 \alpha a_1^2 = p_2 + p_3 \in D$ and $2 \alpha$ is squarefree
+($2 \not | \ g$), $a_1 \in D$ by Lemma~\ref{lem:applem1}.
+Similarly, since $2 \alpha a_2^2 = p_3 - p_2 \in D$,
+$a_2 \in D$ by Lemma~\ref{lem:applem1}.
+Clearly $\alpha \in D$.
+\QED
+}
+
+\noindent This yields 
+a full characterization of rational maps from $\Re^2$ to \Sn{1}.
+%
+\begin{theorem}
+\label{thm:n2}
+A map is a rational map of $\Re^2$ to \Sn{1}\ if and only if 
+it is of the form:
+\begin{equation}
+\label{eq:rationaltoS1}
+	(x_{\pi(1)},x_{\pi(2)}) \mapsto (\frac{a_1^2 - a_2^2}{a_1^2 + a_2^2}, 
+			   \frac{2a_1 a_2}{a_1^2 + a_2^2})
+\end{equation}
+where $a_1,a_2 \in \Re[x_1,x_2]$ and $\pi : \{1,2\} \rightarrow \{1,2\}$
+is a permutation.
+\end{theorem}
+\prf
+By Lemmas~\ref{lem:perm}, \ref{lem:iffpyth} and \ref{lem:kubota}.
+\QED
+% (Only if): Let $(x_1,x_2) \mapsto (\frac{f_1}{f_3}, \frac{f_2}{f_3})$,
+% $f_1,f_2,f_3 \in \Re[x_1,x_2]$, be a rational map of $\Re^2$ to \Sn{1}.
+% Then $(f_1,f_2,f_3)$ is a Pythagorean triple (Lemma~\ref{lem:iffpyth}).
+% By Lemmas~\ref{lem:kubota} and \ref{lem:perm}, 
+% $(f_{\pi(1)}, f_{\pi(2)}, f_3) = \alpha(a_1^2 - a_2^2, 2a_1a_2, a_1^2 + a_2^2)$ 
+% for some $a_1,a_2,\alpha \in \Re[x_1,x_2]$ and permutation 
+% $\pi : \{1,2\} \rightarrow \{1,2\}$.
+% We conclude that the rational map is of the form (\ref{eq:rationaltoS1}).
+
+% (If): Consider a map of the form (\ref{eq:rationaltoS1}), call it $M$.
+% Let $f_1 = a_1^2 - a_2^2$, $f_2 = 2a_1 a_2$, $f_3 = a_1^2 + a_2^2$.
+% By Lemma~\ref{lem:kubota}, $(f_1,f_2,f_3)$ is a Pythagorean triple
+% over $\Re[x_1,x_2]$.
+% By Lemma~\ref{lem:perm}, $(f_{\pi(1)}, f_{\pi(2)}, f_3)$ is also a Pythagorean
+% triple.
+% By Lemma~\ref{lem:iffpyth}, the map 
+% $(x_1,x_2) \mapsto (\frac{f_{\pi(1)}}{f_3}, \frac{f_{\pi(2)}}{f_3})$
+% is a rational map of $\Re^2$ to \Sn{1}.
+% This map is equivalent to 
+% $(x_{\pi(1)},x_{\pi(2)}) \mapsto (\frac{f_1}{f_3}, \frac{f_2}{f_3})$,
+% which is our given map $M$.
+% Thus, $M$ is a rational map of $\Re^2$ to \Sn{1}.
+% \QED
+
+\begin{example}
+With $(a_1,a_2) = (1,x_2)$ and the identity permutation,
+we have the familiar parameterization of the circle
+$(x_1,x_2) \mapsto (\frac{1 - x_2^2}{1 + x_2^2}, 
+				 \frac{2x_2}{1 + x_2^2})$.
+\end{example}
+
+\begin{example}
+With $(a_1,a_2) = (x_1,x_2)$ and the identity permutation,
+$(x_1,x_2) \mapsto (\frac{x_1^2 - x_2^2}{x_1^2 + x_2^2}, 
+				 \frac{2x_1 x_2}{x_1^2 + x_2^2})$
+is a rational map $\Re^2 \rightarrow \Sn{1}$.
+On \Sn{1}, $x_1^2 + x_2^2 = 1$, so the restriction of this map
+to \Sn{1}\ is $(x_1,x_2) \mapsto (x_1^2 - x_2^2, 2x_1x_2)$.
+This map from \Sn{1}\ to \Sn{1}\ is
+the simplest nontrivial quadratic spherical map \cite{ono94}. % [pp. 169,173]
+\end{example}
+
+\begin{example}
+\cite{farouki90} uses Kubota's result to define Pythagorean hodograph curves, 
+which have attractive arc length and offset properties.
+The hodographs of these curves are components of a Pythagorean triple
+of polynomials.
+% which among other things have polynomial arc length (in the curve parameter).
+\end{example}
+
+\vspace{.5in}
+
+\section{$\Re^{3}$ to \Sn{2}}
+\label{sec:n3}
+
+Consider rational maps from $\Re^3$ to \Sn{2},
+and thus Pythagorean quadruples of polynomials in \linebreak $\Re[x_1,x_2,x_3]$.
+Euler knew that 
+\[ (a_1^2+a_2^2-a_3^2-a_4^2,\ 2a_1a_3+2a_2a_4,\ 2a_1a_4-2a_2a_3,
+    \ a_1^2+a_2^2+a_3^2+a_4^2)
+\]
+is a Pythagorean quadruple for any choice of integers $a_1,a_2,a_3,a_4$
+(see Lemma~\ref{lem:corEuler4square} below).
+\linebreak
+\cite{catalan85} observed that this is also a necessary condition.
+%
+\begin{lemma}[Catalan 1885]
+\label{lem:catalan}
+A quadruple of integers is a Pythagorean quadruple
+if and only if it is of the form
+$\alpha (a_1^2+a_2^2-a_3^2-a_4^2,\ 2a_1a_3+2a_2a_4,\ 2a_1a_4-2a_2a_3,
+    \ a_1^2+a_2^2+a_3^2+a_4^2)$
+for some integers $a_1,a_2,a_3,a_4,\alpha$.
+\end{lemma}
+\cite{dietz93} generalized this result to Pythagorean quadruples of
+polynomials in $\Re[x_1]$, $\Re[x_1,x_2]$ or
+$\Re[x_1,x_2,x_3]/<x_1+x_2+x_3-1>$.
+We actually need a generalization to $\Re[x_1,x_2,x_3]$,
+which would yield a full characterization of rational maps from 
+$\Re^3$ to \Sn{2} (Theorem~\ref{thm:n3}).
+We do not present a proof of this result, since we will give a more
+powerful version of the following theorem (see Theorem~\ref{thm:nn} 
+and the commentary after it).
+
+\Comment{
+\begin{lemma}
+\label{lem:dietz}
+A quadruple of polynomials in $\Re[x_1,x_2,x_3]$
+is a Pythagorean quadruple if and only if it is of the form
+$\alpha (a_1^2+a_2^2-a_3^2-a_4^2,\ 2a_1a_3+2a_2a_4,\ 2a_1a_4-2a_2a_3,
+    \ a_1^2+a_2^2+a_3^2+a_4^2)$
+for some polynomials $a_1,a_2,a_3,a_4,\alpha$ in $\Re[x_1,x_2,x_3]$.
+\end{lemma}
+}
+
+\begin{theorem}
+\label{thm:n3}
+A map is a rational map of $\Re^3$ to \Sn{2}\ if and only if
+it is of the form:
+\[
+(x_{\pi(1)},x_{\pi(2)},x_{\pi(3)}) \mapsto (\frac{a_1^2 + a_2^2 - a_3^2 - a_4^2}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+		       \frac{2a_1a_3 + 2a_2a_4}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+		       \frac{2a_1a_4 - 2a_2a_3}{a_1^2 + a_2^2 + a_3^2 + a_4^2})
+\]
+where $a_1,a_2,a_3,a_4 \in \Re[x_1,x_2,x_3]$
+and $\pi : \{1,2,3\} \rightarrow \{1,2,3\}$ is a permutation.
+\end{theorem}
+%
+\begin{example}
+With $(a_1,a_2,a_3,a_4) = (x_1,x_2,x_3,1)$
+and the permutation $(1,2,3) \mapsto (3,2,1)$,
+\[
+(x_1,x_2,x_3) \mapsto 
+(\frac{x_1^2 + x_2^2 - x_3^2 - 1}{x_1^2 + x_2^2 + x_3^2 + 1},
+ \frac{2x_1x_3 + 2x_2}{x_1^2 + x_2^2 + x_3^2 + 1},
+ \frac{2x_1 - 2x_2x_3}{x_1^2 + x_2^2 + x_3^2 + 1})
+\]
+is a rational map $\Re^3 \rightarrow \Sn{2}$.
+This map is used in \cite{dietz93} 
+for the design of curves on \Sn{2}.
+\end{example}
+%
+\begin{example}
+\label{eg:foreshadow}
+With $(a_1,a_2,a_3,a_4)=(x_2,x_1,0,x_3)$ and the identity permutation,
+\[
+(x_1,x_2,x_3) \mapsto 
+(\frac{x_1^2 + x_2^2 - x_3^2}{x_1^2 + x_2^2 + x_3^2},
+ \frac{2x_1x_3}{x_1^2 + x_2^2 + x_3^2},
+ \frac{2x_2x_3}{x_1^2 + x_2^2 + x_3^2})
+\]
+is a rational map $\Re^3 \rightarrow \Sn{2}$.
+\end{example}
+
+\vspace{.5in}
+
+\section{$\Re^{4}$ to \Sn{3}}
+\label{sec:n4}
+
+Consider rational maps from $\Re^4$ to \Sn{3}, and thus
+Pythagorean quintuples of polynomials in \linebreak $\Re[x_1,x_2,x_3,x_4]$.
+$(a_1,a_2,a_3,a_4,a_5)$ is a Pythagorean quintuple if
+$a_1^2 + a_2^2 + a_3^2 + a_4^2 = a_5^2$.
+Pythagorean quintuples are not as well understood as Pythagorean triples
+and quadruples, and our study will lead to some new characterizations
+(Theorems~\ref{thm:necessary4} and \ref{thm:map4}).
+We are not aware of any specific study of Pythagorean quintuples.
+However, in the number theory literature, there is an extensive study of the
+sum of four squares, which is related to Pythagorean quintuples.
+This study was driven by the search for a proof that
+every positive integer is the sum of the squares of four integers.
+This famous result was apparently known by Diophantus in the third century,
+since he assumes it implicitly in his writings \cite{dickson52}. % p. 275
+Fermat (in characteristic fashion!) claimed that he had a proof.\footnote{"I can
+	not give the proof here, which depends upon numerous and abstruse
+	mysteries of numbers; for I intend to devote an entire book
+	to this subject" \cite[p. 6]{dickson52}.}
+However, the first published proof was by Lagrange in 1770 \cite{herstein75}, % p. 375
+over a century later,
+during which time many mathematicians worked on the problem.
+One of these was Euler, who established the following important result in 1748
+\cite{herstein75}.   % p. 209 of Ebbing, p. 373 of Herstein
+	% p. 210, Ebbinghaus for any commutative ring and Gauss' proof
+	% another bulky version in \cite[p. 277]{dickson52}.
+
+\begin{lemma}[Euler's Four Squares Theorem]
+\[
+\begin{array}{ll}
+& (a_1^2 + a_2^2 + a_3^2 + a_4^2) 
+(\hat{a}^2_1 + \hat{a}^2_2 + \hat{a}^2_3 + \hat{a}^2_4) = \\
+& (a_1 \hat{a}_1 - a_2\hat{a}_2 - a_3\hat{a}_3 - a_4\hat{a}_4)^2 +
+   (a_1\hat{a}_2 + a_2\hat{a}_1 + a_3\hat{a}_4 - a_4\hat{a}_3)^2 + \\
+& (a_1\hat{a}_3 - a_2\hat{a}_4 + a_3\hat{a}_1 + a_4\hat{a}_2)^2 +
+   (a_1\hat{a}_4 + a_2\hat{a}_3 - a_3\hat{a}_2 + a_4\hat{a}_1)^2
+\end{array}
+\]
+where $a_1,a_2,a_3,a_4,\hat{a}_1,\hat{a}_2,\hat{a}_3,\hat{a}_4$ are elements of a
+commutative ring.
+% \footnote{The original statement was for integers, but it easily generalizes.}
+% see p. 210 of Ebbinghaus
+\end{lemma}
+
+This result shows that the product of a sum of four squares and a sum of four
+squares is another sum of four squares,
+which reduces the problem of showing that every integer is the sum
+of four squares to the simpler problem
+of showing that every prime is the sum of four squares,
+since every integer can be expressed as the product of primes.
+For our purposes, the most interesting aspect of 
+the Four Squares Theorem is its specialization to 
+two simpler formulae, which are recipes for
+generating Pythagorean quadruples and quintuples.
+
+\begin{lemma}[Euler]
+\label{lem:corEuler4square}
+\ \ \\
+\begin{equation}
+\label{eq:euler1}
+(a_1^2 + a_2^2 + a_3^2 + a_4^2)^2 = 
+(a_1^2 + a_2^2 - a_3^2 - a_4^2)^2 + (2a_1a_3+2a_2a_4)^2 + (2a_1a_4-2a_2a_3)^2
+\end{equation}
+%
+\begin{equation}
+\label{eq:aida}
+(a_1^2 + a_2^2 + a_3^2 + a_4^2)^2 = 
+(a_1^2 + a_2^2 + a_3^2 - a_4^2)^2 + (2a_1a_4)^2 + (2a_2a_4)^2 + (2a_3a_4)^2
+\end{equation}
+where $a_1,a_2,a_3,a_4$ are elements of any commutative ring.
+\end{lemma}
+\prf
+In the Four Squares Theorem, let 
+$(a_1,a_2,a_3,a_4) = (\hat{a}_1,-\hat{a}_2,\hat{a}_3,\hat{a}_4)$
+for (\ref{eq:euler1}) and \\
+$(\hat{a}_1,\hat{a}_2,\hat{a}_3,\hat{a}_4) = (a_1,-a_2,-a_3,a_4)$ 
+for (\ref{eq:aida}).
+Other special cases can be found by assigning different signs.
+\QED
+
+We have already seen the use of the first formula as a necessary and
+sufficient condition for Pythagorean quadruples (Lemma~\ref{lem:catalan}).
+The second formula provides a sufficient condition for Pythagorean quintuples.
+
+\begin{lemma}
+\label{lem:suff4}
+Let $D$ be the integers or the polynomials over $\Re[x_1,x_2,x_3,x_4]$.
+\begin{equation}
+\label{eq:suff4}
+	(a_1^2 + a_2^2 + a_3^2 - a_4^2,\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,\ 
+	 a_1^2 + a_2^2 + a_3^2 + a_4^2)
+\end{equation}
+is a Pythagorean quintuple for any $a_1,a_2,a_3,a_4 \in D$.
+\end{lemma}
+
+We want to show that the form (\ref{eq:suff4}) is also a necessary condition,
+up to a constant factor.
+
+\begin{rmk}
+It is tempting to attempt an extension of Kubota's proof technique 
+for Pythagorean triples to prove a stronger version of Lemma~\ref{lem:suff4}:
+namely, that a quintuple over $D$ is a Pythagorean quintuple over $D$ if and
+only if it is of the form  
+\begin{equation}
+\label{eq:alphasuff4}
+	\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,\ 
+	 a_1^2 + a_2^2 + a_3^2 + a_4^2)
+\end{equation}
+for some $a_1,a_2,a_3,a_4,\alpha \in D$.
+However, this extension breaks down.
+Consider the proof of Kubota's result in the appendix.
+Given a Pythagorean quintuple $(p_1,p_2,p_3,p_4,p_5)$ over $D$,
+let $p_5 - p_1 = gh^2$ where $g$ and $h$ are squarefree and assume
+$2 \ | \ g$ as in the first case of the proof.
+We can generate the Pythagorean quintuple 
+as in (\ref{eq:alphasuff4}) using $(a_1,a_2,a_3,a_4,\alpha) = 
+(\frac{hp_2}{p_5 - p_1}, \frac{hp_3}{p_5 - p_1}, \frac{hp_4}{p_5 - p_1}, 
+h, \frac{g}{2}$),
+a direct generalization of the $a_i$ used by Kubota.
+However, we cannot show that $a_1,a_2,a_3 \in D$:
+the trick of using Lemma~\ref{lem:applem1} does not work, 
+since $p_1 + p_5 = 2\alpha(a_1^2 + a_2^2 + a_3^2)$,
+which is not in the form $ab^2$.
+Without $a_i \in D$, (\ref{eq:alphasuff4}) is a useless normal form
+since it would also generate Pythagorean quintuples not in $D$.
+\end{rmk}
+\Comment{
+KUBOTA'S PROOF TECHNIQUE BREAKS DOWN:
+CANNOT SHOW THAT A_I \in D.
+\begin{theorem}
+Let $D$ be the integers or the polynomials over $\Re[x_1,x_2,x_3,x_4]$.
+A quintuple over $D$ is a Pythagorean quintuple over $D$ if and only if
+it is of the form:
+\begin{equation}
+\label{eq:pythorig}
+	\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+		\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+		\ a_1^2 + a_2^2 + a_3^2 + a_4^2)
+\end{equation}
+for some $a_1,a_2,a_3,a_4,\alpha \in D$.
+\end{theorem}
+\prf
+(If): Lemma~\ref{lem:corEuler4square}.
+
+(Only if): This proof holds for a more general class: Pythagorean quintuples
+over $D$, where $D$ is a unique factorization domain 
+not of characteristic 2, such that 2 is either prime 
+or invertible in $D$.
+$\Re[x_1,x_2,x_3,x_4]$ is such a unique factorization domain,
+as is ${\cal Z}$.
+
+Let $(p_1,p_2,p_3,p_4,p_5)$ be a Pythagorean quintuple over $D$.
+If $p_1=p_5$, let $(a_1,a_2,a_3,a_4,\alpha) = (1,0,0,0,p_1)$.
+Thus, we can assume $p_1 \neq p_5$.
+Factor $p_5 - p_1$ into a square component and a squarefree component:
+$p_5 - p_1 = gh^2$, where $g,h \in D$ and $g$ and $h$ are both
+squarefree.
+
+If $2 \ | \ g$, let $(a_1,a_2,a_3,a_4,\alpha) = 
+(\frac{hp_2}{p_5 - p_1}, \frac{hp_3}{p_5 - p_1}, \frac{hp_4}{p_5 - p_1}, 
+h, \frac{g}{2}$).
+Then $a_1,a_2,a_3,a_4,\alpha$ generate the Pythagorean quintuple 
+$(p_1,\ldots,p_5)$ as in (\ref{eq:pythorig}).
+In particular,
+\[
+\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2)
+= \frac{g}{2} 
+  (\frac{h^2p_2^2 + h^2p_3^2 + h^2p_4^2 - h^2(p_5 - p_1)^2}{(p_5-p_1)^2})
+\]
+and applying $p_1^2 + p_2^2 + p_3^2 + p_4^2 = p_5^2$ and $p_5 - p_1 = gh^2$,
+\[
+= \frac{1}{2} (\frac{-2p_1^2 + 2p_1p_5}{p_5 - p_1}) = p_1.
+\]
+And
+\[
+\alpha (2a_i a_4) = gh^2 \frac{p_{i+1}}{p_5 - p_1} = p_{i+1}
+\]
+for $i=1,2,3$.
+Finally, 
+\[
+\alpha(a_1^2 + a_2^2 + a_3^2 + a_4^2)
+= \frac{g}{2} 
+  (\frac{h^2p_2^2 + h^2p_3^2 + h^2p_4^2 + h^2(p_5 - p_1)^2}{(p_5-p_1)^2})
+= \frac{2p_5^2 - 2p_1p_5}{2(p_5-p_1)} = p_5
+\]
+Thus, $\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2, 2a_1a_4, 2a_2a_4, 2a_3a_4, 
+a_1^2 + a_2^2 + a_3^2 + a_4^2) = (p_1,p_2,p_3,p_4,p_5)$.
+Clearly $a_4,\alpha \in D$, but what about $a_1,a_2,a_3$?
+
+NOT EXTENDED BEYOND HERE.
+If $2 \not | \ g$, let $(a_1,a_2,\alpha) = 
+((\frac{hp_2}{p_3 - p_1} + h)/2, \ 
+ (\frac{hp_2}{p_3 - p_1} - h)/2, \ g)$.
+Then 
+\[
+\alpha (a_1^2 - a_2^2) = 2g\frac{h^2p_2}{p_3-p_1} = p_2
+\]
+\[
+\alpha (2a_1 a_2) = \frac{g}{2} (\frac{h^2p_2^2}{(p_3-p_1)^2} - h^2) = p_1
+\]
+\[
+\alpha(a_1^2 + a_2^2)
+= \frac{gh^2}{4} \frac{2p_2^2 + 2(p_3 - p_1)^2}{(p_3-p_1)^2} = p_3
+\]
+Thus, $\alpha (a_1^2 - a_2^2, 2a_1a_2, a_1^2 + a_2^2) = (p_2,p_1,p_3)$.
+Since $2 \alpha a_1^2 = p_2 + p_3 \in D$ and $2 \alpha$ is squarefree
+($2 \not | \ g$), $a_1 \in D$ by Lemma~\ref{lem:applem1}.
+Similarly, since $2 \alpha a_2^2 = p_3 - p_2 \in D$,
+$a_2 \in D$ by Lemma~\ref{lem:applem1}.
+Clearly $\alpha \in D$.
+\QED
+}
+
+Rather than building a necessary and sufficient condition together,
+we will separate the necessary and sufficient conditions and
+establish a slightly weaker necessary condition for Pythagorean quintuples.
+
+\begin{theorem}
+\label{thm:necessary4}
+Let $D$ be the integers or the polynomials over $\Re[x_1,x_2,x_3,x_4]$.
+	% NB: proof not valid for comm. ring, since comm. ring may not have unit elt 1, which is needed immediately
+A Pythagorean quintuple over $D$ can be expressed in the form
+\begin{equation}
+\label{eq:pyth}
+	\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+		\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+		\ a_1^2 + a_2^2 + a_3^2 + a_4^2)
+\end{equation}
+for some $a_1,a_2,a_3,a_4,\frac{1}{\alpha} \in D$.
+\end{theorem}
+\prf
+Let $(p_1,p_2,p_3,p_4,p_5)$ be a Pythagorean quintuple over $D$.
+If $p_1 = p_5$, let $(a_1,a_2,a_3,a_4,\alpha) = (p_1,0,0,0,\frac{1}{p_1})$.
+Assume $p_1 \neq p_5$.
+Let
+\[
+(a_1,a_2,a_3,a_4,\alpha) = (p_2,p_3,p_4,p_5-p_1,\frac{1}{2(p_5 - p_1)})
+\]
+Then $a_1,a_2,a_3,a_4,\alpha$ generate the Pythagorean quintuple
+$(p_1,\ldots,p_5)$ as in (\ref{eq:pyth}).
+In particular,
+\[
+\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2)
+= \frac{p_2^2 + p_3^2 + p_4^2 - (p_5 - p_1)^2}{2(p_5-p_1)}
+\]
+and applying $p_1^2 + p_2^2 + p_3^2 + p_4^2 = p_5^2$,
+\[
+= \frac{-2p_1^2 + 2p_1p_5}{2(p_5 - p_1)} = p_1.
+\]
+And
+\[
+\alpha (2a_i a_4) = \frac{2p_{i+1}(p_5 - p_1)}{2(p_5 - p_1)} = p_{i+1}
+\]
+for $i=1,2,3$.
+Finally, 
+\[
+\alpha(a_1^2 + a_2^2 + a_3^2 + a_4^2) 
+= \frac{p_2^2 + p_3^2 + p_4^2 + (p_5 - p_1)^2}{2(p_5-p_1)} = p_5
+\]
+Thus, $(p_1,p_2,p_3,p_4,p_5) = \alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+		\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+		\ a_1^2 + a_2^2 + a_3^2 + a_4^2)$.
+\QED
+
+Notice that (\ref{eq:pyth}) is no longer a sufficient condition for
+Pythagorean quintuples, because in general $\alpha \not\in D$.
+In particular, a quintuple in the form (\ref{eq:pyth}) is not necessarily
+a quintuple over $D$.
+Try $(a_1,a_2,a_3,a_4,\alpha) = (1,1,1,1,\frac{1}{x_1})$.
+	
+Combining Lemma~\ref{lem:suff4} (for sufficiency) 
+and Theorem~\ref{thm:necessary4} (for necessity),
+we have a full characterization
+of the rational maps of $\Re^4$ to \Sn{3}.
+The presence of $\alpha \not\in D$ in (\ref{eq:pyth}) does not 
+affect the characterization, since $\alpha$ cancels.
+
+\begin{theorem}
+\label{thm:map4}
+A map is a rational map of $\Re^4$ to \Sn{3}\ if and only if
+it is of the form:
+\begin{equation}
+\label{eq:re4s3}
+\footnotesize{(x_{\pi(1)},x_{\pi(2)},x_{\pi(3)},x_{\pi(4)})} \mapsto 
+\footnotesize{(\frac{a_1^2 + a_2^2 + a_3^2 - a_4^2}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+	 \frac{2a_1a_4}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+	 \frac{2a_2a_4}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+	 \frac{2a_3a_4}{a_1^2 + a_2^2 + a_3^2 + a_4^2})}
+\end{equation}
+where $a_1,a_2,a_3,a_4 \in \Re[x_1,x_2,x_3,x_4]$
+and $\pi : \{1,2,3,4\} \rightarrow \{1,2,3,4\}$ is a permutation.
+\end{theorem}
+\prf
+(Only if): Let $(x_1,x_2,x_3,x_4) \mapsto 
+(\frac{f_1}{f_5},\frac{f_2}{f_5},\frac{f_3}{f_5},\frac{f_4}{f_5})$,
+where $f_1,\ldots,f_5 \in \Re[x_1,x_2,x_3,x_4]$, be a rational map
+of $\Re^4$ to \Sn{3}.
+Then $(f_1,\ldots,f_5)$ is a Pythagorean quintuple (Lemma~\ref{lem:iffpyth}).
+By Theorem~\ref{thm:necessary4} and Lemma~\ref{lem:perm},
+$(f_{\pi(1)},\ldots,f_{\pi(4)},f_5) = \alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+2a_1a_4,2a_2a_4,2a_3a_4,$ $a_1^2 + a_2^2 + a_3^2 + a_4^2)$
+for some $a_1,a_2,a_3,a_4,\frac{1}{\alpha} \in \Re[x_1,x_2,x_3,x_4]$
+and permutation $\pi:\{1,2,3,4\} \rightarrow \{1,2,3,4\}$.
+Thus, $(x_{\pi(1)},x_{\pi(2)},x_{\pi(3)},x_{\pi(4)}) \mapsto$
+\[
+	(\frac{\alpha(a_1^2 + a_2^2 + a_3^2 - a_4^2)}{\alpha(a_1^2 + a_2^2 + a_3^2 + a_4^2)},
+	 \frac{\alpha(2a_1a_4)}{\alpha(a_1^2 + a_2^2 + a_3^2 + a_4^2)},
+	 \frac{\alpha(2a_2a_4)}{\alpha(a_1^2 + a_2^2 + a_3^2 + a_4^2)},
+	 \frac{\alpha(2a_3a_4)}{\alpha(a_1^2 + a_2^2 + a_3^2 + a_4^2)})
+\]
+\[
+= 	(\frac{a_1^2 + a_2^2 + a_3^2 - a_4^2}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+	 \frac{2a_1a_4}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+	 \frac{2a_2a_4}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+	 \frac{2a_3a_4}{a_1^2 + a_2^2 + a_3^2 + a_4^2})
+\]
+(If): Consider a map of the form (\ref{eq:re4s3}).
+This is a rational map of $\Re^4$ to \Sn{3}\ by (\ref{eq:aida})
+and Lemma~\ref{lem:iffpyth}.
+\QED
+
+\begin{example}
+\label{eg:mostnatural}
+The most natural choice for $a_i$,
+$a_i=x_i$, and the identity permutation,
+yields the rational map
+\[
+(x_1,x_2,x_3,x_4) \mapsto 
+	(\frac{x_1^2 + x_2^2 + x_3^2 - x_4^2}{x_1^2 + x_2^2 + x_3^2 + x_4^2},
+	 \frac{2x_1x_4}{x_1^2 + x_2^2 + x_3^2 + x_4^2}, 
+	 \frac{2x_2x_4}{x_1^2 + x_2^2 + x_3^2 + x_4^2}, 
+	 \frac{2x_3x_4}{x_1^2 + x_2^2 + x_3^2 + x_4^2})
+\]
+of $\Re^4$ to \Sn{3}.
+We have used this map for the design of rational curves on \Sn{3} \cite{jj95}.
+Motivated by Theorem~\ref{thm:map4}, 
+we consider this the most natural map from $\Re^4$ to \Sn{3}.
+It is discussed further in \cite{jj98}.
+\end{example}
+\begin{example}
+Although all of our examples have used simple polynomials for $a_i$
+($a_i=1$ or $a_i=x_i$),
+this is not necessary, of course.
+For example, using $(a_1,a_2,a_3,a_4) = (0,2x_2,x_1+x_3,x_4-1)$
+and the identity permutation,
+\footnotesize{
+\[
+\frac{1}{x_1^2 + 4x_2^2 + x_3^2 + x_4^2 + 2x_1x_3 - 2x_4 + 1}
+	(x_1^2 + 4x_2^2 + x_3^2 - x_4^2 + 2x_1x_3 + 2x_4 - 1,
+	 0,
+	 2x_2x_4-2x_2,
+	 2(x_1+x_3)(x_4-1))
+\]
+}
+\normalsize{is a rational map of $\Re^4$ to \Sn{3}.}
+%
+% With $(a_1,a_2,a_3,a_4) = (x_1,x_2^2,x_1+x_3,x_4-x_1)$,
+% \[
+%	(x_1^2 + x_2^4 + x_3^2 - x_4^2 + 2x_1x_3 + 2x_1x_4,\ 
+%	 2x_1x_4-2x_1^2,\ 2x_2^2x_4-2x_1x_2^2,\ 
+%	 2x_1x_4 - 2x_1x_3 - 2x_1^2 + 2x_3x_4)
+% \]
+% is a rational map of $\Re^4$ to \Sn{3}.
+\end{example}
+
+\vspace{.5in}
+
+\section{$\Re^n$ to \Sn{n-1}}
+\label{sec:nn}
+
+The results on rational maps from $\Re^4$ to \Sn{3}\ can be generalized
+to rational maps from $\Re^n$ to \Sn{n-1}, $n \geq 2$.
+The specialization of Euler's Four Squares Theorem (\ref{eq:aida})
+was the key component in the previous development,
+since it offered a recipe for Pythagorean quintuples.
+Fortunately, there is a generalization of this result by
+Ammei (also apparently known by Euler) \cite{dickson52}. % p. 318
+% (In fact, Euler also knew of this result.) % See p. 318 of Dickson.
+
+\begin{lemma}[Ammei c. 1817]
+\label{lem:ammei}
+\begin{equation}
+\label{eq:ammei}
+	(a_1^2 + \cdots + a_n^2)^2 = 
+	(a_1^2 + \cdots + a_{n-1}^2 - a_n^2)^2 + (2a_1a_n)^2 + \ldots + 
+	(2a_{n-1}a_n)^2
+\end{equation}
+where $a_1,\ldots,a_n$ are elements of any commutative ring.
+\end{lemma}
+
+This is a sufficient condition for Pythagorean $(n+1)$-tuples.
+We can again establish that a slightly weaker version is a necessary condition
+for Pythagorean $(n+1)$-tuples.
+
+\begin{theorem}
+\label{thm:necessaryn}
+Let $n \geq 2$ and $D$ be the integers or the polynomials 
+over $\Re[x_1,\ldots,x_n]$.
+A Pythagorean $(n+1)$-tuple over $D$ can be expressed in the form
+\begin{equation}
+\label{eq:pyth2}
+	\alpha (a_1^2 + \ldots + a_{n-1}^2 - a_n^2,
+		\ 2a_1a_n,\ldots,\ 2a_{n-1}a_n,
+		\ a_1^2 + \ldots + a_n^2)
+\end{equation}
+for some $a_1,\ldots,a_n,\frac{1}{\alpha} \in D$.
+\end{theorem}
+\prf
+Let $(p_1,\ldots,p_{n+1})$ be a Pythagorean $(n+1)$-tuple over $D$.
+If $p_1 = p_{n+1}$, let 
+$(a_1,\ldots,a_n,\alpha) = (p_1,0,\ldots,0,\frac{1}{p_1})$.
+Assume $p_1 \neq p_{n+1}$.
+Let 
+\[
+(a_1,\ldots,a_n,\alpha) = (p_2,\ldots,p_n,p_{n+1}-p_1,
+	\frac{1}{2(p_{n+1}-p_1)})
+\]
+Then $a_1,\ldots,a_n,\alpha$ generate the Pythagorean $(n+1)$-tuple
+$(p_1,\ldots,p_{n+1})$ as in (\ref{eq:pyth2}).
+In particular,
+\[
+\alpha (a_1^2 + \ldots + a_{n-1}^2 - a_n^2)
+= \frac{p_2^2 + \cdots + p_n^2 - (p_{n+1}-p_1)^2}{2(p_{n+1}-p_1)}
+\]
+and applying $p_1^2 + \ldots + p_n^2 = p_{n+1}^2$,
+\[
+= \frac{-2p_1^2 + 2p_1p_{n+1}}{2(p_{n+1} - p_1)}
+= p_1
+\]
+And
+\[
+\alpha (2a_i a_n) 
+= \frac{2p_{i+1}(p_{n+1}-p_1)}{2(p_{n+1}-p_1)}
+= p_{i+1}
+\]
+for $i=1,\ldots,n-1$.
+Finally, 
+\[ 
+\alpha (a_1^2 + \ldots + a_n^2)
+= \frac{p_2^2 + \cdots + p_n^2 + (p_{n+1}-p_1)^2}{2(p_{n+1}-p_1)}
+= p_{n+1}.
+\]
+\QED
+
+This leads to our most general result: 
+a full characterization of the rational maps of $\Re^n$ to \Sn{n-1}.
+
+\begin{theorem}
+\label{thm:nn}
+A map is a rational map of $\Re^n$ to \Sn{n-1}, $n \geq 2$, if and only if
+it is of the form:
+\[
+	(x_{\pi(1)},\ldots,x_{\pi(n)}) \mapsto 
+	(\frac{a_1^2 + \cdots + a_{n-1}^2 - a_n^2}{a_1^2 + \cdots + a_n^2},
+	 \frac{2a_1a_n}{a_1^2 + \cdots + a_n^2},
+	 \ldots,
+	 \frac{2a_{n-1}a_n}{a_1^2 + \cdots + a_n^2})
+\]
+where $a_1,\ldots,a_n \in \Re[x_1,\ldots,x_n]$
+and $\pi: \{1,\ldots,n\} \rightarrow \{1,\ldots,n\}$ is a permutation.
+\end{theorem}
+
+\section{Commentary}
+\label{sec:commentary}
+
+Theorem~\ref{thm:nn} applies to all $n \geq 2$ and thus represents 
+a solution to the cases $n=2,3,4$ already considered.
+Since this theorem is a direct generalization of the $n=4$ case,
+there is no new solution for $n=4$.
+The solution for $n=2$ is also 
+equivalent to the previous solution.
+However, there is a new characterization for $n=3$:
+a map is a rational map from $\Re^3$ to \Sn{2}\ if and only if it is of
+the form $(x_1,x_2,x_3) \mapsto 
+(\frac{a_1^2 + a_2^2 - a_3^2}{a_1^2 + a_2^2 + a_3^2}, 
+ \frac{2a_1a_3}{a_1^2 + a_2^2 + a_3^2}, 
+ \frac{2a_2a_3}{a_1^2 + a_2^2 + a_3^2})$
+where $a_1,a_2,a_3 \in \Re[x_1,x_2,x_3]$.
+This is not a contradiction: any rational map
+from $\Re^3$ to \Sn{2}\ can be either expressed in the form of 
+Theorem~\ref{thm:n3} or in the form of Theorem~\ref{thm:nn} with $n=3$.
+
+It turns out that if we set 
+$(a_1,a_2,a_3,a_4) = (\hat{a}_2, \hat{a}_1, 0, \hat{a}_3)$
+in the characterization of Theorem~\ref{thm:n3},
+the characterization of Theorem~\ref{thm:nn} for $n=3$ is produced
+(see Example~\ref{eg:foreshadow}).
+Thus, the characterization of Theorem~\ref{thm:nn} is stronger than
+Theorem~\ref{thm:n3}: not only can a rational map from $\Re^3$ to \Sn{2}\ 
+be put in the form of Theorem~\ref{thm:n3}, it can be put in the form
+of Theorem~\ref{thm:n3} with $a_3=0$.
+The polynomial $a_3$ of Theorem~\ref{thm:n3} is redundant.
+
+We now have a characterization of all rational maps from $\Re^n$ to \Sn{n-1}.
+The related findings on Pythagorean $(n+1)$-tuples are reviewed 
+in Table~\ref{tab:pyth}.
+The second column of this table gives the normal form for Pythagorean
+$(n+1)$-tuples for various $n$
+and the third (resp., fourth and fifth) column indicates when this
+normal form was shown to be a sufficient (resp., necessary and necessary) 
+condition for an $(n+1)$-tuple to be
+a Pythagorean $(n+1)$-tuple over the integers
+(resp., over the integers and polynomial rings).
+The star $^*$ on the results from this paper refers to the fact that
+$\frac{1}{\alpha} \in D$, not $\alpha \in D$ as in the other results.
+
+\begin{table}[h]
+\label{tab:pyth}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+$n$ & normal form for Pythagorean $(n+1)$-tuples & suff {\cal Z} & nec {\cal Z} & 
+\footnotesize{nec $\Re[x_1,\ldots,x_n]$} \\
+\hline
+$2$ & \tiny{$\alpha(a_1^2 - a_2^2, 2a_1a_2, a_1^2 + a_2^2)$} &
+\footnotesize{classical} & 
+\footnotesize{classical} & 
+\footnotesize{Kubota 1972} \\ 
+\hline
+$3$ & \tiny{$\alpha (a_1^2+a_2^2-a_3^2-a_4^2, 2(a_1a_3+a_2a_4), 
+    2(a_1a_4-a_2a_3), a_1^2+a_2^2+a_3^2+a_4^2)$} &
+\footnotesize{Euler 1748} & 
+\footnotesize{Catalan 1885} & 
+\footnotesize{Dietz 1993} \\ 
+\hline
+$4$ & \tiny{$\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+		2a_1a_4, 2a_2a_4, 2a_3a_4,
+		a_1^2 + a_2^2 + a_3^2 + a_4^2)$} &
+\footnotesize{Euler 1748} & 
+\footnotesize{$^*$Johnstone 1998} & 
+\footnotesize{$^*$Johnstone 1998} \\
+\hline
+$n$ & \tiny{$\alpha (a_1^2 + \ldots + a_{n-1}^2 - a_n^2,
+	2a_1a_n, \ldots, 2a_{n-1}a_n,
+	a_1^2 + \ldots + a_n^2)$} & 
+\footnotesize{Ammei 1817} & 
+\footnotesize{$^*$Johnstone 1998} & 
+\footnotesize{$^*$Johnstone 1998} \\ \hline
+\end{tabular}
+\end{table}
+
+Notice that all of the characterizations of 
+rational maps from $\Re^n$ to \Sn{n-1}
+can be derived from Euler's
+Four Squares Theorem, since the original characterizations of $n=3,4$
+are derived from special cases of the Four Squares Theorem
+and the general characterization for all $n$ is derived from a generalization
+of one of these special cases.
+
+% \section{Quadratic spherical maps}
+% All of this taken from Ono, Chapter 5.
+\Comment{
+Quadratic spherical maps are a class of maps from the $m$-sphere to the
+$n$-sphere % that have received some attention
+(see \cite{ono94,ebbinghaus90}).	% Ono, Chapter 5; Ebbinghaus, p. 236
+% especially in the context
+% of Hopf maps, which are quadratic spherical maps with some additional properties
+
+\begin{defn2}
+A map $f:\Re^m \rightarrow \Re^n$ is {\bf quadratic} if 
+\begin{quote}
+1) $f(kx) = k^2 f(x)$ whenever $k \in \Re,\ x \in \Re^m$, and \\
+2) the map $(x,y) \mapsto \frac{1}{2} [f(x+y) - f(x) - f(y)],\ x,y\in\Re^m$
+is bilinear.
+	% restricting K to \Re, X to \Re^m, and Y to \Re^n in Ono, p. 165
+\end{quote}
+\end{defn2}
+
+\begin{defn2}
+A quadratic map $f:\Re^m \rightarrow \Re^n$ is {\bf spherical} 
+if $\| f(x) \| = \| x \|^2$ for all $x \in \Re^m$.
+	% restricting quadratic forms q_x and q_y to squared Euclidean norms
+	% x_1^2 + ... + x_m^2 (or x_n^2)
+	% which strictly translates into \| f(x) \|^2 = \| x \|^4,
+	% which is simplified to above form
+\end{defn2}
+
+If $f:\Re^{m} \rightarrow \Re^{n}$ is a quadratic spherical map, 
+then $f:\Sn{m-1} \rightarrow \Sn{n-1}$.
+Thus, quadratic spherical maps send the unit sphere into the unit sphere,
+and hence their name.
+
+Two other classical quadratic spherical maps are 
+$f:\Sn{3} \rightarrow \Sn{2}$ defined by:	% \cite[pp. 171,174]{ono94}
+\begin{equation}
+\label{eqn:classicalHopf}
+	(x_1,x_2,x_3,x_4) \mapsto 
+	(x_1^2 + x_2^2 - x_3^2 - x_4^2,\ 
+	 2(x_1 x_3 + x_2 x_4),\ 
+	 2(x_1 x_4 + x_2 x_3))
+\end{equation}
+and $f:\Sn{n} \rightarrow \Sn{n}$ defined by: % \cite[p. 193]{ono94}
+\begin{equation}
+\label{eqn:HopfM}
+	(w,x_1,\ldots,x_{n}) \mapsto
+	(w^2 - x_1^2 - \cdots - x_{n}^2,\ 
+	 2wx_1, \ldots,\ 2wx_{n})
+\end{equation}
+%
+% All of these maps are also Hopf maps.
+% (\ref{eqn:classicalHopf}) is called the classical Hopf map.
+% Notice the similarity between (\ref{eqn:HopfM})
+% and the projection version of stereographic injection 
+% (\ref{eqn:stereoinjection}).
+
+\begin{example}
+The normal form of Theorem~\ref{thm:n3} is somewhat reminiscent of the quadratic
+spherical map (\ref{eqn:classicalHopf}).
+However, notice the difference in dimension of the domain (3 in Theorem~\ref{thm:n3}
+and 4 in (\ref{eqn:classicalHopf}))
+and the difference in sign of the last component.
+\end{example}
+}
+
+\section{Conclusions}
+
+The main result of the paper has been a characterization of
+rational maps of $\Re^n$ to \Sn{n-1}, $n \geq 2$,
+resulting in a normal form for all of these maps.
+Rational maps of $\Re^n$ to \Sn{n-1}\ are inextricably linked
+with Pythagorean $(n+1)$-tuples.
+However, our result does not yet establish a normal form for all
+Pythagorean $(n+1)$-tuples,
+since we decoupled the necessary and sufficient conditions for
+Pythagorean $(n+1)$-tuples,
+proving a slightly weaker necessary condition.
+This characterization of Pythagorean $(n+1)$-tuples
+is tantalizingly close but still an open problem.
+This paper has also revealed the strong link between Euler's
+Four Square Theorem and Pythagorean $(n+1)$-tuples,
+and hence rational maps of $\Re^n$ to \Sn{n-1}.
+
+The most well-known map involving the sphere is stereographic projection.
+In \cite{jj98}, we discuss the relationship of stereographic projection
+to the normal form for rational maps of $\Re^n$ to \Sn{n-1},
+as well as further exploring the most natural rational map 
+of $\Re^n$ to \Sn{n-1}\ (Example~\ref{eg:mostnatural}).
+
+The application of rational maps of $\Re^n$ to \Sn{n-1}\ to the
+design of rational quaternion splines is explored in \cite{jj95,jj+jimbo98}.
+
+\section{Appendix}
+
+For completeness and reference,
+we present Kubota's proof of his result on Pythagorean triples.
+First, a technical lemma is needed.
+
+\begin{lemma}
+\label{lem:applem1}
+Let $D$ be a unique factorization domain and $K$ its field of quotients.
+Let $a \in D$, $b \in K$.
+If $a$ is squarefree and $ab^2 \in D$, then $b \in D$.
+\end{lemma}
+\prf
+Let $b = \frac{m}{n}$ where $m,n \in D$.
+$a(\frac{m^2}{n^2}) \in D$ implies $n^2 \ | \ am^2$.
+Let $n = n_1 \ldots n_k$ be the prime factorization of $n$,
+so $n_1^2 \ldots n_k^2 \ | \ am^2$.
+Since $n_i^2 \not | \ a$ ($a$ is squarefree),
+$n_i \ | \ m^2$ for all $i$.
+Since $n_i$ is prime, $n_i \ | \ m$ for all $i$.
+We conclude that $n \ | \ m$ and $b \in D$.
+\QED
+
+\begin{lemma}[Kubota 1972]
+\label{lem:kubota2}
+A triple of polynomials in $\Re[x_1,x_2]$ is a Pythagorean triple 
+if and only if it is of the form 
+\begin{equation}
+\label{eq:triple2}
+	\alpha(a_1^2 - a_2^2, 2a_1a_2, a_1^2 + a_2^2)
+\end{equation}
+for some $a_1,a_2,\alpha \in \Re[x_1,x_2]$.
+\end{lemma}
+\prf
+(If):  A triple of the form (\ref{eq:triple2}) is clearly a Pythagorean triple:
+\[
+	(a_1^2 - a_2^2)^2 + (2a_1a_2)^2 = 
+	a_1^4 + a_2^4 + 2a_1^2a_2^2 = (a_1^2 + a_2^2)^2
+\]
+
+(Only if): 
+Kubota's proof holds for a more general class: Pythagorean triples
+over $D$, where $D$ is a unique factorization domain 
+not of characteristic 2, such that 2 is either prime 
+or invertible in $D$.
+$\Re[x_1,x_2]$ is such a unique factorization domain.
+${\cal Z}$ is also such a domain, so this proof also functions
+as a proof of Lemma~\ref{lem:classical}.
+
+Let $(p_1,p_2,p_3)$ be a Pythagorean triple over $D$.
+If $p_1=p_3$, let $(a_1,a_2,\alpha) = (1,0,p_1)$.
+Thus, we can assume $p_1 \neq p_3$.
+Factor $p_3 - p_1$ into a square component and a squarefree component:
+$p_3 - p_1 = gh^2$, where $g,h \in D$ are squarefree.
+
+If $2 \ | \ g$, let $(a_1,a_2,\alpha) = (\frac{hp_2}{p_3 - p_1}, h, \frac{g}{2}$).
+Then $a_1,a_2,\alpha$ generate the Pythagorean triple $(p_1,p_2,p_3)$
+as in (\ref{eq:triple2}).
+In particular,
+\[
+\alpha (a_1^2 - a_2^2)
+= \frac{g}{2} 
+  (\frac{h^2p_2^2 - h^2(p_3 - p_1)^2}{(p_3-p_1)^2})
+\]
+and applying $p_1^2 + p_2^2 = p_3^2$ and $p_3 - p_1 = gh^2$,
+\[
+= \frac{1}{2} (\frac{-2p_1^2 + 2p_1p_3}{p_3 - p_1}) = p_1.
+\]
+And
+\[
+\alpha (2a_1 a_2) = gh^2 \frac{p_2}{p_3 - p_1} = p_2
+\]
+Finally, 
+\[
+\alpha(a_1^2 + a_2^2)
+= \frac{g}{2} 
+  (\frac{h^2p_2^2 + h^2(p_3 - p_1)^2}{(p_3-p_1)^2})
+= \frac{2p_3^2 - 2p_1p_3}{2(p_3-p_1)} = p_3
+\]
+Thus, $\alpha (a_1^2 - a_2^2, 2a_1a_2, a_1^2 + a_2^2) = (p_1,p_2,p_3)$.
+Since $ga_1^2 = 2 \alpha a_1^2 = p_1 + p_3 \in D$, 
+$a_1 \in D$ by Lemma~\ref{lem:applem1}.
+Clearly $a_2,\alpha \in D$.
+
+If $2 \not | \ g$, let $(a_1,a_2,\alpha) = 
+((\frac{hp_2}{p_3 - p_1} + h)/2, \ 
+ (\frac{hp_2}{p_3 - p_1} - h)/2, \ g)$.
+Then 
+\[
+\alpha (a_1^2 - a_2^2) = 
+\frac{gh^2}{4}[\frac{(p_2+p_3-p_1)^2 - (p_2-p_3+p_1)^2}{(p_3-p_1)^2}] = 
+\frac{gh^2}{4}[\frac{4p_2(p_3-p_1)}{(p_3-p_1)^2}] = 
+p_2
+\]
+\[
+\alpha (2a_1 a_2) = \frac{g}{2} (\frac{h^2p_2^2}{(p_3-p_1)^2} - h^2) = 
+\frac{1}{2}(\frac{p_2^2 - p_3^2 - p_1^2 + 2p_3p_1}{p_3-p_1}) = 
+p_1
+\]
+\[
+\alpha(a_1^2 + a_2^2)
+= \frac{gh^2}{4} [\frac{2p_2^2 + 2(p_3 - p_1)^2}{(p_3-p_1)^2}] = p_3
+\]
+Thus, $\alpha (a_1^2 - a_2^2, 2a_1a_2, a_1^2 + a_2^2) = (p_2,p_1,p_3)$.
+Since $2 \alpha a_1^2 = p_2 + p_3 \in D$ and $2 \alpha$ is squarefree
+($2 \not | \ g$), $a_1 \in D$ by Lemma~\ref{lem:applem1}.
+Similarly, since $2 \alpha a_2^2 = p_3 - p_2 \in D$,
+$a_2 \in D$ by Lemma~\ref{lem:applem1}.
+Clearly $\alpha \in D$.
+\QED
+
+\bibliographystyle{plain}
+\begin{thebibliography}{Lozano-Perez 83}
+
+\bibitem[Barr 92]{barr92}
+Barr, A. and B. Currin and S. Gabriel and J. Hughes (1992)
+Smooth Interpolation of Orientations with Angular Velocity Constraints
+using Quaternions.
+SIGGRAPH '92, 313--320.
+
+\bibitem[Catalan 1885]{catalan85}
+Catalan, E. (1885) Bull. Acad. Roy. Belgique 3(9), p. 531.
+Referenced in Dickson, L.E. (1952) History of the Theory of Numbers: Volume II,
+Diophantine Analysis.  Chelsea (New York), p. 269.
+
+\bibitem[Dickson 52]{dickson52}
+Dickson, L.E. (1952) History of the Theory of Numbers: Volume II,
+Diophantine Analysis.  Chelsea (New York).
+
+\bibitem[Dietz 93]{dietz93}
+Dietz, R. and J. Hoschek and B. Juttler (1993)
+An algebraic approach to curves and surfaces on the sphere and
+on other quadrics.
+Computer Aided Geometric Design 10, 211-229.
+
+\bibitem[Euler 1748]{euler48}
+Fuss, P., editor (1843) Corresp. Math. et Phys.,
+`Correspondance entre Leonhard Euler et C. Goldbach 1729-1763',
+St. Petersburg, Vol. 1, p. 452.  
+Referenced in Dickson, L.E. (1952) History of the Theory of Numbers: Volume II,
+Diophantine Analysis.  Chelsea (New York), p. 277.
+% see p. 209, Ebbinghaus, Numbers
+
+\bibitem[Farouki 90]{farouki90}
+Farouki, R. and T. Sakkalis (1990)
+Pythagorean Hodographs.
+IBM J. Res. Develop. 34, 736--752.
+
+\bibitem[Herstein 75]{herstein75}
+Herstein, I. (1975) Topics in Algebra.
+2nd edition, John Wiley (New York).
+
+\bibitem[Hoschek 89]{hoschek89}
+Hoschek, J. and D. Lasser (1989)
+Fundamentals of Computer Aided Geometric Design.
+Translated by L. Schumaker.  A.K. Peters (Wellesley, MA).
+% p. 593-594.
+
+\bibitem[Johnstone 98a]{jj98}
+Johnstone, J. (1998)
+The Most Natural Map to the Sphere.
+Technical Report 98-02, CIS Dept., UAB.
+
+\bibitem[Johnstone 95]{jj95}
+Johnstone, J. and J. Williams (1995)
+Rational Control of Orientation for Animation.
+Graphics Interface '95, 179--186.
+
+\bibitem[Johnstone 98b]{jj+jimbo98}
+Johnstone, J. and J. Williams (1995)
+Rational Quaternion Splines,
+Technical Report 98-03, CIS Dept., UAB.
+
+\bibitem[Kim 95]{kim95}
+Kim, M.-J. and M.-S. Kim and S. Shin (1995)
+A General Construction Scheme for Unit Quaternion Curves with Simple
+Higher Order Derivatives.
+SIGGRAPH '95, 369--376.
+
+\bibitem[Kim 88]{kim88}
+Kim, M.-S. (1988)
+Motion Planning with Geometric Models.
+Ph.D. thesis, Purdue University.
+
+\bibitem[Kreyszig 59]{kreyszig59}
+Kreyszig, E. (1959) Differential Geometry.
+Dover (New York).
+
+\bibitem[Kubota 72]{kubota72}
+Kubota, K. (1972) Pythagorean triples in unique factorization domains.
+American Mathematical Monthly 79, 503--505.
+
+\bibitem[Lozano-Perez 83]{lozanoperez83}
+Lozano-Perez, T. (1983)
+Spatial Planning: A Configuration Space Approach.
+IEEE Trans. on Computers C-32 (2), February, 108--120.
+
+\bibitem[Ono 94]{ono94}
+Ono, T. (1994) Variations on a Theme of Euler.
+Plenum Press (New York).
+
+\end{thebibliography}
+
+\end{document}

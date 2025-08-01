@@ -1,0 +1,7 @@
+[ angle and axis pairs, defining orientations; Source: GI95's quaternion.in4 ]
+{
+0 1 0 1
+10 1 0 1
+20 1 0 1
+170 3 0 2
+}

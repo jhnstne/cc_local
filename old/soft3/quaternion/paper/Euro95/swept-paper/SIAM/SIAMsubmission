@@ -1,0 +1,208 @@
+Dear Sir or Madam,
+
+	I enclose a short and extended abstract for a contributed paper
+	to the Fourth SIAM Conference on Geometric Design.
+	Thank you for your attention to this matter.
+	Please notify me if you need extra copies.
+
+John K. Johnstone
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+1.  Name of conference
+
+	Fourth SIAM Conference on Geometric Design (Nashville, Nov. 6-9, 1995)
+
+2.  Type of Presentation
+      Contributed:  Lecture form    
+
+3.  Equipment for Visual Support
+      Lecture Form/Minisymposium:
+            Overhead Projector    		YES
+            2" x 2" Slide Projector (35mm)    	YES
+
+4.  If you are a speaker in a minisymposium, who is the organizer?
+	
+	Not applicable.
+
+5.  What is the minisymposium title?
+	
+	Not applicable.
+
+6.  If more than one author, who will present the paper?
+
+	John K. Johnstone.
+
+7.  Please include at least 3 keywords but no more that 5 in order of importance below.
+	
+	swept surface
+	exact representation
+	rational Bezier surface
+	orientation
+	quaternion
+
+Complete addresses of authors:
+
+	John K. Johnstone
+        Department of Computer and Information Sciences
+        University of Alabama at Birmingham
+        115A Campbell Hall, 1300 University Boulevard
+        Birmingham, AL 35294-1170
+	johnstone@cis.uab.edu
+	(205) 934-2213
+
+	James P. Williams
+	Department of Computer Science
+	Johns Hopkins University
+	Baltimore, MD 21218
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SHORT ABSTRACT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentstyle[ltexconf]{report} 
+\begin{document}
+ 
+\title{An exact sweep of a curve}
+ 
+\abstract{We show how to construct a rational Bezier model of a swept
+surface that interpolates
+$n$ positions and orientations of a fixed rational space curve
+and maintains the shape of the curve at all intermediate points
+of the sweep.
+Thus, the surface models
+an exact sweep of the curve, consistent with the given data.
+Through a simple extension, we also allow the sweeping curve to change
+its size through the sweep.
+The position, orientation, and size of the sweeping curve can change with
+arbitrary continuity.
+This surface
+encompasses the surface of revolution and extruded surface, but extends
+them to arbitrary sweeps.
+It can also be used to model the path of a swept object whose shape does not
+change during the sweep, such as in robotics and CAD/CAM, using curves generated
+automatically by the moving object.}   
+
+\author{\underbar{John K. Johnstone}\\
+University of Alabama at Birmingham, Birmingham, AL\\
+\\
+James P. Williams\\
+Johns Hopkins University, Baltimore, MD}
+
+\eject 
+
+\end{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% EXTENDED ABSTRACT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentstyle[l-extabs]{report} 
+\begin{document}
+ 
+\title{An exact sweep of a curve}
+
+Consider a fixed curve sweeping through 3-space and suppose
+that we want a rational Bezier model of the surface that it sweeps out.
+We show how to build a rational swept surface that
+interpolates $n$ frames of a fixed rational space curve 
+({\em i.e.}, $n$ position/orientation pairs) 
+and, more importantly, 
+maintains the shape of the curve at all intermediate points of the sweep.
+Thus, the surface models 
+an exact sweep of the curve, consistent with the given data.
+For added flexibility, we also allow the sweeping curve to change its
+size through the sweep.
+This swept surface models sweeping bodies that do not change shape,
+such as in robotics and CAD/CAM,
+and the frames can be generated automatically by the moving body.
+For design, it encompasses the surface of revolution 
+and extruded surface, and extends them to arbitrary sweeps of a curve.
+
+We assume discrete data on the position and orientation
+of the sweeping body for reasons both of application and design.
+For the modeling of a physically sweeping body ({\em e.g.}, a robot), 
+it is simple to gather discrete position/orientation data, 
+but much more difficult to gather it continuously.
+In design, it is usually appropriate to design the swept surface
+by specifying only a finite number of frames.
+
+The major challenge is to rationally preserve the shape of the curve 
+through the sweep.
+The interpolation of curves that can vary in shape during the sweep
+can already be solved using the traditional tensor product surface.
+And the shape of the curve can be preserved through the sweep
+using Frenet frames if the surface need not be rational.
+However, we want a rational model, for compatibility with 
+present modeling systems.
+We build a rational tensor product Bezier surface, complete with a full
+definition of its control mesh.
+
+There is a rich literature on swept surfaces, but none
+that yields a rational parametric surface
+representing an exact sweep for our large class of surfaces.
+Several papers use the Frenet frame of differential geometry
+to control the sweep of a curve ({\em e.g.}, Pegna 1988,
+Bronsvoort and Klok 1985).
+The path of the sweep is specified by a space curve $d(t)$,
+which defines the position of the reference point on the
+sweep curve, and the sweep curve's orientation is defined by
+the Frenet frame of the position curve $d$.
+The rotation defined by the Frenet frame is not rational,
+and thus neither is the swept surface.  
+The envelope of swept surfaces ({\em i.e.}, the implicit equation of the surface
+swept out by a sweeping surface) has been the subject of many papers
+({\em e.g.}, Martin and Stephenson 1990).
+Coquillart and Bloomenthal and Riesenfeld 
+construct swept surfaces by approximating offset curves
+of the axis of the sweep, in the latter paper to define translational sweeps,
+surfaces of revolution, and approximations of rotation-minimizing sweeps.
+(The rotation-minimizing frame 
+is an attempt to remove some of the problems of the Frenet frame.)
+The important special class of canal surfaces, 
+surfaces swept by a sphere, are studied by Rossignac and Requicha.
+Farouki shows that rational canal surfaces can be constructed by sweeping
+a sphere along a special Pythagorean hodograph space curve, and gives the
+rational parameterization.
+The ray tracing of swept surfaces (as opposed to their Bezier surface 
+definition) has been studied by van Wijk (both with the sweep of a sphere
+of varying radius and the rotation, translation,
+and translation with scaling of a planar cubic spline)
+and by Bronsvoort and Klok (for generalized cylinders).
+
+Although our method directly models the sweep of a curve,
+the sweep of a surface or a solid can be modeled indirectly
+by using curve frames that represent the intersection of two 
+instantaneously close frames of the surface.
+Although this will not construct an 
+exact model of an actual sweep of the surface,
+it is likely to be a good approximation since the 
+envelope of a surface is computed by such intersections
+of neighbouring positions of the surface.
+
+A curve is defined by its position, orientation, and scale.
+We isolate each of these three components and independently 
+design each of them to interpolate the frames.
+Rational interpolation of position and scale is straightforward, 
+but rational orientation interpolation is challenging.
+The orientation of a curve is represented by a unit quaternion.
+This reduces the problem to interpolation of points on the unit
+sphere in 4-space by a curve constrained to this sphere.
+This can be done using optimization but this will not create
+a rational curve.
+We show how to translate to an equivalent problem of interpolation
+of points in 4-space without any constraints.
+
+Once the three components (position, orientation, and scale) of the sweeping
+curve are defined, they must be fused together into a surface representation.
+The quaternion curve is translated to a rotation matrix 
+and the control mesh is built by analyzing the
+path of each control point of the curve.
+
+In the presentation, 
+we will show how to interpolate orientations constrained to the quaternion sphere
+and how to explicitly build the control mesh of the surface.
+We will also show pictures of surfaces generated by our method.
+
+\end{document}
+

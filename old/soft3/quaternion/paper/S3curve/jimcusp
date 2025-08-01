@@ -1,0 +1,88 @@
+> 
+> Jim,
+> I'm at the cusp part of the paper:
+> when the map M introduces cusps (and hopefully ways of easily
+> avoiding these cusps by appropriate design of the curve in 4-space
+> before mapping by M).
+> You rightly observe that any point on the space curve c(t)
+> where c(t) = c'(t) will cause a cusp at M(c(t)).
+> However, this is simply one of the type of points that leads
+> to cusps.  (You also mention the image of (0,0,0,0) is a cusp.)
+> In particular, when I type the following into Maple
+> (where c(t) = (p,q,r,s), c'(t) = (P,Q,R,S))
+> 
+> a := p^2 + q^2 + r^2 + s^2;
+> A := 2*p*P + 2*q*Q + 2*r*R + 2*s*S;
+> eqns := {a*(p*S + P*s) - A*p*s,
+>          a*(q*S + Q*s) - A*q*s,
+>          a*(r*S + R*s) - A*r*s};
+> solve(eqns,{p,q,r,s});
+> 
+> you will see that there are a lot of other solutions.
+> Some can be immediately discarded because they are imaginary,
+> but others are less clear (the ROOTOF solutions, in particular).
+> 
+> I bring this up because I think we need a parallel attack on this
+> problem.  Think about it and let me know if you have any insights.
+> I am looking for an elegant characterization of the points of
+> c(t) that map to cusps, and hopefully a characterization that makes
+> it clear how to avoid these types of points (e.g., it is easy to
+> avoid the origin).
+> 
+> John
+> 
+
+
+Let's look at M as a composite mapping (as I did in the part of the
+writeup I gave you titled CONDITION 1)
+
+IN CONDITION 1 it is clear that M1, the first part of the mapping introduces
+a cusp ONLY if the curve passes through the origin.  
+
+start with a curve C(t) = [p,q,r,s]
+
+M1(C(t)) = D(t) = [p^2+q^2 ....... ] 
+M2(D(t)) = D(t) / || D(t) ||   --- normalization 
+
+assume we did not introduce any cusps with M1 -- this is origin avoidance
+
+now, we must just solve the problem of "when does normalization introduce
+cusps into a curve"
+
+suppose we have a vector valued function V, and we normalize it by
+dividing through by || V ||
+
+
+d/dt(V/||V||) = ||V||*V' - (V*<V,V'>)/||V|| all over <V,V> where
+<A,B> denotes the dot product of vectors A and B.  We can drop the
+denominator since we are going to try to solve == 0.
+
+This results in the vector equation:
+
+||V||*V' - (V*<V,V'>)/||V|| = (0,0,0,0)   -- for a 4-dimensional function
+
+multiplying both sides by ||V|| yields:
+
+<V,V> * V' - V * <V,V'> = (0,0,0,0)   [MAIN]
+
+this equation is satisfied ONLY when <V,V'>/ (||V|| * ||V'||) = 1,
+i.e. when V and V' lie along the same line, or more simply:
+
+V' = kV
+
+Substituting the above into  [MAIN] yields:
+
+<V,V>*kV - V*k*<V,V> == (0,0,0,0)
+
+so the simple condition we are looking for is , TAH DAH:
+
+V' = kV where k != 0 is the ONLY time when the condition 
+specified in [MAIN] can be satisfied.  Therefore the only 
+conditions that can introduce a cusp are passage through the
+origin or colinearity of V and V'.  QED
+
+
+Jim
+
+
+

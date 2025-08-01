@@ -1,0 +1,8 @@
+Ways to build a surface
+-----------------------
+
+surface from a curve:
+	surface of revolution
+	surface of extrusion
+	tangential developable: tangent space of a space curve
+	ruled surface as lofting of two curves

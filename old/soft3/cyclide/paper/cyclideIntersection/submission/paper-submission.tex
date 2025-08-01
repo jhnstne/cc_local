@@ -1,0 +1,2723 @@
+% I think that this is what I originally submitted to CAGD
+
+\documentstyle[12pt]{article} 
+
+\newif\ifFull
+\Fullfalse
+
+\makeatletter
+\def\@maketitle{\newpage
+ \null
+ %\vskip 2em                   % Vertical space above title.
+ \begin{center}
+       {\Large\bf \@title \par}  % Title set in \Large size. 
+       \vskip .5em               % Vertical space after title.
+       {\lineskip .5em           %  each author set in a tabular environment
+	\begin{tabular}[t]{c}\@author 
+	\end{tabular}\par}                   
+  \end{center}
+ \par
+ \vskip .5em}                 % Vertical space after author
+\makeatother
+
+% non-indented paragraphs with xtra space
+% set the indentation to 0, and increase the paragraph spacing:
+\parskip=8pt plus1pt
+\parindent=0pt
+% default values are 
+% \parskip=0pt plus1pt
+% \parindent=20pt
+% for plain tex.
+
+\newenvironment{summary}[1]{\if@twocolumn
+\section*{#1} \else
+\begin{center}
+{\bf #1\vspace{-.5em}\vspace{0pt}} 
+\end{center}
+\quotation
+\fi}{\if@twocolumn\else\endquotation\fi}
+
+\renewenvironment{abstract}{\begin{summary}{Abstract}}{\end{summary}}
+
+\newcommand{\SingleSpace}{\edef\baselinestretch{0.9}\Large\normalsize}
+\newcommand{\DoubleSpace}{\edef\baselinestretch{1.4}\Large\normalsize}
+\newcommand{\Comment}[1]{\relax}  % makes a "comment" (not expanded)
+\newcommand{\Heading}[1]{\par\noindent{\bf#1}\nobreak}
+\newcommand{\Tail}[1]{\nobreak\par\noindent{\bf#1}}
+\newcommand{\QED}{\vrule height 1.4ex width 1.0ex depth -.1ex\ } % square box
+\newcommand{\arc}[1]{\mbox{$\stackrel{\frown}{#1}$}}
+\newcommand{\lyne}[1]{\mbox{$\stackrel{\leftrightarrow}{#1}$}}
+\newcommand{\ray}[1]{\mbox{$\vec{#1}$}}
+\newcommand{\seg}[1]{\mbox{$\overline{#1}$}}
+\newcommand{\tab}{\hspace*{.2in}}
+\newcommand{\se}{\mbox{$_{\epsilon}$}}  % subscript epsilon
+\newcommand{\ie}{\mbox{i.e.}}
+\newcommand{\eg}{\mbox{e.\ g.\ }}
+\newcommand{\figg}[3]{\begin{figure}[htbp]\vspace{#3}\caption{#2}\label{#1}\end{figure}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\prf}{\noindent{{\bf Proof} :\ }}
+
+\newtheorem{rmk}{Remark}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{conjecture}{Conjecture}[section]
+\newtheorem{claim}{Claim}[section]
+\newtheorem{notation}{Notation}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[section]
+\newtheorem{defn2}{Definition}
+
+\ifFull
+\SingleSpace
+\else
+\DoubleSpace
+\fi
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\topmargin}{0pt}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+
+\input{clock}
+
+\setlength{\headsep}{.2in}
+\setclock
+
+% POSSIBLE TITLES (FOR THIS PAPER OR SPINOFFS)
+	% A new approach to intersection through decomposition
+	
+\title{A New Intersection Algorithm using Circle Decomposition
+%	Circle decomposition and its use in intersection,
+%		with particular attention to cyclides
+	\thanks{This work supported by National Science Foundation grant
+	IRI-8910366.}}
+% 	DON'T WANT CYCLIDES IN THE TITLE
+% 	\\ Intersection from circles, a new exact method for an extended
+%		vocabulary of primitives
+%	\\(Preliminary version)
+\author{John K. Johnstone\thanks{Department of Computer Science,
+	The Johns Hopkins University,
+	Baltimore, Maryland 21218 USA,
+	jj@cs.jhu.edu.}}
+\date{Version: \today \clock}
+
+\begin{document}
+
+% HEADER ON EACH PAGE
+% \markright{\fbox{{\bf Cyclides}} \hrulefill 
+% 	   \fbox{{\bf Johnstone, \today}} \hrulefill}
+% \pagestyle{myheadings}
+
+\maketitle
+
+% *********************************************************************
+
+% \input{newintro}
+% % \input{intro}
+
+\begin{abstract}
+The present vocabulary of a solid modeler is canonically the plane,
+(some subset of) the quadrics, and the torus.
+The class of cyclides is also becoming important.
+Quadrics and cyclides lie in the more general class of ringed surfaces:
+surfaces that can be swept out by a circle.
+This class also contains the important class of revolute surfaces.
+We will present a method for the exact intersection of any ringed surface with
+any quadric or cyclide.
+This algorithm shows that it is feasible to expand the 
+vocabulary of solid modeling primitives to include all ringed surfaces.
+In solid modeling, surface intersection is crucial to the design of solids
+and their subsequent analysis.
+
+Our intersection algorithm is exact: 
+that is, the intersection is computed symbolically rather than numerically.
+For exact intersection, we must reduce to degree 4 computations.
+We do this by concentrating on the decomposition of a surface into simpler
+components.
+Previous algorithmic development has centered around 
+the degree of an algebraic surface.
+Two keys to our algorithm are circle decomposition and inversion.
+% We will fully develop 
+% ALREADY DONE, SO DON'T EMPHASIZE
+% the circle decomposition of a cyclide 
+% (i.e., its description as a union of circles),
+% and results on the inverse of any circle.
+\end{abstract}
+
+% Amy and I worked on the center of the inverse of a circle,
+% and more globally on finding the directrix curve (curve of centers) 
+% of a cyclide via mapping of directrix curve of torus or cylinder
+% The theme was `directrix curves of lower degree than the surface'
+% (e.g., line directrix on quadric ruled, conic directrix on cyclide)
+% which I believed was a good way of reducing the complexity of the 
+% computations on a surface.
+
+Keywords: intersection, cyclides, circles, inversion, ringed surfaces
+
+
+\section{Introduction}
+
+In this paper, we develop a new method for intersection that can be used
+to exactly compute the intersection of higher degree surfaces.
+The surfaces that we concentrate on are swept surfaces called {\em ringed}
+surfaces, which include any surface that can be swept out by a circle.
+This class contains all revolute surfaces and all quadrics, surfaces that
+are very important for design.
+Note that a ringed surface can be of arbitrarily high degree.
+
+We also concentrate on cyclides, which are special ringed surfaces 
+and a natural extension of the quadric and torus.
+Cyclides have received considerable attention by the solid modeling
+community as a blending surface, a patch, and a tractable surface.
+
+It is desirable to add both ringed surfaces and cyclides to a solid modeler,
+which in its rudimentary form only includes planes, natural quadrics, and tori.
+A key step in the integration of any primitive into the vocabulary of a solid
+modeler is the development of an intersection algorithm.
+This paper addresses this problem.
+
+We develop a method for the intersection of any quadric or cyclide surface
+with a ringed surface.
+The new method uses circle decomposition and inversion to solve the 
+intersection problem, rather than the traditional elimination, tracing, or
+implicit/parametric methods.
+This new intersection technique is powerful: a
+complicated surface such as the quartic cyclide can be intersected exactly
+with a surface of arbitrary degree, without resorting to approximate methods.
+This defies the common conception that exact intersection is restricted to 
+low degree surfaces.
+
+In the next section, we establish that cyclides and ringed surfaces 
+are the natural extensions of quadric surfaces and the natural primitives 
+to include in the vocabulary of a solid modeler, after the quadric surface.
+Section~\ref{prev-wk} reviews previous work on intersection and cyclides.
+The next two sections formally introduce cyclides and the inversion map, 
+respectively.
+We present our new algorithm for the intersection of a ringed surface and 
+a quadric or cyclide in Section~\ref{sec:nim}.
+Section~\ref{sec:inv-cyclide} shows how to compute the inverse of a torus,
+while the more difficult inversion from a cyclide to a torus is developed
+in Section~\ref{sec:totorus}.
+We discuss the mapping of a cyclide to a quadric in 
+Section~\ref{sec:toquadric}.
+The precise effect of inversion on a circle is examined in Section~\ref{sec1}.
+Methods for the circle decomposition of a cyclide are presented in
+Section~\ref{sec-decomp}, while the advantages of this decomposition 
+are analyzed in Section~\ref{advs}.
+Section~\ref{sec:conc} ends with conclusions and ideas for future work.
+
+\section{Cyclides and ringed surfaces are the natural extensions of quadrics}
+
+In this section, we would like to argue that the 
+cyclide is the most natural extension of the present solid modeling
+CSG (constructive solid geometry) vocabulary.
+The plane, the quadric surfaces, and the torus are the most fundamental
+primitives for design.
+Revolute surfaces are also very popular, because they arise naturally
+in manmade objects.
+All of these surfaces (except the plane) are examples of ringed surfaces.
+
+\begin{defn2}
+\label{ringed}
+A {\bf ringed}\footnote{
+	% A ruler is `a strip of wood or metal having a straight edge used for
+	% measuring or drawing lines'.
+	Since we have not been able to find a term for this class of surfaces
+	in the literature, we have introduced the term `ringed'.
+	The following definition explains our choice of this term:
+	{\em Ring}: anything having a circular form; v.,
+	to move in a ring or a curving course (Random House Dictionary, 1980).}
+{\bf surface} % (or cyclic surface, Gordon) : sounds stupid
+is a surface generated by a circle sweeping through space.
+% (i.e., a single-parameter family of circles).
+The curve that the center of the circles sweeps along is 
+a {\bf directrix curve}.
+A {\bf radius function} and {\bf orientation function} 
+give the radius and orientation of the circle at each point of the
+directrix curve.
+\Comment{
+There may be more than one directrix curve,
+since there may be more than one way to generate the ringed surface by
+sweeping a circle through space.
+}
+\end{defn2}
+
+\begin{rmk}
+A well-known subclass of ringed surfaces is the canal surface, 
+% (see \cite{rr84,rossignac85})
+which is a surface generated by sweeping a sphere along a curve
+% Hilbert, p. 219; Rossignac and Requicha on constant-radius blending surfaces
+or, equivalently, a ringed surface where the 
+plane of the circle is always perpendicular to the directrix.
+% this last point is mentioned in Gordon too: p. 207
+Also, note the similarity between ringed and ruled surfaces, 
+which are surfaces generated by a line sweeping through space.
+\end{rmk}
+
+The Dupin cyclide is a special ringed surface that has received
+considerable attention (see Section~\ref{prev-wk}).
+It is very useful in blending and patching.
+We shall introduce it formally in Section~\ref{sec-cy}.
+We believe that the renewed interest in the cyclide is natural:
+it is not only very useful, but it is the logical extension
+of the quadric surface and the torus, which are of course the most
+popular primitives for solid modeling.
+To see this, note that the quadric is a ringed surface with
+a line directrix and a quadratic radius function, 
+a torus is a ringed surface with a circle directrix and a constant
+radius function, 
+while a Dupin cyclide is a ringed surface with a conic directrix 
+and a quadratic radius function.
+
+% *conic directrix* rather than line, but still *quadratic radius function*
+% thus, can get degree 8 intersection of cyclides, 
+% using circle x conic parameterization of cyclide
+%
+% can cyclide be input via conic directrix curve and radius function?
+%
+%	   Forget about quadratic radius function: it is a bell.
+%	   (Determining the algebra of the radius function for the
+%	    space circle in Corollary 5.1 is too difficult.)
+%	   Having a conic directrix curve for sweeping circle is enough.
+
+% *********************************************************************
+
+% \input{prev-wk}
+
+\section{Previous work}
+\label{prev-wk}
+
+Our method of intersection, using circle decomposition and inversion,
+contrasts with more traditional techniques of intersection, such as
+tracing and elimination \cite{HOF89}.
+Tracing \cite{BHHL88} is an excellent technique 
+when numeric computation of the intersection is necessary.
+The output is a collection of points on the intersection 
+of two surfaces.
+Elimination theory provides a very general method for the intersection 
+of two curves or surfaces, using the elimination of a variable by a 
+resultant.
+This method is not appropriate for the intersection of a ringed surface 
+and a cyclide, because the resultant is of degree $4n$,
+where $n$ is the degree of the ringed surface (e.g., $4n = 16$ if the ringed
+surface is a cyclide).
+% One must be careful about extraneous factors whenever using resultants.
+
+Another popular method of intersection is the implicit/parametric method:
+(1) the parametric equation of one surface is substituted into the implicit
+equation of the other surface, (2) the resulting equation (in the
+parameters $s$ and $t$) is solved for $s$ (in terms of $t$), 
+and (3) this solution is substituted back into the original parametric 
+equation.
+It is important to note that de Pont and Martin \cite{DEP84,MDS86} use
+this method to solve the intersection of cyclides with planes, quadrics,
+and cyclides.
+They observe that the implicit/parametric method is applicable to 
+cyclide/cyclide intersection because the equation derived in step (2) 
+is of degree 4 in each of the parameters, although it is of degree 8 overall.
+Thus, it is possible to solve the equation symbolically for either $s$
+or $t$.
+Our method is an extension of their work to general ringed surfaces, as
+well as an interesting alternative for cyclide/cyclide and cyclide/quadric
+intersection.
+
+% see circle-cyclide-int-is-tough file for elaboration
+
+% LOOK IN HOFFMANN DISCUSSION OF INTERSECTION?  SHOWS SOME WEAKNESSES OF 
+% IMPLICIT/PARAMETRIC THAT MAY NOT APPLY TO OUR METHOD.
+
+% EVEN FOR THIS SUBCASE OF OUR PROBLEM, OUR METHOD MAY BE PREFERABLE
+% IF THERE ARE SOME DISADVANTAGES OF IMPLICIT/PARAMETRIC LISTED IN HOFFMANN.
+
+% **********************
+
+
+% THIS COMMENT WAS REMOVED IN TECH REPORT VERSION
+\begin{rmk}
+Sabin \cite{Sabin89} comments on the tractability of cyclide intersection,
+% p. 150
+% [Something like `Two cyclides always share a component at infinity, 
+% called the circle at infinity.']
+noting that the real part of the intersection of two cyclides is a curve 
+of degree 8 (rather than 16 as expected) and genus 3, 
+the latter property implying that it has a 
+parametric equation in terms of solutions of fourth order equations, 
+and thus can be solved symbolically.
+
+It is interesting that cyclide/cyclide intersection is exactly
+solvable, reducing to a degree 4 computation, despite the fact that
+computing the distance between two circles, which is related to 
+detecting a null intersection between two tori, has no closed-form
+solution \cite{neff90}.
+% Note that the output of our intersection algorithm is a parameterization,
+% which might have no real locus.
+% That is, we do not directly state whether the intersection is or is not
+% empty.
+\end{rmk}
+
+% *************************************************
+
+There is a considerable body of work on the Dupin cyclide.
+Two early classical mathematical studies are the papers 
+of Maxwell \cite{MAX68} and Cayley \cite{CAY96}.
+They develop the key properties of Dupin cyclides.
+% e.g., anticonics, inversion of cyclide is cyclide, parabolic cyclides
+% Another important development of cyclide theory is in Forsyth \cite{F12}.
+%
+A more recent discussion of the 
+geometry, construction, and classification of cyclides is
+available in Chandru, Dutta, and Hoffmann \cite{CDH89a}.
+Cyclides are an object of interest for mathematicians,
+because they are the only surfaces whose lines of curvature are all circular,
+and because they are the only surfaces whose evolute (or surface of centers)
+consists of two curves, rather than two surfaces \cite{H52}.
+	% Hilbert, p. 217
+
+The use of cyclides in solid modeling and design was first explored
+at Cambridge, with a collection of work including the theses of Martin 
+\cite{MAR82}, de Pont \cite{DEP84}, and Sharrock \cite{SHAR85}.
+They develop a surface design system based on patching together cyclides.
+The system uses principal patches, whose boundaries are lines of curvature, 
+which makes the use of cyclides natural.
+
+The use of cyclides as blending surfaces has been developed by Chandru, Dutta, 
+Hoffmann, in Hoffmann \cite{H88}, then Chandru, Dutta, and Hoffmann 
+\cite{CDH89b-ifip}, and Dutta \cite{Dutta89}.
+Blending is the operation of smoothing off sharp corners and edges,
+a fundamental operation in solid modeling.
+Cyclides prove to be natural blending surfaces,
+because they are the envelope of a sphere rolling about a conic.
+The rolling of a sphere about the intersection of two surfaces is a good way
+of blending them; and the spine of this spherical envelope can be approximated
+by conic segments.
+Pratt \cite{P89} also discusses blending with cyclides,
+this time of cylinder/plane, 
+cone/sphere, and cone-torus (the Cranfield object).
+He also considers the Bezier formulation of cyclides and their offsets.
+Other papers on cyclides have been written by McLean \cite{Mc85} and Degen
+\cite{Degen90}.
+% already mentioned above:
+% and Martin, de Pont, and Sharrock \cite{MDS86}.
+% (discussing intersection and blending).
+
+The use of a circle decomposition of a ringed surface to solve
+ringed/quadric and ringed/cyclide intersection is reminiscent of the use
+of a line decomposition of a ruled surface to solve the intersection
+of a ruled surface with any surface of degree four or less.
+The decomposition of ruled surfaces to the $\mbox{line}(t)$ representation 
+is covered in Johnstone \cite{JOH89}.
+Levin recognized that it is easy to intersect with ruled surfaces: 
+he reduced quadric intersection to the 
+intersection of a quadric with a ruled \cite{LEVI76}.
+
+% *********************************************************************
+
+% structure of cyclide
+% \input{cyclide}
+
+\section{Dupin cyclides}
+\label{sec-cy}
+
+\subsection{Definitions}
+
+There are many definitions in use for a cyclide,
+so it is important to make it clear what our definition is.
+A general definition of a cyclide is 
+a quartic surface with a double curve at the circle at infinity\footnote{The
+	circle at infinity is the curve $x^{2} + y^{2} + z^{2} + w^{2} = 0$.}
+% (i.e., contains the circle at infinity twice)
+or a cubic surface that contains the circle at infinity
+(e.g., \cite{F12,SOM47}). % p. 408 of Sommerville, p. 324 of Forsyth
+A Dupin cyclide is a special type of cyclide,
+and the first type of cyclide studied.
+The most general definition of a Dupin cyclide, 
+and one that is often used in the literature (e.g., \cite{CDH89a,FISCH86}),
+% Dutta on p. 288, Fischer on p. 28
+is a surface whose lines of curvature are all circles or lines.
+% we earlier called this a {\em general Dupin cyclide}
+% plane, sphere, cylinder, cone, 
+% parabolic cyclide, or a quartic Dupin cyclide.)
+% e.g., the two families of lines of curvature of a cylinder are lines and 
+% circles
+Note that, under this definition, the Dupin cyclide includes 
+the plane, sphere, cylinder, and cone: those key surfaces that are
+already in the vocabulary of a solid modeler.
+In this paper, we shall use a more restricted definition of the Dupin cyclide,
+which agrees with Dupin's original definition 
+(the envelope of a sphere
+that is tangent to three fixed spheres in a continuous manner \cite{MAX68}).
+
+\begin{defn2}
+\label{ourdefn}
+A {\bf Dupin cyclide} is a surface whose lines of curvature are all circles.
+\end{defn2}
+
+This definition removes surfaces such as the plane, cylinder, cone, and 
+parabolic cyclide, some of whose lines of curvature are lines.
+In the rest of the paper, `cyclide' will refer to the quartic Dupin cyclide
+of Definition~\ref{ourdefn}.
+
+\begin{rmk}
+\label{rmk:conic}
+The centers of the lines of curvature of a Dupin cyclide 
+lie on a conic \cite{F12,H52}. 
+% curve of centers: Hilbert, Forsyth; also Coolidge,p267
+That is, the Dupin cyclide is a circle sweeping along a conic.
+\end{rmk}
+
+In this sense, a Dupin cyclide is the generalization of a quadric surface,
+since any quadric surface is a circle sweeping along a line.
+
+\figg{cyc-pic}{Cyclides: (a) Ring cyclide (b) Self-intersecting torus 
+	[13]
+	(c) Singly-horned cyclide (d) Doubly-horned cyclide [17]}{5in} % 5.5in
+
+\subsection{Mechanisms for defining cyclides}
+
+\subsubsection{Implicit equation}
+
+Forsyth \cite{F12} 
+developed a normal form for the implicit equation of a Dupin cyclide:
+
+\be
+\label{eqcy}
+(x^{2} + y^{2} + z^{2} - \mu^{2} + b^{2})^{2} = 4(ax-c\mu)^{2} + 4b^{2}y^{2}
+\ee
+where $a,b > 0$, $c,\mu \geq 0$, and $a^{2} = b^{2} + c^{2}$.
+% see equivalent parametric definition in Depont: c=0 is OK
+
+	% not difficult to translate to this implicit form
+	% e.g., if two circles are given, we can map them to normal form and
+	% use the computation of the two circles below to determine what the 
+	% normal form is; or if parameterization is used, use de Pont's 
+	% parameterization equivalent on p. 31.
+
+\subsubsection{The planes of symmetry of a cyclide}
+
+The cyclide has two planes of symmetry, and its cross-section
+by either of these planes is a pair of circles.
+These circles yield a lot of information about the cyclide.
+
+\figg{fig:sym}{(a) $y=0$, the exterior plane of symmetry
+	       (b) $z=0$, the interior plane of symmetry}{5in} % 6in
+
+\begin{lemma}
+\label{lem:sym}
+The planes of symmetry of the cyclide in (\ref{eqcy}) are $y=0$ and $z=0$
+(Figure~\ref{fig:sym}).
+The two circles in the plane $y=0$ are $(x-a)^2 + z^2 = (\mu - c)^2$
+and $(x+a)^2 + z^2 = (\mu + c)^2$.
+The two circles in the plane $z=0$ are $(x-c)^2 + y^2 = (\mu - a)^2$
+and $(x+c)^2 + y^2 = (\mu + a)^2$.
+\end{lemma}
+\prf 
+The pair of circles in $y=0$ are found by factoring 
+$(x^{2} + z^{2} - \mu^{2} + b^{2})^{2} = 4(ax-c\mu)^{2}$
+into $[(x^{2} + z^{2} - \mu^{2} + b^{2} - 2(ax-c\mu)]
+      [(x^{2} + z^{2} - \mu^{2} + b^{2} + 2(ax-c\mu)] = 0$,
+which is equivalent, using $a^2 = b^2 + c^2$, to
+$[(x-a)^2 + z^2 - (\mu - c)^2][(x+a)^2 + z^2 - (\mu + c)^2]$.
+The same technique is used for the pair of circles in $z=0$,
+except the equation (\ref{eqcy}) for the cyclide is replaced by
+the following equivalent equation \cite{F12}:
+\be
+(x^{2} + y^{2} + z^{2} - \mu^{2} - b^{2})^{2} = 4(cx-a\mu)^{2} - 4b^{2}z^{2}
+\ee
+\QED
+
+\begin{rmk}
+\label{rmk:ext}
+The smaller circle in the $y=0$ plane never lies inside the larger one
+(i.e., $2a + |\mu - c| > \mu + c$).
+% easy to show 
+Conversely, the smaller circle in the $z=0$ plane never lies outside the 
+larger one (i.e., $2c < |\mu - a| + \mu + a$).
+\end{rmk}
+
+Remark~\ref{rmk:ext} motivates the following terminology.
+
+\begin{defn2}
+The {\bf exterior} (resp., {\bf interior}) {\bf plane of symmetry} of a cyclide
+is the plane of symmetry whose smaller circle never lies inside 
+(resp., outside) the larger circle.
+The {\bf exterior} (resp., {\bf interior}) {\bf circles} are the two circles 
+that lie in the exterior (resp., interior) plane of symmetry.
+\end{defn2}
+
+\begin{rmk}
+$y=0$ is the exterior plane of symmetry and 
+$z=0$ is the interior plane of symmetry for the normal form (\ref{eqcy}).
+\end{rmk}
+
+We can identify three configurations for the
+exterior and interior circles of a cyclide:
+\begin{enumerate}
+\item
+	the smaller exterior circle lies completely outside the larger exterior
+	circle, and the smaller interior circle lies completely inside the
+	larger interior circle;
+\item
+	the smaller exterior circle intersects the larger exterior circle,
+	and the smaller interior circle lies completely inside the
+	larger interior circle;
+\item
+	the smaller exterior circle lies completely outside the larger exterior
+	circle, and the smaller interior circle intersects the
+	larger interior circle.
+\end{enumerate}
+
+Associated with these three configurations are the three classes of cyclides:
+{\em ring} cyclides, {\em self-intersecting} 
+cyclides, and {\em horned} cyclides, respectively (see Figure~\ref{cyc-pic}).
+The horned cyclide splits further into {\em singly-horned}
+(when the smaller interior circle is tangent to the 
+larger interior circle) and {\em doubly-horned} (otherwise).
+The {\em horns} of a horned cyclide are the intersections of its interior
+circles.
+
+\begin{rmk}
+\label{rmk:rel}
+Using the normal form (\ref{eqcy}) and Figure~\ref{fig:sym},
+we note that the exterior circles intersect if and only if $\mu \geq a$,
+while the interior circles intersect if and only if $\mu \leq c$.
+(For example, $2c + (a-\mu) \geq \mu+a \Rightarrow 2c \geq 2\mu$.)
+Thus, a cyclide is horned if $\mu \leq c$, ring if $c < \mu < a$, 
+and self-intersecting if $\mu \geq a$.
+\end{rmk}
+
+The above development gives us a very useful way of defining a cyclide.
+The following result can be easily proved using Figure~\ref{fig:sym}.
+
+\begin{notation}
+Let $C(c,r,o)$ be the circle with center $c$ and radius $r$
+that lies in the plane with normal $o$.
+\end{notation}
+
+\begin{lemma}
+\label{lem:uni}
+A cyclide is fully determined by its exterior circles and its type,
+or its interior circles and its type.
+In particular, the cyclide with exterior circles $C_1(c_1,r_1,o)$
+and $C_2(c_2,r_2,o)$, $r_1 \geq r_2$
+is the cyclide with normal form (\ref{eqcy}) where
+\begin{itemize}
+\item
+	$a = \frac{\|c_2 - c_1\|}{2}$, 
+\item
+	$\mu = \left\{ \begin{array}{ll}
+		\frac{r_1 - r_2}{2} &	\mbox{if the cyclide is horned} \\
+		\frac{r_1 + r_2}{2} &	\mbox{otherwise}
+	\end{array}
+	\right. $
+\item
+	$c = r_1 - \mu$, and 
+\item
+	$b = \sqrt{a^2 - c^2}$,
+\end{itemize}
+under the rigid transformation
+that rotates the $y$-axis to the
+vector $o$, and translates the origin to $\frac{c_1 + c_2}{2}$.\footnote{Note 
+	that the normal form 
+	(\ref{eqcy}) assumes that the exterior circles
+	lie in the plane $y=0$, centered at the origin.}
+% That is, if $f(x,y,z)$ is equation of this normal form,
+% the equation of the cyclide is $f(M1 M2 (x,y,z))$.
+
+The cyclide with interior circles $C_1(c_1,r_1,o)$
+and $C_2(c_2,r_2,o)$, $r_1 \geq r_2$
+is the cyclide with normal form (\ref{eqcy}) where
+\begin{itemize}
+\item
+	$c = \frac{\|c_2 - c_1\|}{2}$, 
+\item
+	$\mu = \left\{ \begin{array}{ll}
+	\frac{r_1 + r_2}{2} & \mbox{if the cyclide is self-intersecting} \\
+	\frac{r_1 - r_2}{2} & \mbox{otherwise}
+	\end{array}
+	\right.$
+\item
+	$a = r_1 - \mu$, and 
+\item
+	$b = \sqrt{a^2 - c^2}$,
+\end{itemize}
+under the rigid transformation that rotates the $z$-axis to the
+vector $o$, and translates the origin to $\frac{c_1 + c_2}{2}$.
+%
+% CONDITIONS THAT CIRCLES BE PROPER INTERIOR AND EXTERIOR CIRCLES
+%	(E.G., FOR INPUT MECHANISM OF CYCLIDES)
+% circles $C_1$ and $C_2$ in one plane of symmetry 
+% and $C_3$ and $C_4$ in the other plane of symmetry, 
+% where $C_i$ is the circle\footnote{There are two special cases 
+% 	where one of the
+% 	circles degenerates to a point.
+%	If $\mu = c$, the circle $C_2$ degenerates to a point.
+% 	If $\mu = a$, the circle $C_4$ degenerates to a point.}
+% with center $c_i$ and radius $r_i$, $i=1,2,3,4$,
+% such that
+% \begin{enumerate}
+% \item
+%	$C_1$ and $C_2$ lie in the same plane;
+% \item
+% 	$C_3$ and $C_4$ lie in the same plane, perpendicular to the plane of 
+%	$C_1$ and $C_2$;
+% \item	
+%	$r_1 \geq r_2$ and $C_2$ does not lie completely inside $C_1$;
+% \item	
+%	$r_3 \geq r_4$ and $C_4$ does not lie completely outside $C_3$;
+% \item
+%	$\|c_1 - c_2\| > \|c_3 - c_4\|$;  % so that a > c
+% \item
+%	$r_3 = r_1 - \frac{\|c_3 - c_4\|}{2} + \frac{\|c_1 - c_2\|}{2}$
+%	and $r_4 = |r_1 - \frac{\|c_3 - c_4\|}{2} - \frac{\|c_1 - c_2\|}{2}|$.
+% \end{enumerate}
+%
+\end{lemma}
+
+\begin{rmk}
+In this paper, we are consistently able to represent a cyclide 
+by two circles in a plane of symmetry.  All of the algorithms
+that deal with a cyclide use this representation (Theorems~\ref{thm:invtorus} 
+and \ref{cor:coi}).
+
+Cayley also used two circles in a plane of symmetry to define the cyclide.
+However, his method of deriving the cyclide from these two circles is 
+quite different (see \cite[p. 285]{CDH89a}).
+
+Chandru, Dutta, and Hoffmann \cite{CDH89a} observe that the input of a
+cyclide by two (exterior) circles in its plane of symmetry is natural 
+for blending, where the circles can encode two (extremal) positions
+of a rolling ball blend.
+\end{rmk}
+
+\Comment{
+\subsubsection{Cyclide as circle $\times$ conic}
+
+Good representation because: 
+	Simple point classification (like any implicit):
+		find the point q of the ellipse such that p lies on its
+		normal plane
+			IS THIS EASY?
+		p lies on cyclide $\Leftrightarrow$ 
+		dist(p,q) = radius of circle at q
+	Generate points (like any parametric)
+	Don't need to store orientation function: tangent to conic at q 
+		is always the normal of the plane of the circle at q
+
+
+Many authors use this representation (e.g. Dutta (conic = spine for blending))
+
+Maxwell's equation in terms of anticonic parameters: p. 286 of Dutta.
+
+}
+
+% *********************************************************************
+
+% theory of inversion
+% \input{inversion}
+
+\section{Inversion}
+\label{sec:inv}
+
+In this section, we formally introduce the inversion map.
+As suggested by Figure~\ref{fig1},
+inversion is the generalization of reflection.
+While a point is reflected in a line or plane, it is inverted with respect
+to a circle or sphere.
+
+In the following discussion, we shall present definitions and results
+for the sphere; however, most results also apply to inversion in a 
+circle, by simply replacing sphere by circle and plane by line.
+
+\figg{fig1}{(a) Reflection in a line (b) Inversion in a circle}{2.5in}
+
+\begin{defn2}
+$\mbox{inv}_{S}(p)$, the {\bf inverse of a point} $p \in \Re^{3}$ in the 
+sphere $S$ of radius $R$ centered at $c$, 
+is the point $p' \in \ray{cp}$ such that
+$\mbox{dist}(c,p)\ *\ \mbox{dist}(c,p') = R^{2}$.
+$S$, $c$ and $R$ are called the {\bf sphere of inversion},
+the {\bf center of inversion},
+and the {\bf radius of inversion}, respectively.
+As a special case, the inverse of a point in a plane is the reflection
+of that point in the plane.
+% Johnson, p. 44 \cite{J29}.
+%
+\Comment{
+One may also define an inversion map restricted to a plane.
+Let $C$ be a circle of radius $r$ centered at $c$ and lying in the plane $P$.
+The {\em inverse} of a point $p \in P$ in the circle $C$, 
+$\mbox{inv}_{C}(p)$, is the point $p' \in \ray{cp}$ such that
+$\mbox{dist}(c,p)\ \mbox{dist}(c,p') = r^{2}$.
+}
+\end{defn2}
+
+Note that, under inversion, the interior of the sphere of inversion
+is mapped to its exterior and vice versa, while the sphere is mapped to itself.
+
+\begin{lemma}
+\label{lem-inv}
+Let $S$ be the sphere of inversion with center $c$ and radius $R$.
+$\mbox{inv}_{S}(p) = \frac{R^{2}}{||p-c||^{2}} (p-c) + c$.
+\end{lemma}
+\Heading{Proof:}
+The inverse of $p$ is $p' = c + k(p-c)$, where $k\|p - c\|*\|p - c\| = R^{2}$.
+\QED
+
+The most important property of inversion is that, 
+in general, it maps circles to circles.
+\Comment{
+% ***********************************
+% THING TO DO: PROVE FOR GENERAL CASE; REQUIRES PROOF THAT INV(N-SPHERE)
+% 		IS AN N-SPHERE
+%
+% IN JOURNAL: 
+% STATE GENERAL CASE IN TERMS OF I-SPHERE.
+% ELEGANT TO STATE MOST GENERAL CASE;   MAIN PROBLEM: GOOD DEFN OF I-SPHERE
+% 	COLLAPSES SEVERAL CASES INTO ONE;
+%	ALLOWS STATEMENT OF GENERALIZED PROOF;
+%	FORCES ME TO UNDERSTAND CIRCLE -> CIRCLE PROOF SO THAT I CAN EXTEND
+%	TO N-SPHERE -> N-SPHERE
+
+\begin{description}
+\item[(1.4a)]
+\label{lem:inversion}
+	The inverse of an $i$-sphere is an $i$-sphere or an $i$-plane,
+	$i \leq n$
+	\cite{D49,Coo71}.
+	It is an $i$-plane exactly when the $i$-sphere 
+	passes through the center of inversion.
+	%
+	% \cite[p. 210]{D49}: nice proof for plane circles.
+	% \cite[p. 26, 228]{Coolidge} % statement for plane circles (p. 26)
+			    % statement for spheres and space circles (p. 228)
+PROOF: PROOF FOR PLANE CIRCLES (E.G., JOHNSON, P. 50) AND LINES (P. 49)
+	GENERALIZES DIRECTLY TO HYPERSPHERES AND HYPERPLANES.
+	NOW YOU CAN PROVE FOR $I$SPHERE BY INDUCTION, AND INTERSECTION.
+\end{description}
+
+\noindent where
+
+\begin{defn2}
+An $i$-sphere (resp., $i$-plane) is a hypersphere (resp., hyperplane) 
+in $R^{i}$.
+Thus, a 2-sphere is a circle and a 3-sphere is the typical sphere.
+More technically, in $\Re^{n}$, 
+a hypersphere is an $n$-sphere, a hyperplane is an $n$-plane,
+an $i$-sphere is the intersection of a hypersphere and an $i+1$-plane ($i < n$)
+and an $i$-plane is the intersection of a hyperplane and an $i+1$-plane 
+($i < n$).
+\end{defn2}
+
+We are interested in the following subcase: 
+\begin{description}
+\item[]
+	The inverse of a circle is a circle or a line.
+	It is a line exactly when the circle 
+	passes through the center of inversion.
+\end{description}
+
+}
+
+\begin{description}
+\item[(1)]
+\label{lem:inversion}
+	The inverse of a circle is a circle or a line.
+% (e.g., \cite{Coo71})
+	It is a line exactly when the circle 
+	passes through the center of inversion.\footnote{This is
+	the key to Peaucellier's linkage for drawing a straight line.}
+\item[(2)]
+	The inverse of a sphere is a sphere or a plane.
+	It is a plane exactly when the sphere 
+	passes through the center of inversion.
+	%
+	% \cite[p. 210]{D49}: nice proof for plane circles.
+	% Johnson also has a nice proof (the same one) for plane circles **
+	% \cite[p. 26, 228]{Coolidge} % statement for plane circles (p. 26)
+			    % statement for spheres and space circles (p. 228)
+\Comment{
+Proof for space circles:
+Any circle is the intersection of a sphere and a plane.
+If the circle contains the center of inversion, then 
+the sphere and plane both invert to a plane, which intersect in a line.
+Otherwise, the sphere and plane both invert to a sphere,
+which intersect in a circle.
+
+Proof for lines: 
+$\mbox{inv}(\mbox{inv}(p)) = p$.
+}
+\end{description}
+
+% Inversion is useful as a dual map in computational geometry, 
+% as discussed in Preparato and Shamos.
+
+% IN JOURNAL: \figg{}{Circles map to circles}{1in}
+
+Several other properties of inversion are indirectly important.
+
+\begin{description}
+\item[(3)]
+	$\mbox{inv}_{S}^{-1} = \mbox{inv}_{S}$, 
+	i.e., $\mbox{inv}_{S}(\mbox{inv}_{S}(p)) = p$.
+	% Inversion is self-inverse; `reciprocal' (is used in Johnson)
+\end{description}
+
+Combining properties (1) and (3), we have
+
+\begin{description}
+\item[(4)]
+	The inverse of a line $L$ is a circle through the center
+	of inversion or a line.
+	It is a line exactly when $L$
+	passes through the center of inversion,
+	in which case the inverse of $L$ is $L$.
+\end{description}
+
+(4) is also true for planes.
+
+\begin{description}
+\item[(5)]
+\label{prop:conformal}
+	Inversion is conformal.
+	% \cite{Davis}
+	% p. 214
+	That is, the angle between two intersecting curves is 
+	preserved under inversion.
+\end{description}
+
+\begin{defn2}
+If the point $p$ lies outside the sphere $S$,
+the {\bf polar} of $p$ with respect to $S$
+is the plane that intersects $S$ in the points of tangency from $p$ 
+(Figure~\ref{fig2}).
+\end{defn2}
+
+\begin{description}
+% FOLLOWING FACT IS NEEDED TO FIND CENTER OF SPACE CIRCLE
+\item[(6)]
+\label{prop:polar}
+If $p$ lies outside $S$, $\mbox{inv}_{S}(p)$ 
+lies on the polar of $p$ with respect to $S$ \cite{Coo71}.
+% IN JOURNAL: CHECK THIS: (ONLY STATED FOR CIRCLES S)
+% p. 22
+Thus, $\mbox{inv}_{S}(p)$ is the intersection of $p$'s polar
+and the line to the center of $S$ (Figure~\ref{fig2}).
+\end{description}
+
+\figg{fig2}{The relation between inversion and polars}{3in}
+
+\begin{description}
+\item[(7)]
+Lines of curvature are preserved under inversion \cite{FISCH86}. % p. 29
+\end{description}
+
+% That is, lines of curvature are mapped onto lines of curvature
+
+A direct consequence of (7), and (1), is that cyclides are mapped to cyclides.
+
+\begin{description}
+\item[(8)]
+The inverse of a Dupin cyclide is a Dupin cyclide,
+if the center of inversion does not lie on the cyclide.\footnote{Under the
+	more general definition of a Dupin cyclide as a surface whose lines
+	of curvature are circles or lines,
+	the inverse of a Dupin cyclide is always a Dupin cyclide.}
+% Reference of this fact: p. 29 of Gerd Fischer: Dupin -> Dupin 
+% parabolics arise from centers of inversion on cyclide
+\end{description}
+
+In special cases, the inverse of a cyclide can be simpler than a cyclide.
+
+\begin{description}
+\item[(9a)] Any Dupin cyclide can be inverted to a torus.
+\item[(9b)] Any singly-horned Dupin cyclide can be inverted to a cylinder.
+\item[(9c)] Any doubly-horned Dupin cyclide can be inverted to a cone.
+\item[(9d)] Any self-intersecting Dupin cyclide can be inverted to a cone.
+\end{description}
+
+These important cases will be proved and discussed in 
+Section~\ref{sec:totorus}.
+
+% *********************************************************************
+
+% \input{newintmethod}
+
+\section{A new method for intersection}
+\label{sec:nim}
+
+% IT IS VERY GOOD TO PRESENT THE INTERSECTION RESULTS AT THE BEGINNING,
+% BEFORE CIRCLE DECOMPOSITION, CIRCLE INVERSION, TORUS INVERSION, AND OTHER
+% WEAPONRY THAT IS BEING BUILT FOR THE INTERSECTION METHOD.
+% THE READER WILL UNDERSTAND IF WE INDICATE THE RESULTS OF LATER SECTIONS.
+% THE READER WILL BE MOTIVATED TO READ THE LATER SECTIONS.
+% THE READER WHO ONLY READS THE FIRST BIT WILL UNDERSTAND THE METHOD.
+
+In this section, we present our method for the exact intersection of any
+ringed surface with a quadric or cyclide.
+%
+% The fact that the canonical CSG primitives (quadric, torus, plane) 
+% are the union of circles or lines
+% is a weakness from the point of view of representational power, but
+% a strength from the point of view of algorithmic unity and integration.
+% Previous algorithmic development has not taken advantage of this unity of
+% structure, centering instead around the degree of a primitive.
+% 
+We begin with intersection with a quadric surface, then intersection with
+a horned or self-intersecting cyclide, and finally intersection with a ring
+cyclide.
+Our goal is to reduce everything to a degree 4 computation.
+This is necessary for exact computation, since equations of higher degree
+do not have closed form solutions \cite{He75} 
+and must be solved numerically.
+
+Consider the intersection of a ringed surface with a quadric surface,
+which illustrates the importance of circle decomposition in intersection.
+Using a circle decomposition of the ringed surface 
+(that is, a decomposition of the surface into circles, 
+$\cup_{t \in I} \rm{circle}(t)$),
+the ringed/quadric intersection can be reduced
+to a circle($t$)/quadric intersection.
+% 	the only important fact is that we have a circle decomposition:
+% 	i.e., circle x conic could be replaced by circle x arbitrary-curve
+This can be interpreted as an infinite number of circle/quadric intersections.
+Treating the parameter $t$ as a constant,
+we can solve symbolically for the intersection of the circle with the quadric
+(since it is a degree 4 computation).
+The resulting parameterization in $t$ is the intersection curve.
+
+% EXAMPLE: need Section~\ref{sec-decomp}
+
+Circle decomposition also immediately simplifies the intersection
+of a ringed surface with a cyclide,
+by reducing it to circle($t$)/cyclide intersection, 
+which is a symbolic degree 8 computation.
+The secret to reducing the intersection to a degree 4 computation 
+is to reduce the circles to lines.
+In particular, exact ringed/cyclide intersection
+requires inversion as well as circle decomposition.
+%
+\Comment{
+REDUNDANT: EXACTLY THE SAME REASON THAT CIRCLE/CYCLIDE IS DEGREE 8.
+Another way of seeing that circle decomposition yields a degree 8 computation
+for cyclide/cyclide intersection is the following.
+To elaborate on the circle decomposition of a cyclide,
+it is possible to parameterize the cyclide as a circle sweeping about a conic.
+We shall discuss the circle decomposition of a cyclide further
+in Sections~\ref{sec-cy} and \ref{sec-decomp}.
+Note that this parameterization of a cyclide is only degree 2 in $s$ 
+(since the circle has a degree 2 parameterization)
+and degree 2 in $t$ (since the conic has a degree 2 parameterization),
+although it is still degree 4 in total.
+Using this parameterization, the intersection of the cyclide
+$f(x,y,z)=0$ with the cyclide $(x(s,t),y(s,t),z(s,t))$ can be computed via
+$f(x(s,t),y(s,t),z(s,t)) = 0$, which is 
+an equation of degree 8 in $t$ rather than degree 16.
+}
+%
+Recall that inversion can reduce the degree, as in the mapping
+of a circle to a line, or a horned cyclide to a cylinder.
+% or a torus to a parabolic cyclide (a cubic surface).
+% In all cases, inversion is with respect to a point on the object.
+
+In some cases, the intersection of a ringed surface and a cyclide quickly 
+reduces to the intersection of a ringed surface and a quadric.
+Recall that a horned cyclide can be inverted to a cylinder or cone,
+and a self-intersecting cyclide can be inverted to a cone
+(Property (9b-9d) of inversion).
+Suppose that the cyclide is horned or self-intersecting,
+and the inversion map $f$ maps it to a cylinder or cone.
+By circle decomposition, the ringed/cyclide intersection can be reduced to
+a circle(t)/cyclide intersection.
+Since circles are inverted to circles, this can 
+be further reduced to a circle(t)/cylinder or circle(t)/cone intersection
+by the inversion $f$:
+$\cup_{t \in I} [f(\mbox{circle}(t))] \cap f(\mbox{cyclide})$.
+This is the intersection of a ringed surface and a quadric,
+which has been solved above.
+The desired result is the inversion $f(C)$ of this curve $C$.
+
+We can now restrict our attention to the
+intersection of a ringed surface with a ring cyclide, which is the most
+challenging problem.
+The ringed/cyclide intersection 
+is first reduced to circle$_1$($t$)/cyclide intersection.
+The degree of the computation is then halved from 8 to 4 through inversion.
+We first reduce the (ring) cyclide to a (ring) torus $T$ via inversion
+(Property (9a) of inversion).
+This inversion maps the circles of the ringed surface to circles.
+That is, the circle$_1$($t$)/cyclide intersection is reduced via inversion
+to a circle$_2$($t$)/torus intersection.
+This is an (infinite) collection of circle/torus intersections,
+still a degree 8 computation.
+We reduce it further to an (infinite) collection of line intersections,
+by inverting each circle to a line.
+However, this reduction 
+requires a different center of inversion for each circle, 
+since the center of inversion must lie on the circle in order to invert it
+to a line.
+We shall use a symbolic center of inversion: circle$_2$($t$) 
+will have the center of inversion (circle$_2$($t$))($k$).
+$k$ must be a constant, since we must restrict to one free parameter, $t$.
+Under this symbolic inversion, the torus is inverted to a symbolic cyclide.
+Thus, the collection of circle/torus intersections,
+$\cup_{t \in I} [{\rm circle}_{2}(t) \cap {\rm torus}\ T]$, 
+is reduced to a collection of line/cyclide intersections: 
+$\cup_{t \in I} [{\rm line}(t) \cap {\rm cyclide}(t)]$,
+where ${\rm line}(i) = {\rm inv}_{({\rm circle}_{2}(i))(k)}{\rm circle}_{2}(i)$
+and ${\rm cyclide}(i) = {\rm inv}_{({\rm circle}_{2}(i))(k)} T$.
+
+\begin{rmk}
+The reason that we first reduce the cyclide to a torus 
+is that we know how to compute the inverse of a torus with respect to any 
+point.
+\end{rmk}
+
+% The reason we reduce to $\mbox{circle}(t)$/torus 
+% rather than staying with $\mbox{circle}(t)$/cyclide 
+% is that we know how to compute the inverse of a torus with respect to any 
+% point; but we only know how to invert a general cyclide with
+% respect to points in its planes of symmetry.
+% There is no way of restricting the symbolic center of inversion to two 
+% planes.
+
+We want the implicit equation of cyclide($t$),
+so that we can substitute the parameterization of line($t$) into the
+cyclide's implicit equation, yielding a degree 4 equation in $t$,
+which can be solved symbolically, yielding the points of 
+intersection of line($t$)/cyclide($t$).
+Unfortunately, it is difficult to determine the exact implicit equation of 
+cyclide($t$) (Section~\ref{sec:inv-cyclide}).
+Instead, we find the implicit equations of two cyclides: 
+$(c_1(x,y,z))(t)$ and $(c_2(x,y,z))(t)$, where
+\[ {\rm cyclide}(t) = \left\{ \begin{array}{ll}
+	c_1(t) & {\rm if\ } ({\rm circle}_2(t))(k) 
+		\mbox{ lies outside the torus $T$} \\
+	c_2(t) & {\rm if\ } ({\rm circle}_2(t))(k) 
+		\mbox{ lies inside the torus $T$}.
+   \end{array} \right. 
+\]
+That is, cyclide($t$) switches from $c_1(t)$ to $c_2(t)$ or from $c_2(t)$ to 
+$c_1(t)$ when the center of inversion crosses the torus.
+We compute both $\mbox{line}(t) \cap c_1(t)$ and $\mbox{line}(t) \cap c_2(t)$,
+and then choose the appropriate one for each $t$, as follows.
+By computing the intersections
+of $\{({\rm circle}_2(t)(k) | \mbox{$t \in I$}\}$, 
+the locus of the center of inversion, 
+with the torus (say these intersections are at $t = t_1,t_2,\ldots,t_N$),
+we can identify the intervals $(t_i,t_{i+1})$ where cyclide($t$) = $c_1(t)$
+and the remaining intervals $(t_j,t_{j+1})$ where cyclide($t$) = $c_2(t)$.
+Thus, we can correctly compute the intersection of line($t$)/cyclide($t$).
+
+\Comment{
+\begin{rmk}
+For a cyclide, since the center of circle($t$) sweeps along a conic 
+(Remark~\ref{rmk:conic}), a fixed point (circle($t$))($k$), 
+which is at a constant offset from the center,
+also sweeps along a conic.
+Thus, the intersection of $\{({\rm circle}(t)(k) | t \in I\}$ and the torus
+is a numeric degree 8 computation, which is done offline.
+
+For ringed surfaces, step (3) of the cyclide/cyclide method may become 
+a more complicated computation (i.e., the solution of an equation
+of higher degree).
+\end{rmk}
+}
+
+\begin{rmk}
+\label{rmk:noton}
+The intersections ${\rm circle}_2(t_i)(k)$ of 
+$\{({\rm circle}_2(t)(k) | \mbox{$t \in I$}\}$ and the torus $T$ are special,
+because ${\rm cyclide}(i) = {\rm inv}_{({\rm circle}_{2}(i))(k)} T$
+and the inverse of a torus with respect to a point on the torus 
+is a (cubic) parabolic cyclide, rather than a quartic cyclide.
+Thus, cyclide(t) is $c_1(t)$ on some intervals $(t_i,t_{i+1})$,
+$c_2(t)$ on the remaining intervals $(t_j,t_{j+1})$,
+and $c_3(t)$ for $t = t_i, i = 1,\ldots,N$, where $c_3(t)$ is a parabolic 
+cyclide.
+To avoid the complication of computing $c_3(t)$,
+we ignore the values $t=t_i$ when computing the line($t$)/cyclide($t$) 
+intersections, thus ignoring
+a finite number of points from the intersection.
+In fact, since the intersection curve is continuous,
+these `missing' points are limits of their neighbours,
+and are automatically filled in.
+\end{rmk}
+
+The result of line($t$)/cyclide($t$) 
+is the parameterization (in $t$) of the intersection curve of the ringed
+surface and the original cyclide, after a series of two inversions
+(Figure~\ref{fig:box}).
+Thus, we need to invert this result,
+first via the symbolic center of inversion (circle$_2$($t$))($k$)
+and then via the center of inversion used for 
+the original cyclide-to-torus inversion.
+The final result is the desired intersection curve.
+
+To review, here is our algorithm for ringed/cyclide intersection.
+
+\ifFull
+\vspace{.2in}
+\else
+\clearpage
+\fi
+
+\centerline{{\bf The Circle Method}}
+\begin{description}
+\item[1.]
+	Express ringed $\cap$ cyclide as
+		$\cup_{t \in I}[{\rm circle}(t) \cap {\rm cyclide}]$.
+\item[2.]
+	If the cyclide is horned or self-intersecting, 
+	then:
+\begin{description}
+\item[(a)]
+	Reduce the problem to 
+	$\cup_{t \in I}[f({\rm circle}(t)) \cap f({\rm cyclide})]$,
+	where $f$ is the inversion that maps the cyclide to a cylinder
+ 	or cone.  
+	Sections~\ref{sec:toquadric} and \ref{sec1} 
+	deal with the computation
+	of the map $f$ and the inverse of each circle, respectively.
+\item[(b)]
+	The intersection of the circle $f({\rm circle}(t))$ with the
+	quadric $f({\rm cyclide})$ can be computed symbolically.
+	If this intersection is $\alpha(t)$, 
+	then the ringed/cyclide intersection curve is 
+	$f(\alpha(t))$.
+\item[(c)]
+	Exit.
+\end{description}
+\item[3.]
+(Note that we now know that we are working with a ring cyclide.)\\
+	Reduce $\cup_{t \in I}[{\rm circle}(t) \cap {\rm cyclide}]$
+		to $\cup_{t \in I}[{\rm circle}(t) \cap {\rm torus}]$,
+		by inverting the cyclide to a torus (Section~\ref{sec:totorus})
+		and mapping each circle under this inversion 
+		(Section~\ref{sec1}).
+		Let the center of inversion be $c$.
+\item[4.]
+	Compute the intersections of the curve
+		$[(\mbox{circle}(t))(k) | t \in I]$
+		with the torus.  Let these intersections be
+		$t_1,t_2,\ldots,t_N$.
+		% this is a conic by Remark~\ref{rmk:conic}
+\item[5.]
+	Identify the intervals $(t_{i_1},t_{i_{1}+1}), (t_{i_2},t_{i_{2}+1}),
+		\ldots, (t_{i_m},t_{i_{m}+1})$,
+		where $(\mbox{circle}(t))(k)$ lies outside the torus.
+\item[6.]
+	Reduce $\cup_{t \in I}[{\rm circle}(t) \cap {\rm torus}]$
+		to $\cup_{t \in I}[{\rm line}(t) \cap {\rm cyclide}(t)]$,
+		where 
+\[ 
+	{\rm cyclide}(t) = \left\{ \begin{array}{ll}
+		c_1(t) & t \in \cup_{j \in 1,\ldots,m}\{(t_{i_j},t_{i_{j}+1})\}
+				\\
+		c_2(t) & {\rm otherwise}.
+	\end{array} \right.
+\]
+		by inverting the circle (Section~\ref{sec1}) and 
+		torus (Section~\ref{sec:inv-cyclide}) with respect to the 
+		center of inversion (circle($t$))($k$).
+		Both $c_1(t)$ and $c_2(t)$ are implicit equations of cyclides.
+
+	   % MUST MAKE SURE THAT WE CAN FIND PARAMETRIC EQUATION OF LINE(T)
+\item[7.]
+	Viewing $t$ as a symbolic constant,
+		compute $\mbox{line}(t) \cap c_1(t)$
+		for its four intersections $p_{1,1}(t)$, $p_{2,1}(t)$,
+		$p_{3,1}(t)$, $p_{4,1}(t)$.
+		That is, substitute the parameterization of line($t$) into
+		$c_1(t)$, and solve the resulting degree 4 equation 
+		symbolically.
+		Similarly, compute the four intersections
+		$p_{1,2}(t)$, $p_{2,2}(t)$, $p_{3,2}(t)$, $p_{4,2}(t)$
+		of $\mbox{line}(t) \cap c_2(t)$.
+		Let
+\[ 
+	p_i(t) = \left\{ \begin{array}{ll}
+	p_{i,1}(t) & t \in \cup_{j \in 1,\dots,m}\{(t_{i_j},t_{i_{j}+1})\} 
+				\\
+		p_{i,2}(t) & {\rm otherwise}.
+	\end{array} \right.
+\]
+\item[8.]
+	Invert $p_1(t)$, $p_2(t)$, $p_3(t)$, and $p_4(t)$ to 
+		$q_1(t)$, $q_2(t)$, $q_3(t)$, $q_4(t)$,
+		using the symbolic center of inversion $(\mbox{circle}(t))(k)$
+		(and the same radius of inversion as in step (6)).
+\item[9.]
+	Invert $q_1(t)$, $q_2(t)$, $q_3(t)$, and $q_4(t)$ to 
+		$r_1(t)$, $r_2(t)$, $r_3(t)$, $r_4(t)$,
+		using the center of \mbox{inversion $c$}
+		(and the same radius of inversion as in step (3)).
+\item[10.]
+	The intersection of the original ringed surface and cyclide is
+		$\cup_{t \in I} [r_1(t),r_2(t),r_3(t),r_4(t)]$.
+\end{description}
+
+\begin{figure}[h]
+\[
+\begin{array}{c}
+\mbox{ringed} \cap \mbox{cyclide}  \\
+\downarrow \\
+\mbox{circle}(t) \cap \mbox{cyclide} \\
+\downarrow \\
+\mbox{circle}(t) \cap \mbox{torus} \\
+\downarrow \\
+\mbox{line}(t) \cap \mbox{cyclide}(t)
+\end{array}
+\]
+\caption{Ringed/cyclide intersection (last two arrows are inversion maps)}
+\label{fig:box}
+\end{figure}
+
+
+% The complexity of this computation is as follows:
+% 	START HERE
+
+
+\Comment{
+Q. WHAT ABOUT INSTABILITY OF DEGREE 4 CLOSED FORM?
+A. IF YOU DON'T WANT TO USE DEGREE 4 SYMBOLIC COMPUTATION,
+	CAN STILL USE NUMERIC METHODS, BUT OF COURSE WILL ONLY GET 
+	APPROXIMATE  INTERSECTION (I.E., WILL HAVE TO CHOOSE A FINITE
+	SET OF CIRCLES TO INTERSECT)
+If desired, rather than computing the closed form solution for the intersection
+curve, it is of course possible to get a finite number of points on the 
+intersection curve by substituting a constant value for $t$ in each of the 
+above methods, and solving numerically.
+You can choose an arbitrary granularity for these points on the intersection.
+(This is an advantage of this method over the tracing method of finding
+a finite number of points on the intersection.  The tracing method must
+choose a fine granularity of points, since it must take care not to lose
+the curve as it traces along it.)
+}
+
+% ********************BOGUS*******************************************
+
+\Comment{
+Actually, general cyclide/cyclide intersection can be solved (exactly)
+using the mapping to a torus.
+In particular, the cyclide/cyclide intersection can be reduced to a 
+(circle(t) parameterization)/cyclide intersection,
+which can be further reduced via inversion to a 
+(circle(t) parameterization)/torus intersection.\footnote{Actually,
+	any parameterization of the first cyclide may be used,
+	but the circle(t) parameterization is the most natural one.}
+Now interpret the circle(t) parameterization as a point parameterization
+point(s,t).
+Note that a point lies on the intersection of a surface with a torus
+if and only if it lies on the surface and at distance $d$ from the circle $C$,
+where the torus is the $d$-offset of $C$.
+Thus, the [point(s,t)/(torus = offset(C,d))] intersection can be reduced to a
+\be
+\label{g}
+dist(point(s,t),C) = d
+\ee
+calculation.
+Since there is a degree 4 formula for point-circle distance,
+the solution of (\ref{g}) for $t$ is 
+a degree 4 * (degree of s in point(s,t)) computation.
+	POINT(S,T) IS DEGREE 2 IN BOTH S AND T, 
+	SO DIST(POINT(S,*),C) = D 
+	IS A DEGREE EIGHT FORMULA IN S!
+	WHICH CANNOT BE SOLVED SYMBOLICALLY
+The resulting parameterization in $t$ is the intersection curve.
+
+% IS POINT-CIRCLE DISTANCE FORMULA POSSIBLY DEGREE 1 OR 2 IN POINT,
+%	(ALTHOUGH IT IS DEGREE 4 TOTAL) ? NO
+}
+
+% *******************END OF BOGUS************************************
+
+% *********************************************************************
+
+% inverse of torus
+% \input{inv-torus}
+
+\section{The inverse of a torus}
+\label{sec:inv-cyclide}
+
+In this section, we show how to compute the inverse of a torus.
+This is needed in step (6) of the intersection algorithm.
+Note that we don't need to consider the inverse of an arbitrary torus.
+Like cyclides, we can distinguish between ring, horned, and self-intersecting
+tori, and we only need to consider the inverse of ring tori 
+(i.e., tori whose exterior circles are disjoint).
+This is enough because 
+the torus in step (6) of the algorithm is a ring torus,
+being the inverse of a ring cyclide.
+
+The inverse of a ring torus is an easy computation for the following reason.
+We know that the inverse of a cyclide is a cyclide (Property (8) of inversion).
+The inverse of a cyclide is easy to compute if the center of inversion
+lies on a plane of symmetry.
+This plane remains a plane of symmetry and the inverse cyclide is
+determined by the effect of the inversion on the two circles in this plane
+of symmetry (Lemma~\ref{lem:uni}).
+For this reason, the inverse of a torus is always easy to compute,
+since a torus has an infinite number of planes of symmetry which cover space.
+That is, the center of inversion always lies in a plane of symmetry.
+The only difficulty is deciding whether the plane of symmetry becomes 
+an exterior or interior plane of symmetry.
+The following lemma shows how to decide.
+
+\begin{lemma}
+\label{lem:intorext}
+Consider the inverse of a ring torus.
+Let $P$ be the exterior plane of symmetry of the torus that contains
+the center of inversion.
+The exterior circles in $P$ map to interior circles if and only if the
+center of inversion lies inside one of the exterior circles.
+\end{lemma}
+\prf
+Let $C_1$ and $C_2$ be the two exterior circles in the plane $P$.
+We will prove that $\mbox{inv}(C_2)$ contains $\mbox{inv}(C_1)$ 
+if and only if $C_2$ contains the center of inversion.
+Suppose $C_2$ contains the center of inversion $c$.
+In particular, in every direction from $c$, $C_2$ is encountered before $C_1$.
+After inversion, in every direction from $c$,
+$\mbox{inv}(C_1)$ will be encountered before $\mbox{inv}(C_2)$,
+because the closer a point is to the center of inversion, 
+the further away it is mapped from the center of inversion.
+Since $\mbox{inv}(C_2)$ is a circle that contains the center of inversion,
+this implies that $\mbox{inv}(C_2)$ contains $\mbox{inv}(C_1)$.
+
+Suppose $C_2$ does not contain the center of inversion.
+Circles are stretched radially out from the center of inversion,
+or shrunk radially in.
+Thus, in order for $C_1$ to map inside $C_2$, it must lie in the sector
+defined by $C_2$ as well as the annulus defined by $C_2$ 
+(Figure~\ref{fig:cant}).
+It is impossible to satisfy both of these criteria,
+since $C_1$ and $C_2$ are disjoint.
+\QED
+
+\figg{fig:cant}{$C_1$ cannot map inside $C_2$}{3.75in}
+
+This leads immediately to the desired result.
+Note that we can assume that the center of inversion does not lie on the torus,
+since this will be the case in step (6) of the intersection algorithm.
+(Remark~\ref{rmk:noton}).
+
+\ifFull
+\else
+\newpage
+\fi
+
+\begin{theorem}
+\label{thm:invtorus}
+Let $T$ be a ring torus and let
+$S$ be a sphere of inversion with center $c \not \in T$.
+The inverse of $T$ is the ring cyclide with 
+\[ \begin{array}{ll}
+   {\rm interior\ circles\ } \mbox{inv}_S(E_1), \mbox{inv}_S(E_2) &
+		\rm{if\ the\ center\ of\ inversion\ lies\ inside\ } T \\
+   {\rm exterior\ circles\ } \mbox{inv}_S(E_1), \mbox{inv}_S(E_2) &
+			\rm{otherwise}
+   \end{array}
+\]
+where $E_1$ and $E_2$ are the exterior circles of $T$
+that lie in the same plane as the center of inversion.
+\end{theorem}
+\Comment{
+\prf
+By Lemma~\ref{lem:intorext}, 
+the exterior circles of the torus are mapped to interior circles
+if and only if one of them contains the center of inversion.
+\QED
+}
+
+Section~\ref{sec1} discusses how to compute the inverse of a circle
+(for $\mbox{inv}_S(E_1)$ and $\mbox{inv}_S(E_2)$).
+and Lemma~\ref{lem:uni} shows how to recover a cyclide from its interior or
+exterior circles.
+In the following section, 
+we consider the map from a cyclide to a torus, which
+is needed in step (3) of the intersection algorithm and in 
+Section~\ref{sec-decomp} on circle decomposition.
+
+% *********************************************************************
+
+% reduction of cyclide to torus
+% \input{totorus}
+
+\section{The mapping of a cyclide to a torus}
+\label{sec:totorus}
+
+The inverse of a torus is always a cyclide, but the inverse of a cyclide
+is rarely a torus.
+Nevertheless, it is always possible to find a center of inversion that maps
+a cyclide to a torus.
+It is clear from Figure~\ref{fig:sym} that a cyclide is a torus if and only
+if $c=0$, if and only if the interior circles are concentric.
+	% since the exterior and interior circles identify a cyclide
+Thus, a cyclide can be mapped to a torus by
+inverting its interior circles (or its exterior circles) 
+to concentric interior circles.
+% THUS AGAIN WE CAN DIRECTLY USE THE REP BY CIRCLES IN PLANES OF SYMMETRY
+We attack this problem in the following section.
+
+% ********************************************************************
+
+\subsection{Mapping to concentric circles}
+
+There is a classical method for inverting two non-intersecting circles 
+into concentric circles.
+
+\begin{defn2}
+\label{defn:power}
+The {\bf power} of a point $P$ with respect to a circle $C$,
+$\mbox{power}_{C}(P)$, is the product of the (signed) distances from
+$P$ to the closest point and the furthest point 
+of the circle.\footnote{The classical
+	definition of $\mbox{power}_{C}(P)$ is  
+	the product of signed distances from $P$ 
+	to any pair of points $U$ and $V$
+	on $C$, such that $U$, $V$, and $P$ are collinear.
+	This product is well defined.
+	Our definition chooses the closest and furthest points of the
+	circle for $U$ and $V$.}
+Thus, $\mbox{power}_{C}(P) = (||P-c|| - r)(||P-c|| + r)
+= ||P-c||^2 - r^2$, where $c$ and $r$ are the 
+center and radius of $C$.
+\end{defn2}
+
+% ADDS NOTHING
+%\figg{fig-power1}{$\mbox{power}_{C}(P)=\mbox{dist}(P,U)\mbox{dist}(P,V)$}{1in}
+
+\begin{rmk}
+\label{rmk:pow}
+The power of a point can be thought of as a distance measure of the point
+from a circle. 
+Both the closest and furthest points of the circle are used, 
+rather than just the closest point.
+This encodes more information: if only the closest point is used, 
+the inside of the circle cannot be distinguished from the outside.
+The power of a point is positive when the point lies outside the 
+circle and negative when the point lies inside.
+
+% See Johnson, p. 30, on power of line roughly equivalent 
+% to ratio to distance to line = midpoint of their common chord.
+
+% Since distance to a sphere is a distance metric, so is power.
+% (NEED TO SHOW A BIT MORE CAREFULLY.  GIVE EXAMPLE OF A INSIDE AND 
+% B OUTSIDE CIRCLE FOR TRIANGLE INEQUALITY.)
+\end{rmk}
+
+\begin{defn2}
+The {\bf radical axis} of two coplanar circles $C_1$ and $C_2$
+is the locus of points $P$ such that $\mbox{power}_{C_1}(P) = 
+\mbox{power}_{C_2}(P)$ (Figure~\ref{fig:rad}).
+A {\bf coaxal system} of circles is a collection of circles, 
+each pair of which have the same radical axis.
+\end{defn2}
+
+\begin{rmk}
+\label{rmk:coa}
+The radical axis of two circles is a line perpendicular to the line 
+between their centers \cite{J29}. % Johnson, p. 31
+There are three types of coaxal systems of circles:
+% \cite{J29}, Johnson, p. 36
+\begin{description}
+\item[(1)]
+	a collection of concentric circles;
+\item[(2)]
+	a collection of circles through one or two fixed points;
+\item[(3)]
+	a collection of non-intersecting circles, all of which are orthogonal
+	to a fixed circle, and all of whose centers are collinear.
+\end{description}
+We are interested in the latter type.
+\end{rmk}
+
+\figg{fig:rad}{A coaxal system with radical axis $A$, all orthogonal to the 
+		circle $C$ [20]}{1.75in}
+% Figure 10 from Johnson, p. 35
+
+\begin{defn2}
+Consider a coaxal system of type~(3),
+all of whose circles are orthogonal to the circle $C$ and
+all of whose centers lie on the line $L$.
+The {\bf limiting points} of this coaxal system are the two points of 
+intersection of $C$ and $L$.
+\end{defn2}
+
+The points $K$ and $K'$ are the limiting points of the coaxal system
+in Figure~\ref{fig:rad}.
+
+\begin{lemma}
+\cite{J29} % p. 55
+\label{lem:cntr}
+Two non-intersecting circles are inverted to concentric circles
+if a limiting point of their coaxal system is chosen as
+the center of inversion.
+\end{lemma}
+
+The following lemma shows how to find this limiting point.
+
+% FIGURE: (a) circles not inside one another, (b) one circle contains other.
+
+\begin{lemma}
+\cite{J29} % p. 35
+\label{lem:sqrtp}
+Let $C_1$ and $C_2$ be two non-intersecting circles, with centers $c_1$
+and $c_2$.
+Let $P$ be the intersection of their radical axis and $\lyne{c_1c_2}$.
+The limiting points of the coaxal system of $C_1$ and $C_2$
+lie on $\lyne{c_1c_2}$, at distance $\sqrt{\mbox{power$_{C_1}(P)$}} = 
+\sqrt{\mbox{power$_{C_2}(P)$}}$ from $P$.
+\end{lemma}
+
+% to compute limiting point: (1) compute $P$, which is the unique point on 
+% 		the line $\lyne{c_1c_2}$ with equal power to both centers.
+%			     (2) compute the power of $P$
+% 			     (3) compute the limiting point as the points
+%			         	along the line of centers at this
+%					distance from $P$.
+
+It is simple to compute $P$, the unique point on the line between the centers
+such that \mbox{power$_{C_1}(P) =$ power$_{C_2}(P)$}, 
+and thus it is simple to compute the limiting point.
+
+\subsection{Reduction of cyclide to torus}
+
+We can now invert a cyclide to a torus using 
+inversion with respect to a limiting point of the interior or exterior circles.
+
+\begin{theorem}
+\label{cor:coi}
+Let $C$ be a cyclide.
+Let $C_1(c_1,r_1,o)$ and $C_2(c_2,r_2,o)$, $r_1 < r_2$, be 
+\[
+\begin{array}{ll}
+\mbox{the interior circles of $C$} & \mbox{\ \ \ \ if $C$ is a ring or 
+			self-intersecting cyclide} \\
+\mbox{the exterior circles of $C$} & \mbox{\ \ \ \ if $C$ is a horned cyclide}
+\end{array} 
+\]
+The cyclide $C$ is mapped to a torus under an inversion 
+whose center is the limiting point of $C_1$ and $C_2$.
+Moreover, the interior circles of the torus are the inverses of $C_1$ 
+and $C_2$.
+\end{theorem}
+\prf
+We wish to map two non-intersecting circles in a plane of symmetry of $C$
+to two concentric circles in a plane of symmetry.
+This will successfully map $C$ to a torus, since the only cyclide with 
+concentric interior circles is the torus.
+By choosing the center of inversion to lie in a plane of symmetry of $C$,
+we guarantee that this plane remains a plane of symmetry.
+The non-intersecting condition enforces the use of interior circles
+for the self-intersecting cyclide, and exterior circles for the horned
+cyclide (Remark~\ref{rmk:rel}).
+Note that we could have used either interior or exterior circles for the ring
+cyclide.
+\QED
+
+% Agrees with Depont's special case on p. 37, when radii and centers of
+% interior circles for Forsyth's normal form are plugged in.
+
+\begin{rmk}
+Note that the radius of inversion is arbitrary;
+and that the torus is not necessarily a ring torus (e.g., it may be 
+self-intersecting).
+\end{rmk}
+
+\begin{rmk}
+The inversion of a singly-horned cyclide to a torus deserves additional 
+comment, since it is a degenerate case.
+Let the exterior circles of the singly-horned cyclide be $C_1$ and $C_2$.
+One of these exterior circles is a point, a degenerate circle (say $C_2$).
+We can still talk of the coaxal system of $C_1$ and $C_2$,
+but $C_2$ is now a degenerate circle of the coaxal system.
+In particular, $C_2$ is a limiting point of the coaxal system.
+(This is to be expected, since given a circle of a coaxal system,
+the circle always contains one of the limiting points; thus, when 
+the circle degenerates to a point, it degenerates to the limiting point.)
+This means that we have to take care with the choice 
+of the center of inversion: if the two limiting points of 
+the coaxal system of $C_1$ and $C_2$ are $C_2$ and 
+$P$, we should choose $P$ as the center of inversion.
+Otherwise, the process of inverting the cyclide to a torus is identical.
+% following sentence added to technical report
+The singly-horned cyclide will map to a `horned' torus, for which one
+interior circle is a point.
+\end{rmk}
+
+Since a torus is fully defined by its interior circles, and Section~\ref{sec1}
+will show how to compute the inverse of a circle,
+Theorem~\ref{cor:coi} fully defines the mapping of a cyclide to a torus.
+
+% Note that we do not find the torus by finding the inversion of the entire
+% cyclide surface with respect to a center of inversion.
+% Instead, we find key components of the image surface: interior circles of 
+% torus, or vertex and a circle of cone.
+
+% ************************************************************
+
+\section{The mapping of a cyclide to a quadric}
+\label{sec:toquadric}
+
+The previous section showed that every cyclide can be simplified 
+to a torus, through inversion.
+In this section, we show that certain cyclides (the horned cyclide 
+and the self-intersecting cyclide) can also be mapped to a cylinder or a cone
+by inversion.
+This is a very useful mapping, since the degree of the surface drops.
+% It is also very easy to establish.
+
+\subsection{Reduction of horned cyclides to cylinders and cones}
+\label{sec:tocyl}
+
+\begin{lemma}
+% Fischer, p. 29, states first property; DePont in his thesis uses both facts
+% but does not prove
+\label{lem:horn}
+A singly-horned cyclide is mapped to a circular cylinder 
+if its horn is used as the center of inversion.
+A doubly-horned cyclide is mapped to a circular cone
+if one of its horns is used as the center of inversion.
+\end{lemma}
+\prf
+Although this result is well-known, 
+we provide the proof since it is an important result.
+All circles of a horned cyclide pass through the horns.
+Thus, if one of the horns is used as the center of inversion,
+the circles are all mapped to lines and 
+the inverse of the horned cyclide is a ruled surface.
+This inverse must also be a general
+Dupin cyclide (i.e., a surface whose lines of curvature are circles 
+{\em or lines}).\footnote{See the footnote to property (8) of inversion.}
+But the only general Dupin cyclides that are ruled are the cylinder and cone.
+
+All of the circles of a doubly-horned cyclide pass through the second horn,
+so this horn maps to a cone vertex and the cyclide maps to a cone.
+The circles of a singly-horned cyclide only share the one horn,
+so this cyclide maps to a cylinder.
+\QED
+
+\begin{rmk}
+\label{rmk:interior}
+The interior circles are fundamental in the reduction of a horned cyclide
+to a cone/cylinder.
+The center of inversion is a horn, which is an intersection of the interior
+circles.
+Moreover, since the center of inversion lies in an (interior) plane of
+symmetry, the interior circles map to lines in a plane of symmetry;
+and these lines clearly define the cone/cylinder.
+For the doubly-horned cyclide, their intersection defines the cone vertex
+and their angle defines the cone angle;
+for the singly-horned cyclide, they are parallel and their bisector
+is the cylinder's axis.
+\end{rmk}
+
+\Comment{
+I DON'T WANT TO ATTACK DE PONT, SO DON'T MENTION THIS.
+de Pont sketches a different method for mapping cyclides to tori,
+(stressing the fact that the image circles must be equal
+radius) It is not as general (is based upon Forsyth's  normal form (\ref{eqcy})
+and it is only sketched: i.e., there are magic formula.
+(Small point: he doesn't show how to find horns.)
+Also note that dePont mistakenly says horned cyclides cannot be mapped to tori 
+\cite[p. 37]{}.
+}
+
+\subsection{Reduction of self-intersecting cyclides to cones}
+\label{sec:tocone}
+
+By a similar argument, the self-intersecting cyclide can also 
+be mapped to a cone.
+In Lemma~\ref{lem:horn}, we mapped a cyclide to a cone/cylinder
+by inverting with respect to an intersection of the interior circles.
+For the self-intersecting cyclide, we use the exterior circles.
+
+\begin{lemma}
+A self-intersecting cyclide is mapped to a cone by an inversion centered
+at one of the intersections of its exterior circles.
+\end{lemma}
+\Heading{Proof:}
+Let $C$ be the self-intersecting cyclide, 
+and let $i$ and $j$ be the two intersections of its exterior circles.
+Let $i$ be the center of inversion.
+It is not true that all the circles (lines of curvature)
+on the cyclide pass through $i$,
+but it is still true that the circles
+(lines of curvature) of the cyclide that pass through $i$ cover the 
+cyclide.\footnote{To see this, one can invert $C$
+	to a self-intersecting torus, for which the statement is clear
+	because of the symmetry of the torus.  
+	Inversion preserves the property.}
+This is enough to guarantee that $\mbox{inv}_{S}(C)$ is a ruled surface.
+Moreover, by the same argument, 
+the lines on $\mbox{inv}_{S}(C)$ all pass through 
+$\mbox{inv}_{S}(j)$.
+We conclude that $\mbox{inv}_{S}(C)$, which must be a general Dupin cyclide,
+is a circular cone.
+\QED
+
+\begin{rmk}
+Just as with the doubly-horned cyclide (Remark~\ref{rmk:interior}),
+the vertex of the cone and the cone angle are defined by the image
+of the two exterior circles.
+\end{rmk}
+
+% *********************************************************************
+
+% inverse of arbitrary circle
+% \input{inv-circle}
+
+\section{The inverse of any circle}
+\label{sec1}
+
+The inverse of a circle is usually a circle, and this
+inverse circle is well understood in two dimensions: i.e., 
+when the plane of the circle contains the center of inversion and
+the inversion is thus restricted to a plane.
+However, the literature is silent on the general case of the
+inverse of a circle in three dimensions.
+In this section, we consider this inverse of a {\em space} circle in detail.
+
+\begin{defn2}
+A {\bf plane circle} is a circle whose plane contains the center of inversion. 
+A {\bf space circle} is a circle whose plane does not contain the center of
+inversion.
+\end{defn2}
+
+For the mapping of a cyclide to a torus,
+only the inverse of a plane circle is needed, since
+one can work completely in a plane of symmetry of the cyclide 
+(Section~\ref{sec:totorus}).
+However, the inverse of a space circle is needed in many other places of the
+intersection algorithm, such as the reduction of 
+circle(t)/cyclide intersection to circle(t)/torus intersection
+(Step (3) of the algorithm in Section~\ref{sec:nim})
+and our circle decomposition of a cyclide (Section~\ref{sec-decomp}).
+
+A circle is fully defined by its center, its radius, and its
+orientation in space.
+In the following sections, we examine how inversion affects these 
+three components.
+
+\subsection{Radius}
+
+\begin{theorem}
+\label{thm:rad}
+Let $S$ be the sphere of inversion with center $c$ and radius $R$.
+\begin{enumerate}
+\item
+% \label{lem-radius1}
+Let $D$ be a plane circle or a sphere, of radius $r$, $c \not \in D$.
+The radius of $\mbox{inv}_{S}(D)$ is 
+\be
+\label{rad1} 
+	\frac{R^{2}}{|\mbox{power}_{D}(c)|} r
+\ee
+% or $\frac{R^{2}}{|a^{2} + b^{2} + c^{2} - r^{2}|} r$, center $(a,b,c)$
+\item
+% \label{lem:radp}
+Let $D$ be a line or plane, $c \not \in D$.
+The radius of $\mbox{inv}_{S}(D)$ is 
+\be
+\label{rad2}
+	\frac{R^{2}}{2\mbox{dist}(c,D)}
+\ee
+\item
+% \label{thm:rad}
+Let $D$ be a space circle of radius $r$ and center $d$,
+\Comment{
+lying in the plane $p$,
+with equation $f(x,y,z)=0$ and normal $N$.
+% $p$ with equation $f(X) = N \cdot X + \alpha = 0$.
+}
+lying in the plane $p$.
+The radius of $\mbox{inv}_{S}(D)$ is 
+\be
+\label{eq:spacerad}
+\begin{array}{ll}
+ 	{\rm radius\ of\ inv}_{S}(p) &	{\rm if\ } c\in E \\[.1in]
+ 	\frac{\rm{radius\ of\ inv}_{S}(E)\ *\ \rm{radius\ of\ inv}_{S}(p)}
+        {\rm{dist(center\ of\ inv}_{S}(E)\ ,\ \rm{center\ of\ inv}_{S}(p))}
+						&	{\rm otherwise}
+\end{array}
+\ee
+%
+\Comment{
+or, equivalently,
+\be
+\label{eq:radsc}
+\begin{array}{ll}
+	\frac{R^{2}}{2\mbox{dist}(c,p)}		&	{\rm if\ } c\in E \\ 
+	\frac{R^{2}r}{2f(c)(d-c) + \mbox{power}_E(c) N}
+						&	{\rm otherwise}
+\end{array}
+\ee
+}
+%
+where $E$ is the sphere with the same center and radius as $D$.
+\end{enumerate}
+\end{theorem}
+\Heading{Proof:}
+\begin{enumerate}
+\item
+% ****************************
+% PLANE CIRCLE
+% ****************************
+The result for plane circles is classical \cite{Coo71,J29}.
+% Coolidge: p. 30, 231 (sphere), no proof
+% plane circle: Johnson, p. 51, proof included and relationship to power cited
+% also Davis, p. 217
+\Comment{
+PROOF OF PLANE CIRCLE ON p. 51 OF JOHNSON.
+NO PROOF IN COOLIDGE, BUT STATEMENT FOR SPHERE.
+DO WE NEED A PROOF FOR SPHERE?  NAH.
+
+\Heading{Proof:}
+Consider the line $L$ connecting the center of inversion and the center of the
+circle.
+It intersects the circle in two points, $A$ and $B$, which form a diameter
+of the circle.
+The inverses of $A$ and $B$ are also a diameter of the inverse circle,
+since the center of the inverse circle also lies on $L$ (Figure~\ref{fig-bar}).
+Therefore, we want to compute the distance between $\mbox{inv}(A)$ and
+$\mbox{inv}(B)$.
+$A$ is a distance of $r$ from the center of the circle:
+\[ A = (a,b,c) - r \frac{(a,b,c)}{\|(a,b,c)\|} 
+     = (1 - \frac{r}{\sqrt{a^{2}+b^{2}+c^{2}}})*(a,b,c) \]
+\[ B = (1 + \frac{r}{\sqrt{a^{2}+b^{2}+c^{2}}})*(a,b,c) \]
+Applying Lemma~\ref{lem-inv} to get the inverses of $A$ and $B$,
+and computing half of the distance between these two inverses,
+we find that the radius of the inverse circle is
+$\frac{R^{2}r}{|a^{2}+b^{2}+c^{2}-r^{2}|}$.
+\QED
+\figg{fig-bar}{}{1in}
+}
+\item
+% ****************************
+% LINE
+% ****************************
+Suppose $D$ is a line (or plane), $c \not \in D$.
+Let $P$ be the closest point of $D$ to $c$.
+Since the inverse of $D$ is a circle (or sphere) through $c$
+and $\lyne{cP}$ is an axis of symmetry (Figure~\ref{fig:plrad}),
+the diameter of $\mbox{inv}_S(P)$ is 
+$\mbox{dist}(c,\mbox{inv}_S(P)) = \frac{R^{2}}{\mbox{dist}(c,P)}$.
+\Comment{
+% a more detailed proof
+For simplicity, we restrict to a plane through $\lyne{cP}$.
+Let $L$ be the line on $D$ in this plane (Figure~\ref{fig:plrad}).
+The inverse of the plane $D$ is a sphere through $c$,
+and the inverse of $L$ is a circle through $c$ (a great circle of the
+sphere).
+$L$ and $\mbox{inv}(L)$ are symmetric about $\lyne{cP}$.
+Thus, the diameter of $\mbox{inv}(L)$, and the diameter of $\mbox{inv}(p)$,
+is $\mbox{dist}(c,\mbox{inv}(P))$.
+}
+
+\item
+% ****************************
+% SPACE CIRCLE
+% ****************************
+Let $D$ be a space circle, the intersection of the sphere $E$ 
+and the plane $p$.
+$\mbox{inv}_{S}(D) = \mbox{inv}_{S}(E) \cap \mbox{inv}_{S}(p)$.
+$\mbox{inv}_{S}(E)$ and $\mbox{inv}_{S}(p)$ are orthogonal,
+since $E$ and $p$ are
+% ($p$ goes through the center of $E$)
+(property (5) of Section~\ref{sec:inv}).
+% \ref{prop:conformal}
+$\mbox{inv}_{S}(p)$ is a sphere (i.e., $c \not \in p$, because $D$ 
+is a space circle).
+There are two cases based on whether $\mbox{inv}_{S}(E)$ is a sphere or
+a plane.
+Suppose $c \in E$.
+Then $\mbox{inv}_{S}(E)$ is a plane, which must pass through the center
+of $\mbox{inv}_{S}(p)$ since 
+$\mbox{inv}_{S}(E)$ and $\mbox{inv}_{S}(p)$ are orthogonal.
+Thus, the radius of $\mbox{inv}_{S}(D)$ is identical to the radius of  
+$\mbox{inv}_{S}(p)$.
+
+Suppose $c \not \in E$.
+Then $\mbox{inv}_{S}(E)$ is a sphere.
+Let the center of $\mbox{inv}_{S}(E)$ be $C_{1}$, and
+the center of $\mbox{inv}_{S}(p)$ be $C_{2}$.
+Any plane containing the centers of the two spheres 
+intersects the two spheres in two circles (Figure~\ref{fig:space-center}),
+which intersect in $X$ and $Y$.
+The center of $\mbox{inv}_{S}(D)$ is the midpoint of $\seg{XY}$,
+i.e., $\seg{XY} \cap \seg{C_{1}C_{2}}$.
+(The two spheres are generated by rotating the two circles about 
+the axis $\seg{C_{1}C_{2}}$; 
+thus, $\mbox{inv}_{S}(D)$ is generated by rotating $X$ and $Y$ about
+$\seg{C_{1}C_{2}}$.)
+% Thus, the center of $\mbox{inv}_{S}(D)$ must lie on $\seg{C_{1}C_{2}}$.
+Let the center of $\mbox{inv}_{S}(D)$ be $C_{3}$,
+so that
+the desired radius of $\mbox{inv}_{S}(D)$ is $\mbox{dist}(C_{3},X)$.
+Since $\mbox{inv}_{S}(E)$ and $\mbox{inv}_{S}(p)$ are orthogonal,
+$\triangle X C_1 C_2$ is a right triangle.
+Its area is $\frac{1}{2} C_1 X * C_2 X$.
+Since $\angle C_1 C_3 X$ is also a right angle, $C_3 X$ is the altitude
+of $\triangle X C_1 C_2$, whose area is therefore $\frac{1}{2} C_1 C_2 *C_3 X$.
+Equating these two expressions for the area, we have
+$C_3 X = \frac{C_1 X * C_2 X}{C_1 C_2}$.
+\Comment{
+The formula (\ref{eq:radsc}) 
+is derived from 1., 2., and Theorem~\ref{thm:center} below.
+}
+%
+%
+\Comment{
+CLUMSIER PROOF 
+Since $\angle C_{1}C_{3}X$ is a right angle,
+$C_{3}X = \sin \theta * C_{1}X$.
+Also recall that the two circles intersect orthogonally, 
+so $\angle C_{1}XC_{2}$ is a right angle.
+Thus, $\cos \theta = \frac{C_{1}X}{C_{1}C_{2}}$ and
+$(C_{1}C_{2})^{2} = (C_{1}X)^{2} + (C_{2}X)^{2}$.
+We can use these to solve for $\sin \theta$: 
+$\sin \theta 	= \sqrt{1 - \cos^{2} \theta}
+		= \sqrt{1 - (\frac{C_{1}X}{C_{1}C_{2}})^{2}}
+		= \sqrt{\frac{(C_{1}C_{2})^{2} - 
+	(C_{1}X)^{2}}{(C_{1}C_{2})^{2}}}
+		= \sqrt{\frac{(C_{2}X)^{2}}{(C_{1}C_{2})^{2}}}
+		= \frac{C_{2}X}{C_{1}C_{2}}$.
+Thus, $C_{3}X = \frac{C_{2}X * C_{1}X}{C_{1}C_{2}}$.
+% Finally, $C_{1}X$ is the radius of $\mbox{inv}_{S}(E)$ and
+% $C_{2}X$ is the radius of $\mbox{inv}_{S}(p)$.
+}
+\end{enumerate}
+\QED
+
+\figg{fig:plrad}{The inverse of a line}{2.5in}
+
+\figg{fig:space-center}{$C_3$ is the center of the space circle}{2.1in}
+
+\begin{rmk}
+The formulas (\ref{rad1}) and (\ref{rad2}) both 
+involve the factor $\frac{R^2}{d}$, 
+where $d$ is the
+distance of the object from the center of inversion (Remark~\ref{rmk:pow}).
+This factor is also important in the mapping of a point under inversion
+(Lemma~\ref{lem-inv}).
+It encodes the amount of stretching of a point or plane circle 
+under inversion.
+%
+% the power of a point is a stretching map:
+% d^2 - k^2: radius k stays constant, while d grows linearly
+% so d^2 - k^2 grows almost quadratically, which is a form of stretching.
+\end{rmk}
+
+% ***************************************************************
+
+\subsection{Center}
+
+The amount of stretching that a point undergoes during inversion is nonlinear.
+The relative stretching (or shrinking) 
+of a point far away from the circle of inversion 
+is much more than that of a point close to the circle of inversion.
+For this reason, the center of a circle does not map to the center of the new
+circle under inversion.
+However, it turns out that the new center 
+can be found with two or three applications of the inversion map.
+
+\begin{theorem}
+\label{thm:center}
+Let $S$ be the sphere of inversion with center $c$ and radius $R$.
+\begin{enumerate}
+\item
+% \label{lem-twoappl1}
+Let $D$ be a plane circle or a sphere, of center $d$, $c \not \in D$.
+The center of $\mbox{inv}_{S}(D)$ is 
+\be
+\label{cen1}
+	 \mbox{inv}_{S} ( \mbox{inv}_{D} (c))
+% or THE FOLLOWING RESULT IS NEW  (ESPECIALLY RELATIONSHIP TO POWER)
+% \label{lem-center}
+\Comment{
+	I'M SURE THIS IS WRONG (I got 
+$c + \frac{R^{2}\mbox{power}_{D}(c)}{||\mbox{power}_{D}(c)||^{2}} (d-c)
+	when I last checked it)
+
+	= c + \frac{R^{2}}{\mbox{power}_{D}(c)} (d-c)
+}
+\ee
+\item
+% \label{lem:cenplane}
+Let $D$ be a line or plane, with equation $f(x,y,z)=0$ and normal $N$,
+$c \not \in D$.
+The center of $\mbox{inv}_{S}(D)$ is 
+\be
+\label{cen2}
+	\mbox{inv}_{S}(\mbox{reflection}_{D}(c))
+% or
+% \label{cor-plane}
+	% the plane $Ax+By+Cz+\alpha=0$ $(\alpha \neq 0)$ 
+	= c - \frac{R^{2}}{2f(c)} N
+\ee
+\item
+% \label{thm:center}
+Let $D$ be a space circle with center $d$,
+% lying in the plane $p$ with equation $f(x,y,z)=0$ and normal $N$.
+lying in the plane $p$.
+The center of $\mbox{inv}_{S}(D)$ is
+\be
+\label{eq:spacecen}
+\begin{array}{ll}
+\rm{center\ of\ inv}_{S}($p$)			&	{\rm if\ } c \in E \\
+%\mbox{inv}_{S}(\mbox{reflection}_{p}(c))	&	{\mbox if} c \in E \\
+\mbox{inv}_{\mbox{inv}_{S}(p)} (\rm {center\ of\ inv}_{S}($E$)) 
+						&	{\rm otherwise}
+\end{array}
+\ee
+\Comment{
+or, equivalently,
+% \label{cor-cen}
+\be
+\begin{array}{ll}
+	c - \frac{R^{2}}{2f(c)} N		&	{\rm if\ } c\in E \\ 
+	(c - \frac{R^{2}}{2f(c)} N) + 
+	\frac{R^{2}\rm{power}_E(c)}{2f(c)}
+	\frac{2f(c)(d-c) + \mbox{power}_E(c) N}
+	   {\|2f(c)(d-c) + \mbox{power}_E(c) N\|^2}
+						&	{\rm otherwise}
+\end{array}
+\ee
+}
+where $E$ is the sphere with the same center and radius as $D$.
+\end{enumerate}
+\end{theorem}
+\Heading{Proof:}
+\begin{enumerate}
+\item
+% **************
+% PLANE CIRCLE
+% **************
+This is a classical result \cite{Coo71,D49,J29}.
+% Coolidge, p. 231 for sphere
+% also Johnson, p. 56 for plane circle
+% \cite[p. 216]{D49} is a good proof of the plane circle case.
+% The formula can be found through the application of Lemma~\ref{lem-inv}.
+%
+\Comment{
+% SINCE COOLIDGE HAS NO PROOF FOR SPHERE, HERE IS THE PROOF FOR SPHERE, 
+%
+\Heading{Proof:}
+We provide a proof for spheres, since we have only seen a statement
+without proof in the literature \cite[p. 231]{Coo71}.
+NOTE: IN THE FOLLOWING PROOF THE SPHERE OF INVERSION IS CALLED C
+AND THE SPHERE THAT IS BEING INVERTED IS CALLED D (FOR HISTORICAL REASONS)
+Let $D$ be a sphere.
+Consider any plane $p$ through the centers of both spheres $C$ and $D$.
+This plane divides both spheres in half.
+That is, it is a plane of symmetry of $D$.
+It is clear that points on one side of the plane
+stay on that side of the plane under inversion.
+Therefore the plane remains a plane of symmetry for the inverse of $D$.
+% 
+\Comment{
+(This can be seen by considering the image of diametral pairs.
+If $p$ isn't a plane of symmetry, 
+then, on the inverse sphere, there exist two points that define a diameter
+(i.e., a diametral pair of points)
+that lie strictly on one side of the plane.
+But a diametral pair on inv($D$) is the inverse of a diametral pair
+on $D$ (because they are extremal ELABORATE), and all diametral pairs 
+of the original sphere either lie on opposite
+sides of the plane or they both lie on the plane.
+This leads to a contradiction.)
+}
+%
+This means that the center of $\mbox{inv}(D)$ is the center of 
+$\mbox{inv}(D) \cap p$.
+Our problem now reduces to a two-dimensional problem on the plane $p$,
+using the two circles $D \cap p$ and $\mbox{inv}_{C}(D) \cap p$.
+\QED
+}
+
+\item
+% ****************
+% LINE/PLANE
+% ****************
+It is classical that the center of $\mbox{inv}_S(D)$ is 
+$\mbox{inv}_{S}(\mbox{reflection}_{D}(c))$ \cite{Coo71}.
+To get the formula, note that the reflection of $c$ in the plane $D$ is 
+$c - 2 \frac{f(c)}{\|N\|} \frac{N}{\|N\|}$,
+since $c$ lies at distance $\frac{|f(c)|}{\|N\|}$ from $D$ in
+the direction $(\mbox{sign}(f(c))) N$ \cite{SS14}.
+% p. 17, Snyder and Sisam
+% i.e., $c$ lies in the halfspace pointed to by $sign(f(c)) N$ 
+An application of Lemma~\ref{lem-inv} yields the result.
+%
+% [p. 30, 231]
+% IN JOURNAL (POSSIBLY???): PROOF SINCE NO PROOF IN COOLIDGE
+%
+% IN THE FOLLOWING, THE SPHERE OF INVERSION IS CALLED C.
+% The result for lines in 2D (i.e., line in same plane as circle $C$)
+% is stated in Coolidge \cite[p. 30]{Coo71}.
+% BUT NO PROOF IN COOLIDGE
+% Same proof idea as that used in the proof of 
+% Lemma~\ref{lem-twoappl} in Davis \cite{D49}.
+% Let $A$ be the center of the inverse of $D$.
+% We shall prove the equivalent result:
+% $c = \mbox{reflection}_{D}(\mbox{inv}_{C}(A))$.
+% VERY CLOSE TO A PROOF, BUT CAN'T SEEM TO PROVE THAT CENTER OF inv(d) lies
+% on the line cA.
+
+\item
+% ****************
+% SPACE CIRCLE
+% ****************
+Let $D$ be a space circle.
+$\mbox{inv}_{S}(D) = \mbox{inv}_{S}(E) \cap \mbox{inv}_{S}(p)$.
+Recall from the proof of Theorem~\ref{thm:rad} that,
+if $c \in E$, $\mbox{inv}_{S}(E)$ is a plane that passes 
+through the center of the sphere $\mbox{inv}_{S}(p)$,
+so the center of $\mbox{inv}_{S}(D)$ is identical to the center of  
+$\mbox{inv}_{S}(p)$.
+Suppose $c \not \in E$.
+$\mbox{inv}_{S}(D)$ is the intersection of the two spheres $\mbox{inv}_{S}(E)$
+and $\mbox{inv}_{S}(p)$,
+with centers $C_1$ and $C_2$.
+Any plane containing the centers of the two spheres 
+intersects the two spheres in two circles (Figure~\ref{fig:space-center}),
+which intersect in $X$ and $Y$.
+As we saw in Theorem~\ref{thm:rad}, the center of $\mbox{inv}_S(D)$ is 
+$\seg{XY} \cap \seg{C_{1}C_{2}}$.
+We can find this point using inversion, as follows.
+$\mbox{inv}_{S}(E)$ and $\mbox{inv}_{S}(p)$ are orthogonal,
+since $E$ and $p$ are.
+That is, $C_1$'s and $C_2$'s tangents are normal at $X$ and $Y$.
+Thus, $C_2$'s tangents at $X$ and $Y$ pass through $C_{1}$.
+That is, $\lyne{XY}$ is the polar of $C_{1}$ with respect to the circle
+centered at $C_{2}$.
+By Property~(6) of Section~\ref{sec:inv},
+$\lyne{XY} \cap \seg{C_{1}C_{2}}$ is
+the inverse of $C_{1}$ in the circle centered at $C_{2}$.
+That is, the center of $\mbox{inv}_{S}(D)$ is the inverse of $C_1$ in
+$\mbox{inv}_{S}(p)$.
+Note that by symmetry, the center of $\mbox{inv}_{S}(D)$ is also the inverse 
+of $C_2$ in
+$\mbox{inv}_{S}(E)$.
+% The formula is determined by an application of Lemma~\ref{lem-inv}.
+\end{enumerate}
+\QED
+
+\Comment{
+The formulas (\ref{cen1}) and (\ref{cen2}) 
+again involve the factor $\frac{R^2}{d}$, 
+where $d$ is the distance from the center of inversion to 
+the object.\footnote{The
+	distance from the center of inversion to the line is actually 
+	$\frac{|f(c)|}{\|N\|}$, but we can
+	assume that $N$ is a unit normal.}
+Recall that we saw this factor with the mapping of the radius by inversion.
+}
+
+It is straightforward to reduce the space circle formulas 
+(\ref{eq:spacerad}) and 
+(\ref{eq:spacecen}) to algebraic formulas, by applying the inversion map 
+of Lemma~\ref{lem-inv} and the results for spheres and planes.
+
+% Also notice that, in Corollary~\ref{cor-plane}, 
+% the plane's normal is the analogue of the circle's center.
+
+% *********************************************************
+
+% COLLECTION OF INVERSION MAPS REPRESENTATION IS JUST AS GOOD.
+% Now that we understand the effect of inversion on the center, 
+% we can compute the new center directly, rather than in terms of
+% a collection of inversion maps.
+
+\subsection{Orientation}
+
+\begin{defn2}
+The {\bf orientation} of a plane is its normal vector.
+The orientation of a circle is the orientation of the plane that contains it.
+\end{defn2}
+
+\begin{theorem}
+\label{thm:orient}
+Let $S$ be the sphere of inversion with center $c$ and radius $R$.
+\begin{enumerate}
+
+\item
+The orientation of a plane circle does not change under inversion.
+% which explains why the inversion literature does not contain any discussion 
+% of orientation
+
+\item
+Let $D$ be a sphere with center $d$, such that $c \in D$.
+The orientation of $\mbox{inv}_{S}(D)$ is $d-c$.
+
+\item
+Let $D$ be a space circle with center $d$, 
+% lying in the plane $p$ with equation $f(x,y,z)=0$ and normal $N$.
+lying in the plane $p$.
+The orientation of $\mbox{inv}_{S}(D)$ is 
+\[
+\begin{array}{ll}
+\rm{the\ orientation\ of\ } \mbox{inv}_{S}($E$)	&	{\rm if\ } c \in E \\
+\rm{the\ vector\ from\ the\ center\ of\ } \mbox{inv}_{S}($p$)
+\rm{\ to\ the\ center\ of\ } \mbox{inv}_{S}(E)
+						&	{\rm otherwise}
+\end{array}
+\]
+% or from the center of $\mbox{inv}_{S}(D)$ to the center of 
+% $\mbox{inv}_{S}(p)$.
+%
+\Comment{
+or, equivalently, 
+\[
+\begin{array}{ll}
+	d-c					&	{\rm if\ } c\in E \\ 
+	R^2\ \frac{2f(c)(d-c) + \mbox{power}_E(c) N}
+	         {2f(c) \mbox{power}_E(c)}
+						&	{\rm otherwise}
+\end{array}
+\]
+}
+where $E$ is the sphere with the same center and radius as $D$.
+\end{enumerate}
+\end{theorem}
+\ifFull
+\else
+\newpage
+\fi
+\Heading{Proof:}
+\begin{description}
+\item[2.]
+See Figure~\ref{fig:plrad}. % and the proof of Theorem~\ref{thm:rad}.
+\item[3.]
+If $c \in E$, $\mbox{inv}_{S}(E)$ is a plane that contains $\mbox{inv}_{S}(D)$.
+If $c \not \in E$, 
+recall that $\mbox{inv}_{S}(D)$ is generated by rotating $X$ about
+the axis $C_{1}C_{2}$, in Figure~\ref{fig:space-center}.
+Thus, $C_{1}C_{2}$ is a normal to the plane that contains $\mbox{inv}_{S}(D)$.
+\end{description}
+\QED
+
+The inverse of an arbitrary circle in 3-space is now fully understood.
+
+% *********************************************************************
+
+% circle decomposition via inversion of space circle
+% \input{circle-decomp}
+
+\section{Circle decomposition of a cyclide}
+\label{sec-decomp}
+
+In this section, we consider the circle decomposition of a special ringed
+surface, the cyclide.
+For other ringed surfaces, we assume that a circle decomposition is given
+directly, but this is not necessary for the cyclide.
+There are two ways to see that a
+cyclide is no more than a collection of circles.
+Its lines of curvature, which cover the surface, are all circles.
+Alternatively, it is the inverse of a torus, 
+which is clearly a collection of circles,
+and circles are preserved under inversion.
+This observation leads 
+immediately to a simple method for the circle decomposition of a cyclide.
+The circle decomposition of a torus is easy, 
+and we know how a circle maps under inversion.
+
+\begin{defn2}
+$C(t) = [(\mbox{c}(t),r(t),o(t)]$, $t \in I \subset \Re$, is
+a {\bf circle decomposition} of a surface S if 
+\begin{itemize}
+\item
+	$C(t)$ is the circle with 
+	center $\mbox{c}(t)$, radius $r(t)$, and orientation $o(t)$,
+\item
+	$S = \cup_{t \in I} C(t)$, and 
+\item	
+	$\mbox{c}(t)$, $r(t)$, and $o(t)$ all change smoothly with $t$.
+\end{itemize}
+\end{defn2}
+
+\begin{lemma}
+A ring torus with interior circles $C_1(c,r_1,o)$ and 
+$C_2(c,r_2,o)$, $r_1 > r_2$, has circle decomposition 
+$[\mbox{center}(t) = mid(t),
+ \mbox{radius}(t) = \frac{r_1 - r_2}{2},
+ \mbox{orientation}(t) = o \times (c - mid(t))]$,
+where $mid(t)$ is a parameterization of the circle with center $c$,
+radius $\frac{r_1+r_2}{2}$, and orientation~$o$.
+
+A self-intersecting or horned torus with interior circles $C_1(c,r_1,o)$ and 
+$C_2(c,r_2,o)$, $r_1 > r_2$, has circle decomposition 
+$[\mbox{center}(t) = mid(t),
+ \mbox{radius}(t) = \frac{r_1 + r_2}{2},
+ \mbox{orientation}(t) = o~\times~(c~-~mid(t))]$,
+where $mid(t)$ is a parameterization of the circle with center $c$,
+radius $\frac{r_1-r_2}{2}$, and orientation~$o$.
+\end{lemma}
+% simple proof
+
+\begin{lemma}
+Let $C$ be a cyclide and let the torus $T = \mbox{inv}_S(C)$ be its inverse,
+where inversion is done with respect
+to the center of inversion in Corollary~\ref{cor:coi}.
+If $c(t)$ is a circle decomposition of $T$,
+then $[\mbox{center of inv}_S(c(t)),\mbox{radius of inv}_S(c(t)),
+\mbox{orientation of inv}_S(c(t))]$ is a circle decomposition of $C$.
+The center, radius, and orientation of the circles of the latter decomposition
+can be determined using the results of Section~\ref{sec1}.
+\end{lemma}
+
+\begin{rmk}
+A self-intersecting or horned cyclide can also be mapped to a cylinder or
+cone, which has a simple circle decomposition.
+\end{rmk}
+
+\begin{rmk}
+The analogous problem for ruled surfaces is to find a line decomposition.
+In \cite{jj91ru}, the present author shows how to achieve this line 
+decomposition, by finding generators and a directrix curve on the 
+ruled surface.
+\end{rmk}
+
+\begin{rmk}
+The circle decomposition of a quadric surface is discussed in \cite{JS90u}.
+Recall that the centers lie on a line, and the radius function is quadratic.
+% NEED TO KNOW RADIUS FUNCTION: don't know for any nontrivial quadric yet?
+\end{rmk}
+
+% **************************************************************
+
+The above method is simple and, since it uses inversion, 
+it is a natural method for our intersection algorithm.
+However, there are other methods for decomposing a cyclide into circles.
+% It does a good job of yielding direct information about the center, 
+% radius, and orientation of the circles in the decomposition.
+% I think Cayley just gives circles, which has the disadvantage
+% of not being finitely representable (since there are an infinite number of
+% circles).  Our method gives radius function, orientation function, curve
+% of centers, which is compact representation of the infinite number of circles
+%
+An excellent method is due to Cayley \cite{CAY96}:
+if $C_1$ and $C_2$ are the two interior circles of a cyclide
+and $P$ is one of their centers of similitude,
+% (a point that divides the line
+% between the centers of C1 and C2 in the ratio of their radii)
+% p. 27-28, Coolidge, or p. 282 of CDH89a for definition
+then the circles of the cyclide rotate about the center of similitude.
+That is, a circle of the cyclide lies in a plane through $P$ (and
+perpendicular to the plane of the interior circles),
+and its diameter is defined by the intersections of this plane
+with the two interior circles.
+This method is also reported in Chandru et. al. \cite[p. 282]{CDH89a}
+and Coolidge \cite[p. 270]{Coo71}.
+
+Forsyth \cite{F12} gives formulae for the radius and center of the circles on a
+cyclide. 
+% center is the conic (a cos \theta, b sin \theta)
+However, the formulae are for the normal form (\ref{eqcy}) 
+and involve trigonometric functions.
+
+\Comment{
+Ignorable:
+	(2) Maxwell's construction
+	(3) anticonics of cyclide
+}
+
+\Comment{
+STEINER METHOD (NOT PRESENTED HERE, BUT A POTENTIAL METHOD: MAY PRESENT 
+		ELSEWHERE)
+	Not worthy of attention given the equally good (probably superior)
+		method of Coolidge (also outlined in Dutta, On the Geom), 
+		using centers of similitude.
+}
+
+% *********************************************************************
+
+% circle decomposition via Steiner: a more direct method 
+	% perhaps not as useful in our method of intersection
+
+% *********************************************************************
+
+\Comment{
+\section{Intersection}
+ 
+The intersection of a circle with a quadric surface is a degree 4 computation.
+It can be computed from the following system of equations:
+\[
+		f(P) = 0		quadric (deg 2)
+\]
+\[
+		dist(P,c) = r		sphere  (deg 2)
+\]
+\[
+		g(P) = 0		plane   (deg 1)
+\]
+The solution of this system (e.g., by resultants) is a degree 4 computation.
+}
+
+% *********************************************************************
+
+% discuss robustness of inversion (since we use quite a few inversion maps
+% to compute intersections: if information is lost with each inversion,
+% this is a disadvantage.
+% % \input{robust}
+
+% *********************************************************************
+
+% advantages of circle decomposition (including offset)
+% \input{advantages}
+
+\section{Advantages of a circle decomposition}
+\label{advs}
+
+We have already seen that the representation of a surface by circles
+is a great advantage in intersection.
+However, there are other reasons that a circle decomposition is advantageous.
+\begin{itemize}
+\item
+	$(\mbox{circle}(s))(t)$ is a very good parameterization.
+	%
+	% This is the 
+	% parameterization where $s$ is the parameter on each circle,
+	% and $t$ varies over all the circles.
+	% That is, $(\rm{circle}(s))(k)$ is the $k^{th}$ circle.
+	%
+	It is easy to define geometrically meaningful subsets of 
+	the surface by a range on $t$, and it is always of degree 2 in $s$.
+\item
+	For the cyclide, the circle decomposition has the advantage
+	of revealing the lines of curvature.
+	These lines of curvature are important, for example,
+	in defining principal patches from the cyclide
+	\cite{DEP84,MAR82,SHAR85}.
+		% a parameterization by lines of curvature (which is 
+		% often wanted: e.g., p. 103, Martin's thesis)
+\item
+	It is simple to render the surface, since the circle is a basic
+	graphical element.
+\item
+	Rotation and translation of the surface is simple:
+	it reduces to rotation and translation of the directrix curve
+	(Definition~\ref{ringed}), which may be simpler
+	than rotation and translation of the entire surface.
+	The radius and orientation of each circle does not change.
+	Moreover, there is no danger of introducing errors into these 
+	radii and orientations due to floating point error 
+	during the manipulation.
+\item
+	The surface has the representation of a generalized cylinder,
+	which is a preferred representation for computer vision applications.
+\Comment{
+THIS IS INDEPENDENT OF A CIRCLE DECOMPOSITION:
+\item
+	Point membership classification of a cyclide $C$ is simple:
+	invert the point and classify it against the torus 
+	$T = \mbox{inv}_S(C)$, which is an easy test.
+% I am not implying that point membership classification is not simple for
+% other representations as well: e.g., two circles rep leads easily to 
+% implicit representation, which is well known to be good for PMC
+}
+\item
+	Offset computation of the cyclide is simple (Section~\ref{offset}).
+\end{itemize}	
+
+% medial axis of cyclide?
+
+\subsection{The offset of a cyclide}
+\label{offset}
+
+An important application of the circular decomposition of a cyclide
+is in offset computation.
+In general, offsets are difficult to compute \cite{FAR86,FN90b,FN90a},
+but the offset of a cyclide is simple, as we shall see.
+Not only is the offset of a cyclide simple to compute, but
+it is still a cyclide.
+This is interesting, because the offset of a surface is usually a 
+more complicated surface.
+
+The offset of a surface is very important in machining the surface,
+where it indicates the surface that the center of the spherical ball cutter
+should follow.
+It also has applications in motion planning (where an offset surface
+may indicate an error buffer about an obstacle, or how to grow the obstacle
+by a circular robot), encoding of tolerance, and as a general tool for
+growth/shrinkage of an object.
+
+\begin{defn2}
+The {\bf $d$-offset} of a surface $(x(s,t),y(s,t),z(s,t))$ is the surface
+\[ 
+	(x(s,t),y(s,t),z(s,t)) \pm d N(s,t)
+\]
+where $N(s,t)$ is the unit normal
+to the surface at the point $(x(s,t),y(s,t),z(s,t))$.
+\end{defn2}
+
+The use of a circle decomposition is important to the 
+simple computation of the offset.
+
+% We need only change the radius of each circle of its circular decomposition
+% by the same amount.
+
+\begin{theorem}
+\label{thm:offset}
+The $d$-offset of the cyclide 
+with the circle decomposition
+\[ ({\rm center}(t), {\rm radius}(t), {\rm orientation}(t)) \]
+is the cyclide with the circle decomposition
+\[ ({\rm center}(t), {\rm radius}(t) \pm d, {\rm orientation}(t)) \]
+\end{theorem}
+
+This result has been established many times before,
+but since we have an interesting and short alternative to the other proofs
+in terms of circle decompositions, we will give it.
+For other discussions of the offset of cyclides, 
+the reader should refer to the clear presentation by Pratt \cite{P89}, 
+% p. 414
+or Martin \cite{MAR82} or Dutta \cite{Dutta89}.
+% Martin, e.g., bottom of p. 103
+% Dutta et. al. also mention (but don't prove): P7 of p. 289, CDH89
+% DUTTA THESIS, P. 53;
+% but the resultant usefulness of the circle decomposition
+% has not been observed.
+
+To establish the result, 
+we need to show that offsetting along the surface normal is equivalent
+to offsetting along the normal to the circles of the circular decomposition.
+Note that it is not generally true that the surface normal is equivalent 
+to the normal to a curve on the surface
+(Figure~\ref{normal}).
+
+\figg{normal}{Surface normals and curve normals are not equivalent 
+		[29]}{2in}
+% Fig 4.13, p. 102, Millman and Parker
+
+\begin{lemma}
+\cite{MP77}
+% [p. 110]
+Let $\psi(s)$ be a unit speed curve on a surface.
+% DOES SPEED OF CURVE AFFECT NORMAL? IF NOT, REMOVE UNIT SPEED CRITERION.
+The normal to $\psi(s)$ is everywhere normal to the surface if and only if
+$\psi(s)$ is a geodesic.
+% N = normal to curve and n = normal to surface (p. 102)
+\end{lemma}
+
+\begin{lemma}
+\label{lem:grau}
+\cite{GRAU47}
+% [p. 151]
+% problem #7
+A line of curvature on an ordinary\footnote{A surface is ordinary if it
+	is not a developable surface or a plane.}
+surface whose Gauss map is a great circle, or a portion thereof, is a geodesic.
+\end{lemma}
+
+% Ordinary surface: p. 96 of Graustein.  [Cyclides are ordinary, because
+% they are neither developable nor planes.]
+
+% Gauss map [do we need to define?]
+% spherical representation = Gauss map, see p. 96 of Graustein
+
+The circles on the cyclide satisfy this criterion.
+Thus, they are geodesics and their normals are equivalent to the surface
+normals.
+This establishes Theorem~\ref{thm:offset}.
+% This allows us to offset along the radii of the circles instead,
+% and establishes the desired result.
+
+% ***********************
+
+%      V: another approach would be to show that INVERSION PRESERVES GEODESICS
+% 	since the circles of a torus or cylinder are certainly geodesics,
+% 	because (for torus) they are meridians of surfaces of revolution,
+%	which are always geodesic (p. 110, PROP 5.5, 
+%	Millman and Parker, Elts of 
+%	Differential Geometry); and it is clear for cylinder.
+%	This would be a nice property to prove, independent of this problem
+%		[Know normal to circles of torus are normals of surface
+%		Key problem: does inversion preserve this property?]
+%	Property to test: Does inversion always preserve geodesics?
+
+
+
+% *********************************************************************
+
+% volume of cyclide?  LEAVE TO DIFFERENT PAPER
+% % \input{volume}
+
+% *********************************************************************
+
+% NEED IMPLEMENTATION TO VERIFY MY FINDINGS BEFORE PUBLICATION
+
+%\input{implementation}
+%
+% this paper is the foundation of a solid modeler including all quadrics,
+% all cyclides, as well as all ruled surfaces (based on a related paper
+% on ruled surfaces)
+%
+% already some implementation by Dutta, using circles in planes of symmetry
+% see Dutta, `On the Geom of cyclides', Appendix, p. 290
+
+% *********************************************************************
+
+% \input{conclusion}
+
+\section{Conclusions}
+\label{sec:conc}
+
+In this paper, we have developed a method for the exact intersection of any
+ringed surface with any surface in the present vocabulary (quadrics and
+cyclides).
+This is a first step towards expanding the vocabulary 
+of a solid modeler to include all ringed surfaces.
+The intersection algorithm is not only directly applicable 
+to modeling with these surfaces,
+but it reveals that exact intersection of complex surfaces is feasible,
+and that the decomposition of surfaces into simpler components
+(in this case, circles) can be powerful.
+We suspect that alternatives such as this to 
+traditional methods (e.g., elimination methods or implicit/parametric
+combinations) will prove very useful in handling other complicated
+intersections.
+
+The two key techniques of this paper are circle decomposition and inversion.
+The circle decomposition immediately simplifies an apparently degree $4n$
+computation (where $n$ is the degree of the ringed surface),
+ringed $\cap$ cyclide, 
+to a degree 8 computation of ${\rm circle}(t) \cap {\rm cyclide}$.
+The inversion map induces another simplification,
+transforming a cyclide to a torus (which is an easier surface to work with)
+and the circle to a line (which is a curve of lower degree).
+This leads to a degree 4 computation of the intersection.
+
+We end by proposing some directions for future work.
+First, the extension of other algorithms to all ringed surfaces is needed,
+so that we can fully incorporate this class into the vocabulary.
+Second, since we have seen the benefit of the description of surfaces 
+as circles or lines sweeping along simple curves (ringed and ruled surfaces),
+this approach might be extended further, looking at other simple curves
+sweeping along simple curves.
+The work on generalized cyclides (e.g., Degen \cite{Degen90}) 
+is an example of work in this direction.
+% e.g., unions of conics, even unions of circles$+$lines = parabolic cyclides
+Finally, the intersection of ringed surface with ringed surface, 
+and ruled surface with ruled surface is an important problem that we are 
+presently working on.
+
+
+
+
+% *********************************************************************
+
+\section{Acknowledgements}
+
+Discussions with Chris Hoffmann were very helpful.
+I thank C.-K. Shene for an improved proof of Theorem~\ref{thm:rad},
+and for useful discussions.
+
+\bibliographystyle{plain}
+\bibliography{/users/cogito/jj/bib/modeling}
+
+\end{document}

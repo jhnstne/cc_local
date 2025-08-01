@@ -1,0 +1,42 @@
+(Message inbox:2962)
+Return-Path: shene
+Return-Path: <shene@blaze.cs.jhu.edu>
+Received: from mail-client (atta-boy.cs.jhu.edu)
+           by blaze.cs.jhu.edu; Thu, 31 Oct 91 17:01:22 EST
+Date: Thu, 31 Oct 91 17:02:47 EST
+From: shene@blaze.cs.jhu.edu
+Sender: shene@blaze.cs.jhu.edu
+To: jj
+
+{\Huge
+\begin{center}
+      CONNECTIONS TO BLENDING
+\end{center}
+\vspace{1cm}
+\LARGE
+\begin{itemize}
+     \item {\bf Monge--Warren}: Two quadric surfaces intersect in conics if
+          and only if there exists a common inscribed or  circumscribed
+          quadric surface.
+     \item {\bf Sabin}: Two cones intersect in conics if and only if they have
+          a cyclide as their blending surface.
+     \item Two cones intersect in conics if and only if they have a constant
+          radius sphere blending with directrix on a conic.
+\end{itemize}
+\vspace{1cm}
+
+\centerline{\bf Some Notes}
+\Large
+\begin{enumerate}
+     \item The Monge--Warren result is not geometric.  For cylinders and
+          and cones, a simple geometric method is available.
+     \item The Warren result can be proved {\em without} ideal theory.
+          A simple argument based on B\'{e}zout theorem is available and this
+          can be generalized to general algebraic surfaces.
+     \item The cones in Sabin's result is semi-cones.  Furthermore, the
+          definition of blending is different from the one given by
+          Hoffmann-Hopcroft--Warren.  Thus, in the HHW sense, only one of the
+          two intersection conics can be blended with cyclide.
+\end{enumerate}
+          
+}

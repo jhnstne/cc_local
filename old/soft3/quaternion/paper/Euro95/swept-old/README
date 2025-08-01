@@ -1,0 +1,7 @@
+keys: keyframes
+sweepback: swept surface
+intermediate: isoparametric curves
+
+Coke bottle: POS.coke, curve.circle
+canoe: POS.canoe, curve.canoe
+robot: POS.snake, curve.robot

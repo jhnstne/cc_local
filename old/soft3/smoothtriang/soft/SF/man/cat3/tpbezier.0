@@ -1,0 +1,198 @@
+
+
+
+C Library Functions                                   tpbezier(3)
+
+
+
+NNNNAAAAMMMMEEEE
+     tpbezier
+
+
+SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
+     Interface module for tensor product Bezier surface patches.
+
+
+SSSSYYYYNNNNTTTTAAAAXXXX
+     ####iiiinnnncccclllluuuuddddeeee ttttppppppppaaaattttcccchhhh....hhhh
+
+
+DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN::::
+     TTTTPPPPBBBBeeeezzzziiiieeeerrrr TTTTPPPPBBBBeeeezzzziiiieeeerrrrCCCCrrrreeeeaaaatttteeee(((( ddddeeeeggggrrrreeeeeeeeUUUU,,,, ddddeeeeggggrrrreeeeeeeeVVVV,,,, rrrraaaannnnggggeeee))))
+     iiiinnnntttt ddddeeeeggggrrrreeeeeeeeUUUU;;;;
+     iiiinnnntttt ddddeeeeggggrrrreeeeeeeeVVVV;;;;
+     SSSSppppaaaacccceeee rrrraaaannnnggggeeee;;;;
+
+     Return a new degreeU by degreeV tensor product Bezier patch.
+
+     vvvvooooiiiidddd TTTTPPPPBBBBeeeezzzziiiieeeerrrrFFFFrrrreeeeeeee((((ppppaaaattttcccchhhh))))
+     TTTTPPPPBBBBeeeezzzziiiieeeerrrr ppppaaaattttcccchhhh;;;;
+
+     Free the storage associated with a tensor product patch.
+
+     iiiinnnntttt TTTTPPPPBBBBeeeezzzziiiieeeerrrrRRRReeeeaaaadddd(((( ppppaaaattttcccchhhh,,,, rrrraaaannnnggggeeee))))
+     PPPPaaaattttcccchhhh ****ppppaaaattttcccchhhh;;;;
+     SSSSppppaaaacccceeee rrrraaaannnnggggeeee;;;;
+
+     Read a patch from the stdin.  One is  returned  on  success,
+     zero  on failure.  The coordinates read in are assumed to be
+     coordinates relative to the  standard  frame  of  the  range
+     space.
+
+     iiiinnnntttt GGGGeeeettttTTTTPPPPBBBBeeeezzzziiiieeeerrrr((((ppppaaaattttcccchhhh,,,, rrrraaaannnnggggeeee))))
+     TTTTPPPPBBBBeeeezzzziiiieeeerrrr**** ppppaaaattttcccchhhh;;;;
+     SSSSppppaaaacccceeee rrrraaaannnnggggeeee;;;;
+
+     Read a patch from din.
+
+
+     vvvvooooiiiidddd TTTTPPPPBBBBeeeezzzziiiieeeerrrrWWWWrrrriiiitttteeee(((( ppppaaaattttcccchhhh))))
+     PPPPaaaattttcccchhhh ppppaaaattttcccchhhh;;;;
+
+     Write the patch out on stdout.
+
+     PPPPooooiiiinnnntttt TTTTPPPPBBBBeeeezzzziiiieeeerrrrGGGGeeeettttPPPPooooiiiinnnntttt(((( pppp,,,, iiii1111,,,, iiii2222))))
+     TTTTPPPPBBBBeeeezzzziiiieeeerrrr pppp;;;;
+     iiiinnnntttt iiii1111,,,, iiii2222;;;;
+
+     Return the position of the control point  whose  multi-index
+     is (i1,i2).
+
+
+
+SunOS 5.6                 Last change:                          1
+
+
+
+
+
+
+C Library Functions                                   tpbezier(3)
+
+
+
+     vvvvooooiiiidddd TTTTPPPPBBBBeeeezzzziiiieeeerrrrSSSSeeeettttPPPPooooiiiinnnntttt(((( ppppaaaattttcccchhhh,,,, pppptttt,,,, iiii1111,,,, iiii2222))))
+     PPPPaaaattttcccchhhh ppppaaaattttcccchhhh;;;;
+     PPPPooooiiiinnnntttt pppptttt;;;;
+     iiiinnnntttt iiii1111,,,, iiii2222;;;;
+
+     Set the vertex whose multi-index is (i1,i2) to pt.
+
+     vvvvooooiiiidddd TTTTPPPPBBBBeeeezzzziiiieeeerrrrEEEEvvvvaaaallllWWWWiiiitttthhhhNNNNoooorrrrmmmmaaaallll(((( ppppaaaattttcccchhhh,,,, ppppooooiiiinnnntttt,,,, nnnnoooorrrrmmmmaaaallll,,,, uuuu,,,, vvvv))))
+     TTTTPPPPBBBBeeeezzzziiiieeeerrrr ppppaaaattttcccchhhh;;;;
+     PPPPooooiiiinnnntttt ****ppppooooiiiinnnntttt;;;;
+     NNNNoooorrrrmmmmaaaallll ****nnnnoooorrrrmmmmaaaallll;;;;
+     SSSSccccaaaallllaaaarrrr uuuu,,,,vvvv;;;;
+
+     Evaluate the patch at the point  whose  barycentric  coordi-
+     nates  are (u,v).  Also computed is the normal vector to the
+     surface at the point.
+
+
+     PPPPooooiiiinnnntttt TTTTPPPPBBBBeeeezzzziiiieeeerrrrEEEEvvvvaaaallll(((( ppppaaaattttcccchhhh,,,, uuuu,,,, vvvv))))
+     TTTTPPPPBBBBeeeezzzziiiieeeerrrr ppppaaaattttcccchhhh;;;;
+     SSSSccccaaaallllaaaarrrr uuuu,,,, vvvv;;;;
+
+     Evaluate the patch at the point  whose  barycentric  coordi-
+     nates are (u, v).
+
+     vvvvooooiiiidddd TTTTPPPPBBBBeeeezzzziiiieeeerrrrEEEEvvvvaaaallllWWWWiiiitttthhhhSSSSeeeeccccoooonnnnddddOOOOrrrrddddeeeerrrr((((ppppaaaattttcccchhhh,,,, pppp,,,, uuuu,,,,vvvv dddduuuu,,,,ddddvvvv,,,, dddduuuuuuuu,,,,dddduuuuvvvv,,,,dddduuuuvvvv))))
+     TTTTPPPPBBBBeeeezzzziiiieeeerrrr ppppaaaattttcccchhhh;;;;
+     PPPPooooiiiinnnntttt**** pppp;;;;
+     SSSSccccaaaallllaaaarrrr uuuu,,,,vvvv;;;;
+     VVVVeeeeccccttttoooorrrr**** dddduuuu;;;;
+     VVVVeeeeccccttttoooorrrr**** ddddvvvv;;;;
+     VVVVeeeeccccttttoooorrrr**** dddduuuuuuuu;;;;
+     VVVVeeeeccccttttoooorrrr**** dddduuuuvvvv;;;;
+     VVVVeeeeccccttttoooorrrr**** ddddvvvvvvvv;;;;
+
+     Evaluate a patch at (u,v) for second order information.
+
+     vvvvooooiiiidddd TTTTPPPPBBBBeeeezzzziiiieeeerrrrEEEEvvvvaaaallllWWWWiiiitttthhhhNNNNoooorrrrmmmmaaaallllAAAAnnnnddddGGGGKKKK((((ppppaaaattttcccchhhh,,,, pppp,,,, nnnn,,,, ggggkkkk,,,, uuuu,,,, vvvv))))
+     TTTTPPPPBBBBeeeezzzziiiieeeerrrr ppppaaaattttcccchhhh;;;;
+     PPPPooooiiiinnnntttt**** pppp;;;;
+     NNNNoooorrrrmmmmaaaallll**** nnnn;;;;
+     SSSSccccaaaallllaaaarrrr**** ggggkkkk;;;;
+     SSSSccccaaaallllaaaarrrr uuuu,,,,vvvv;;;;
+
+     Evaluate the patch at (u,v) for position, normal, and  Gaus-
+     sian curvature.
+
+
+     vvvvooooiiiidddd TTTTPPPPBBBBeeeezzzziiiieeeerrrrEEEEvvvvaaaallllWWWWiiiitttthhhhNNNNoooorrrrmmmmaaaallllAAAAnnnnddddSSSSFFFFFFFF((((ppppaaaattttcccchhhh,,,, pppp,,,, nnnn,,,, ssssffffffff,,,, uuuu,,,, vvvv))))
+     TTTTPPPPBBBBeeeezzzziiiieeeerrrr ppppaaaattttcccchhhh;;;;
+     PPPPooooiiiinnnntttt**** pppp;;;;
+     NNNNoooorrrrmmmmaaaallll**** nnnn;;;;
+
+
+
+SunOS 5.6                 Last change:                          2
+
+
+
+
+
+
+C Library Functions                                   tpbezier(3)
+
+
+
+     SSSSFFFFFFFF**** ssssffffffff;;;;
+     SSSSccccaaaallllaaaarrrr uuuu,,,,vvvv;;;;
+
+     Evaluate the patch at (u,v) for position, normal, and Second
+     Fundamental Form.
+
+
+
+DDDDAAAATTTTEEEE
+     January 25, 1992
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SunOS 5.6                 Last change:                          3
+
+
+

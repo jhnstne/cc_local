@@ -1,0 +1,393 @@
+The Language of Shape in Architecture and Design
+
+Source: Hasan-Uddin Khan, International Style: Modernist Architecture from 1925 to 1965 (Taschen, New York, 2001)
+
+Plane, Polyhedra and line arrangements
+-------------------------------
+
+abstraction of the plane
+	- Mies' Farnsworth House (1946-51, Plano, IL); p. 156 of Khan's IS
+
+abstraction of the rectangular box
+	- Philip Johnson's Glass House (1949, New Canaan, CT); p. 157 of Khan's IS
+
+rectilinear: Piet Mondrian (e.g., Tableau 1, 1921; p. 11 of Khan's 'International Style'
+	- see De Stijl's art too
+	- see Theo van Doesburg's Rhythm of a Russian Dance (1918), p. 63 of Khan's 'International Style')
+	- the plan of internal volumes is integral
+	- e.g., Adolf Loos' 'Raumplan' (plan of spaces) as in Steiner House (Vienna, 1910); mentioned on p. 15 of Khan's 'International Style'
+	- Palladio floor plans
+
+intersecting planes
+	- Gerrit Thomas Rietveld's Schr\"{o}der House (Utrecht, 1924)
+	(p. 16 and 19 of Khan's 'International Style')
+	- Mies van der Rohe's Brick Country House (1923)
+	(defining spaces rather than rooms); p. 38 of Khan's International Style
+	- also his onyx wall in the living area of Tugendhat House (p. 71 of Khan's International Style)
+	- also his Barcelona Pavilion (1929, Barcelona)
+	- Wright's Falling Water House might be in this line, horizontally rather than vertically?
+	- Gropius' Bauhaus Building (Dessau, 1926): pixelated square windows across entire wall,
+		also reminiscent of quadtree
+	- regular decomposition in contrast to irregular Mondrian/Rietveld
+	- reveals steel structure proudly
+	- Pierre Chareau's Maison de Verre (1928-32, Paris), similar to Bauhaus building: 
+	- pixelated with glass squares, steel structure revealed
+	- line arrangement
+	
+elegant slabs
+	- Mies' Seagram Building (NYC, 1954-58), p. 129 of Khan's IS
+		- set back 27m from street!
+		- elevators designed by Philip Johnson
+	- Mies' Lake Shore Drive Apartments (Chicago, 1948-51), p. 126 of Khan's IS
+	- SOM's (Skidmore, Owings and Merrill) Lever House (Gordon Bunshaft, main architect), (New York 1950-52)
+	- cuboid with setback: Associated Architects' RCA Building (NYC, 1931-33) 
+	  at Rockefeller Center, p. 121 of Khan's IS
+		- Rockefeller Center was originally intended for Metropolitan Opera,
+	          but Depression made them back out after Rockefeller had bought up the land in anticipation
+	- Phoenix-Rheinrohr Administration Building, D\"{u}sseldorf, Germany (1955-60);
+		p. 145 of Khan's IS
+	- Gio Ponti's Pirelli Tower (Milan, 1956-60): faceted; p. 147 of Khan's IS
+	- Harrison/Abramovitz's UN Building (NYC, 1947-50); p. 124 of Khan's IS
+
+Alvar Aalto's Paimio Sanatorium (1929,1933, west of Helsinki)
+	introduces curved elements into the International rectangularity,
+	which noticeably softens the form
+	(p. 51 of Khan's 'International Style')
+
+Graphics literature: visibility in a floor plan: Teller and Sequin's 'Visibility Preprocessing for Interactive Walkthroughs'
+
+Ruled surface
+-------------
+
+screensaver: sweeping line
+classic ruleds: cylinder vase, hyperboloid bowl, saddle
+Calatrava buildings
+Meyerhoff Hall, Baltimore
+theory: generatrix, line through typical point of generatrix, lofting (Maya),
+	doubly ruled, developable surface, tangent developable,
+	classical ruled surfaces
+rolling up metal into a developable
+
+Conic
+-----
+
+ellipse
+	- Philip Johnson's Lipstick Building
+
+parabolic arch in Le Corbusier's competition project for the 
+	Palace of Soviets (Moscow, 1931);
+	p. 8 of 'International Style' by Khan
+
+catenary
+--------
+
+catenary arch: St. Louis' Gateway Arch 1964 (designed by Eero Saarinen)
+	(reference on p. 137 of Khan's IS)
+
+catenary roof: Paul Rudolph's Healy Guest House (1948-9, Sarasota); p. 176 of Khan's IS
+
+Superellipse
+------------
+
+developed by Piet Hein, Finland
+Scientific American article by Martin Gardner
+
+Helix
+-----
+
+- a geodesic on the cylinder
+- varies by pitch and radius
+- examples:
+	- poison oak or kudzu vine travelling up a tree
+	- parking garage ramps (see Birmingham garage north on 20th Street)
+	- snail (Jim McClintock slide)
+	- Walter Gropius/Adolph Meyer office building at the Werkbund Exhibition
+	  (Cologne, 1914): glass-enclosed visible staircase (each flight is an
+	  independent helix): p. 14 of Khan's 'International Style'
+	- spiral staircase of Richard Meier (p. 148, Jodidio's 'Richard Meier')
+	  or of Yorke villa (p. 58 of Kahn's 'International Style')
+	- ramps in Berthold Lubetkin's Penguin Pool (London Zoo, 1934); p. 54 of Kahn's International Style
+	- Eero Saarinen's staircase in Research Department of General Motors Technical Center
+		p. 137 of Khan's 'International Style' and 
+		p. 38 of 'Eero Saarinen On His Work' (Yale Univ. Press, 1968)
+- squirrels chase each other up trees along helices
+- a helix is a geodesic midway between the circle and line (the limit of the helix 
+	in one direction is a circle and in the other direction is a line)
+
+Surface of revolution
+---------------------
+
+vases, bowls, columns, chess pieces, 
+lathing 
+domes
+	- Pantheon
+	- onion dome
+
+Tube
+----
+
+canal surface, envelope of spheres
+torus, cyclide
+rolling ball
+generalized surface
+Jim Williams' work on generalized cylinders
+joining surface
+veins, branching
+
+A Greek vase often has tubular handles, augmenting its surface of revolution.
+
+Marcel Breuer's Wassily chair, inspired by bicycle handlebars (designed in 1925,
+	manufactured in 1929)
+	made of bent chrome-plated metal tubing
+	member of Bauhaus
+	p. 43, Khan's International Style
+	see dwr.com/productdetail.cfm?id=0024
+
+Surface of extrusion
+--------------------
+
+Kansai Airport Terminal
+El Monte Apartments
+Marcel Breuer's HUD building (p. 127 of Rifkind's Field Guide)
+Arne Jacobsen and Flemming Lassen's House of the Future (1929) 
+	is a circle variously extruded, with a helicopter pad on top
+curved elements in International Style
+	- curved glass wall in Mies' Tugendhat House; p. 70 of Khan's International Style
+	- curved wall in Brinkman and van der Vlugt's Van Nelle Tobacco, Tea and Coffee Factory 
+	  (Rotterdam, 1926-29); p. 68 in Khan's 'International Style'
+	- curved balcony in Oud's Workers' Houses (Hook, Holland, 1924-27); p. 80 of Khan's 'Intern. Style'
+	- curved wall in Le Corbusier's Villa Savoye (near Paris, 1928-31); p. 82-3 of Khan's 'Intern. Style'
+Marcel Breuer's UNESCO Headquarters (Paris, 1953-58); p. 174 of Khan's IS
+	- triangle's spine
+	- blending of tangent discontinuity at branch
+Le Corbusier's Obus plan for Algiers; p. 189 of Khan's IS
+Reidy's Pegregulho Housing (Rio de Janeiro); p. 195 of Khan's IS and www.artcritical.com/tates.htm
+Oscar Niemeyer's Copan Building (S\~{a}o Paulo, 1951-57); p. 198 of Khan's IS
+
+
+Quadric
+-------
+
+A quadric surface is an algebraic surface of degree 2.
+An algebraic surface is an implicit surface where $f(x,y,z)$ is a polynomial.
+An implicit surface is the zeroset of $f(x,y,z)=0$.
+Unlike other algebraic surfaces (except for the trivial case of planes),
+the quadric surfaces can be completely classified, as
+ellipsoids (which includes spheres), 
+cylinders (with any conic as cross-section), 
+hyperbolic paraboloids (or saddles),
+hyperboloids of one or two sheets, 
+and cones.
+The cone, circular cylinder and sphere are called the natural quadrics (?).
+The type of a quadric can be determined from the coefficients of its defining polynomial.
+The polynomial may be expressed as a matrix expression:
+x^t A x = 0 where A = [...].
+The classification is based on the determinant and subdeterminants of this matrix...
+
+sphere
+	- as geodesation of a dodecahedron
+	- as latitude/longitude
+	- Eero Saarinen's Kresge Auditorium (MIT, 1953-55)
+		- p. 138 of Khan's 'International Style'
+		- part of a sphere (see essay at end of Gehry book)
+		- p. 40 of 'Eero Saarinen on his work'
+	- also Sydney Opera House (each patch is spherical)
+	- Eero Saarinen's Design Department of General Motors Technical Center (1948-56, Warren, MI)
+		p. 136 of Khan's 'International Style'
+
+geodesic dome (typically a hemisphere)
+	- Richard Buckminster Fuller
+	- US pavilion, Expo, Montreal World's Fair (1967); p. 113 of Khan's Intern. Style
+
+cylinder 
+	- column
+	- cylinder as blending surface (between front and roof, also serving as counterpoint to
+		the rigid rectangularity of the rest of the house): 
+		Adolf Loos' Steiner House (Vienna, 1910); p. 17 of Khan's 'International Style'
+	- barrel vaults of Louis Kahn's Kimbrell Art Museum (Fort Worth)
+
+elliptic paraboloid 
+	- Oscar Niemeyer's National Congress (Brasilia, 1958-60); p. 219 of Khan's IS (also a sphere)
+
+saddle:
+	Calgary's Saddledome
+	Phillipe Starck's Dadada stool (www.dwr.com/productdetail.cfm?id=2582)
+	University of Georgia athletic center?
+
+hyperboloid of one sheet
+	- Oscar Niemeyer's Cathedral of Our Lady of Fatima (Brasilia, 1959-70); p. 218 of Khan's IS
+
+Euclidean solids
+
+CSG
+	- Erik Asplund's Stockholm Public Library (1920-28, Stockholm)
+	  is a cylinder on top of a rectangular cube; p. 53 of Kahn's International Style
+	- Thomas Jefferson's Library at the University of Virginia (1817):
+	   sphere of same radius as width of building, with its top popping out of top as dome;
+	   p. 37, Robert Adam's Classical Architecture
+	- Richard Meier?
+
+NURBS
+-----
+
+Gehry
+
+-------------------------------------------------------------------------------------
+
+Architects who need to be covered: Le Corbusier, 
+	Walter Gropius, Ludwig Mies van der Rohe (Bauhaus founders)
+	Alvar Aalto, Le Corbusier (other developers of International Style in 1920's)
+
+
+Movements:
+
+International Style
+	- influenced by technology, which was breaking down borders (rail connections)
+	  and the ability to mass-produce
+	- 'fascination with the machine' illustrated by Fritz Lang's Metropolis (1926)
+	- Communism influenced consciousness to globalism (1917)
+	- Le Corbusier writings (1920's)
+	- search for functional simplicity (p. 17, Kahn's 'International Style')
+	- dubbed 'International Style' in 1932 at the MOMA exhibit organized by Philip Johnson and
+	  Henry-Russell Hitchcock
+	- 'Architecture as Volume': first principle of Hitchcock/Johnson's in their monograph
+	  'The International Style: Architecture since 1922': floors freed up by reinforced concrete columns
+	- often visible columns supporting underneath
+	- Hitcock/Johnson:
+		- seamlessness: 'smooth unbroken skin', flat roof, window as most important element,
+		   seamless windows not interrupting the facade, smooth materials (again for seamlessness),
+		- regularity: 'typically with columns equally spaced' or cellular structure of Gropius'
+		  Bauhaus Building; symmetry is not necessary and even discouraged
+		- curved surfaces are fine (but invariably extruded curved surfaces?)
+		- horizontality
+		- 'avoidance of applied decoration': simplicity; use of sculpture and painting for ornament;
+		  natural restrained colors
+		- contrast to nature (but set in nature)
+		   (p. 67-8 of Khan's International Style)
+	- public housing and factories are popular, for social context
+	- William Jordy (quoted on p. 78 of Khan's 'International Style'):
+	  'The aims of simplification and purification, providing it with a morality of Calvinist austerity'
+ 	  'symbolic objectivity'
+	- Philip Johnson's revised definition in 1960's, as stated by Kahn in 'International Style', p. 80:
+	  'structural honesty, repetitive modular rhythms, clarity expressed by large expanses of glass,
+	   flat roofs, the box as the container, and no ornamentation.'
+
+Louis Sullivan coins 'form follows function' in the essay 'The tall office building,
+	artistically considered' (1896) but it goes back to Vitruvius in 1st century AD
+Neue Sachlichkeit (new objectivity) of Gustav Friedrich Hartlaub, 1924: 
+	'began to be used to denote an objective and rational approach to painting, 
+	and sometimes to architecture' (p. 16, Khan's 'International Style')
+
+Rationalism
+	- 'The Rationalists viewed design as a primary social and ethical activity,
+	   and called for economically affordable building.
+	   They further advocated industrial technologies of standardization and
+	   prefabrication at all scales, from that of city planning to design 
+	   of objects.' (p. 18, Khan's 'International Style')
+	- MIAR (Movimento Italiano per l'Architettura Razionale), 1931
+	- strongly related to Functionalism
+
+Bauhaus
+	- founded by Walter Gropius (Weimar, Germany, 1919)
+	- 'The school aimed to end the isolation of the arts one from another
+	   and to train craftsmen and artists in a cooperative effort.'
+	   (p. 21 of Khan's 'International Style').
+	- Klee and Kandinsky (and later Itten) taught a course on color and form
+	- Josef Albers and Marcel Breuer were successful graduates
+	- moved to Dessau in 1926 into Gropius' Bauhaus Building
+	- Hannes Meyer (Communist) became director in 1928,
+	  then Mies van der Rohe in 1930 (after Meyer forced to resign)
+	- Dessau terminates grant in 1932, pressured by Nazis: Bauhaus moves to Berlin
+	- Hitler closes it down in 1933
+	- Gropius quote of 1913: 'Exactly stamped form devoid of all accident,
+	  clear contrasts, the ordering of members, the arrangement of like parts
+	  in series ...' (quoted on p. 24 of Khan's 'International Style')
+	- quoted from Wolf von Eckardt, it 'created the patterns and set the
+	  standards of present-day industrial design; it helped to invent modern
+	  architecture; it altered the look of everything from the chair you are
+	  sitting in to the page you are reading now.' (p. 26, Kahn's 'International
+	  Style')
+
+Le Corbusier
+	- actually Charles-Edouard Jeanneret
+	- adopted his maternal grandfather's name in 1920 (born in 1887, died in 1965)
+	- machine \`{a} habiter (machine for living in), 1921 in L'Esprit Nouveau
+	- Five Points: cube on reinforced concrete pillars, strip windows, 
+		       open plan, freed facade, roof terrace, 
+
+good example of curtain wall: Sir Evan Williams' Boots Factory (Beeston, England 1930-32)
+	p. 57 of Kahn's International Style
+
+Mies van der Rohe
+	- moved to US in 1938
+	- 'whenever technology reaches its real fulfillment it transcends into architecture'
+	  (quoted on p. 95 of Khan's International Style)
+	- Note: in walking around a set of extruded buildings, the visibility behaves essentially like a 2d scene
+	- good orthogonal scene of polygons for this walkthrough is Mies' IIT campus (p. 94 of Khan's Int. Style)
+	- IIT campus buildings' aligned but staggered nature allows visibility (vistas) and follows the 
+	  intersecting planes principle
+	- words that describe his architecture: 'clarity', 'absolute command of the technology', 'less is more'
+	  (Khan p. 96 of Int. Style) 
+	  [changed to 'less is a bore' in later slamming of International Style and Modernism; p. 224 of Khan's IS]
+	- 'His search was to subtract and distill the structure [of Chicago's 19th C. tall buildings] and expression
+	   until he arrived at "almost nothing", an idea that he developed in his axiom "less is more".'
+	   p. 125 of Khan's IS
+	- 'I don't want to be interesting.  I want to be good...For me novelty has no interest."
+	  (quoted on p. 125 of Khan's International Style)
+	- The saying "God is in the details." is attributed to him although noone heard him say it.
+	  Flaubert said "Le Bon Dieu est dans le d\'{e}tail."
+
+Piet Mondrian
+	- aesthetic doctrine of Neo-Plasticism, using a limited vocabulary of shapes (horizontal and vertical lines)
+	  and colors (red, yellow and blue -- the primary triad -- and black, white, gray)
+	  (http://momawas.moma.org/collection/depts/paint_sculpt/blowups/paint_sculpt_018.html)
+
+Eero Saarinen
+	- son of Eliel Saarinen, worked with him until his death in 1950
+	- designed St. Louis' Gateway Arch: a catenary
+	- Kresge Auditorium and Chapel, MIT
+	- TWA Terminal
+	- David Ingalls Ice Hockey Rink at Yale (1958-62)
+	- Terminal Building at Dulles International Airport (1958-63)
+
+Louis Kahn
+	- "light as a definer of space" (p. 182 of Khan's 'International Style') (how?)
+	- "structures based on the tetrahedron" (which ones?)
+	- 
+
+
+Light-catchers
+--------------
+	- draw light in, especially for museums
+	- Architects' Collaborative's Bauhaus Archive (Berlin, 1976-77); p. 159 of Khan's IS
+	
+
+Streamlined design
+------------------
+
+Norman Bel Geddes
+	- flying car
+Henry Dreyfuss (1904-72)
+	- student of Bel Geddes
+	- Bell telephone
+	- Honeywell thermostat: circle within circle
+	- J-3 Hudson steam locomotive (1938)
+	- Hoover vacuum
+	- Polaroid camera
+
+Furniture
+---------
+
+Charles Eames
+	- student at Eliel Saarinen's Cranbrook Academy of Art (p. 103 of Khan's 'Int Style')
+Eero Saarinen
+	- moulded plastic furniture, womb chair
+
+Airports
+--------
+
+Eero Saarinen's TWA Terminal at JFK (1956-62)
+	- 'sculptural effect' (p. 138 of Khan's IS)
+Eero Saarinen's Terminal Building at Dulles International Airport (1958-63)
+	- p. 138 and 142-3 of Khan's International Style
+	- p. 102-113 of 'Eero Saarinen on his work'

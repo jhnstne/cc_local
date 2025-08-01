@@ -1,0 +1,63 @@
+
+
+FOR JOURNAL:
+
+Should we try to show how to construct the cyclide from the three circles
+(e.g., how to retrieve the type information to translate into implicit eqn)?
+Can we do it? SAVE FOR JOURNAL
+
+I still don't understand this:
+Since these two cyclides have the same principal circles and center of
+similitude $X^\prime$, they are identical.
+NEED TO ARGUE THAT THEY HAVE SAME DIRECTRIX CONIC, BUT THIS GETS MESSY.
+DISCUSS WITH CK AFTER.
+
+Proof of Lemma 4.7:
+Why does the cyclide contain the circle (know that principal circle is
+tangent and principal line is too):
+IT TAKES A SWEEPING ARGUMENT: ELABORATE LATER
+Therefore, the cone ${\cal C}_1$ is tangent
+to the parabolic cyclide along the circle with diameter $\overline{AB}$ and
+perpendicular to the axial plane: the cyclide and cone both contain this circle
+and, by Lemma~\ref{lemma:on-principal-line}, 
+the cyclide is tangent to the cone along the circle.
+
+
+Figure 1 is misleading concerning the horizontal and vertical symm
+planes, since they are not horiz and vertical.
+
+Figure of horiz plane with its two circles would be useful.
+
+should motivate the focal length formulas on p. 10 (in proof) at least a bit
+
+Put in conclusions:
+CK: what do we think about blending of other quadrics by cyclides? (obvious question): cannot be done using Humbert: only revolute quadrics (see scrap paper)
+
+
+
+SMALL CORRECTIONS
+
+
+p. 1, par 1: change Dupin cyclide is in general nonsingular to
+	nonsingular in real space [since it has singularities on double
+	conic in complex space]  NOT CHANGED
+
+p. 3, par 1: network of cyclides -> use piecewise cyclide instead
+	(look in new Pratt paper:  Math Method of CAGD)  NOT CHANGED
+
+*******
+
+use C3 rather than D in Lemma 4.1 (more intuitive, unless D
+	is used to indicate that it is in diff family)
+	NOT DONE BECAUSE I THINK IT DOES INDICATE DIFF FAMILY
+	(AND BECAUSE DIFFICULT CHANGE)
+
+MOVE EXAMPLES TO AN EARLIER SECTION??	NOT WORTH THE TROUBLE (NOW ANYWAY)
+Do in journal version.
+
+after Lemma 4.1 statement, but before its Proof, add a Remark:
+	most of the restrictions on the third circle D are natural:
+	see explanation of first two restrictions in IMA talk slides.
+
+	NOT ADDED: ADD IN JOURNAL VERSION (ALMOST CLEAR AND DON'T HAVE THE
+	TIME)

@@ -1,0 +1,187 @@
+# Test programs for finding quintic pyth. hodograph
+# bezier curves
+
+# P0,P1,P2,P3 will be quadratic bezier curves
+
+P0 := vector([p00,p01,p02]);
+P1 := vector([p10,p11,p12]);
+P2 := vector([p20,p21,p22]);
+P3 := vector([p30,p31,p32]);
+
+# impose the restrictions
+
+x1 := add(scalarmul(bezproduct(P0,2,P1,2),2),
+	  scalarmul(bezproduct(P2,2,P3,2),-2));
+
+
+x2 := add(scalarmul(bezproduct(P1,2,P3,2),2),
+	  scalarmul(bezproduct(P0,2,P2,2),2));
+
+
+x3 := add(
+	add(bezproduct(P1,2,P1,2),bezproduct(P2,2,P2,2)),
+	scalarmul(	
+		add(bezproduct(P0,2,P0,2),bezproduct(P3,2,P3,2)),-1));
+
+xtp := gen_bernstein(4,t,x1);
+ytp := gen_bernstein(4,t,x2);
+ztp := gen_bernstein(4,t,x3);
+
+
+
+genrand := rand(-10..10);
+Conditions := 	{
+		xp0=A,yp0=B,zp0=C,
+		xp1=D,yp1=E,zp1=F,
+		x1=0,y1=0,z1=1
+		};
+
+#Conditions := 	{
+#		x0=A,y0=B,z0=C,
+#		x1=D,y1=E,z1=F
+#		};
+
+
+Tan0System := 	{
+		xtp - xp0,
+		ytp - yp0,
+		ztp - zp0
+		};
+
+# Stipulate Tangent Vector for t=0
+Tan0System := subs(t=0,Tan0System);
+
+
+Tan1System := 	{
+		xtp - xp1,
+		ytp - yp1,
+		ztp - zp1
+		};
+# Stipulate Tangent Vector for t=1
+Tan1System := subs(t=1,Tan1System);
+
+PEqns	:= 
+		{
+		int(expand(xtp),t),
+		int(expand(ytp),t),
+		int(expand(ztp),t)
+		};
+
+PEvector := [
+			int(expand(xtp),t),
+			int(expand(ytp),t),
+			int(expand(ztp),t)
+		   ];
+
+
+PSystem :=
+		{
+		int(expand(xtp),t) - (x0*(1-t) + x1*t),
+		int(expand(ytp),t) - (y0*(1-t) + y1*t),
+		int(expand(ztp),t) - (z0*(1-t) + z1*t)
+		};
+
+P0System := subs(t=0,PSystem);
+P1System := subs(t=1,PSystem);
+
+
+Tsol0 	:= solve(Tan0System,{p10,p20,p30});
+Tsol1 	:= solve(Tan1System,{p02,p12,p32});
+Tav0	:= allvalues(Tsol0,d);
+Tav1	:= allvalues(Tsol1,d);
+Tav01	:= Tav0[1];
+Tav11	:= Tav1[1];
+Tav02	:= Tav0[2];
+Tav12	:= Tav1[2];
+
+S11	:=	Tav01 union Tav11;
+S12	:=	Tav01 union Tav12;
+S21	:=	Tav02 union Tav11;
+S22	:=	Tav02 union Tav12;
+
+Psol1 	:= solve(P1System,{p01,p21,p31});
+Pav1 	:= allvalues(Psol1,d);
+Pav11 	:= Pav1[1];
+Pav12	:= Pav1[2];
+Pav13	:= Pav1[3];
+Pav14	:= Pav1[4];
+
+
+S11	:=	Tav01 union Tav11;
+
+S11a := subs(Conditions,S11);
+C1 := subs(S11a,Pav11);
+C1 := subs(p00=0,p11=0,p22=0,C1);
+C1 := subs(Conditions,C1);
+
+C2 := subs(S11a,Pav12);
+C2 := subs(p00=0,p11=0,p22=0,C2);
+C2 := subs(Conditions,C2);
+
+#C3 := subs(S11a,Pav13);
+#C3 := subs(p00=0,p11=0,p22=0,C3);
+#C3 := subs(Conditions,C3);
+
+#C4 := subs(S11a,Pav14);
+#C4 := subs(p00=0,p11=0,p22=0,C3);
+#C4 := subs(Conditions,C4);
+
+tryit := proc()
+for i from 1 to 100 do
+Ar := genrand();
+Br := genrand();
+Cr := genrand();
+Dr := genrand();
+Er := genrand();
+Fr := genrand();
+Arn := evalf(Ar/(sqrt(Ar^2+Br^2+Cr^2)));
+Brn := evalf(Br/(sqrt(Ar^2+Br^2+Cr^2)));
+Crn := evalf(Cr/(sqrt(Ar^2+Br^2+Cr^2)));
+Drn := evalf(Dr/(sqrt(Dr^2+Er^2+Fr^2)));
+Ern := evalf(Er/(sqrt(Dr^2+Er^2+Fr^2)));
+Frn := evalf(Fr/(sqrt(Dr^2+Er^2+Fr^2)));
+ANS1 := map(evalf,subs(A=Arn,B=Brn,C=Crn,D=Drn,E=Ern,F=Frn,C1));
+ANS2 := map(evalf,subs(A=Arn,B=Brn,C=Crn,D=Drn,E=Ern,F=Frn,C2));
+ANS3 := map(evalf,subs(A=Arn,B=Brn,C=Crn,D=Drn,E=Ern,F=Frn,C3));
+ANS4 := map(evalf,subs(A=Arn,B=Brn,C=Crn,D=Drn,E=Ern,F=Frn,C4));
+print(i);
+lprint(Arn,Brn,Crn,Drn,Ern,Frn);
+print(ANS1);
+print(ANS2);
+print(ANS3);
+print(ANS4);
+od;
+end;
+
+
+
+
+#C1s := subs(A=Ar,B=Br,C=Cr,Conditions,t=1,p00=0,p22=0,p11=0,eval(C1));
+#C1a := subs(Conditions,t=1,p00=0,p22=0,p11=0,p21=0,eval(C1));
+#C1b := subs(Conditions,t=1,p00=0,p22=0,p21=0,p31=0,eval(C1));
+#C1c := subs(Conditions,t=1,p00=0,p22=0,p31=0,p11=0,eval(C1));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

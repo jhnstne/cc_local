@@ -1,0 +1,56 @@
+Dear Prof. Dietz, 
+
+I appreciate your thoughtful reading of our paper.
+You make some very good points.
+
+> M(a,b,c,d,1) is nothing else than stereographic projection of the
+> point (0,a,b,c,d) onto S^3 with the center of projection (1,0,0,0,1).
+
+This is a good observation.  I should certainly have noted this.
+The biggest impact this has for application of these curves is the
+singularity at the center of projection.
+That is, the curve in image space should avoid the x4=0 hyperplane.
+Fortunately, this singularity can be avoided in practical applications,
+partly because of the fact that antipodal points represent the
+same orientation.  However, I need to elaborate on this in the paper.
+
+> Interpolating curves constructed by M depend on the chosen coordinate system,
+> since the center of projection is fixed.
+
+Invariance under coordinate transformation
+is not a problem for the application of this work to animation,
+since the exact curve generated for an animation is less important
+than the fact that it is a good one.
+
+>  If the P^4-curve is set up as cubic curve, not all sextic rational curves
+>  on the S^3 are representable by M. In this sence the representation is not
+>  complete.
+
+>  There is no reason why a cubic B-spline curve should be converted to
+>  Bezier representation when mapped to the S^3. How to multiply B-splines
+>  can be found in e.g.
+>  Morken, K.: Some identities for products and degree raising of splines,
+>              Construct. Approx. 7 (1991), 195-208
+>  Dietz, R.; Hoschek, J.; Juettler, B.: Rational patches on quadrics,
+>              Computer-Aided Design 27 (1995), 27-40
+
+We were aware that B-splines could have been mapped back directly.
+However, recall that we do not stipulate either the form of the interpolating
+curve in image space or the form of the interpolating curve on the 3-sphere.
+We wish to allow any form, as long as it represents rational curves.
+(This is motivated by the large number of papers
+on different versions of quaternion curves built around spherical interpolation,
+including B-spline, Hermite, Catmull-Rom, etc. -- see the discussion of related
+work.)
+Section 8 is simply an *example* of how the image of a curve could be computed
+in the popular case of the Bezier curve.
+
+I need to clarify these issues in the paper.
+Thanks again for your input.
+
+Best regards,
+John
+
+
+
+

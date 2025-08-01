@@ -1,0 +1,96 @@
+interface(quiet=true);
+interface(echo=0);
+writeto(`log`);
+
+read `genutils.maple`;
+read `bezutils.maple`;
+read `sphere_curves`;
+read `ho5+.maple`;
+read `bcircle.maple`;
+read `directrix.maple`;
+read `extract_control.maple`;
+read `writehull.maple`;
+
+
+tempres1 := multiply(RDUMMY,scalarmul(vector(CU1),.1));
+tempres2 := vector([tempres1[1]/tempres1[4],tempres1[2]/tempres1[4],
+		tempres1[3]/tempres1[4]]);
+tempres3 := add(tempres2,vector(PT));
+XT1 :=	[
+ 	subs(RDX=RT[1],RDY=RT[2],RDZ=RT[3],tempres3[1]),
+ 	subs(RDX=RT[1],RDY=RT[2],RDZ=RT[3],tempres3[2]),
+ 	subs(RDX=RT[1],RDY=RT[2],RDZ=RT[3],tempres3[3])
+	];
+
+tempres1 := multiply(RDUMMY,scalarmul(vector(CU2),.1));
+tempres2 := vector([tempres1[1]/tempres1[4],tempres1[2]/tempres1[4],
+		tempres1[3]/tempres1[4]]);
+tempres3 := add(tempres2,vector(PT));
+XT2 :=	[
+ 	subs(RDX=RT[1],RDY=RT[2],RDZ=RT[3],tempres3[1]),
+ 	subs(RDX=RT[1],RDY=RT[2],RDZ=RT[3],tempres3[2]),
+ 	subs(RDX=RT[1],RDY=RT[2],RDZ=RT[3],tempres3[3])
+	];
+tempres1 := multiply(RDUMMY,scalarmul(vector(CU3),.1));
+tempres2 := vector([tempres1[1]/tempres1[4],tempres1[2]/tempres1[4],
+		tempres1[3]/tempres1[4]]);
+tempres3 := add(tempres2,vector(PT));
+XT3 :=	[
+ 	subs(RDX=RT[1],RDY=RT[2],RDZ=RT[3],tempres3[1]),
+ 	subs(RDX=RT[1],RDY=RT[2],RDZ=RT[3],tempres3[2]),
+ 	subs(RDX=RT[1],RDY=RT[2],RDZ=RT[3],tempres3[3])
+	];
+tempres1 := multiply(RDUMMY,scalarmul(vector(CU4),.1));
+tempres2 := vector([tempres1[1]/tempres1[4],tempres1[2]/tempres1[4],
+		tempres1[3]/tempres1[4]]);
+tempres3 := add(tempres2,vector(PT));
+XT4 :=	[
+ 	subs(RDX=RT[1],RDY=RT[2],RDZ=RT[3],tempres3[1]),
+ 	subs(RDX=RT[1],RDY=RT[2],RDZ=RT[3],tempres3[2]),
+ 	subs(RDX=RT[1],RDY=RT[2],RDZ=RT[3],tempres3[3])
+	];
+
+
+printlevel := 1;
+FINAL_HULL1 := extract_hull(RADIUS_CONTROL,0,ORIENT_CONTROL,4,
+		DIRECTRIX_CONTROL,3,CUT_CONTROL1,2);
+FINAL_HULL2 := extract_hull(RADIUS_CONTROL,0,ORIENT_CONTROL,4,
+		DIRECTRIX_CONTROL,3,CUT_CONTROL2,2);
+FINAL_HULL3 := extract_hull(RADIUS_CONTROL,0,ORIENT_CONTROL,4,
+		DIRECTRIX_CONTROL,3,CUT_CONTROL3,2);
+FINAL_HULL4 := extract_hull(RADIUS_CONTROL,0,ORIENT_CONTROL,4,
+		DIRECTRIX_CONTROL,3,CUT_CONTROL4,2);
+
+
+
+fh1 := eval(beztensor_to_function(FINAL_HULL1,11,2,t,u));
+fh2 := eval(beztensor_to_function(FINAL_HULL2,11,2,t,u));
+fh3 := eval(beztensor_to_function(FINAL_HULL3,11,2,t,u));
+fh4 := eval(beztensor_to_function(FINAL_HULL4,11,2,t,u));
+
+FINAL1 := htoc(fh1);
+FINAL2 := htoc(fh2);
+FINAL3 := htoc(fh3);
+FINAL4 := htoc(fh4);
+
+writeto(terminal);
+plot3d({FINAL1,FINAL2,FINAL3,FINAL4},t=0..1,u=0..1);
+plot3d({XT1,XT2,XT3,XT4},t=0..1,u=0..1);
+interface(quiet=false);
+interface(echo=1);
+
+
+writehull(`part1`,FINAL_HULL1,11,2,1);
+writehull(`part2`,FINAL_HULL2,11,2,2);
+writehull(`part3`,FINAL_HULL3,11,2,3);
+writehull(`part4`,FINAL_HULL4,11,2,4);
+writecurve(`cpart1`,FINAL_HULL1,11,2,20,6,1);
+writecurve(`cpart2`,FINAL_HULL2,11,2,20,6,2);
+writecurve(`cpart3`,FINAL_HULL3,11,2,20,6,3);
+writecurve(`cpart4`,FINAL_HULL4,11,2,20,6,4);
+
+
+
+
+
+

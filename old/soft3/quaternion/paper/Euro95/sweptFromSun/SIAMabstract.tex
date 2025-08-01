@@ -1,0 +1,272 @@
+\documentstyle[12pt]{article} 
+
+\newif\ifFull
+\Fullfalse
+
+\makeatletter
+\def\@maketitle{\newpage
+\null
+% \vskip 2em                   % Vertical space above title.
+\begin{center}
+        {\Large\bf \@title \par}  % Title set in \Large size. 
+        \vskip .5em               % Vertical space after title.
+       {\lineskip .5em           %  each author set in a tabular environment
+        \begin{tabular}[t]{c}\@author 
+        \end{tabular}\par}                   
+\end{center}
+\par
+\vskip .5em}                 % Vertical space after author
+\makeatother
+
+% non-indented paragraphs with xtra space
+% set the indentation to 0, and increase the paragraph spacing:
+%% \parskip=8pt plus1pt                             
+%% \parindent=0pt
+% default values are 
+% \parskip=0pt plus1pt
+% \parindent=20pt
+% for plain tex.
+
+\newenvironment{summary}[1]{\if@twocolumn
+\section*{#1} \else
+\begin{center}
+{\bf #1\vspace{-.5em}\vspace{0pt}} 
+\end{center}
+% \quotation
+\fi}{\if@twocolumn\fi}
+% {\if@twocolumn\else\endquotation\fi}
+
+\renewenvironment{abstract}{\begin{summary}{Abstract}}{\end{summary}}
+
+\newcommand{\SingleSpace}{\edef\baselinestretch{0.9}\Large\normalsize}
+\newcommand{\DoubleSpace}{\edef\baselinestretch{1.4}\Large\normalsize}
+\newcommand{\Comment}[1]{\relax}  % makes a "comment" (not expanded)
+\newcommand{\Heading}[1]{\par\noindent{\bf#1}\nobreak}
+\newcommand{\Tail}[1]{\nobreak\par\noindent{\bf#1}}
+\newcommand{\QED}{\vrule height 1.4ex width 1.0ex depth -.1ex\ } % square box
+\newcommand{\arc}[1]{\mbox{$\stackrel{\frown}{#1}$}}
+\newcommand{\lyne}[1]{\mbox{$\stackrel{\leftrightarrow}{#1}$}}
+\newcommand{\ray}[1]{\mbox{$\vec{#1}$}}          
+\newcommand{\seg}[1]{\mbox{$\overline{#1}$}}
+\newcommand{\tab}{\hspace*{.2in}}
+\newcommand{\se}{\mbox{$_{\epsilon}$}}  % subscript epsilon
+\newcommand{\ie}{\mbox{i.e.}}
+\newcommand{\eg}{\mbox{e.\ g.\ }}
+\newcommand{\figg}[3]{\begin{figure}[htbp]\vspace{#3}\caption{#2}\label{#1}\end{figure}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\prf}{\noindent{{\bf Proof} :\ }}
+\newcommand{\choice}[2]{\left( \begin{array}{c} \mbox{\footnotesize{$#1$}} \\ \mbox{\footnotesize{$#2$}} \end{array} \right)}      
+\newcommand{\ddt}{\frac{\partial}{\partial t}}
+
+\newtheorem{rmk}{Remark}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{conjecture}{Conjecture}[section]
+\newtheorem{claim}{Claim}[section]
+\newtheorem{notation}{Notation}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[section]
+\newtheorem{defn2}{Definition}
+
+\DoubleSpace
+
+\setlength{\oddsidemargin}{2mm}
+\setlength{\evensidemargin}{2mm}
+\setlength{\headsep}{0pt}
+\setlength{\topmargin}{0pt}
+\setlength{\textheight}{216mm}
+\setlength{\textwidth}{156mm}
+
+\title{Exact sweep of a curve\thanks{This work was partially supported by 
+	National Science Foundation grant CCR-9213918.}}
+\author{John K. Johnstone \and James P. Williams}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+% *********************************************************************
+\begin{abstract}
+We show how to construct a rational Bezier model of a swept
+surface that interpolates
+$n$ positions and orientations of a fixed rational space curve
+and maintains the shape of the curve at all intermediate points
+of the sweep.
+Thus, the surface models
+an exact sweep of the curve, consistent with the given data.
+Through a simple extension, we also allow the sweeping curve to change
+its size through the sweep.
+The position, orientation, and size of the sweeping curve can change with
+arbitrary continuity.
+This surface
+encompasses the surface of revolution and extruded surface, but extends
+them to arbitrary sweeps.
+It can also be used to model the path of a swept object whose shape does not
+change during the sweep, such as in robotics and CAD/CAM, using curves generated
+automatically by the moving object.
+\end{abstract}
+
+{\bf Keywords}: swept surface, rational Bezier surface, orientation, quaternion, exact representation
+
+\clearpage
+
+Consider a fixed curve sweeping through 3-space and suppose
+that we want a rational Bezier model of the surface that it sweeps out.
+We show how to build a rational swept surface that
+interpolates $n$ frames of a fixed rational space curve 
+({\em i.e.}, $n$ position/orientation pairs) 
+and, more importantly, 
+maintains the shape of the curve at all intermediate points of the sweep.
+Thus, the surface models 
+an exact sweep of the curve, consistent with the given data.
+For added flexibility, we also allow the sweeping curve to change its
+size through the sweep.
+This swept surface models sweeping bodies that do not change shape,
+such as in the applications of robotics and CAD/CAM,
+and the frames can be generated automatically by the moving body.
+For design, it also encompasses the surface of revolution 
+and extruded surface, and extends them to arbitrary sweeps of a curve.
+
+We assume discrete data on the position and orientation
+of the sweeping body for reasons both of application and design.
+For the modeling of a physically sweeping body ({\em e.g.}, a robot), 
+it is simple to gather discrete position/orientation data, 
+but much more difficult to gather it continuously.
+In design also, it is usually appropriate to design the swept surface
+by specifying only a finite number of frames.
+
+The major challenge is to rationally preserve the shape of the curve 
+through the sweep.
+The interpolation of curves that can vary in shape during the sweep
+can already be solved using the traditional tensor product surface.
+And the shape of the curve can be preserved through the sweep
+using Frenet frames if the surface need not be rational.
+However, we want a rational model, for compatibility with 
+present modeling systems.
+We build a rational tensor product Bezier surface, complete with a full
+definition of its control mesh.
+
+There is a rich literature on swept surfaces, but none
+that yields a rational parametric surface
+representing an exact sweep for our large class of surfaces.
+Several papers use the Frenet frame of differential geometry
+to control the sweep of a curve ({\em e.g.}, Pegna \cite{Pegna88},
+Bronsvoort and Klok \cite{bronsklok85}).
+The path of the sweep is specified by a space curve $d(t)$,
+which defines the position of the reference point on the
+sweep curve, and the sweep curve's orientation is defined by
+the Frenet frame of the position curve $d$.
+The rotation defined by the Frenet frame is not rational,
+and thus neither is the swept surface.  % see Pegna, p. 47
+The envelope of swept surfaces ({\em i.e.}, the implicit equation of the surface
+swept out by a sweeping surface) has been the subject of many papers
+({\em e.g.}, Martin and Stephenson \cite{martinsteph90}).
+Coquillart \cite{coquillart87} and Bloomenthal and Riesenfeld 
+\cite{bloom91} construct swept surfaces by approximating offset curves
+of the axis of the sweep, in the latter paper to define translational sweeps,
+surfaces of revolution, and approximations of rotation-minimizing 
+sweeps.
+(The rotation-minimizing frame 
+is an attempt to remove some of the problems of the Frenet frame.)
+The important special class of canal surfaces, 
+surfaces swept by a sphere, are studied by Rossignac and Requicha 
+\cite{rossignac85,rossrequicha84}.
+Farouki shows that rational canal surfaces can be constructed by sweeping
+a sphere along a special Pythagorean hodograph space curve, and gives the
+rational parameterization \cite{farouki94}.
+% only works for rotationally symmetric circle sweep curve
+The ray tracing of swept surfaces (as opposed to their Bezier surface 
+definition) has been studied by van Wijk (both with the sweep of a sphere
+of varying radius \cite{vanwijk84euro} and the rotation, translation,
+and translation with scaling of a planar cubic spline \cite{vanwijk84tog})
+and by Bronsvoort and Klok \cite{bronsklok85} (for generalized cylinders).
+
+Although our method directly models the sweep of a curve,
+the sweep of a surface or a solid can be modeled indirectly
+by using curve frames that represent the intersection of two 
+instantaneously close frames of the surface.
+Although this will not construct an 
+exact model of an actual sweep of the surface,
+it is likely to be a good approximation since the 
+envelope of a surface is computed by such intersections
+of neighbouring positions of the surface.
+
+A curve is defined by its position, orientation, and scale.
+We isolate each of these three components and independently 
+design each of them to interpolate the frames.
+Rational interpolation of position and scale is straightforward, 
+but rational orientation interpolation is challenging.
+The orientation of a curve is represented by a unit quaternion.
+This reduces the problem to interpolation of points on the unit
+sphere in 4-space by a curve constrained to this sphere.
+This can be done using optimization but this will not create
+a rational curve.
+We show how to translate to an equivalent problem of interpolation
+of points in 4-space without any constraints.
+
+
+In the presentation, 
+we will show how to interpolate orientations constrained to the quaternion sphere
+and how to explicitly build the control mesh of the surface from the position,
+orientation, and scaling components of the sweeping curve.
+We will also show pictures of surfaces generated by our method.
+
+\bibliographystyle{plain}
+\begin{thebibliography}{Shoemake 85}
+
+\bibitem{bloom91}
+Bloomenthal, M. and R. Riesenfeld (1991)
+Approximation of sweep surfaces by tensor product NURBS.
+SPIE Proceedings,
+% : Curves and Surfaces in Computer Vision and Graphics II,
+Vol. 1610, 132--144.
+
+\bibitem{bronsklok85}
+Bronsvoort, W. and F. Klok (1985)
+Ray tracing generalized cylinders.
+ACM Transactions on Graphics, 4(4), October, 291--303.
+
+\bibitem{coquillart87}
+Coquillart, S. (1987)
+A control-point-based sweeping technique.
+IEEE Computer Graphics and Applications, November, 36--45.
+
+\bibitem{farouki94}
+Farouki, R. (1994)
+Pythagorean-hodograph space curves.
+Advances in Computational Mathematics, 2, 41--66.
+
+\bibitem{martinsteph90}
+Martin, R. and P. Stephenson (1990)
+Sweeping of three-dimensional objects.
+CAD, 22, 223--234.
+
+
+\bibitem{Pegna88}
+Pegna, J. (1988) Variable sweep geometric modeling.
+Ph.D. thesis, Dept. of Mechanical Engineering, Stanford University.
+
+\bibitem{rossignac85}
+Rossignac, J. (1985)
+Blending and offsetting solid models.
+Ph.D thesis, University of Rochester.
+
+\bibitem{rossrequicha84}
+Rossignac, J. and A. Requicha (1984)
+Constant-radius blending in solid modeling.
+Computers in Mechanical Engineering, July, 65--73.
+
+
+\bibitem{vanwijk84euro}
+van Wijk, J. (1984)
+Ray tracing objects defined by sweeping a sphere.
+EUROGRAPHICS '84, 73--82.
+
+\bibitem{vanwijk84tog}
+van Wijk, J. (1984)
+Ray tracing objects defined by sweeping planar cubic splines.
+ACM Transactions on Graphics, 3(3), July, 223--237.
+
+\end{thebibliography}
+
+\end{document}

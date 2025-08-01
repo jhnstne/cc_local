@@ -1,0 +1,13 @@
+This directory contains the sourse for the program 'Stick'.  The main
+program is in the file 'toSticks.c'.  
+
+The suggested method of adding new formats is to create two routines, 
+one to read your format and put a triangle into the internal triangle format,
+and another to write out a triangle in the internal format to whatever format
+you desire.  Note that one of these routines might be unnecessary if
+you are willing to use a format already in place.
+
+Next, add a new #define constant to identify your format (these constants
+are in stick.h).  Now modify the routines InputType() and/or Method() to
+enable Stick to use your new format.  Finally, modify the routines
+ReadTriangle() and/or PrintTriangle() to call your new routine(s).

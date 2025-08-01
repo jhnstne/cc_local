@@ -1,0 +1,65 @@
+# Test programs for finding cubic pyth. hodograph
+# bezier curves
+
+# P0,P1,P2,P3 will be linear bezier curves
+
+P0 := vector([p00,p01]);
+P1 := vector([p10,p11]);
+P2 := vector([p20,p21]);
+P3 := vector([p30,p31]);
+
+# XT, YT, ZT will be cubic bezier curves
+
+XT := vector([x0,x1,x2,x3]);
+YT := vector([y0,y1,y2,y3]);
+ZT := vector([z0,z1,z2,z3]);
+
+
+# compute the first derivatives of the primary curves
+
+XTprime := bezdiff(XT,3);
+YTprime := bezdiff(YT,3);
+ZTprime := bezdiff(ZT,3);
+
+
+# impose the restrictions
+
+x1 := add(scalarmul(bezproduct(P0,1,P1,1),2),
+	  scalarmul(bezproduct(P2,1,P3,1),-2));
+
+
+x2 := add(scalarmul(bezproduct(P1,1,P3,1),2),
+	  scalarmul(bezproduct(P0,1,P2,1),2));
+
+
+x3 := add(
+	add(bezproduct(P1,1,P1,1),bezproduct(P2,1,P2,1)),
+	scalarmul(	
+		add(bezproduct(P0,1,P0,1),bezproduct(P3,1,P3,1)),-1));
+
+xtp := gen_bernstein(2,t,XTprime);
+ytp := gen_bernstein(2,t,YTprime);
+ztp := gen_bernstein(2,t,YTprime);
+
+
+
+Conditions := {xp0=dA,yp0=dB,zp0=dC,xp1=dD,yp1=dE,zp1=dF,x0=A,y0=B,z0=C,x1=D,y1=E,z1=F};
+
+
+Tan0System := 	{
+		xtp - xp0,
+		ytp - yp0,
+		ztp - zp0
+		}
+
+Tan0System := subs(t=0,Tan0System);
+
+
+Tan1System := 	{
+		xtp - xp1,
+		ytp - yp1,
+		ztp - zp1
+		}
+
+Tan1System := subs(t=1,Tan1System);
+

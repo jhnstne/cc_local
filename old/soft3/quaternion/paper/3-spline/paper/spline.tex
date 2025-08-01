@@ -1,0 +1,2188 @@
+\documentstyle[11pt]{article}
+\newif\ifFull
+\Fullfalse
+\input{header}
+\newcommand{\add}[1]{#1}		% {{\bf #1}}
+\DoubleSpace
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{.5in}	% should be 0pt for 1in
+% \setlength{\headsep}{.5in}
+\setlength{\textheight}{8.5in}
+\setlength{\textwidth}{6.5in}
+\setlength{\columnsep}{5mm}	% width of gutter between columns
+% \markright{Quaternion splines: \today \hfill}
+% \pagestyle{myheadings}
+% -----------------------------------------------------------------------------
+
+\title{A rational quaternion spline of arbitrary continuity}
+% A Simple but Effective Rational Quaternion Spline
+% Rational Quaternion Splines as Euclidean Curves}
+% \title{Euclidean curves on a surface}
+\author{J.K. Johnstone\thanks{Geometric Modeling Lab, 125 Campbell,
+	Computer and Information Sciences, 
+	UAB, Birmingham, AL 35294.}\ \ and 
+	J.P. Williams\thanks{Imaging and Visualization Group,
+	Siemens Corporate Research, Princeton, NJ.}}
+	% \\August 1999 (revision of July 1999)}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Quaternion splines are a classical tool for orientation control in computer
+animation and robotics.
+In this paper, we design a rational quaternion spline
+with many desirable properties:
+it is a fully general NURBS curve of arbitrary continuity;
+\add{it has a closed form algebraic description, leading to simple 
+derivative computation;}
+its construction is an efficient generalization of classical interpolation
+techniques in Euclidean space, leading to simple implementation and
+easy incorporation into existing NURBS-based modelers;
+it is coordinate-frame invariant;
+and it is of high quality.
+% demonstrably better than earlier curves;
+% compare to trim, Wang and Joe, and Ravani
+% and it can interpolate derivative information.
+
+The vast majority of quaternion splines have been non-rational curves.
+There are many advantages to the design of rational quaternion splines,
+such as computational efficiency (both in designing the
+quaternion spline and in later using the spline) and compatibility 
+with existing NURBS technology.
+The few other rational quaternion splines have been limited to
+$C^1$ continuity and have had other difficulties.
+% There has only been one attempt at a rational quaternion spline, by Wang
+% and Joe. (also by Nielsen)
+% Their construction, however, is not of a general rational curve 
+% but a curve composed entirely of spherical biarcs (great circles of a sphere), 
+% which imposes considerable restrictions on the resulting curve
+% (for example, low continuity)
+% and is again incompatible with existing NURBS technology.
+
+We believe that our rational quaternion spline will be of considerable
+use in interactive animation, interactive robot motion control, and 
+motion analysis.
+Its design is also suggestive of a general approach for the design
+of rational curves on arbitrary surfaces.
+\end{abstract}
+
+\noindent Keywords: quaternion spline, rational curves, interpolation,
+	  orientation, animation, motion control.
+\clearpage
+
+\section{Introduction}
+\label{sec:intro}
+
+\subsection{A rational quaternion spline}
+
+Quaternion splines are a classical tool for orientation control in computer
+animation and robotics.
+The design of quaternion splines has received a great deal
+of attention since Shoemake introduced them in 1985 \cite{shoemake85}.
+However, quaternion splines have traditionally been non-rational curves 
+\cite{shoemake85,duff85,pletinckx89,schlag91,barr92,nielson92,nielson93,nam95,park95,kim95,rama97}.
+The only exceptions are a quaternion spline constructed
+from spherical biarcs by Wang and Joe \cite{wang93}
+and a quadratic quaternion spline of Nielson \cite{nielson92,nielson93},
+both of which have restricted $C^1$ continuity.
+In this paper, we design a rational quaternion spline that can have
+arbitrary continuity.
+It is also of superior quality compared to both rational and nonrational
+quaternion splines.
+
+A rational quaternion spline has many advantages.\footnote{A 
+	curve is rational if its parameterization can be 
+	expressed as a rational map.
+	A map $(x_1,\ldots,x_n) \mapsto (f_1 (x_1,\ldots,x_n),\ldots,f_m (x_1,\ldots,x_n))$
+	is rational if its components $f_i$ are all rational polynomials
+	(quotients of polynomials).}
+% due to its efficiency and compatibility.
+Rational curves (usually represented as NURBS)
+	% \footnote{Any rational curve can be expressed as a NURBS curve.}
+are the most efficient of curves,
+due to the inherent efficiency of polynomial computations and 
+the elegant and powerful theory of rational Bezier and B-spline curves.
+As a result of this elegance,
+rational Bezier curves and NURBS are the {\em de facto} standard 
+in modeling systems, with a large, established suite of algorithms for their 
+manipulation.
+Thus, the design of a rational quaternion spline will allow the 
+curve to be incorporated immediately into existing software and 
+geometric models, 
+and subsequent computations with the curve will be simple and efficient.
+Our algorithm for the quaternion spline's construction is also efficient, 
+largely because of the rationality of the computations.
+This will allow interactive design for interactive animation, 
+interactive robot motion control, and efficient motion analysis.
+Since the design of a motion matching a designer's intent 
+is as much of an art as a science,
+interactive design and refinement is a desirable feature.
+\add{Last but not least, a rational quaternion spline has a closed form algebraic representation,
+unlike most other quaternion splines.
+A closed form makes curve analysis possible, such as derivative computation.
+Derivative computation is important in many applications
+of quaternion splines to motion control, such as in spacetime optimization
+\cite{witkin88} in motion editing \cite{popovic99}.}
+
+\subsection{Design on a surface}
+\label{subsec:design}
+
+The main challenge of quaternion spline design is that it involves the design of
+a curve {\em on a surface}.
+A unit quaternion is a point on the unit sphere \Sn{3}\ in 4-space,
+$x_1^2 + x_2^2 + x_3^2 + x_4^2 - 1 = 0$.
+	% The superscript 3 refers to the dimension of the manifold.
+In particular, the unit quaternion 
+$(\cos \frac{\theta}{2}, v \sin \frac{\theta}{2})$, $v \in \Re^3$, $\|v\|=1$,
+represents the orientation of an object 
+where the object in its canonical orientation 
+has been rotated by $\theta$ radians about the axis $v$.
+(See Section~\ref{sec:quaternion} for a full review of quaternions.)
+If the orientations of a rigid object in a finite series of keyframes are
+represented by quaternions, the design of a smooth curve
+on \Sn{3}\ interpolating these quaternions represents a smooth
+motion of the object through the desired orientations.
+This interpolating curve on \Sn{3}\ is called a quaternion spline.
+Thus, quaternion spline design is curve design on a surface.
+
+The design of a curve on a surface is more challenging than the conventional
+design of a curve in Euclidean space, since surfaces are Riemannian spaces
+with a significantly different geometry than Euclidean space.
+For example, in moving from Euclidean to Riemannian geometry, 
+straight lines are replaced by geodesics.
+Indeed, the constraint of the quaternion spline to \Sn{3}\ is the major 
+reason for the nonrationality of the existing quaternion spline methods, 
+since constraint to a sphere is most easily
+done through a nonrational analogue of linear interpolation, slerping
+\cite{shoemake85,duff85,pletinckx89,schlag91,nielson92,nielson93,kim95,nam95},
+or by inherently nonrational constrained optimization \cite{barr92,rama97}.
+
+Since the modeling of curves in Euclidean space
+is much better understood than the modeling of curves in Riemannian space, 
+another promising approach to the
+design of a quaternion spline is to somehow reduce the problem to the 
+design of a curve in Euclidean space, unconstrained to a surface.
+% `Doctor, it hurts when I do this!'  `Well, then don't do it.'
+% This reduction of an unknown problem to a known problem is a time-honored
+% classical mathematical technique.
+An approach for achieving this reduction is as follows.
+Let $f:\Re^m \rightarrow \Sn{3}$ be a map to \Sn{3}.
+Then any curve $C$ in $m$-space yields a curve $f(C)$ on \Sn{3}\ 
+(Figure~\ref{fig:reduce}).
+We can now concentrate on the Euclidean problem of designing the curve $C$.
+The problem of constraining the curve to the surface has been
+effectively reduced to the problem of constructing a map to the surface.
+
+\begin{defn2}
+The design of a curve on a surface through the design of a curve in $m$-space
+and a map from $m$-space to the surface will be called the {\bf Euclidean-space
+	% image-space, surface-map
+approach} to curve design on the surface.
+\end{defn2}
+\begin{figure}
+\vspace{2.5in}
+\special{psfile=/usr/people/jj/modelTR/3-spline/img/fig1white.ps
+	 hoffset=100}
+\caption{A curve in Euclidean space maps to a curve on the surface}
+% file: fig1.showcase
+% tops fig1white.rgb -m 6.5 1.5 > fig1white.ps
+% a simple picture of S, C, f(C), and f (as an arrow) for a generic surface S
+\label{fig:reduce}
+\end{figure}
+
+Since we want the quaternion spline to be rational,
+the curve $C$ and the map $f$ must be rational.
+It is simple to construct a rational curve $C$,
+since the classical methods for curve design in Euclidean space yield 
+rational curves \cite{farin97}.
+The construction of a good rational map to \Sn{3}\ is more challenging.
+
+We are now ready to give our general algorithm for the design of a rational
+quaternion spline through the quaternions
+$\{p_i\}_{i=1,\ldots,k} \subset \Sn{3}$.
+Refer to Figures~\ref{fig:alg1a}-\ref{fig:alg2c}.
+%
+\begin{description}
+\item[(1a)] Design a rational map to \Sn{3}, $f:\Re^4 \rightarrow \Sn{3}$.
+\item[(1b)] Compute the inverse map $f^{-1}:\Sn{3} \rightarrow \Re^4$.
+\item[(2a)] Compute $\{f^{-1}(p_i)\}_{i=1,\ldots,k}$, 
+	    mapping the quaternions to Euclidean space.
+\item[(2b)] Design a rational curve $C$ in Euclidean space, interpolating $\{f^{-1}(p_i)\}_{i=1,\ldots,k}$.
+\item[(2c)] Compute $f(C)$, mapping the curve back to the surface.
+	    This is the desired rational quaternion spline interpolating
+	    the quaternions $\{p_i\}_{i=1,\ldots,k}$.
+\end{description}
+
+We prefer rational maps to \Sn{3}\ with domain $\Re^4$, the resident
+Euclidean space, since then $f^{-1}(p_i)$ is a curve in step 2a
+(as opposed to a point if the domain is $\Re^3$ or a surface if $\Re^5$).
+This leads to a useful flexibility in the interpolation step 2b,
+since we can interpolate curves rather than points,
+which can be used to design better curves on the surface.
+
+Note that the inverse map $f^{-1}$ need not be rational.
+Also note that (1a-b) are preprocessing steps,
+(2b) is a well understood interpolation problem
+and (2a) and (2c) are simple operations.
+Thus, this algorithm is easily implemented and integrated into
+existing modeling/animation systems.
+	% Later in the paper, we shall consider the addition of derivative data
+	% for the curve to interpolate.
+	%% We postpone this discussion in order to avoid overcomplicating the issue
+	%% at the outset.
+
+\clearpage
+\twocolumn
+
+\begin{figure}
+\vspace{2in}
+\special{psfile=/usr/people/jj/modelTR/3-spline/img/step1a.ps hoffset=40}
+\caption{Step 1a}
+\label{fig:alg1a}
+% file: ~jj/modelTR/3-spline/img/step1a.showcase
+% tops step1a.rgb -m 6.5 1.5 > step1a.ps
+% 1a: point in 3-space, sphere, arrow from point to sphere marked 'f'
+\end{figure}
+
+\begin{figure}
+\vspace{2in}
+\special{psfile=/usr/people/jj/modelTR/3-spline/img/step1b.ps hoffset=40}
+\caption{Step 1b ($g=f^{-1}$)}
+\label{fig:alg1b}
+% file: ~jj/modelTR/3-spline/img/step1b.showcase
+% tops step1b.rgb -m 6.5 1.5 > step1b.ps
+% 1b: point on sphere, sphere, arrow from point to general 3-space marked g
+\end{figure}
+
+\begin{figure}
+\vspace{2in}
+\special{psfile=/usr/people/jj/modelTR/3-spline/img/stepdata.ps hoffset=40}
+\caption{Quaternions}
+\label{fig:algdata}
+% the following all use `s3spline -m 90 < data5-1'
+% Data Points on (quaternions on S3)
+% tops stepdata.rgb -m 6.5 1.5 > stepdata.ps
+\end{figure}
+
+\begin{figure}
+\vspace{2in}
+\special{psfile=/usr/people/jj/modelTR/3-spline/img/step2a.ps hoffset=40}
+\caption{Step 2a}
+\label{fig:alg2a}
+% 2a: Data Points and Inverse Lines on
+% tops step2a.rgb -m 6.5 1.5 > step2a.ps
+\end{figure}
+
+\begin{figure}
+\vspace{2in}
+\special{psfile=/usr/people/jj/modelTR/3-spline/img/step2b.ps hoffset=40}
+\caption{Step 2b}
+\label{fig:alg2b}
+% 2b: Data Points, Inverse Lines and Image Curve on
+% tops step2b.rgb   -m 6.5 1.5 > step2b.ps
+\end{figure}
+
+\begin{figure}
+\vspace{2in}
+\special{psfile=/usr/people/jj/modelTR/3-spline/img/step2c.ps hoffset=40}
+\caption{Step 2c}
+\label{fig:alg2c}
+% 2c: Data Points, Image Curve and S3 curve on
+% tops step2c.rgb   -m 6.5 1.5 > step2c.ps
+\end{figure}
+
+\clearpage
+\onecolumn
+
+Since $f$ is a rational map,
+the curve on \Sn{3}\ inherits the continuity of the curve $C$ in $\Re^4$.
+Since it is simple to define cubic interpolating curves
+in Euclidean space with $C^2$ continuity, or curves of higher degree with
+even higher continuity, the curve on $S^3$ can easily have $C^2$ continuity
+and indeed arbitrary continuity.
+Other quaternion splines have considerable difficulty with continuity.
+
+The rest of the paper will be structured as follows.
+Section~\ref{sec:prevwork} reviews related work on quaternion splines
+and Section~\ref{sec:quaternion} gives the basic theory of quaternions.
+In Section~\ref{sec:map}, we build a good rational map to \Sn{3} and its inverse.
+In Section~\ref{sec:eucdesign},
+we discuss the design of an interpolating curve in Euclidean space,
+especially the interpolation of curves as opposed to points. 
+In Section~\ref{sec:curveimage}, we show how to map a curve in $\Re^4$
+back to a curve on \Sn{3} while preserving the Bezier structure,
+for the important case of the cubic Bezier curve.
+In Section~\ref{sec:avoid}, we discuss a region of instability 
+for the inverse map and show how to avoid this region.
+	% In Section~\ref{sec:deriv}, we show how the quaternion spline
+	% can be designed to interpolate derivative data as well.
+Section~\ref{sec:eg} gives examples of quaternion splines designed using the
+new method.	
+In Section~\ref{sec:results}, we show how to analyze the quality of a 
+quaternion spline, and use this measure to show the superiority
+of our method over some other methods.
+We end with some conclusions and ideas for future work in 
+Section~\ref{sec:conclusions}.
+\add{An appendix contains a proof of a technical result from 
+Section~\ref{sec:eucdesign}.}
+
+\section{Related work}
+\label{sec:prevwork}
+
+There is a rich literature on quaternion splines.
+\cite{shoemake85} introduced them as a solution 
+for keyframe animation in 1985.
+He used spherical linear interpolation (slerping) between points on \Sn{3}.
+Many others have also used slerping 
+\cite{duff85,pletinckx89,schlag91,nielson92,nielson93,kim95,nam95}.
+The spherical linear interpolation between points $P_0$ and $P_1$ on $S^3$ is:
+\[ P(t) = \frac{\sin((1-t)\theta) P_0 + \sin(t \theta) P_1}{\sin \theta}
+\]
+where $\cos \theta = P_0 \cdot P_1$.
+This represents an arc of the great circle between $P_0$ and $P_1$.
+The de Casteljau algorithm can be used to build traditional Bezier curves.
+A spherical analog to the de Casteljau algorithm based upon
+spherical linear interpolation is used to build quaternion splines,
+mimicking Bezier \cite{shoemake85,kim95}, B-spline 
+\cite{duff85,nielson92,nielson93,kim95}, Hermite \cite{kim95,nam95},
+cardinal spline \cite{pletinckx89}, and Catmull-Rom \cite{schlag91} curves.
+Since slerping is a nonrational operation,
+all of the methods based on slerping generate nonrational curves.
+Most of these curves are defined only by a geometric construction, and have
+no closed form algebraic definition.
+Computation of derivatives of these curves is complicated,
+as is the imposition of $C^2$ continuity.
+Kim et. al. \cite{kim95} provide solutions to the latter two problems,
+using Lie algebra and its exponential map.
+Our use of conventional Bezier or B-spline curves completely removes 
+these problems with continuity or derivative calculation.
+\cite{park97} again uses Lie algebra to design the quaternion spline,
+working on the SO(3) manifold rather than the \Sn{3}\ manifold.
+
+\cite{barr92} uses constrained optimization to develop optimal
+quaternion splines, optimizing the constraint that the curve lie on \Sn{3}.
+They also introduce low covariant acceleration
+as a desirable property of a quaternion spline,
+and incorporate it into their constraints.
+This ability to incorporate extra constraints into the optimization
+is a nice feature of their algorithm.
+Their quaternion spline is nonrational with no closed-form expression,
+and their numerical optimization can be expensive.
+Their approach is refined for added efficiency in \cite{rama97}.
+
+\cite{wang93, wang94} and \cite{nielson93} are close in spirit 
+to this paper, since they design rational quaternion splines.
+However, these curves are limited in scope.
+\cite{wang93,wang94} and \cite{nielson93} develop quadratic curves
+with $G^1$ continuity, and \cite{wang94} develops sextic curves
+with $C^1$ continuity.
+At least $C^2$ continuity is desirable, especially for animation.
+	% In \cite{wang93,wang94}, the input points must be augmented with 
+	% tangents, since the problem is posed as a Hermite interpolation problem.
+The quaternion splines of \cite{wang93} are built from biarcs 
+(great circles of the sphere), and those of \cite{nielson93} from circular arcs.
+Both Wang and Nielson's methods also involve heuristic, data-dependent choices
+that can be difficult to make,
+such as the choice of a spherical biarc from
+a one-parameter family of valid spherical biarcs, or a center of projection.
+Our method generalizes the work of Wang and Nielson, 
+by creating rational curves of arbitrary even degree 
+(all rational curves on $S^3$ have even degree \cite{wang94}) 
+and arbitrary continuity,
+based on traditional NURBS and without any data-dependent choices.
+
+The Euclidean-space approach has been used before
+for the design of curves on surfaces \cite{dietz93,wang94}.
+	% \cite{dietz93} and \cite{wang94} design rational curves on quadrics
+	% in 3-space.
+	% They both use a variant of the Euclidean-space approach.
+The classical solution to the design of trim curves on a surface 
+is another example, where the trim curve is designed in the parameter space 
+of the surface and then mapped back to the surface using the
+parameterization. % \cite{foley96}
+Trim curves are not a good solution to quaternion splines, however.
+It turns out that a parameterization of \Sn{3}\ is not a good map
+to the surface for quaternion spline design (see Section~\ref{sec:results}).
+Its domain is also wrong ($\Re^3$ rather than $\Re^4$) as discussed
+in Sections~\ref{sec:intro} and~\ref{sec:eucdesign}.
+
+\section{Quaternions and orientation}
+\label{sec:quaternion}
+
+The unit quaternion is a preferred representation for the
+orientation of a rigid object in computer animation.
+The quaternion was invented by Hamilton in 1843
+	% H. Coxeter, Non-Euclidean Geometry, Univ. of Toronto Press, 1961, p. 122
+as a 4-dimensional generalization of complex numbers.
+It was soon recognized that the quaternion can also be used
+to represent an orientation.
+To see this, we appeal to a fundamental result of Euler from 1752
+\cite{goldstein50} (Figure~\ref{fig:eulerRotation}).	
+	% goldstein, p. 118
+	% also junkins, optimal spacecraft rotational maneuvers, p. 26
+	% Cayley quickly realized the quaternion's use for rotation,
+	% establishing a connection to the rotation matrix 
+	% (see Coxeter, Non-Euclidean Geometry, p. 122).
+\begin{theorem}[Euler]
+A rigid body can be moved from an arbitrary initial orientation
+to an arbitrary final orientation by a single rotation of the body
+about a fixed axis.
+\end{theorem}
+%
+\begin{figure}
+\vspace{2.5in}
+\special{psfile=/usr/people/jj/modelTR/3-spline/img/EulerRotThm.ps
+	 hoffset=150}
+\caption{Any change of orientation can be expressed as a rotation about a fixed axis}
+% file: EulerRotThm.showcase
+% tops EulerRotThm.rgb -m 6.5 1.5 > EulerRotThm.ps
+\label{fig:eulerRotation}
+\end{figure}
+%
+This shows that the orientation of a rigid body can be represented by 
+a rotation axis $v$, $\|v\|=1$, and the rotation angle $\theta$ about 
+this axis required to rotate the body into the given orientation from a
+canonical orientation (say, the orientation in which the exact geometry
+of the body was originally specified).
+$v$ and $\theta$ are encoded in a unit quaternion by
+$(\cos \frac{\theta}{2}, v \sin \frac{\theta}{2})$.
+Notice that $v$ and $\theta$ can be easily extracted from this encoding.
+
+The quaternion's representation of orientation has two great benefits.
+First, since it is a unit vector, it can be interpreted geometrically
+as a point on \Sn{3}.
+Second, we can measure the amount of rotation using this geometric
+interpretation, since the metric on \Sn{3}
+is the same as the metric of the rotation group \cite{misner73}.
+%
+\begin{theorem}
+\label{thm:metric}
+The metrics on \Sn{3}\ and the rotation group SO(3) are equivalent.
+	% That is, arc length on \Sn{3}\ is proportional (equivalent?) to
+	% the (Frobenius norm?) of the associated rotation matrix.
+\end{theorem}
+%
+In short, the speed of a body's rotation through 3-space
+can be directly measured,
+and directly controlled, through the length of the quaternion spline.
+This is an important tool for motion control in animation or robotics.
+	% For example, constant speed on quaternion spline yields
+	% constant speed of rotation of the rigid body.
+
+The rotation of an object by a quaternion need not be 
+computed using its literal interpretation as rotation about an axis.
+Quaternion algebra offers an easier solution, which we now review.
+The quaternion $(a,b,c,d)$ is actually shorthand for $a + bi + cj + dk$,
+where $i$, $j$ and $k$ satisfy the relationship 
+	% generalizations of the imaginary unit $i$
+\begin{equation}
+\label{eq:ijk}
+	i^2 = j^2 = k^2 = ijk = -1. 
+\end{equation}
+A quaternion $(a,b,c,d)$ is often expressed as a scalar component
+and a vector component, $(s,v)$, where $s=a$ and $v=(b,c,d)$.
+Using this notation and applying (\ref{eq:ijk}),
+the formula for quaternion multiplication is
+\begin{equation}
+\label{eq:qmult}
+	[s_1,v_1] * [s_2,v_2] =
+	[s_1*s_2 - v_1 \cdot v_2,\ 
+	 s_1 * v_2 + s_2 * v_1 + v_1 \times v_2]
+\end{equation}
+A point $p \in \Re^3$ is rotated by the unit quaternion $[s,v]$
+to the point $[s,-v] * [0,p] * [s,v]$.
+This is a quaternion, but it can be interpreted
+as a point in 3-space since its scalar part is necessarily 0.
+	% quaternions form a noncommutative division ring (ring whose nonzero elements
+	% form a group under multiplication: Hernstein, p. 125
+
+Mathematically, an orientation can be represented by either of two antipodal quaternions
+(by flipping the rotation axis $v$).
+That is, \Sn{3}\ is a double covering of SO(3).\add{\footnote{A natural
+	explanation for this double covering is provided by Dirac's belt trick,
+	well developed in \cite{hart94}.}}
+However, when using quaternions for motion control, only one of the two
+quaternion representations is appropriate in a given context:
+the quaternion with the smaller angular gap on \Sn{3} to the previous quaternion.
+This is true because a small angular gap between consecutive quaternions
+creates less spinning than a large angular gap.
+Consider the difference between a small rotation and the complementary
+rotation that represents an almost complete pirouette.
+If the designer's intent is to include the pirouette, then this should be
+made explicit in the motion control by adding intermediate quaternions
+that imply this spin.
+A motion should not introduce spinning unless it is explicitly designed in.
+
+The quaternion has several advantages over other representations
+for orientation, such as the rotation matrix and Euler angles.
+Unlike Euler angles, quaternions do not experience gimbal lock,
+can be combined easily, and have an effectively unique representation
+for each orientation.
+Unlike rotation matrices, quaternions have a concise representation,
+4 scalars rather than 9.\footnote{A quaternion is still slightly 
+	larger than it needs to be since $v$, being a unit vector, 
+	is fully determined by only 2 of its elements.
+	That is, $v$ and $\theta$ could have been encoded in 
+	a quaternion using only 3 scalars.
+	However, the redundancy of 4 scalars is necessary for
+	the quaternion's geometric interpretation on a unit sphere 
+	and the metric equivalence of Theorem~\ref{thm:metric}.}
+And unlike both Euler angles and rotation matrices, 
+quaternions have a natural geometric interpretation through identification
+with \Sn{3}, which is a crucial element in algorithmic development.
+
+\section{A map to and from \Sn{3}}
+\label{sec:map}
+
+The first step in our algorithm for the design of a rational quaternion
+spline is to design a good rational map from 4-space to the surface \Sn{3}.
+Recall that we prefer a map with domain $\Re^4$, so that the data points will be
+mapped to one-dimensional curves in Euclidean space and the 
+curve design in Euclidean space will enjoy more flexibility.
+
+Our approach is as follows.
+We shall first develop a normal form for all rational maps of $\Re^4$ to \Sn{3}.
+We will then choose a particular map.
+Finally, we will compute the inverse of this map.
+
+\subsection{Rational maps of $\Re^4$ to \Sn{3}}
+
+Consider a rational map from $\Re^4$ to \Sn{3}:
+\[
+	(x_1,\ldots,x_4) \mapsto
+	(\frac{f_1(x_1,\ldots,x_4)}{f_{5}(x_1,\ldots,x_4)}, \ldots,
+	 \frac{f_4(x_1,\ldots,x_4)}{f_{5}(x_1,\ldots,x_4)})
+\]
+where $f_1,\ldots,f_{5}$ are polynomials.
+Since the image lies on \Sn{3}, $f_1^2 + \cdots + f_4^2 = f_{5}^2$
+and $(f_1,f_2,f_3,f_4,f_5)$ is a Pythagorean quintuple.\footnote{This term derives
+	from the Pythagorean Theorem on right triangles,
+	which involves Pythagorean triples.}
+\begin{defn2}
+$(a_1,\ldots,a_{5}) \in K^{n+1}$
+is a {\bf Pythagorean quintuple over $K$} 
+if $a_1^2 + \ldots + a_4^2 = a_5^2$.
+\end{defn2}
+%
+Thus, the study of rational maps from $\Re^{4}$ to \Sn{3}\ 
+is equivalent to the study of Pythagorean quintuples of polynomials.
+Pythagorean quintuples involve the sum of four squares.
+In the number theory literature, there is an extensive study of the
+sum of four squares (driven by the search for a proof that
+every positive integer is the sum of the squares of four integers \cite{dickson52}).
+An important result was developed by Euler,\footnote{This result shows that the product of a sum of four squares and a sum of four
+	squares is another sum of four squares.
+	This reduces the problem of showing that every integer is the sum
+	of four squares to the simpler problem
+	of showing that every prime is the sum of four squares,
+	since every integer can be expressed as the product of primes.}
+which we can use to build Pythagorean quintuples, 
+and then a characterization of maps to \Sn{3}.
+
+\begin{lemma}[Euler's Four Squares Theorem \cite{herstein75}]
+\label{lem:euler}
+% p. 373 of Herstein
+\[
+\begin{array}{ll}
+& (a_1^2 + a_2^2 + a_3^2 + a_4^2) 
+(\hat{a}^2_1 + \hat{a}^2_2 + \hat{a}^2_3 + \hat{a}^2_4) = \\
+& (a_1 \hat{a}_1 - a_2\hat{a}_2 - a_3\hat{a}_3 - a_4\hat{a}_4)^2 +
+   (a_1\hat{a}_2 + a_2\hat{a}_1 + a_3\hat{a}_4 - a_4\hat{a}_3)^2 + \\
+& (a_1\hat{a}_3 - a_2\hat{a}_4 + a_3\hat{a}_1 + a_4\hat{a}_2)^2 +
+   (a_1\hat{a}_4 + a_2\hat{a}_3 - a_3\hat{a}_2 + a_4\hat{a}_1)^2
+\end{array}
+\]
+where $a_1,a_2,a_3,a_4,\hat{a}_1,\hat{a}_2,\hat{a}_3,\hat{a}_4$ are elements of a
+commutative ring.
+% \footnote{The original statement was for integers, but it easily generalizes.}
+% see p. 210 of Ebbinghaus
+\end{lemma}
+
+\begin{corollary}
+\label{lem:suff4}
+$(a_1^2 + a_2^2 + a_3^2 - a_4^2,\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,\ 
+ a_1^2 + a_2^2 + a_3^2 + a_4^2)$
+is a Pythagorean quintuple for any polynomials $a_1,a_2,a_3,a_4$.
+\end{corollary}
+\prf
+Let $(\hat{a}_1,\hat{a}_2,\hat{a}_3,\hat{a}_4) = (a_1,-a_2,-a_3,a_4)$. 
+\QED
+
+\noindent The following lemma establishes a weaker version of the necessary condition
+associated with Corollary~\ref{lem:suff4}.
+This in turn leads to the desired necessary and sufficient condition for rational maps
+of $\Re^4$ to \Sn{3}.
+
+\begin{lemma}
+\label{thm:necessary4}
+A quintuple of polynomials is Pythagorean only if it can be expressed in the form
+\begin{equation}
+\label{eq:pyth}
+	\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+		\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+		\ a_1^2 + a_2^2 + a_3^2 + a_4^2)
+\end{equation}
+for some polynomials $a_1,a_2,a_3,a_4,\frac{1}{\alpha}$.
+\end{lemma}
+\prf
+Let $(p_1,p_2,p_3,p_4,p_5)$ be a Pythagorean quintuple of polynomials.
+If $p_1 = p_5$, let\\
+$(a_1,a_2,a_3,a_4,\alpha) = (p_1,0,0,0,\frac{1}{p_1})$.
+Thus, we may assume without loss of generality that $p_1 \neq p_5$.
+Let $(a_1,a_2,a_3,a_4,\alpha) = (p_2,p_3,p_4,p_5-p_1,\frac{1}{2(p_5 - p_1)})$.
+Then $a_1,a_2,a_3,a_4,\alpha$ generate the Pythagorean quintuple
+$(p_1,\ldots,p_5)$ as in (\ref{eq:pyth}).
+In particular,
+\[
+\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2)
+= \frac{p_2^2 + p_3^2 + p_4^2 - (p_5 - p_1)^2}{2(p_5-p_1)}
+\]
+and applying $p_1^2 + p_2^2 + p_3^2 + p_4^2 = p_5^2$,
+\[
+\alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2) = \frac{-2p_1^2 + 2p_1p_5}{2(p_5 - p_1)} = p_1.
+\]
+Also, 
+\[
+\alpha (2a_i a_4) = \frac{2p_{i+1}(p_5 - p_1)}{2(p_5 - p_1)} = p_{i+1}
+\]
+for $i=1,2,3$.
+Finally, 
+\[
+\alpha(a_1^2 + a_2^2 + a_3^2 + a_4^2) 
+= \frac{p_2^2 + p_3^2 + p_4^2 + (p_5 - p_1)^2}{2(p_5-p_1)} = p_5
+\]
+Thus, $(p_1,p_2,p_3,p_4,p_5) = \alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+		\ 2a_1a_4,\ 2a_2a_4,\ 2a_3a_4,
+		\ a_1^2 + a_2^2 + a_3^2 + a_4^2)$.
+\QED
+
+\begin{corollary}
+\label{thm:map4}
+A map is a rational map of $\Re^4$ to \Sn{3}\ if and only if
+it is of the form:
+\begin{equation}
+\label{eq:re4s3}
+\small{(x_1,x_2,x_3,x_4)} \mapsto 
+\small{\frac{1}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+	(a_1^2 + a_2^2 + a_3^2 - a_4^2, 2a_1a_4, 2a_2a_4, 2a_3a_4)}
+\end{equation}
+where $a_1,a_2,a_3,a_4$ are polynomials over $x_1,x_2,x_3,x_4$
+(or some permutation of this form).\footnote{This result generalizes
+	to rational maps from $\Re^n$ to \Sn{n-1}, $n \geq 2$,
+	using an identical proof.
+	That is, a map is a rational map of $\Re^n$ to \Sn{n-1}, $n \geq 2$, 
+	if and only if it is of the form:
+\[
+	(x_1,\ldots,x_n) \mapsto
+	(\frac{a_1^2 + \cdots + a_{n-1}^2 - a_n^2}{a_1^2 + \cdots + a_n^2},
+	 \frac{2a_1a_n}{a_1^2 + \cdots + a_n^2},
+	 \ldots,
+	 \frac{2a_{n-1}a_n}{a_1^2 + \cdots + a_n^2})
+\]
+where $a_1,\ldots,a_n$ are polynomials over $x_1,\ldots,x_n$.}
+\end{corollary}
+\prf
+Consider a rational map
+of $\Re^4$ to \Sn{3}, $(x_1,x_2,x_3,x_4) \mapsto 
+(\frac{f_1}{f_5},\frac{f_2}{f_5},\frac{f_3}{f_5},\frac{f_4}{f_5})$,
+where $f_1,\ldots,f_5$ are polynomials over $x_1,\ldots,x_4$.
+Then $(f_1,\ldots,f_5)$ is a Pythagorean quintuple
+so it can be expressed in the normal form
+$(f_1,\ldots,f_5) = \alpha (a_1^2 + a_2^2 + a_3^2 - a_4^2,
+2a_1a_4,2a_2a_4,2a_3a_4,$ $a_1^2 + a_2^2 + a_3^2 + a_4^2)$
+for some polynomials $a_1,a_2,a_3,a_4,\frac{1}{\alpha}$
+by Lemma~\ref{thm:necessary4}.
+Thus, the map is of the form (\ref{eq:re4s3}), since the leading $\alpha$
+cancels when expressed in 
+$(\frac{f_1}{f_5},\frac{f_2}{f_5},\frac{f_3}{f_5},\frac{f_4}{f_5})$.
+Notice that it is legal to cancel the $\alpha$, since
+$\alpha = \frac{1}{\beta}$ for some polynomial $\beta$,
+which implies that $\alpha$ is never zero.
+
+Now consider a map of the form (\ref{eq:re4s3}).
+This is a rational map of $\Re^4$ to \Sn{3}\ by Corollary~\ref{lem:suff4}.
+\QED
+
+\noindent The most natural choice for the polynomials $a_i$ 
+in Corollary~\ref{thm:map4} is $a_i = x_i$ and the identity permutation.
+%
+\begin{defn2}
+The {\bf most natural} map to \Sn{3}\ is 
+$M: \Re^4 - \{0\} \rightarrow \Sn{3}$ defined by:
+\begin{equation}
+\label{eqM}
+\footnotesize{
+	M(x_1,x_2,x_3,x_4) =
+	\frac{1}{x_1^2 + x_2^2 + x_3^2 + x_4^2}
+	(x_1^2 + x_2^2 + x_3^2 - x_4^2, 2x_1x_4, 2x_2x_4, 2x_3x_4)
+	 }
+\end{equation}
+\end{defn2}
+%
+We fully analyze this map in \cite{jj98b}.
+For example, we show that it is a powerful extension of
+the inverse map of stereographic projection.
+\add{We also further explain the title `most natural'.}
+We shall use the map $M$ as our rational map to \Sn{3}.
+
+\begin{rmk}
+Ironically, Euler's Four Squares Theorem, our main tool
+in the development of the map $M$ to the quaternion sphere \Sn{3}, 
+can be viewed as an anticipation
+of quaternions themselves (a century in advance of their invention by Hamilton!)
+since it encodes the product formula for quaternions 
+(compare Lemma~\ref{lem:euler}):
+\[
+\begin{array}{ll}
+& (a_1 + a_2 i + a_3 j + a_4 k) 
+(\hat{a}_1 + \hat{a}_2 i + \hat{a}_3 j + \hat{a}_4 k) = \\
+& (a_1 \hat{a}_1 - a_2\hat{a}_2 - a_3\hat{a}_3 - a_4\hat{a}_4) +
+   (a_1\hat{a}_2 + a_2\hat{a}_1 + a_3\hat{a}_4 - a_4\hat{a}_3) i + \\
+&  (a_1\hat{a}_3 - a_2\hat{a}_4 + a_3\hat{a}_1 + a_4\hat{a}_2) j +
+   (a_1\hat{a}_4 + a_2\hat{a}_3 - a_3\hat{a}_2 + a_4\hat{a}_1) k
+\end{array}
+\]
+\end{rmk}
+
+\subsection{The inverse map}
+
+To map the quaternions to Euclidean space,
+the inverse of our map to \Sn{3}\ is needed (step 1b of the algorithm
+in Section~\ref{subsec:design}).
+Since the manifold $\Re^4$ is one dimension larger than \Sn{3}, 
+one would expect the preimage of a point of \Sn{3}\ to be 
+a curve in $\Re^4$.
+This is indeed the case.
+In fact, the inverse of a point is simply a line.
+The proof of the following theorem is simplified by working in projective space.
+%
+\begin{defn2}
+\label{defn:projspace}
+% We shall make use of projective space in some of the proofs in this paper.
+Real {\bf projective $n$-space} $P^n$ is the space 
+$\{ (x_1,x_2,\ldots,x_{n+1}) : x_i \in \Re, \mbox{not all zero} \}$
+under the equivalence relation 
+\begin{equation}
+\label{eq:projequivalence}
+(x_1,\ldots,x_{n+1}) = k(x_1,\ldots,x_{n+1}),\ \ k \neq 0 \in \Re.
+\end{equation}
+The point $(x_1,\ldots,x_{n+1})$ in projective $n$-space, $x_{n+1} \neq 0$,
+is equivalent to the point $(\frac{x_1}{x_{n+1}},\ldots,\frac{x_n}{x_{n+1}})$
+in $n$-space.
+The point $(x_1,\ldots,x_n,0)$ in projective $n$-space represents the point
+at infinity in the direction $(x_1,\ldots,x_n)$.
+To translate from $n$-space to projective $n$-space, the point 
+$(x_1,\ldots,x_n)$ is typically transformed into the point $(x_1,\ldots,x_n,1)$.
+See \cite{harris92} for more details on projective space.
+\end{defn2}
+
+\begin{theorem}
+\label{thm:inverse}
+$M^{-1}: S^3 \rightarrow \Re^4$ is defined as follows:
+\[ 
+\footnotesize{
+	M^{-1}(x_1,x_2,x_3,x_4) =
+	\left\{ 
+	\begin{tabular}{ll}
+		$t(x_2,x_3,x_4,1-x_1),\ t \in \Re,\ t \neq 0 \hspace{.2in}$
+		  & $\mbox{if } (x_1,x_2,x_3,x_4) \neq (1,0,0,0)$\\
+		$H$ & $\mbox{if } (x_1,x_2,x_3,x_4) = (1,0,0,0)$
+	\end{tabular}
+	\right.
+}
+\]
+where $H$ is the hyperplane $x_4 = 0$ minus the origin.
+That is, the preimage of $(x_1,x_2,x_3,x_4) \neq (1,0,0,0)$ on \Sn{3}
+is a line through the origin, minus the origin.
+\end{theorem}
+\prf 
+We work in projective space, where the map $M$ becomes
+\begin{equation}
+\label{eq:proj}
+	 (x_1,x_2,x_3,x_4,x_5) \rightarrow
+	 (x_1^2 + x_2^2 + x_3^2 - x_4^2,\ 
+	 2x_1 x_4,\ 2x_2 x_4,\ 2x_3 x_4,\ 
+	 x_1^2 + x_2^2 + x_3^2 + x_4^2).
+\end{equation}
+Let $p = (p_1,p_2,p_3,p_4,1) \in S^3 \subset P^4$.
+We want to determine the conditions on $q = (q_1,q_2,q_3,q_4,q_5)$
+so that $M(q_1,q_2,q_3,q_4,q_5) = p$.
+Suppose that $M(q_1,q_2,q_3,q_4,q_5) = p$.
+Using (\ref{eq:projequivalence}), we have
+\begin{equation}
+\label{eq1}
+	q_1^2 + q_2^2 + q_3^2 - q_4^2 = kp_1
+\end{equation}
+\begin{equation}
+\label{eq2}
+	2q_1q_4	= kp_2
+\end{equation}
+\begin{equation}
+\label{eq3}
+	2q_2q_4	= kp_3
+\end{equation}
+\begin{equation}
+\label{eq4}
+	2q_3q_4	= kp_4
+\end{equation}
+\begin{equation}
+\label{eq5}
+	q_1^2 + q_2^2 + q_3^2 + q_4^2 = k
+\end{equation}
+for some $k \neq 0$.
+$q_5$ is arbitrary, since it does not appear in these equations.
+Subtracting (\ref{eq1}) from (\ref{eq5}), 
+we have $2q_4^2 = k(1 - p_1)$
+or 
+\begin{equation}
+\label{eq:q4}
+q_4 = \pm \sqrt{\frac{k(1-p_1)}{2}}
+\end{equation}
+%
+{\bf Case 1:\ }
+Suppose $p_1 = 1$. Then $p = (1,0,0,0,1)$ since $p \in \Sn{3}$.
+$q_4 = 0$ by (\ref{eq:q4})
+and $M(q) = (q_1^2 + q_2^2 + q_3^2, 0, 0, 0, q_1^2 + q_2^2 + q_3^2)
+       = (1,0,0,0,1)$ for any values of $q_1,q_2,q_3$, not all zero.
+That is, $M(q) = p$ if and only if $q \in H$ where $H$ is 
+the hyperplane $x_4 = 0$ minus the origin.
+Equivalently, $M^{-1}(p) = H$.\\
+%
+{\bf Case 2:\ }
+Suppose $p_1 \neq 1$.
+Then $p_1 < 1$ since $p \in \Sn{3}$. 
+From (\ref{eq:q4}), $q_4 \neq 0$ and $q_4$ is a real number.
+From (\ref{eq2}-\ref{eq4}), $q_i = \frac{kp_{i+1}}{2q_4}$ for $i=1,2,3$:
+\[
+	q = (\frac{kp_2}{2q_4}, \frac{kp_3}{2q_4}, \frac{kp_4}{2q_4}, q_4, q_5)
+\]
+Using (\ref{eq:projequivalence}), 
+\[
+	q = \frac{2q_4}{k} q
+	  = (p_2, p_3, p_4, \frac{2q_4^2}{k},\frac{2q_4q_5}{k})
+\]
+and then (\ref{eq:q4}),
+\[
+	q = (p_2,p_3,p_4,1-p_1, \pm \sqrt{\frac{2(1-p_1)}{k}} q_5)
+\]
+Since $q_5$ and $k$ are arbitrary,
+\[
+	q = (p_2,p_3,p_4,1-p_1, k') \hspace{1in} k' \in \Re
+\]
+We have shown that $M(q) = p$ only if 
+$q = (p_2,p_3,p_4,1 - p_1,k')$.
+
+On the other hand, if $q = (p_2,p_3,p_4,1 - p_1,k')$, $k' \in \Re$
+and $p_1 \neq 1$,
+then 
+\[
+\scriptsize{M(q) = (p_2^2 + p_3^2 + p_4^2 - (1 - p_1)^2,\ 
+	2p_2 (1 - p_1),\ 2p_3 (1 - p_1),\ 2p_4 (1 - p_1),\ 
+	p_2^2 + p_3^2 + p_4^2 + (1 - p_1)^2).}
+\]
+Using $p_1^2 + p_2^2 + p_3^2 + p_4^2 = 1$ ($p \in \Sn{3}$),
+\[
+M(q) = (2p_1(1 - p_1),\ 2p_2 (1 - p_1),\ 2p_3 (1 - p_1),\ 2p_4 (1 - p_1),\ 
+2(1 - p_1))
+\]
+or $M(q) = (p_1,p_2,p_3,p_4,1)$ using (\ref{eq:projequivalence}).
+Thus, $M(q) = p$ if and only if 
+$q = (p_2,p_3,p_4,1 - p_1,k')$, $k' \in \Re$.
+Translating back from projective space,
+$M(q) = p$ if and only if 
+$q = t(p_2,p_3,p_4, 1-p_1)$, $t \neq 0 \in \Re$.
+Equivalently, $M^{-1}(p) = t(p_2,p_3,p_4, 1-p_1)$, $t \neq 0 \in \Re$.
+It is understandable that the preimage does not contain the origin, 
+since $M$ is undefined there.
+\QED
+% $q \in M^{-1}(p)$ if and only if $M(q) = p$.
+
+\begin{defn2}
+\label{defn:pole}
+The special point $(1,0,0,0)$ is called the {\bf pole} of the map $M^{-1}$.
+$(x_2,x_3,x_4,1-x_1)$ is called the {\bf defining point} of the preimage 
+$M^{-1}(x_1,x_2,x_3,x_4)$.
+\end{defn2}
+
+\noindent Notice the beautiful simplicity of the defining point.
+
+\ifFull
+\begin{rmk}
+Although the proof technique of Theorem~\ref{thm:inverse}
+works for any individual map,
+we cannot apply it to the abstract general map (\ref{eq:re4s3})
+to reveal the general inverse map.
+The above proof requires working in projective space, to take 
+advantage of the extra equation it offers;
+this would require getting inside the arbitrary polynomials
+$a_i$ of (\ref{eq:re4s3}) to translate them into projective space,
+an unfeasible task
+since these polynomials are of unknown and varying degree.
+\end{rmk}
+\fi
+
+% Example of another map: using $a_1=x_1 - 1$, $a_2 = x_2^2$, $a_3=0$, 
+% and $a_4=x_4$,
+% let $M(q_1,q_2,q_3,q_4,q_5) = (q_1^2 - 2q_1 + 1 + q_2^4 - q_4^2,
+% 				2q_1q_4 - 2q_4, 2q_2^2 q_4, 0, 
+% 				q_1^2 - 2q_1 + 1 + q_2^4 + q_4^2)$.
+
+\section{Designing the curve in Euclidean space}
+\label{sec:eucdesign}
+
+Once the quaternions have been mapped into Euclidean space,
+the next step is to design the curve in Euclidean space.
+This involves interpolating a curve through the 
+inverse image lines $M^{-1}(p_i)$.
+We will reduce this problem to point interpolation, 
+by choosing one point per line
+and applying conventional interpolation through a set of points.
+Each point should be chosen wisely, taking full advantage of our
+flexibility to choose any point on the line.
+A more precise statement of step (2b) of our algorithm
+for curve design on a surface is now:
+%
+\begin{description}
+\item[(i)] 
+	Intelligently choose $k$ points
+	$\{q_i\}$ on the $k$ lines $\{M^{-1}(p_i)\}$.
+\item[(ii)]
+	Design a rational curve $C$ in Euclidean space
+	interpolating $\{q_i\}_{i=1,\ldots,k}$, using classical techniques.
+\end{description}
+
+To understand our choice of points $\{q_i\}$ on the lines
+$\{M^{-1}(p_i)\}$, we must motivate the desirability of designing
+a short curve in Euclidean space.
+Other factors being equal, we prefer shorter quaternion splines.
+We want to minimize any unnecessary spinning of the object:
+loop-the-loops or gyration should not be introduced 
+unless explicitly designed in the motion.
+Since the metric of \Sn{3}\ is the same as the metric of the rotation
+matrix group SO(3) (Theorem~\ref{thm:metric}), 
+the removal of unnecessary object rotation is equivalent to the
+removal of unnecessary length in the quaternion spline.
+Thus, we prefer shorter quaternion splines.
+Although curve length in Euclidean space is not
+equivalent to curve length of the associated quaternion 
+spline,\footnote{For example in the extreme case, motion along
+	an inverse line $M^{-1}(p_i)$ in $\Re^4$ causes no associated
+	motion on \Sn{3}.  However, in general, the arc length
+	of the two curves, one in Euclidean space and the other on \Sn{3},
+	are strongly related.
+	Moreover, the avoidance of motion in Euclidean space always leads 
+	to the avoidance of motion on \Sn{3}.}
+shorter curves in Euclidean space are associated with shorter
+quaternion splines.
+
+By the above analysis, we prefer the curve in Euclidean space to move
+efficiently between the lines $\{M^{-1}(p_i)\}$.
+A good choice of points $\{q_i\}$ is the set of closest points:
+
+\clearpage
+	
+\begin{itemize}
+\item On the first inverse line, let $q_1$ be the intersection
+of the line $M^{-1}(p_1)$ and \Sn{3}.
+\item On subsequent lines, let $q_i$ be the closest point to $q_{i-1}$.
+\end{itemize}
+
+\add{An undesirable property of this set of closest points is that
+it spirals in towards the origin,
+continually attracted inwards by the closest criterion.
+Although we have not encountered any problems arising from this property
+even for datasets with hundreds of quaternions,
+some may want an alternative choice for $\{q_i\}$.
+An excellent alternative
+is to consistently choose $q_i$ to be the point of 
+$M^{-1}(p_i)$ on \Sn{3}.	% choose the closest intersection to the
+				% previous point on S3
+This is a very good approximation to the closest point, 
+especially if the data quaternions $\{p_i\}$ are densely sampled.
+The appendix develops a formula for the distance of the point on \Sn{3}\ from
+the closest point as a function of the angular distance between the associated
+quaternions, which formally establishes the quality of this approximation.
+
+The on-\Sn{3} choice of $\{q_i\}$ has the advantage of generating curves
+in Euclidean space that are guaranteed to avoid the origin, 
+which is important since
+the map $M$ back to Riemannian space is undefined at the origin (see~(\ref{eqM})).
+Clearly the points $\{q_i\}$ avoid the origin.
+Since all points $\{q_i\}$ lie on \Sn{3}\ and consecutive
+$p_i$, and thus consecutive $q_i$, do not lie on opposite sides of \Sn{3}
+(see Section~\ref{sec:quaternion}),
+the interpolating curve of the $\{q_i\}$ also avoids the origin.
+}
+
+\section{Mapping back to \Sn{3}}
+% \subsection{Mapping the curve back to the surface}
+\label{sec:curveimage}
+
+After the curve is designed in $\Re^4$, it must be mapped back to a curve
+on \Sn{3}\ using $M$.
+The following theorem shows how this mapping is done, segment by segment,
+for the important case of a cubic Bezier curve in $\Re^4$.
+We concentrate on the cubic Bezier curve since classical design of an 
+interpolating curve in $\Re^4$ will generate
+a cubic polynomial curve \cite{farin97}.	% Chapter 9
+\add{Notice that cubic B-spline curves are also handled by this formula, since a cubic
+B-spline curve can be easily translated to a cubic Bezier curve.}
+The image of other curves under $M$ (Bezier and B-spline curves of higher
+degree, Catmull-Rom, Hermite, etc.) can be computed similarly.
+
+\begin{theorem}
+\label{sextic}
+Let $c(t)$ be a cubic Bezier curve in 4-space with
+control points $b_i = (b_{i1},b_{i2},b_{i3},b_{i4})$, $i=0,\ldots,3$.
+The image of $c(t)$ under $M$ is a rational sextic Bezier curve with 
+weights 
+\begin{equation}
+\label{eq:weights}
+w_k = \sum_{\begin{array}{c} \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}}
+        \frac{\choice{3}{i} \choice{3}{j}}{\choice{6}{k}}
+	\ (b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} + b_{i4} b_{j4})
+\end{equation}
+and control points 
+\begin{equation}
+\label{eq:control-pts}
+c_k = \frac{1}{w_k} 
+      \sum_{\begin{array}{c} \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}} 
+        \frac{\choice{3}{i} \choice{3}{j}}{\choice{6}{k}}
+	\left( \begin{array}{c}
+            b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} - b_{i4} b_{j4} \\
+            2b_{i1} b_{j4} \\
+            2b_{i2} b_{j4} \\
+            2b_{i3} b_{j4} 
+	\end{array} \right)
+\end{equation}
+for $k = 0, \ldots, 6$.
+\end{theorem}
+\prf
+Let $B_i^n(t)$ be the $i^{th}$ Bernstein polynomial of degree $n$.
+Then $c(t) = \sum_{i=0}^3 B_i^3(t) b_{i}$.
+This proof is a simple application of the product rule of Bernstein polynomials
+\cite{farin97}:
+\[
+	B_i^m(t) B_j^n(t) = \frac{\choice{m}{i} \choice{n}{j}}{\choice{m+n}{i+j}}
+		B_{i+j}^{m+n}(t).
+\]
+We will again work in projective space, where we recall that
+the map $M$ becomes
+\[
+	 (x_1,x_2,x_3,x_4,x_5) \rightarrow
+	 (x_1^2 + x_2^2 + x_3^2 - x_4^2,\ 
+	 2x_1 x_4,\ 2x_2 x_4,\ 2x_3 x_4,\ 
+	 x_1^2 + x_2^2 + x_3^2 + x_4^2).
+\]
+Let $M(c(t)) = (m_1(t),m_2(t),m_3(t),m_4(t),m_5(t))$.
+$m_5(t)$ can be simplified using the product rule 
+of Bernstein polynomials, as follows:
+\[ m_5(t) =  [\sum_{i=0}^3 B_i^3(t) b_{i1}]^2 + 
+	\ldots + [\sum_{i=0}^3 B_i^3(t) b_{i4}]^2
+     =   \sum_{i=0}^3 \sum_{j=0}^3 
+	\frac{\choice{3}{i} \choice{3}{j}}{\choice{6}{i+j}}
+       B^6_{i+j}(t) (b_{i1} b_{j1} + \ldots + b_{i4} b_{j4})
+\]
+Letting $k=i+j$, 
+\[ m_5(t) = \sum_{k=0}^6 B_k^6(t) 
+	\sum_{\begin{array}{c}  \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}} 
+	\frac{\scriptchoice{3}{i} \scriptchoice{3}{j}}{\scriptchoice{6}{k}}
+	(b_{i1} b_{j1} + \ldots + b_{i4} b_{j4}) \]
+Computing the other coordinates analogously yields
+\[ M(c(t)) = 
+   \sum_{k=0}^6 B_k^6(t)
+	\sum \frac{\choice{3}{i} \choice{3}{j}}{\choice{6}{k}}
+	\left( \begin{array}{c}
+            b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} - b_{i4} b_{j4} \\
+            2b_{i1} b_{j4} \\
+            2b_{i2} b_{j4} \\
+            2b_{i3} b_{j4} \\
+            b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} + b_{i4} b_{j4}
+	\end{array} \right) \]
+% \[         = \sum_{k=0}^6 B_k^6(t) 
+%	\sum_{\begin{array}{c} 0 \leq i \leq 3 \\ 
+%			     0 \leq j \leq 3 \\ 
+%			     i+j=k
+%			     \end{array}} 
+%       \frac{\choice{3}{i} * \choice{3}{j}}{\choice{6}{k}}
+%	\left( \begin{array}{c}
+%           b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} + b_{i4} b_{j4} \\
+%            w_k (\frac{b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} - b_{i4} b_{j4}}{w_k}) \\
+%            w_k (\frac{2b_{i1} b_{j4}}{w_k}) \\
+%            w_k (\frac{2b_{i2} b_{j4}}{w_k}) \\
+%            w_k (\frac{2b_{i3} b_{j4}}{w_k})
+%	\end{array} \right) \]
+%
+which is a sextic rational Bezier curve with weights (\ref{eq:weights}) and 
+control points (\ref{eq:control-pts}).
+\QED
+
+Notice how the map $M$ reveals itself in the formula for the control points
+and weights, its numerator in the control points and its denominator
+in the weights.
+The remaining components of the formulae (\ref{eq:weights}-\ref{eq:control-pts})
+are a reflection of the product rule for Bernstein polynomials.
+
+\section{Avoiding the pole}
+\label{sec:avoid}
+
+The design of our curve is essentially complete.
+However, we must refine one of the steps in the interests of stability.
+The mapping of the data into Euclidean space is unstable
+if any of the data is close to the pole $(1,0,0,0)$.
+In this section, we shall show how the quaternions $\{p_i\}_{i=1,\ldots,k}$
+can be moved away from the pole for robust curve design.
+
+\subsection{Ill-conditioning near the pole}
+\label{sec:ill}
+
+$M^{-1}$ is not well-behaved near 
+its pole $(1,0,0,0)$.
+Recall that the image of a point $p \neq (1,0,0,0)$ 
+under $M^{-1}$ is a line through the
+origin and the defining point of $M^{-1}(p)$ (Definition~\ref{defn:pole}).
+As a point $p$ on \Sn{3}\ approaches the pole $(1,0,0,0)$,
+the defining point of $M^{-1}(p)$ approaches the origin:
+\[ 
+\mbox{lim}_{(x_1,x_2,x_3,x_4) \rightarrow (1,0,0,0)} (x_2,x_3,x_4,1-x_1)
+= (0,0,0,0) 
+\]
+Consequently, the defining point becomes an ill-conditioned specification
+of $M^{-1}(p)$:
+small motions of $p$ can cause large motions of $M^{-1}(p)$.
+This is analogous to the solution of a linear
+system when the condition number of the matrix becomes large,
+and the linear system becomes very sensitive to perturbation of the matrix.
+
+\begin{example}
+If $p$ on \Sn{3}\ is at distance $d$ from the pole,
+the defining point of $M^{-1}(p)$ is also at distance $d$ from the
+origin.
+Then a motion of $d+\epsilon$ of $p$ (corresponding to a motion
+of the defining point directly towards the origin) can yield
+a 90-degree change of orientation of the line $M^{-1}(p)$.
+\end{example}
+
+In other words, near the pole on \Sn{3}, there is little correspondence 
+between position of $p$ and position of $M^{-1}(p)$.
+This leads to quaternion splines that jump wildly about the pole 
+or create cusps (Figure~\ref{fig:wild}).
+We conclude that we want to move data points away from the pole.
+The following definition gives an empirical notion of how far the points
+must be moved away.
+
+\begin{figure}
+\vspace{3in}
+\special{psfile=/usr/people/jj/modelTR/3-spline/img/unstable.ps hoffset=80}
+\caption{Unstable behaviour near the pole (cusp is directly at pole) and its correction}
+\label{fig:wild}
+% s3spline -m 90 -p < data3-cusp &
+% s3spline -m 90    < data3-cusp &
+% tops unstable.rgb -m 8.5 2 > unstable.ps
+\end{figure}
+
+\begin{defn2}
+\label{defn:far}
+A point $p \in \Sn{3}$ is {\bf too close to the pole}
+if the angle formed by the vectors $p$ and $(1,0,0,0)$ is smaller
+than 30 degrees. % pi/6 radians
+Experimental evidence indicates that points closer to the pole 
+can lead to undesirable behaviour in the curve.
+% 30 = PI/6; PI/7 is definitely too small (lowerbound), as witnessed by data5-1
+% using TOOCLOSEDIST = PI/7;
+% we have not found an example that is not treated well by PI/6.
+\end{defn2}
+
+% \begin{example}
+% data5-1 using $\pi/7$ vs. $\pi/6$.
+% \end{example}
+
+\Comment{
+Another way of seeing this ill-conditioning is by observing the behaviour
+of $M$ near the origin.
+$M$ is undefined at the origin, due to the division by zero.
+However, $M$ is also badly behaved {\bf near} the origin.
+For example, consider approaching near the origin along the line $(0,0,t,.01)$.
+In moving the short distance from $(0,0,.01,.01)$ to $(0,0,0,.01)$, 
+the image under $M$ moves all the way from $(0,0,0,1)$ to $(-1,0,0,0)$.
+That is, a move of distance $.01$ in $\Re^4$ maps to a move of angular distance
+$\frac{\pi}{2}$ on \Sn{3}.
+The portion of a curve in $\Re^4$ that is near the origin
+will be stretched as it is mapped under $M$.
+This is not desirable, as shown in Figure~\ref{fig:tooCloseToPole}.
+
+This is not quite as strong or direct an argument for ill-conditioning as the previous
+argument, since there is nothing forcing the user to use preimage points 
+near the origin.
+However, notice that if you do not stay close to the origin, 
+then the large changes in the line with small changes on \Sn{3} mean that 
+small distances on \Sn{3} will be filled by long curves (and thus not optimal
+geodesics) since the preimage curve will be necessarily long.
+}
+
+\subsection{Moving data away from the pole}
+
+We shall use a single rotation about the origin 
+to move the data points away from the pole $(1,0,0,0)$.
+Once the quaternion spline has been robustly designed, 
+it will be rotated back by the same amount, 
+yielding the desired curve.\footnote{Rotation of a rational 
+	Bezier curve can be achieved simply by
+	rotation of its control polygon.}
+	% another advantage of rational curves.
+Let us call the locus of points on \Sn{3}\ such that
+no data point is within 30 degrees the {\bf empty region} of \Sn{3}.
+Our problem reduces to finding a point $p$ in an empty region of \Sn{3}:
+% on \Sn{3}\ such that no data point is within 30 degrees of $p$:
+then a rotation of $p$ to the pole will move all data points a safe
+distance from the pole.
+We first show that there is an empty region to find,
+and then how to find a point in an empty region.
+
+\subsection{Existence of an empty region}
+
+First, is there an empty region?
+It is theoretically possible that the data points are so densely packed
+on the sphere that there is no empty region.
+However, the requisite number of data points is huge.
+	% large in theory, and
+The 'surface area' of \Sn{3} is $2\pi^2$ \cite{kendall61}
+while a region 30 degrees wide about a point has area $\pi/6$.
+	% A point covers a region 30 degrees wide about it, which has
+	% a surface area of $\pi/6$ on the sphere \Sn{3}\ of area $2\pi^2$
+	% \cite{kendall61}.
+Thus, theoretically only about $12\pi \approx 38$ points are needed to
+cover the sphere, leaving no empty region.\footnote{Actually, quite
+	a few more points are needed, since the discs about the 38 points
+	do not abut perfectly.}
+However, this requires a gap of at least 60 degrees between 
+consecutive quaternions, a very large change of orientation.
+The typical gap between consecutive quaternions for reasonable
+motion control is about 20 degrees.
+	% independent of the method used to construct the quaternion spline.
+Using a gap of 20 degrees, 434,783 points\footnote{The surface area 
+	of \Sn{2}\ is $4\pi$, while the surface area
+	of a region on \Sn{2}\ 10 degrees wide centered about a point is 
+	$\int_{0}^{2\pi} \int_0^{\frac{\pi}{18}}  \sin \phi \ d\phi \ d\theta
+	= .0000289$ \cite{lang79}.}
+	% Lang, Calculus of several variables, p. 228
+	% p. 208 for parameterization, p. 224-5 for ||dx/dphi x dx/dtheta||
+	% integral of sin is -cos
+are needed to cover \Sn{2}, and even more to cover \Sn{3}.
+	% In the examples of Section~\ref{sec:results}, 
+	% the distance between quaternions is about --- \ref{}.
+Moreover, in order to leave no empty region, the quaternions
+must be spread across the entire sphere.
+It is far more common for the data to be restricted to a small region
+of the sphere.
+Thus, there will be an empty region on \Sn{3} in all but the most
+pathological cases (over 500,000 quaternions uniformly scattered across
+\Sn{3}).
+
+% We need a data point covering every empty region of the sphere.
+% Consider the number of points needed to cover just the 2-sphere \Sn{2}.
+% A point on \Sn{2}\ covers a region 30 degrees wide about it,
+% which has the following surface area:
+% \[
+%  \int_{0}^{2\pi} \int_0^{\frac{\pi}{6}}  \sin \phi \ d\phi \ d\theta
+%	= .841787
+% \]
+% using 10 degrees or \pi/18, area is only .0000289
+% which leads to 431,073 points.
+% Therefore, for data sets of size 15,
+% it is possible to find a point $p$ with no data points within 30
+% degrees of $p$.
+
+\subsection{Finding an empty region}
+
+There are many ways to find a point in an empty region of \Sn{3}.
+We shall offer three methods, a very simple randomized method, 
+a heuristic method, and an optimal method.
+Since there are so many empty regions on \Sn{3},
+a random choice of point on \Sn{3}\ is effective 
+(where we continue to choose a point on \Sn{3}\ 
+at random until a point in an empty region is found).
+	% That is, we could randomly choose a point on \Sn{3}, test if it is
+	% sufficiently far away from all data points, and if not then randomly choose
+	% another point, and so on, until a valid point in an empty region is found.
+	% The density of empty regions ensures the efficiency of this method.
+		% The results in Section~\ref{sec:results} support the effectiveness
+		% of a random choice of empty region \ref{}.
+	% How many attempts before success? on all6: 1,1,1,1,4,56
+This is an extremely simple method: the only care that must
+be taken is with repeatability and coordinate-frame invariance.
+If given the same data twice, we would like the same 
+quaternion spline to be constructed, 
+so we would like to choose the same point in an empty region
+to rotate to the pole.
+Fortunately, we can take advantage of the predictability 
+of pseudo-random number generators.
+If we use a pseudo-random number generator with the same seed,
+such as the C/C++ 'rand' function, exactly the same sequence of `random'
+points will be generated (see Remark~\ref{rmk:random}) 
+each time it is called,
+leading to the same quaternion spline if the method is repeated.
+%
+\begin{rmk}
+\label{rmk:random}
+To find a random point on \Sn{3}, we find four random numbers 
+in [-1,1] defining a 4-vector, and then normalize this vector.
+A random number in [-1,1] can be generated in C/C++ using the 'rand' function
+as follows:
+(float) (rand() \% 32767) / 16383 - 1.0.
+\end{rmk}
+To make the method coordinate-frame invariant,
+the data is first rotated into a canonical frame 
+(before the random choice of empty region) as follows:
+$p_0$ is rotated to the pole, 
+then $p_1$ is rotated to the $\{x_2=0,x_3=0\}$ plane (without moving $p_0$),
+and finally $p_2$ is rotated to the $\{x_3=0\}$ hyperplane
+(without moving $p_0$ or $p_1$).\footnote{Only
+	3 points are necessary to define a unique frame of reference,
+	since the added degree of freedom is locked down through
+	the points lying on \Sn{3}.}
+Of course, this rotation is also reversed at the end.
+	% This rotation to a canonical frame for coordinate-frame invariance
+	% is also useful in the following heuristic method
+	% (or alternatively one has to be careful to rotate eigenvectors
+	% in a coordinate-frame-independent way).
+	% Rotation to a canonical frame allows use of standard rotation
+	% matrix with normal n to best-fitting plane as first row,
+	% n x e1 as 2nd row, n x e1 x e2 as 3rd row, and 
+	% n x e1 x e2 x e3 as fourth row.
+	% Similarly, for the optimal method.
+	% However, a random choice is not repeatable, so we do not use it. 
+
+There is also an heuristic approach to finding a point of an
+empty region, which is not guaranteed to find a point
+but usually works well.
+This will find not just any empty point, but usually a very good empty
+point.
+Rather than directly looking for an empty region, we
+try to move the data far from the pole by moving the best-fitting plane
+of the data as far as possible from the pole.
+Since the best-fitting plane is a good representative of most of the
+points, the points tend to move far away from the pole.
+However, this method is not guaranteed 
+since outliers may still be moved close to the pole.
+It is efficient, since the best-fitting plane can be computed
+quickly from the covariance matrix of the data \cite{ballard82}.
+This method is equivalent to choosing the normal of the best-fitting plane
+as the empty point.
+
+Finally, one could find the optimal empty point:
+the point in the middle of the largest 
+empty region which will move the data 
+as far away as possible from the pole.
+This is a generalization of the classical largest empty circle
+problem for points in a plane \cite{shamos85}, 
+and a similar technique can be used.
+Let $f(p)$ be the distance of $p \in \Sn{3}$ from the nearest quaternion
+(measuring distance on the surface).
+The maximum of $f(p)$ 
+is attained at some vertex of the Voronoi diagram of the quaternions on
+\Sn{3}.
+This is the desired optimal empty point.
+The Voronoi diagram must be built on a surface, which 
+is itself an interesting problem.
+Luckily, only the Voronoi vertices need to be computed,
+not the entire Voronoi diagram.
+A Voronoi diagram is built out of point bisectors, and
+the bisector of two points on \Sn{3}\ is a great circle of \Sn{3}.
+A simplistic approach is to compute a superset of the Voronoi vertices
+by intersecting all bisectors of two quaternions, and then 
+choose the one furthest from all quaternions.
+	% O(n choose 2) = O(n^2) circles; 
+	% O(n^4) intersections
+	% O(n^5) distance calculations, but can abort early on many
+
+Some discussion is necessary about the issue of 
+coordinate-frame invariance.
+The observant reader may have noticed that we have established
+coordinate-frame invariance for our quaternion splines on \Sn{3},
+but should actually be more interested in coordinate-frame invariance 
+of the objects in 3-space that are undergoing the motion.
+	% (The latter is equivalent to coordinate-frame invariance in the rotation
+	% group SO(3).)
+Fortunately, these invariances are equivalent, due to the following lemma.
+%
+\begin{lemma}
+Rotation of an object in 3-space by a constant amount
+is equivalent to rotation of the associated quaternion on \Sn{3}
+by a constant amount.
+\end{lemma}
+\prf
+Let the original orientation of the object and the amount of
+rotation be represented by the quaternions $q = (q_1,q_2,q_3,q_4)$ 
+and $c = (c_1,c_2,c_3,c_4)$, respectively.
+Then the orientation of the object after the rotation is $c q$,
+so the associated quaternion of the object
+has changed from $q$ to $c q$.
+Using the formula for quaternion multiplication (\ref{eq:qmult}),
+we notice that $c q$ can also be interpreted as the rotation 
+of $q$ on \Sn{3}\ by a constant amount (depending on $c$):
+\[
+c * q = \left( \begin{array}{cccc}
+	c_1 & -c_2 & -c_3 & -c_4 \\
+	c_2 &  c_1 & -c_4 &  c_3 \\
+	c_3 &  c_4 &  c_1 & -c_2 \\
+	c_4 & -c_3 &  c_2 &  c_1
+	\end{array} \right)
+	\left( \begin{array}{c}
+	q_1 \\ q_2 \\ q_3 \\ q_4
+	\end{array} \right)
+\]
+This matrix is a rotation matrix in 4-space.
+	% unit rows and columns, orthogonal rows, orthogonal columns
+	% unit determinant (yes, checked)
+\QED
+
+Finally, note that the maps $M$ and $M^{-1}$ are not affine invariant.
+	% Obviously not affine invariant, otherwise we would not need
+	% to rotate away from pole, since this would have no effect
+	% on the quaternion spline shape.
+Thus, in order to make our quaternion spline construction 
+coordinate-frame invariant, a rotation to a canonical frame 
+is necessary as a preprocessing step, regardless of whether we want 
+to rotate away from the pole or not.
+In other words, our rotation of the data serves a dual purpose:
+avoiding the pole and making the quaternion spline construction
+coordinate-frame invariant.
+
+\section{Examples}
+\label{sec:eg}
+
+To consolidate our understanding of the algorithm before moving on to its
+analysis, we will now provide some examples.
+Figure~\ref{fig:eg6} shows six rational quaternion splines designed using the
+method of this paper (on input of 5, 5, 6, 10, 66, and 100 quaternions,
+respectively).
+\add{All of these examples have $C^2$ continuity, since we choose to use cubic B-spline
+curves for the interpolation in Euclidean space.}
+We can visualize quaternion splines, which reside in 4-space,
+using the following trick.
+Points of $x_3=0$ are mapped by $M^{-1}$ 
+to points of $x_2=0$ in Euclidean space,
+which are then mapped back by $M$ to points of $x_3=0$ on \Sn{3}\ again.
+Therefore, we can visualize quaternion splines in 3 dimensions
+using data samples with $x_3=0$.
+	% These figures are still slightly misleading, since they are
+	% three-dimensional images of a four-dimensional scene.
+We only apply this restriction to $x_3=0$ to the examples
+that we want to visualize in this paper.
+The quaternion splines that we analyze in Section~\ref{sec:results}
+reside in 4-space, with fully general quaternion data.
+Figure~\ref{fig:invariance} illustrates the coordinate-frame invariance
+of the method: rotated data sets generate the same curve, rotated.
+
+\begin{figure}
+\vspace{5in}
+\special{psfile=/usr/people/jj/modelTR/3-spline/img/all6.ps hoffset=-20}
+\caption{Examples}
+\label{fig:eg6}
+% s3spline -m 90 < data5-1 &
+% s3spline -m 120 < data/5nicepts.dat &
+% s3spline -m 120 -a < data/input3 &
+% s3spline -m 90 < data10-2 &
+% s3spline       < data66-20deg &
+% s3spline -m 90 < data100-1 &
+% tops all6.rgb -m 8.5 4 > all6.ps
+\end{figure}
+
+\begin{figure}
+\vspace{3in}
+\special{psfile=/usr/people/jj/modelTR/3-spline/img/data5-1+rot.ps hoffset=80}
+\caption{Coordinate-frame invariance}
+\label{fig:invariance}
+% s3spline -m 90 < data5-1 &
+% s3spline -m 90 < data5-1-rot &
+% tops data5-1+rot.rgb -m 8.5 2 > data5-1+rot.ps
+\end{figure}
+
+% Examples of our quaternion splines used in orientation control (for next paper)
+
+\section{Analysis}
+\label{sec:results}
+
+In this section, we consider the quality of our rational quaternion
+spline and compare it to other quaternion splines.
+\cite{barr92} proposes that covariant acceleration
+be used as a measure of the quality of a quaternion spline:
+the smaller the covariant acceleration, the more desirable the curve.
+%
+\begin{defn2}
+The {\bf covariant acceleration} of a curve segment $c(t)$, $t \in I$, is 
+$\int_I \| c''(t) \setminus c(t)\| \ dt$, where
+$a \setminus b = a - (\frac{a \cdot b}{b \cdot b}) b$.
+\end{defn2}
+%
+Their motivation is as follows.
+The acceleration of a curve on a surface can be decomposed into
+normal and covariant components: normal acceleration is necessary
+as it keeps the curve on the surface, but covariant acceleration
+is not.
+%
+% They built a quaternion spline that minimized covariant acceleration,
+% through constrained optimization, as their interpretation 
+% of the `optimal' curve.
+% Incidentally, they
+% used the term `tangential acceleration', but we prefer to use the 
+% more classical term, covariant acceleration.
+Low covariant acceleration can also be motivated by appealing to the 
+design of short quaternion splines, as discussed in 
+Section~\ref{sec:eucdesign}.
+The shortest curve through a set of points is necessarily a geodesic,
+which has zero covariant acceleration \cite{thorpe79}.
+	% (The geodesic is not rational, in general,
+	% and would not be desirable even if it was,
+	% as the rigidity of perfection necessarily ignores all other
+	% constraints.)
+	
+We will use covariant acceleration as a measure of curve quality.
+One should note that covariant acceleration is only a guide to quality
+and should not be viewed as an absolute measure.
+For example, geodesics with their minimal covariant acceleration
+are not necessarily desirable as quaternion splines, as
+the rigidity of their perfection can force them into strange shapes
+not conducive to motion control.
+	% just as the rigid perfection of minimal surfaces can generate
+	% unusual shapes.
+\Comment{
+We compute an approximation to covariant acceleration by discretely sampling the curve:
+% and computing the covariant acceleration at each of these samples:
+\[ \int_I \| c''(t) \setminus c(t)\| \ dt
+\approx \sum_{i=0}^N 
+	\| c''(t_0 + i \delta) \setminus c(t_0 + i \delta) \|\  \delta.
+\]
+}
+The best judge of the quality of a quaternion spline
+is the motion that it generates.
+We have found that our quaternion splines generate very natural motions,
+and have shown their effectiveness for animation in \cite{jjjw95}.
+	% \footnote{This paper uses
+	% a slightly different choice of point on $M^{-1}(p_i)$.}
+% Their use in motion control will be further explored in \cite{jj00}.
+
+\subsection{Choice of point on $M^{-1}(p_i)$}
+
+We first explore the advantage of the flexibility 
+to choose any points on the lines $M^{-1}(p_i)$.
+We compare the following strategies for choosing the point on $M^{-1}(p_i)$:
+the closest point,
+% (the method outlined in Section~\ref{sec:eucdesign} and the preferred method),
+the intersection of $M^{-1}(p_i)$ with \Sn{3}, and
+the defining point of $M^{-1}(p_i)$.
+% which is basically an arbitrary choice of point on the line in Euclidean space.
+We find that these choices are progressively worse, as expected.
+All of these data sets have 100 points.
+	% Recall that (1) was not used since it has trouble with the definition
+	% of tangents and large data sets.
+	% Therefore, we use small data sets that do not require subdivision
+	% for this comparison.
+
+\begin{table}[h]
+\begin{tabular}{|c|c|c|c|c|}  	\hline
+Data set & \multicolumn{3}{c|}{Covariant acceleration of our curve} & Improvement factor\\ \hline
+	 & Closest & On \Sn{3} & Defining point & \\ \hline
+1 & 23.9 & 394   & 410   &  17  \\ \hline
+2 & 30.0 & 166   & 190	 &  6.3 \\ \hline
+3 & 14.0 & 31.5  & 36.3  &  2.6 \\ \hline
+% Data set 1: data100-2 (see script)
+% Data set 2: test100-55deg
+% Data set 3: test100-30deg
+% 5000 probes
+\end{tabular}
+\caption{Curve quality with various choices of point on $M^{-1}(p_i)$}
+\label{tab:cov}
+\end{table}
+
+\subsection{Trim curves}
+
+We next compare our rational quaternion spline with trim curves.
+Recall from Section~\ref{sec:intro} that trim curves also use modeling 
+in Euclidean space, in this case parameter space, 
+but use the surface parameterization as the map to the surface.
+This comparison should capture the advantage of using a well-designed map to the
+surface, as well as the advantage of 
+	% a map from the domain $\Re^4$ rather than $\Re^3$, with its associated 
+flexibility in choosing an inverse point along a line.
+% We use the standard rational parameterization of \Sn{3},
+% which is fundamentally equivalent to using stereographic projection as the 
+% map to and from \Sn{3}.
+% \begin{equation}
+% \label{Snparam}
+%	S(t_1,t_2,t_3) = 
+%	\frac{1}{t_1^2 + t_2^2 + t_3^2 + 1} 
+%	(2t_1, 2t_2, 2t_3, t_1^2 + t_2^2 + t_3^2 - 1) \ \ \ \ t_i \in (-\infty,\infty)
+% \end{equation}
+% inverse of this parameterization is stereographic projection
+%
+% A better comparison of trim curves to Euclidean curves might be to
+% use a Bezier representation of the sphere.
+%
+Typical results from these tests are presented in Table~\ref{tab:cov},
+ordered by the amount of improvement.
+These data sets, like all of the others we use in this section, 
+are generated randomly, with restrictions on distance between consecutive
+quaternions.
+This shows the consistent improvement when using the new approach,
+usually about an order of magnitude.
+
+\begin{table}
+\begin{tabular}{|c|c|c|c|}  	\hline
+Data set & \multicolumn{2}{c|}{Covariant acceleration} & Improvement factor \\ \hline
+	 & Our curve  & Trim curve & \\ \hline
+1 & 23.9 & 764 & 32 \\ \hline
+2 & 25.0 & 457 & 18 \\ \hline
+3 & 41.3 & 352 & 8.5\\ \hline
+4 & 15.9 & 90.6 & 5.7 \\ \hline
+5 & 14.8 & 42.4 & 2.9 \\ \hline
+% Data set 1: data100-2 (see script)
+% Data set 2: test100-60deg
+% Data set 3: test200-50deg
+% Data set 4: test500-20deg
+% Data set 5: test300-20deg
+% 5000 probes
+\end{tabular}
+\caption{A comparison with trim curves}
+\label{tab:cov2}
+\end{table}
+
+\subsection{Park and Ravani's method}
+
+We now compare to a nonrational quaternion spline.
+It is meaningless to compare with Barr et. al.'s methods \cite{barr92,rama97}
+since they explicitly minimize covariant acceleration.
+Therefore, we choose to compare to another good nonrational spline,
+Park and Ravani's method \cite{park97}.
+The results are in Table~\ref{tab:cov3}.
+	% We can only use small inputs since, in our implementation,
+	% the intermediate values in the Lie method 
+	% % (led by u) 
+	% become progressively larger at an explosive rate,
+	% overflowing after about 15 points.
+	% However, these small inputs are enough to show our rational quaternion spline
+	% performs well against the nonrational Lie method.
+
+% Is covariant acceleration computation of Ravani correct? Awfully large.
+
+\begin{table}
+\begin{tabular}{|c|c|c|c|}  	\hline
+Data set & \multicolumn{2}{c|}{Covariant acceleration} & Improvement factor \\ \hline
+	 & Our curve & Lie curve & \\ \hline
+1 & 0.364 & 652 & 1791 \\ \hline
+2 & 0.643 & 555 & 863 \\ \hline
+3 & 13.3  & 645 & 48 \\ \hline
+% Data set 1: test5-20deg (see script)
+% Data set 2: test10-20deg
+% Data set 3: data10-1
+\end{tabular}
+\caption{A comparison with Park and Ravani}
+\label{tab:cov3}
+\end{table}
+
+\subsection{Execution times}
+
+As one would expect from its reliance on classical NURBS technology
+and rational computations, our method is very efficient.
+Table~\ref{tab:time} gives some typical results,
+running on a 225MHz SGI Octane workstation.
+The first six results are for the examples in Figure~\ref{fig:eg6}.
+Times of 0 are possible since the profiler we use measures in intervals
+of 30 microseconds.
+Clearly, curve design is entirely interactive and responsive.
+
+\begin{table}
+\begin{tabular}{|c|c|c|}  	\hline
+Data set & \# of data points & Time (seconds) \\ \hline
+1 & 5 & 0.00 \\ \hline
+2 & 5 & 0.00 \\ \hline
+3 & 6 & 0.00 \\ \hline
+4 & 10 & 0.00 \\ \hline
+5 & 66 & 0.03 \\ \hline
+6 & 100 & 0.03 \\ \hline
+7 & 200 & 0.12 \\ \hline	% dataset: test200-50deg (see script)
+8 & 500 & 0.27 \\ \hline	% dataset: test500-20deg 
+\end{tabular}
+\caption{Execution times}
+\label{tab:time}
+\end{table}
+
+\section{Conclusions and future work}
+\label{sec:conclusions}
+
+We have developed a rational quaternion spline of high quality.
+It is a B-spline of arbitrary continuity, and is easily built
+using the classical construction of interpolating B-splines in Euclidean 
+space.\footnote{The curve can be any rational curve, not necessarily expressed
+	as a B-spline curve, but we assume that the B-spline curve will be the
+	most commonly used.}
+The dependence of the method on existing B-spline technology leads to
+great efficiency in both the implementation and the execution of the
+method, which can promote interactive control for animation or robot motion.
+	% or spacecraft control
+Previous quaternion splines have required new tools (e.g., slerping,
+constrained optimization, biarcs) that prevent them from being
+incorporated into existing NURBS modelers.
+
+\add{An exploration of the use of this new quaternion spline for motion editing 
+and spacetime optimization would be most interesting, 
+motivated by its closed form, simple derivative computation, and efficiency.}\
+
+We believe that there is additional promise in the Euclidean space approach
+for curve design on surfaces.
+In particular, there are two forms of inherent flexibility in the method
+that deserve further study:
+map flexibility (the choice of map to the surface)
+and interpolation flexibility (the choice of point on the inverse image curve
+during Euclidean space interpolation).
+In the future, we also want to explore a direct interpolation of the set
+of inverse image curves by a curve.
+	% General problem of designing a curve that interpolates curves, rather than points.
+% A full understanding of the relationship between curves in Euclidean
+% and Riemannian space is also an interesting challenge.
+
+\section{Acknowledgements}
+
+I appreciate comments of Sebastian Grassia on the paper.
+
+\bibliographystyle{plain}
+\begin{thebibliography}{Lozano-Perez 83}
+
+\bibitem[Ballard 82]{ballard82}
+Ballard, D. and C. Brown (1982)
+Computer Vision.
+Prentice-Hall (Englewood Cliffs, NJ).
+
+\bibitem[Barr 92]{barr92}
+Barr, A. and B. Currin and S. Gabriel and J. Hughes (1992)
+Smooth Interpolation of Orientations with Angular Velocity Constraints
+using Quaternions.
+SIGGRAPH '92, 313--320.
+
+\bibitem[Dickson 52]{dickson52}
+Dickson, L.E. (1952) History of the Theory of Numbers: Volume II,
+Diophantine Analysis.  Chelsea (New York).
+
+\bibitem[Dietz 93]{dietz93}
+Dietz, R. and J. Hoschek and B. Juttler (1993)
+An algebraic approach to curves and surfaces on the sphere and
+on other quadrics.
+Computer Aided Geometric Design 10, 211-229.
+
+\bibitem[Duff 85]{duff85}
+Duff, T. (1985)
+Quaternion splines for animating orientation.
+1985 Monterey Computer Graphics Workshop, 54--62.
+
+\bibitem[Farin 97]{farin97}
+Farin, G. (1997)
+Curves and Surfaces for CAGD: A Practical Guide (4th edition).
+Academic Press (New York).
+
+\bibitem[Foley 96]{foley96}
+Foley, J. and A. van Dam and S. Feiner and J. Hughes (1996)
+Computer Graphics: Principles and Practice (2nd edition in C).
+Addison-Wesley (Reading, Massachusetts).
+
+\bibitem[Golub 89]{golubvanloan89}
+Golub, G. and C. Van Loan (1989)
+Matrix Computations.
+2nd edition, Johns Hopkins University Press (Baltimore).
+
+\bibitem[Goldstein 50]{goldstein50}
+Goldstein, H. (1950)
+Classical Mechanics.
+Addison-Wesley (Reading, Massachusetts).
+
+\bibitem[Harris 92]{harris92}
+Harris, J. (1992)
+Algebraic Geometry: A First Course.
+Springer-Verlag (New York).
+
+\bibitem[Hart 94]{hart94}
+Hart, J. and G. Francis and L. Kauffman (1994)
+Visualizing Quaternion Rotation.
+ACM Transactions on Graphics 13(3), July, 256--276.
+
+\bibitem[Herstein 75]{herstein75}
+Herstein, I. (1975) Topics in Algebra.
+2nd edition, John Wiley (New York).
+
+\bibitem[Hoschek 92]{hoschekSeemann92}
+Hoschek, J. and G. Seemann (1992)
+Spherical splines.
+Mathematical Modeling and Numerical Analysis, 26(1), 1--22.
+
+\bibitem[Johnstone and Williams 95]{jjjw95}
+Johnstone, J. and J. Williams (1995)
+Rational Control of Orientation for Animation.
+{\em Graphics Interface '95}, Quebec City, 179--186.
+
+\bibitem[Johnstone 99b]{jj98b}
+Johnstone, J.K. (1999)
+The Most Natural Map to the $n$-sphere.
+Manuscript.
+Available at http://www.cis.uab.edu/info/faculty/jj/cos.html.
+
+\bibitem[Kendall 61]{kendall61}
+Kendall, M.G. (1961)
+A Course in the Geometry of n Dimensions.
+Charles Griffin (London).
+
+\bibitem[Kim 95]{kim95}
+Kim, M.-J. and M.-S. Kim and S. Shin (1995)
+A General Construction Scheme for Unit Quaternion Curves
+with Simple Higher Order Derivatives.
+SIGGRAPH '95, 369--376.
+
+\bibitem[Kreyszig 63]{kreyszig63}
+Kreyszig, E. (1963)
+Differential Geometry.
+Dover (New York).
+
+\bibitem[Lang 79]{lang79}
+Lang, S. (1979)
+Calculus of Several Variables, 2nd edition.
+Addison-Wesley (Reading, Mass).
+
+\bibitem[Misner 73]{misner73}
+Misner, C. and K. Thorne and J. Wheeler (1973)
+Gravitation.
+W.H. Freeman (San Francisco).
+
+\bibitem[Nam 95]{nam95}
+Nam, K.-W. and M.-S. Kim (1995)
+Hermite interpolation of solid orientations based on a smooth blending
+of two great circular arcs on SO(3).
+Proc. of CG International '95.
+
+\bibitem[Nielson 92]{nielson92}
+Nielson, G. and R. Heiland (1992)
+Animated rotations using quaternions and splines on a 4D sphere.
+Programming and Computer Software, 145--154.
+
+\bibitem[Nielson 93]{nielson93}
+Nielson, G. (1993)
+Smooth interpolation of orientations.
+In Models and Techniques in Computer Animation, Springer-Verlag (New York),
+75--93.
+
+\bibitem[Park 95]{park95}
+Park, F. and B. Ravani (1995)
+Bezier Curves on Riemannian Manifolds and Lie Groups with
+Kinematics Applications.
+Transactions of the ASME 117, 36--54.
+
+\bibitem[Park 97]{park97}
+Park, F. and B. Ravani (1997)
+Smooth Invariant Interpolation of Rotations.
+ACM Transactions on Graphics 16(3), 277--295.
+
+\bibitem[Pletinckx 89]{pletinckx89}
+Pletinckx, D. (1989) 
+Quaternion calculus as a basic tool in computer graphics.
+The Visual Computer 5, 2--13.
+
+\bibitem[Popovic 99]{popovic99}
+Popovic, Z. and A. Witkin (1999)
+Physically Based Motion Transformation.
+SIGGRAPH '99, 11--20.
+
+\bibitem[Ramamoorthi 97]{rama97}
+Ramamoorthi, R. and A. Barr (1997)
+Fast Construction of Accurate Quaternion Splines.
+SIGGRAPH '97, Los Angeles, 287--292.
+
+\bibitem[Schlag 91]{schlag91}
+Schlag, J. (1991) Using geometric constructions to interpolate
+orientation with quaternions.  In Graphics Gems II, Academic Press (New York),
+377--380.
+
+\bibitem[Preparata 85]{shamos85}
+Preparata, F. and M. Shamos (1985)
+Computational Geometry: An Introduction.
+Springer-Verlag (New York).
+
+\bibitem[Shoemake 85]{shoemake85}
+Shoemake, K. (1985) Animating rotation with quaternion curves.
+SIGGRAPH '85, San Francisco, 19(3), 245--254.
+
+\bibitem[Thorpe 79]{thorpe79}
+Thorpe, J. (1979)
+Elementary Topics in Differential Geometry.
+Springer-Verlag (New York).
+
+\bibitem[Wang 93]{wang93}
+Wang, W. and B. Joe (1993)
+Orientation Interpolation in Quaternion Space using Spherical Biarcs.
+Graphics Interface '93, 24--32.
+
+\bibitem[Wang 94]{wang94}
+Wang, W. (1994)
+Rational Spherical Curves.
+Technical Report, Dept. of Computer Science, University of Hong Kong.
+
+\bibitem[Witkin 88]{witkin88}
+Witkin, A. and M. Kass (1988)
+Spacetime Constraints.
+Computer Graphics 22(4) (Proc. SIGGRAPH '88), 159--168.
+
+% \bibitem[Woo 97]{opengl97}
+% Woo, M. and J. Neider and T. Davis (1997)
+% OpenGL Programming Guide (2nd edition).
+% Addison-Wesley Developers Press (Reading, Mass.),
+% pp. 464-8.
+\end{thebibliography}
+
+\section{Appendix}
+
+In this appendix, we establish that the choice of $q_i$ as the point on \Sn{3}
+(Section~\ref{sec:eucdesign})
+is a good approximation to the closest point to $q_{i-1}$.
+Consider two unit quaternions $p_1 = (a,b,c,d)$ and $p_2 = (A,B,C,D)$.
+Let $\epsilon$ be their difference in $x_1$-coordinate and $\theta$
+be the angle between $p_1$ and $p_2$.
+Consider the difference between the choice of inverse image as closest point $q_2$
+and point $q_2'$ on \Sn{3} (Figure~\ref{fig:QQdist}).
+The distance between $q_2$ and $q_2'$ is $1-\cos \alpha$, where
+$\alpha$ is the angle between the inverse image lines $M^{-1}(p_1)$ and
+$M^{-1}(p_2)$ (see Figure~\ref{fig:QQdist} again).
+$\cos \alpha$ can be reexpressed as follows:
+\[
+	\cos \alpha = \frac{(b,c,d,1-a)}{\sqrt{2-2a}}
+	\cdot
+	\frac{(B,C,D,1-A)}{\sqrt{2-2A}}
+	= \frac{\cos \theta + 1 - a - A}
+	       {2\sqrt{1-a-A+aA}}
+\]
+since $\cos\theta = (a,b,c,d) \cdot (A,B,C,D)$.
+Reexpressing $A$ as $a + \epsilon$,
+\[
+\cos \alpha = \frac{\cos \theta + 1 - 2a - \epsilon}
+	       {2\sqrt{1-2a-\epsilon+a^2 + \epsilon a}}
+	= \frac{\cos \theta + 1 - 2a - \epsilon}
+	       {2\sqrt{(1-a-\frac{\epsilon}{2})^2 - \frac{\epsilon^2}{4}}}
+\]
+Suppose that $\frac{\epsilon^2}{4}$ is very small and can be ignored,
+and that $\theta$ is small so that $\cos \theta$ is close to 1.
+This is true if the quaternion data is densely sampled.
+Then 
+\[
+\cos \alpha \approx \frac{2 - 2a - \epsilon}{2(1-a-\frac{\epsilon}{2})} = 1,\ \ 
+1-\cos \alpha \approx 0
+\]
+and the distance between $q_2$ and $q_2'$, $1 - \cos\alpha$, is small.  
+We conclude that the choice of $q_i$ as the 'point on \Sn{3}'
+is a good approximation to the choice of $q_i$ as the closest point to $q_{i-1}$,
+especially when the quaternion data is densely sampled.
+
+\begin{figure}
+\vspace{2.5in}
+\special{psfile=/usr/people/jj/modelTR/3-spline/img/dist1-cosAlpha.ps
+	 hoffset=150}
+\caption{The distance between $q_2$ and $q_2'$ is $1-\cos\alpha$}
+% file: dist1-cosAlpha.showcase
+% tops dist1-cosAlpha.rgb -m 6.5 1.5 > dist1-cosAlpha.ps
+\label{fig:QQdist}
+\end{figure}
+
+\end{document}
+
+\ifFull
+The main battering ram for new breakthrough should be the rationality
+of the quaternion spline and its good quality (better than rational trim curve
+or nonrational Lie methods or rational biarc).
+So present the paper as a new high-quality rational quaternion spline.
+We can talk about extensions to other surfaces in the conclusions, but
+it is not yet a general method for design of curves on surfaces,
+so save that argument for when it blossoms beyond S3.
+The argument of mapping to Euclidean space still holds and can motivate
+the method (paragraph 3 on).
+But start with the rational quaternion spline problem and proceed
+to the Euclidean space approach rather than the other way around.
+This also deflects criticism as extension of Dietz.
+It is not a massive change from the approach of Dietz of curves on
+surfaces (although we choose points in Euclidean space, rather than 
+curves directly from curves, which changes many things)
+and the general approach is not the main point anyway.
+\fi
+
+\Comment{
+Note: 
+Rational maps to a nontrivial surface are bound to be nonlinear
+and algebraically stated (this, we might change)
+so not coordinate-frame invariant.
+(Think of Bezier curve's coordinate-frame invariance, which depends
+on its geometric description by de Casteljau or alternatively
+its use of linear interpolation in the Bezier basis algebraic version.)
+Thus, the trick of this paper of using a rotation of every input
+to a canonical position as a preprocessing step is a perhaps universal
+technique that we can use to enforce coordinate-frame invariance
+when using maps to a surface in Riemannian modeling.
+}
+
+% \section{Motion control}
+% \label{sec:motion}
+% \subsection{Orientation keyframes for animation and robot motion}
+
+% Call the new quaternion splines `Euclidean quaternion splines'.
+% Call the general class of new interpolating curves on the surface
+% `Euclidean curves on the surface'.
+
+% {\bf Separate paper on applications of S3 splines to orientation control,
+% sing examples from graphics and robotics.}
+
+
+% \section{Curve interpolation}
+
+% \section{Interactive editing of a curve}
+
+
+
+
+\Comment{
+\subsection{The best rotation}
+
+What single rotation will move the entire set of data points far from the pole?
+It makes sense to find a good representative for all the data
+points and rotate it farthest away from the pole.
+We choose the best-fitting plane.
+The added benefit of this choice is that the best-fitting plane
+can be computed efficiently using the covariance matrix.
+
+% see end of document for commentary on best-fitting plane itself
+
+To maximize the distance of the best-fitting plane from the pole,
+its normal should be oriented towards the pole (Figure~\ref{fig:avoid}).
+We need to decide whether to rotate $+v_{min}$ or $-v_{min}$ to the pole
+$(1,0,0,0)$, choosing the rotation that moves the best-fitting plane
+farthest away from the pole.
+Under either rotation, the best-fitting plane 
+will be rotated to a plane $x_1 = c$ for some $c \in \Re$.
+Since the sample mean lies on the best-fitting plane,
+we can compute its image under the two rotations
+(or just the $x_1$-coordinate of its image) 
+and choose the rotation that yields the smaller $x_1$-coordinate.
+
+\begin{example}
+\label{eg:resolve}
+The choice of $\pm v_{min}$ is an important one.
+Consider a set of data points on the plane $x_1=.9$.
+The best-fitting plane is $x_1=.9$
+and the direction of minimum dispersion is $\pm(1,0,0,0)$.
+Rotating $(1,0,0,0)$ to the pole does not move the points,
+leaving them undesirably close to the pole,
+but rotating $(-1,0,0,0)$ to the pole achieves the
+goal of flipping the data points to the other side.
+\end{example}
+
+\begin{figure}
+\vspace{1in}
+\caption{Input set (a) before and (b) after rotation}
+\label{fig:avoid}
+\end{figure}
+% figure of an example with best-fitting plane shown
+
+You need a tie-breaking scheme for assigning
+the eigenvectors to positive and negative coordinate axes,
+so that the method is coordinate-frame invariant.
+The present idea is to project the sample points onto
+the eigenvector and choose the direction of the extreme
+point as the positive axis.
+If there is a tie, choose the extreme point with the smaller
+index.  (Of course, this makes the method variant under
+*reversal* of the data, which is not so nice.)
+Other problem with this method: what if sample points are coplanar?
+Then some eigenvector is degenerate, and we have problems
+making consistent rotation.
+
+The rotation matrix that rotates $v_{min}$
+to $(1,0,0,0)$ is computed easily, using the fact that the rows
+of a rotation matrix are mapped to the coordinate axes under the
+rotation.
+Thus, $\frac{v_{min}}{\|v_{min}\|}$ is the first row of the desired rotation matrix,
+and the other rows are chosen orthogonal to $v_{min}$ using
+cross product.
+
+A corollary of the choice of best-fitting plane rotation
+is that the method is bi-invariant (coordinate-frame invariant).
+Bi-invariant, since no matter where a point set is rotated,
+it will be perturbed to the same optimal (for that point set)
+orientation for mapping to Euclidean space.
+Claim: no matter how you rotate the input, it is perturbed to the same
+place before it is mapped to image space.
+The map $M$ is not invariant to rotation, but the overall method is.
+
+Since the best-fitting plane of $\{p_i\}_{i=1,\ldots,k}$ 
+minimizes distance from the point set in the least-squares sense,
+there may be outliers that are far from the best-fitting plane.
+These outliers could be moved close to the pole by the rotation,
+even as the best-fitting plane is moved far from it.
+A solution to this problem requires subdivision of the problem
+into two or more quaternion splines.
+After all, a valid rotation can always be found if the data
+set is small enough.
+For example, a set of 4 quaternions can always be rotated to
+the hyperplane $x_1=0$, which is far from the pole.
+Subdivision requires an understanding of how to prescribe tangent
+information.
+
+} % end of /Comment
+
+
+\Comment{
+Best-fitting plane commentary
+
+\begin{defn2}
+The {\bf best-fitting plane} of a set of points $\{r_i\}_{i=1,\ldots,k}$
+is the plane that minimizes $\sum_{i=1}^k \mbox{dist}^2 (r_i,\mbox{plane})$.
+The dispersion (or {\bf variance}) of a set of scalars
+$\{x_i\}_{i=1,\ldots,k}$ is $\sum_{i=1}^k \frac{(x_i -
+\bar{x})^2}{k-1}$, where $\bar{x} = \sum_{i=1}^k x_i / k$ is the mean.
+This is a measure of the spread of the sample.
+The dispersion of a set of points in the direction $v$ is the dispersion
+of the orthogonal projection of the points onto $v$.
+The {\bf covariance matrix} of a set of points $\{r_i\}_{i=1,\ldots,k}$ 
+is $\sum_{i=1}^k \frac{(r_i - \bar{r})(r_i - \bar{r})^T}{k-1}$,
+where $\bar{r}$ is the sample mean of the points.
+\end{defn2}
+
+The normal of the best-fitting plane of the data points $\{p_i\}_{i=1,\ldots,k}$
+is the direction of minimum dispersion of $\{p_i\}$.
+This is the direction that the plane can best afford to ignore,
+and hence the normal direction.
+The covariance matrix is a generalization of dispersion to many dimensions.
+Not surprisingly, it can be used to compute properties of dispersion.
+In particular, the direction of minimum dispersion of 
+the point set $\{p_i\}$ is the minimum 
+eigenvector (say $v_{min}$) of the covariance matrix of $\{p_i\}$ \cite{ballard82}.
+Hence, the best-fitting plane is the plane through the sample mean
+with normal $v_{min}$.
+}
+
+% Other optimization measures (strain energy, measures from spacecraft dynamics, etc.).
+
+Improvement over trim curves:
+The image-space approach to curve design on surfaces offers
+added flexibility in the choice of map and the choice of interpolation
+over the classical trim-curve approach to curve design on surfaces.
+Using the important case of curves on \Sn{3}, 
+we have shown that this added flexibility improves curve design.
+By choosing the most natural map $M$ rather than the surface parameterization,
+better curves result, so map flexibility is an improvement.
+By choosing the closest-point sequence of points on the inverse lines
+of the generalization of stereographic projection
+rather than the unique surface parameterization inverse,
+better curves result, so interpolation flexibility is an improvement.

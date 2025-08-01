@@ -1,0 +1,6 @@
+[ FILE: teapot
+  A scene consisting solely of the Utah teapot.
+]
+{
+BEZSURF ../data/object/UtahTeapot.cpt3 2 0 0 0
+}

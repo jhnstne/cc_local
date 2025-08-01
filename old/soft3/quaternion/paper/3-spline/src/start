@@ -1,0 +1,2 @@
+emacs -geometry 91x72+0+0 s3spline.c ~/software/Cbin/quaternion/Quaternion.h &
+gv ../ratqspline.pdf &

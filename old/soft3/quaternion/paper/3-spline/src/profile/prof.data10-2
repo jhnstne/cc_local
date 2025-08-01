@@ -1,0 +1,26 @@
+-------------------------------------------------------------------------
+SpeedShop profile listing generated Fri Jul  9 16:21:47 1999
+   prof s3spline.totaltime.m4429
+                s3spline (n32): Target program
+                     totaltime: Experiment name
+                 ut,30000,0:cu: Marching orders
+               R10000 / R10010: CPU / FPU
+                             1: Number of CPUs
+                           225: Clock frequency (MHz.)
+  Experiment notes--
+	  From file s3spline.totaltime.m4429:
+	Caliper point 0 at target begin, PID 4429
+			/usr/people/jj/Orientation/S3curve/soft/s3spline -m 90 -t
+	Caliper point 1 at exit(0)
+-------------------------------------------------------------------------
+Summary of statistical callstack sampling data (totaltime)--
+                             0: Total Samples
+                             0: Samples with incomplete traceback
+                         0.000: Accumulated Time (secs.)
+                          30.0: Sample interval (msecs.)
+-------------------------------------------------------------------------
+Function list, in descending order by exclusive time
+-------------------------------------------------------------------------
+ [index]  excl.secs excl.%   cum.%  incl.secs incl.%    samples  procedure  (dso: file, line)
+
+

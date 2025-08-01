@@ -1,0 +1,81 @@
+From jimbo@blaze.cs.jhu.edu Wed Aug 17 17:17:31 1994
+Return-Path: <jimbo@blaze.cs.jhu.edu>
+Received: from blaze.cs.jhu.edu by cis.uab.edu (4.1/SMI-4.1)
+	id AA06676; Wed, 17 Aug 94 17:17:28 CDT
+Message-Id: <9408172217.AA06676@cis.uab.edu>
+Received: from mail-client (peregrine.cs.jhu.edu)
+           by blaze.cs.jhu.edu; Wed, 17 Aug 94 18:17:23 EDT
+From: jimbo@blaze.cs.jhu.edu (James P. Williams)
+Sender: jimbo@blaze.cs.jhu.edu
+Received: by mail-client (4.1) id AA16169; Wed, 17 Aug 94 18:17:22 EDT
+Subject: Re: Derivation, etc.
+To: jj@cis.uab.edu (John Johnstone)
+Date: Wed, 17 Aug 1994 18:17:22 -0400 (EDT)
+In-Reply-To: <9408161940.AA27980@cis.uab.edu> from "John Johnstone" at Aug 16, 94 02:40:51 pm
+X-Mailer: ELM [version 2.4 PL13]
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Content-Length: 1696
+Status: OR
+
+
+
+	I went over the math, plugged it into maple and it seems
+	to work out alright. There is a singularity in the mapping 
+	at X0=X1 but this is easily picked up by the fact that if X0=X1,
+	then all the other X's go to 0.
+
+	I would like to prove that the curve on the 4-Sphere is 
+	continuous if it's 4-Space pre-image is continuous, i.e.
+	if POST(t) = M[PRE(t)] and d/dt(PRE(t))!= [0,0,0,0] for 
+	all t then d/dt(POST(t))!=[0,0,0,0] for all t.  This would
+	free us from the worry of cusps.
+
+	Also, visualizing a curve on a 4-sphere is a bit of a problem.
+	I have some software that will make 3-D projections of 4-D
+	objects, but they are not too meaningful.
+
+	Jim
+
+
+Here's some Maple code for the map M[] and it's inverses. Do you have 
+Maple? Do you have an SGI?  Will need to know for the future.
+
+#################################
+# forward version of the mapping
+Mforward := proc(V)
+        temp := vector(5);
+        temp[1] := V[1]^2 + V[2]^2 + V[3]^2 + V[4]^2;
+        temp[2] := V[1]^2 + V[2]^2 + V[3]^2 - V[4]^2;
+        temp[3] := 2*V[1]*V[4];
+        temp[4] := 2*V[2]*V[4];
+        temp[5] := 2*V[3]*V[4];
+        eval(temp);
+end;
+
+# positive choice for inverse
+Minverse1 := proc(V)
+        temp := vector(4);
+        w := 2*sqrt((V[1]-V[2])/2);
+        temp[1] := V[3]/w;
+        temp[2] := V[4]/w;
+        temp[3] := V[5]/w;
+        temp[4] := (V[1]-V[2])/w;
+        eval(temp);
+end;
+
+# negative choice for inverse
+Minverse2 := proc(V)
+        temp := vector(4);
+        w := -2*sqrt((V[1]-V[2])/2);
+        temp[1] := V[3]/w;
+        temp[2] := V[4]/w;
+        temp[3] := V[5]/w;
+        temp[4] := (V[1]-V[2])/w;
+        eval(temp);
+end;
+
+########################################
+
+

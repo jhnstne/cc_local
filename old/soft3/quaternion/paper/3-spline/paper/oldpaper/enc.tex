@@ -1,0 +1,152 @@
+\documentstyle[12pt]{article}
+
+\newif\ifFull
+\Fullfalse
+
+\makeatletter
+\def\@maketitle{\newpage
+ \null
+ \vskip 2em                   % Vertical space above title.
+ \begin{center}
+       {\Large\bf \@title \par}  % Title set in \Large size. 
+       \vskip .5em               % Vertical space after title.
+       {\lineskip .5em           %  each author set in a tabular environment
+        \begin{tabular}[t]{c}\@author 
+        \end{tabular}\par}                   
+  \end{center}
+ \par
+ \vskip .5em}                 % Vertical space after author
+\makeatother
+
+% default values are 
+% \parskip=0pt plus1pt
+% \parindent=20pt
+\parskip=.2in
+\parindent=0pt
+
+\newcommand{\SingleSpace}{\edef\baselinestretch{0.9}\Large\normalsize}
+\newcommand{\DoubleSpace}{\edef\baselinestretch{1.4}\Large\normalsize}
+\newcommand{\Comment}[1]{\relax}  % makes a "comment" (not expanded)
+\newcommand{\Heading}[1]{\par\noindent{\bf#1}\nobreak}
+\newcommand{\Tail}[1]{\nobreak\par\noindent{\bf#1}}
+\newcommand{\QED}{\vrule height 1.4ex width 1.0ex depth -.1ex\ \vspace{.3in}} % square box
+\newcommand{\arc}[1]{\mbox{$\stackrel{\frown}{#1}$}}
+\newcommand{\lyne}[1]{\mbox{$\stackrel{\leftrightarrow}{#1}$}}
+\newcommand{\ray}[1]{\mbox{$\vec{#1}$}}          
+\newcommand{\seg}[1]{\mbox{$\overline{#1}$}}
+\newcommand{\tab}{\hspace*{.2in}}
+\newcommand{\se}{\mbox{$_{\epsilon}$}}  % subscript epsilon
+\newcommand{\ie}{\mbox{i.e.}}
+\newcommand{\eg}{\mbox{e.\ g.\ }}
+\newcommand{\figg}[3]{\begin{figure}[htbp]\vspace{#3}\caption{#2}\label{#1}\end{figure}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\prf}{\vspace{-.3in}\noindent{{\bf Proof}:\ \ \ }}
+\newcommand{\choice}[2]{\mbox{\footnotesize{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}      
+\newcommand{\scriptchoice}[2]{\mbox{\scriptsize{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}
+\newcommand{\tinychoice}[2]{\mbox{\tiny{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}
+\newcommand{\ddt}{\frac{\partial}{\partial t}}
+\newcommand{\Sn}[1]{\mbox{{\bf S}$^{#1}$}}
+\newcommand{\calP}[1]{\mbox{{\bf {\cal P}}$^{#1}$}}
+
+\newtheorem{rmk}{Remark}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{conjecture}{Conjecture}[section]
+\newtheorem{claim}{Claim}[section]
+\newtheorem{notation}{Notation}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{defn2}{Definition}[section]
+
+\DoubleSpace
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{-.25in}	% technically should be 0pt for 1in
+\setlength{\headsep}{0pt}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+\setlength{\columnsep}{5mm}		% width of gutter between columns
+
+% -----------------------------------------------------------------------------
+
+\title{Encyclopedia Galactica}
+% History: begun 8/13/97.
+
+\begin{document}
+\maketitle
+% ----------------------------------------------------------------------------
+
+\section{Stereographic projection}
+
+Stereographic projection is a map from \Sn{n} to $\Re^n$,
+embedded in $\Re^{n+1}$ as a hyperplane.
+A point is mapped to its projection from
+a center of projection on \Sn{n}, called the pole of the stereographic projection,
+to a hyperplane through the origin parallel to the pole's tangent plane (Figure~\ref{fig:stereo}).
+Conventionally, the pole is the north pole $(0,\ldots,0,1)$
+and consequently the hyperplane is $x_{n+1}=0$.
+Stereographic projection $\sigma_q$ with pole $q$ and hyperplane $H$ is
+a map
+\[	\sigma_q : \Sn{n} - \{ q \} \rightarrow H \equiv \Re^n	\]
+
+\begin{figure}
+\vspace{2in}
+\caption{Stereographic projection}
+\label{fig:stereo}
+\end{figure}
+
+The inverse map to stereographic projection is a map onto the sphere
+\[	\varphi_H : H \rightarrow \Sn{n} - \{ q \}	\]
+Both maps are rational.
+
+\begin{lemma}
+Let $q$ be the pole $(0,\ldots,0,1)$ and $H$ the hyperplane $x_{n+1}=0$.
+\[
+	\sigma_q (x_1,\ldots,x_{n+1}) = 
+	\frac{1}{1-x_{n+1}} (x_1, \ldots, x_n, 0)
+\]
+\[
+	\varphi_H (x_1,\ldots,x_n,0) = 
+	\frac{1}{x_1^2 + \cdots + x_n^2 + 1} 
+	(2x_1, \ldots, 2x_n, x_1^2 + \cdots + x_n^2 - 1)
+\]	% see thorpe79, p. 125 for latter formula
+\end{lemma}
+\prf
+The line through $p = (x_1,\ldots,x_{n+1})$ and $q$, $tp + (1-t)q$,
+intersects $H$ at $t = \frac{1}{1 - x_{n+1}}$.
+The line through $(r,0)$ and $q$, $t(r,0) + (1-t)q$,
+intersects \Sn{n} at $t=0,\frac{2}{\|r\|^2 + 1}$.
+\QED
+
+Reference: Thorpe (1979).
+Use: Rational interpolation on 3-sphere paper (GI '95).
+
+Additional comments: 
+	- Circles are preserved.  (mentioned in Boehm/Paluszny paper I reviewed)
+
+% ----------------------------------------------------------------------------
+
+\section{Pythagorean $n$-tuples}
+
+\begin{defn2}
+{\rm 
+A {\em Pythagorean $n$-tuple} ($n \geq 3$) is an $n$-tuple 
+$(x_1,\ldots,x_n)$ that satisfies\\
+$x_1^2 + \ldots + x_{n-1}^2 = x_{n}^2$.
+If $x_i \in F$, we may refer to a Pythagorean $n$-tuple over $F$.
+}
+\end{defn2}
+
+% ----------------------------------------------------------------------------
+
+\bibliographystyle{plain}
+\begin{thebibliography}{Dickson 52}
+
+\bibitem[Thorpe 79]{thorpe79}
+Thorpe, J.A. (1979) Elementary Topics in Differential Geometry.
+Springer-Verlag (New York), p. 124.
+
+\end{thebibliography}
+
+\end{document}

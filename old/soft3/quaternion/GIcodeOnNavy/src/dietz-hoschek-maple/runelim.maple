@@ -1,0 +1,52 @@
+read `bezutils.maple`;
+read `quintic.maple`;
+read `elim.maple`;
+
+
+
+deuce_it := proc()
+ir1 := step_reduce(eqall,15,p00);
+print(`ir1 computed`);
+ir2 := step_reduce(ir1,14,p01);
+print(`ir2 computed`);
+ir3 := step_reduce(ir2,13,p10);
+print(`ir3 computed`);
+ir4 := step_reduce(ir3,12,p02);
+print(`ir4 computed`);
+ir5 := step_reduce(ir4,11,p11);
+print(`ir5 computed`);
+ir6 := step_reduce(ir5,10,p12);
+print(`ir6 computed`);
+ir7 := step_reduce(ir6,9,p20);
+print(`ir7 computed`);
+ir8 := step_reduce(ir7,8,p21);
+print(`ir8 computed`);
+ir9 := step_reduce(ir8,7,p22);
+print(`ir9 computed`);
+ir10 := step_reduce(ir9,6,p30);
+print(`ir10 computed`);
+ir11 := step_reduce(ir10,5,p31);
+print(`ir11 computed`);
+ir12 := step_reduce(ir11,4,p32);
+print(`ir12 computed`);
+ir13 := step_reduce(ir12,3,z3);
+print(`ir13 computed`);
+ir14 := step_reduce(ir13,2,y3);
+print(`ir14 computed`);
+eval(ir2);
+end;
+
+
+deuce_it1 := proc()
+ir1 := step_reduce(eqall,6,p00);
+print(`ir1 computed`);
+ir2 := step_reduce(ir1,5,p01);
+print(`ir2 computed`);
+ir3 := step_reduce(ir2,4,p10);
+print(`ir3 computed`);
+ir4 := step_reduce(ir3,3,p02);
+print(`ir4 computed`);
+ir5 := step_reduce(ir4,2,p11);
+eval(ir5);
+end;
+

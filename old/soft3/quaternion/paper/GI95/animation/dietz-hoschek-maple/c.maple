@@ -1,0 +1,56 @@
+
+tryit := proc()
+for i from 1 to 100 do
+Ar := genrand();
+Br := genrand();
+Cr := genrand();
+Dr := genrand();
+Er := genrand();
+Fr := genrand();
+Arn := evalf(Ar/(sqrt(Ar^2+Br^2+Cr^2)));
+Brn := evalf(Br/(sqrt(Ar^2+Br^2+Cr^2)));
+Crn := evalf(Cr/(sqrt(Ar^2+Br^2+Cr^2)));
+Drn := evalf(Dr/(sqrt(Dr^2+Er^2+Fr^2)));
+Ern := evalf(Er/(sqrt(Dr^2+Er^2+Fr^2)));
+Frn := evalf(Fr/(sqrt(Dr^2+Er^2+Fr^2)));
+ANS1 := map(evalf,subs(A=Arn,B=Brn,C=Crn,D=Drn,E=Ern,F=Frn,C1));
+ANS2 := map(evalf,subs(A=Arn,B=Brn,C=Crn,D=Drn,E=Ern,F=Frn,C2));
+
+print(i);
+lprint(Ar,Br,Cr,Dr,Er,Fr);
+print(ANS1);
+print(ANS2);
+od;
+end;
+
+
+
+tryit1 := proc()
+for i from 1 to 100 do
+Ar := genrand();
+Br := genrand();
+Cr := genrand();
+Dr := genrand();
+Er := genrand();
+Fr := genrand();
+Arn := evalf(Ar/(sqrt(Ar^2+Br^2+Cr^2)));
+Brn := evalf(Br/(sqrt(Ar^2+Br^2+Cr^2)));
+Crn := evalf(Cr/(sqrt(Ar^2+Br^2+Cr^2)));
+Drn := evalf(Dr/(sqrt(Dr^2+Er^2+Fr^2)));
+Ern := evalf(Er/(sqrt(Dr^2+Er^2+Fr^2)));
+Frn := evalf(Fr/(sqrt(Dr^2+Er^2+Fr^2)));
+ANS1 := map(evalf,subs(A=Ar,B=Br,C=Cr,D=Dr,E=Er,F=Fr,C1));
+ANS2 := map(evalf,subs(A=Ar,B=Br,C=Cr,D=Dr,E=Er,F=Fr,C2));
+
+print(i);
+lprint(Ar,Br,Cr,Dr,Er,Fr);
+print(ANS1);
+print(ANS2);
+od;
+end;
+
+
+
+
+
+

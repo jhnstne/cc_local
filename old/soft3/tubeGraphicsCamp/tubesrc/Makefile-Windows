@@ -1,0 +1,20 @@
+# File: camp/Makefile
+# Author: J.K. Johnstone
+# Last Modified: 24 April 2000
+
+ARCH       = LINUX
+SHELL      = /bin/csh
+CC         = g++
+HOME	   = /home/jj
+CLASSBASE  = ${HOME}/software/Cbin
+
+LIBRARIES  = -lglut -lGLU -lGL -lm
+LDFLAGS    = -I${CLASSBASE} 
+
+all: tube
+
+.cpp:
+	${CC} -Wno-deprecated -g -o $@ $< ${LIBRARIES} ${LDFLAGS}
+
+touch :
+	touch tube.c++

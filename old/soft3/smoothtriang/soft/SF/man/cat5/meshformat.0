@@ -1,0 +1,132 @@
+
+
+
+Headers, Environments, and Macros                   meshformat(5)
+
+
+
+NNNNAAAAMMMMEEEE
+     Mesh Format - the format of a mesh file.
+
+
+DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
+     A mesh is a topological data structure for  representing  2-
+     manifolds.   The mesh library, mesh 3, provides a procedural
+     interface for traversing a mesh.   This  document  describes
+     the external format of a mesh.
+
+
+     The CNF format of a mesh is:
+
+     meshfile   :    pointfacelist   mesh               |    mesh
+               ;
+
+     pointfacelist  :    pointfacelist                      point
+               |    pointfacelist    face              |    point
+               |    face           ;
+
+     point          :    ident '=' dstruct            |     ident
+     ';'           ; pointdata :    STRING_TOKEN           ;
+
+     face      :    ident   '='   facedata             ;    face-
+     data  :    '[' namedPointList ']' dstruct           |    '['
+     namedPointList ']' ';'           ;
+
+     namedPointList :    pointName            |    namedPointList
+     ',' pointName           ;
+
+     pointName :    IDENT           |    pointdata           ;
+
+     mesh      :    ident  '='  '{'  namedFaceList  '}'   dstruct
+               |    ident   '='   '{'   namedFaceList   '}'   ';'
+               ;
+
+     namedFaceList  :    faceName                 |    vertexName
+               |    namedFaceList           ','          faceName
+               |    namedFaceList ',' vertexName           ;
+
+     faceName  :    IDENT           |    facedata           ;
+
+     ident          :    IDENT           ;
+
+
+     NOTE -- "dstruct" above is a dstruct.  See the documentation
+     on  dstructs  for  their format.  In particular, note that a
+     dstruct is terminated by a  ';'.   The  userdata  3  package
+     expects a particular dstruct format for geometry at the ver-
+     tices.
+
+     Implicit in the above are  edges.   Edges  are  formed  from
+
+
+
+SunOS 5.6                 Last change:                          1
+
+
+
+
+
+
+Headers, Environments, and Macros                   meshformat(5)
+
+
+
+     adjacent  vertices in a face.  A future release should allow
+     for explicit representation of edges.  This  would  only  be
+     useful  for  associating  data with an edge; any edge listed
+     would also need to appear in a face.
+
+     Note that there are  several  restrictions  on  a  mesh  not
+     imposed  by  the  above grammar.  First, each face must have
+     three or more edges/vertices.  Second, only  two  faces  may
+     share an edge, and these edge must have opposite orientation
+     in these faces (i.e., [a,b,c]  and  [b,a,d]  are  legal  but
+     [a,b,c]  and  [a,b,d] is illegal).  A third restriction con-
+     cerns bounary edges.  An edge which occurs in only one  face
+     is a boundary edge.  There may be at most two boundary edges
+     incident to a vertex.
+
+     Only the faces listed in the mesh will be part of the  mesh.
+     The  vertices  of  the  mesh will be those vertices that are
+     part of a face that is listed in the mesh and  the  vertices
+     explicitly listed in the mesh.
+
+
+EEEExxxxaaaammmmpppplllleeee
+     % % Author: Charles Loop % Purpose: An octahedron %  %    -e
+     3 3 3 -o -1 -1 -1 -u 0 1 0
+
+     px = (Point . (pos . [1,0,0]) (norm . [1,0,0])); py = (Point
+     .  (pos  .  [0,1,0]) (norm . [0,1,0])); pz = (Point . (pos .
+     [0,0,1]) (norm . [0,0,1])); mx = (Point . (pos  .  [-1,0,0])
+     (norm  .  [-1,0,0])); my = (Point . (pos . [0,-1,0]) (norm .
+     [0,-1,0])); mz = (Point . (pos . [0,0,-1])  (norm  .  [0,0,-
+     1]));
+
+     PPP = [px,py,pz]; PPM = [py,px,mz]; PMP = [pz,my,px]; PMM  =
+     [px,my,mz];  MPP  =  [mx,pz,py];  MPM  =  [mx,py,mz];  MMP =
+     [mx,my,pz]; MMM = [mz,my,mx];
+
+     mesh = {PPP,PMP,MPP,MMP,PPM,PMM,MPM,MMM};
+
+
+
+SSSSEEEEEEEE AAAALLLLSSSSOOOO
+     dstruct(3), mesh(3), operators(3), userdata(3)
+
+
+DDDDAAAATTTTEEEE
+     November 12, 1991
+
+
+
+
+
+
+
+
+
+SunOS 5.6                 Last change:                          2
+
+
+

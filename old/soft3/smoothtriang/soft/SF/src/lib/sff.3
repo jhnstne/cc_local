@@ -1,0 +1,88 @@
+.TH sff 3
+
+.SH NAME
+sff
+
+.SH SYNOPSIS
+Routines for manipulating second fundemental forms.
+
+.SH SYNTAX
+
+.B #include "sff.h"
+
+.SH DESCRIPTION:
+
+.nf
+.B Scalar EvalSFF(sff,v)
+.B SFF *sff;
+.B Vector v;
+.fi
+
+Evaluate the second fundemental form to extract the normal curvature
+in direction 
+.B v.
+
+.nf
+.B Scalar EvalSFF2(sff,v1,v2)
+.B SFF *sff;
+.B Vector v1;
+.B Vector v2;
+.fi
+
+Evaluate the second fundemental form to get the normal component 
+of the mixed partial in directions
+.B v1
+and
+.B v2.
+
+
+.nf
+.B BOOLEAN dGetSFF(ds,path,f,sff)
+.B Lnode* ds;
+.B char* path;
+.B Frame f;
+.B SFF* sff;
+.fi
+
+Extract a second fundemental form at
+.B path
+from the dstruct
+.B ds
+relative to frame
+.B f.
+
+
+.nf
+.B BOOLEAN pPutSFF(ds,path,sff)
+.B Lnode** ds;
+.B char* path;
+.B SFF* sff;
+
+Write a second fundemental form to a dstruct.
+
+
+.nf
+.B SFF CreateConjugateSFF(v0,v1,k0,k1)
+.B Vector v0;
+.B Vector v1;
+.B Scalar k0;
+.B Scalar k1;
+
+Create a second fundemental form from conjugate directions v0 and v1 with
+curvatures k0 and k1 respectively.
+
+.nf
+.B Vector SFFConjugate(s,v)
+.B SFF* s;
+.B Vector v;
+
+Return the conjugate direction of v relative to s.
+
+.nf
+.B Scalar SFFGaussianCurvature(s)
+.B SFF* s;
+
+Return the Gaussian Curvature determined by a Second Fundemental Form.
+
+.SH DATE
+February 25, 1990

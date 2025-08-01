@@ -1,0 +1,1933 @@
+\documentstyle[12pt,titlepage]{article}
+\newif\ifFull
+\Fullfalse
+\input{header}
+\SingleSpace
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{0in}	% should be 0pt for 1in
+% \setlength{\headsep}{.5in}
+\setlength{\textheight}{8.5in}
+\setlength{\textwidth}{6.5in}
+\setlength{\columnsep}{5mm}		% width of gutter between columns
+
+% \markright{Quaternion splines: \today \hfill}		% Euclidean curves
+% \pagestyle{myheadings}
+
+% -----------------------------------------------------------------------------
+
+\title{Rational Quaternion Splines as Euclidean Curves}
+% \title{Euclidean curves on a surface}
+% Rational quaternion splines
+\author{J.K. Johnstone \and J.P. Williams}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+A new approach to the design of interpolating curves on a surface
+is proposed, and applied to the design of rational quaternion splines.
+An essential element of the approach is the use of a map to the surface,
+which allows the curve to be designed in unconstrained Euclidean space.
+The curves constructed by the new method are of superior quality,
+the method is highly efficient, and there is flexibility in the 
+design of the curve that is lacking from more traditional techniques.
+% By using rational map to $\Re^4$ rather than parameter space,
+%	there are two added degrees of freedom for curve design:
+%	interpolating curves rather than points in image space
+%	(choose any point along the line = one dof)
+%	and choosing *any* rational map to \Sn{3}\ rather than 
+%	automatically using the parameterization map.
+
+The design of interpolating curves (curves that interpolate a set of data
+points and possibly derivative information at these data points)
+is a fundamental problem in curve design.
+We discuss a new method for the design of interpolating curves on a surface.
+The essence of the method is to map the points to Euclidean space,
+design the curve in unconstrained Euclidean space, 
+and map the curve back to the surface.
+The design is efficient, simple,
+% (once the map to and from Euclidean space is developed)
+and highly flexible because it is done in a higher-dimensional
+space (typically one dimension higher than the surface).
+% We discuss how to evaluate the quality of a curve on a surface,
+% and use these measures to give evidence of the superiority of the
+% new technique over other methods.
+
+Design rational curves and
+design on hypersurfaces in arbitrary dimension.
+
+The curves can also be designed to interpolate derivative information.
+Thus, subcurves can be joined smoothly to form larger curves.
+
+Our method is coordinate-frame invariant (PROVE IT).  See Ravani.
+\end{abstract}	
+
+% \tableofcontents
+
+\section{Introduction}
+\label{sec:intro}
+
+The design of curves on surfaces is an important problem,
+with applications ranging from the trimming of surfaces in solid modeling,
+to the design of splines on the quaternion sphere for orientation control
+in computer animation, to the design of shortest paths on configuration
+space obstacles in robot motion planning.
+%  \footnote{Shortest paths amongst obstacles must inherently hug the obstacles.}
+The design of a curve on a surface is more challenging than the 
+conventional design of a curve in Euclidean space.
+First, a surface constraint is added to the more typical constraints
+such as interpolation of data points and preservation of smoothness criteria.
+Second, surfaces are Riemannian spaces and 
+Riemannian geometry is significantly different from Euclidean geometry.
+% \cite{kreyszig63}.
+For example, in moving from Euclidean to Riemannian geometry,
+straight lines are replaced by geodesics.
+% (\eg, a helix on a cylinder).
+
+In this paper, we shall present a new general approach to the design of curves
+on surfaces and discuss its implementation and advantages.
+A single case study of this theory will be presented in detail:
+the design of curves on \Sn{3}.
+
+Since the modeling of curves in Euclidean space is much better understood, 
+a promising approach to the
+design of a curve on a surface is to somehow reduce the problem to the 
+design of a curve in Euclidean space, not restricted to any surface.
+% `Doctor, it hurts when I do this!'  `Well, then don't do it.'
+% This reduction of an unknown problem to a known problem is a time-honored
+% classical mathematical technique.
+This allows the Riemannian problem to be solved as an extension
+of the well-studied Euclidean problem, rather than as an entirely new
+problem domain.
+An approach for achieving this reduction to an Euclidean problem is as follows.
+
+Suppose that we are designing a curve on the hypersurface\footnote{A
+	hypersurface in $n$-space is a manifold of dimension $n-1$.}
+$S$ in $n$-space.
+Let $f:\Re^m \rightarrow S$ be a map to the surface.
+Then any curve $C$ in $m$-space yields a curve $f(C)$ on the surface.
+(See Figure~\ref{fig:reduce}.)
+Consequently, we can now concentrate on designing the curve $C$, 
+an Euclidean problem.
+Although this is the simplest statement of the approach (the approach becomes
+much more interesting when we add constraints on the type of map $f$ and 
+the type of curve on the surface),
+it reveals the essence of the approach most clearly:
+the problem of constraining the curve to the surface is reduced to the
+problem of developing a map to the surface.
+The design of a curve on a surface through the design of a curve in $m$-space
+and a map from $m$-space to the surface will be called the {\bf Euclidean-space
+	% image-space, surface-map
+approach} to curve design on a surface.
+The resulting curves will be called {\bf Euclidean curves} on the surface.
+
+\begin{figure}
+\vspace{2.5in}
+\special{psfile=/usr/people/jj/modelTR/3-spline/img/fig1.ps
+	 hoffset=100}
+\caption{The Euclidean-space approach to curve design on a surface}
+% file: fig1.showcase
+% tops fig1.rgb -m 6.5 1.5 > fig1.ps
+% a simple picture of S, C, f(C), and f (as an arrow) for a generic surface S
+\label{fig:reduce}
+\end{figure}
+
+Not surprisingly, the Euclidean-space approach has been used before.
+% \cite{dietz93,wang94}.
+% Given its simplicity and elegance, this is not surprising.
+The classical solution to the design of trim curves on a surface 
+is an example:
+the trim curve is designed in the parameter space of the surface \cite{foley96}.
+The surface parameterization is used as the map to the surface, % ($m=n-1$), 
+which has the advantage that no map to the surface needs to be
+developed.
+However, a different map to the surface using the full power of
+the Euclidean-space approach can improve the quality of the curve.
+One can use added control in both steps of the Euclidean approach to optimize
+the curve: the map can be directly controlled and, by choosing the
+correct map, the design of the curve in Euclidean space is given more
+flexibility (see below), which can be used to incorporate design optimizations.
+Another reason to look beyond the trim-curve solution is the design of 
+interpolating curves on a surface.
+We shall now explore the rational interpolating curve on a surface,
+which is the main focus of the paper.
+
+	% Interpolating curves are perhaps the most important class of curves
+	% in practical applications of curve design.
+The interpolation of data points is necessary in many applications:
+for example, in the design of quaternion 
+splines for computer animation, where the data points are the orientations of 
+the known keyframes; or in the design of paths on configuration-space
+obstacles for robot motion, where the data points are the source, destination,
+and rendezvous points of the path.
+The design of rational curves is also highly desirable:
+the rational curve is the most efficient of curves, because of the efficiency
+of polynomial computations and the elegant theory of rational Bezier
+and B-spline curves.
+As a result, the rational curve is the defacto standard in modeling systems, 
+with a large, established suite of algorithms for its manipulation.
+Thus, the design of a rational curve will allow the curve to be incorporated 
+immediately into existing software, and subsequent computations with the curve
+will be simple and efficient.
+Finally, we note that we are interested in curve design on
+hypersurfaces in arbitrary dimensions.
+For applications in animation and robotics, 
+curves on surfaces in 4-space and 6-space are of just as much
+interest as curves on surfaces in 3-space.
+
+Consider the design of a rational
+curve on the hypersurface $S$ that interpolates the set of points 
+$\{p_i\}_{i=1,\ldots,k} \subset S$, using the Euclidean-space approach.
+\marginpar{Change all $n$ to $k$
+ 	for number of points.}
+The algorithm is as follows. \marginpar{Change all $2A$ to $2a$.}
+Notice that (1a-b) are preprocessing steps.
+%
+\begin{description}
+\item[(1a)] Design a rational map to the surface, $f:\Re^m \rightarrow S$ (preferably $m=n$).
+\item[(1b)] Compute the inverse map $f^{-1}:S \rightarrow \Re^m$.
+\item[(2a)] Map the data points to Euclidean space, by computing $\{f^{-1}(p_i)\}_{i=1,\ldots,k}$.
+\item[(2b)] Design a rational curve $C$ in Euclidean space, interpolating $\{f^{-1}(p_i)\}_{i=1,\ldots,k}$.
+\item[(2c)] Map the curve back to the surface, by computing $f(C)$.
+\end{description}
+
+We prefer maps to the surface of the form $f:\Re^n \rightarrow S$ (i.e., $m=n$).
+Since $\Re^n$ is one dimension larger than $S$,
+if $m=n$ then $f^{-1}(p_i)$, the inverse image of a point on $S$, is a curve.
+This leads to a useful flexibility in the interpolation step (2b),
+since one is interpolating curves, not points.
+This can be used to design better curves on the surface.
+This is a further disadvantage of the use of the surface
+parameterization $f:\Re^{n-1} \rightarrow S$ as the map to the surface,
+which yields points $f^{-1}(p_i)$ in Euclidean space.
+
+Note that the inverse map $f^{-1}$ need not be rational.
+Only the map $f$ and the curve $C$ must be rational.
+Later in the paper, we shall consider the addition of derivative data
+for the curve to interpolate.
+% We postpone this discussion in order to avoid overcomplicating the issue
+% at the outset.
+
+As a case study of the proposed method,
+we will consider in detail the design of rational interpolating curves 
+on the 3-sphere \Sn{3}, also called quaternion splines.
+We will show that this design is efficient and yields curves of superior
+quality.
+Quaternion splines arise in computer animation in the control of
+orientation: the points on \Sn{3}\ are unit quaternions representing
+discrete orientations of an object in a series of keyframes,
+and the problem is to design a smooth motion of the object through
+these keyframes,
+which reduces to the design of a curve on \Sn{3}
+interpolating the quaternions.
+The application of quaternion 
+splines is not restricted to computer animation, although they were
+first developed in this context.  
+Any application involving motion control,
+such as robot motion or spacecraft control, 
+can make good use of quaternion splines for orientation control.
+
+A major advantage of the Euclidean-space approach is that it is easily
+implemented and integrated into existing modelers,
+since the heart of the algorithm is the design
+of a curve in Euclidean space (step 2b).
+The resulting curve can also be easily integrated into existing
+geometric models, since it is a true rational curve.
+Previous quaternion splines, for example, have required entirely new
+weaponry (such as slerping or constrained optimization)
+for the design of the curve;
+and the resulting curve was highly nonrational so it could not be
+directly handled by a NURBS modeling system.
+
+The rest of the paper will be structured as follows.
+We present some basic terminology in Section~\ref{sec:defn}.
+Section~\ref{sec:prevwork} reviews previous work in curve design on surfaces
+in general, and quaternion spline design in particular.
+The heart of the paper is Sections~\ref{sec:map}-\ref{sec:avoid},
+in which we present our implementation of the Euclidean-space approach
+for quaternion splines.
+We show how to design a good map to the surface, and its inverse,
+in Section~\ref{sec:map}.
+This section is largely based on a separate paper \cite{jj98a}.
+The design of the curve in Euclidean space and its mapping back 
+to Riemannian space are discussed in Sections~\ref{sec:eucdesign} and
+\ref{sec:curveimage}, respectively.
+The interpolation of derivative information is added in
+Section~\ref{sec:derivative}.
+We discuss a region of instability for the inverse in Section~\ref{sec:ill},
+and show how to avoid this region using principal component analysis 
+(Section~\ref{sec:best}) or subdivision (Section~\ref{sec:divandconq}),
+leading to a final revised version of the 
+algorithm for curve design in Section~\ref{sec:restatement}.
+We need to measure the quality of a curve in order to compare methods.
+In Section~\ref{sec:cov}, we discuss quality measures for a curve
+and in Section~\ref{sec:comparison} we present several examples
+of quaternion splines and use the quality measures
+to argue the superiority of the proposed approach, including
+the advantage of its map flexibility and interpolation flexibility.
+We end with some conclusions and ideas for future work.
+The appendix contains the proof of a theorem from Section~\ref{sec:map}.
+
+% ****************************************************************************
+% ****************************************************************************
+\section{Definitions}
+\label{sec:defn}
+
+\begin{defn2}
+\Sn{n}\ is the unit sphere in $(n+1)$-space $x_1^2 + \ldots + x_{n+1}^2 - 1 = 0$.
+\Sn{n}\ is called the {\bf unit $n$-sphere}.
+\end{defn2}
+%
+The superscript of \Sn\ refers to the dimension of the manifold, which is one less
+than the dimension of its resident Euclidean space:
+\Sn{1}\ is a circle, \Sn{2}\ is a sphere, and \Sn{3}\ is a hypersphere
+in 4-space.
+Since \Sn{3}\ can be identified with the set of unit quaternions,
+we shall sometimes refer to it as the {\bf quaternion sphere}.
+
+\begin{defn2}
+A {\bf rational polynomial} is a quotient of polynomials.
+A map 
+$(x_1,\ldots,x_n) \mapsto (f_1 (x_1,\ldots,x_n),\ldots,f_m (x_1,\ldots,x_n))$
+is {\bf rational} if 
+its components $f_i$ are all rational polynomials.
+\end{defn2}
+
+\begin{defn2}
+$\Re[x_1,\ldots,x_n]$ is the ring of polynomials in the $n$ variables
+$x_1,\ldots,x_n$ with real coefficients.
+\end{defn2}
+
+We shall make use of projective space in some of the proofs in this paper.
+
+\begin{defn2}
+\label{defn:projspace}
+Real {\bf projective $n$-space} $P^n$ is the space of $(n+1)$-tuples
+$\{ (x_1,x_2,\ldots,x_{n+1}) : x_i \in \Re, i=1,\ldots,n, \mbox{not all zero} \}$
+under the equivalence relation $(x_1,\ldots,x_{n+1}) = k(x_1,\ldots,x_{n+1})$
+if $k \neq 0 \in \Re$.
+The point $(x_1,\ldots,x_{n+1})$ in projective $n$-space, $x_{n+1} \neq 0$,
+is equivalent to the point $(\frac{x_1}{x_{n+1}},\ldots,\frac{x_n}{x_{n+1}})$
+in $n$-space.
+The point $(x_1,\ldots,x_n,0)$ in projective $n$-space represents the point
+at infinity in the direction $(x_1,\ldots,x_n)$.
+To translate from $n$-space to projective $n$-space, the point 
+$(x_1,\ldots,x_n)$ is typically transformed into the point $(x_1,\ldots,x_n,1)$.
+See \cite{harris92} for more details on projective space.
+\end{defn2}
+
+\section{Related work}
+\label{sec:prevwork}
+
+There is a rich literature on quaternion splines.
+\cite{shoemake85} introduced quaternion splines as a solution
+for keyframe animation in 1985, using slerping (spherical linear
+interpolation) between points on \Sn{3}.
+\cite{barr92} used constrained optimization to develop optimal
+quaternion splines, introducing low covariant acceleration
+as a desirable property of a quaternion spline,
+and refining this approach for added efficiency in \cite{rama97}.
+\cite{park97} uses Lie algebra to design the quaternion spline.
+\cite{kim95} also uses Lie algebra and its exponential map.
+\cite{wang93} builds quaternion splines from biarcs 
+(great circles of the sphere).
+
+Our work on quaternion splines differs from the earlier work
+in two important ways: it designs rational curves\footnote{The
+	only rational method is \cite{wang93}, which is quite restricted:
+	designing curves from segments of great circles
+	with limited continuity.}
+and it is very efficient as it avoids expensive tools,
+such as the constrained optimization in \cite{barr92}.
+
+Since $M$ is a rational map,
+the curve on the 3-sphere inherits the continuity of the curve in image space.
+Since it is simple to define interpolating curves
+in image space with $C^2$ continuity, or curves of higher degree with
+even higher continuity, 
+the curve on $S^3$ can easily have $C^2$ continuity
+and indeed arbitrary continuity.
+Other interpolation methods (e.g., slerping methods, spherical biarc methods)
+have considerable difficulty with continuity.
+
+\cite{dietz93} and \cite{wang94} design rational curves on quadrics,
+especially the sphere (\Sn{2}).
+They both use a variant of the Euclidean-space approach.
+\marginpar{ELABORATE}
+
+\cite{park95}
+
+from 3sphere.tex:
+
+The most popular method is to use spherical linear interpolation 
+(also called slerping) 
+\cite{shoemake85,duff85,pletinckx89,schlag91,nielson92,nielson93,kim95,nam95}.
+The spherical linear interpolation between the points $P_0$ and $P_1$ on $S^3$ is:
+\[ P(t) = \frac{\sin((1-t)\theta) P_0 + \sin(t \theta) P_1}{\sin \theta}
+\]
+where $\cos \theta = P_0 \cdot P_1$, which is the great circle between $P_0$ and $P_1$.
+A spherical analog to the de Casteljau algorithm based upon this
+spherical linear interpolation is used to build curves,
+mimicking Bezier \cite{shoemake85,kim95}, B-spline 
+\cite{duff85,nielson92,nielson93,kim95}, Hermite \cite{kim95,nam95},
+cardinal spline \cite{pletinckx89}, and Catmull-Rom \cite{schlag91} curves.
+Since slerping is a nonrational operation,
+all of the methods based on slerping generate nonrational curves.
+Most of these curves are defined only by a geometric construction, and have
+no closed form algebraic definition.
+Computation of derivatives of these curves is complicated,
+as is the imposition of $C^2$ continuity, and
+Kim et. al. \cite{kim95} go to considerable trouble to solve these two problems.
+The use of conventional Bezier curves completely removes 
+these problems with continuity or derivative calculation.
+
+The work of Wang \cite{wang93, wang94} and Nielson \cite{nielson93}
+is closest in spirit to this paper, since it designs rational curves on $S^3$.
+However, these curves are limited in scope.
+Wang \cite{wang93,wang94} (using spherical biarcs) 
+and Nielson \cite{nielson93} develop quadratic curves
+with $G^1$ continuity, and Wang \cite{wang94} develops sextic curves
+with $C^1$ continuity.
+% $C^2$ continuity is desirable, especially for animation.
+In Wang \cite{wang93,wang94}, the input points must be augmented with 
+tangents, since the problem is posed as a Hermite interpolation problem.
+Both Wang and Nielson's methods also involve heuristic, input-dependent choices 
+% (such as the choice of a spherical biarc from
+% a one-parameter family of valid spherical biarcs, or a center of projection)
+that can be difficult to make.
+Neither of the methods has any completeness result about the
+coverage of rational curves by their method.
+Our method subsumes the work of Wang and Nielson, 
+by creating rational curves of arbitrary
+even degree (all rational curves on $S^3$ have even degree \cite{wang94}) 
+and arbitrary continuity, using a single data-independent map that is provably complete.
+
+The above methods require implementation of new curves,
+such as slerped curves or spherical biarcs.
+In our method, no new curves must be implemented, just two maps:
+a map to the 3-sphere and its inverse.
+Consequently, the implementation of our method and its incorporation
+into any modeling software is much simpler.
+
+Barr et.\ al.\ \cite{barr92} design interpolating curves on $S^3$ 
+through constrained optimization: the constraint to the 3-sphere 
+is realized through its introduction into an optimization problem.
+This yields a nonrational curve again, indeed with no closed-form expression
+and approximate.
+The numerical optimization is also expensive.
+The method does have the advantage of allowing extra constraints 
+to be incorporated into the optimization (they choose to design a curve
+that minimizes tangential acceleration).
+
+
+
+\section{A rational map to the surface}
+\label{sec:map}
+
+The first step in our algorithm is to design a good rational map to the 
+surface \Sn{3}.
+We prefer a map with domain $\Re^4$, so that the data points will be
+mapped to one-dimensional curves in Riemannian space and the 
+curve design in Riemannian space will enjoy considerable flexibility.
+In \cite{jj98a}, we develop the following characterization of rational
+maps of $\Re^4$ to \Sn{3}.
+
+\begin{theorem}
+\label{thm:map4}
+A map is a rational map of $\Re^4$ to \Sn{3}\ if and only if
+it is of the form:
+\begin{equation}
+\label{eq:re4s3}
+\footnotesize{(x_{\pi(1)},x_{\pi(2)},x_{\pi(3)},x_{\pi(4)})} \mapsto 
+\footnotesize{
+	\frac{1}{a_1^2 + a_2^2 + a_3^2 + a_4^2},
+	(a_1^2 + a_2^2 + a_3^2 - a_4^2, 2a_1a_4, 2a_2a_4, 2a_3a_4)
+	}
+\end{equation}
+where $a_1,a_2,a_3,a_4 \in \Re[x_1,x_2,x_3,x_4]$
+and $\pi : \{1,2,3,4\} \rightarrow \{1,2,3,4\}$ is a permutation.
+\end{theorem}
+
+\noindent The most natural choice for the polynomials $a_i$ and the permutation $\pi$ 
+in Theorem~\ref{thm:map4} is $a_i = x_i$ and the identity permutation.
+This leads to a particular rational map to \Sn{3}\ that we call the natural map.
+%
+\begin{defn2}
+The {\bf natural} map to \Sn{3}\ is 
+$M: \Re^4 - \{0\} \rightarrow \Sn{3}$ defined by:
+\begin{equation}
+\label{eqM}
+\footnotesize{
+	M(x_1,x_2,x_3,x_4) =
+	\frac{1}{x_1^2 + x_2^2 + x_3^2 + x_4^2}
+	(x_1^2 + x_2^2 + x_3^2 - x_4^2, 2x_1x_4, 2x_2x_4, 2x_3x_4)
+	 }
+\end{equation}
+\end{defn2}
+%
+We shall use the natural map $M$ as our map to \Sn{3}.
+We fully analyze this map in \cite{jj98b}.
+It can be viewed as a generalization of the inverse of stereographic projection.
+% establishing that $M$ is related to stereographic
+% projection but significantly more sophisticated.
+% In particular, the restriction of $M$ to the hyperplane $x_4=1$ 
+% is the inverse of stereographic projection, while the restriction of $M$
+% to all the other hyperplanes is unrelated to stereographic projection.
+
+To map the data points from Riemannian space to Euclidean space,
+the inverse of the map to the surface is needed.
+Since the manifold $\Re^4$ is one dimension larger than \Sn{3}, one would expect
+several points of $\Re^4$ to map to the same point of \Sn{3}\ under $M$.
+That is, in general, the preimage of a point of \Sn{3}\ should be a curve in $\Re^4$.
+This is indeed the case.
+
+\begin{theorem}
+\label{thm:inverse}
+Let $H$ be the hyperplane $x_4 = 0$ minus the origin.
+The inverse of the natural map to \Sn{3}, $M^{-1}: S^3 \rightarrow \Re^4$, is
+\[ 
+\footnotesize{
+	M^{-1}(x_1,x_2,x_3,x_4) =
+	\left\{ 
+	\begin{tabular}{ll}
+		$\alpha(x_2,x_3,x_4,1-x_1),\ \alpha \in \Re,\ \alpha \neq 0 \hspace{.2in}$
+		  & $\mbox{if } (x_1,x_2,x_3,x_4) \neq (1,0,0,0)$\\
+		$H$ & $\mbox{if } (x_1,x_2,x_3,x_4) = (1,0,0,0)$
+	\end{tabular}
+	\right.
+}
+\]
+That is, the preimage of $(x_1,x_2,x_3,x_4) \neq (1,0,0,0)$ on \Sn{3}
+is a line through the origin, minus the origin.
+\end{theorem}
+\prf See the appendix. \QED
+%
+\begin{defn2}
+\label{defn:pole}
+The special point $(1,0,0,0)$ is called the {\bf pole} of the map $M^{-1}$.\\
+$(x_2,x_3,x_4,1-x_1)$ is called the {\bf defining point} of the preimage 
+$M^{-1}(x_1,x_2,x_3,x_4)$.
+\end{defn2}
+
+% The inverse of a point on \Sn{3}\ is needed to interpolate points.
+% We may also want the inverse of a derivative so that we can 
+% interpolate derivative information on \Sn{3}.
+% Fortunately, this is computed using straightforward differentiation.
+
+% \begin{corollary}
+% \label{cor:higherderiv}
+% Let $C(t) = (x_1(t), x_2(t), x_3(t), x_4(t)) \subset \Sn{3}$
+	% don't use C, that is reserved for the curve in Euclidean space (see 2B)
+% be a curve on \Sn{3}\ not containing the pole $(1,0,0,0)$.
+% \[
+% 	M^{-1}(C(t)) = \alpha(t)(x_2(t), x_3(t), x_4(t), 1-x_1(t))
+% \]
+% \[
+% 	\frac{\partial}{\partial t}M^{-1}(C(t)) = 
+% 	\alpha(t)(x'_2(t), x'_3(t), x'_4(t), -x'_1(t)) +
+% 	\alpha'(t) (x_2(t), x_3(t), x_4(t), 1-x_1(t))
+% \]
+% \end{corollary}
+
+% This corollary shows that it is simple to design curves on \Sn{3}\ that
+% interpolate derivative data as well as points.
+% The inverse images of the derivatives are simply added as constraints
+% to the interpolation of step 2A.
+
+\section{Designing the curve in Euclidean space}
+\label{sec:eucdesign}
+
+Once the data points have been mapped into Euclidean space,
+the next step is to design the curve in Euclidean space.
+This involves interpolating a curve through the 
+inverse image lines $M^{-1}(p_i)$.
+We will reduce this to point interpolation, 
+by choosing one point per line
+and applying conventional interpolation through a set of points.
+Each point should be chosen wisely, taking full advantage of our
+flexibility to choose any point on the line.
+A more precise statement of step (2B) of our algorithm
+for curve design on a surface is now:
+%
+\begin{description}
+\item[(i)] 
+	Intelligently choose $n$ points
+	$\{q_i\}$ on the $n$ lines $\{M^{-1}(p_i)\}$.
+\item[(ii)]
+	Design a rational curve $C$ in Euclidean space,
+	interpolating $\{q_i\}_{i=1,\ldots,n}$, using classical techniques.
+\end{description}
+
+Consider the choice of points $\{q_i\}$.
+Shorter curves on \Sn{3}\ are
+desirable, since they are associated with low covariant
+acceleration (see Section~\ref{sec:cov}).
+Moreover, unnecessary movement in Euclidean space
+may be reflected in unnecessary movement in Riemannian space.
+(The connection between movement in $\Re^4$ and movement on \Sn{3}\ 
+is not tightly coupled, as witnessed by the extreme case of motion along
+an inverse line in $\Re^4$ which causes no motion on \Sn{3}.
+However, one can certainly
+say that the avoidance of motion in Euclidean space leads to the avoidance
+of motion in Riemannian space.)
+Therefore, we would prefer the curve in Euclidean space to move
+efficiently between the lines $\{M^{-1}(p_i)\}$.
+It would seem that an optimal choice of points	
+$\{q_i\}$ would be a set of closest points:
+	
+\begin{itemize}
+\item On the first inverse line, let $q_1$ be the intersection
+of the line $M^{-1}(p_1)$ and \Sn{3}.
+\item On subsequent lines, let $q_i$ be the closest point to $q_{i-1}$.
+\end{itemize}
+
+Unfortunately, a closer look at this solution reveals some problems.
+The first problem is that the points $\{q_i\}$ begin to fall
+into the origin, continually attracted inwards by their shortness criterion.
+This problem is annoying, but it can be solved by decomposing
+the data set into several parts (see Section~\ref{sec:divandconq}).
+A more intractable problem is associated with the addition of derivative
+data to the curve design problem.
+
+It is desirable for the design of an interpolating curve to allow the 
+addition of derivative as well as position data.
+For example, it may be useful to enforce end tangents or curvatures,
+and derivative information may even be known at intermediate points.
+Moreover, later developments in our study of interpolating curves on \Sn{3}\ will
+reveal that interpolation of derivative information is not only a desirable 
+luxury but, in some unusual cases, a necessity for the correct 
+interpolation of position data alone (Section~\ref{sec:avoid}).
+It is this interpolation of derivative data that causes particular problems
+with the choice of closest points $\{q_i\}$.
+
+By choosing $q_i$ based on the `closest' criterion,
+the position of $q_i$ depends on the position of a {\em neighbour} $q_{i-1}$,
+and thus on the position of not only the associated data point $p_i$ on the
+surface, but also the position of a neighbouring data point $p_{i-1}$.
+We would prefer a choice of $q_i$ that only depends on the corresponding
+data point $p_i$ on the surface.
+The neighbour-dependency of closest-$\{q_i\}$
+causes substantial difficulties when translating tangents in Riemannian space
+to tangents in Euclidean space: 
+we basically need knowledge of a neighbourhood of $p_i$ in Riemannian space
+to build the tangent at $q_i$ in Euclidean space.
+That is, we need a curve on the surface in order to build the tangents
+in Euclidean space!
+This is clearly backward.
+There is some possibility of solving this apparently self-referential problem,
+% recursive definition?
+but it involves a sophisticated solution and is a source for future work.
+%
+% soln: build first curve, say on points 1-15;
+% then build tangent at 15 as follows: build optimal rotation for 13-30
+% (that is add in last couple of points of previous subcurve);
+% rotate first curve using this 13-30 rotation: the neighbourhood of the
+% curve around the endpoint 15 will be safely away from pole;
+% compute M^{-1} (first curve) and measure tangent at endpoint 15 off this curve.
+% This reduces the problem to finding M^{-1} (curve).
+% This reduces to finding $\alpha(t)$ for the inverse curve.
+% The set of inverse lines forms a ruled surface.
+% We are interested in a line of regression of this ruled surface,
+% which follows the closest point at each stage (I believe).
+% The computation of this line of regression is equivalent to computing
+% the closest point on every line.
+% Once \alpha(t) is known, we could determine the Bezier curve rep of the
+% curve alpha(t) (x2(t),x3(t),x4(t),1-x1(t))$, or we can simply 
+% differentiate $\alpha(t)(x2(t),x3(t),x4(t),1-x1(t))$ and evaluate at endpoint.
+%
+% WARNING: Choice of closest point is susceptible to spiraling of the inverse point into
+% the origin.  See data66-1.
+% Another motivation to decompose input into subsets.
+% About 15 points seems to be the maximum before spiraling reaches origin.
+%
+
+% For clarity, consider a new interpretation of our problem:
+% notice that by Theorem~\ref{thm:inverse},
+% \[
+%	q_i = \alpha_i * \mbox{defining point}(p_i),\ \ \alpha_i \in \Re, \ \alpha_i \neq 0.
+% \]
+% so the construction of $q_i$ can be reduced to the construction of $\alpha_i$.
+
+A good alternative to the `closest point' is the `point on \Sn{3}'.
+That is, suppose that we choose $q_i$ to be the intersection of
+$M^{-1}(p_i)$ with \Sn{3}.
+Then, $q_i$ is almost always close to $q_{i-1}$
+and is a good approximation to the closest point to $q_{i-1}$
+(especially when the data points on \Sn{3}\ are not widely spaced, which
+is the common scenario in motion control).
+\marginpar{{\bf FORMALIZE.}}
+Moreover, $q_i$ is dependent only on $p_i$, not any of its neighbours.
+
+\begin{lemma}
+If $p_i = (x_{1i}, x_{2i}, x_{3i}, x_{4i}) \in \Sn{3}$, 
+\[
+	M^{-1} \cap \Sn{3} 
+	= \frac{(x_{2i}, x_{3i}, x_{4i}, 1 - x_{1i})}{\sqrt{2-2x_{1i}}}
+\]
+\end{lemma}
+\prf
+$\| (x_{2i}, x_{3i}, x_{4i}, 1 - x_{1i}) \|
+ = \sqrt{x_{2i}^2 + x_{3i}^2 + x_{4i}^2 + (1 - x_{1i})^2}
+ = \sqrt{2-2x_{1i}}$
+since $p_i \in \Sn{3}$.
+\QED
+
+\noindent This allows a further refinement of step (2B), the design of the
+curve in Euclidean space:
+%
+\begin{description}
+\item[(2B)]
+	Design a rational curve $C$ in Euclidean space,
+	interpolating $\{M^{-1}(p_i) \cap \Sn{3}\}_{i=1,\ldots,n}$.
+\end{description}
+
+Ironically, notice that this refinement implies
+that the curve design in Euclidean space is also interpolating points 
+on the surface \Sn{3}\ (although different points than the data points):
+the major difference is that the design is no longer constrained
+to the surface.
+
+Clearly, one could imagine the choice of different $q_i$ to satisfy other
+optimality criteria.
+A full tapping of the inherent flexibility in the choice of $q_i$
+and a full understanding of the association between curves in Euclidean
+and Riemannian space is a fascinating topic for further study.
+
+\section{Mapping back to Riemannian space}
+% \subsection{Mapping the curve back to the surface}
+\label{sec:curveimage}
+
+After the curve is designed in $\Re^4$, it must be mapped back to a curve
+on \Sn{3}\ using $M$.
+The following theorem shows how this mapping is done, segment by segment,
+for the important case of a cubic Bezier curve in $\Re^4$.
+(Classical design of an interpolating curve in $\Re^4$ will generate
+a cubic polynomial curve: see Chapter 9 of \cite{farin97}.)
+The image of other curves under $M$ can be computed in a similar way.
+
+\begin{theorem}
+\label{sextic}
+Let $c(t)$ be a cubic Bezier curve in 4-space with
+control points $b_i = (b_{i1},b_{i2},b_{i3},b_{i4})$, $i=0,\ldots,3$.
+The image of $c(t)$ under $M$ is a rational sextic Bezier curve with 
+weights $w_k$ ($k = 0, \ldots, 6$):
+\begin{equation}
+\label{eq:weights}
+w_k = \sum_{\begin{array}{c} \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}}
+        \frac{\choice{3}{i} * \choice{3}{j}}{\choice{6}{k}}
+	(b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} + b_{i4} b_{j4})
+\end{equation}
+and control points $c_k$:
+\begin{equation}
+\label{eq:control-pts}
+c_k = \frac{1}{w_k} 
+      \sum_{\begin{array}{c} \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}} 
+        \frac{\choice{3}{i} * \choice{3}{j}}{\choice{6}{k}}
+	\left( \begin{array}{c}
+            b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} - b_{i4} b_{j4} \\
+            2b_{i1} b_{j4} \\
+            2b_{i2} b_{j4} \\
+            2b_{i3} b_{j4} 
+	\end{array} \right)
+\end{equation}
+\end{theorem}
+% No need to incorporate knot vector into this formula, because of invariance
+% of Bezier curve under affine parameter transformations (p. 44, Farin, 3rd)
+\prf
+This is a simple application of the product rule of Bernstein polynomials
+\cite{farin97}.
+We will work in projective space, just as in the proof of 
+Theorem~\ref{thm:inverse}.\\
+Let $M(c(t)) = M(\sum_{i=0}^3 B_i^3(t) b_{i}) 
+:= (m_1(t),m_2(t),m_3(t),m_4(t),m_5(t))$, 
+where $B_i^n(t)$ is the $i^{th}$ Bernstein polynomial of degree $n$.
+The coordinate $m_5$ can be simplified using the product rule 
+of Bernstein polynomials, as follows:
+\[ m_5(t) =  [\sum_{i=0}^3 B_i^3(t) b_{i1}]^2 + 
+	\ldots + [\sum_{i=0}^3 B_i^3(t) b_{i4}]^2
+     =   \sum_{i=0}^3 \sum_{j=0}^3 
+	\frac{\choice{3}{i} * \choice{3}{j}}{\choice{6}{i+j}}
+       B^6_{i+j}(t) (b_{i1} b_{j1} + \ldots + b_{i4} b_{j4})
+\]
+Letting $k=i+j$, this becomes
+\[ \sum_{k=0}^6 B_k^6(t) 
+	\sum_{\begin{array}{c}  \mbox{\footnotesize{$0 \leq i \leq 3$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq 3$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}} 
+	\frac{\scriptchoice{3}{i} * \scriptchoice{3}{j}}{\scriptchoice{6}{k}}
+	(b_{i1} b_{j1} + \ldots + b_{i4} b_{j4}) \]
+Computing the other coordinates analogously yields
+\[ M(c(t)) = 
+   \sum_{k=0}^6 B_k^6(t)
+	\sum \frac{\choice{3}{i} * \choice{3}{j}}{\choice{6}{k}}
+	\left( \begin{array}{c}
+            b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} - b_{i4} b_{j4} \\
+            2b_{i1} b_{j4} \\
+            2b_{i2} b_{j4} \\
+            2b_{i3} b_{j4} \\
+            b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} + b_{i4} b_{j4}
+	\end{array} \right) \]
+% \[         = \sum_{k=0}^6 B_k^6(t) 
+%	\sum_{\begin{array}{c} 0 \leq i \leq 3 \\ 
+%			     0 \leq j \leq 3 \\ 
+%			     i+j=k
+%			     \end{array}} 
+%       \frac{\choice{3}{i} * \choice{3}{j}}{\choice{6}{k}}
+%	\left( \begin{array}{c}
+%           b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} + b_{i4} b_{j4} \\
+%            w_k (\frac{b_{i1} b_{j1} + b_{i2} b_{j2} + b_{i3} b_{j3} - b_{i4} b_{j4}}{w_k}) \\
+%            w_k (\frac{2b_{i1} b_{j4}}{w_k}) \\
+%            w_k (\frac{2b_{i2} b_{j4}}{w_k}) \\
+%            w_k (\frac{2b_{i3} b_{j4}}{w_k})
+%	\end{array} \right) \]
+%
+which is a sextic rational Bezier curve with weights (\ref{eq:weights}) and 
+control points (\ref{eq:control-pts}).
+\QED
+
+Notice how the map $M$ reveals itself in the formula for the control points
+and weights, its numerator in the control points and its denominator
+in the weights.
+The remaining components of the formulae (\ref{eq:weights}-\ref{eq:control-pts})
+are a reflection of the product rule for Bernstein polynomials.
+
+\section{Mapping derivatives to Euclidean space, too}
+\label{sec:derivative}
+
+As hinted in Section~\ref{sec:eucdesign}, 
+we would like to design curves that interpolate not only point data,
+but derivative data as well.
+Beyond the direct application to situations where derivative information
+is known (e.g., pick up the ball on the table at this position while
+moving tangent to the table), 
+derivative interpolation also allows us to design several curves 
+independently yet guarantee that they join smoothly.
+The key element in derivative interpolation is the mapping of derivatives
+to Euclidean space.
+The subsequent design of a rational curve in Euclidean space
+interpolating the derivatives as well as the points
+is well understood: using either Hermite curves or, if the only derivatives
+are end tangents, using the same classical cubic B-spline interpolation that
+we have used for points.
+In this section, we show how tangents on the surface can be mapped
+to tangents in Euclidean space.
+
+Let $C$ be the curve in Euclidean space and $M(C)$ the curve on the surface.
+We assume, without loss of generality, that the polynomial curve $C$
+and the rational curve $M(C)$ are both represented as Bezier curves.
+We shall only present the interpolation of end tangents,
+since this is the most common case, and intermediate tangents can be
+reduced to this case by subdivision.
+Suppose that $M(C)$ must be designed to interpolate the points 
+$\{p_i\}_{i=1,\ldots,n}$ and the tangent $T$ at $p_1$.
+(Interpolation of a tangent at $p_n$ is analogous.)
+We begin with a sketch of the method.
+Since the beginning tangent of a Bezier curve is defined by its first 
+two control points, the constraint on the beginning tangent of $M(C)$ can be
+translated into a constraint on the first two control points of $M(C)$.
+This constraint can then be translated back into a constraint
+on the first two control points of $C$, using Theorem~\ref{sextic}'s
+relationship between the control points of $C$ 
+and the control points and weights of $M(C)$.
+Moreover, the first control point of $C$ is already known:
+it is the image of the first data point, $M^{-1}(p_1) \cap \Sn{3}$,
+since Bezier curves are endpoint-interpolating.
+Therefore, the tangent constraint on \Sn{3}\ can be translated
+into a constraint on the second control point in Euclidean space.
+We now proceed with the details.
+% The following theorem provides the details of how to build the tangent
+% in Euclidean space (technically, the second control point) that
+% will correspond to the tangent $T$ in Riemannian space.
+
+Let $b_0 = (b_{01}, b_{02}, b_{03}, b_{04})$ and 
+$b_1 = (b_{11}, b_{12}, b_{13}, b_{14})$ be 
+the first two control points of $C$,
+$c_0$ and $c_1$ the first two control points of $M(C)$,
+and $w_0$ and $w_1$ the weights of the first two control points of $M(C)$.
+The desired tangent is $T$ on the global curve on \Sn{3},
+but $\delta_i T$ on the local Bezier curve component of knot length $\delta_i$
+of the subcurve on \Sn{3}.
+% local tangent = (knot interval \delta) * global tangent (see p. 105, Farin, 3rd)
+We are trying to solve for $b_1$ in Euclidean space.
+By the theory of rational Bezier curves \cite{farin97},
+\[
+	\delta_i T = 6 \frac{w_1}{w_0} (c_1 - c_0)
+\]
+Applying Theorem~\ref{sextic}, 
+\[
+	\delta_i T = 6 \frac{w_1}{w_0} \frac{1}{w_1} \frac{3}{6}
+	\left(
+	\begin{array}{c}
+	2(b_{01}b_{11} + b_{02}b_{12} + b_{03}b_{13} - b_{04}b_{14})\\
+	2(b_{01}b_{14} + b_{11}b_{04})\\
+	2(b_{02}b_{14} + b_{12}b_{04})\\
+	2(b_{03}b_{14} + b_{13}b_{04})
+	\end{array} \right)
+	- 6 \frac{w_1}{w_0} \frac{1}{w_0}
+	\left(
+	\begin{array}{c}
+	b_{01}^2 + b_{02}^2 + b_{03}^2 - b_{04}^2\\
+	2b_{01}b_{04}\\
+	2b_{02}b_{04}\\
+	2b_{03}b_{04}
+	\end{array} \right).
+\]
+We claim that $b_0$ and $w_0$ are known.
+$b_0 = M^{-1}(p_1) \cap \Sn{3}$, since the first Bezier control point agrees
+with the first point of the curve.
+Using (\ref{eq:weights}) of Theorem~\ref{sextic},
+$w_0 = b_{01}^2 + b_{02}^2 + b_{03}^2 + b_{04}^2$ 
+(so $w_0=1$ since $b_0 \in \Sn{3}$)
+and
+\[
+  w_1 = b_{01}b_{11} + b_{02}b_{12} + b_{03}b_{13} + b_{04}b_{14}
+\]
+This simplifies the relationship between the tangent $T$ and $b_1$:
+\[
+	\delta_i T = 6 \left( \begin{array}{c}
+	(b_{01}b_{11} + b_{02}b_{12} + b_{03}b_{13} - b_{04}b_{14})
+	- \hat{b} 
+	  (b_{01}b_{11} + b_{02}b_{12} + b_{03}b_{13} + b_{04}b_{14}) \\
+	(b_{01}b_{14} + b_{11}b_{04})
+	- 2b_{01}b_{04} 
+	  (b_{01}b_{11} + b_{02}b_{12} + b_{03}b_{13} + b_{04}b_{14}) \\
+	(b_{02}b_{14} + b_{12}b_{04})
+	- 2b_{02}b_{04}
+	  (b_{01}b_{11} + b_{02}b_{12} + b_{03}b_{13} + b_{04}b_{14}) \\
+	(b_{03}b_{14} + b_{13}b_{04})
+	- 2b_{03}b_{04}
+	  (b_{01}b_{11} + b_{02}b_{12} + b_{03}b_{13} + b_{04}b_{14}) \\
+	\end{array} \right)
+\]
+where $\hat{b} = b_{01}^2 + b_{02}^2 + b_{03}^2 - b_{04}^2$.
+Finally, this can be expressed as a linear system:
+\[
+6 \left( \begin{array}{cccc}
+b_{01}(1-\hat{b}) & b_{02}(1-\hat{b}) & b_{03}(1-\hat{b}) & b_{04}(-1-\hat{b}) \\
+b_{04}(1-2b_{01}^2) & -2b_{01}b_{02}b_{04} & -2b_{01}b_{03}b_{04} & b_{01}(1-2b_{04}^2) \\
+-2b_{01}b_{02}b_{04} & b_{04} (1-2b_{02}^2) & -2b_{02}b_{03}b_{04} & b_{02}(1-2b_{04}^2) \\
+-2b_{01}b_{03}b_{04} & -2b_{02}b_{03}b_{04} & b_{04}(1-2b_{03}^2) & b_{03}(1-2b_{04}^2)
+\end{array} \right)
+\left( \begin{array}{c} b_{11} \\ b_{12} \\ b_{13} \\ b_{14} \end{array} \right)
+= \delta_i T.
+\]
+%
+Notice that all components of the matrix are known.
+This system can be solved for the second control point $b_1 = (b_{11},b_{12},b_{13},b_{14})$
+using traditional methods for the solution of systems of linear
+equations.
+We use LU-decomposition with partial pivoting \cite{golubvanloan89}.
+The following theorem formalizes this result.
+
+\begin{theorem}
+Let $C$ be a cubic Bezier curve in Euclidean space 
+on the knot interval of length $\delta_i$,
+whose first control
+point is $b_0 = (b_{01}, b_{02}, b_{03}, b_{04})$.
+If the second control point of $C$ is the solution $x$ to the linear system
+\[
+6 \left( \begin{array}{cccc}
+b_{01}(1-\hat{b}) & b_{02}(1-\hat{b}) & b_{03}(1-\hat{b}) & b_{04}(-1-\hat{b}) \\
+b_{04}(1-2b_{01}^2) & -2b_{01}b_{02}b_{04} & -2b_{01}b_{03}b_{04} & b_{01}(1-2b_{04}^2) \\
+-2b_{01}b_{02}b_{04} & b_{04} (1-2b_{02}^2) & -2b_{02}b_{03}b_{04} & b_{02}(1-2b_{04}^2) \\
+-2b_{01}b_{03}b_{04} & -2b_{02}b_{03}b_{04} & b_{04}(1-2b_{03}^2) & b_{03}(1-2b_{04}^2)
+\end{array} \right)
+x
+= \delta_i T
+\]
+where $\hat{b} = b_{01}^2 + b_{02}^2 + b_{03}^2 - b_{04}^2$,
+then the image $M(C)$ on \Sn{3}\ has the beginning tangent $\delta_i T$.
+\end{theorem}
+% NOTE: incorporate knot lengths into the computation of the
+% desired tangent vector $T$ when using in code, since
+% code will involve splines rather than individual Bezier curves.
+
+% \begin{rmk}
+% Comment on why we cannot use derivative of $M_I$ to map the
+% tangent to Euclidean space.
+% Basically, $C(t) \neq M_I(M(C(t))$.
+% Give example of difference between tangent computed this way
+% and tangent computed our correct way.
+% \end{rmk}
+
+% This lemma is necessary, even though we know the tangent $T$ of the curve
+% in Euclidean space for the previous subcurve, because $T$ is a tangent of
+% the curve in Euclidean space associated with a {\em rotated} version
+% of the previous subcurve on \Sn{3}, and we need the tangent associated
+% with a {\em different} rotated version of the present subcurve.
+% Unfortunately, $M^{-1}$ is not affinely invariant 
+% (tangent ($M^{-1}$(rotation of C(t))) is not the rotation of 
+% tangent($M^{-1}$(C(t))).
+
+\Comment{
+
+\begin{lemma}
+\label{lem:invtang}
+Consider the design of a curve on \Sn{3}\ interpolating the data points 
+$\{p_i\}_{i=1,\ldots,n}$ using step (2A).
+Assume that none of the data points lies near the pole.
+If we want the curve on \Sn{3}\ to have the first derivative 
+$(T_1,T_2,T_3,T_4)$ at the data point $p_i = (P_1,P_2,P_3,P_4)$, 
+the curve in Euclidean space should 
+be designed with the tangent 
+\[
+ \frac{1}{(2-2P_1)^{3/2}} (T_2 (2-2P_1) + P_2 T_1,\ \ 
+ 	   		 T_3 (2-2P_1) + P_3 T_1,\ \ 
+			 T_4 (2-2P_1) + P_4 T_1,\ \ 
+			 T_1 (2-2P_1) + (1-P_1) T_1)
+\]
+at the point ${\cal M}^I(p_i)$.
+\end{lemma}
+\prf
+Let $D(t) = \{(x_1(t), x_2(t), x_3(t), x_4(t)): t \in I\}$ 
+be any curve on \Sn{3} with $D(t_0) = p_i$ and
+$D'(t_0) = (T_1,T_2,T_3,T_4)$ for some $t_0 \in I$.
+Let $E(t) = \{{\cal M}^I(D(t)): t \in I\}$ be the image of $D(t)$
+under ${\cal M}^I$.
+\[
+	E(t) = \frac{(x_2(t),x_3(t),x_4(t),1-x_1(t))}{\sqrt{2-2x_1(t)}}.
+\]
+If we let $y(t) = \sqrt{2-2x_1(t)}$,
+$E(t) = (\frac{x_2}{y}, \frac{x_3}{y}, \frac{x_4}{y}, \frac{1-x_1}{y})$.
+(Every variable implicitly depends on the parameter $t$, but we shall now omit this dependence
+for clarity.)
+By straightforward differentiation,
+\[
+ E'(t) = (\frac{x'_2 y - x_2 y'}{y^2}, 
+	  \frac{x'_3 y - x_3 y'}{y^2}, 
+	  \frac{x'_4 y - x_4 y'}{y^2}, 
+	  \frac{-x'_1 y - (1-x_1) y'}{y^2}).
+\]
+To compute $y'$, notice that $y^2 = 2-2x_1$ and, differentiating,
+$2yy' = -2x'_1$.
+Thus, $y' = \frac{-x'_1}{y}$.
+We can now express
+\[
+ E'(t) = (\frac{x'_2 y^2 + x_2 x'_1}{y^3},
+ 	  \frac{x'_3 y^2 + x_3 x'_1}{y^3},
+ 	  \frac{x'_4 y^2 + x_4 x'_1}{y^3},
+ 	  \frac{x'_1 y^2 + (1-x_1) x'_1}{y^3}).
+\]
+Since $p_i$ is far from the pole, $y(t) \neq 0$ in a neighbourhood of $t_0$.
+Thus,
+\[
+ E'(t_0)= (\frac{T_2 (2-2P_1) + P_2 T_1}{(2-2P_1)^{3/2}},
+ 	   \frac{T_3 (2-2P_1) + P_3 T_1}{(2-2P_1)^{3/2}},
+ 	   \frac{T_4 (2-2P_1) + P_4 T_1}{(2-2P_1)^{3/2}},
+	   \frac{T_1 (2-2P_1) + (1-P_1) T_1}{(2-2P_1)^{3/2}}).
+\]
+A curve designed with tangent $E'(t_0)$ in Euclidean space
+will map to a curve with tangent $(T_1,T_2,T_3,T_4)$ on \Sn{3}.
+\QED
+
+Notice that the curve $E(t)$ of the proof is not equivalent to 
+the curve $C(t)$ that will be designed in Euclidean space.
+In particular, $E(t)$ lies on \Sn{3} since ${\cal M}^I$ maps to \Sn{3},
+whereas $C(t)$ is not constrained to \Sn{3}, so it will only
+lie on \Sn{3}\ at the data points $\{ {\cal M}^I(p_i) \}_{i=1,\ldots,n}$, 
+in general.
+However, the tangent behaviour of $C(t)$ and $E(t)$ at the inverse data points 
+$\{ {\cal M}^I(p_i)\}_{i=1,\ldots,n}$ {\bf is} the same.
+APPARENTLY NOT!
+}
+
+\section{Avoiding the pole}
+\label{sec:avoid}
+
+The design of our curve is essentially complete.
+However, we must refine one of the steps in the interests of stability.
+The mapping of the data into Euclidean space (step 2A) is unstable
+if any of the data is close to the pole $(1,0,0,0)$.
+In this section, we shall show how the data points $\{p_i\}_{i=1,\ldots,n}$
+can be moved away from the pole for robust curve design.
+
+\subsection{Ill-conditioning near the pole}
+\label{sec:ill}
+
+$M^{-1}$, the map to Euclidean space, is not well-behaved near 
+its pole $(1,0,0,0)$.
+Recall that the image of a point under $M^{-1}$ is a line through the
+origin and the defining point of $M^{-1}(p)$ (see Theorem~\ref{thm:inverse} 
+and Definition~\ref{defn:pole}).
+As a point $p$ on \Sn{3}\ approaches the pole $(1,0,0,0)$,
+the defining point of $M^{-1}(p)$ approaches the origin:
+\[ 
+\mbox{lim}_{(x_1,x_2,x_3,x_4) \rightarrow (1,0,0,0)} (x_2,x_3,x_4,1-x_1)
+= (0,0,0,0) 
+\]
+Consequently, the defining point becomes ill-conditioned:
+small motions of $p$ can cause large motions of $M^{-1}(p)$.
+This is analogous to the solution of a linear
+system when the condition number of the matrix becomes large,
+and the linear system becomes very sensitive to perturbation of the matrix.
+
+\begin{example}
+Suppose a data point $p$ on \Sn{3}\ is at distance $d$ from the pole,
+and thus the defining point of $M^{-1}(p)$ is at distance $d$ from the
+origin.
+Then a motion of $d+\epsilon$ of the data point (corresponding to a motion
+of the defining point directly towards the origin) can yield
+a 90-degree change of orientation of the line $M^{-1}(p)$.
+\end{example}
+
+In other words, near the pole on \Sn{3}, there is little correspondence 
+between position of $M^{-1}(p)$ in Euclidean space 
+and position of $p$ on \Sn{3}.
+This leads to curves on \Sn{3}\ that jump wildly about the pole 
+(Figure~\ref{fig:wild}).
+We conclude that we want to move data points away from the pole,
+an issue addressed in the next section.
+We end this section with an empirical definition of how close to the pole
+is `too close'.
+
+\begin{figure}
+\vspace{2in}
+\caption{Unstable behaviour near the pole}
+% example of bad behaviour at pole if no rotation applied away from pole
+% data/...
+\label{fig:wild}
+\end{figure}
+
+\begin{defn2}
+\label{defn:far}
+A point $p \in \Sn{3}$ is {\bf too close to the pole}
+if the angle formed by the vectors $p$ and $(1,0,0,0)$ is smaller
+than 10 degrees. \marginpar{{\bf Implement.}}
+This is an empirical definition, arising from experimental evidence
+that points closer to the pole lead to undesirable behaviour in the curve.
+\end{defn2}
+
+\Comment{
+Another way of seeing this ill-conditioning is by observing the behaviour
+of $M$ near the origin.
+$M$ is undefined at the origin, due to the division by zero.
+However, $M$ is also badly behaved {\bf near} the origin.
+For example, consider approaching near the origin along the line $(0,0,t,.01)$.
+In moving the short distance from $(0,0,.01,.01)$ to $(0,0,0,.01)$, 
+the image under $M$ moves all the way from $(0,0,0,1)$ to $(-1,0,0,0)$.
+That is, a move of distance $.01$ in $\Re^4$ maps to a move of angular distance
+$\frac{\pi}{2}$ on \Sn{3}.
+The portion of a curve in $\Re^4$ that is near the origin
+will be stretched as it is mapped under $M$.
+This is not desirable, as shown in Figure~\ref{fig:tooCloseToPole}.
+
+This is not quite as strong or direct an argument for ill-conditioning as the previous
+argument, since there is nothing forcing the user to use preimage points 
+near the origin.
+However, notice that if you do not stay close to the origin, 
+then the large changes in the line with small changes on \Sn{3} mean that 
+small distances on \Sn{3} will be filled by long curves (and thus not optimal
+geodesics) since the preimage curve will be necessarily long.
+}
+
+\subsection{The best rotation}
+\label{sec:best}
+
+We shall use a single rotation to move the data points far away from the 
+pole $(1,0,0,0)$.
+Once the curve on \Sn{3}\ has been robustly designed, it will be rotated 
+back on \Sn{3}\ by the same amount, 
+yielding the desired curve.\footnote{Rotation of a rational 
+	Bezier curve can be achieved simply by
+	rotation of its control polygon.
+	This is another illustration of an advantage of rational curves.}
+
+First, does such a rotation exist?
+Recal that a data point is considered too close to the pole if it is
+within an angular distance of 10 degrees from the pole.
+Our problem reduces to finding a point $p$ on \Sn{3}\ such that no data
+point is within 10 degrees of $p$:
+then a rotation of $p$ to the pole will move all data points a safe
+distance from the pole.
+It is theoretically possible that the data points are so densely packed
+on the sphere that no such empty region surrounding a point $p$ exists,
+but the requisite number of data points is huge.
+We need a data point covering every empty region of the sphere.
+Consider the maximal region of \Sn{3}\ that a single data point can
+`cover' (forcing the desired point $p$ to look elsewhere).
+A data point covers \Sn{3}\ in a region 10 degrees wide about it,
+which has the following surface area (see \cite{lang79}).
+On \Sn{2}, this region is 
+\[
+  \int_0^{2\pi} \int_0^{\frac{\pi}{18}  \sin \phi d\phi d\theta
+  = .0000289
+\]
+The entire surface area of \Sn{2}\ is $4\pi$ or $---$,
+so the fraction of \Sn{2}\ covered by each data point is at most
+$\frac{.0000289}{4\pi}$,
+or more than $431,073$ data points are needed to densely pack \Sn{2}\
+so that no rotation can successfully move all data points safely away
+from the pole.
+Even more data points are needed to densely pack \Sn{3} (ANALYZE).
+Therefore, the above approach will work for data sets of size 
+$431,072$ or less.
+
+There are various ways to find a candidate empty region of \Sn{3}\
+to rotate to the pole.
+Since there are so many empty regions in \Sn{3} (as revealed by the
+above analysis), a random choice is a simple and effective way to 
+choose an empty region.
+That is, we randomly choose a point on \Sn{3}, test if it is
+sufficiently far away from all data points (if not randomly choose
+another, and so on), and rotate this point to the pole.
+The results in Section~\ref{sec:results} support the effectiveness
+of this random choice of empty region.
+
+CAN PROBABLY REMOVE REST OF THIS SECTION.
+COMPUTATION OF COVARIANCE MATRIX IS OVERKILL, UNLESS RANDOM
+CHOICE SHOWS IT TO BE NECESSARY.
+MAKE SURE RANDOM CHOICE IS IN 4-space, NOT OUR 3-space USED
+FOR VISUALIZATION.
+
+Section~\ref{sec:divandconq} will deal with the case where
+this rotation does not successfully move all of the points far enough
+from the pole.
+
+What single rotation will move the entire set of data points far from the pole?
+It makes sense to find a good representative for all the data
+points and rotate it farthest away from the pole.
+We choose the best-fitting plane.
+The added benefit of this choice is that the best-fitting plane
+can be computed efficiently using the covariance matrix.
+
+\begin{defn2}
+The {\bf best-fitting plane} of a set of points $\{r_i\}_{i=1,\ldots,n}$
+is the plane that minimizes $\sum_{i=1}^n \mbox{dist}^2 (r_i,\mbox{plane})$.
+The dispersion (or {\bf variance}) of a set of scalars
+$\{x_i\}_{i=1,\ldots,n}$ is $\sum_{i=1}^n \frac{(x_i -
+\bar{x})^2}{n-1}$, where $\bar{x} = \sum_{i=1}^n x_i / n$ is the
+mean.
+This is a measure of the spread of the sample.
+The dispersion of a set of points in the direction $v$ is the dispersion
+of the orthogonal projection of the points onto $v$.
+The {\bf covariance matrix} of a set of points $\{r_i\}_{i=1,\ldots,n}$ 
+is $\sum_{i=1}^n \frac{(r_i - \bar{r})(r_i - \bar{r})^T}{n-1}$,
+where $\bar{r}$ is the sample mean of the points.
+\end{defn2}
+
+The normal of the best-fitting plane of the data points $\{p_i\}_{i=1,\ldots,n}$
+is the direction of minimum dispersion of $\{p_i\}$.
+This is the direction that the plane can best afford to ignore,
+and hence the normal direction.
+The covariance matrix is a generalization of dispersion to many dimensions.
+Not surprisingly, it can be used to compute properties of dispersion.
+In particular, the direction of minimum dispersion of 
+the point set $\{p_i\}$ is the minimum 
+eigenvector (say $v_{min}$) of the covariance matrix of $\{p_i\}$ \cite{ballard82}.
+Hence, the best-fitting plane is the plane through the sample mean
+with normal $v_{min}$.
+
+To maximize the distance of the best-fitting plane from the pole,
+its normal should be oriented towards the pole (Figure~\ref{fig:avoid}).
+We need to decide whether to rotate $+v_{min}$ or $-v_{min}$ to the pole
+$(1,0,0,0)$, choosing the rotation that moves the best-fitting plane
+farthest away from the pole.
+Under either rotation, the best-fitting plane 
+will be rotated to a plane $x_1 = k$ for some $k \in \Re$.
+Since the sample mean lies on the best-fitting plane,
+we can compute its image under the two rotations
+(or just the $x_1$-coordinate of its image) \marginpar{{\bf Implement.}}
+and choose the rotation that yields the smaller $x_1$-coordinate.
+
+\begin{example}
+\label{eg:resolve}
+The choice of $\pm v_{min}$ is an important one.
+Consider a set of data points on the plane $x_1=.9$.
+The best-fitting plane is $x_1=.9$
+and the direction of minimum dispersion is $\pm(1,0,0,0)$.
+Rotating $(1,0,0,0)$ to the pole does not move the points,
+leaving them undesirably close to the pole,
+but rotating $(-1,0,0,0)$ to the pole achieves the
+goal of flipping the data points to the other side.
+\end{example}
+
+\begin{figure}
+\vspace{1in}
+\caption{Input set (a) before and (b) after rotation}
+\label{fig:avoid}
+\end{figure}
+% figure of an example with best-fitting plane shown
+
+The rotation matrix that rotates $v_{min}$
+to $(1,0,0,0)$ is computed easily, using the fact that the rows
+of a rotation matrix are mapped to the coordinate axes under the
+rotation.
+Thus, $\frac{v_{min}}{\|v_{min}\|}$ is the first row of the desired rotation matrix,
+and the other rows are chosen orthogonal to $v_{min}$ using
+cross product.
+
+\subsection{Sometimes no single rotation will do}
+\label{sec:divandconq}
+
+Since the best-fitting plane of $\{p_i\}_{i=1,\ldots,n}$ 
+minimizes distance from the point set in the least-squares sense,
+there may be outliers that are far from the best-fitting plane.
+These outliers could be moved close to the pole by the rotation,
+even as the best-fitting plane is moved far from it.
+In other words,
+if there are enough data points sampled densely across 
+the sphere, there may be no single rotation that 
+moves all data points sufficiently far from the pole.
+For example, consider a sample of points on \Sn{3}\ such that
+the maximum angular spacing between any point and its nearest neighbour
+is less than 10 degrees.
+Using Definition~\ref{defn:far},
+there is no single rotation of this point set that moves every point far
+from the pole.
+
+To solve this problem, we use a divide-and-conquer strategy.
+The input is divided into several parts and a curve is designed through
+each part independently. 
+This allows each part to be rotated independently away from the pole.
+There are two approaches to this subdivision of input: lazy and eager.
+In a lazy subdivision, we first compute the optimal rotation for the entire
+set and then determine if any data point is too close to the pole
+after rotation.
+If so, we divide the input at the first close point and recursively
+solve the second half.
+In an eager subdivision,
+the input is automatically subdivided into subsets of size $k$.\footnote{If the
+	last subset, which in general has less than $k$ points,
+	has fewer than 4 points, then it is combined with the previous subset.
+	We do not want to build a curve through 1-3 points.}
+The advantage of a lazy subdivision is that no subdivision is necessary
+in the majority of cases.
+The disadvantage is that the first close point may be at the beginning of the set,
+leading to little progress.
+In the worst case, the first data point is always too close 
+and $O(n)$ eigenvector computations
+on a covariance matrix are necessary (where $n$ is the number of data points),
+not to mention $O(n)$ rotations.
+%\footnote{This can be reduced to 
+%	$\frac{n}{4}$ using Lemma~\ref{lem:atleastfour}, 
+%	but this is still a large number of eigenvector computations.}
+
+An eager subdivision improves the worst-case number of eigenvector computations
+and, equally importantly, each eigenvector computation involves $k$ samples
+rather than $O(n)$ samples.
+We want $k$ to be as large as possible for efficiency, 
+but small enough that $k$ points can be safely rotated away from the pole.
+A lowerbound for $k$ is 4, since the best-fitting hyperplane of 
+four points will contain all of the points, and thus all of the points
+will be rotated to the $x_1=0$ plane.
+A combination of the two approaches can be used, with an eager
+subdivision into subsets of size $k$ and a solution of each subset using
+lazy subdivision.
+This allows the safe use of a large subset size $k$.
+In the examples of this paper, we choose an eager subdivision
+of the input with a subset size $k=15$.
+
+Using subdivision, several curves are designed, one per subset.
+Care must be taken to join these subcurves continuously.
+Consider $C^1$ continuity, which is typically sufficient.
+Except for the first subcurve, we want to constrain the beginning
+tangent of each subcurve to the end tangent of the previous subcurve.
+End tangents of the curve on \Sn{3}\ can be constrained
+using the methods of Section~\ref{sec:derivative}.
+Higher continuity can be achieved analogously.
+
+SHOULD DEFINE TANGENTS AT BOUNDARY BETWEEN SUBCURVES USING BESSEL
+TANGENT, NOT BY INHERITING FROM PREVIOUS CURVE.
+
+Finally, we must consider the parameterization of the entire curve.
+We need a global knot vector, not several independently designed knot vectors
+for each subcurve.
+Moreover, the knot vector must be defined with respect to the surface.
+That is,
+even though we are designing the curve in Euclidean space,
+the parameterization of this curve needs to be designed 
+with respect to the data
+on the surface, since the maps between the surface and Euclidean space
+are not isometric (distance is not preserved).
+Thus, we design a knot vector for the curve using the entire collection
+of data points $\{p_i\}_{i=1,\ldots,n}$, 
+and use a Riemannian distance metric.
+For example, suppose that we want
+a chord-length or centripetal parameterization,
+which involves computing the distance between data points.
+A Riemannian distance metric should be used, not 
+the typical Euclidean distance metric.
+On \Sn{3}, this is simple: the distance between two points $p_1$ and
+$p_2$ is $\mbox{angle} (p_1,p_2) = \cos^{-1}(p_1 \cdot p_2)$ 
+rather than $\|p_2 - p_1\| = \sqrt{(p_2 - p_1) \cdot (p_2 - p_1)}$.
+
+% The curve in Euclidean space will be of poorer quality than usual,
+% because the wrong knot vector is being used.
+% That is, with respect to the points in Euclidean space, the knot vector
+% may not be close to centripetal or chord-length.
+% We shall have to observe whether this affects the quality of the
+% curve on the surface.
+
+\subsection{A restatement of the algorithm}
+\label{sec:restatement}
+
+The original algorithm of Section~\ref{sec:intro} 
+has been significantly refined: we now restate it in its final form.
+Notice that all of step (1) is a preprocessing phase, 
+which is done once offline before the design of any curves.
+Our design of a rational interpolating curve on \Sn{3}\ is as follows.
+
+\vspace{.2in}
+
+\centerline{{\bf Preprocessing phase}}
+\begin{description}
+\item[(1A)] Design a rational map to the surface \Sn{3}, $M:\Re^4 \rightarrow \Sn{3}$.
+\item[(1B)] Compute the inverse map $M^{-1}: \Sn{3} \rightarrow \Re^4$.
+%\item[(1C)] Design ${\cal M}^I$, a specialization of the inverse map
+%		from lines to points.
+\end{description}
+
+\vspace{.2in}
+
+\centerline{{\bf Subdivision phase}}
+\begin{description}
+\item[(2A)] Define a knot vector for the curve on \Sn{3}, using a
+	Riemannian distance metric.
+\item[(2B)] Subdivide the data into subsets of size 15.
+\item[(2C)] Define `Bessel' end tangents for these subsets.
+\end{description}
+
+\vspace{.2in}
+
+Then, for each subset $\{q_i\}_{i=1,\ldots,m}$, we design a subcurve
+as follows.
+
+\vspace{.2in}
+
+\centerline{{\bf Design phase}}
+\begin{description}
+\item[(3A)] Compute the optimal rotation $R$ of the subset $\{q_i\}$
+	away from the pole. Apply it to the points and end tangents
+	of the subset.
+\item[(3B)] Map the rotated data points to Euclidean space, by computing 
+	$\{M^{-1}(R(q_i)) \cap \Sn{3}\}_{i=1,\ldots,m}$.
+\item[(3C)] Map the rotated end tangents to Euclidean space.
+\item[(3D)] Design a rational curve in Euclidean space
+	interpolating $\{M^{-1}(R(q_i)) \cap \Sn{3}\}$, the
+	associated end tangents, and using the appropriate knot subvector.
+\item[(3E)] Map the subcurve back to the surface using $M$.
+\item[(3F)] Rotate the subcurve back to its original position, using $R^{-1}$.
+\end{description}
+
+To consolidate our understanding of the algorithm before moving on to its
+analysis, we will now provide some examples.
+
+-EXAMPLES-
+
+Note {\bf Visualization of 4 dimensions}\marginpar{{\bf How do we?}}
+Visualization mode x3=0 quaternions.  Visualization of 4D in 3D.  
+(using input with x3=0; see VISUALIZE).
+
+\section{Results}
+\label{sec:results}
+
+\subsection{A quality measure}
+\label{sec:cov}
+
+\cite{barr92} proposed that covariant acceleration
+be used as a measure of the quality of a quaternion spline:
+the smaller the covariant acceleration, the more desirable the curve.
+%
+\begin{defn2}
+Let $a,b \in \Re^n$.
+$a \setminus b = a - (\frac{a \cdot b}{b \cdot b}) b$.
+The {\bf covariant acceleration} $C$ of a curve segment $c(t)$, $t \in I$, is 
+$\int_I \| c''(t) \setminus c(t)\| \ dt$.
+\end{defn2}
+%
+\cite{barr92} provides a good motivation for the avoidance of covariant
+acceleration, as follows.
+The acceleration of a curve on a surface can be decomposed into
+normal and covariant components: normal acceleration is necessary,
+as it keeps the curve on the surface, but covariant acceleration
+is not strictly necessary.
+%
+% They built a quaternion spline that minimized covariant acceleration,
+% through constrained optimization, as their interpretation 
+% of the `optimal' curve.
+% Incidentally, they
+% used the term `tangential acceleration', but we prefer to use the 
+% more classical term, covariant acceleration.
+Low covariant acceleration can also be motivated by appealing to the design of 
+geodesic curves.
+Other factors being equal, we prefer shorter curves.
+This is especially true when using the quaternion spline to control
+motion.
+An object should not experience unnecessary rotation: loop-the-loops
+or gyration should not be introduced unless explicitly designed into
+the motion.
+Since the metric of \Sn{3}\ is the same as the metric of the rotation
+matrix group SO(3) \cite{misner73}, arc length on \Sn{3}\ represents the
+change in orientation of the object controlled by this curve.
+Within the context of other constraints, 
+we want to minimize any unnecessary spinning of the object.
+This leads to a desire to minimize covariant acceleration since
+geodesics, the shortest curves through a set of points,
+have zero covariant acceleration \cite{thorpe79}.
+(The geodesic itself is not attainable as a rational curve, in general,
+and would not necessarily be desirable even if it was,
+as the rigidity of perfection necessarily ignores all other
+constraints.)
+
+We will use covariant acceleration as a measure of the relative quality
+of our curves.
+We compute an approximation by discretely sampling the curve:
+% and computing the covariant acceleration at each of these samples:
+\[ \int_I \| c''(t) \setminus c(t)\| \ dt
+\approx \sum_{i=0}^N 
+	\| c''(t_0 + i \delta) \setminus c(t_0 + i \delta) \|\  \delta.
+\]
+
+\subsection{The comparison}
+\label{sec:comparison}
+
+Our first quality comparison explores the advantages of the flexibility 
+to choose any point on the lines $M^{-1}(p_i)$.
+We compare several strategies:
+(1) a choice of the closest point (the first method proposed in
+Section~\ref{sec:eucdesign})
+(2) the chosen method, where the point is chosen as the intersection with
+\Sn{3}, and
+(3) a choice of the defining point of $M^{-1}(p_i)$ (which is basically
+an arbitrary choice of point on the line in Euclidean space).
+We expect these choices to be progressively worse.
+Recall that (1) was not used since it has trouble with the definition
+of tangents and large data sets.
+Therefore, we use small data sets that do not require subdivision
+for this comparison.
+
+We next compare the method of this paper with trim curves.
+Recall that trim curves use the surface parameterization as the map
+to the surface, and design the curve in the 
+parameter space of the surface (Section~\ref{sec:intro}).
+This comparison should capture the advantage of using a well-designed map to the
+surface, especially the added power of a map from the domain $\Re^4$.
+In order to design trim curves, we need a rational parameterization 
+of \Sn{3}\ and we use the standard one:
+\begin{equation}
+\label{Snparam}
+	S(t_1,t_2,t_3) = 
+	\frac{1}{t_1^2 + t_2^2 + t_3^2 + 1} 
+	(2t_1, 2t_2, 2t_3, t_1^2 + t_2^2 + t_3^2 - 1) \ \ \ \ t_i \in (-\infty,\infty)
+\end{equation}
+
+% inverse of this parameterization is stereographic projection
+
+% A fairer comparison of trim curves to Euclidean curves might be to
+% use a Bezier representation of the sphere.
+
+The results from some of these tests are presented in Table~\ref{tab:cov},
+which shows the consistent improvement of the new approach.
+This behaviour was observed on many other trials as well.
+The improvement was typically several orders of magnitude.
+
+\begin{table}
+\label{tab:cov}
+\end{table}
+
+{\bf Input conventions}
+Sampling criterion on input.  % MAXANGLEDIFF in qspline.c
+\marginpar{{\bf Do we need to?}}
+
+\section{Conclusions and future work}
+
+The image-space approach to curve design on surfaces offers
+added flexibility in the choice of map and the choice of interpolation
+over the classical trim-curve approach to curve design on surfaces.
+Using the important case of curves on \Sn{3}, 
+we have shown that this added flexibility improves curve design.
+By choosing the natural map rather than the surface parameterization,
+better curves result, so map flexibility is an improvement.
+By choosing the closest-point sequence of points on the inverse lines
+of the generalization of stereographic projection
+rather than the unique surface parameterization inverse,
+better curves result, so interpolation flexibility is an improvement.
+Much more study can be done on the potential of map and interpolation
+flexibility, but the message is clear that the 
+image-space approach in its most general form offers a promising
+method for the design of curves on surfaces.
+
+Despite the specific advantages of the quaternion spline
+over earlier quaternion splines (rationality, generality, and efficiency), 
+our main purpose in presenting this material
+is an example of the more general Euclidean-space method for designing
+curves on surfaces.
+
+
+Mention relationship of quaternions to 4-squares theorem and Hamilton/Gauss.
+
+Open problems: 
+	1. We have shown that other choices of map {\em can} beat the surface
+	parameterization.
+	But what is the {\em best} map for a given surface and type of curve (e.g., interpolating)?
+	2. We have shown a good map for the design of curves on \Sn{3}.
+	But what about the design of curves on other surfaces?
+	3. General problem of designing a curve that interpolates curves, rather than points.
+	4. Determining tangent in Euclidean space when using closest point on inverse line.
+		(Involves computing $\alpha(t)$.)
+		[See comments embedded in paper above.]
+	5. Compare eager and lazy approaches to input subdivision,
+	   as well as maximal/optimal sizes for the subset in eager evaluation
+	6. $C^2$ continuous splines, by passing 2nd derivative back too
+		(still easy to set 2nd derivative, filling the 2nd dof of the cubic spline)
+
+In the future, we want to explore the direct interpolation of the set
+of inverse image curves by a curve.
+
+A topic for future study is the choice of an optimal value
+for the subset size $k$ in lazy subdivision (Section~\ref{sec:divandconq})
+and the tradeoff between lazy and eager subdivision.
+
+Other optimization measures (strain energy, etc.)...
+Another measure used in spacecraft dynamics is ---.
+
+{\bf Explicitly minimizing covariant acceleration}
+
+Covariant acceleration is zero at a point of a curve on \Sn{3}\ if the curve's
+second derivative vector is orthogonal to the sphere.
+We can try to enforce this restriction at data points,
+since the desired second derivative vector for the quaternion spline
+can be mapped to a desired second derivative vector in inverse space,
+where design is carried out.
+To interpolate a second derivative vector at every data point will require
+a quintic Hermite curve in inverse space, which will map to a degree 10
+curve on \Sn{3}.
+One can keep a cubic curve in inverse space by simply interpolating
+second derivative vectors at the endpoints, since there are two free
+end conditions in a cubic B-spline.
+
+\bibliographystyle{plain}
+\begin{thebibliography}{Lozano-Perez 83}
+
+\bibitem[Ballard 82]{ballard82}
+Ballard, D. and C. Brown (1982)
+Computer Vision.
+Prentice-Hall (Englewood Cliffs, NJ).
+
+\bibitem[Barr 92]{barr92}
+Barr, A. and B. Currin and S. Gabriel and J. Hughes (1992)
+Smooth Interpolation of Orientations with Angular Velocity Constraints
+using Quaternions.
+SIGGRAPH '92, 313--320.
+
+\bibitem[Dietz 93]{dietz93}
+Dietz, R. and J. Hoschek and B. Juttler (1993)
+An algebraic approach to curves and surfaces on the sphere and
+on other quadrics.
+Computer Aided Geometric Design 10, 211-229.
+
+\bibitem{duff85}
+Duff, T. (1985)
+Quaternion splines for animating orientation.
+1985 Monterey Computer Graphics Workshop, 54--62.
+
+\bibitem[Farin 97]{farin97}
+Farin, G. (1997)
+Curves and Surfaces for CAGD: A Practical Guide (4th edition).
+Academic Press (New York).
+
+\bibitem[Foley 96]{foley96}
+Foley, J. and A. van Dam and S. Feiner and J. Hughes (1996)
+Computer Graphics: Principles and Practice (2nd edition in C).
+Addison-Wesley (Reading, Massachusetts).
+
+\bibitem[Golub 89]{golubvanloan89}
+Golub, G. and C. Van Loan (1989)
+Matrix Computations.
+2nd edition, Johns Hopkins University Press (Baltimore).
+
+\bibitem[Harris 92]{harris92}
+Harris, J. (1992)
+Algebraic Geometry: A First Course.
+Springer-Verlag (New York).
+
+\bibitem{hoschekSeemann92}
+Hoschek, J. and G. Seemann (1992)
+Spherical splines.
+Mathematical Modeling and Numerical Analysis, 26(1), 1--22.
+
+\bibitem{jjjw95}
+Johnstone, J. and J. Williams (1995)
+Rational Control of Orientation for Animation.
+{\em Graphics Interface '95}, Quebec City, 179--186.
+
+\bibitem[Johnstone 98a]{jj98a}
+Johnstone, J.K. (1998)
+A Characterization of Rational Maps of $\Re^n$ to \Sn{n-1}.
+Manuscript.
+
+\bibitem[Johnstone 98b]{jj98b}
+Johnstone, J.K. (1998)
+The Most Natural Map to the $n$-sphere.
+Manuscript.
+
+\bibitem[Kim 95]{kim95}
+Kim, M.-J. and M.-S. Kim and S. Shin (1995)
+A General Construction Scheme for Unit Quaternion Curves
+with Simple Higher Order Derivatives.
+SIGGRAPH '95, 369--376.
+
+\bibitem[Kreyszig 63]{kreyszig63}
+Kreyszig, E. (1963)
+Differential Geometry.
+Dover (New York).
+
+\bibitem[Misner 73]{misner73}
+Misner, C. and K. Thorne and J. Wheeler (1973)
+Gravitation.
+W.H. Freeman (San Francisco).
+
+\bibitem{nam95}
+Nam, K.-W. and M.-S. Kim (1995)
+Hermite interpolation of solid orientations based on a smooth blending
+of two great circular arcs on SO(3).
+Proc. of CG International '95.
+
+\bibitem{nielson92}
+Nielson, G. and R. Heiland (1992)
+Animated rotations using quaternions and splines on a 4D sphere.
+Programming and Computer Software, 145--154.
+
+\bibitem{nielson93}
+Nielson, G. (1993)
+Smooth interpolation of orientations.
+In Models and Techniques in Computer Animation, Springer-Verlag (New York),
+75--93.
+
+\bibitem[Park 95]{park95}
+Park, F. and B. Ravani (1995)
+Bezier Curves on Riemannian Manifolds and Lie Groups with
+Kinematics Applications.
+Transactions of the ASME 117, 36--54.
+
+\bibitem[Park 97]{park97}
+Park, F. and B. Ravani (1997)
+Smooth Invariant Interpolation of Rotations.
+ACM Transactions on Graphics 16(3), 277--295.
+
+\bibitem{pletinckx89}
+Pletinckx, D. (1989) 
+Quaternion calculus as a basic tool in computer graphics.
+The Visual Computer 5, 2--13.
+
+\bibitem[Ramamoorthi 97]{rama97}
+Ramamoorthi, R. and A. Barr (1997)
+Fast Construction of Accurate Quaternion Splines.
+SIGGRAPH '97, Los Angeles, 287--292.
+
+\bibitem{schlag91}
+Schlag, J. (1991) Using geometric constructions to interpolate
+orientation with quaternions.  In Graphics Gems II, Academic Press (New York),
+377--380.
+
+\bibitem[Shoemake 85]{shoemake85}
+Shoemake, K. (1985) Animating rotation with quaternion curves.
+SIGGRAPH '85, San Francisco, 19(3), 245--254.
+
+\bibitem[Thorpe 79]{thorpe79}
+Thorpe, J. (1979)
+Elementary Topics in Differential Geometry.
+Springer-Verlag (New York).
+
+\bibitem[Wang 93]{wang93}
+Wang, W. and B. Joe (1993)
+Orientation Interpolation in Quaternion Space using Spherical Biarcs.
+Graphics Interface '93, 24--32.
+
+\bibitem[Wang 94]{wang94}
+Wang, W. (1994)
+Rational Spherical Curves.
+Technical Report, Dept. of Computer Science, University of Hong Kong.
+
+% \bibitem[Woo 97]{opengl97}
+% Woo, M. and J. Neider and T. Davis (1997)
+% OpenGL Programming Guide (2nd edition).
+% Addison-Wesley Developers Press (Reading, Mass.),
+% pp. 464-8.
+
+\end{thebibliography}
+
+\section{Appendix}
+\label{appendix}
+
+\subsection{Proof of Theorem~\ref{thm:inverse}}
+
+We repeat the statement of Theorem~\ref{thm:inverse} and now prove it.
+
+\begin{theorem}
+Let $H$ be the hyperplane $x_4 = 0$ minus the origin.
+The inverse of the natural map, $M^{-1}: S^3 \rightarrow \Re^4$, is
+\[ 
+\footnotesize{
+	M^{-1}(x_1,x_2,x_3,x_4) =
+	\left\{ 
+	\begin{tabular}{ll}
+		$t(x_2,x_3,x_4,1-x_1),\ t \in \Re,\ t \neq 0 \hspace{.2in}$
+		  & $\mbox{if } (x_1,x_2,x_3,x_4) \neq (1,0,0,0)$\\
+		$H$ & $\mbox{if } (x_1,x_2,x_3,x_4) = (1,0,0,0)$
+	\end{tabular}
+	\right.
+}
+\]
+\end{theorem}
+\prf 
+We will work in projective space, where the map $M$ becomes\footnote{Notice 
+    that all $x_5$ terms cancel in $M(\frac{x_1}{x_5},\ldots,\frac{x_4}{x_5})$,
+    since the numerator and denominator of the terms are both homogeneous of 
+    degree two.}
+\begin{equation}
+\label{eq:proj}
+	 (x_1,x_2,x_3,x_4,x_5) \rightarrow
+	 (x_1^2 + x_2^2 + x_3^2 - x_4^2,\ 
+	 2x_1 x_4,\ 2x_2 x_4,\ 2x_3 x_4,\ 
+	 x_1^2 + x_2^2 + x_3^2 + x_4^2).
+\end{equation}
+% M_proj (x1,x2,x3,x4,x5) = M(x1/x5,...,x4/x5) = --- in R4 = --- in P4
+Let $p = (x_1,x_2,x_3,x_4,x_5) \in S^3 \subset P^4$.
+Suppose $M(q_1,q_2,q_3,q_4,q_5) = p$.
+We wish to determine the necessary form of $q = (q_1,q_2,q_3,q_4,q_5)$.
+
+By (\ref{eq:proj}) and Definition~\ref{defn:projspace}, we have
+\begin{equation}
+\label{eq1}
+	q_1^2 + q_2^2 + q_3^2 - q_4^2 = kx_1
+\end{equation}
+\begin{equation}
+\label{eq2}
+	2q_1q_4	= kx_2
+\end{equation}
+\begin{equation}
+\label{eq3}
+	2q_2q_4	= kx_3
+\end{equation}
+\begin{equation}
+\label{eq4}
+	2q_3q_4	= kx_4
+\end{equation}
+\begin{equation}
+\label{eq5}
+	q_1^2 + q_2^2 + q_3^2 + q_4^2 = kx_5
+\end{equation}
+for some $k \neq 0$.
+$q_5$ is arbitrary, since it does not appear in these equations.
+Subtracting (\ref{eq1}) from (\ref{eq5}), 
+we have $2q_4^2 = k(x_5 - x_1)$
+or 
+\begin{equation}
+\label{eq:q4}
+q_4 = \pm \sqrt{\frac{k(x_5-x_1)}{2}}
+\end{equation}
+%
+{\bf Case 1:\ }
+Suppose $x_1 = x_5$. That is, $p = (1,0,0,0,1)$ since $p \in \Sn{3}$.
+$q_4 = 0$ by (\ref{eq:q4})
+and $M(q) = (q_1^2 + q_2^2 + q_3^2, 0, 0, 0, q_1^2 + q_2^2 + q_3^2)
+       = (1,0,0,0,1)$ for any values of $q_1,q_2,q_3$, not all zero.
+That is, $M(q) = p$ if and only if $q \in H$ where $H$ is 
+the hyperplane $x_4 = 0$ minus the origin.
+Equivalently, $M^{-1}(p) = H$.\\
+%
+{\bf Case 2:\ }
+Suppose $x_1 \neq x_5$.
+This implies $x_5 > x_1$ since $p \in \Sn{3}$. 
+Thus, $q_4 \neq 0$ and $q_4$ is a real number.
+From (\ref{eq2}), $q_1 = \frac{kx_2}{2q_4}$.
+Similarly, $q_2 = \frac{kx_3}{2q_4}$ and $q_3 = \frac{kx_4}{2q_4}$.
+Thus, 
+\[
+	q = (\frac{kx_2}{2q_4}, \frac{kx_3}{2q_4}, \frac{kx_4}{2q_4}, q_4, q_5)
+\]
+Using (\ref{defn:projspace}), 
+\[
+	q = \frac{2q_4}{k} q
+	  = (x_2, x_3, x_4, \frac{2q_4^2}{k},\frac{2q_4q_5}{k})
+\]
+and using (\ref{eq:q4}),
+\[
+	q = (x_2,x_3,x_4,x_5-x_1, \pm \sqrt{\frac{2(x_5-x_1)}{k}} q_5)
+\]
+Since $q_5$ is arbitrary (as well as $k$),
+\[
+	q = (x_2,x_3,x_4,x_5-x_1, k') \hspace{1in} k' \in \Re
+\]
+We conclude that $M(q) = p$ only if 
+$q = (x_2,x_3,x_4,x_5 - x_1,k')$.
+On the other hand, if $q = (x_2,x_3,x_4,x_5 - x_1,k')$, $k' \in \Re$
+and $x_1 \neq x_5$,
+then 
+\begin{equation}
+\label{eq:Mq}
+\tiny{
+M(q) = (x_2^2 + x_3^2 + x_4^2 - (x_5 - x_1)^2,\ 
+	2x_2 (x_5 - x_1),\ 2x_3 (x_5 - x_1),\ 2x_4 (x_5 - x_1),\ 
+	x_2^2 + x_3^2 + x_4^2 + (x_5 - x_1)^2).
+}	
+\end{equation}	
+Since $p \in \Sn{3}$, $x_1^2 + x_2^2 + x_3^2 + x_4^2 = x_5^2$,
+which we can use to reduce (\ref{eq:Mq}) to
+\[
+M(q) = (2x_1(x_5 - x_1),\ 2x_2 (x_5 - x_1),\ 2x_3 (x_5 - x_1),\ 2x_4 (x_5 - x_1),\ 
+2x_5(x_5 - x_1))
+\]
+or $p = (x_1,x_2,x_3,x_4,x_5)$ using (\ref{defn:projspace}).
+
+Thus, $M(q) = p$ if and only if 
+$q = (x_2,x_3,x_4,x_5 - x_1,k')$, $k' \in \Re$.
+Translating back from projective space (see Definition~\ref{defn:projspace}),
+$M(q) = p$ if and only if 
+$q = t(x_2,x_3,x_4, 1-x_1)$, $t \neq 0 \in \Re$.
+
+The preimage does not contain the origin, since the natural
+map is undefined there.
+\QED
+
+% $q \in M^{-1}(p)$ if and only if $M(q) = p$.
+
+The inverse of any other rational map of $\Re^4$ to \Sn{3}\ can be computed
+in an analogous fashion.
+Although the above technique works for any individual map,
+we unfortunately cannot apply it to the abstract general map (\ref{eq:re4s3})
+to reveal the general inverse map.
+The above proof requires working in projective space, to take 
+advantage of the extra equation it offers;
+this would require getting inside the arbitrary polynomials
+$a_i$ of (\ref{eq:re4s3}) to translate them into projective space,
+an unfeasible task
+since these polynomials are of unknown and varying degree.
+
+% Example of another map: using $a_1=x_1 - 1$, $a_2 = x_2^2$, $a_3=0$, 
+% and $a_4=x_4$,
+% let $M(q_1,q_2,q_3,q_4,q_5) = (q_1^2 - 2q_1 + 1 + q_2^4 - q_4^2,
+% 				2q_1q_4 - 2q_4, 2q_2^2 q_4, 0, 
+% 				q_1^2 - 2q_1 + 1 + q_2^4 + q_4^2)$.
+\end{document}
+
+
+
+
+
+% \section{Motion control}
+% \label{sec:motion}
+% \subsection{Quaternions and orientation}
+% \subsection{Orientation keyframes for animation and robot motion}
+
+% Call the new quaternion splines `Euclidean quaternion splines'.
+% Call the general class of new interpolating curves on the surface
+% `Euclidean curves on the surface'.
+
+% {\bf Separate paper on applications of S3 splines to orientation control,
+% sing examples from graphics and robotics.}
+
+
+% \section{Curve interpolation}
+
+% \section{Interactive editing of a curve}
+

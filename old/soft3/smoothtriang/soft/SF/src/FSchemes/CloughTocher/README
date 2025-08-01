@@ -1,0 +1,15 @@
+Five versions of Clough-Tocher:
+    CloughTocher.c	- Standard Clough-Tocher; split after
+			  computing crossboundary
+    CloughTocherB.c	- Standard Clough-Tocher; split before
+			  computing crossboundary (the other
+			  version is more efficient).
+    Farin.c		- Farin's modification to Clough-Tocher;
+			  this version minimizes the C^2
+			  discontinuity of the mini-triangles.
+    Foley.c		- Use the Foley-Opitz method for computing
+			  the crossboundary derivative.
+			  This version has cubic percision.
+    MFarin.c		- Minimize the C^2 discontinuity across
+			  macro-triangles (and then split).
+			  This version has cubic percision.

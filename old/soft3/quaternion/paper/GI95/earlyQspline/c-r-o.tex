@@ -1,0 +1,57 @@
+A calculus of sweeping
+----------------------
+
+(1) A Bezier representation of ringed surfaces
+
+A ringed surface is defined by a (center, radius, orientation) triple:
+(c(t), r(t), o(t)).  It is the surface constructed by sweeping a circle
+such that, at time t, its center lies at c(t), its radius is r(t), and
+the normal of its plane is o(t).
+Let c(t) and o(t) be Bezier curves, and r(t) be a Bezier function.
+A parameterization of this ringed surface is $M_3(t) M_2(t) M_1(t) C(s)$, 
+where C(s) is a rational parameterization of the unit circle centered at
+the origin in the xy-plane, M_1(t) is the transformation matrix for
+translation by c(t), M_2(t) is the transformation matrix for scaling
+by r(t), and M_3(t) is the transformation matrix for rotation of the
+z-axis to o(t).
+If each of these elements is rational, then the entire
+parameterization is rational, and we can determine its control
+points through analysis of products of Bernstein polynomials or blossoming
+or some other method.
+
+The problem arises with M_3(t): it will not be rational unless o(t)
+is a unit vector for all t, or at least the length of o(t) is rational
+for all t (which enforces o(t) to remain constant at some rational number,
+since rational numbers are sparse in the reals).
+Therefore, the Bezier curve o(t) must lie on a sphere.
+There are methods for constructing a Bezier curve that interpolates a 
+finite collection of points on a sphere [Dietz-Hoschek]: this is equivalent
+to being able to specify a finite number of orientations of the circles
+on the ringed surface.  However, we would optimally like to have a 
+method of controlling the orientation of every circle on the ringed 
+surface: otherwise it is impossible to exactly model known surfaces
+(such as the cyclide or the quadric) or to exactly define a blending 
+surface as a sweeping marble tangent to two surfaces.
+Consequently, we would like to have a method for constructing spherical
+Bezier curves with more control: by taking any space curve
+and projecting it onto the unit sphere, using the origin as center of 
+projection.  Undoubtedly the problem is that these images of arbitrary 
+curves are not rational and thus cannot be represented as Bezier curves.
+It would be interesting to establish the conditions on a space curve that 
+guarantee its projection is rational.  (One would suspect that the 
+orientation curve of the cyclide satisfies these conditions, since the 
+cyclide has an exact representation as a biquadratic ringed surface.)
+Note that it is certainly worthwhile to pursue the Dietz-Hoschek channel
+as well, since the input to many ringed surfaces will be exactly a finite
+number of circles, rather than a continuous stream of circles, in which 
+case the Dietz-Hoschek method works wonderfully.
+
+Concise statement of challenge: 
+             (1) Determine the projection map of a point 
+onto a sphere, with center of projection at the origin.
+             (2) Apply this projection map to an entire space curve.
+             (3) Establish when this projection is rational, and thus 
+which class of space curves can be successfully transformed into 
+spherical Bezier curves.
+             (4) Check that the cyclide's orientation curve o(t) satisfies 
+these criteria.

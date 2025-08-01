@@ -1,0 +1,4 @@
+tops fig:stereo.rgb              -m 6.5 2.5 > fig:stereo.ps
+tops texture-perfect.rgb 	 -m 6.5 2.5 > texture-perfect.ps
+tops texture-stereo.rgb          -m 6.5 2.5 > texture-stereo.ps
+

@@ -1,0 +1,134 @@
+.TH tpbezier 3
+
+.SH NAME
+tpbezier
+
+.SH SYNOPSIS
+Interface module for tensor product Bezier surface patches.
+
+.SH SYNTAX
+
+.B #include "tppatch.h"
+
+.SH DESCRIPTION:
+
+.nf
+.B TPBezier TPBezierCreate( degreeU, degreeV, range)
+.B int degreeU;
+.B int degreeV;
+.B Space range;
+.fi
+
+Return a new degreeU by degreeV tensor product Bezier patch.
+
+.nf
+.B void TPBezierFree(patch)
+.B TPBezier patch;
+.fi
+
+Free the storage associated with a tensor product patch.
+
+.nf
+.B int TPBezierRead( patch, range)
+.B Patch *patch;
+.B Space range;
+.fi
+
+Read a patch from the stdin.  One is returned on success, zero
+on failure.  The coordinates read in are assumed to be coordinates
+relative to the standard frame of the range space.
+
+.nf
+.B int GetTPBezier(patch, range)
+.B TPBezier* patch;
+.B Space range;
+.fi
+
+Read a patch from din.
+
+
+.nf
+.B void TPBezierWrite( patch)
+.B Patch patch;
+.fi
+
+Write the patch out on stdout.
+
+.nf
+.B Point TPBezierGetPoint( p, i1, i2)
+.B TPBezier p;
+.B int i1, i2;
+.fi
+
+Return the position of the control point whose multi-index is (i1,i2).
+
+.nf
+.B "void TPBezierSetPoint( patch, pt, i1, i2)"
+.B Patch patch;
+.B Point pt;
+.B int i1, i2;
+.fi
+
+Set the vertex whose multi-index is (i1,i2) to pt.
+
+.nf
+.B "void TPBezierEvalWithNormal( patch, point, normal, u, v)"
+.B TPBezier patch;
+.B Point *point;
+.B Normal *normal;
+.B Scalar u,v;
+.fi
+
+Evaluate the patch at the point whose barycentric coordinates are (u,v).
+Also computed is the normal vector to the surface at the point.
+
+
+.nf
+.B Point TPBezierEval( patch, u, v)
+.B TPBezier patch;
+.B Scalar u, v;
+.fi
+
+Evaluate the patch at the point whose barycentric coordinates are (u, v).
+
+.nf 
+.B "void TPBezierEvalWithSecondOrder(patch, p, u,v du,dv, duu,duv,duv)"
+.B TPBezier patch;
+.B Point* p;
+.B Scalar u,v;
+.B Vector* du;
+.B Vector* dv;
+.B Vector* duu;
+.B Vector* duv;
+.B Vector* dvv;
+.fi
+
+Evaluate a patch at (u,v) for second order information.
+
+.nf
+.B "void TPBezierEvalWithNormalAndGK(patch, p, n, gk, u, v)"
+.B TPBezier patch;
+.B Point* p;
+.B Normal* n;
+.B Scalar* gk;
+.B Scalar u,v;
+.fi
+
+Evaluate the patch at (u,v) for position, normal, and Gaussian curvature.
+
+
+.nf
+.B "void TPBezierEvalWithNormalAndSFF(patch, p, n, sff, u, v)"
+.B TPBezier patch;
+.B Point* p;
+.B Normal* n;
+.B SFF* sff;
+.B Scalar u,v;
+.fi
+
+Evaluate the patch at (u,v) for position, normal, and Second Fundamental
+Form.
+
+
+.SH DATE
+January 25, 1992

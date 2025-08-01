@@ -1,0 +1,54 @@
+From jj Tue Aug 16 14:40:53 1994
+Return-Path: <jj>
+Received: by cis.uab.edu (4.1/SMI-4.1)
+	id AA27980; Tue, 16 Aug 94 14:40:51 CDT
+Date: Tue, 16 Aug 94 14:40:51 CDT
+From: jj (John Johnstone)
+Message-Id: <9408161940.AA27980@cis.uab.edu>
+To: jimbo@blaze.cs.jhu.edu
+Subject: Derivation, etc.
+Cc: jj
+Status: OR
+
+Jim, here's the derivation of the inverse formula
+for your records.
+If X=(x0,x1,x2,x3,x4) = M(p,q,r,s)
+then p = x2/2s, q = x3/2s, r = x4/2s and
+substituting into x1 = p^2 + q^2 + r^2 - s^2 yields
+4s^4 + (4x1)s^2 - (x2^2 + x3^2 + x4^2) = 0
+exactly as in your derivation.
+Instead of solving the latter, we examine
+x0=p^2 + q^2 + r^2 + s^2, which after substitution yields
+4s^4 - (4x0)s^2 + (x2^2 + x3^2 + x4^2) = 0.
+Adding this equation with the previous equation (4 lines up)
+yields 4s^2 (2s^2 + x1 - x0) = 0 
+yields s=0 or s = +- \sqrt{(x0-x1)/2}.
+Substituting this s into the equations for p,q,r,s yields
+the inverse map described earlier:
+M^{-1}(x0,x1,x2,x3,x4) = (+-2 \sqrt{(x0-x1)/2},x2,x3,x4,x0-x1).
+
+If you can, please code this map up in your graphics package
+(that is, code up the map M and its inverse M^{-1})
+and apply it mathematically and pictorially to verify that
+I haven't made any mistakes.  
+
+
+For step 2 (finding a curve to interpolate the inverse images
+{r1,...,rk}) we can apply typical interpolation techniques:
+since M^{-1} yields points, not entire lines, we don't need
+the system of linear equations solution of Dietz-Hoschek.
+
+A good place for you to work on is step 3:
+finding control points of the image of the space curve found
+in step 2 (using product formulas for Bernstein polynomials),
+
+I want to get some pictures of this technique in action
+(i.e., some pictures of curves on the 4sphere interpolating
+given points) to verify that we are making sense before
+we send off any abstract (even the 1page version) to a
+conference.  Since the abstract is due at the end of the month,
+let's try to work out the math as much as possible this week
+so that we have some spare time for the implementation.
+
+jj
+
