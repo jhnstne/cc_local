@@ -1,0 +1,1156 @@
+\chapter{The Convex-Segment Method of Sorting}
+\section{Sorting a Convex Segment}
+\label{sec-2.1}
+
+The observation that motivates the new method is that 
+a convex segment can be sorted easily.
+Since every curve is a concatenation of convex segments (Figure~\ref{2.2}),
+this suggests a divide and conquer strategy.
+%
+\figg{2.2}{A curve is a collection of convex segments}{1.5in}
+
+The new method only applies directly to plane curves.
+However, the sort of a space curve
+(\ie, a curve that does not lie in a plane)
+can be mapped into a sort of a plane curve,
+as we shall see in Section~\ref{sec-spacecurve}, so there is
+no loss of generality.
+
+\begin{definition}
+A segment \arc{PQ} of a plane curve is {\bf convex} if no line has more than 
+two intersections with \arc{PQ}, unless all of the intersections occur at
+the same point and are even in number\footnote{The normal definition of 
+convexity is that 
+\arc{PQ} is convex if no line has more than two intersections with \arc{PQ}.
+We amend this definition because, for our purposes, a curve such as 
+\mbox{$y=x^{4}$ } can be considered convex.
+Thus, in the terminology of Section~\ref{sec-divide}, we allow a convex 
+segment to contain flexes of even order.} (Figure~\ref{2.1}).
+%
+\begin{figure}[htb]\vspace{4.75in}\caption{(a) is convex; (b)-(d) are not}\label{2.1}\end{figure}
+%\figg{2.1}{(a) is convex; (b)-(d) are not}
+%
+
+There is another useful characterization of convexity:
+a plane segment is convex if it lies entirely on one side of
+the closed halfplane determined by the tangent line at any point of
+the segment \cite{docarmo}. 
+\end{definition}
+\begin{definition}
+A polygon P is {\bf convex} if, for all $A,B \in P$, the line 
+segment \seg{AB}\ is entirely contained in P.
+The {\bf convex hull} of a set of points S
+is the smallest convex polygon that contains S.
+\end{definition}
+%
+\begin{notation}
+Let P and Q be points of a curve C.
+\pq\ is the segment of the curve joining P to Q.\footnote{If the 
+curve is closed, then the context should make clear which segment is
+intended.}
+\end{notation}
+
+The following theorem establishes that it 
+is simple to sort a set of points on a convex segment.
+
+\begin{theorem}
+\label{thm-2.1}
+Let $p_{1},\ldots,p_{n}$ be points of a convex segment \arc{AB}, 
+and let H be the convex hull of A, B, $p_{1},\ldots,p_{n}$.
+Then the vertices of H are A, B, $p_{1},\ldots,p_{n}$.
+Moreover, the order of the vertices on the boundary of H is exactly
+the order of the points on \arc{AB} (Figure~\ref{2.3}).
+\end{theorem}
+
+\figg{2.3}{An example of Theorem 2.1}{2.25in}
+%
+\begin{proof}
+It is sufficient to
+show that the polygon created by joining the points A, B, 
+$p_{1},\ldots,p_{n}$ in sorted
+order is their convex hull.  Let this polygon 
+be $P = r_{0}r_{1}\ldots r_{n+1}$\ , where $r_{0} = A$, $r_{n+1} = B$, and
+$r_{1},\ldots ,r_{n}$ is the sorted order of the $p_{i}$ on the curve.
+Let $E = \seg{r_{i}r_{i\oplus 1}}$ be an edge of P (where 
+$\oplus$ is addition mod $n+2$), \lyne{E} the infinite
+line containing E, and $\arc{E}~=~\arc{r_{i}r_{i\oplus 1}}$.
+By convexity, \lyne{E}\ can have only two
+intersections with \arc{AB}, those at $r_{i}$ and $r_{i\oplus 1}$.
+Therefore, all of \arc{E}\ must lie on the same side of \lyne{E},
+with the rest of \arc{AB}\ on the other side.\footnote{A point
+of tangency to \lyne{E} counts as two intersections, so \arc{AB} cannot
+stay on \arc{E}'s side by being tangent at $r_{i}$
+or $r_{i\oplus 1}$.}
+Since none of the $r_{j}$ lie in between $r_{i}$ and $r_{i\oplus 1}$,
+all of the points $r_{j}$ lie on one side of the halfplane defined
+by the edge E, and only the endpoints of E lie on \lyne{E}.
+Suppose, for the sake of contradiction,
+that the continuation \lyne{E} of E intersects another edge
+\seg{r_{j}r_{j\oplus 1}}.
+Either $r_{j}$ and $r_{j\oplus 1}$ lie on opposite sides of \lyne{E}
+or one of $r_{j},r_{j\oplus 1}$ lies on \lyne{E},
+a contradiction in either case.
+Therefore, the continuation of any edge of the polygon P does not strike any other
+edge of P.
+By Lemma~\ref{conv3}, P is convex.
+Since a convex polygon is the convex hull of its vertices,
+P is the convex hull of the $r_{i}$'s.
+\end{proof}
+
+\begin{corollary}
+\label{easyconic}
+Conics can be sorted easily.
+\end{corollary}
+\begin{proof}
+Conics are convex, since 
+a line can have only two intersections with an irreducible curve of order 
+two (Theorem~\ref{bezout}).
+\end{proof}
+
+When Theorem~\ref{thm-2.1}\ is used to sort a 
+set of points on a convex segment,
+there is no need to actually create the convex hull.
+Let \mbox{$Q = \frac{1}{3}(A+B+p_{1})$},
+the barycenter of A, B, and $p_{1}$.
+Q will lie in the interior of the convex hull of 
+A, B, $p_{1},\ \ldots,\ p_{n}$ (Figure~\ref{2.4}).
+Consider the angles that the lines $\lyne{QA},\ \lyne{QB},\ 
+\lyne{Qp_{1}},\ \ldots,\ \lyne{Qp_{n}}$ make with the positive x-axis, and
+sort these angles from $\angle$\lyne{QA} to $\angle$\lyne{QB}
+(where $0 \equiv 2\pi$).
+Since A, B, $p_{1},\ \ldots,\ p_{n}$ are the vertices of a convex polygon
+and Q is a point in the interior of this polygon, the order of the angles
+from $\angle$\lyne{QA} to $\angle$\lyne{QB} is equivalent to the order of the
+vertices on the polygon from A to B.
+Therefore, $p_{1},\ \ldots,\ p_{n}$ can be sorted on \arc{AB}\ by sorting
+the angles that they make with a central point.
+
+\figg{2.4}{Sorting points on a convex segment by sorting angles}{2.25in}
+
+Once it is realized that points on a convex segment can be sorted easily,
+the focus on curve sorting can change,
+since the problem has essentially been reduced from sorting points to sorting
+convex segments.
+Of course, the curve must first be divided up into convex segments.
+We consider this division problem in the next section.
+%
+\section{Convex Segmentation}
+\label{sec-divide}
+
+The crucial step of the new method is the decomposition of the curve
+into convex segments.
+This decomposition allows us to take advantage of the simplicity of sorting
+points on a convex segment.
+The decomposition is achieved by the tangents at certain special 
+points of the curve: the singularities (Appendix~\ref{app-defn}) and flexes.
+%\footnote{These tangents do not
+%necessarily split the curve into convex segments without redundancies.
+%That is, perhaps a strict subset of the boundaries
+%that the tangents create on the curve would satisfactorily divide the curve
+%into convex segments.}
+
+\begin{definition}
+A {\bf point of inflection}, or {\bf flex} for short,
+of a curve F is a nonsingular point $P \in F$ whose tangent
+has three or more intersections with F at P.
+(The tangent of most simple points 
+intersects the curve twice at the point of tangency.)
+The number of intersections of the flex's tangent with the curve at the 
+flex is called the {\bf order} of the flex.
+A flex of odd order is called a {\bf flox}.\footnote{This is our own term.
+It is not used in the literature.}
+\end{definition}
+%
+\begin{example}
+The origin of \(y = x^3\) is a flox.
+\end{example}
+
+The interesting property of a flex is that the curve can only change its
+direction of curvature (from convex to concave or vice versa) at a
+flex or a singularity.
+In other words, flexes are the only
+nonsingular points P such that the curve in any neighbourhood of P can
+lie on both sides of P's tangent.
+This is an important property because the curve in the neighbourhood
+of a point P of a convex segment always lies on one side of P's tangent.
+Since the curve in the neighbourhood of a flex of even
+order does not lie on both sides of P's tangent 
+(Lemma~\ref{planarcutsthru}), we will only be interested in floxes.
+
+%
+%Unless explicitly noted, hereinafter `flex' shall refer to a flex of odd
+%order.
+%We shall try to use the term `flox'; however, since this is rather a clumsy
+%term, we shall sometimes refer to floxes simply as flexes.
+\figg{2.4A}{(a-b) touch (c) touch and cross}{1.5in}
+\begin{definition}
+\label{defn-cross}
+The {\bf inside} (resp., {\bf outside}) of a plane curve \mbox{f(x,y) = 0}
+is the halfplane \mbox{f(x,y) $<$ 0} (resp., \mbox{f(x,y) $>$ 0}).
+Two curves {\bf touch} at P if they intersect at P.
+A line L {\bf crosses} a plane curve C at P if L touches C at P and L 
+lies on both the inside
+and outside of C in any neighbourhood of P (Figure~\ref{2.4A}).
+\end{definition}
+%
+
+The tangents at the singularities and floxes of a curve subdivide the plane
+of the curve into several cells and split the curve into several segments.
+The following theorem establishes that each of these segments is convex.
+%As motivation for the next theorem, notice that as a curve passes
+%through an ordinary singularity, it crosses one of the tangents of the
+%singularity.
+%However, the curve need not cross the tangent of an extraordinary
+%singularity.
+%
+%\fig{6}{chap-2}
+
+\begin{theorem}
+\label{tangents-split}
+Let T be the set of tangents of the singularities and floxes of a curve F,
+and let \arc{PQ}\ be a nonconvex segment of F.
+Then some tangent of T touches or crosses \arc{PQ}.
+(Moreover, unless \arc{PQ} contains a singularity, some tangent of T
+crosses \arc{PQ}.)
+%Moreover, if no tangent crosses \arc{PQ}, then \arc{PQ}\ must contain
+%an extraordinary singularity SING such that the curve lies entirely on 
+%one side of SING's tangent in a small enough neighbourhood of SING.
+\end{theorem}
+%
+\begin{proof}
+Assume, without loss of generality, that \pq\  does not contain a flox or 
+a singularity.
+(If it does, then we are done.)
+By Lemma~\ref{threecross}, there exists a line L that crosses \pq\  at 
+three (or more) distinct points.
+Let \xo, \xt, and \xth\ be three of these points such that $\xt \in \xotha$ 
+and \mbox{$\xotha \cap L = \{ \xo,\xt,\xth\}$} 
+(\ie, \xo, \xt, and \xth\ are as close together as possible on \pq).
+\xotha\ does not change its direction of curvature,
+since there is no flox or singularity on \pq.
+Moreover, \xotha\ is not a line segment, otherwise \lyne{\xo\xth}\ would be
+a component of the curve (Theorem~\ref{bezout}),
+contradicting the irreducibility of the curve.
+Therefore, without loss of generality, we can assume 
+that \xotha\ looks like Figure~\ref{2.7}(a).
+Let R be the closed region bounded by \xotha\ 
+and \seg{\xo\xth} (Figure~\ref{2.7}(b)).
+We will show that R contains a flox or a 
+singularity.
+This will complete the proof, since the tangent
+of a point inside R must cross $\xotha \subset \pq$ at least once.
+(The tangent must cross the boundary of R twice, and at most one of these
+intersections can be with 
+%
+\figg{2.7}{(a) \xotha\ (b) the region R}{2in}
+%
+\seg{\xo\xth}.)\\
+%Let 
+%\[ \fxo = \left\{ \begin{array}{ll}
+%	\mbox{$F \setminus \xotha$}  &\ \ \ \mbox{if F is closed}\\ \\
+%	\mbox{the segment of $F\setminus\xotha$}  &\ \ \ \mbox{if F is open}\\
+%        \mbox{with endpoint \xo}
+%	\end{array}
+%	\right.   \]
+%
+\tab The curve lies inside of R as it leaves \xotha\ from \xo\ and outside 
+of R as it leaves \xotha\ from \xth.
+Therefore, the curve must cross the boundary of R after it leaves \xotha\
+from \xo, either because it must join with \xth\ (if the curve is closed)
+or because an infinite segment of an algebraic curve
+cannot remain within a closed region (if the curve is open,
+using Lemma~\ref{nonbounded}).
+The curve cannot cross the \xotha\ boundary of R, since
+\mbox{$\xotha \subset \pq$} is nonsingular by assumption.
+Therefore, the curve must cross \seg{\xo\xth} after it leaves
+\xotha\ from \xo.
+
+%Consider \xo's tangent.
+%Since \arc{PQ} crosses L at \xo, the tangent at \xo\ must cross L.
+%Thus, \xt\ and \xth\ lie on opposite sides of \xo's tangent.
+%In particular, as the curve leaves \xo\ along \xotha, it lies on the
+%opposite side of \xo's tangent from \xth.
+%Remember that the x1x3 arc only crosses x1's tangent once, since it is
+%a spiral and x1,x2,x3 are as close together as possible.
+%
+%\hence Since \xo\ is not a flex, 
+As the curve leaves \xotha\ from \xo,
+it lies on the opposite side of \xo's tangent from \seg{\xo\xth}.
+Therefore, after the curve leaves \xotha\ from \xo\ and before it leaves
+R, the curve must cross \xo's tangent inside of R, in order to reach 
+\seg{\xo\xth}.
+In order to cross over \xo's tangent, the curve
+must cross itself or change its curvature inside of R (Figure~\ref{2.9}),
+otherwise it will spiral around inside R forever.
+Therefore, R contains a singularity or a flox.
+\end{proof}
+%
+\figg{2.9}{The curve must cross itself or change its curvature in travelling
+from \xo\ to \seg{\xo\xth}}{1.75in}
+
+\begin{corollary}
+The tangents of the singularities and floxes of a curve divide the curve
+into convex segments.
+\end{corollary}
+
+\begin{example}
+\label{eg-2.2.2}
+Figure~\ref{2.10}\ illustrates the division of a curve into
+convex segments by the tangents at singularities and floxes.
+\end{example}
+\begin{figure}[htbp]\vspace{4.75in}
+\caption{Convex segmentation of (a) limacon of Pascal (b) serpentine (c) Cassinian oval}
+\label{2.10}\end{figure}
+
+Theorem~\ref{tangents-split} establishes that
+the segmentation of a curve by its singularities and the 
+points where the
+curve crosses a singularity/flox tangent will be a convex segmentation.
+Therefore, the nonsingular points at which the curve touches (but does not
+cross) a singularity/flox tangent can be ignored.
+For example, the convex segment from \wo\ in Figure~\ref{2.10A} should be
+\arc{\wo W_{3}} rather than \arc{\wo W_{2}}.
+\figg{2.10A}{Nonsingular points where the curve merely touches a tangent are ignored}{1.5in}
+%
+\section{The Cell Partition and the Sorting of Convex Segments}
+\subsection{The Cell Partition}
+
+Consider a subdivision of the plane into cells by the
+tangents at the singularities and floxes of a curve.
+Some of the cells contain a convex segment of the curve,
+some of the cells contain several convex segments of the curve,
+and the rest of the cells do not contain any of the curve
+(Figure~\ref{2.10}).
+This subsection develops some terminology to describe this situation.
+
+\begin{definition}
+A {\bf cell partition} of a plane curve F is a partition of the plane
+into convex polygons, called {\bf cells}, by the tangents at the singularities
+and the floxes of F.
+A line segment that forms part of the boundary of a cell 
+is called a {\bf cell segment}.
+A tangent of a singularity or flox of F is called a {\bf \wall} 
+of the cell partition.
+Consider the points where the curve intersects the cell partition.
+%r different \wallpoints are assigned to a 
+%singularity with r distinct tangents:
+%each tangent has one \wallpoint associated with it.
+%All of the r \wallpoints of a singularity share the same coordinates:
+%they are only logically different.
+Many of these intersections arise 
+intentionally: \ie, the intersection is a singularity or a flox through
+which a \wall\ of the cell partition was intentionally passed.
+The other intersections arise
+indirectly and are called {\bf incidental} \wallpoints.
+The points of intersection of the curve with the cell partition
+are collectively called {\bf curve points}.\footnote{Recall that
+the nonsingular points of intersection where the curve
+only touches a wall are ignored.}
+
+The curve is decomposed into convex segments by the cell partition.
+A {\bf multisegment cell} is a cell that contains more than one 
+convex segment.
+The endpoints of each convex segment are \wallpoints.
+If \ \arc{VW} is a convex segment of the partition, then V is called
+a {\bf partner} of W (and vice versa).
+A \wallpoint\ separates two convex segments and thus usually has two partners.
+However, a \wallpoint\ might only have one partner: a convex
+segment that goes off to infinity within a cell C will have only one endpoint,
+and this \wallpoint\ will not have a partner with respect to C.
+\end{definition}
+%
+\begin{example}
+The cell partition of the serpentine (Figure~\ref{2.10}(b)) has three
+walls and three \wallpoints, each of which is a flox.
+E and F are partners, as are F and G.
+The cell partition of the Cassinian oval (Figure~\ref{2.10}(c)) 
+has four \walls,
+arising from the four flexes A, B, C, and D. 
+There are four incidental \wallpoints: $\wo,\wt,W_{3},W_{4}$.
+Cell 1 is the only multisegment cell.
+\wo\ and \wt\ are partners in cell 1, as are $W_{3}$ and $W_{4}$.
+\end{example}
+%$A_{1},A_{2}$, B, and C are \wallpoints.\footnote{Note that we draw the two
+%\wallpoints of the singularity offset along the appropriate tangent in order
+%to indicate which tangent is associated with each \wallpoint.}
+%B and C are incidental \wallpoints.
+%Cell 1 is a multisegment cell.
+%B is the partner of C with respect to cell 1.
+%$A_{2}$ is the partner of C with respect to cell 4.
+%$A_{1}$ is the partner of B with respect to cell 4.
+%$A_{1}$ is the partner of $A_{2}$ with respect to cell 3.
+%
+%E has no partner in cell X.
+%This cell partition has no incidental \wallpoints.
+
+A cell partition is not simply a collection of \walls.
+It is a large data structure that defines interrelationships
+between cells, \walls, \wallpoints, and convex segments.
+It contains information that is needed in the implementation of the
+new sorting method, such as the \walls\ of each cell (in implicit and
+parametric representations);  for each of these \walls, the side that the cell
+lies on; the \wallpoints\ on each cell segment;
+and adjacency information, such as the two cells that border a cell segment.
+
+The creation of the cell partition of a curve is a preprocessing step that
+is entirely independent of the sorting of any points on the curve.
+%
+\subsection{The Sorting of Convex Segments}
+We complete our description of the new sorting method
+by discussing
+how to determine the order of the convex segments on the curve.
+The sorting of the convex segments is done in an unusual manner.
+In fact, to say that we `sort' the convex segments is a misnomer.
+Unlike a normal sort, we do not create a list of convex segments and 
+rearrange them into proper order.
+Instead, the points from A to B are sorted by traversing the curve from A to
+B by convex segments, stepping from \wallpoint\ to \wallpoint.
+The next convex segment is determined only when we
+need to move to it.\footnote{This technique is reminiscent of lazy evaluation
+in compiler theory.
+Since we sort the convex segments `lazily',
+only those convex segments that lie on the sort segment
+are encountered and sorted.}
+As each convex segment is encountered, the points that lie on it are found
+and sorted (using Theorem~\ref{thm-2.1}), and this subsort is appended to the
+end of a global sort which is being accumulated.
+Thus, the sorting of the convex segments is interleaved with the sorting
+of the sortpoints.
+
+A crucial step in the traversal of a curve by convex segments is the 
+determination of the next convex segment.
+Given a convex segment \arc{VW}, we must be able to find the
+convex segment that follows \arc{VW}\ from W.
+Suppose that \arc{VW}\ lies in cell C and W lies on the boundary
+of cells C and D.
+The problem of finding the convex segment that follows \arc{VW}\
+from W reduces to finding the partner of W in D.
+If the cell D contains only one convex segment (as is often the case),
+then this is trivial.
+Chapter~\ref{chap-3}\ discusses how to determine the partner of a 
+\wallpoint\ in a multisegment cell.
+
+The other main step in the traversal of a curve by convex segments is
+the computation of the points that lie on a given convex segment.
+It turns out that the theory that must be developed to solve this problem
+is the same as for the solution of the above next-convex-segment problem.
+Chapter~\ref{chap-3} discusses how to find the convex segment that 
+contains a given point of the curve and, thus, 
+how to find the points that lie on a given convex segment.
+The first step is to find the cell that contains the point:
+a point lies in a cell if and only if it lies on the proper side of each 
+of the \walls\ that define the cell.
+If the point's cell contains only one convex segment,
+then this convex segment contains the point.
+However, if the cell contains several convex segments,
+then the decision is much more complicated.
+
+The first convex segment is determined by first 
+finding the convex segment \arc{VW} that contains the start point S.
+Recall that, as part of the definition of a sorting problem, a vector at
+S is provided to indicate the direction in which the sort is to proceed
+from S.
+This vector can be used to 
+determine whether the first convex segment is \arc{SV}\ or \arc{SW}:
+\arc{SV}\ is the first convex segment if and only if the vector points to the
+inside of the chord \lyne{SV}\ (see Appendix~\ref{app-defn}'s definition).
+
+We have now presented the fundamentals of our new method of curve sorting.
+We refer to it as the convex-segment method of sorting.
+%
+\begin{example}
+Consider the sorting of points along a Cassinian oval (Figure~\ref{2.12a}).
+We determine that the startpoint S 
+lies on \arc{\wt C}\ and use the vector at
+S to choose the subsegment \arc{\wt S}\ as the first convex segment.
+There are no points on \arc{\wt S}, so we move on.
+The next convex segment is \arc{\wo\wt}, since \wo\ is \wt's partner in 
+cell~1.
+There are two sortpoints in cell~1 ($P_{1}$ and $P_{5}$), but only $P_{1}$
+lies on \arc{\wo\wt}.
+We make $P_{1}$ the first element of the sort.
+We jump to the next convex segment \arc{\wo A} and
+sort the two points, $P_{2}$ and $P_{3}$, that lie on this convex segment
+by sorting the angles that \wo, $P_{2},\ P_{3}$, and A make with a 
+central point. 
+We add $P_{2}$ and $P_{3}$ to the global sort, and
+move on to the next convex segment \arc{AB}.
+We immediately move
+on to \arc{BW_{3}}, since we find that \arc{AB}\ does not contain any
+sortpoints.
+Both END and $P_{4}$ lie on \arc{BW_{3}}.
+The presence of END indicates that this is the last convex segment 
+that needs to be considered.
+Upon sorting END and $P_{4}$, $P_{4}$ is discarded because it comes after END.
+The final sorted list is $P_{1},P_{2},P_{3}$.
+\end{example}
+\begin{figure}[htbp]\vspace{2.75in}\caption{Sorting a Cassinian oval}
+\label{2.12a}\end{figure}
+%
+\section{Resolving the Ambiguity at Singularities}
+\label{sec-resolve}
+
+The traversal of a curve by convex segments is especially challenging in 
+the neighbourhood of a singularity.
+In particular, it can be ambiguous which branch of the curve should be
+followed from a singular \wallpoint.
+%
+\begin{example}
+Consider the curve in the neighbourhood of A on Figure~\ref{2.13}(a). 
+It is ambiguous whether this is 
+two semicircles touching or two flexes crossing.
+In particular, it is not clear whether $P_{2}$ or $P_{3}$ follows $P_{1}$.
+
+\figg{2.13}{Ambiguity about a singularity}{2.5in}
+
+Consider the sorting of points on a loop around an ordinary 
+singularity (Figure~\ref{2.13}(b)).
+It is not immediately clear whether the order is \mbox{$P_{1},P_{2},P_{3}$} or
+\mbox{$P_{3},P_{2},P_{1}$}.
+\end{example}
+%
+
+This problem is resolved by finding,
+for each branch that passes through a singularity, a pair of points,
+one on either side of the singularity.
+These two points serve to guide the sort through the singularity along
+the proper branch.
+Before we discuss how to find these points, we offer an example of how they
+are used.
+%
+\figg{2.15}{Resolving the ambiguity at a singularity}{3in}
+%
+\begin{example}
+\label{eg-pseudo}
+We associate four points with the singularity A of Figure~\ref{2.15}(a):
+$V_{1},\ V_{2},\ W_{1}, \mbox{ and } W_{2}$.
+$V_{1}$ is paired with $V_{2}$ on the solid arc, and 
+$W_{1}$ is paired with $W_{2}$ on the dotted arc.
+When this curve is sorted, rather than traversing the curve 
+from START to A, A to A, and
+A to END, the traversal proceeds 
+from START to $V_{2}$, $V_{1}$ to $W_{2}$, and 
+$W_{1}$ to END.
+Notice that if the traversal reaches a point associated with a singularity 
+such as $V_{2}$, then the traversal continues from
+$V_{2}$'s partner, not $V_{2}$ itself.
+
+
+Suppose that we have determined that the curve of Figure~\ref{2.15}(b) 
+is actually two semicircles touching at A.
+We will associate four points with the singularity, as above.
+The convex segments of the two cells of Figure~\ref{2.15}(b) 
+are now \arc{PV_{1}}, \arc{V_{2}Q}, \arc{RW_{1}}, and \arc{W_{2}S}.
+If a traversal of the curve during a sort reaches P, 
+then it will proceed to $V_{1}$ and then on from $V_{2}$ to Q.
+In particular, there is no danger of the traversal mistakenly
+proceeding from P to A to S.
+\end{example}
+%
+
+Notice that, after each singularity of the curve has been decomposed in this 
+manner, every convex segment of the curve is bounded by simple points.
+Care must be taken with the sortpoints that lie on any of the segments about
+a singularity that are essentially sliced out, such as sortpoints that lie on
+\arc{V_{1}V_{2}} in the previous example.
+We shall discuss how to sort these points at the end of this section.
+%
+\subsection{Blowing Up The Curve at a Singularity}
+
+For each branch that passes through a singularity, we wish to find a pair
+of points on it, one on either side of the singularity.
+We would like to do this by crawling a small distance along the arc in both
+directions from the singularity.
+However, there is no reliable way of crawling along a given arc as it passes
+through a singularity. 
+Therefore, we must isolate each arc of the singularity so that we can crawl
+along it robustly.
+We accomplish this by blowing up the curve at the singularity by a series
+of quadratic transformations \cite{bhh,wa}.
+
+Suppose that a curve has been translated so that one of its singularities
+is at the origin.
+Let its new equation be $f(x,y)=0$.
+Consider the {\bf affine quadratic transformation} $x = x_{1},\ y = x_{1}y_{1}$
+(of Cremona) \cite{wa} and the associated curve $f(x_{1},x_{1}y_{1})$.
+The useful property of this transformation is that it maps the origin
+to the entire $y_{1}$-axis and maps the rest of the y-axis to infinity:
+$y_{1} = \frac{y}{x}$ so $(0,b)$ 
+maps to $(0,\frac{b}{0})$, which is a point at
+infinity unless $b=0$.
+The quadratic transformation is one-to-one for all points $(x,y)$ with $x \neq 0$.
+The line $y = mx$ through the origin is mapped to the horizontal line 
+$y_{1}=m$:
+$y=mx \rightarrow  x_{1}y_{1} = mx_{1}  \rightarrow  y_{1}=m$.
+Thus, a quadratic transformation maps distinct tangent directions of the
+various branches of $f$ at the singular origin to different
+points on the {\bf exceptional line} $x_{1} =0$.\footnote{The quadratic
+transformation does not map the line $x=0$ properly, so we must make sure
+that $x=0$ is not a tangent direction to the curve at the origin.
+This is done by a nonsingular linear transformation $x = \alpha\hat{x}+\beta\hat{y}$
+and $y = \delta\hat{x} + \gamma\hat{y}$, such that
+neither $\alpha\hat{x}+\beta\hat{y}$ nor
+$\delta\hat{x} + \gamma\hat{y}$ are tangents to the curve at the origin.}
+The intersections of the transformed branches with the exceptional
+line correspond to the transformed points of the singularity at the 
+%
+\figg{2.17}{(a) node and (b) its quadratic transformation}{1.75in}
+%
+origin (Figure~\ref{2.17}).
+If an intersection point on the exceptional line is singular, 
+then the procedure is applied recursively (Figure~\ref{18}).
+Hence, under quadratic transformations, the various branches of the 
+curve in the neighbourhood of the singularity eventually 
+get transformed to separate branches.
+Once a branch is isolated, it is simple to find two points of it
+on either side of the singularity, since there are no other branches
+present to cause confusion. 
+
+\begin{figure}[htbp]\vspace{5.25in}\caption{(a) the original singularity (b) after one quadratic transformation
+(c) after a second transformation: the original singularity has been 
+successfully transformed into two simple points}\label{18}\end{figure}
+%
+%\figg{19}{Another example of blowing up a singularity}
+%
+
+\begin{lemma}[{\cite{abba3,wa}}]
+A finite number of applications of the quadratic transformation reduces
+a singularity to a number of simple points.
+\end{lemma}
+%
+
+To summarize, for each singular point of the curve, we translate 
+the singularity to the origin
+and apply a series of quadratic transformations until the singularity is 
+transformed into a set of nonsingular points.
+Each branch of the transformed curve will intersect the exceptional line
+in a simple (nonsingular) point.
+For each of these branches, we compute two points on either side of 
+the exceptional line $x_{1}$= 0 (by crawling an 
+\mbox{$\epsilon$-distance}) and  map this pair back onto
+the corresponding branch of the original curve, by applying inverse
+transformations.
+The pair of points on each branch clarify the branch connectivity at the 
+singularity  and allow a robust traversal of the curve by convex segments.
+
+\begin{definition}
+The collection of points associated with a singularity are called
+{\bf pseudo \wallpoints}.
+(For example, $V_{1}$, $V_{2}$, $W_{1}$, and $W_{2}$ of 
+Example~\ref{eg-pseudo} are pseudo \wallpoints.)
+They replace the singularity \wallpoint\ in the cell partition.
+That is, for the purposes of curve traversal, 
+the singularity is no longer considered to be a \wallpoint.
+\end{definition}
+
+As mentioned above, the sortpoints 
+that lie close to a singularity (on one of the segments that is `sliced out')
+must be treated as a special case.
+These points must be sorted by mapping them to the blown-up, desingularized 
+curve and using the crawling method.
+%That is, if there are any sortpoints that lie in an \mbox{$\epsilon$-ball}
+%about the singularity (where the \mbox{$\epsilon$-ball} is chosen so that
+%it is just big enough to contain all of the points associated with the 
+%singularity), then these points must be sorted by crawling.
+This is not expensive because the sliced-out segment is very short and
+very few jumps are needed to crawl over it.
+
+%Once the arcs of a singularity have been isolated,
+%they are nonsingular in the neighbourhood of the image of the singularity
+%and it is possible to crawl along them safely.
+%Let C be the original curve, S the singularity of multiplicity m,
+%g(C) the desingularized curve, and $S_{1},\ldots,S_{m}$ the images of S
+%on g(C).
+%For each $S_{i}$, we crawl to $S_{i}^{+\epsilon}$ and $S_{i}^{-\epsilon}$
+%(two points on opposite sides of $S_{i}$ and very close to $S_{i}$)
+%and map these points back to the original curve.
+%The collection 
+%$\{g^{-1}(S_{i}^{+\epsilon}),g^{-1}(S_{i}^{-\epsilon})\}$
+%are the points associated with the singularity, 
+%and $g^{-1}(S_{i}^{+\epsilon})$ is paired 
+%with $g^{-1}(S_{i}^{-\epsilon})$.
+%These points are considered to be \wallpoints of the appropriate cell
+%of C's cell partition.
+%
+\section{Of Flexes and Singularities}
+\label{sec-flexsing}
+
+This section explains how to find the \walls\ of a cell partition.
+We start with a discussion of projective space so that we can show how to
+find the singularities and flexes of a curve.
+We then examine how to find the tangents of a singularity and a flex,
+and how to distinguish a flox from a flex.
+
+We have been working in {\bf affine space}, the familiar n-dimensional
+Euclidean space in which points are represented as n-tuples, such as
+(0,0) for the origin of the plane.
+Projective space is an extension of affine space.
+Consider the equivalence relation 
+$ (x_{1},\ldots,x_{n+1}) \approx (y_{1},\ldots,y_{n+1})$ if and only if
+there exists $t \neq 0$ such that $x_{i} = t*y_{i}$
+for all i.
+{\bf N-dimensional projective space} (over the field K) is the space of
+equivalence classes of tuples of $K^{n+1} \setminus \{(0,0,\ldots,0)\}$
+under this equivalence relation.
+The point \mbox{$(x_{1},\ldots,x_{n})$} of affine space is identified with the
+point \mbox{$(t*x_{1},\ldots,t*x_{n},t)$} \mbox{$= (x_{1},\ldots,x_{n},1)$} 
+of projective space.
+That is, points in affine space are associated with 
+points of the complement of $x_{n+1} = 0$ in projective space.
+The plane $x_{n+1} = 0$ of projective space is called the {\bf plane
+at infinity}.
+It allows the formal treatment of points and components at infinity, such
+as the intersection of two curves at infinity.
+The point $(x_{1},\ldots,x_{n},0)$ represents the point at infinity along
+the vector $(x_{1},\ldots,x_{n})$.
+Projective space is the extension of affine space by the plane
+at infinity.\footnote{A more spatially oriented and evocative view of 
+projective space is offered by Fulton \cite{fulton}.  
+The point $(x_{1},\ldots,x_{n})$ is identified with the line in $K^{n+1}$
+through $(0,0,\ldots,0)$ and $(x_{1},\ldots,x_{n},1)$.
+Projective space is the collection of lines through $(0,0,\ldots,0)$
+in $K^{n+1}$.
+Affine space is embedded in projective space as the plane $x_{n+1} = 1$.
+Two points of $K^{n+1}$ on the same line are equivalent.
+The lines through $(0,0,\ldots,0)$ in the plane $x_{n+1} = 0$ correspond
+to the points at infinity.}
+
+In projective space, a plane algebraic curve is the zero set of a
+{\bf homogeneous} polynomial (i.e., a polynomial whose terms are all of the
+same degree) in three variables.\footnote{The equation must be homogeneous,
+since solutions must be invariant under the above equivalence relation.}
+The curve $F(X,Y,Z) = 0$ in projective space corresponds to the curve 
+$f(x,y) := F(x,y,1) = 0$ in affine space.
+Conversely, the curve $f(x,y) = 0$ of order $n$ in 
+affine space corresponds to the curve $F(X,Y,Z) := Z^{n}f(\frac{X}{Z},
+\frac{Y}{Z}) = 0$ in projective space, which is a homogenized version of 
+$f(x,y) = 0$.
+In both cases, the curve $f(x,y) = 0$ is equivalent to the curve 
+$F(X,Y,Z) = 0$ without its points at infinity.
+%
+\begin{example}
+The projective equivalent of the curve \mbox{$x^{2}+2x-4y-3=0$} is
+\mbox{$x^{2}+2xz-4yz-3z^{2}=0$}.
+Consider the hyperbola \mbox{$x^{2}-y^{2}-1=0$} and one of its asymptotes
+\mbox{$x-y=0$}.
+Their projective equivalents are\\
+\mbox{$x^{2}-y^{2}-z^{2}=0$}
+and \mbox{$x-y=0$}, respectively.
+Solving for their intersection yields \mbox{$x=y,\ z=0$}.
+Therefore, since \mbox{$(x,x,0) \approx (1,1,0)$}, the hyperbola 
+intersects its asymptote at the point of infinity \mbox{$(1,1,0)$}.
+\end{example}
+
+The following lemma gives the mathematical characterization of a
+singularity and a flex.
+%
+\begin{lemma}[{\cite[pp. 51,71]{wa}}]
+\label{lem-singflex}
+Let $F(x,y,z) = 0$ be the representation of a plane curve C in projective
+space, and let P be a point of projective space.
+\begin{quote}
+\begin{enumerate}
+\item P is a singularity of C if and only if
+$F_{x}(P) = F_{y}(P) = F_{z}(P) = 0$
+\item P is a flex of C if and only if F(P) = 0, 
+P is not a singularity, and \mbox{det($F_{ij}(P)) = 0$},
+\end{enumerate}
+\end{quote}
+%
+where $F_{x}$ is the derivative of F with respect to x, etc.;
+$F_{11}=F_{xx},$ etc.;
+and $(F_{ij}(P))$ is a 3 by 3 matrix.
+(The curve \mbox{det($F_{ij}(P)) = 0$} is called the Hessian of the 
+curve $F=0$.)
+\end{lemma}
+
+Therefore, the computation of the singularities of a curve of order $n$ involves
+the solution of a system of three equations of degree $n-1$.
+The computation of the flexes involves the solution of
+a system of two equations, one of
+degree $n$ and the other of \mbox{degree $3(n-2)$}.
+Resultants offer a possible method of solution (Appendix~\ref{app-defn}).
+The solution of systems of equations is a well-studied problem,
+so we do not elaborate further.
+
+The following lemma gives an indication of the worst-case complexity of a 
+cell partition.
+%
+\begin{lemma}[{\cite[pp. 65,120]{wa}}]
+\label{lem-maxsing}
+A curve of order n has at most $\frac{(n-1)(n-2)}{2}$ singularities.
+A curve of order n 
+that has no extraordinary\footnote{See Appendix~\ref{app-defn}.}
+singularities of multiplicity greater
+than two has at most $3n(n-2)-6\delta-8\kappa$ flexes, where
+$\delta$ is the number of nodes of the curve (properly counted)
+and $\kappa$ is the number of cusps.
+\end{lemma}
+%
+These maxima are not attained simultaneously.
+The maximum number of flexes occurs when there are no singularities, and
+the number of flexes decreases as the number of singularities increases.
+
+It is simple to find the tangent of a flex.
+%
+\begin{lemma}[{\cite[p. 55]{wa}}]
+\label{tangenteqn}
+If P is a nonsingular point of the plane curve \mbox{$F(x,y,z)=0$}
+(in projective space), then the equation of the tangent to F at P is
+\[ F_{x}(P)x + F_{y}(P)y + F_{z}(P)z = 0 \]
+\end{lemma}
+%
+\begin{definition}
+The {\bf order form} of a polynomial $f(x,y)=0$ is the homogeneous
+polynomial consisting of the terms of lowest degree in f.
+\end{definition}
+
+The tangents of a singularity are found by translating the singularity to the
+origin and applying the following lemma.
+%
+\begin{lemma}[{\cite[p. 54]{wa}}]
+If the order form of $f(x,y)=0$ is of degree $r$, 
+then the origin is a singularity of $f=0$ of multiplicity $r$, 
+and the components of the order form are the tangents to $f$ at the origin.
+\end{lemma}
+%
+
+We wish to ignore all flexes of even order, so we require a method of
+computing the order of a flex.
+\begin{lemma}
+\label{formatofneweqn}
+Let P be a nonsingular point of a plane curve.
+%Using Lemma~\ref{newcurveeqn}, 
+Let $f(x,y)=0$ be the equation
+of the curve after it has been translated and rotated so that P is the
+origin and P's tangent is the x-axis.
+Then the number of intersections of P's tangent with the curve at P is
+\[ \mbox{min } \{\ i\ |\ Ax^{i} \mbox{ is a term of } f(x,y), 
+\mbox{ for some A} \neq 0\}\]
+\end{lemma}
+%
+\begin{proof}
+(This proof is a variation upon the discussion of \cite[p.\ 53]{wa}.)
+The intersections of $f(x,y)$ with the x-axis 
+(whose parameterization is \mbox{$x=t,\ y=0$})
+are represented by the roots of $f(t,0)=0$.
+The number of intersections of $f(x,y)$ with the x-axis at the origin is
+equal to the multiplicity of the root $t=0$ in $f(t,0)=0$.
+The Taylor expansion of $f(t,0)$ is 
+\[ f(0,0) + f_{x}(0,0)*t + \frac{1}{2!}f_{xx}(0,0)*t^{2} +
+   \frac{1}{3!}f_{xxx}(0,0)*t^{3} + \ldots \]
+and the multiplicity of the root $t=0$ is the lowest nonzero power of t
+in this expansion.
+That is, the multiplicity of intersection of $f(x,y)$ with the x-axis at
+the origin is 
+\[ \mbox{min } \{\ i\ |\ (\frac{df}{dx^{i}})(0,0) \neq 0 \} \]
+\[ = \mbox{min } \{\ i\ |\ Ax^{i} \mbox{ is a term of } f(x,y), 
+\mbox{ for some A} \neq 0\}\]
+\end{proof}
+%
+\section{Space Curves}
+\label{sec-spacecurve}
+
+The convex-segment 
+method has been presented as a technique for sorting plane curves.
+Indeed, its reliance upon a cell partition of the curve's plane suggests that
+it can only be used to sort plane curves.
+However, we shall now show that space curves can also be sorted by the new 
+method.
+
+We solve a sorting problem for a space curve by mapping it to a related
+sorting problem for a plane curve.
+The plane curve is derived by projecting the space curve.
+%
+\begin{definition}
+Let B be a plane and let q be a point, $q \notin B$.
+The {\bf (central) projection of a point} p (with respect to q and B)
+is the point of intersection of the line $\lyne{pq}$ with B.
+The {\bf (central) projection of a space curve} C (with respect to q 
+and B) is the plane curve generated by the projections of the points of C.
+B is the {\bf plane of projection} and q is the 
+{\bf center of projection}.
+\end{definition}
+%
+\begin{lemma}
+\label{lem-sec5-project}
+Let $z=0$ be the plane of projection and let $(x_{c},y_{c},z_{c})$
+be the center of projection ($z_{c} \neq 0$).
+The projection map $P:\Re^{3} \rightarrow \Re^{2}$ is 
+\[ P(x_{3d}, y_{3d},z_{3d}) = (\frac{x_{c}z_{3d} - x_{3d}z_{c}}{z_{3d}-z_{c}},
+                             \frac{y_{c}z_{3d} - y_{3d}z_{c}}{z_{3d}-z_{c}})\]
+The inverse map $P^{-1}:\Re^{2} \rightarrow \Re^{3}$ is 
+\[P^{-1}(x_{2d},y_{2d})=(\frac{x_{2d}(z_{c}-z_{3d})+x_{c}z_{3d}}{z_{c}},
+                              \frac{y_{2d}(z_{c}-z_{3d})+y_{c}z_{3d}}{z_{c}},
+                              z_{3d}) \]
+The inverse image of $(x_{2d},y_{2d})$ must be expressed
+in terms of $z_{3d}$, since infinitely many points project to a given
+point on the plane (viz., all of the points on the line between 
+$(x_{2d},y_{2d},0)$ and $(x_{c},y_{c},z_{c})$).
+\end{lemma}
+%
+\begin{proof}
+The line through $(x_{c},y_{c},z_{c})$ and $(x_{3d},y_{3d},z_{3d})$ 
+can be parameterized by 
+$((x_{3d}-x_{c})t + x_{c},(y_{3d}-y_{c})t+y_{c},(z_{3d}-z_{c})t+z_{c})$.
+The projection of $(x_{3d},y_{3d},z_{3d})$ lies on this line 
+and has a z-coordinate of 0.  
+Therefore, it corresponds to the parameter value $\hat{t}$
+where $(z_{3d}-z_{c})\hat{t} + z_{c} = 0 \Rightarrow \hat{t} = 
+\frac{-z_{c}}{z_{3d}-z_{c}}$.
+Therefore, 
+\[ \mbox{proj }(x_{3d},y_{3d},z_{3d}) 
+= ((x_{3d}-x_{c})(\frac{-z_{c}}{z_{3d}-z_{c}}) + x_{c},\ 
+   (y_{3d}-y_{c})(\frac{-z_{c}}{z_{3d}-z_{c}}) + y_{c},\ 0) \]
+\[ = (\frac{z_{c}(x_{c}-x_{3d}) + x_{c}(z_{3d}-z_{c})}{z_{3d}-z_{c}},
+\ \frac{z_{c}(y_{c}-y_{3d}) + y_{c}(z_{3d}-z_{c})}
+   {z_{3d}-z_{c}},\ 0) \]
+\[ = (\frac{x_{c} z_{3d} - z_{c} x_{3d}}{z_{3d}-z_{c}},
+\ \frac{y_{c} z_{3d} - z_{c} y_{3d}}{z_{3d} - z_{c}},\ 0) \]
+%
+The inverse map can be derived by solving for $x_{3d}$ and $y_{3d}$
+in the equations
+\[ x_{2d} = \frac{x_{c}z_{3d} - x_{3d}z_{c}}{z_{3d}-z_{c}},
+\ y_{2d} = \frac{y_{c}z_{3d} - y_{3d}z_{c}}{z_{3d}-z_{c}} \]
+\end{proof}
+
+\begin{corollary}
+\label{cor-chap2-sec5}
+Let $z=0$ be the plane of projection and let $(x_{c},y_{c},z_{c})$
+be the center of projection ($z_{c} \neq 0$).
+Let A be the plane $z = z_{c}$.
+The projection map $P:\Re^{3} \rightarrow \Re^{2}$ is continuous on 
+$\Re^{3} \setminus A$.
+(That is, \mbox{$lim_{\alpha \rightarrow 0}\ P(X+\alpha) = P(X)$} for
+$X \in \Re^{3} \setminus A$.)
+\end{corollary}
+\begin{proof}
+If f(x), g(x), and h(x) are polynomials, then the rational map
+$(\frac{f(x)}{h(x)},\frac{g(x)}{h(x)})$ is continuous at all points where 
+the denominator is not zero.
+\end{proof}
+%
+\begin{definition}
+Order on the segment SEG is {\bf preserved} by the projection map
+\mbox{proj:$\Re^{3} \rightarrow \Re^{2}$}
+if proj(SEG) is connected and,
+\mbox{for all $P_{1},P_{2},P_{3} \in $ SEG},
+proj($P_{2}$) lies in between proj($P_{1}$) and proj($P_{3}$)
+whenever $P_{2}$ lies in between $P_{1}$ and $P_{3}$.
+\end{definition}
+
+We want to choose a projection that preserves order on the sort segment
+of the space curve.
+We do this by ensuring that the projection map is continuous on the 
+entire sort segment.
+In the rest of this section, F is a space curve defined by 
+the intersection of the two
+%\footnote{As discussed in 
+%Appendix~\ref{app-defn}, we only deal with space curves that are
+%defined by the intersection of two surfaces.}
+(affine) surfaces 
+$f_{1}(x,y,z) = 0$ and $f_{2}(x,y,z) = 0$,
+and \arc{PQ} is a finite segment of F (viz., the sort segment).
+%
+\begin{lemma}
+\label{thm-orderpreserve}
+Let \mbox{proj$_{C}$} be the projection map for the projection onto the plane
+$z=0$ from the center of projection C.
+There exists a point $C \in \Re^{3}$ such that order on \arc{PQ}\ is 
+preserved by the projection \mbox{proj$_{C}$}.
+\end{lemma}
+%
+\begin{proof}
+Let $\alpha = \mbox{max} \{\ z' \mid (x',y',z') \in \arc{PQ} \}$.
+$\alpha$ exists because \arc{PQ}\ is a finite segment.
+Choose C = $(x_{C},y_{C},z_{C})$ so that $z_{C} > \alpha$.
+proj$_{C}$ will be continuous on \arc{PQ}, by 
+Corollary~\ref{cor-chap2-sec5}.
+proj$_{C}(\arc{PQ})$ is connected, since it is the continuous image of a 
+connected segment.
+Let $P_{1},P_{2},P_{3}$ be points of \arc{PQ}\ such that $P_{2}$ lies
+in between $P_{1}$ and $P_{3}$.
+The continuity of proj$_{C}$ ensures that 
+$\mbox{proj}_{C}(P_{2})$ lies in between proj$_{C}(P_{1})$ and 
+proj$_{C}(P_{3})$.
+\end{proof}
+
+In solid modeling applications, \arc{PQ}\ will usually be the finite
+segment of a space curve that defines an edge of a solid model.
+The model will be bounded and, in particular, it will be bounded in the z 
+direction.
+Therefore, the 
+center of projection can be chosen above this bound to guarantee
+the continuity of the projection map on the sort segment, and thus
+the preservation of order on the projected sort segment.
+In the rest of this section, let $z=0$ be the plane of projection and
+let $(x_{c},y_{c},z_{c})$ be the center of projection, chosen so that the
+projection map is continuous on \arc{PQ}.
+
+In order to apply the convex-segment 
+method to the projection proj(\arc{PQ}) of the
+sort segment, we must know the implicit equation 
+of the irreducible 
+component of the projection that contains proj(\arc{PQ}).
+The following lemma shows how this equation 
+%can be determined from the equation \mbox{$f_{1}=0 \cap f_{2}=0$}
+can be determined from the equation $f_{1}$=0 $\cap$ $f_{2}$=0
+of the original space curve.  
+It makes use of the resultant of a pair of polynomials, which is defined
+in Appendix~\ref{app-defn}.
+%
+\begin{lemma}
+\label{lem-sec5-planeeqn}
+The projection of F is contained in the plane curve defined by
+the resultant $R(x,y)$ of 
+\( g_{1}(x,y,z) := f_{1}(\frac{x(z_{c}-z)+x_{c}z}{z_{c}},
+                              \frac{y(z_{c}-z)+y_{c}z}{z_{c}},
+                              z) \) and
+\( g_{2}(x,y,z) := f_{2}(\frac{x(z_{c}-z)+x_{c}z}{z_{c}},
+                              \frac{y(z_{c}-z)+y_{c}z}{z_{c}},
+                              z) \) with respect to z.
+Moreover, the projection of \arc{PQ}\ is contained in a 
+connected component of the curve $R(x,y) = 0$.
+\end{lemma}
+%
+\begin{proof}
+Let $\beta = (x_{2d},y_{2d},0)$ be a point of the projection of F.
+By Lemma~\ref{lem-sec5-project}, the point of F that projects into 
+$\beta$ is 
+$(\frac{x_{2d}(z_{c}-z_{3d})+x_{c}z_{3d}}{z_{c}},
+                              \frac{y_{2d}(z_{c}-z_{3d})+y_{c}z_{3d}}{z_{c}},
+                              z_{3d})$, for some $z_{3d}$.
+That is, there exists $z_{3d}$ such that
+\[ f_{1}(\frac{x_{2d}(z_{c}-z_{3d})+x_{c}z_{3d}}{z_{c}},
+                              \frac{y_{2d}(z_{c}-z_{3d})+y_{c}z_{3d}}{z_{c}},
+                              z_{3d}) = 0 \]
+and
+\[ f_{2}(\frac{x_{2d}(z_{c}-z_{3d})+x_{c}z_{3d}}{z_{c}},
+                              \frac{y_{2d}(z_{c}-z_{3d})+y_{c}z_{3d}}{z_{c}},
+                              z_{3d}) = 0 \]
+Therefore, for every point \mbox{$(x_{0},y_{0})$} of the projection of F,
+there exists $z_{0}$ 
+such that \mbox{$g_{1}(x_{0},y_{0},z_{0}) = g_{2}(x_{0},y_{0},z_{0}) = 0$}.
+Thus, by Lemma~\ref{resultant}, for every point \mbox{$(x_{0},y_{0})$} of the 
+projection, \mbox{$R(x_{0},y_{0}) = 0$}.
+Therefore, \mbox{$R(x,y)=0$} contains the projection of F.
+Since the projection map is continuous on \arc{PQ} and the continuous
+image of a connected set is 
+connected,
+the projection of \arc{PQ}\ is connected.
+\end{proof}
+
+The problem of sorting points along a space curve has now been successfully
+reduced to a problem of sorting points along a plane curve.
+The equation of the plane curve is computed by the method of 
+Lemma~\ref{lem-sec5-planeeqn},
+and the sortpoints, start point, and end point are the projections of their
+counterparts on the space curve.
+
+Let A be the plane that contains the center of projection and lies parallel
+to the plane of projection.
+By the choice of the center of projection (Lemma~\ref{thm-orderpreserve}),
+all of the sort segment lies on
+the same side of A; and a sortpoint will lie on the same connected 
+component as the sort segment if and only if it lies on this side of A.
+Therefore, 
+since we want all of the projected sortpoints to lie on the same connected
+component of the projected plane curve (Section~\ref{a-chap1-sec}),
+we discard all sortpoints on the space curve
+that lie on the opposite side of A from the sort segment.
+These sortpoints do not lie on the sort segment, so they can be safely
+ignored.
+
+If the resultant of Lemma~\ref{lem-sec5-planeeqn}
+is factored into irreducible components (perhaps by the method of \cite{berlekamp}
+or \cite{wang}),
+then it is simple
+to determine the component associated with the projection of the sort segment.
+Let proj(P) be the projection of a sortpoint of the space curve
+(one that has not been discarded).
+The desired component is the unique one that contains proj(P).
+
+It is possible that a sortpoint of the space curve could 
+project into a singularity.
+This must be avoided because the sorting of a set of points that
+includes singularities can be ambiguous (Section~\ref{a-chap1-sec}).
+Therefore, if a projected sortpoint proj(P) is discovered to be a 
+singularity when the singularities and flexes of the projection are
+computed, then proj(P) is offset along the appropriate branch 
+of the singularity
+by crawling a short distance along the space curve from the original 
+sortpoint P to a point $P_{\epsilon}$.
+That is, if proj(P) is a singularity, then we map P to 
+proj($P_{\epsilon}$), which is not a singularity.
+(The crawl is stable because P cannot be a singularity.
+Care must be taken to make the crawl on the space curve short so that
+it does not crawl over another sortpoint, since this would disrupt the order
+of the sortpoints.)
+
+Similarly, if two sortpoints $S_{1}$ and $S_{2}$ of the space curve
+project to the same point of the projection, then $S_{1}$ should be mapped
+to \mbox{proj$(S_{1}^{\epsilon})$} and $S_{2}$ to 
+\mbox{proj$(S_{2}^{\epsilon})$}, where $S_{i}^{\epsilon}$ is found by
+crawling a short distance from $S_{i}$.
+(Care must be taken that $S_{1}^{\epsilon}$ and $S_{2}^{\epsilon}$
+do not still map to the same point.)
+
+The computation of the resultant 
+of Lemma~\ref{lem-sec5-planeeqn} and its subsequent factorization 
+(in order to find the irreducible component that contains the projection)
+are expensive operations.
+The expense of the factorization is the lesser problem,
+since the resultant is often already irreducible.
+We conclude that although the convex-segment 
+method can indeed be used to sort points on a space curve,
+space curve sorting is considerably more expensive than 
+plane curve sorting.
+
+Since it can be difficult to find the parameterization of a space curve,
+the parameterization method may also decide to sort the projection of the
+space curve rather than the space curve itself.
+Recall that a rational parameterization of the space curve $S_{1} \cap S_{2}$
+is derived from a low degree, rational parameterization of $S_{1}$ or $S_{2}$.
+If there is no such parameterization (or no such parameterization
+is computable by a known algorithm),
+then the only recourse may be to look for a 
+parameterization of the projection and sort it instead.
+Therefore, the expense of projecting the space curve to a plane curve
+may have to be absorbed by the parameterization method as well.
+%
+\section{A Broad Comparison of the Methods}
+
+We have been introduced to three methods of sorting points along an
+algebraic curve.
+The crawling method sorts the points by making short jumps along the curve.
+The parameterization method observes that the sorting of points 
+on a line is simple and
+tries to unwind the curve into a line by parameterizing it.
+The convex-segment method borrows from both of these methods.
+
+Like the crawling method, the convex-segment method 
+leaps from one point to another along the curve
+(viz., from a \wallpoint\ to its partner).
+However, its jumps are large while the crawling method's jumps must be
+very small.
+Moreover, once the partner of each \wallpoint\ of the cell partition has been
+computed (which can be done once and for all in a preprocessing step),
+each jump of the convex-segment method can be
+done very quickly; whereas, the crawling method 
+must grope for some time (by applying
+Newton's method) to find the destination of each jump.
+In short, the convex-segment method 
+makes large, bold jumps while the crawling method makes small, timid ones.
+
+The convex-segment method is similar to the parameterization method because
+they both reduce the sorting problem to an easier one.
+However, rather than trying to reduce the entire problem 
+(from sorting points
+on a curve to sorting real numbers), the convex-segment method
+divides the problem up into many
+smaller ones and reduces each one of these (from sorting points on a convex 
+segment to sorting the angles those points make with a central point).
+We shall see that the many small reductions of the convex-segment method
+can be done more quickly than the single, large reduction of
+the parameterization method.
+

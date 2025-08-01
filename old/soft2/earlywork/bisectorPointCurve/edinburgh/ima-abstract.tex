@@ -1,0 +1,140 @@
+\documentstyle[12pt,titlepage]{article}
+\begin{document}
+
+\newcommand{\ACMTOG}{{\sl ACM Trans.\ Graph.\ }}
+\newcommand{\AMM}{{\sl Amer.\ Math.\ Monthly\ }}
+\newcommand{\BIT}{{\sl BIT\ }}
+\newcommand{\CACM}{{\sl Commun.\ ACM\ }}
+\newcommand{\CAD}{{\sl Comput.\ Aided Design\ }}
+\newcommand{\CAGD}{{\sl Comput.\ Aided Geom.\ Design\ }}
+\newcommand{\CGIP}{{\sl Comput.\ Graph.\ Image Proc.\ }}
+\newcommand{\CJ}{{\sl Computer\ J.\ }}
+\newcommand{\DCG}{{\sl Discrete\ Comput.\ Geom.\ }}
+\newcommand{\IBMJRD}{{\sl IBM\ J.\ Res.\ Develop.\ }}
+\newcommand{\IJCGA}{{\sl Int.\ J.\ Comput.\ Geom.\ Applic.\ }}
+\newcommand{\IEEECGA}{{\sl IEEE Comput.\ Graph.\ Applic.\ }}
+\newcommand{\IEEETPAMI}{{\sl IEEE Trans.\ Pattern Anal.\ Machine Intell.\ }}
+\newcommand{\JACM}{{\sl J.\ Assoc.\ Comput.\ Mach.\ }}
+\newcommand{\JAT}{{\sl J.\ Approx.\ Theory\ }}
+\newcommand{\MC}{{\sl Math.\ Comp.\ }}
+\newcommand{\MI}{{\sl Math.\ Intelligencer\ }}
+\newcommand{\NM}{{\sl Numer.\ Math.\ }}
+\newcommand{\SIAMJNA}{{\sl SIAM J.\ Numer.\ Anal.\ }}
+\newcommand{\SIAMR}{{\sl SIAM Review\ }}
+
+\title{
+Computing the bisector \\
+of a point and a plane curve
+}
+
+\author{
+Rida~T.~Farouki \\
+IBM Thomas~J.~Watson Research Center, \\
+P.~O.~Box 218, Yorktown Heights, NY 10598. \\
+farouki@watson.ibm.com \\ \\
+John~K.~Johnstone \\
+Department of Computer Science, \\
+The Johns Hopkins University, Baltimore, MD 21218. \\
+jj@cs.jhu.edu
+}
+
+\date{}
+
+\maketitle
+
+In this paper, 
+we investigate the bisector of a fixed point ${\bf p}$ and a smooth
+plane curve $C$ --- {\it i.e.}, the locus traced by a point
+that remains equidistant with respect to ${\bf p}$ and $C$ ---
+in the case that $C$ admits a regular polynomial or rational parameterization. 
+Our method also applies to finite segments of plane curves.
+
+The bisector is a basic component of a geometric vocabulary
+because of the importance of distance in geometrical applications.
+Point/curve bisectors arise in a variety of geometric ``reasoning'' 
+and geometric
+decomposition problems ({\it e.g.}, planning paths of maximum
+clearance in robotics, or computing Voronoi diagrams for areas
+with curvilinear boundaries). Although they are much simpler
+than other loci --- line/curve and curve/curve bisectors ---
+that arise in these contexts, no systematic analysis of the
+properties of point/curve bisectors is currently available
+in the literature.
+Related work on the bisector has been done by Hoffmann and Vermeer \cite{HV91},
+Hoffmann \cite{H90}, Dutta and Hoffmann \cite{DH90},
+Bookstein \cite{bookstein79}, Lee \cite{lee82},
+Yap \cite{yap87}, Yap and Alt \cite{yap89}, and
+Nackman and Srinivasan \cite{nackman91}.
+
+The parabola may be regarded as the bisector of a point ${\bf p}$ and
+a line $L$.
+If we substitute a smooth plane curve $C$ in place of
+the straight line $L$, the bisector locus is of a more
+subtle nature. This paper is concerned with investigating
+the geometric properties of such loci, and formulating
+tractable representations for them. 
+
+It is shown that the bisector may be
+regarded as (a subset of) a ``variable--distance'' offset curve to
+$C$ which has the attractive property, unlike fixed--distance offsets,
+of being generically a rational curve. 
+A trimming procedure, which identifies the parametric subsegments
+of this curve that constitute the true bisector, is described.
+It turns out that this trimming should be done
+at parameter values associated with inflection points of $C$,
+class points of $C$ (points whose tangents pass through ${\bf p}$),
+and circular points of $C$ (points whose circles of curvature
+pass through ${\bf p}$), as well as at 
+self-intersections of the untrimmed bisector,
+in order to reveal the true bisector.
+We give explicit polynomials whose solution identifies the parameter
+values of these special points,
+and make some observations about the position of self-intersections.
+
+We show that the time to compute the bisector of a point and a 
+regular polynomial parametric curve of degree $n$ is 
+$O(9n^{2}) \varphi(2n-1) + \varphi(O(9n^2)) + O(9n^3)$, where 
+$\varphi(n)$ is the time to solve an equation of degree $n$.
+
+\clearpage
+
+\begin{thebibliography}{99}
+
+\bibitem{bookstein79}
+F.~L.~Bookstein (1979), The line--skeleton, \CGIP{\bf 11}, 123--137.
+
+\bibitem{DH90}
+D.~Dutta and C.~M.~Hoffmann (1990), A geometric investigation of the
+skeleton of CSG objects, {\it Technical Report UM--MEAM--90--02},
+Dept.\ of Mechanical Engineering, The University of Michigan.
+
+\bibitem{H90}
+C.~M.~Hoffmann (1990), A dimensionality paradigm for surface interrogations,
+\CAGD{\bf 7}, 517--532.
+
+\bibitem{HV91}
+C.~M.~Hoffmann and P.~Vermeer (1991), Eliminating extraneous solutions in
+curve and surface operations, \IJCGA{\bf 1}, 47--66.
+
+\bibitem{lee82}
+D.~T.~Lee (1982), Medial axis transformation of a planar shape,
+\IEEETPAMI{PAMI--{\bf 4}}, 363--369.
+
+\bibitem{nackman91}
+L.~R.~Nackman and V.~Srinivasan (1991), Bisectors of linearly separable
+sets, \DCG{\bf 6}, 263--275.
+
+\bibitem{yap87}
+C.--K.~Yap (1987), An ${\rm O}(n\log n)$ algorithm for the Voronoi
+diagram of a set of simple curve segments, \DCG{\bf 2}, 365--393.
+
+\bibitem{yap89}
+C.--K.~Yap and H.~Alt (1989), Motion planning in the {\it
+CL\/}--Environment, in {\it Lecture notes in computer science 382\/}
+(F.~Dehne, J.--R.~Sack, and N.~Santoro, eds.), Springer, New York,
+373--380 (Proceedings of the Workshop on Algorithms and Data
+Structures WADS~'89, Ottawa, Canada, August 17--19, 1989).
+
+\end{thebibliography}
+
+\end{document}

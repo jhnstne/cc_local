@@ -1,0 +1,5 @@
+mpx
+cip (after creating window)
+
+add .sp 1i to beginning of pic file
+pic <file> | itroff

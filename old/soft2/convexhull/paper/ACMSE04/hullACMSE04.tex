@@ -1,0 +1,595 @@
+% hull.tex
+% Last updated: 10 February 2004
+% Alternate ACM SIG Proceedings document using LaTeX2e
+\documentclass{sig-alternate}
+
+\newcommand{\Comment}[1]{\relax}  % makes a "comment" (not expanded)
+\newcommand{\QED}{\vrule height 1.4ex width 1.0ex depth -.1ex\ \vspace{.3in}} % square box
+\newcommand{\lyne}[1]{\mbox{$\stackrel{\leftrightarrow}{#1}$}}
+\newcommand{\seg}[1]{\mbox{$\overline{#1}$}}
+\newcommand{\prf}{\noindent{{\bf Proof}:\ \ \ }}
+\newcommand{\choice}[2]{\mbox{\footnotesize{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}      
+\newcommand{\scriptchoice}[2]{\mbox{\scriptsize{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}
+\newcommand{\tinychoice}[2]{\mbox{\tiny{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}
+
+\newtheorem{theorem}{Theorem}	
+\newtheorem{rmk}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{defn2}[theorem]{Definition}
+\newtheorem{observation}[theorem]{Observation}
+
+\title{Giftwrapping a curve with the convex hull}
+% A smooth Jarvis march
+% Smooth convex hull of a curve
+% A smooth Graham's scan for the convex hull of a curve
+% Hulls, kernels, and giftwrapping of smooth curves
+% The convex hull of a smooth curve
+\numberofauthors{1}
+\author{
+\alignauthor J.K. Johnstone\thanks{This work was supported in part by the National Science Foundation under grant CCR-0203586.}\\
+\affaddr{Geometric Modeling Lab}\\
+\affaddr{Computer and Information Sciences}\\
+\affaddr{University of Alabama at Birmingham}\\
+\affaddr{University Station, Birmingham, AL, USA 35294}\\
+\email{jj@cis.uab.edu}
+}
+
+\begin{document}
+\conferenceinfo{ACMSE}{'04, April 2-3, 2004, Huntsville, Alabama USA.}
+\CopyrightYear{2004}
+\maketitle
+
+\begin{abstract}
+We develop an algorithm to compute the convex hull of a closed planar parametric curve.
+The algorithm sweeps a tangent around the curve, using bitangents
+to define events and effectively wrapping a tangent around the hull.
+% giftwrapping the curve with the hull.
+First, a point on the hull is found using a walk out of a concavity and next,
+the entire hull is found using a walk punctuated by bitangents.
+The algorithm is a smooth analogue to two classical computational geometry algorithms:
+plane sweep and giftwrapping.
+% We giftwrap the curve with the hull,
+% This algorithm is a smooth analogue to the Jarvis march giftwrapping algorithm
+% for computing the convex hull of a set of points.
+% using a smooth analogue of the plane sweep algorithm, in which the vertical line
+% is replaced by a tangent and bitangents are used as events.
+It leverages our recent work on the computation of bitangents.
+% The algorithm is practical since it only requires the computation of bitangents 
+% and a few line-curve intersections.
+% What about curves with cusps?} No problem, you simply have degenerate curve segments between
+% bitangent endpoints.
+% {\bf What about tritangents?} Not considered by Elber either. Simply ignore the middle point of
+% tangency.
+\end{abstract}
+
+\category{I.3.5}{Computer Graphics}{Computational Geometry and Object Modeling}[Geometric algorithms, languages, and systems, splines.]
+\keywords{Convex hull, bitangent, plane sweep, giftwrapping.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+
+The bitangents of a curve are the lines that are tangent to the curve in two distinct places
+(Figure~\ref{fig:convhullob3a}).
+Once the bitangents of a curve are known, 
+it becomes feasible to build many secondary structures at a reasonable cost,
+such as the convex hull and the kernel.
+In this paper, we consider the construction of the convex hull of a closed planar parametric curve
+(Figure~\ref{fig:curveob1b}).
+The convex hull is useful to simplify algorithms such as interference detection,
+to diagnose concavities, and for general scene analysis.
+Structures like the hull and kernel have been classically computed for polygons.
+The calculation of these structures in a smooth environment,
+as opposed to a polygonal environment built from a discrete sampling of the
+smooth environment, can significantly simplify the structures and improve their accuracy.
+
+In \cite{jj01}, we showed how to compute the bitangents of a parametric curve
+efficiently using a dual representation of the tangent space of the curve,
+and intersection in dual space.
+Last year, we studied the kernel of a smooth curve 
+and reduced it to a convex hull problem \cite{jj03}.
+In this paper, we address the hull problem itself.
+
+Our hull algorithm sweeps a tangent around the curve, 
+using bitangents to define events % where convexity tests must be performed
+and effectively wrapping a tangent around the hull.
+This is a smooth analogue to two classical computational geometry algorithms:
+plane sweep and giftwrapping.
+We define these related approaches and previous work on the convex hull in Section~\ref{sec:work},
+and explore the relationships to our algorithm in Section~\ref{sec:analysis}.
+The algorithm for the convex hull is presented in Section~\ref{sec:hull}.
+We conclude in Section~\ref{sec:conclusions}.
+
+\begin{figure}[h]
+\begin{center}
+\begin{picture}(10,10)(0,0)
+\put(70,-10){\makebox(0,0){(a)}}
+\end{picture}
+\includegraphics*[scale=.4]{../img/jjhu1Gray.jpg}
+% \vspace{.2in}
+\begin{picture}(10,10)(0,0)
+\put(70,-10){\makebox(0,0){(b)}}
+\end{picture}
+\includegraphics*[scale=.4]{../img/jjhu2Gray.jpg}
+\end{center}
+\caption{(a) A smooth curve and (b) its convex hull}
+\label{fig:curveob1b}
+% convexhull -p -d 10 data/ob1b.pts
+% kernel -p -d 10 data/ob1b.pts
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \clearpage
+
+\section{Related work}
+\label{sec:work}
+
+The convex hull of S is the smallest convex set that contains S.
+The convex hull of a finite set of points, and by extension a polygon,
+is one of the classical computational geometry problems,
+and has been intensely studied for decades \cite{preparata85}.
+We mention those algorithms most related to the smooth algorithm in this paper.
+
+Graham's O($n \log n$) algorithm for the convex hull of a set of points in 2-space
+ \cite{graham72}
+is arguably the first paper in computational geometry. % \cite{orourke94}. % p. 8
+% Consider the computation of the convex hull of $N$ points in the plane by Graham's scan.
+In Graham's scan, we sort the $n$ points radially about an internal point
+and then traverse this list, discarding points $p_i$ such that
+$p_{i-1} p_i p_{i+1}$ makes a right turn (reflex angle).
+If the points are the ordered vertices of a polygon,
+Graham's scan may be interpreted as a sweep around 
+the boundary of the polygon, testing for reflex angles.
+
+The Jarvis march \cite{jarvis73} uses giftwrapping to compute the hull.
+Starting at the lowest point, which must be a hull point, the next point
+on the hull is the one with the smallest turning angle from horizontal.
+This defines the first hull edge.
+Subsequent hull points are again found as the point with the smallest turning angle,
+this time from the present hull edge.
+Notice that this can be interpreted as wrapping a cord around the hull, picking
+up a hull vertex and hull edge whenever the cord touches a point.
+Thus, it is a simple example of giftwrapping.
+The Jarvis march is an $O(hn)$ algorithm, where $h$ is the number of vertices on the hull,
+so it behaves best when many points lie in the interior of the hull.
+
+The plane (or line) sweep \cite{preparata85} % also edelsbrunner,mehlhorn
+is another algorithmic technique that is related to our smooth hull algorithm.
+A vertical line is swept across the plane, punctuated by events.
+% such as in the computation of the intersections of a line arrangement).
+In a classical vertical sweep, say of a line arrangement, events are
+defined by intersections and vertex endpoints and the order of the lines 
+is adjusted at these events.
+
+The convex hull of a smooth curve has received far less attention
+than the convex hull of a set of points or a polygon.
+Two other approaches are notable.
+Bajaj and Kim \cite{bajaj91} compute the convex hull of an algebraic curve $f(x,y)=0$.
+Elber, Kim and Heo \cite{elber01} compute the convex hull of a rational curve
+using the zero-set of a system of equations to characterize the segments of the hull.
+An emphasis is placed on avoiding the computation of bitangents that do not participate
+in the hull.
+Our emphasis is instead on finding the correct bitangents that 
+lie on the hull when all bitangents are available, since
+we are able to find all bitangents efficiently using our dual method \cite{jj01}.
+We are also particularly interested in an easily implementable algorithm.
+\cite{seong04} recently studied the convex hull of a parametric surface.
+
+A note on the computation of bitangents, which are fundamental to this algorithm.
+The computation of bitangents reduces to curve intersection in dual space, as follows
+\cite{jj01}.
+Using the dualization of a line in 2-space to a point in projective 2-space,
+the tangent space of a curve (the space of its tangent lines) can be dualized
+to a curve, called the tangential curve.
+The bitangents of two curves A and B 
+correspond to intersections of the tangential curves of A and B.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Smooth hull}
+\label{sec:hull}
+
+Consider the convex hull of a closed plane curve $C$.
+
+\begin{defn2}
+A line is {\bf free} if it does not intersect $C$.
+A point of tangency is not counted as an intersection.
+\end{defn2}
+
+The following lemma is also proved in \cite{elber01}. 
+
+\begin{lemma}
+\label{lem:condition}
+Let $C$ be a closed plane curve.
+The point $P \in C$ lies on the boundary of the convex hull of $C$ if and only if
+the tangent at $P$ is free.
+\end{lemma}
+\prf
+The tangent of a point on the boundary of the convex hull 
+defines a halfplane that contains the curve 
+(since the convex hull of a point set is the intersection of the halfplanes 
+that contain the point set).
+The tangent of a point inside a concavity lies inside the convex hull, so it
+clearly intersects the curve.
+%	More formally but no better,
+%	A tangent defines a containing halfplane if and only if it is free.
+%	The halfplane defined by the tangent at $P$ is clearly a limit halfplane
+%	in this direction and therefore a boundary point of the hull if it is free.
+%	Conversely, if $P$ lies on the convex hull boundary, 
+%	then some halfplane through $P$ is containing.
+%	But the only possible containing halfplane through $P$
+%	is its tangent halfplane.
+\QED
+
+	% convexhull -p -d 10 data/ob1b.pts
+\begin{figure}[h]
+\begin{center}
+\includegraphics*[scale=.4]{../img/jjhu3aGray.jpg} 
+\includegraphics*[scale=.4]{../img/jjhu3bGray.jpg}
+\includegraphics*[scale=.4]{../img/jjhu3cGray.jpg}
+\end{center}
+\caption{A point of the convex hull has a free tangent}
+\label{fig:tangent}
+\end{figure}
+
+Since there are an infinite number of tangents to test for freedom on a curve,
+Lemma~\ref{lem:condition} does not yield a useful algorithm for constructing the convex hull.
+However, adding coherence does \cite{foleyvandam}.
+Consider walking along the curve.
+If the tangent is free at some point, it will remain free for some time.
+In order to lose freedom, the tangent must begin to intersect the curve,
+an event that will occur at a free bitangent. % technically, immediately after
+By the same argument, a tangent will only regain freedom as it passes through a free bitangent.
+We conclude that we do not need to test every tangent for freedom, only the bitangents.
+
+\begin{theorem}
+\label{thm:chull}
+Let $C$ be a closed plane curve.
+The convex hull of $C$ is bounded by its free bitangents
+and the curve segments of $C$ between these bitangents.
+\end{theorem}
+
+This issue can be interpreted in another way.
+The convex hull must cap the concavities of $C$,
+and the appropriate caps are bitangents of $C$ (Figure~\ref{fig:curveob1b}b).
+The only question is which bitangents?
+Lemma~\ref{lem:condition} shows that the bitangents on the hull are the free bitangents.
+
+% A better algorithm (a form of smooth giftwrapping)
+
+The obvious algorithm suggested by Theorem~\ref{thm:chull} is to compute
+the $b$ bitangents of $C$ \cite{jj01} and perform $b$ line-curve intersections 
+to filter these bitangents down to free bitangents. 
+The rest of this section shows that we can do better, on average.
+The free bitangents can be computed with fewer intersection tests using a walk around the hull.
+
+Imagine walking around the convex hull, starting at a point of $C(t)$
+that lies on the convex hull.
+To stay on the hull, it is enough to ensure that we never enter a concavity.
+Fortunately, a free bitangent guards every concavity,
+so encountering an endpoint of a bitangent during our hull walk
+indicates that we are entering a concavity.
+Whenever we meet a bitangent endpoint, we shall mark the associated bitangent
+as a free bitangent, leap over to the other side of the bitangent
+(thus leaping over the concavity), and continue the hull walk from there.
+In this way, the free bitangents can be gathered by walking around the curve:
+they are the only bitangents that are met during this walk.
+The walk also gathers the hull curve segments.
+Notice that the walk is virtual:
+'walking' across a curve segment is equivalent to moving to the next
+element in a sorted list of parameter values, as described below.
+Here is the high level algorithm for computing the convex hull.
+
+\vspace{.2in}
+
+\centerline{{\bf Algorithm 1: Computing the convex hull of $C$}}
+
+\begin{enumerate}
+\item Compute the bitangents of $C$.
+% \item Sort the parameter values of the endpoints of these bitangents.
+\item Find a point $P \in C$ on the convex hull.
+\item Walk around the curve starting at $P$, leaping across every bitangent that is met.
+  The hull consists of the bitangents and curve segments encountered in this walk.
+  Note that only free bitangents are found during this walk.
+\end{enumerate}
+
+This algorithm requires some elaboration.
+Algorithms~2 and 3 below implement steps~2 and 3.
+Since the boundary of the convex hull of a curve with no bitangents (a convex curve)
+is simply $C$, we may assume without loss of generality that $C$ has at least one bitangent.
+Let $\{E_0 = C(e_0), E_1 = C(e_1), \ldots, E_{2n-1} = C(e_{2n-1})\}$
+be the endpoints of the bitangents of $C(t)$, where $e_0 < e_1 < \ldots < e_{2n-1}$, and
+let $\{\seg{E_i E_{\mbox{\tiny{buddy}}(i)}}\}$ be the bitangents.
+In Algorithms~2 and 3, $\oplus$ and $\ominus$ represent addition and subtraction in modulo arithmetic.
+
+The walk must begin on the convex hull.
+Motivated by the Jarvis march, we could find a point of the hull by finding the lowest
+point of the curve.
+The lowest point has an horizontal tangent or it is a cusp, and can be found by
+solving $y'(t) = 0$.
+A second approach is to use a walk to find a point of the hull, which unifies step 2 with
+step 3.
+% To bootstrap the walk,
+% a seed point $P = C(t_{\mbox{\tiny{start}}})$
+% of the convex hull must be found (Step 2).
+% This seed point can be found using a walk.
+Starting at an arbitrary point of the curve
+% the beginning of the curve $C(a)$
+% (where $C(t)$ is defined over $t \in [a,b]$)
+and until we reach the convex hull, we can walk out of a concavity
+by moving to the next bitangent endpoint.
+This will soon reach a free bitangent.
+Notice that the following algorithm places the starting point in the middle of a segment 
+for robustness.
+% We finish by moving the start point to the middle of a hull curve segment
+% in order to make the ensuing walk robust.
+% the seed point should be in the interior of a hull curve segment
+% (e.g., not a bitangent endpoint).
+% For the same reason, if $t_{\mbox{\tiny{start}}} = a$ is a free bitangent endpoint, 
+% we should move 
+% $t_{\mbox{\tiny{start}}}$ forward or backward to the midpoint of the
+% next segment, whichever is free.
+\Comment{
+\item if the tangent at $C(a)$ does not intersect $C$
+\begin{itemize}
+\item if $a=e_i$ (some bitangent endpoint)
+\begin{itemize}
+\item if the tangent at $C(\frac{e_i + e_{i \oplus 1}}{2})$ does not intersect the curve
+\begin{itemize}
+\item choose $\frac{e_i + e_{i \oplus 1}}{2}$ as the starting point.
+\end{itemize}
+\item else choose $\frac{e_{i \ominus 1} + e_i}{2}$ as the starting point.
+\end{itemize}
+\item else choose $a$ as the starting point.
+\end{itemize}
+\item else
+\begin{itemize}
+}
+
+\vspace{.2in}
+
+\centerline{{\bf Algorithm 2:}}
+\centerline{{\bf A walk to find a starting point on the convex hull}}
+
+\begin{enumerate}
+
+\item $i \leftarrow 0$; $t_{\mbox{\tiny{start}}} \leftarrow \frac{e_0 + e_1}{2}$
+\item while the tangent at $C(t_{\mbox{\tiny{start}}})$ intersects $C$
+\begin{enumerate}
+\item	$i \leftarrow i + 1$
+\item	$t_{\mbox{\tiny{start}}} \leftarrow \frac{e_{i} + e_{i \oplus 1}}{2}$
+\end{enumerate}
+\item $C(t_{\mbox{\tiny{start}}})$ is a point on the convex hull.
+% \item $t_{\mbox{\tiny{start}}} \leftarrow \frac{e_i + e_{i \oplus 1}}{2}$.
+%	(If $t_{\mbox{\tiny{start}}} = a$, we may have to move to 
+%	$\frac{e_{i \ominus 1} + e_i}{2}$ instead, whichever is free.)
+\end{enumerate}
+
+Algorithm 2 walks out of a local concavity, probing the bitangents inside this concavity.
+Each probe requires a line-curve intersection.
+Since the bitangents inside a concavity are usually a small minority of the 
+bitangents of the entire curve, 
+the starting point can be found, on average, in far fewer than $b$ line-curve intersections
+(where $b$ is the number of bitangents).
+% since it only has to walk out of the local concavity.
+% That is, the bitangents in a local concavity are probed, rather than the bitangents across the entire
+% curve.
+The exact number of line-curve intersections depends on the nesting of concavities and on
+the position of the first probe, and varies from 1 in the best case to $b$ in the worst case
+(consider a cup with only one bitangent covering its one concavity).
+% not around the entire curve.
+% This is why we prefer finding the free bitangents through a walk.
+In theory, the lowest point solution is more efficient (no line curve intersections!), 
+but in practice Algorithm~2 is also a good choice.
+
+The remainder of the algorithm, the walk around the hull in Step~3 of Algorithm~1, 
+requires no more line-curve intersections.
+Consider an implementation of this walk.
+This algorithm collects the boundary of the convex hull in $CH$.
+
+
+\vspace{.2in}
+
+\centerline{{\bf Algorithm 3: A walk around the convex hull}}
+
+\begin{enumerate}
+\item 	If $C$ has no bitangents, return($C$).
+\item   $CH = \emptyset$ and let 
+        $(e_{i \ominus 1},e_i)$ be the segment that contains $t_{\mbox{\tiny{start}}}$.
+\item	do
+\begin{enumerate}
+\item	$CH = CH \cup \{\mbox{bitangent with endpoint $E_i$}\} $
+        % [Walk to the next bitangent] 
+	% add the bitangent with endpoint $E_i$ to the convex hull
+% 	(which will be a free bitangent)
+% \item   $\mbox{convhull}(C) = \mbox{convhull}(C) \cup$ 
+%	bitangent with endpoint $E_i$ 
+\item	$CH = CH \cup \{ S = \mbox{ segment from } E_{\mbox{\tiny{buddy}}(i)}$ 
+  $ \mbox{to }$ $E_{\mbox{\tiny{buddy}}(i) \oplus 1} \}$
+  % [Jump across this bitangent and continue to the next bitangent] 
+	% add the curve segment $S$ starting at $E_{\mbox{\tiny{buddy}}(i)}$
+	% and ending at $E_{\mbox{\tiny{buddy}}(i) \oplus 1}$
+	% to the convex hull
+% \item	$\mbox{convhull}(C) = \mbox{convhull}(C) \cup$ 
+%	curve segment $S$ starting at $E_{\mbox{buddy}(i)}$.
+\item	$i \leftarrow \mbox{buddy}(i) \oplus 1$
+\end{enumerate}
+ 	while $S$ does not contain the starting point $P$
+\item return($CH$)
+\end{enumerate}
+
+Step (3a) is equivalent to walking across a free bitangent of the hull.
+Step (3b) is equivalent to walking across the next curve segment of the hull.
+This walk requires no line-curve intersections and takes $O(f)$ time, 
+where $f$ is the number of free bitangents.
+
+\begin{example}
+Let's trace the algorithm on the simple example of Figure~\ref{fig:algtrace}.
+A starting point is found at $P$, by walking out of the concavity
+at the beginning of the curve $b$.
+During the walk of the convex hull, 
+the bitangent between endpoints 1 and 2 is added first,
+then the curve segment between 2 and 3, the bitangent between 3 and 4,
+and so on until we add the curve segment between 0 and 1,
+which contains $P$ and signals the completion of the hull.
+\end{example}
+
+	% convexhull -p -d 10 data/complexKernel.pts
+\begin{figure}[h]
+\begin{center}
+\includegraphics*[scale=.5]{../img/jjhu5aGray.jpg} 
+\includegraphics*[scale=.5]{../img/jjhu5cGray.jpg}
+\end{center}
+\caption{Computing the convex hull with a walk}
+\label{fig:algtrace}
+\end{figure}
+
+Note that a curve segment in step~3b of Algorithm~3 may be degenerate of zero length,
+if two bitangents meet at a point.
+This can be true at a cusp of the curve.
+
+Figure~\ref{fig:convhullob3a} is a good illustration of the power of the 
+algorithm.
+This curve has 23 bitangents, yet our walk can find the free bitangents
+with only one line-curve intersection (to find the starting point)
+rather than 23.
+
+	% convexhull -p -d 10 data/ob3a.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.5]{../img/jjhu4aGray.jpg}  
+\includegraphics*[scale=.5]{../img/jjhu4bGray.jpg}
+\includegraphics*[scale=.5]{../img/jjhu4cGray.jpg}
+\end{center}
+\caption{A curve, its bitangents, and its convex hull}
+\label{fig:convhullob3a}
+\end{figure}
+
+We conclude that the convex hull can be computed from the bitangents of a curve
+simply by finding the lowest point and sorting the bitangent endpoints.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{The kinship to polygonal algorithms}
+\label{sec:analysis}
+
+The proposed algorithm shares traits with three classical algorithms from computational geometry.
+First, it is a smooth version of the classical plane sweep algorithm, 
+in which the vertical line is replaced by a tangent line
+and events are defined by bitangents rather than line intersections.
+
+% \ifTalk
+% We can interpret our algorithm as a tangent sweep (a sweep through tangent space),
+% a smooth version of plane sweep.
+
+% In our sweep, we sweep a line controlled by the curve's tangent space,
+% where events are defined by bitangents (intersections in dual space).
+% In fact, we can avoid a physical sweep (just appealing to its structure)
+% and get its effects from a sorting of bitangent parameter values.
+% \fi
+
+The algorithm is also related to the Graham scan.
+Observe that a reflex angle on a polygon indicates a concavity.
+The sweep around the polygon of Graham's scan, testing for reflex angles, is 
+replaced by a sweep around the curve, 'testing' for free bitangents.
+However, there are two significant differences.
+% In the Graham scan, we must walk around the inside of the concavity until a nonreflex angle is
+% found, at which point the hull continues.
+Since the bitangents have been precomputed, we can immediately 
+bridge the concavity without traversing it,
+whereas the Graham scan must descend into the concavity.
+Moreover, we don't actually have to perform a freedom test at the bitangent events, 
+since the answer will always be in the affirmative.
+
+Consequently, the proposed algorithm looks most like the Jarvis march.
+We use a smooth version of giftwrapping, in which 
+the boundary of the hull is found by wrapping around until the next bitangent endpoint is found,
+which is necessarily the bitangent with the smallest turning angle.
+Just as the Jarvis march never visits the vertices and edges inside the hull,
+in the final walk of our algorithm, we do not visit the parts of the curve inside the hull.
+Consequently, our algorithm shares the output-sensitivity (efficiency 
+related to the size of the hull) of the Jarvis march.
+Once again, no computation (in this case of the smallest turning angle) is necessary
+once the bitangents have been sorted.
+
+% Notice that events associated with inactive bitangents are never encountered.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Conclusions}
+\label{sec:conclusions}
+
+We have presented an algorithm for computing the convex hull of a parametric curve.
+It defines the hull from the free bitangents that span its concavities
+and finds the free bitangents without a direct test for freedom, using a walk that
+stays on the hull simply by sorting the parameter values of bitangent endpoints.
+We are presently studying other problems in computer graphics that rely on the
+isolation of a subset of bitangents from a scene.
+
+\section{Acknowledgements}
+
+This work was supported in part by the National Science Foundation under grant
+CCR-0203586.
+
+\bibliographystyle{plain}
+\begin{thebibliography}{99}
+
+\bibitem{bajaj91}
+Bajaj, C. and M.-S. Kim (1991)
+Convex hulls of objects bounded by algebraic curves.
+Algorithmica 6, 533--553.
+
+\bibitem{elber01}
+Elber, G., M.-S. Kim and H.-S. Heo (2001)
+The Convex Hull of Rational Plane Curves.
+Graphical Models 63, 151--162.
+
+\bibitem{foleyvandam}
+J. Foley, A. van Dam, S. Feiner and J. Hughes (1996)
+Computer Graphics: Principles and Practice.
+Second Edition in C.
+Addison-Wesley (Reading, MA).
+
+\bibitem{graham72}
+Graham, R. (1972)
+An efficient algorithm for determining the convex hull of a finite planar set.
+Information Processing Letters 1, 132--133.
+
+\bibitem{jarvis73}
+Jarvis, R. (1973)
+On the identification of the convex hull of a finite set of points
+in the plane.
+Information Processing Letters 2, 18--21.
+
+\bibitem{jj01}
+Johnstone, J. (2001)
+A Parametric Solution to Common Tangents.
+International Conference on Shape Modelling and Applications (SMI2001),
+Genoa, Italy, IEEE Computer Society, 240--249.
+
+\bibitem{jj03}
+Johnstone, J. (2003)
+Kernels from hulls.
+41st Annual ACM Southeast Conference, Savannah, 354--358.
+
+\bibitem{preparata85}
+Preparata, F. and M. Shamos (1985)
+Computational Geometry: An Introduction.
+Springer-Verlag (New York).
+
+\bibitem{seong04}
+Seong, J., G. Elber, J. Johnstone and M.-S. Kim (2004)
+The Convex Hull of Freeform Surfaces.
+Computing, to appear.
+
+\end{thebibliography}
+
+\balancecolumns
+
+\end{document}

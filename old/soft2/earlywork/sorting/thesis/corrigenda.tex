@@ -1,0 +1,40 @@
+\newif\ifFull
+\Fullfalse
+% \Fulltrue
+\documentstyle[12pt]{article} 
+%
+\input{macros}
+%
+% Page format
+%
+\DoubleSpace
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\topmargin}{0pt}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+%
+%
+\begin{document}
+%
+{\bf Thesis Corrigenda}
+\vspace{.5in}
+\begin{enumerate}
+\item
+	p. 85, line 6: "O($mn^{3}\alpha[n]$) worst case time" should be
+	"O($m \log m n^{3}\alpha[n]$) worst case time" 
+\item
+	p. 87, line 5: O($n^{2}(2^{MAX}n)^{2}\alpha[2^{MAX}n]$) should be 
+	O($n^{2}(2^{MAX}n) + \alpha[2^{MAX}n]$).
+\item
+	p. 88, line 8: "takes O($p$) time" should be "takes O($p \log p$) time"
+\item	
+	p. 88, line 10: O($mn^{3}\alpha[n]$) should be O($m \log m n^{3}\alpha[n]$)
+\item
+	p. 88, Corollary 4.1: O($m+n^{3}$) should be O($m \log m +n^{3}$)
+\item
+	p. 88, Corollary 4.2: O($m$) should be O($m \log m$)
+\end{enumerate}
+
+\end{document}

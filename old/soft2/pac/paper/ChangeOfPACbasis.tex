@@ -1,0 +1,331 @@
+\documentclass[reqno]{amsart}
+\usepackage{amssymb,latexsym,amsmath}
+\usepackage{amsthm}
+\usepackage{amsbsy}
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+\usepackage{graphicx}
+\usepackage{times}
+\usepackage{epsfig}
+
+\theoremstyle{plain}
+
+\begin{document}
+
+\title{Changing Basis for algebraic curves}
+\author{Xiao Hu}
+\author{J K.~Johnstone}
+\address{Computer Science Department\\
+	 University of Alabama at Birmingham\\
+	 Birmingham, AL, 35255}
+
+\date{January 27, 2003}
+\maketitle
+
+
+%\pagestyle{myheadings}
+%\markboth{Changing Basis for algebraic curves}{Changing Basis for algebraic curves}
+
+
+\section{Introduction}
+ Algebraic curves are most commonly expressed in standard power
+ basis:
+ \begin{equation}\label{n1}
+ f(x,y) = \sum_{i+j \leq n}c_{ij}x^{i}y^{j} = 0
+ \end{equation}
+ For computer-aided geometric design applications, there are
+ advantages to expressing algebraic curves in the Bernstein
+ polynomial basis. For one thing, floating-point computations are
+ more stable.  The Bernstein basis also provides a meaningful
+ relationship between the coefficient values and the shape of the
+ curve.
+
+Algebraic curves expressed in Bernstein form have been termed
+ \emph{piecewise algebraic curves}, because it is possible to
+ piece them together with derivative continuity. We refer to them
+ as \textrm{PAC}s(\cite{h1}).
+
+ A PAC amounts to the intersection of a nonparametric triangular Bezier 
+ surface patch 
+ \[
+    \mathbf{G}(u,v,w) = \sum_{i+j+k=n}\frac{n!}{i!j!k!}u^{i}v^{j}w^{k}\mathbf{b}_{ijk}
+ \]
+ with the plane $z=0$.
+
+ A PAC is defined within a triangle with vertices
+ $\bold{x}_{n00},\bold{x}_{0n0},\bold{x}_{00n}$.  This triangle
+ can be thought of as a window through which a portion of the
+ algebraic curve is viewed.  The triangle vertices can be any
+ three noncollinear points.
+
+ There are many applications based on the PAC form of a algebraic curve. T W.~Sederberg~\cite{h1}  constructed a algorithm for computing all real points at which two plane algebraic curves intersect within a specified area, using their corresponding PAC forms.  We can also use the PAC form to plot the algebraic curve efficiently~\cite{h5}. Similarly, \cite{h4} introduces the Bernstein Pyramid Polynomials(BPP) basis for an algebraic surface and constructed a algorithm for scan line display of algebraic surface of arbitrary degree and topology. 
+ %%%%
+In \cite{h6}, when we want to represent the tangent space of a surface by a surface in dual space, we must clip away the points at infinity on each tangentail surface.  The clipping algorithm depends on a computation of the local extrema of an implicit curve. The local extrema of an implicit curve have horizontall or vertical tangents.  Then if we express the curve in the PAC form,  then the points with horizontal tangents are the intersections of the PAC curve with its polar with respect to the point at infinity~\cite{h1}.
+
+ %%%%
+
+
+
+
+In this report, we review some properties of the Bivariate Bernstein polynomials and give a algorithm to convert any algebraic curve given in power form to PAC. This algorithm is easy to implement and efficient.
+
+
+\section{Bivariate Bernstein Polynomials}\label{S:b}
+ Univariate Bernstein polynomials are the terms of the binomial
+ expansion of $(t+(1-t))^{n}$.  In the bivariate case, Bernstein
+ polynomials $B_{\mathbf{i}}^{n}$ are defined by
+ \begin{equation}\label{e1}
+ B_{\mathbf{i}}^{n}(u,v,w) = \frac{n!}{i!j!k!}u^{i}v^{j}w^{k};
+ \|\mathbf{i}\|=i+j+k=n
+ \end{equation}
+ where $ u+v+w = 1$
+
+ It has the following properties:
+ \begin{enumerate}
+ \item $\sum_{i+j+k=n}B_{\mathbf{i}}^{n} = 1$
+
+ \begin{proof}
+    \begin{align*}
+    1 &= (u+v+w)^{n} = (u+(v+w))^{n} \\
+    &= \sum_{i=0}^{n}\binom{n}{i}u^{i}(v+w)^{n-i} \\
+    &=
+    \sum_{i=0}^{n}\binom{n}{i}u^{i}\sum_{j=0}^{n-i}\binom{n-i}{j}v^{j}w^{n-i-j}
+    \\
+    &=\sum_{i=0}^{n}\sum_{j=0}^{n-i}\frac{n!(n-i)!}{i!(n-i)!j!(n-i-j)!}u^{i}v^{j}w^{n-i-j}
+    \\
+    &=\sum_{i=0}^{n}\sum_{j=0}^{n-i}\frac{n!}{i!j!(n-i-j)!}u^{i}v^{j}w^{n-i-j}\\
+    &=\sum_{i=0,j=0,k=0,i+j+k=n}\frac{n!}{i!j!k!}u^{i}v^{j}w^{k}
+    \\
+    &= \sum_{i+j+k=n}B_{\mathbf{i}}^{n}
+    \end{align*}
+\end{proof}
+
+ \item $\sum_{i+j+k=n}\dfrac{i}{n}B_{\mathbf{i}}^{n} = u$ \\
+ \begin{proof}
+ \begin{align*}
+   \sum_{i+j+k=n}\frac{i}{n}B_{\mathbf{i}}^{n}
+    &=\sum_{i+j+k=n}\frac{i}{n}\frac{n!}{i!j!k!}u^{i}v^{j}w^{k} \\
+    &=u\sum_{i+j+k=n}\frac{(n-1)!}{(i-1)!j!k!}u^{i-1}v^{j}w^{k} \\
+    &= u\sum_{i+j+k=n-1}\frac{(n-1)!}{i!j!k!}u^{i}v^{j}w^{k} \\
+    &=u(u+v+w)^{n-1} \\
+    &=u
+ \end{align*}
+\end{proof}
+
+ \item $\sum_{i+j+k=n}\dfrac{j}{n}B_{\mathbf{i}}^{n} = v$
+
+ \item $\sum_{i+j+k=n}\dfrac{k}{n}B_{\mathbf{i}}^{n} = w$
+
+\section{Power-to-PAC conversion}\label{S:con}
+Any algebraic curve given in power form $f(x,y)=\sum_{i+j\leq
+n}a_{ij}x_{i}y_{j}=0$ can be expressed as a PAC within a given
+triangle $(x_{0},y_{0}),(x_{1},y_{1}),(x_{2},y_{2})$.
+
+\subsection{Recursive approach}
+ Sederberg\cite{h1} presents a recursive algorithm to this
+problem. First, the power equation is put in homogeneous form:
+\[
+ F(X,Y,W) = \sum_{i+j+k=n}a_{ij}X^{i}Y^{j}W^{k}
+\]
+where $x=X/W$ and $y=Y/W$ and $f(x,y)=F(X,Y,1)$.  According to
+Euler's law,
+\[
+F(X,Y,W)=\frac{X\times F_{X}+Y\times F_{Y} + W \times F_{W} }{n}
+\]
+Then $f(x,y)=0$ can be expressed as a PAC $g(u,v,w)=0$ using the
+recursive algorithm:
+\[
+  g(u,v,w)=\mathbf{C2B}(0,0,0)
+\]
+where $\mathbf{C2B}$ is defined as:
+\begin{tabbing}
+
+    fun\=ction $\mathbf{C2B}(i,j,k)$\\
+       \>if \=i+j+k == n then  \\
+       \>   \> $\mathbf{C2B} = i!j!k!a_{ij}$\\
+       \>else  \\
+       \>   \> $\mathbf{C2B} = \dfrac{x(u,v,w)\times \mathbf{C2B}(i+1,j,k) + y(u,v,w)\times \mathbf{C2B}(i,j+1,k)+\mathbf{C2B}(i,j,k+1)
+       }{n-i-j-k}$
+\end{tabbing}
+where
+\begin{align*}
+x = ux_{0} + vx_{1} + wx_{2} \\
+y = uy_{0} + vy_{1} + wy_{2}
+\end{align*}
+
+\subsection{Direct appoach}
+When we wanted to implement Sederberg's algorithm, we found
+it not simple to use.  So we develop our algorithm. Its form looks
+a little complex, but it is very easy and quick to implement.
+
+Given a triangle whose vertices are
+$(x_{0},y_{0}),(x_{1},y_{1}),(x_{2},y_{2})$, then any point
+$(x,y)$ can be expressed as
+\begin{equation}\label{e2}
+\begin{aligned}
+x = ux_{0} + vx_{1} + wx_{2} \\
+y = uy_{0} + vy_{1} + wy_{2}
+\end{aligned}
+\end{equation}
+Assume the power equation has been put in homogeneous form
+\begin{equation}\label{e3}
+f(x,y)=F(x,y,s) = \sum_{i+j+k=n}a_{ij}x^{i}y^{j}s^{k}
+\end{equation}
+where $s = 1 = u+v+w $. \\
+Plug \eqref{e2} into \eqref{e3}, we can get
+\begin{align*}
+f(x,y) &= \sum_{i+j+k=n}a_{ij}(ux_{0} + vx_{1} +
+wx_{2})^{i}(uy_{0} + vy_{1} + wy_{2})^{j}(u+v+w)^{k} \\
+&=\sum_{i+j+k=n}a_{ij}\sum_{i_{0}+j_{0}+k_{0}=i}x_{0}^{i0}x_{1}^{j0}x_{2}^{k0}u^{i0}v^{j0}w^{k0}\frac{i!}{i_{0}!j_{0}!k_{0}!}
+(uy_{0} + vy_{1} + wy_{2})^{j}(u+v+w)^{k} \\
+ \begin{split}
+=\sum_{ijk}^{n}a_{ij}\sum_{i_{0}j_{0}k_{0}}^{i}\sum_{i_{1}j_{1}k_{1}}^{j}\sum_{i_{2}j_{2}k_{2}}^{k}
+\\u^{i_{0}+i_{1}+i_{2}}v^{j_{0}+j_{1}+j_{2}}w^{k_{0}+k_{1}+k_{2}}
+x_{0}^{i_{0}}x_{1}^{j_{0}}x_{2}^{k_{0}}y_{0}^{i_{1}}y_{1}^{j_{1}}y_{2}^{k_{1}}
+ \frac{i!j!k!}{i_{0}!j_{0}!k_{0}!i_{1}!j_{1}!k_{1}!i_{2}!j_{2}!k_{2}!}
+\end{split}\\
+&=\sum_{s_{0}+s_{1}+s_{2}=n}\frac{n!}{s_{0}!s_{1}!s_{2}!}u^{s_{0}}v^{s_{1}}w^{s_{2}}c_{s_{1},s_{2},s_{3}}
+\end{align*}
+And
+\begin{align*}
+c_{s_{1},s_{2},s_{3}}=\sum_{i,j}a_{ij}x_{0}^{i_{0}}x_{1}^{j_{0}}x_{2}^{k_{0}}y_{0}^{i_{1}}y_{1}^{j_{1}}y_{2}^{k_{1}}\frac{i!j!k!}{i_{0}!j_{0}!k_{0}!i_{1}!j_{1}!k_{1}!i_{2}!j_{2}!k_{2}!}
+\frac{s_{0}!s_{1}!s_{2}!}{n!}
+\end{align*}
+where
+\[
+ i_{0}+i_{1}+i_{2} = i, j_{0}+j_{1}+j_{2} = j, i_{0}+j_{0}+k_{0} = s_{0},i_{1}+j_{1}+k_{1}=s_{1},i_{2}+j_{2}+k_{2} =
+ s_{2}
+\]
+Thus we get the PAC form of the original power form.
+
+\section{Convert Bezier surface form to Power form}
+If we are give two variable Bernstein polynomials like the Bezier
+surface form:
+\begin{equation}
+F(x,y)=\sum_{i=0}^{m}\sum_{j=0}^{n}b_{ij}B_{i}^{m}(x)B_{j}^{n}(y)
+\end{equation}
+How can we change it into the homogeneous power form like
+(\ref{e3})?
+
+Let $w=1$, then we have
+\begin{align*}
+F(x,y)&=\sum_{i=0}^{m}\sum_{j=0}^{n}b_{ij}B_{i}^{m}(x)B_{j}^{n}(y)
+\\
+&=\sum_{i=0}^{m}\sum_{j=0}^{n}b_{ij}\binom{m}{i}\binom{n}{j}(w-x)^{m-i}x^{i}(w-y)^{n-j}y^{j}\\
+&=\sum_{i=0}^{m}\sum_{j=0}^{n}b_{ij}x^{i}y^{j}\binom{m}{i}\binom{n}{j}
+(\sum_{s=0}^{m-i}\binom{m-i}{s}w^{m-i-s}(-1)^{s}x^{s})
+(\sum_{t=0}^{n-j}\binom{n-j}{t}w^{n-j-t}(-1)^{t}y^{t}) \\
+&=\sum_{i=0}^{m}\sum_{j=0}^{n}b_{ij}x^{i}y^{j}\binom{m}{i}\binom{n}{j}
+\sum_{s=0}^{m-i}\sum_{t=0}^{n-j}w^{m-i+n-j-(s+t)}
+\binom{m-i}{s}\binom{n-j}{t}(-1)^{s+t}x^{s}y^{t}
+\end{align*}
+Let $s+i=I,t+j=J$ and recombine the expression we can get:
+\begin{align*}
+F(x,y)&=\sum_{I+J+K=m+n}w^{K}x^{I}y^{J}\sum_{i=0}^{I}\sum_{j=0}^{J}\binom{m-i}{I-i}\binom{n-j}{J-j}
+(-1)^{I+J-i-j}\binom{m}{i}\binom{n}{j}b_{ij}\\
+&=\sum_{I+J+K=m+n}w^{K}x^{I}y^{J}a_{IJ}
+\end{align*}
+where
+\[
+a_{IJ}=\sum_{i=0}^{I}\sum_{j=0}^{J}\binom{m-i}{I-i}\binom{n-j}{J-j}
+(-1)^{I+J-i-j}\binom{m}{i}\binom{n}{j}b_{ij}, \quad I\leq m, J \leq n
+\]
+Obviously this is a homogeneous power form of the original
+expression.
+\end{enumerate}
+
+\section{Other Issues}
+ \textbf{Problem}: Give power form of a algebraic curve and a
+triangle, we can get the coefficients of the corresponding PAC.
+When we change the triangle, how can we find the new coefficients from the old coefficients?  For example, the vertices of the old triangle is $\mathbf{q}_{00},\mathbf{q}_{n0},\mathbf{q}_{0n}$. Vertex $\mathbf{q}_{00}$, for example, can be removed to a new location $\mathbf{q}_{00}^{\prime}$.  
+The barycentric coordinates of $\mathbf{q}_{00}^{\prime}$ with respect to $\mathbf{q}_{00},\mathbf{q}_{n0},\mathbf{q}_{0n} $ can be easily found:
+\begin{equation}\label{e11}
+   a\mathbf{q}_{00} + b\mathbf{q}_{n0} + c\mathbf{q}_{0n} = \mathbf{q}_{00}^{\prime}
+\end{equation}
+
+\subsection{Recursive approach}
+Farin~\cite{h2} gave a recursive algorithm to get the new coefficients:
+\begin{tabbing}
+  \hspace*{.25in}\=\hspace{2ex}\=\hspace{2ex}\=\hspace{2ex}\=\hspace{2ex}\kill
+    \>for $i=1$ to $n$ do \\
+    \> \>for $j=0$ to $n-i$ do \\
+    \> \> \>for $k=0$ to $n-i-j$ do \\
+    \> \> \> \>$\mathbf{P}_{jk} = a\mathbf{P}_{j,k} + b\mathbf{P}_{j+1,k} + c\mathbf{P}_{j,k+1} $
+\end{tabbing}
+
+\subsection{Polar form approach}
+We can have another approach using H.-P. Seidel~\cite{h3}'s polar form. 
+\begin{theorem}\label{T:f1}\cite{h3} For each polynomial $F:\mathbb{R}^{2}\rightarrow
+\mathbb{R}^{d}$ of degree $n$ there exists a unique polar form
+$f:(\mathbb{R}^{2})^{n} \rightarrow \mathbb{R}^{d}$ with
+\begin{tabbing}
+ \hspace*{.25in}\=hspace{2ex}\=\hspace{2ex}\kill
+\> - $f$ is symmetric  \\
+\> - $f$ is multiaffine, i.e. \\
+\> \> $f(\mathbf{z}_{1},(\alpha\hat{\mathbf{z}} + \beta\tilde{\mathbf{z}},\mathbf{z}_{3},\ldots,\mathbf{z}_{n}) = \alpha f(\mathbf{z}_{1},\hat{\mathbf{z}},\mathbf{z}_{3},\ldots,\mathbf{z}_{n}) + \beta f(\mathbf{z}_{1},\tilde{\mathbf{z}} ,\mathbf{z}_{3},\ldots,\mathbf{z}_{n}) $ \\
+\> - $f$ is diagonal, i.e. $F(\mathbf{z}) = f(\underbrace{\mathbf{z},\ldots,\mathbf{z}}_{n}) $
+\end{tabbing}
+\end{theorem}
+
+\begin{theorem}\label{T:f2}\cite{h3}
+If power form $F(\mathbf{z}),\mathbf{z}=(x,y)$ and its PAC form $\sum_{i+j+k=n}B^{n}_{i,j,k}p_{ijk}$ over triange $(\mathbf{R},\mathbf{S},\mathbf{T})$ are given, then
+\[
+   p_{ijk}= f(\underbrace{\mathbf{R},\ldots,\mathbf{R}}_{i},\underbrace{\mathbf{S},\ldots,\mathbf{S}}_{j},\underbrace{\mathbf{T},\ldots,\mathbf{T}}_{k})
+\]
+\end{theorem}
+
+\begin{theorem}
+If polynomial $F(\mathbf{z})$'s PAC form over triangle $(\mathbf{q}_{00},\mathbf{q}_{n0},\mathbf{q}_{0n})$ is $\sum_{i+j+k=n}B^{n}_{i,j,k}p_{i,j,k}$. Then if we move $\mathbf{q}_{00}$ to a new vertex $\mathbf{q}^{\prime}_{00}$ and the corresponding PAC form is $\sum_{i+j+k=n}B^{n}_{i,j,k}p^{\prime}_{i,j,k}$ where $\mathbf{q}_{00}^{\prime}$ satisfies \eqref{e11} , then we have
+\[
+  p^{\prime}_{ijk} = \sum_{i_{0} + j_{0} + k_{0} = i}\frac{i!}{i_{0}!j_{0}!k_{0}!}a^{i_{0}}b^{j_{0}}c^{k_{0}}p_{i_{0},j_{0}+j,k_{0}+k}
+\]
+\end{theorem}
+
+\begin{proof}
+ From Theorem~\ref{T:f2} and Theorem~\ref{T:f1} we know that 
+ \begin{align*}
+   p^{\prime}_{ijk} &= f(\underbrace{\mathbf{q}^{\prime}_{00},\ldots,\mathbf{q}^{\prime}_{00}}_{i},\underbrace{\mathbf{q}_{n0},\ldots,\mathbf{q}_{n0}}_{j},\underbrace{\mathbf{q}_{0n},\ldots,\mathbf{q}_{0n}}_{k}) \\
+   &= af(\mathbf{q}_{00},\underbrace{\mathbf{q}^{\prime}_{00},\ldots,\mathbf{q}^{\prime}_{00}}_{i-1},\underbrace{\mathbf{q}_{n0},\ldots,\mathbf{q}_{n0}}_{j},\underbrace{\mathbf{q}_{0n},\ldots,\mathbf{q}_{0n}}_{k}) \\
+   &+
+   bf(\mathbf{q}_{n0},\underbrace{\mathbf{q}^{\prime}_{00},\ldots,\mathbf{q}^{\prime}_{00}}_{i-1},\underbrace{\mathbf{q}_{n0},\ldots,\mathbf{q}_{n0}}_{j},\underbrace{\mathbf{q}_{0n},\ldots,\mathbf{q}_{0n}}_{k}) \\ 
+   &+
+   cf(\mathbf{q}_{0n},\underbrace{\mathbf{q}^{\prime}_{00},\ldots,\mathbf{q}^{\prime}_{00}}_{i-1},\underbrace{\mathbf{q}_{n0},\ldots,\mathbf{q}_{n0}}_{j},\underbrace{\mathbf{q}_{0n},\ldots,\mathbf{q}_{0n}}_{k}) \\
+   &= \ldots \\
+   &= \sum_{i_{0} + j_{0} + k_{0} = i}\frac{i!}{i_{0}!j_{0}!k_{0}!}a^{i_{0}}b^{j_{0}}c^{k_{0}}f(\underbrace{\mathbf{q}_{00},\ldots}_{i0},\underbrace{\mathbf{q}_{n0},\ldots}_{j0},\underbrace{\mathbf{q}_{0n},\ldots}_{k0},
+   \underbrace{\mathbf{q}_{n0},\ldots,\mathbf{q}_{n0}}_{j},\underbrace{\mathbf{q}_{0n},\ldots,\mathbf{q}_{0n}}_{k}) \\
+   &= \sum_{i_{0} + j_{0} + k_{0} = i}\frac{i!}{i_{0}!j_{0}!k_{0}!}a^{i_{0}}b^{j_{0}}c^{k_{0}}f(\underbrace{\mathbf{q}_{00},\ldots}_{i0}, \underbrace{\mathbf{q}_{n0},\ldots,\mathbf{q}_{n0}}_{j_{0}+j},\underbrace{\mathbf{q}_{0n},\ldots,\mathbf{q}_{0n}}_{k_{0}+k}) \\
+   &= \sum_{i_{0} + j_{0} + k_{0} = i}\frac{i!}{i_{0}!j_{0}!k_{0}!}a^{i_{0}}b^{j_{0}}c^{k_{0}}p_{i_{0},j_{0}+j,k_{0}+k}
+\end{align*}
+Similarly, if we change $\mathbf{q}_{n0}$ to $\mathbf{q}_{n0}^{\prime}$, then we have
+\[
+    p^{\prime}_{ijk}= \sum_{i_{0} + j_{0} + k_{0} = j}\frac{j!}{i_{0}!j_{0}!k_{0}!}a^{i_{0}}b^{j_{0}}c^{k_{0}}p_{i+i_{0},j,k_{0}+k}
+\]
+If we change $\mathbf{q}_{0n}$ to $\mathbf{q}_{0n}^{\prime}$, then we have
+\[
+    p^{\prime}_{ijk}= \sum_{i_{0} + j_{0} + k_{0} = k}\frac{k!}{i_{0}!j_{0}!k_{0}!}a^{i_{0}}b^{j_{0}}c^{k_{0}}p_{i+i_{0},j+j_{0},k}
+\]
+\end{proof}
+
+
+\begin{thebibliography}{99}
+\bibitem{h1}
+T W Sederberg, \emph{Algorithm for algebraic curve intersection},
+Computer Aided Design, Vol 21 no 9(1989), pp.~547--554
+\bibitem{h2}
+Farin, G., \emph{Bezier polynomials over triangles and the construction of piecewise $C^{r}$ polynomials}, TR/91, Department of Mathematics, Brunel University, Uxbridge, Middlesex, England, 1980.
+\bibitem{h3}
+H.-P. Seidel, \emph{Euclidean Geometry and computers}, 2nd Edition, pp.~235--286, World Scientific Publishing Co., 1994
+\bibitem{h4}
+T W.~Sederberg, A K.~Zundel, \emph{Scan line display of algebraic surfaces}, ACM computer Graphics, Vol 23, no 3(1989), pp.~147--156
+\bibitem{h5}
+T W.~Sederberg, A K.~Zundel, \emph{Planar piecewise algebraic curves}, Computer Aided Geometric Design, Vol 1(1984),pp.~241--255
+\bibitem{h6}
+J K.~Johnstone, \emph{The Bezier tangential surface system: a dual structure for visibility analysis}
+
+
+\end{thebibliography}
+
+
+
+
+\end{document}

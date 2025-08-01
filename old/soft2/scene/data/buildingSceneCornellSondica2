@@ -1,0 +1,11 @@
+[ FILE: buildingSceneCornellSondica2
+  A 2D test scene for object visibility.
+  Call: umbra -r 20 -S data/umbra/buildingSceneCornellSondica2
+  Built so changes of visibility are along curved portion (unlike buildingScene1)
+  Created: 5/1/03
+]
+{
+../../interpolation/data/arch/sondica.pts  .4 5    -12  -1
+../../interpolation/data/arch/cornell1.pts 1 10	    12  -4
+}
+.08	0 0

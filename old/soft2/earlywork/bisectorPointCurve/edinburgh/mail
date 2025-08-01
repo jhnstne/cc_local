@@ -1,0 +1,421 @@
+Rida,
+	Here are some thoughts on the curve-curve bisector problem.
+
+We want to use a local method (given a point on one of the curves, find
+the associated point on the bisector) rather than a global method
+(find the global equations that must be satisfied for a point to lie on
+the bisector and solve them).
+
+Consider the straightforward extension of the point-curve bisector solution:
+given a point P on one of the curves (say C1), move out along its normal
+until equidistant from P and the other curve C2.
+The problem with this solution is that we don't have a 
+formula for distance from the curve C2.
+
+Another local approach is to use local curvature information.
+You coordinate the motion along the two curves so that normals intersect
+at the bisector (or at least at a point equidistant from the two current points
+of the curve).
+The speed of motion is determined by the curvature:
+the higher the curvature, the slower the motion.
+The problem that I am encountering is that the need for controlling the speed
+of motion seems to require an arc-length parameterization.
+(So perhaps this method would work with Pythagorean hodograph curves, but
+not general parametrics.)
+
+Does this sound familiar to anything that you have tried?
+
+			John
+*************************************************************************
+
+Rida,
+	I like the IMA paper very much.
+You have done a great job of smoothly and concisely extracting all 
+of the interesting results from the long CAGD paper.
+
+The material on the curve-curve bisector is an excellent contribution.
+I like the proof that one can find the points of a point-curve
+bisector that contribute to the curve-curve bisector by computing the
+intersections with the normal.
+This method is satisfying because it is the natural extension of the 
+point-curve bisector idea of moving out along the normal from a point 
+r(u') on the curve until equidistant from r(u') and P.
+In particular, the analogue for the curve-curve bisector seems impossible 
+because P becomes a curve and we don't have a closed-formula expression 
+for the distance to a curve.
+However, the computation of the point-curve bisector w.r.t. r(u') 
+and the second curve captures the equidistant locus, 
+so we know where to stop when moving out
+along the normal: exactly when you hit this point-curve bisector.
+
+I only have the following comments: 
+
+(1) Note that, at the beginning of Remark 2.1, 2.2 and Section 2.5,
+there are extraneous >'s in the file you sent me.
+
+(2) In Remark 2.4, should the degree of (2.9) be 4n-3 (rather than 4n-4),
+which changes the degree of P_i to 9n^2 - 23n + 12,
+or deg(P_i) = 24 for cubics?
+
+(3) Is the following geometric interpretation of (3.8) correct
+(I don't fully understand the algebraic transition from (3.7) to (3.8)):
+	if you are at an intersection of `neighboring' point-curve bisectors,
+	then if you go a `distance' \delta u along the tangent vector at 
+	the bisector,
+	or \delta \lambda along the direction in which the bisector is tending,
+	then you should end up at the same point (at a first order approx)?
+
+(4) When we are revising the CAGD paper, there are a few points that 
+might be added from this version:
+the added emphasis that the irregular point must lie on the evolute,
+the discussion of the use of the Bernstein-Bezier form,
+the equations (2.15) and (2.16) about the points-at-infinity polynomial 
+for ellipses, and
+equation (2.21) about the parameter values of self-intersections on the 
+ellipse.
+
+By the way, since I will be finishing up another paper for Edinburgh
+next week, I may have to postpone work on the final CAGD paper until
+the first week of September.  
+
+I will send you a note about critical points tomorrow.
+
+			John
+
+**********************************************************************
+
+Rida,
+	When I looked at your examples which only used self-intersections
+and points at infinity, I started to wonder about the necessity
+of active points, but I also wondered if they only arose with more
+complicated examples.  Your observation about the lack of cusps on the 
+bisector, by convexity, and the consequent removal of circular points 
+seems to have cleared up the problem.
+
+	Let me try to clarify the issue of active points.
+Consider motion along the untrimmed bisector.
+Active segments were introduced in order to rigorously establish (in the 
+proof of Theorem 3.2 of the technical report)
+that the curve must enter the tangent circle at *two distinct* points
+when we leave the true bisector (see the proof).
+If we know that we are on an active segment, 
+then the circle cannot become full from a neighbourhood of q',
+so it must be entered from a distinct point.
+Therefore, it is easy to establish that a self-intersection occurs.
+
+Suppose that we remove the assumption that we are on an active segment.
+The danger that I envisioned was that, while remaining tangent at q',
+the curve might begin to enter the circle at q'
+(rather than entering at a point distinct from q').
+This would not be a self-intersection.
+This can happen if the curvature at q' is sharper than the circle
+and begins to happen when the curvature at q' is equal to the circle
+(i.e., q is the center of curvature).
+But in this case, q' is a circular point and q is a cusp on the untrimmed
+bisector.
+Since the bisector never contains a cusp, even as an endpoint, it seems as
+if we can ignore this possibility.
+
+To recap, the active segment was defined in order to ensure that
+the curve in the nhood of q' lies completely outside their Cq circle.
+It seems that we can remove this strong restriction using the observation
+that circular points induce cusps, which cannot lie on the bisector.
+This would remove Defn 3.2 (of active point) through the rest of Section 3.1,
+with the exception of the observation about the equivalence of 'circular'
+points and induced cusps.
+We still need points at infinity, so Thm 3.2 would have to cut both
+at self-intersections and at points at infinity.
+
+The only thing that still bothers me a bit is that 
+we have accounted for circular points, and we still want points at infinity
+(class points), but there is no direct explanation of inflection points.
+However, since inflection points were introduced in response to the question
+'where can the relative position of p and the circle of curvature change?'
+rather than by the direct question 'when can the curve enter the tangent circle
+at q' ', it is not necessary to account for them.
+
+I will be interested to hear your thoughts on this issue.
+
+				John
+
+P.S. Could you tell me the length of talks at Mathematics of Surfaces?
+This is in reference to another Edinburgh paper, which I will present.
+
+
+**************************************************************************
+
+(Message inbox:4045)
+Return-Path: farouki@watson.ibm.com
+Return-Path: <farouki@watson.ibm.com>
+Received: from server.cs.jhu.edu
+           by blaze.cs.jhu.edu; Fri, 21 Aug 92 14:17:02 EDT
+Received: by server.cs.jhu.edu; Fri, 21 Aug 92 14:16:57 -0400
+Sender: farouki@watson.ibm.com
+Received: from yktvmz.watson.ibm.com by watson.ibm.com (IBM VM SMTP V2R2)
+   with BSMTP id 0224; Fri, 21 Aug 92 14:16:50 EDT
+Date: Fri, 21 Aug 92 14:11:07 EDT
+From: farouki@watson.ibm.com
+To: jj@blaze.cs.jhu.edu
+
+John,
+       Thanks for the notes; sorry for the delay
+in responding -- I was out of the office all morning.
+I believe the Edinburgh talks are supposed to be
+half an hour. Have you not received the conference
+program yet? I got my copy a week or more ago.
+       Yes, I was quite excited about the curve/curve
+bisector results myself, as I didn't envisage making
+so much progress on it at first. We might want to
+consider fleshing this out into a proper paper later
+on, since the IMA proceedings don't get such a wide
+circulation, and the referees liked the point/curve
+paper.
+       I believe your observations on whether or
+not the "circular" points and inflections need to
+be considered when trimming are correct, although
+I have to read them again more carefully.
+
+                             Rida
+
+*************************************************
+
+(Message inbox:4047)
+Return-Path: farouki@watson.ibm.com
+Return-Path: <farouki@watson.ibm.com>
+Received: from server.cs.jhu.edu
+           by blaze.cs.jhu.edu; Sun, 23 Aug 92 10:29:10 EDT
+Received: by server.cs.jhu.edu; Sun, 23 Aug 92 10:29:03 -0400
+Sender: farouki@watson.ibm.com
+Received: from yktvmz.watson.ibm.com by watson.ibm.com (IBM VM SMTP V2R2)
+   with BSMTP id 6654; Sun, 23 Aug 92 10:28:58 EDT
+Date: Sun, 23 Aug 92 10:26:58 EDT
+From: farouki@watson.ibm.com
+To: jj@blaze.cs.jhu.edu
+
+John,
+        I thought about whether or not we should
+keep the "circular" points and points corresponding
+to inflections in the trimming procedure, and decided
+that I am reluctant to remove them. The arguments you
+gave originally about "local occupancy" of the tangent
+circle are rigorous and geometrically easy to understand.
+The argument about ruling out cusps on the grounds of
+convexity, on the other hand, seems indirect and less
+satisfying. By keeping the inflections/circular points,
+our trimming process is at worst somewhat redundant
+(this would also make the revision less painful). Of
+course, we could include a comment in the CAGD paper
+to the effect that the true bisector cannot have cusps,
+and thus splitting the untrimmed bisector at them may
+not be essential. Please let me know if you agree with
+this plan.
+
+        About the points in your earlier note:
+
+(1) Those extraneous >'s must have been inserted in
+    transit; my file doesn't have them.
+
+(2) The degree is 4n-4, rather than 4n-3, because there
+    is a cancellation of the leading term in (2.9).
+
+(3) In going from (3.7) to (3.8), I have expanded out
+    the right-hand side as a bivariate Taylor series
+    and then cancelled the term {\bf b}_\lambda(u)
+    on both the left and right; but your "geometric"
+    interpretation is essentially correct.
+
+(4) I'll add those items to the CAGD paper (some of
+    them are already there).
+
+Please let me know if you agree with the above plan for
+revising the CAGD paper; I'd like to get it done ASAP.
+
+                                           Rida
+
+*************************************************
+
+Rida,
+	Sorry for the delay.  I was without access to a terminal until
+just now: I am at Stonybrook (Amy has a conference here) and just got set
+up in an office.
+	I feel fine about leaving the original trimming procedure
+in, with a comment about the lack of cusps on the final bisector.
+My main concern is that the referee requested `an example illustrating
+the need for active/inactive trimming'.
+Without an explicit motivation for inflection points (i.e., an example that 
+shows a bisector bounded at an inflection point), I don't think the referee
+would be satisfied.  How about the following solution?
+
+We can retain the idea of active/inactive points, but exclude inflection points
+as endpoints of active segments in Thm 3.1, using the following argument.
+The point corresponding to an inflection cannot be the endpoint of an active
+segment: in a nhood of the inflection q', the corresp. pt is always active, since
+p either lies on the opp. side of the tangent at q'
+or inside the circle of curvature at q' (since this is the entire halfplane
+or close to the halfplane in a nhood of q').
+Thus, inflection pts can be removed from Defn 3.3 and Thm 3.1, but the overall
+structure maintained if we add the above observation to the text.
+Let me know what you think.
+
+			John
+
+*************************************************
+
+(Message inbox:4052)
+Return-Path: farouki@watson.ibm.com
+Return-Path: <farouki@watson.ibm.com>
+Received: from server.cs.jhu.edu
+           by blaze.cs.jhu.edu; Mon, 24 Aug 92 13:55:49 EDT
+Received: by server.cs.jhu.edu; Mon, 24 Aug 92 13:55:44 -0400
+Sender: farouki@watson.ibm.com
+Received: from yktvmz.watson.ibm.com by watson.ibm.com (IBM VM SMTP V2R2)
+   with BSMTP id 0249; Mon, 24 Aug 92 13:55:36 EDT
+Date: Mon, 24 Aug 92 13:50:04 EDT
+From: farouki@watson.ibm.com
+To: jj@blaze.cs.jhu.edu
+
+John,
+     I agree with your latest argument that inflections
+can be ignored during the trimming -- it fits in nicely
+with the earlier definition of "active" points. I will
+make the appropriate changes.
+     I have started hacking away at the paper, and have
+shaved of five or six pages already. But it's becoming
+more difficult to cut away "fat" without throwing away
+the "meat." When will you be back in Baltimore?
+
+                                    Rida
+
+************************************************************
+
+(Message inbox:4065)
+Return-Path: farouki@watson.ibm.com
+Return-Path: <farouki@watson.ibm.com>
+Received: from server.cs.jhu.edu
+           by blaze.cs.jhu.edu; Wed, 26 Aug 92 10:37:40 EDT
+Received: by server.cs.jhu.edu; Wed, 26 Aug 92 10:37:35 -0400
+Sender: farouki@watson.ibm.com
+Received: from yktvmz.watson.ibm.com by watson.ibm.com (IBM VM SMTP V2R2)
+   with BSMTP id 6394; Wed, 26 Aug 92 10:37:28 EDT
+Date: Wed, 26 Aug 92 10:23:27 EDT
+From: farouki@watson.ibm.com
+To: jj@blaze.cs.jhu.edu
+
+John,
+      What do you think of the following idea re
+the necessity of trimming at cusps:
+
+1) When dealing with a complete curve, defined
+   over the entire real line as parameter domain,
+   trimming at cusps is not necessary, since the
+   trimming at self-intersections & at infinity
+   will remove all cusps anyway. Note that a
+   "complete" curve must go off to infinity or
+   form a closed loop.
+
+2) When dealing with a finite curve segment,
+   trimming at cusps becomes important if, say,
+   only one of the two parameter values that
+   correspond to a self-intersection is within
+   the parameter range of that segment.
+
+The above idea is motivated by the fact that
+trimming at cusps is a "local" consideration,
+while trimming at self-intersections is a "global"
+one. Consider a typical "fishtail" as in, for
+example, the point/ellipse bisectors, and let
+u1 < u2 < u3 < u4 be such that u1 & u4 define
+the self-intersection, while u2 & u3 are the
+two cusps. If one has an entire ellipse, splitting
+at u2 & u3 is not really necessary. But suppose
+one only has a finite ellipse segment, that ends
+somewhere between u2 & u3. Then, I contend,
+splitting at the cusp u2 becomes essential.
+
+  Do you agree? If so, it would clear up the
+problem, and we could include such a comment
+in the revised paper.
+                              Rida
+
+***************************
+
+Rida,
+	Great, you have captured exactly where cusps come in.
+The ellipse example is indeed the best example, and optimally
+we could include an example of a finite segment clipped at a cusp as evidence
+of the necessity of cusps.
+You are right that, when applying
+the convexity argument to rule out cusps, there is an implicit assumption 
+that the bisector is closed.
+If it isn't closed, then clipping at cusps is consistent with convexity.
+
+Do you want me to wait for a new copy before reading?
+
+		John
+
+***********************
+
+(Message inbox:4067)
+Return-Path: farouki@watson.ibm.com
+Return-Path: <farouki@watson.ibm.com>
+Received: from server.cs.jhu.edu
+           by blaze.cs.jhu.edu; Wed, 26 Aug 92 15:54:09 EDT
+Received: by server.cs.jhu.edu; Wed, 26 Aug 92 15:54:01 -0400
+Sender: farouki@watson.ibm.com
+Received: from yktvmz.watson.ibm.com by watson.ibm.com (IBM VM SMTP V2R2)
+   with BSMTP id 5254; Wed, 26 Aug 92 15:53:55 EDT
+Date: Wed, 26 Aug 92 15:50:21 EDT
+From: farouki@watson.ibm.com
+To: jj@blaze.cs.jhu.edu
+
+John,
+      Since you agree, and we now know that (apart from
+the inflections, which we've corrected) we were right &
+the referee wrong, I don't want to make a big deal about
+it in the paper. I'll just modify the paragraph at the
+end of Section 3.2 (i.e., after Remark 3.3) to say that
+trimming at cusps is essential for finite segments, and
+consistent with convexity.
+      So you can go ahead and look at the version you
+now have. I've read it through carefully myself, and am
+pretty confident with it all.
+                                       Rida
+
+****************************************8
+
+(Message inbox:4074)
+Return-Path: farouki@watson.ibm.com
+Return-Path: <farouki@watson.ibm.com>
+Received: from server.cs.jhu.edu
+           by blaze.cs.jhu.edu; Thu, 27 Aug 92 17:22:14 EDT
+Received: by server.cs.jhu.edu; Thu, 27 Aug 92 17:22:06 -0400
+Sender: farouki@watson.ibm.com
+Received: from yktvmz.watson.ibm.com by watson.ibm.com (IBM VM SMTP V2R2)
+   with BSMTP id 7474; Thu, 27 Aug 92 17:21:58 EDT
+Date: Thu, 27 Aug 92 17:15:18 EDT
+From: farouki@watson.ibm.com
+To: jj@blaze.cs.jhu.edu
+
+John,
+     Unfortunately, I no longer believe my earlier
+claim regarding the necessity of trimming at cusps
+when bisecting a point and a FINITE curve segment.
+In such a case, it is ESSENTIAL to "complete" the
+untrimmed bisector using the tangent-extensions at
+its end points. When the intersections of these
+tangent intersections with the rest of b(u) and
+each other are included as "critical" points, the
+cusps are always contained within segments that
+will be thrown out anyway. At least this is true
+in all the examples I've looked at. So it may be
+that splitting at cusps is generically redundant.
+     Anyway, I've included appropriate verbiage
+in the revised paper and mailed it off now, as I'm
+thoroughly sick of unearthing new problems every
+time I go back to it! One day we'll understand
+this cusp business, but for now I'm not ashamed
+to be proposing a method with potential redundancy.
+
+                                     Rida
+
+***************************************

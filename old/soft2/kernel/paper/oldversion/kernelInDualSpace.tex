@@ -1,0 +1,525 @@
+\documentclass[12pt]{article}
+\usepackage[pdftex]{graphicx}
+\usepackage{times}
+\input{header}
+
+\newif\ifJournal
+\Journalfalse
+\newif\ifTalk
+\Talkfalse
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{-1in}	% should be 0pt for 1in
+% \setlength{\headsep}{.5in}
+\setlength{\textheight}{8.6in}
+\setlength{\textwidth}{6.875in}
+\setlength{\columnsep}{5mm}	% width of gutter between columns
+
+% \DoubleSpace
+
+\title{The smooth kernel, dually}
+% Computing a smooth kernel purely in dual space}
+% A purely dual computation of the smooth kernel
+% Smooth kernels in 2-space:  Finding one point of a smooth kernel\\is as hard as finding the entire kernel}
+\author{J.K. Johnstone\\
+	Geometric Modeling Lab\\
+	Computer and Information Sciences\\
+	University of Alabama at Birmingham\\
+	University Station, Birmingham, AL, USA 35294}
+%	Geometric Modeling Lab, Computer and Information Sciences, University
+%	Station, Birmingham, AL, USA 35294; Phone: (205) 975-5633; 
+%	Fax: (205) 934-5473; jj@cis.uab.edu
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We show that the kernel of a plane curve can be computed purely in dual space.
+No recourse is made to primal structures such as inflection points.
+This disciplined abnegation of primal space, although perhaps appearing
+to be a form of self-flagellation, does have its advantages.
+For example, the dual solution is more easily generalizable to 
+surfaces in 3-space than the primal solution.
+\end{abstract}
+
+Solution structure: kernel point to free line to free bitangent to 
+			free cusp bitangent to (free line through cusps
+			OR free tangent through cusp) to ...
+
+\section{Introduction}
+
+The kernel of a polygon can be computed as the intersection of its interior
+halfplanes.
+Analogously, the kernel of a plane curve can be computed as the intersection
+of the interior tangent halfplanes of its inflection points
+with the curve's interior.
+These are computations in primal space.
+Suppose that, instead, we want to compute the kernel in dual space.
+This can be done without recourse to any primal computations,
+once the curve % (or actually its tangent space) 
+is mapped to dual space.
+In this paper, we consider the kernel problem through this dual lens.
+In 2-space, this is a problem of academic curiosity: what does a
+computation of the kernel look like in dual space?
+Moving to 3-space, a dual interpretation of the kernel 
+takes on practical importance.
+Since the inflection point in 2-space does not have a clean generalization
+to 3-space, it is not clear how to generalize the primal solution.
+The dual solution of curve kernels will have better promise for generalization
+to surface kernels.
+
+The kernel of a polygon is the locus of points that sees the entire 
+polygon.\footnote{P sees Q if $\seg{PQ}$ does not intersect the polygon.}
+This definition, which applies equally well to curves,
+highlights the importance of kernels for visibility analysis.
+However, for curves, Elber observed that there is a more useful 
+characterization of the kernel \cite{elber02}.
+
+\begin{lemma}[Elber]
+\label{lem:kernel}
+Let $C$ be a closed plane curve.
+$P \in \mbox{kernel}(C)$ if and only if no tangent of $C$ intersects $P$.
+\end{lemma}
+
+Notice that this clarifies that the kernel is the region
+carved out by the tangent space (Figure~\ref{fig:kernel}b).
+Lemma~\ref{lem:kernel} also leads directly to a dual interpretation of the 
+kernel.
+This interpretation involves the tangential curve,
+a dual representation of the curve's tangent space.
+For more details on the tangential curve, see \cite{jj01,jj02}.
+
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.5]{img/jjke1.jpg}
+\includegraphics*[scale=.5]{img/jjke2.jpg}
+\end{center}
+\caption{(a) The kernel of a curve (b) The tangent space of a curve, revealing the kernel}
+\label{fig:kernel}
+% kernel -p -d 10 data/ob1b.pts, with left window grown
+\end{figure}
+
+\begin{defn2}
+\label{defn:tangentialcurve}
+Let $C(t)$ be a plane curve.
+The {\bf tangential curve} of $C(t)$ is the curve $C^*(t)$,
+where $C^*(t)$ is the dual of the tangent at $C(t)$.
+\end{defn2}
+
+\begin{corollary}
+Let $C$ be a closed plane curve.
+$P \in \mbox{kernel}(C)$ if and only if dual($P$) does not intersect the 
+tangential curve $C^*$.
+\end{corollary}
+
+\begin{defn2}
+A line in dual space is {\bf free} if it does not intersect the 
+tangential curve $C^*$.
+\end{defn2}
+
+\begin{corollary}
+\label{cor:free}
+$P \in \mbox{kernel}(C)$ if and only if dual($P$) is free.
+\end{corollary}
+
+% picture of kernel, points in and out of kernel, and associated dual lines
+% including some tangents
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.4]{img/jjke3a.jpg}
+\includegraphics*[scale=.4]{img/jjke3b.jpg}
+\includegraphics*[scale=.4]{img/jjke3c.jpg}
+\end{center}
+\caption{Kernel points in primal space are associated with free lines in dual space}
+\label{fig:freeline}
+% kernel -p -d 10 -x .5 data/ob1b.pts (origin now in kernel)
+\end{figure}
+
+\noindent 
+The essence of duality is that lines in dual space are associated
+with points in primal space.
+(The tangential curve associates tangents in dual space with points in
+primal space.)
+Corollary~\ref{cor:free} says that free lines in dual space
+are associated with kernel points in primal space (Figure~\ref{fig:freeline}).
+Continuing this argument, free tangents (that is, extremal free lines) 
+in dual space must be associated with boundary kernel points in primal space.
+And free bitangents (free lines extremal in at least two ways) in dual space 
+are associated with corner kernel points in primal space 
+(Figures~\ref{fig:kernelob1a} and \ref{fig:complex}).
+
+\begin{lemma}
+$P$ is a corner of the kernel if and only if dual($P$) is a free bitangent of $C^*$.
+\end{lemma}
+
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.5]{img/jjke16.jpg}
+\end{center}
+\caption{Corners of the kernel are associated with free bitangents in dual space}
+\label{fig:kernelob1a}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.5]{img/jjke17.jpg}
+\end{center}
+\caption{The kernel of a cloverleaf}
+\label{fig:complex}
+\end{figure}
+
+The remaining task is to properly connect the corners into the kernel.
+Since the kernel is convex, the order of the corners is obvious.
+The type of connection is also clear: if the corner point lies in the strict
+interior of $C$, connect it with its neighbouring corner by a straight line (why?).
+If two consecutive points lie on the boundary of $C$, connect
+them by a curve segment.
+The type of bitangent will reveal whether the point lies on the boundary of $C$,
+as discussed below.
+	% if bitangent is tangent through cusp, then dual point lies on $C$
+	% if bitangent is line through cusps, dual point does not lie on $C$
+This leads to a dual algorithm for computing the smooth kernel.
+
+{\bf Don't introduce algorithm yet: stay pure.}
+
+\centerline{{\bf Computing the kernel of a closed plane curve $C$ in dual space}}
+
+\begin{enumerate}
+\item	Compute the free bitangents of the tangential curve system $C^*$.
+	The associated points in primal space are the corners of the kernel.
+\item   Radially sort the kernel corners about their sample mean.
+\item	Join consecutive kernel corners by a curve segment if they both lie
+	on $C$ and by a line segment otherwise.
+	This defines the boundary of the convex kernel.
+\end{enumerate}
+
+A purer algorithm that does not require any computation in primal space
+can be developed once we better understand the relationship of the
+problem to cusp bitangents in the next section.
+
+\section{Bitangents in dual space}
+
+In this section, we explore the bitangents of the tangential curve system,
+and discover that they must all be cusp bitangents when the kernel is nonempty.
+
+\Comment{
+We shall compute the kernel of a closed plane curve $C$ 
+in dual space, using only the tangential curve system $C^*$.
+A point set in primal space becomes a line set in dual space.
+By Corollary~\ref{cor:free}, it is the lines that do not intersect $C^*$
+(the free lines) that characterize the kernel.
+The first observation is that a search for free lines can begin
+with a search for free bitangents.
+}
+
+\begin{defn2}
+\label{defn:bitang}
+Let $C^*$ be a tangential curve system.
+A {\bf $C^*$-tangent} is a conventional tangent of $C^*$
+or a line through an endpoint of $C^*$.
+
+A {\bf conventional bitangent} of $C^*$ is a line
+that is tangent to $C^*$ at two or more distinct points.
+In nontrivial cases, the tangential curve system will contain cusps.
+A {\bf cusp bitangent} of $C^*$ is a tangent of $C^*$ that passes
+through a cusp, or a line between two cusps.
+A {\bf degenerate bitangent} is a tangent that passes through 
+an endpoint of $C^*$.
+In the rest of this paper, a {\bf $C^*$-bitangent} is a 
+conventional, cusp, or degenerate bitangent of $C^*$.
+\end{defn2}
+
+\Comment{
+\begin{lemma}
+\label{lem:existence}
+Let $C$ be a closed plane curve.
+If $\mbox{kernel}(C)$ is nonempty, one of the $C^*$-bitangents is free.
+\end{lemma}
+\prf
+Since the kernel is nonempty,
+there exists a free line in dual space.
+By continuous movements, this free line can be continuously moved 
+until it becomes $C^*$-tangent to the tangential curve system,
+while preserving its freedom.
+(This movement is coordinated in the two dual spaces so that the
+two lines represent the same point.)
+Then, this free $C^*$-tangent can be moved to a free $C^*$-bitangent.
+In particular, we can move the free line until it touches the curve once,
+then move the tangent along the tangential curve 
+until it touches the curve again at an endpoint or a second point of tangency.
+\QED
+
+\vspace{-.3in}
+}
+
+% can restrict to cusp and degenerate bitangents
+
+As discussed in \cite{jj02},
+the conventional bitangents of a curve are associated
+with the self-intersections of its tangential curve system.\footnote{If 
+	a line is tangent to the curve at two distinct points,
+	the tangents at the two points dualize to an intersection.}
+But we also show in that paper that $(C^*)^* = C$ (which is consistent
+with the fact that the dual map is its own inverse).
+Therefore, conventional bitangents of $C^*$ are associated
+with self-intersections of $C$.
+But if the kernel of $C$ is nonempty, $C$ cannot have any self-intersections.
+(The curve's interior is divided into two parts at a self-intersection,
+and these two parts cannot see each other.  Consider a figure 8.)
+We conclude that the free $C^*$-bitangents
+are cusp or degenerate bitangents.
+
+{\bf Establish that degenerate bitangents are never free, 
+so that we can restrict to cusp bitangents.}
+
+\begin{lemma}
+$P$ is a corner of the kernel if and only if dual($P$) is a free cusp bitangent of $C^*$.
+\end{lemma}
+
+Since all free bitangents of $C^*$ are cusp bitangents,
+we can classify the associated kernel corners in primal space.
+Kernel corners associated with tangents through a cusp lie
+on $C$, since a tangent of $C^*$ dualizes to a point of $C$.
+Kernel corners associated with lines through two cusps lie
+inside $C$.
+
+\centerline{{\bf Computing the kernel of a closed plane curve $C$ in dual space}}
+
+\begin{enumerate}
+\item	Compute the free cusp bitangents of the tangential curve system $C^*$.
+\item
+\begin{enumerate}
+\item	If $T$ is a free cusp bitangent in dual space between two cusps $c_1$ 
+	and $c_2$,
+	connect its associated corner $T^*$ by a line segment to any corner
+	associated with a free cusp bitangent involving $c_1$ or $c_2$.
+\item	If $T_1$ is a free cusp bitangent with point of tangency $p_1$
+	and $T_2$ is a free cusp bitangent with point of tangency $p_2$,
+	connect $T_1$'s associated corner 
+	with $T_2$'s associated corner by a curve segment
+	if there are no cusps or other points of tangency on the 
+	curve segment between $p_1$ and $p_2$.
+	(PROOF?)
+\end{enumerate}
+\end{enumerate}
+
+\Comment{
+\begin{enumerate}
+\item	Compute the free cusp bitangents of the tangential curve system $C^*$.
+	(The associated points in primal space are the corners of the kernel.)
+\item	(The kernel corners are connected together to define the boundary
+	of the kernel as follows. 
+	Recall that cusp bitangents come in two flavours:
+	lines between two cusps and tangents through cusps.)
+	
+	If $T$ is a free line in dual space between two cusps $c_1$ and $c_2$,
+	connect its associated corner $T^*$ by a line segment to any corner
+	associated with cusps $c_1$ or $c_2$.
+	If $T_1$ is a free tangent through a cusp with point of tangency $p_1$
+	and $T_2$ is a free tangent through a cusp with point of tangency $p_2$,
+	connect $T_1$'s associated corner 
+	with $T_2$'s associated corner by a curve segment
+	if there are no cusps or other points of tangency on the 
+	curve segment between $p_1$ and $p_2$.
+	(PROOF?)
+\end{enumerate}
+}
+
+\section{An explanation in primal space}
+
+Now that we have developed an algorithm purely in dual space,
+we can pause and interpret this algorithm in light of primal space.
+The cusps of $C^*$ are associated with tangents through the inflection points
+of $C$ (Figure~\ref{fig:infl}).  (Why?)
+A line through 2 cusps is associated with an intersection of two
+inflection tangents (Figure~\ref{fig:comp1}),
+and a tangent through a cusp is associated with an intersection of an
+inflection tangent with the curve $C$ (Figure~\ref{fig:comp2}).
+In short, cusp bitangents are associated with intersections of 
+inflection tangents with $C$ and themselves.
+
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.4]{img/jjke5.jpg}
+\end{center}
+\caption{Inflection points of $C$ and their tangents, and the associated cusps of the clipped $C^*$}
+\label{fig:infl}
+% kernel -p -d 10 data/ob1b.pts
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.4]{img/jjke6.jpg}
+\end{center}
+\caption{The first type of cusp bitangent, interpreted in primal space}
+\label{fig:comp1}
+% fig 11
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.4]{img/jjke7.jpg}
+\end{center}
+\caption{The second type of cusp bitangent, interpreted in primal space}
+\label{fig:comp2}
+\end{figure}
+
+We are basically computing the convex hull of $C^*$ in dual space,
+except that $C^*$ is a messy disconnected curve and so the convex hull
+is not traditional (Figure~\ref{fig:banana}).
+In fact, the kernel and the convex hull can be equated,
+if we can first find one point of the kernel \cite{wang02}.
+({\bf Elaborate.})
+
+	%	kernel data/banana1.pts; 
+	%	kernel data/banana4.pts.
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.5]{img/jjke15.jpg}
+\includegraphics*[scale=.5]{img/jjke14.jpg}
+\end{center}
+\caption{The kernel of two bananas, one empty and one not}
+\label{fig:banana}
+\end{figure}
+
+In this light, finding free cusp bitangents is equivalent
+to finding intersections of the inflection tangents (with $C$ and themselves)
+that lie inside the kernel.
+In primal space, this could be done by comparing against the
+interior halfplanes of the inflection tangents.
+The algorithm in dual space points out that the kernel is fully defined
+by these interior intersections (Figure~\ref{fig:free}).
+
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.4]{img/jjke8.jpg}
+\end{center}
+\caption{Certain intersections of the inflection tangents fully define the kernel}
+\label{fig:free}
+\end{figure}
+
+\section{Reduction to finding a seed point of the kernel}
+
+The problem with finding a seed point is curves with empty kernel.
+We must find a set that provably contains a kernel point, if one exists.
+This must be a rather comprehensive set, since it is must be sufficient.
+
+\section{The tangential curve system and dual space}
+
+{\bf Refinement to free lines in two dual spaces using the tangential curve system,
+for robust treatment of tangents that map to infinity.}
+
+\section{Cusps}
+
+The computation of the cusps of a rational curve is discussed in
+\cite{manocha92} and \cite{li97}.
+On a curve with a proper parametrization (see Sederberg 1986, basically
+a curve that cannot be degree reduced),
+a point is a cusp if and only if its tangent vector vanishes \cite{manocha92}. % Section 5, p. 11
+(On improper curves, a vanishing tangent vector is only a necessary
+condition for a cusp.)
+Finding cusps reduces to root finding of a univariate polynomial.
+
+\Comment{
+On a plane algebraic curve $f(x,y,w)=0$ expressed in projective space, 
+the tangent through a simple point $P$ of the curve
+is the line $f_x(P) x + f_y(P) y + f_w(P) w = 0$.
+A singular point is a point with $f_x(P) = f_y(P) = 0$ (and possibly
+other vanishing higher derivatives).
+If all of the first $r-1$ derivatives vanish at $P$ but at least one of the
+$r^{th}$ derivatives does not vanish, 
+then the singular point has $r$ tangents.
+A cusp is a singular point where these $r$ tangents are identical.
+}
+
+\section{Finding cusps}
+
+Why not find roots of 'length of tangent = 0'?
+$x'(t)^2 + y'(t)^2 = 0$.
+This would have the surface analog of 'length of normal = 0'.
+Similar to finding the silhouette as intersection of normal surface
+with z=0 plane.
+Zeros of $f(u,v) = x_u^2 + y_u^2 + z_u^2 = 0$ are intersections of
+$z = f(u,v)$ with $z=0$ ($\frac{\partial S}{\partial u} = 0$).
+Zeros of $g(u,v) = x_v^2 + y_v^2 + z_v^2 = 0$ 
+($\frac{\partial S}{\partial v} = 0$).
+And zeroes of $(x_u - x_v)^2 + (y_u - y_v)^2 + (z_u - z_v)^2 = 0$
+($\frac{\partial S}{\partial u} = \frac{\partial S}{\partial v}$).
+
+For each segment of a rational Bezier curve, 
+you must solve for all roots of $I(t) = (R(t) \times R'(t)) \cdot R''(t)$
+where $R(t) = (X(t),Y(t),W(t))$,
+then isolate the multiple roots that satisfy 
+$X'(t) : X(t) = Y'(t) : Y(t) = W'(t) : W(t)$.
+How will we find multiple roots, since they may violate Descartes'
+rule of signs?
+Find $G(t) = gcd(I(t),I'(t))$ using the Euclidean algorithm
+and solve this function for its roots (could these be multiple roots? yes).
+Notice that if $R(t)$ is degree 5 (as in tangential curves),
+$I(t)$ is of degree 3(3) = 9 and 
+$G(t)$ is of degree at most 4 (at most 4 double roots in 9 roots).
+Recursively find multiple roots of $G(t)$
+until you finally get a constant gcd or degree 1 or 2 gcd that
+can be directly solved.
+
+References:
+
+'Identification of inflection points and cusps on rational curves'
+Yong-Ming Li and Robert J. Cripps (1997)
+CAGD 14, 491--497.
+
+'Detecting Cusps and Inflection Points'
+D. Manocha and J. Canny (1992)
+CAGD 9, 1--24.
+
+\section{Moving to surfaces in 3-space}
+
+{\bf Motivation for writing up tangential surface system paper.}
+
+{\bf Give example of silhouette in tangential surface paper
+	to show how lazy evaluation works.}
+
+Computing the kernel of a surface $S$ in dual space
+is related to the convex hull of the tangential surface system $S^*$.
+The convex hull of a surface is defined by free bitangent developables.
+If the surface kernel is nonempty, $S$ has no self-intersections
+so the tangential surface system has no conventional bitangent planes.
+Thus, we are looking for cusp bitangent planes.
+In particular, we are looking for free cusp bitangent developables.
+The kernel in primal space will be defined by these developables
+along with portions of $S^*$ between the developables.
+
+\begin{defn2}
+A {\bf surface cusp} is a point where the normal vector disappears.
+A {\bf cusp bitangent plane} is a tangent plane that passes through a cusp.
+A {\bf cusp bitangent developable} is the envelope of a one-parameter family
+of cusp bitangent planes.
+\end{defn2}
+
+Surface cusps are computed as follows.
+The normal of a surface $S(u,v)$ at a simple point is 
+$\frac{\partial S}{\partial u} \times \frac{\partial S}{\partial v}$.
+This normal vanishes if $\frac{\partial S}{\partial u} = 0$,
+$\frac{\partial S}{\partial v} = 0$, or 
+$\frac{\partial S}{\partial u} = \frac{\partial S}{\partial v}$.
+
+The tangent planes of a surface $S$ through a point $p$ are computed 
+by intersecting the plane $p^*$ with the tangential surface system $S^*$.
+Thus, the tangent planes of $S^*$ through a cusp $p$ are computed 
+in primal space (the dual of dual space) by intersecting the plane $p^*$ 
+with $S$.
+
+\begin{itemize}
+\item	Compute cusp curves.
+\end{itemize}
+
+What is the mapping of a cusp curve to primal space?
+Vanishing normal.
+Use $(S^*)^* = S$.
+A tangential surface represents the tangent space of a surface,
+which can be interpreted as the normal space (since an element
+of the tangent space is a tangent plane, which is identified with
+a normal).
+Think about how the tangential surface relates to the normal surface.
+
+\end{document}

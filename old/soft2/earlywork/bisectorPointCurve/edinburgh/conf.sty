@@ -1,0 +1,176 @@
+\typeout{Document Style Option `conf'.}
+\@twosidetrue \@mparswitchtrue
+\input art12.sty \relax
+
+\def\booktitle{Mathematics of Surfaces V}
+
+\def\sectsize{\Large}
+
+\oddsidemargin .25in \evensidemargin .25in
+\marginparwidth 1in \marginparsep 7pt
+\topmargin 0in \headheight 12pt \headsep 20pt \footheight 12pt \footskip 30pt
+\textheight 620pt \textwidth 32.5pc \columnsep 10pt \columnseprule 0pt
+
+\def\@p@rt{\@startsection{part}{0}{\z@}{-3.5ex plus -1ex minus
+ -.2ex}{2.3ex plus .2ex}{\noindent\Large\bf\@partapp}}
+\def\part#1{\setcounter{equation}{0} \@p@rt{#1}
+ \message{``\@partapp-\thepart. #1'' }\medskip}
+
+\def\@section{\@startsection{section}{1}{\z@}{-3.5ex plus -1ex minus
+ -.2ex}{2.3ex plus .2ex}{\sectsize\bf}}
+\def\section#1{\setcounter{equation}{0} \@section{#1}
+ \message{``\thesection. #1'' }\medskip}
+
+\def\partmark#1{}
+
+\def\appendix{\clearpage
+ \setcounter{part}{0}
+ \setcounter{section}{0}
+ \def@partapp{Appendix}\def\sectsize{\large}
+ \def\thepart{\Alph{part}}\def\thesection{\thepart.\arabic{section}}
+\message{Appendix }}
+
+\def\@ctiex[#1]#2{\if@filesw\immediate\write\@auxout{\string\citation{#2}}\fi
+  \def\@citea{}\@cite{\@for\@citeb:=#2\do
+    {\citea\def\@citea{,\,\linebreak[0]\relax}@ifundefined
+      {b@\@citeb}{{\bf ?}\@warning
+      {Citation `\@citeb' on page \thepage \space undefined}}%
+\hbox{\csname b@\@citeb\endcsname}}}{#1}}
+
+\@addtoreset{equation}{part}
+\@addtoreset{equation}{section}
+\def\theequation{\thesection.\arabic{equation}}
+
+\def\endtitlepage{\if@restonecol \twocolumn \else \relax \fi}
+
+\arraycolsep .5ex \tabcolsep .6ex \arrayrulewidth .04ex \doublerulesep .2ex
+\tabbingsep \labelsep
+
+\skip\@mpfootins = \skip\footins
+\fboxsep = .3ex \fboxrule = .04ex
+
+\def\@partapp{Part}
+
+\def\tableofcontents{\section*{Contents}
+ \@starttoc{toc}\message{Contents }}
+\def\listoffigures{\@section*{List of Figures}\@starttoc{lof}}
+\def\listoftables{\@section*{List of Tables}\@starttoc{lof}}
+
+\newif\ifnumberedbib \numberedbibtrue
+\def\numberedbib{\numberedbibtrue}
+\def\unnumberedbib{\numberedbibfalse}
+
+\def\@biblabel#1{\ifnumberedbib{[#1]}\else\relax\fi}
+\def\thebibliography#1{\setcounter{totalnumber}{0}
+\@section*{References}\message{References }
+\ifnumberedbib
+    \list
+  {[\arabic{enumi}]}{\settowidth\labelwidth{[#1]}\leftmargin\labelwidth
+     \advance\leftmargin\labelsep
+     \usecounter{enumi}}
+\else
+    \list{}{}
+\fi
+     \sloppy\clubpenalty4000\widowpenalty4000
+     \sfcode`\.=1000
+\relax}
+\def\endthebibliography{\endlist
+\setcounter{totalnumber}{3}}
+
+\def\theindex{\@restonecoltrue
+\columnseprule \z@
+\columnsep 3.5ex\twocolumn[\@section*{Index}]
+ \thispagestyle{plain}\parindent\z@
+ \parskip\z@ plus .3pt\relax\let\item\@idxitem}
+
+\long\def\@makecaption#1#2{
+ \vskip 1ex
+ \setbox\@tempboxa\hbox{ {\sc #1.} \strut\ #2}
+ \ifdim \wd\@tempboxa >\hsize
+   \unhbox\@tempboxa\protect\centering\par
+ \else
+   \hbox to \hsize{\hfil\box\@tempboxa\hfil}
+\fi}
+
+\def\halfbox#1{\hfil\parbox[t]{0.475\hsize}{#1}\hfil}
+
+\def\fnum@figure{Figure\enskip\thefigure}
+\def\fnum@table{Table\enskip\thetable}
+
+\def\maketitle{\begin{titlepage}\thispagestyle{plain}
+ \let\footnotesize\small \let\footnoterule\relax
+  \null
+  \begin{center}
+ {\message{Title} \Large \bf \@title \par}
+ \vskip 1em \message{Author(s)}{\large \lineskip .75em
+ \begin{tabular}[t]{c}\@author
+ \end{tabular}\par}
+  \end{center} \par
+\@thanks
+\null
+\end{titlepage}
+\setcounter{footnote}{0} \let\thanks\relax
+\gdef\@thanks{}\gdef\@author{}\gdef\@title{}\let\maketitle\relax}
+
+\def\abstract{\message{Abstract}\small
+\begin{center}
+{\bf Abstract\vspace{-.5em}\vspace{0pt}}
+\end{center}
+\quotation}
+
+\def\endabstract{\endquotation}
+
+\mark{{}{}}
+
+\def\short@uthor{}
+\def\shortauthor#1{\def\short@uthor{#1}}
+
+\def\affil{\end{tabular}
+\vskip-2ex\begin{tabular}[t]{c}\rule{.9\hsize}{0pt}\\ \em}
+
+\if@twoside \def\leftmark{\short@uthor}\def\rightmark{\booktitle}
+\def\ps@headings{\def\@oddfoot{}\def\@evenfoot{}\def\@evenhead{\rm
+\thepage\hfil \it \leftmark}\def\@oddhead{\hbox{} \it \rightmark \hfil
+\rm\thepage}\def\sectionmark##1{}\def\subsectionmark##1{}}
+\else \def\rightmark{\short@uthor}
+\def\ps@headings{\def\@oddfoot{}\def\@evenfoot{}\def\@oddhead{\hbox
+{}\it \rightmark \hfil \rm\thepage}\def\sectionmark##1{\markright
+{}}}
+\fi
+\def\ps@myheadings{\def\@oddhead{\hbox{}\rm\rightmark \hfil
+\rm\thepage}\def\@oddfoot{}\def\@evenhead{\rm \thepage\hfil\rm\leftmark\hbox
+{}}\def\@evenfoot{}\def\sectionmark##1\def\subsectionmark##1{}}
+
+\newenvironment{ackn}{\subsection*{}\begin{quotation}\small
+\message{Acknowledgements }}{\end{quotation}}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{definition}{Definition}[section]
+\newenvironment{proof}{
+ \begin{quote}{\bf Proof\ }}{
+ \nolinebreak\hbox{\ $\Box$}\end{quote}}
+\newenvironment{corollary}[1]{
+\it\trivlist\item[\hskip\labelsep{\bf Corollary\ #1}]}{\endtrivlist}
+
+\newcounter{equationgroup}
+\newenvironment{eqngroup}{%
+\setcounter{equationgroup}{\value{equation}}\setcounter{equation}\z@%
+\def\theequationgroup{\thesection.\arabic{equationgroup}}%
+\def\theequation{\theequationgroup\alph{equation}}%
+\refstepcounter{equationgroup}}{%
+\setcounter{equation}{\value{equationgroup}}%
+\def\theequation{\thesection.\arabic{equation}}%
+\global\@ignoretrue}
+
+\def\dd{{\rm d}}
+\def\DD{{\rm D}}
+\def\ee{{\rm e}}
+\def\ii{{\rm i}}
+
+\typein[\firstpage]{1}
+
+\clubpenalty=500 \widowpenalty=500
+\ps@headings \pagenumbering{arabic} \onecolumn \setcounter{page}{\firstpage}
+

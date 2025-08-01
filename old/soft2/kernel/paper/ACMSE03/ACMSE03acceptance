@@ -1,0 +1,152 @@
+From: ACMSE 2003 - CyberChair <burgemar@mail.armstrong.edu>
+To: jj@cis.uab.edu
+Cc: burgemar@mail.armstrong.edu, burgemar@mail.armstrong.edu
+Subject: ACMSE 2003 Notification
+Date: Wed Jan 29 05:03:37 2003 CDT
+
+Dear John K. Johnstone,
+
+Thank you for your submission to ACMSE 2003.  We are pleased to inform 
+you that your paper, titled
+
+"Kernels from hulls"
+
+has been accepted as for publication in the Proceedings.
+Papers went through a rigorous reviewing process.  Each paper was
+reviewed by at least two of the 58 reviewers. Of the 133 papers 
+submitted, a total of 100 full, short, and student papers were accepted.
+
+Please carefully take into account the enclosed comments by the 
+reviewers when preparing the camera-ready version. It is incumbent 
+upon you to do so.
+
+Full papers are limited to 6 pages and short/position papers to 
+2 pages.  Your camera-ready paper is due on February 3, 2002.  
+Adherence to the alternate style for ACM SIG proceedings 
+http://www.acm.org/sigs/pubs/proceed/template.html, is necessary 
+for the publication of your paper.
+
+To submit your paper, revisit the ACMSE 2003 submission site at
+http://vision.armstrong.edu/acmse/, go to step 3, and use the 
+following login name and password to submit your file:
+
+Login: jj@cis.uab.edu
+Password: E00-1182831445
+
+You will need to submit both a file containing your document source(s) 
+and a final file in pdf or postscript format.
+
+At least one author is required to register for the conference at
+http://vision.armstrong.edu/acmse/registration.html before
+Monday, February 10th; if this is a problem, please notify us 
+**immediately**.
+
+Congratulations on having your paper accepted. We look forward to 
+seeing you in Savannah.
+
+Sincerely,
+
+Dr. Mark Burge
+ACMSE 2003 PC Chair
+*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=
+
+First reviewer's review:
+
+          >>> Summary of the paper <<<
+
+This paper discusses a theoretical study on locationg kernels for a plane
+curve. Although other approaches exit to achieve the same purpose, the
+algorithm presented seems to be efficient and provides extra features.
+
+
+
+
+
+ =*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=
+
+Second reviewer's review:
+
+          >>> Summary of the paper <<<
+
+A couple of new algorithms for computing kernels are given. Relationships
+between convex hulls and kernels are presented.
+
+
+
+          >>> Comments <<<
+
+Well written paper.
+
+
+
+          >>> Points in favour or against <<<
+
+None.
+
+
+
+ =*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=
+
+Third reviewer's review:
+
+          >>> Summary of the paper <<<
+
+This paper establishes a structural relationship between the kernel of a
+planar closed curve in primal space, and the convex hull in dual space. By
+this duality, an efficient algorithm for the calculation of the kernel can
+be reduced to the calculation of the convex hull in dual space.
+
+
+
+          >>> Comments <<<
+
+See below.
+
+
+
+          >>> Points in favour or against <<<
+
+In favor:
+
+A well-written paper, clear and concise. An interesting, and somewhat
+profound result.
+
+Against:
+
+None that I could see.
+
+
+
+ =*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=
+
+Fourth reviewer's review:
+
+          >>> Summary of the paper <<<
+
+New algorithms to compute the kernel of a closed curve in the Euclidean
+plane are presented. Although optimally efficient algorithms have
+previously been developed, the authors nice approach is based on duality
+between points and lines, thereby reducing the computation of the kernel to
+the computation of a convex hull (of the corresponding tangential curve.)
+
+
+
+          >>> Comments <<<
+
+A well written article on a beautiful subject. A couple of comments
+(minor): 1. In the definition of the kernel, p.1, the line PQ is the *open*
+line segment? 2. Is the speed (efficiency) ot these proposed algorithms the
+same (up to a constant) as the optimal one developed by Lee and Preparata?
+3. Has the dual curve been studied in the real projective 2-space at all?
+
+
+
+          >>> Points in favour or against <<<
+
+In favor: A very good paper on a classic subject. Against: Comparison with
+existing efficient algorithms lacking.
+
+
+
+ =*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=--=*=
+

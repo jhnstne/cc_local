@@ -1,0 +1,318 @@
+\chapter{Applications, Future Work, and Conclusions}
+\label{chap-5}
+
+This chapter creates a context for sorting within
+the area of geometric modeling.
+Section~1 cites several applications of sorting, thereby
+establishing its importance.
+Section~2 discusses various research problems that are suggested
+by our work on sorting, and
+we end with some conclusions.
+\section{Applications}
+
+The sorting of points along an algebraic curve has many applications 
+in geometric modeling.
+The components of a geometric model are faces, edges, and vertices, which
+are represented by patches of algebraic surfaces, segments of algebraic
+curves, and points, respectively.
+The sorting of points is a problem that arises naturally in the
+manipulation of these components.
+We consider a number of\vspace{.5in} applications.\\
+%
+{\bf Problem 1}
+\ \ Given 
+a set S of points on an algebraic curve C, determine the points of
+S that lie on an edge E of C.\\
+{\bf Solution}\ \ 
+E is defined by the implicit equation of C 
+and two endpoints $V_{1}$ and $V_{2}$.
+If S is sorted along \arc{V_{1}V_{2}}, then the points of S that
+do not lie on the edge will be ignored and the sorted list will only
+contain the points of S that lie on the \vspace{.5in}edge.\\
+Problem (1) is a very basic problem in geometric modeling.
+It must be solved regularly in operations ranging from intersection to
+display.
+We offer two examples of its use.\\
+{\bf Problem 2}\ \  
+Compute the intersection of two edges.\\
+{\bf Solution}\ \ Let $E_{1}$ and $E_{2}$ be edges of the curves
+$C_{1}$ and $C_{2}$, respectively.
+Once the points of intersection of the two curves have been computed (perhaps
+by resultants), Problem (1) can be applied (twice) to determine 
+the points 
+of $C_{1} \cap C_{2}$ that lie on $E_{1} \cap E_{2}$, since\vspace{.5in}
+\mbox{$E_{1} \cap E_{2} = [(C_{1} \cap C_{2}) \cap E_{1}] \cap E_{2} $.}\\
+%
+{\bf Problem 3}\ \ Determine a bounding box for an edge E.\\
+%
+{\bf Solution}\ \ In motion planning, it is useful to approximate a
+geometric model by a simple superset, because this makes interference
+detection simpler.
+The more expensive interference detection with the geometric model can
+be reserved for those situations when the solid approaches close enough
+to an obstacle that interference is detected with the simple superset.
+Bounding regions are also useful for problems such as (1) above, 
+for they allow
+points that clearly do not satisfy a condition to be quickly discarded.
+We can define a bounding rectangle for an edge E by the minimum and maximum
+x and y values of E.
+Consider the computation of the maximum x value of E.
+(The other extrema are computed in a similar manner.)
+E's x-maximum is either attained at a local x-maximum of E's curve 
+or at an endpoint of the edge.
+Therefore, in order to determine the maximum x-value of E,
+the local x-maxima of the curve must be computed (as solutions of 
+$f_{y} = f = 0$, where $f$ is the implicit equation of E's curve), 
+and then restricted to the subset that lies on E.
+This restriction is an instance of\vspace{.5in} Problem~(1).\\
+%
+{\bf Problem 4}\ \
+Determine if a point lies within a piecewise-algebraic plane patch.\\
+{\bf Solution}\ \
+This problem is fundamental to the display of a geometric model.
+A piecewise-algebraic plane patch is defined by a closed boundary consisting
+of a simply-connected collection of plane algebraic curve segments.
+The problem of determining whether 
+a point $Q$ lies within the closed boundary 
+reduces to the problem of sorting points by the following mapping.
+Consider the straight line $L$ defined by a vertex $V$ on the boundary
+and the point $Q$.
+We compute the set ${\cal I}$ of intersections of $L$ with the algebraic curve
+segments 
+of the patch's boundary, through several applications of Problem~(2).
+The points of ${\cal I}$ and the point $Q$ are then sorted along the line $L$.
+By applying the Jordan curve theorem, the points of ${\cal I}$ can be grouped into
+pairs, and inside/outside intervals can be determined.
+$Q$ lies within the patch if and only if it lies on an inside interval.
+%
+\figg{5.0}{Deciding if Q lies inside the plane patch}{2.25in}
+%
+\begin{example}
+Consider the plane patch of Figure~\ref{5.0}.
+${\cal I} = \{L_{1},L_{2},L_{3},V\}$.
+The sorted order of ${\cal I} \cup \{Q\}$ is $L_{1},L_{2},V,Q,L_{3}$.
+Therefore, the intervals of L that are inside the patch are
+\seg{L_{1}L_{2}} and \seg{VL_{3}}.
+Since Q lies on one of these inside intervals (\seg{VL_{3}}),
+it lies inside of the patch.
+\end{example}
+%
+{\bf Problem 5}\ \
+Determine if a point lies within a 
+piecewise-algebraic convex surface patch.\\
+%
+{\bf Solution}\ \ 
+A piecewise-algebraic surface patch is defined by a closed, 
+simply-connected loop of boundary edges on a primary surface $F$. 
+The edges are algebraic space curve segments defined by the intersection
+of secondary surfaces $G_{i}$ with the primary surface $F$.
+This problem is a direct extension of Problem~(4), with one exception.
+Instead of using a line L defined by the point Q and a vertex on the boundary,
+we use a planar cross-section of the primary surface, where the plane is defined
+by Q and two vertices on the boundary.
+The primary surface is assumed to be convex in order to guarantee that the planar cross-section
+is a connected curve and that a sort of points along the cross-section is 
+therefore well-defined.
+Since we are now sorting points along a curve rather than a line, nontrivial
+sorting is required both to find the points of intersection with the patch
+boundary and to sort\vspace{.5in}~them.\\
+%
+{\bf Problem 6}\ \
+Compute the intersection of two solid models.  
+(See Section\vspace{.5in}~\ref{chap1-sec1}.)
+%
+%
+%{\bf Solution}
+%A piecewise algebraic surface patch is defined by a closed boundary consisting
+%of a simply connected collection of edges on a primary surface $F$.
+%The patch is convex if any line hits the patch at most two times.
+%The edges are algebraic space curve segments defined by the intersection
+%of secondary surfaces $G_{i}$ with the primary surface $F$.
+%The method of determining if a point $Q$ lies within the patch is a
+%direct generalization of the method of problem (6).
+%However, problem (3) is used to compute the intersection set $S$, rather than
+%problem (2).
+%The surface is assumed to be convex in order to guarantee that a plane
+%defined by the point $Q$ and two vertex points $V_1$, $V_2$ 
+%on the boundary patch
+%will intersect the primary surface $F$ in a convex connected curve $CL$.
+%In general, the intersection of an algebraic surface with a plane will
+%yield a reducible curve of many pieces.
+%The points of $S$ and the point $Q$ are sorted on 
+%the convex segment $CL$ rather than the line $L$ of problem (6).
+
+These six problems give an indication of the importance of 
+sorting points along an algebraic curve.
+They also reveal that there are essentially two ways in which sorting can
+be used:
+Problems (1)-(3) use sorting as a means of restricting
+a set of points to a specific subset, while Problems (4)-(6) use sorting
+as a means of introducing an even-odd parity to a set of points.
+%
+\section{Future Work}
+\subsection{Parameterization}
+
+Our investigation of sorting has revealed some problems that require
+further attention.
+One of the most obvious areas for future 
+research is the parameterization of surfaces of higher degree.
+Appendix~\ref{app-D} presents 
+some methods for parameterizing surfaces of 
+degree two and three, but we know of no practical methods for higher degrees.
+%
+\subsection{Curves with Several Connected Components}
+\label{manycomponents}
+
+Curves with several connected components are more challenging
+than curves with a single connected component.\footnote{Just as 
+multisegment cells are more challenging than cells with a single convex
+segment.}
+Example~\ref{foobar} illustrates that all of the sortpoints must lie on the
+same connected component when the convex-segment method is used to sort points
+on a connected component that has no \wallpoints.
+This requirement is not necessary (i.e., the sortpoints can be strewn over 
+several connected components)
+if the points are being sorted on a connected
+component CC that contains at least one \wallpoint, since a convex-segment
+traversal is then possible.
+Any sortpoints that do not lie on CC will 
+be ignored (using Theorem~\ref{thm-parents})
+in the same way that
+any sortpoints on CC that do not lie on the sort segment are ignored.
+%
+\begin{example}
+\label{foobar}
+The quartic curve of Figure~\ref{5.1} has four connected components, but 
+no flexes or singularities.
+Thus, this curve has no walls in its cell partition, and it will appear as if
+all of the sortpoints lie on the same convex segment.
+This will not be a correct 
+conclusion unless all of the sortpoints lie on the same connected component.
+\end{example}
+%
+\figg{5.1}{These sortpoints appear to be on the same convex segment}{2.375in}
+% From Arnon83
+
+Unfortunately, the points that are to be sorted
+may lie on several connected components.
+For example, the sortpoints will often be
+generated by intersecting a curve with another curve or surface 
+(as evidenced by the previous section), and the 
+resulting points may be spread over several connected components.
+Therefore, before sorting can proceed, those sortpoints that lie on 
+connected components with no \wallpoints\
+must be divided into connected components.
+The most obvious way of doing this
+is to create a boundary about 
+%
+\figg{5.3}{Component separation of a quartic curve}{2.5in}
+%
+each connected component (Figure~\ref{5.3}).
+The creation of these boundaries turns out to be simple 
+for cubic curves,
+%
+%There is only one class of cubic curve that has several branches:
+%the nonsingular cubic, which has two branches.
+%The closed component can be separated by finding the two tangents that
+%strike one of the flexes of the curve.  (See Figure~\ref{fig4-chap6}.)
+%
+%Elaborate on cubic branch separation, using end of cubic.tex.
+%
+however a general solution may be very difficult.\footnote{Hilbert's 
+$16^{th}$ problem is to determine the relative position
+of the connected components of a nonsingular algebraic plane curve
+\cite{kaplansky}.}
+%
+%"Hilbert's 16th problem asks for a study of the topology of nonsingular
+%algebraic curves in the real projective plane ... \\
+%... as a topological space, such an algebraic curve is a disjoint union
+%of circles."  (p.153 of Kaplansky:QA36K17+)
+%
+Collins' cylindrical algebraic decomposition provides a possible solution.
+This decomposition can be used to determine the topology of an algebraic curve 
+\cite{arnon83,kozen}, from which
+it should be straightforward to determine boundaries for each connected 
+component.
+Although the computation of a cylindrical algebraic decomposition of
+$\Re^{d}$ is double-exponential (or parallel-exponential) in $d$, we
+are only concerned with decompositions of the plane, so $d=2$ and the
+method may be tractable.
+%The weakness of this approach is the double-exponential (or 
+%parallel-exponential) complexity of the algorithm that computes the 
+%cylindrical algebraic decomposition.
+%It may be necessary to search for a solution that is effective only for curves
+%of low degree.
+
+
+
+The sorting of points along a curve of several connected components 
+is also difficult when the parameterization
+method of sorting is used.
+The following questions arise:
+(1) should each connected component have a separate parameterization?
+(2) if so, how does the implicit equation of a curve 
+      produce several, independent parameterizations?
+(3) if not, how can a single parameterization be split over several
+      connected components
+(i.e., how can the range of parameter values 
+that is associated with each connected component be determined)?
+%
+%
+\subsection{A Theory of Finite Precision}
+
+The algorithms of geometric modeling must be implemented on a
+computer of finite precision.
+This can cause instabilities that, because of their geometric nature,
+are quite different from the instabilities studied in conventional 
+numerical analysis.
+For example, in the creation of a cell partition, the tangent of a flex 
+is intersected with the curve.
+Since the curve can be very flat about a flex, a small error 
+in the tangent will cause the tangent to have more than one intersection
+with the curve near the flex.
+Although this particular problem is easily solved (by merging the
+intersections), finite precision
+problems may eventually impede progress in other
+applications.
+Therefore, the development of a systematic theory for the resolution of
+geometric problems arising from finite precision would be an important
+contribution to geometric modeling.
+\subsection{The Importance of Flexes, Singularities, and Projections}
+
+The convex-segment method has revealed the importance of the
+singularities and flexes of a curve.
+Singularities are also used to develop a curve's parameterization 
+(Section~\ref{subsec-par}).
+It may be advisable to include flexes and singularities
+as an integral component of a curve's representation 
+in a geometric model.
+(For 
+a space curve, the singularities and flexes of its projection would be
+stored.)
+Certainly, the discovery of more efficient algorithms for the computation
+of singularities and flexes would be a significant contribution.
+
+Our investigation of sorting has also demonstrated that
+the best way to solve a problem for a space curve may be to reduce the
+dimension, and hopefully the complexity, of the problem by translating
+it to an equivalent problem for a projection of the space curve.
+%
+\section{Conclusions}
+We have developed a new method of sorting points along an algebraic curve
+that is superior to the conventional methods of sorting.
+Many curves that could not be sorted, or that could only be sorted slowly,
+can now be sorted efficiently.
+The development of our new method has also
+illustrated how an algebraic curve can 
+be decomposed into convex segments, and how the
+ambiguity of sorting through a singularity can be resolved.
+
+The creation and manipulation of curves and surfaces is of major 
+importance to geometric modeling.
+A sophisticated geometric modeling system should offer 
+a rich collection of tools to aid this manipulation.
+Our work on sorting has been an attempt to develop one of these tools.
+The progress of geometric modeling depends upon the development of more
+tools and upon the extension of more
+computational geometry algorithms from polygons to curves and surfaces
+of higher degree.

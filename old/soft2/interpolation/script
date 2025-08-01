@@ -1,0 +1,7 @@
+interpolate ../data/whiteoak.pts
+	- a natural and complex shape that exhibits the power of smooth interpolation,
+	  without the issues of sharp corners (ingalls.pts) or cusps (sondica.pts)
+
+envelope ../data/ob1.pts ob1env.pts
+
+animateEnvelope -s .2 hyperbolicSpiral.pts

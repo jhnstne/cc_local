@@ -1,0 +1,1238 @@
+\documentclass[12pt]{article}
+\usepackage[pdftex]{graphicx}
+% \usepackage{epsfig}
+\usepackage{times}
+\input{header}
+
+\newif\ifJournal
+\Journalfalse
+\newif\ifTalk
+\Talkfalse
+
+\newcommand{\plucker}{Pl\"{u}cker\ }
+\newcommand{\tang}{tangential surface\ }
+\newcommand{\tangs}{tangential surfaces\ }
+\newcommand{\Tang}{Tangential surface\ }
+\newcommand{\atang}{tangential $a$-surface\ }
+\newcommand{\btang}{tangential $b$-surface\ }
+\newcommand{\ctang}{tangential $c$-surface\ }
+\newcommand{\atangs}{tangential $a$-surfaces\ }
+\newcommand{\btangs}{tangential $b$-surfaces\ }
+\newcommand{\ctangs}{tangential $c$-surfaces\ }
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{-1in}	% should be 0pt for 1in
+% \setlength{\headsep}{.5in}
+% \setlength{\textheight}{8.875in}
+\setlength{\textheight}{8.6in}
+\setlength{\textwidth}{6.875in}
+\setlength{\columnsep}{5mm}	% width of gutter between columns
+
+% \DoubleSpace
+
+\title{DRAFT\\Smooth kernels in 2-space:  Finding one point of a smooth kernel\\is as hard as finding the entire kernel}
+% Hulls, kernels, and giftwrapping of smooth curves
+% A smooth Jarvis march
+% The convex hull of a smooth curve
+\author{J.K. Johnstone\\
+	Geometric Modeling Lab\\
+	Computer and Information Sciences\\
+	University of Alabama at Birmingham\\
+	University Station, Birmingham, AL, USA 35294}
+%	Geometric Modeling Lab, Computer and Information Sciences, University
+%	Station, Birmingham, AL, USA 35294; Phone: (205) 975-5633; 
+%	Fax: (205) 934-5473; jj@cis.uab.edu
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The kernel of a point set S is the subset of S that can see every point of S,
+a useful tool in visibility analysis.
+The kernel of a polygon is well understood.
+Recently, Elber developed an algorithm for the kernel of a plane
+parametric curve, expressed as the zero set of a system of equations.
+Motivated by this work,
+we develop an alternative algorithm for the kernel of a closed plane curve
+using duality.
+
+Our starting point is the existence of a 
+dual relationship between the convex hull and kernel:
+if a single point of the kernel can be found,
+the kernel in primal space can be computed 
+directly from the convex hull in dual space.
+This reduces the problem to finding a seed point of the kernel.
+We present a method for computing a seed point,
+by finding a small set of candidate points
+that is guaranteed to contain a kernel point (if the kernel is not empty).
+These candidates are built from the curve's inflection tangents.
+The algorithm is efficient, requiring only a small
+number of line-curve and line-line intersections.
+Finally, we show that the computation of the seed point 
+actually computes the entire kernel, allowing us to avoid the
+reduction to convex hull.
+	% The key idea is that the computation of the seed point yields not only 
+	% the seed point, but all of the corners of the kernel as well.
+The algorithm leverages the power of dual space,
+using the recently developed tangential curve,
+a dual image of the curve's tangent space.
+Dual space is used both for practical computation
+and for theoretical understanding.
+\end{abstract}
+
+\ifTalk
+The convex hull in dual space can be used to compute the kernel
+in primal space, after some massaging.
+It is this massaging that is the main topic of this paper.
+\fi
+
+Keywords: kernel, convex hull, dual space, tangential curve, bitangent,
+inflection point.
+
+% \tableofcontents
+
+\clearpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+
+We shall develop an efficient 
+algorithm for computing the kernel of a closed plane curve.
+The kernel is a convex connected subset of the curve's interior,
+defined as follows (Figure~\ref{fig:curveob1b}).
+% Let us begin with a definition of the kernel.
+% Notice that the kernel is convex and connected.
+
+\begin{defn2}
+\label{defn:kernel}
+Let $C$ be a plane curve.
+The point $P$ can {\bf see the point} $Q$ on $C$
+if the line segment $\seg{PQ}$ does not intersect $C$.
+The {\bf kernel} of $C$ is the locus of points that can see every
+point of $C$:
+\[
+\mbox{kernel}(C) = \{ P \in R^2: \seg{PQ} \ \cap \ C = \emptyset 
+		\hspace{.25in} \forall \ Q \in C \}
+\]
+\end{defn2}
+
+\begin{figure}[b]
+\begin{center}
+\includegraphics*[scale=.5]{img/jjhu1.jpg}
+\includegraphics*[scale=.5]{img/jjke0.jpg}
+\end{center}
+\caption{A smooth curve and its kernel}
+\label{fig:curveob1b}
+% kernel -p -d 10 data/ob1b.pts
+\end{figure}
+
+The kernel is a classical construct of computational geometry
+\cite{preparata85,goodman97}.
+\ifJournal
+Star-shaped polygons, polygons with nontrivial kernels, are an 
+important class.
+\fi
+It is also a fundamental structure for visibility analysis \cite{orourke87}.
+For example, the kernel of a room would be an ideal location to place a camera, 
+robot or light, since the entire room is visible from this point.
+The kernel problem has long been resolved for polygons,
+since Lee and Preparata developed an optimal linear algorithm 
+for the kernel of a simple polygon \cite{lee79}.
+The kernel of a plane curve has only recently been studied \cite{elber02}.
+Elber's algorithm uses an algebraic computation from the zero set of a 
+system of nonlinear equations.
+Motivated by Elber's work, we propose a new algorithm for the kernel of a
+curve that leverages the power of duality.
+
+The structure of our algorithm is as follows.
+We observe that the kernel is dually related to the convex hull.
+This offers a new way of interpreting the kernel using an analysis
+in dual space, especially since the convex hull is well
+understood \cite{elber01,jj02hull}.
+The first attempt is to reduce the problem to the convex hull in dual space.
+However, this requires a single point of the kernel,
+to ensure a robust dualization of the curve (Section~\ref{sec:kernel2hull}).
+Thus, our focus turns to the problem of finding a seed point of the kernel.
+Using the tangents at the inflection points of the curve,
+we find a small set of candidate points that is guaranteed to contain
+a kernel point.
+The seed point is extracted from this candidate set by a simple test
+in dual space, using the tangential curve \cite{jj01,jj02}.
+This completes the reduction to the convex hull.
+
+We next observe that 
+the kernel can be computed directly,
+using the very tools that we developed to find the seed point.
+In particular, the candidate set will not only contain a seed point of
+the kernel: it will contain all of the corner points of the kernel.
+The entire kernel can be defined from these corner points.
+In short, in calculating one point of the kernel, we actually compute
+the entire kernel.
+
+Since our algorithm and its development relies heavily on dual space,
+we first introduce this material in Section~\ref{sec:duality}.
+Section~\ref{sec:kernel2hull} develops the argument that a kernel computation
+can be reduced to a convex hull computation in dual space.
+Section~\ref{sec:candidate} shows how a seed point of the kernel can be computed,
+which clears the way for this reduction.
+Since this process inherently deals with infinite curves in dual space,
+we discuss how to guarantee that this computation is robust 
+in Section~\ref{sec:trim}, by trimming the infinite curves.
+Section~\ref{sec:nohull} presents our preferred algorithm for the kernel,
+computing the kernel directly from the seed point construction.
+We offer some examples of kernels in Section~\ref{sec:eg} and conclude 
+in Section~\ref{sec:conclusions}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{The kernel in dual space}
+\label{sec:duality}
+
+In dual space, lines are replaced by points and points by lines.
+% Duality is a mechanism for reinterpreting lines as points and points as lines.
+We give a short review of duality here.
+For a more detailed discussion, the reader is referred to our papers
+on tangential curves \cite{jj01,jj02}.
+	% We need to use three different dualities, each interpreting the projective 
+	% coordinate differently.
+	% For the work on kernels, we can restrict our attention to the c-duality.
+
+\begin{defn2}
+\label{defn:dual}
+The line $ax+by+c=0$ in 2-space is {\bf dual} to the point 
+$(\frac{a}{c}, \frac{b}{c})$ in 2-space.\footnote{This is equivalent to 
+	the c-duality in \cite{jj02}.}
+% (or the point $(a,b,c)$ in projective 2-space).
+\end{defn2}
+
+\begin{lemma}
+\label{lem:cinfty}
+Lines through the origin map to infinity under c-duality.
+\end{lemma}
+
+\begin{lemma}
+\label{lem:join}
+The line between $a$ and $b$
+	% The join of two points $a$ and $b$
+dualizes to the intersection of the lines $a^*$ and $b^*$.
+\end{lemma}
+
+\begin{lemma}
+Duality is its own inverse:
+$\mbox{dual}(\mbox{dual}(x)) = x$.
+In other words, there is a symmetry to duality:
+if $y = \mbox{dual}(x)$, then $x = \mbox{dual}(y)$.
+\end{lemma}
+
+%%%%%%%%%%%%%%%%%%%%%%
+
+The curve's tangents will play an important role in the kernel.
+When the tangents of a curve are mapped to dual space,
+they define a tangential curve.
+In the rest of the paper,
+$C$ will refer to a closed plane curve and $C^*$ its tangential curve.
+
+\begin{defn2}
+\label{defn:tangentialcurve}
+Let $C(t)$ be a plane curve.
+The {\bf tangential curve} of $C(t)$ is the curve $C^*(t) \subset P^2$,
+where $C^*(t)$ is the dual of the tangent at $C(t)$.\footnote{This is
+	equivalent to the tangential c-curve in \cite{jj02}.
+	Unlike most problems involving the tangent space of a curve,
+	the tangential c-curve is more natural than
+	the tangential a-curve and b-curve for the kernel,
+	basically because of Lemma~\ref{lem:kernel}.}
+\end{defn2}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We can now reinterpret the kernel in dual space.
+% We first need to reinterpret the kernel in primal space.
+\cite{elber02} characterized the kernel in a fresh way that is more
+useful algorithmically than the classical definition.
+It shows that the tangent space 
+of a curve carves out the kernel (Figure~\ref{fig:kernel}b)
+and leads directly to a dual interpretation.
+% Lemma~\ref{lem:kernel} can be reinterpreted in dual space.
+
+\begin{lemma}[Elber]
+\label{lem:kernel}
+$P \in \mbox{kernel}(C)$ if and only if no tangent of $C$ intersects $P$.
+\end{lemma}
+
+\begin{corollary}
+$P \in \mbox{kernel}(C)$ if and only if dual($P$) does not intersect the 
+tangential c-curve $C^*$.
+\end{corollary}
+
+\begin{defn2}
+A line in dual space is {\bf free} if it does not intersect the 
+tangential c-curve $C^*$.
+\end{defn2}
+
+\begin{corollary}
+\label{cor:free}
+$P \in \mbox{kernel}(C)$ if and only if dual($P$) is free.
+\end{corollary}
+
+\noindent In other words, points of the kernel are easily recognizable in dual space
+as free lines (Figure~\ref{fig:freeline}).
+This observation will be central to our computation of the kernel.
+
+\clearpage
+
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.5]{img/jjke1.jpg}
+\includegraphics*[scale=.5]{img/jjke2.jpg}
+\end{center}
+\caption{(a) The kernel of a curve (b) The tangent space of a curve, revealing the kernel}
+\label{fig:kernel}
+% kernel -p -d 10 data/ob1b.pts, with left window grown
+\end{figure}
+
+% picture of kernel, points in and out of kernel, and associated dual lines
+% including some tangents
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.4]{img/jjke3a.jpg}
+\includegraphics*[scale=.4]{img/jjke3b.jpg}
+\includegraphics*[scale=.4]{img/jjke3c.jpg}
+\end{center}
+\caption{Kernel points in primal space are associated with free lines in dual space}
+\label{fig:freeline}
+% kernel -p -d 10 -x .5 data/ob1b.pts (origin now in kernel)
+\end{figure}
+
+\clearpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Computing the kernel from the convex hull}
+\label{sec:kernel2hull}
+
+The kernel of a curve $C$
+is strongly related to its convex hull.
+To get the kernel of $C$, 
+we shrink $C$ until every point of the new $C$
+can see every point of the old $C$.
+The convex hull of $C$ is similar, except that 
+% This is similar to the convex hull of $C$, where we
+instead we expand $C$ until every point of
+the new $C$ can see every point of the {\em new} $C$.
+Both are closures under the 'see' operation ($\seg{PQ}\ \cap \ C = \emptyset$):
+one a contraction and the other an expansion.
+	% It is not surprising, therefore, that the convex hull
+	% can be used in the computation of the kernel.
+The following theorem clarifies the tightness of this relationship.
+
+\begin{theorem}[Wang 02]
+\label{thm:hullisdual}
+Suppose that the kernel of $C$ contains the origin $(0,0)$.
+Then the kernel of $C$ is dual to the convex hull of 
+its tangential curve $C^*$.
+\end{theorem}
+\prf
+More precisely, we will show that the boundary of the kernel of $C$ is dual 
+to the tangent space of the boundary of the convex hull of $C^*$.
+This will show that the kernel of $C$ is immediately available from the 
+convex hull of $C^*$, as shown in Algorithm 1.
+
+Since the kernel contains the origin, no tangent will intersect the origin
+(Lemma~\ref{lem:kernel}) and so no tangent will dualize to infinity (Lemma~\ref{lem:cinfty}).
+Thus, $C^*$ is finite, bounded, and closed,
+and its convex hull is well defined.
+Since kernel points correspond to free lines (Corollary~\ref{cor:free}),
+boundary points of the kernel correspond to 
+free lines that are just about to touch $C^*$, or free tangents of $C^*$.
+But the free tangents of $C^*$ bound its convex hull (Lemma~\ref{lem:condition}
+of the appendix).
+\QED
+
+% does not reveal anything new
+% more importantly, this figure misleads, since we are really interested in the
+% tangent space of the hull
+% the previous figure is a better indication of the result (pt goes to line)
+% figure of translated ob1b, its kernel, and the convex hull of its tangential c-curve
+% \begin{figure}[h]
+% \begin{center}
+% \includegraphics*[scale=.5]{img/--.jpg}
+% \end{center}
+% \caption{The kernel and the convex hull are dual, if the origin lies in the kernel}
+% \label{fig:kernelob1a}
+% \end{figure}
+
+This dual relationship between the kernel and convex hull 
+only holds when the kernel contains the origin,
+because we implicitly rely on the boundedness of $C^*$.
+If the kernel of $C$ does not contain the origin, a reduction to the convex hull
+of $C^*$ will not work since $C^*$ will be unbounded
+or disconnected, and the convex hull of $C^*$
+will be uninteresting (Figure~\ref{fig:originNotInKernel}).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Theorem~\ref{thm:hullisdual} leads to the following algorithm for computing
+the kernel.
+	
+\vspace{.2in}
+
+\centerline{{\bf Algorithm 1: Computing the kernel of $C$ from the hull}}
+
+\begin{enumerate}
+\item 	Find a point P of the kernel.  If no such point exists, 
+	the kernel is empty.
+\item   Translate P to the origin.
+\item	Compute the tangential curve $C^*$.
+\item	Compute the convex hull of $C^*$.
+	This defines the kernel of $C$:
+	the curved segments $C^*(t_1,t_2)$ of the hull boundary define
+	the curved segments $C(t_1,t_2)$ of the kernel boundary,
+	and the bitangents $\seg{C^*(t_1)C^*(t_2)}$ of the hull boundary 
+	define the straight line segments $\seg{C(t_1)C(t_2)}$ of the
+	kernel boundary.
+\end{enumerate}
+
+% figure of ob1b, its kernel, and its unclipped tangential c-curve
+\begin{figure}[h]
+\begin{center}
+\includegraphics*[scale=.5]{img/jjke4.jpg}
+\end{center}
+\caption{A curve whose kernel does not contain the origin, and its infinite tangential curve}
+\label{fig:originNotInKernel}
+% kernel -p -d 10 data/ob1b.pts
+\end{figure}
+
+% We have solved the kernel problem if the origin lies in the kernel.
+% But this will rarely be the case.
+% Indeed, for all curves with empty kernels, this will not be the case.
+
+This establishes that the problem of computing the kernel reduces to the 
+apparently easier problem of computing a single point of the kernel.
+However, this subproblem is slippery.
+	% Notice that if the kernel is empty, there isn't even one to find!
+In fact, we shall discover that finding one point of the kernel
+is just as hard as finding the entire kernel.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Computing a single point of the kernel}
+\label{sec:candidate}
+
+% We must find one point of the kernel.
+We shall attack this problem by finding 
+a finite collection of points that must necessarily contain
+a kernel point, if one exists.
+It will then be a simple process of testing each of these candidates against
+the kernel, using Corollary~\ref{cor:free}.
+If none are in the kernel, the kernel must be empty.
+	% we shall conclude that the kernel is empty.
+	% Otherwise, we shall have one or more seed points for the kernel.
+
+\begin{defn2}
+A set of points $S \subset \Re^2$ is a 
+% {\bf necessary and sufficient set of kernel candidates} 
+{\bf kernel set}
+if $S \cap \mbox{kernel}(C) \neq \emptyset$ 
+whenever  $\mbox{kernel}(C) \neq \emptyset$.
+\end{defn2}
+
+\noindent 
+We shall compute the kernel set in primal space as a set of points,
+but often interpret it in dual space as a set of lines.
+
+Convex curves are a special case in this development.
+Since the kernel of a convex curve $C$ is simply the interior of $C$,
+we can assume without loss of generality that $C$ is concave.
+Moreover, convex curves are easily recognized as curves without inflection
+points.
+We can also assume that the kernel of $C$ is
+not empty, otherwise the choice of kernel set is arbitrary.
+Curves with self-intersections are another trivial case,
+since these curves always have empty kernels.
+(As the tangent sweeps from the self-intersection $I$ back to $I$ again,
+it will sweep out the entire plane, leaving no room for the kernel.)
+Therefore, we can assume that $C$ is a simple concave 
+curve with nonempty kernel (what we shall call a {\bf nontrivial} curve).
+
+% 	\begin{defn2}
+% 	An {\bf inflection point} is a point at which the sign of the curvature changes.
+% 	% Not just a zero curvature.
+% 	\end{defn2}
+
+Inflection points will be central to our construction of the kernel set.
+Thinking of the kernel as the region milled out by the tangent space (Figure~\ref{fig:kernel}b),
+it becomes clear why inflection points will play an important role,
+as they represent local extrema of the tangent's sweep in a particular
+direction.\footnote{The inflection tangents 
+	that you see in 
+	Figure~\ref{fig:kernel}b are not explicitly drawn.
+	They are artifacts of the tangent space, indicating where
+	tangents naturally bunch together as they change direction
+	at an inflection point.}
+Nontrivial curves will have inflection points.
+Indeed, every concavity must contain an inflection point.
+% Consider walking along a (concave, simple) curve and entering a concavity.
+% The curve must eventually change curvature in order to leave the concavity.
+% At this change, there is an inflection point.
+
+%	\begin{lemma}
+%	If $C$ is convex, $\mbox{kernel}(C) = \mbox{interior}(C)$.
+%	\end{lemma}
+%	
+% 	\begin{lemma}
+%	\label{lem:hasinfl}
+%	Suppose $\mbox{kernel}(C) \neq \emptyset$.
+%	If $C$ is not convex, then $C$ has inflection points.
+%	\end{lemma}
+%	\prf
+%	Consider walking along a curve and entering a concavity.
+%	The curve must eventually change curvature in order to leave the concavity.
+%	At this change, there is an inflection point.
+%	\QED
+
+Here is the punch line of our development.
+
+\begin{theorem}
+\label{thm:kernelset}
+Let $T$ be the tangents of the inflection points of $C$.
+Let $H_1$ be the intersections of $T$.
+Let $H_2$ be the intersections of $T$ with $C$.
+A kernel set for a concave $C$ is $H_1 \cup H_2$.
+\end{theorem}
+
+\clearpage
+
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.4]{img/jjke5.jpg}
+\end{center}
+\caption{Inflection points of $C$ and their tangents, and the associated cusps of the clipped $C^*$}
+\label{fig:infl}
+% kernel -p -d 10 data/ob1b.pts
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.4]{img/jjke6.jpg}
+\end{center}
+\caption{The first component $H_1$ of the kernel set}
+\label{fig:comp1}
+% fig 11
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.4]{img/jjke7.jpg}
+\end{center}
+\caption{The second component $H_2$ of the kernel set}
+\label{fig:comp2}
+\end{figure}
+
+\clearpage
+
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.4]{img/jjke8.jpg}
+\end{center}
+\caption{The kernel points in the kernel set of Figures~\ref{fig:comp1}-\ref{fig:comp2}}
+\label{fig:free}
+\end{figure}
+
+Figures~\ref{fig:comp1}-\ref{fig:comp2} 
+illustrate $H_1$ and $H_2$, as points in primal space
+and lines in dual space.
+% \footnote{In this and 
+%	subsequent figures, $C^*$ is trimmed as described in Section~\ref{sec:trim}.}
+To establish that $H_1 \cup H_2$ is a kernel set,
+we shift our attention to dual space.
+The tangent of an inflection point in primal space becomes a cusp in dual space
+(Figure~\ref{fig:infl}).
+After all, at an inflection point the tangent reverses direction,
+so in dual space the point will reverse direction, yielding a cusp.
+
+\ifTalk
+\begin{lemma}
+The tangent of an inflection point of $C$ dualizes to a cusp of $C^*$.
+\end{lemma}
+\fi
+
+% \begin{defn2}
+% A {\bf cusp} is a point at which the incoming and outgoing tangents are
+% in opposite directions.
+% At a cusp, the first derivative is zero.
+% \end{defn2}
+
+%	\begin{lemma}
+%	\label{lem:inflcusp}
+%	An inflection point of $C$ corresponds to a cusp of $C^*$.
+%	\end{lemma}
+%	\prf
+%	As you pass through an inflection point, the tangent reverses direction
+%	\QED
+
+In primal space, we are looking for a kernel point.
+In dual space, we are looking for a free line (Corollary~\ref{cor:free}).
+The next lemma shows that we can restrict our search to bitangents.
+
+\begin{lemma}
+\label{lem:existence}
+If $C$ is nontrivial,
+one of the bitangents of $C^*$ is free.
+\end{lemma}
+\prf
+If $C$ is nontrivial, its kernel is not empty and 
+there exists a free line in dual space.
+We can move this free line to a bitangent while preserving its freedom.
+In particular, we can move the free line until it touches the curve once,
+then pivot until it touches the curve again, generating a bitangent.
+This pivoting is always possible because the bitangent is a cusp
+bitangent (see below).
+%
+%	This will not necessarily work for conventional bitangents.
+%	But it does when we incorporate cusps, as follows.
+%	Push the free line until it touches a cusp (what if it can't reach a cusp?).
+%	Then rotation is free about this cusp, until we become tangent to the curve.
+%	(The problem with rotation about a non-cusp is that you are moving along
+%	the curve in order to maintain tangency and you may go to infinity
+%	before a second point of tangency is found.)
+%
+%	Notice that $C^*$ will have a (cusp) bitangent, since 
+%	$C$ has an inflection point and $C^*$ has a cusp.
+\QED
+
+\vspace{-.3in}
+
+\begin{corollary}
+If $C$ is nontrivial, the bitangents of $C^*$ define a kernel set.
+% need concave C, since a convex C will have C* with no bitangents
+\end{corollary}
+
+% A kernel set is a set of points that necessarily includes a kernel point.
+% In dual space, this becomes a 
+% collection of lines that necessarily includes a free line (Corollary~\ref{cor:free}).
+% Equivalently, there exists a free line if and only if there exists
+% a free line that is a bitangent of $C^*$.
+
+Bitangents come in two flavours: conventional bitangents and cusp bitangents.
+But for nontrivial $C$, $C^*$ only has cusp bitangents.
+
+\begin{defn2}
+\label{defn:bitang}
+A {\bf conventional bitangent} of a curve $C$ is a line
+that is tangent to $C$ at two or more distinct points.
+If a curve contains cusps, tangents of the curve through the cusps
+and lines between the cusps are also considered bitangents.
+% (Figure~\ref{fig:cusps}).
+These will be called {\bf cusp bitangents}.
+\end{defn2}
+
+\begin{lemma}
+If $C$ is nontrivial,
+all of the bitangents of $C^*$ are cusp bitangents.
+\end{lemma}
+\prf
+Conventional bitangents of $C^*$ are associated
+with self-intersections of $(C^*)^*$ 
+and $(C^*)^* = C$ \cite{jj02}.
+Since $C$ is nontrivial, it has no self-intersections
+and we conclude that $C^*$ has no conventional bitangents.
+The only remaining source of bitangents is cusps.
+\QED
+
+\vspace{-.2in}
+
+% What are the points in primal space associated with cusp bitangents in
+% dual space?
+% A cusp bitangent is either a line between two cusps
+% (right side of Figure~\ref{fig:comp1}) 
+% or a tangent through a cusp.
+% (right side of Figure~\ref{fig:comp2})
+% Since cusps dualize to inflection tangents,
+A line between two cusps dualizes to the intersection of the associated inflection
+tangents (Lemma~\ref{lem:join}).
+A tangent of $C^*$ through a cusp dualizes to the intersection of 
+the associated inflection tangent with the curve $C$.
+% \footnote{Here, we again appeal to the fact that $(C^*)^* = C$.}
+We conclude that the (cusp) bitangents of $C^*$ dualize to
+the intersections of the inflection tangents of $C$ ($H_1$) 
+and the intersections of these inflection tangents with $C$
+($H_2$).
+This is the kernel set of Theorem~\ref{thm:kernelset}
+and proves the theorem.
+
+We can gather this material into an algorithm
+for the computation of a kernel set.
+
+\vspace{.2in}
+
+\centerline{{\bf Algorithm 2: Computing the kernel set}}
+
+\begin{enumerate}
+\item Compute the inflection points of $C$.
+\item If $C$ has none, it is convex and $\mbox{kernel}(C) = \mbox{interior}(C)$.
+\item Compute the intersections $H_1$ of the inflection tangents.
+\item Compute the intersections $H_2$ of the inflection tangents with $C$.
+\item $S = H_1 \cup H_2$ is our kernel set.
+\end{enumerate}
+
+% By definition, our kernel set $S$ will contain a kernel point (if the kernel is not empty).
+The kernet set will necessarily contain a kernel point.
+But this kernel point will not make a good seed point without some massaging.
+% We can extract a kernel point directly from the kernel set,
+% but we must manipulate this kernel point.
+It turns out that our kernel set $S$ will contain many kernel points, not just one.
+However, 
+all of these points will inherently lie on the boundary of the kernel
+(Figure~\ref{fig:free}),
+since the kernel set corresponds to extremal free lines (free tangents)
+in dual space.
+The purpose of finding a point $P$ of the kernel is to create
+a finite tangential curve $C^*$ for robust convex hull computation (Algorithm 1).
+But a boundary kernel point will not 
+lead to the most robust convex hull computation,
+since the tangential curve will 'almost' be infinite.
+To get a robust, interior point of the kernel,
+we compute the centroid of the kernel points in $S$.
+Since the kernel is convex, this centroid will lie in the kernel 
+(Figure~\ref{fig:mean}).
+This leads to the following algorithm for
+trimming the kernel set down to a seed point of the kernel.
+The tangential curve is used to isolate the kernel points in $S$,
+appealing to Corollary~\ref{cor:free}.
+
+\vspace{.2in}
+
+\centerline{{\bf Algorithm 3: Computing a seed point from the kernel set}}
+
+\begin{enumerate} 
+\item	Compute the kernel set $S = H_1 \cup H_2$  
+	and tangential curve $C^*$, using Algorithm 2.
+\item	Compute $K = \{s \in S : \mbox{dual}(s) \cap C^* = \emptyset\}$.\footnote{This
+		step will be altered in Section~\ref{sec:trim}.}
+\item	$K$ is the set of kernel points in the kernel set.
+	If $K = \emptyset$, the kernel is empty.
+\item	Let $P$ be the centroid of $K$,
+	an interior point of the kernel.
+\end{enumerate}
+
+$P$ is the desired seed point of the kernel,
+bootstrapping the kernel computation.
+Algorithms 2 and 3 implement step (1) of Algorithm 1
+and complete the reduction of the kernel to the convex hull.
+Notice that the only computational use of dual space in Algorithms
+2 and 3 is the filtering of $S$ down to $K$ through intersection
+with the tangential curve.
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics*[scale=.5]{img/jjke9.jpg}
+\end{center}
+\caption{The centroid of $K$ is a good seed point of the kernel}
+\label{fig:mean}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Trimming the infinite tangential curve}
+\label{sec:trim}
+
+There is a robustness issue in the use of the tangential curve $C^*$
+to find the kernel points $K$ in the kernel set $S$.
+$C^*$ will inherently be infinite during the computation of $K$
+and the infinite parts of $C^*$ will disrupt the analysis in dual space
+(testing whether a line is free).
+To make the computation of $K$ robust,
+it is crucial that the infinite segments of $C^*$ be trimmed away 
+(Figure~\ref{fig:trim}).
+% 	The removal of infinite regions
+%	from tangential a-curves and b-curves is called 'clipping'
+%	because it involves horizontal and vertical line intersections
+%	with the curve that resembles clipping by a window.
+%	In the context of tangential c-curves, it involves removing curve
+%	segments, more suggestive of traditional trimming.
+Fortunately, this is a simple task.
+$C^*$ goes to infinity as the tangent of $C$
+approaches the origin,
+so $C^*$ should be trimmed surrounding the tangents through the origin.
+
+\begin{defn2}
+The {\bf trimmed tangential curve} $C^*_{\mbox{\tiny{trim}}}$
+is $C^*$ with the segments
+\[
+\{C^*(t_i - \epsilon, t_i + \epsilon),\ \ i=1,\ldots,n\}
+\]
+trimmed away,
+where the tangents at $C(t_1),\ldots,C(t_n)$ pass through the origin
+(Figure~\ref{fig:trim}).
+$C^*_{\mbox{\tiny{trim}}}$ is a finite curve.
+\end{defn2}
+
+% tangents thru origin in primal space, untrimmed tangential curve in dual space
+\begin{figure}[h]
+\begin{center}
+\includegraphics*[scale=.5]{img/jjke10.jpg}
+\hspace{.3in}
+\includegraphics*[scale=.5]{img/jjke11.jpg}
+\end{center}
+\caption{(a) Tangents through the origin guide the trimming;
+	 (b) the associated trimmed segments in primal space lead to 
+	 (c) the trimmed tangential curve.}
+\label{fig:trim}
+\end{figure}
+
+The tangents of $C$ through the origin can be computed
+using tangential curves (but the tangential a- and b-curves
+of \cite{jj02} rather than the tangential c-curves of this paper,
+which are inherently unstable for this analysis).
+See \cite{jj02hull}.
+% Step (2) of Algorithm 3 is changed to use the trimmed tangential curve.
+
+% \begin{description}
+% \item[(2)] Compute $K =
+%	\{s \in S : \mbox{dual}(s) \cap C^*_{\mbox{\tiny{trim}}} = \emptyset\}$.
+% \end{description}
+% \vspace{.2in}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \subsubsection{Accounting for trimming}
+% \label{sec:trimarea}
+
+The trimming of $C^*$ may lead to another type of mistake in the computation
+of $K$, if we are not careful.
+	% A kernel point is a point avoided by the tangent space.
+Since trimming $C^*$ is equivalent to removing some of the tangent space of $C$,
+a nonkernel point may be misdiagnosed as a kernel point because the only
+part of tangent space that touched it was trimmed away (Lemma~\ref{lem:kernel}).
+We compensate for the trimming of $C^*$
+by adding a test (in primal space) of $K$ against the tangent space that was trimmed away,
+as follows.
+	% This additional test is performed in primal space using trim regions.
+
+% The trimming of $C^*$ may affect the diagnosis of free lines in dual space.
+% In particular, the set $K$ of kernel points (in Algorithm 3)
+% may include some impostors if we test against $C^*_{\mbox{trim}}$ rather 
+% than $C^*$.
+
+\begin{defn2}
+Suppose that the tangent at $C(t_i)$ passes through the origin.
+	% so that the tangent space of $C(t_i - \epsilon, t_i + \epsilon)$ was removed from $C^*$.
+The {\bf trim region associated with $C(t_i)$} 
+is the region of primal space covered by the tangent space
+of $C(t_i - \epsilon, t_i + \epsilon)$ (Figure~\ref{fig:trimregion}).
+The {\bf trim region} is the union of all of the
+trim regions associated with points whose tangents pass through the origin.
+\end{defn2}
+
+Step (2) of Algorithm 3 becomes:
+
+\begin{description}
+\item[(2a)] Compute $\hat{K} = \{s \in S : \mbox{dual}(s) \cap C^*_{\mbox{\tiny{trim}}} = \emptyset\}$.
+\item[(2b)] Remove the points from $\hat{K}$ that lie in the trim region,
+	yielding $K$.
+\end{description}
+
+This is a robust method of finding $K$, the kernel points in the kernel set.
+\ifJournal
+The trim region is easily computed.
+Let $L_1$ and $L_2$ be the tangents at $C(t_i - \epsilon)$ and $C(t_i + \epsilon)$
+respectively
+and define the inside of $L_1$ (resp., $L_2$) 
+to be the side that contains $L_2$'s (resp., $L_1$'s) point of tangency.
+The trim region associated with $C(t_i)$ 
+is the region inside $L_1$ and outside $L_2$,
+or inside $L_2$ and outside $L_1$.
+\fi
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics*[scale=.5]{img/jjke12.jpg}
+\end{center}
+\caption{A trim region}
+\label{fig:trimregion}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Computing the kernel without the convex hull}
+\label{sec:nohull}
+
+In preparation for computing the kernel from the convex hull, 
+a finite collection of kernel points $K$ was computed.
+In this section, we observe that $K$ already defines the entire kernel
+and no subsequent convex hull computation is required.
+This yields the preferred algorithm for the smooth kernel.
+
+	% In this section, we present our preferred algorithm for the smooth kernel,
+	% which does not require any convex hull computation.
+	% It does rely, however, on the tools that we have developed along the way
+	% to the kernel-from-hull algorithm.
+
+We have observed that the points of $K$ lie on the boundary of the kernel.
+Actually, they lie at the {\em corners} of the boundary because
+$K$ corresponds to free bitangents in dual space.
+Free lines correspond to kernel points, free tangents to kernel
+points on the boundary, and free bitangents to kernel points at the
+corner of the boundary (since they are extremal in two ways).
+This leads to the following algorithm for computing the kernel from $K$.
+
+\vspace{.2in}
+
+\centerline{{\bf Algorithm 4: Computing the kernel of $C$ without the hull}}
+
+\begin{enumerate}
+\item Compute $K$ using Algorithms 2 and 3 (including the trimming refinements of step 2).
+\item Sort $K$ about the sample mean of $K$.
+\item The kernel of $C$ is defined from $K$ as follows.
+      Two consecutive points of the sorted $K$ should be joined by:
+\begin{enumerate}
+\item a curve segment of $C$ if both points are from $H_2$ 
+(intersections of inflection tangents with $C$)
+\item a straight line if either point is from $H_1$ 
+(intersections of inflection tangents).
+\end{enumerate}
+\end{enumerate}
+
+Figure~\ref{fig:nohull} gives an example.
+
+\ifJournal
+These connections of the points of $K$ mimic the behaviour of the
+convex hull in dual space.
+% give an argument why
+\fi
+
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.5]{img/jjke13.jpg}
+\end{center}
+\caption{The points in $K$ fully define the kernel}
+\label{fig:nohull}
+\end{figure}
+
+We conclude that computing a single point of the kernel is as difficult
+as computing the entire kernel,
+since the computation of $K$ needed to find a single point can be used
+instead to compute all of the kernel.
+
+% \begin{lemma}
+% These seed kernel points fully define the kernel (without any subsequent
+% convex hull computation), as follows.
+% Let $\{C^*(t_1), \ldots, C^*(t_n)\}$ be the cusps of $C^*$, sorted along $C^*$.
+% Let $\{C^*(t_i) C^*(u_i): i = 1,\ldots,n\}$ be the tangents through the cusps.
+% Kernel is curve segments $C(u_i) C(u_{i+1})$ and line segments
+% $C(t_i) C(u_i)$(?).
+% \end{lemma}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Examples}
+\label{sec:eg}
+
+Algorithm 4 has been fully implemented and we offer 
+several examples in this section.
+Figure~\ref{fig:banana} shows that 
+the kernel of a banana will vary depending on the intersection
+point of its inflection tangents.
+Figure~\ref{fig:kernelob1a} shows a kernel
+that contains the origin, showing the clear relationship with
+the convex hull in dual space.
+Figure~\ref{fig:complex} illustrates a more complicated multi-sided kernel.
+
+	%	kernel data/banana1.pts; 
+	%	kernel data/banana4.pts.
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.5]{img/jjke15.jpg}
+\includegraphics*[scale=.5]{img/jjke14.jpg}
+\end{center}
+\caption{The kernel of two bananas, one empty and one not}
+\label{fig:banana}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.5]{img/jjke16.jpg}
+\end{center}
+\caption{A kernel clearly dual to the convex hull}
+\label{fig:kernelob1a}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.5]{img/jjke17.jpg}
+\end{center}
+\caption{The kernel of a cloverleaf}
+\label{fig:complex}
+\end{figure}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Conclusions}
+\label{sec:conclusions}
+
+Through an analysis of the tangential curve in dual space,
+we have discovered that the corners of a curve's kernel are defined
+by intersections of the inflection tangents with the curve and each other.
+The appropriate intersections are associated with lines that do not
+intersect the tangential curve in dual space.
+This leads to a simple and efficient algorithm for defining the kernel.
+Dual space and tangential curves are integral to the development
+of this algorithm,
+offering yet another example of the power of tangential curves for 
+analyzing problems that involve tangent spaces,
+including many visibility problems.
+The kernel, which consists of points not struck by any tangent,
+is certainly such a problem.
+We are looking into the extension of these ideas to the kernel of a surface.
+
+% A comparison to Gershon Elber's zero-set algorithm.
+
+\ifTalk
+Our search for a seed kernel point is equivalent to searching
+for a free bitangent of the tangential curve.
+\fi
+
+\ifTalk
+We have developed algorithms for the convex hull of a closed curve
+and the kernel of a closed curve.
+Both involve dual space (to find bitangents or to find free lines).
+Both use bitangents, the hull in primal space and the kernel in dual space.
+Both require a seed point before the algorithm can begin
+(the seed point of the kernel is considerably harder to find).
+Both use the convex hull (or at least can)!
+Both use free lines.
+\fi
+
+\ifTalk
+We can reveal which inflection tangents combine to define boundary points
+of the kernel by mapping to dual space.
+Lines between the duals establish
+pairings and the correct pairings are recognized by being free.
+\fi
+
+\ifTalk
+Once the bitangents of a collection of curves are known, 
+it becomes feasible to build many secondary structures at a reasonable cost,
+such as the convex hull, the visibility graph, and the kernel.
+These algorithms have been classically developed for polygons.
+We consider the construction of all of these structures for smooth curves.
+The calculation of these structures in a smooth environment,
+as opposed to a polygonal environment built from a discrete sampling of the
+smooth environment, can significantly simplify the structures
+and improve their accuracy.
+\fi
+
+% The convex hull of a curve is built out of bitangents.
+% And the kernel set in dual space is built out of bitangents.
+% Thus, no matter how we compute the kernel, as a convex hull
+% or through the kernel set, its computation is based upon bitangents.
+
+% Notice that our algorithm for finding the seed point of the kernel
+% is similar to finding the hull bitangents that define the
+% convex hull in dual space.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\ifJournal
+\section{Acknowledgements}
+
+Wenping Wang made the observation of Theorem~\ref{thm:hullisdual} 
+	at the 2002 Dagstuhl
+	Seminar on Geometric Modeling, at which I gave 
+	a talk on tangential curves and the convex hull of a curve
+	and Gershon Elber gave a talk on the kernel of a curve.
+	I am indebted to Wenping and Gershon for
+	motivating me to explore this relationship.
+I appreciate talks with Wenping and Gershon Elber on the kernel,
+and the opportunity for research and a stimulating
+environment offered by the Dagstuhl seminars.
+Gershon Elber suggested the bananas of Section~\ref{sec:eg}.
+This work was supported in part by the National Science Foundation
+under grant CCR-0203586.
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bibliographystyle{plain}
+\begin{thebibliography}{Johnstone 02a}
+
+\bibitem[Elber 01]{elber01}
+Elber, G., M.-S. Kim and H.-S. Heo (2001)
+The Convex Hull of Rational Plane Curves.
+Graphical Models 63, 151--162.
+
+\bibitem[Elber 02]{elber02}
+Elber, G. (2002)
+The kernel of freeform planar parametric curves.
+Presented at Dagstuhl 2002.
+
+\bibitem[Goodman 97]{goodman97}
+Goodman, J. and J. O'Rourke, editors (1997)
+Handbook of Discrete and Computational Geometry.
+CRC Press (New York).
+
+\bibitem[Johnstone 01]{jj01}
+Johnstone, J. (2001)
+A Parametric Solution to Common Tangents.
+International Conferenced on Shape Modelling and Applications (SMI2001),
+Genoa, Italy, IEEE Computer Society, 240--249.
+
+\bibitem[Johnstone 02a]{jj02}
+Johnstone, J. (2002)
+The tangential curve.
+Manuscript.
+
+\bibitem[Johnstone 02b]{jj02hull}
+Johnstone, J. (2002)
+Giftwrapping smooth hulls.
+Manuscript.
+
+\bibitem[Lee 79]{lee79}
+Lee, D.T. and F. Preparata (1979)
+An Optimal Algorithm for Finding the Kernel of a Polygon.
+Journal of the ACM 26(3), 415--421.
+
+\bibitem[O'Rourke 87]{orourke87}
+O'Rourke, J. (1987)
+Art Gallery Theorems and Algorithms.
+Oxford University Press (New York).
+
+\bibitem[Preparata 85]{preparata85}
+Preparata, F. and M. Shamos (1985)
+Computational Geometry: An Introduction.
+Springer-Verlag (New York).
+
+\bibitem[Wang 02]{wang02}
+Wang, W. (2002) Personal communication.
+
+% \bibitem[Catmull 74]{catmull74}
+% Catmull, E. (1974)
+% A Subdivision Algorithm for Computer Display of Curved Surfaces.
+% Ph.D. thesis, University of Utah.
+
+\end{thebibliography}
+
+\section{Appendix}
+
+%	\begin{defn2}
+%	A line is {\bf free} if it does not intersect $C$.\footnote{Of course,
+%	we do not count a point of tangency as an intersection.}
+%	\end{defn2}
+
+\begin{lemma}
+\label{lem:condition}
+Let $C$ be a closed plane curve.
+The point $P \in C$ lies on the boundary of the convex hull of $C$ 
+if and only if the tangent at $P$ does not intersect $C$.
+\end{lemma}
+\prf
+The tangent of a point inside a concavity will clearly
+intersect the curve.
+But the tangent of a point on the convex hull will define
+a halfplane that contains the curve 
+(since the convex hull of a point set is the intersection of the halfplanes 
+that contain the point set),
+so it will not intersect the curve.
+%	More formally but no better,
+%	A tangent defines a containing halfplane if and only if it is free.
+%	The halfplane defined by the tangent at $P$ is clearly a limit halfplane
+%	in this direction and therefore a boundary point of the hull if it is free.
+%	Conversely, if $P$ lies on the convex hull boundary, 
+%	then some halfplane through $P$ is containing.
+%	But the only possible containing halfplane through $P$
+%	is its tangent halfplane.
+\QED
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\ifJournal
+Our kernet set is sharp, in the sense that an upperbound is sharp:
+there is no smaller kernel set that would always define the kernel.
+There are examples where the intersections of inflection tangents
+define the kernel (if the convex hull is built out of lines between cusps,
+such as a 3-cusped concave triangle) and other examples where the
+intersections of inflection tangents with the curve define the kernel
+(if the tangential curve has one cusp only),
+so both components of the kernel set are necessary in some cases.
+\fi
+
+\ifTalk
+In our reduction of the kernel to the convex hull,
+we need to find a seed point in the kernel.
+The algorithm for querying a point's inclusion in a star-shaped
+polygon \cite[p. 44]{preparata85} 
+also relies on finding a seed point in the kernel to
+act as the origin.
+\fi
+
+\ifJournal
+Possible extension to open curves:
+
+Our method won't work as is on an open concave curve,
+because it assumes that K defines a closed set
+and open curves will have open kernels that go off to infinity.
+However, it could probably be easily changed to work:
+at least to define the kernel inside the convex hull of
+the open curve.
+For example, add the line segment between the endpoints as
+a pseudo-inflection tangent.
+\fi
+
+\end{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{lemma}
+The kernel is convex and connected.
+\end{lemma}
+
+{\bf No need to compute bitangents in this algorithm, and thus no need
+for the following discussion.}
+
+\subsection{Bitangents}
+
+Tangential curves are excellent at computing bitangents
+of curves.
+
+The bitangents of a curve will be important tools in this paper.
+In \cite{jj01}, we showed how to compute the bitangents of a smooth curve
+efficiently using a dual representation of the tangent space of the curve, 
+called the tangential curve.
+
+We use a dual space to compute bitangents.
+Bitangents of $C$ are self-intersections of the tangential curve system of $C$
+(i.e., self-intersections of the clipped tangential a-curve $C_a^*$
+and self-intersections of the clipped tangential b-curve $C_b^*$).
+
+Bitangents of a plane curve \cite{jj01,jj02}.
+
+Convex hull of closed plane curve \cite{jj02,elber01}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The kernel is robustly computed using tangential c-curves,
+although bitangents are robustly computed using tangential a-curves and b-curves,
+packaged into the tangential curve system.
+The c-curve is appropriate after the seed point of the kernel point
+has been moved to the origin, because the tangent space of the curve 
+will not intersect the origin and so the tangential c-curve is finite
+(whereas the a-curve and b-curve are inherently infinite since a closed
+curve must have horizontal and vertical tangents).
+Even before the seed point is calculated, the c-curve works better
+than the a-curve or b-curve.
+%
+We guarantee that the tangent space of the curve does not intersect the origin.
+	% since we shall compute a convex hull in dual space, which is inherently
+	% closed and therefore inherently straddles both a-dual and b-dual spaces,
+	% which complicates the hull computation.
+
+\begin{rmk}
+Once we find a point of the kernel and translate it to the origin,
+we can exclusively use tangential c-curves for any problem (e.g., bitangent),
+since they have no problems with infinity, and ignore the subtlety of
+clipping and tangential curve systems (Section~\ref{sec:duality}).
+\end{rmk}
+

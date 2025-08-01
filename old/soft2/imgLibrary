@@ -1,0 +1,51 @@
+Smooth curves
+-------------
+
+whiteoak, leaf1
+ingalls, cornell1, cornell2, sondica, hud (all in arch subdirectory)
+curve9c (abstract)
+
+Extruded surfaces
+-----------------
+
+all architectural curves
+
+
+Bitangents
+----------
+
+SMI: circle.pts, ovoid.pts, ob1.pts, ob3.pts
+Euro: whiteoak.pts, leaf1.pts, other leaves?
+      ingalls.pts
+      curve9b.pts, curve9c.pts
+
+Bitangents through a point
+--------------------------
+
+see 2d/tangthrupt
+
+Convex hull
+-----------
+
+see 2d/convexhull and dagstuhl talk
+
+
+Kernel
+------
+
+banana*.pts, complexKernel.pts
+see 2d/kernel
+
+Visual events
+-------------
+
+
+
+Umbra
+-----
+
+see umbra/data/img
+
+
+Penumbra
+--------

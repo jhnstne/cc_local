@@ -1,0 +1,70 @@
+\begin{lemma}
+\label{newcurveeqn}
+Let P = ($p_{1},p_{2}$) be a nonsingular point of the curve
+\mbox{F(x,y) = 0}.
+Consider the translation and rotation of the curve so that P becomes the
+origin and P's tangent becomes the x-axis.
+The equation of this new curve is:
+%
+\[ H(x,y) = \left\{ \begin{array}{lll}
+F(p_{1}+y,p_{2}-x)  & & \mbox{if $F_{y}(P) = 0$} \\ \\
+F(p_{1}+\frac{|F_{y}(P)|x-\mbox{sign}*|F_{x}(P)|y}{\sqrt{F_{x}^{2}(P)+F_{y}^{2}(P)}} , &
+p_{2} + \frac{\mbox{sign}*|F_{x}(P)|x + |F_{y}(P)|y}{\sqrt{F_{x}^{2}(P)+F_{y}^{2}(P)}}) & \mbox{if $F_{y}(P) \neq 0$,} \\ \\
+ & \mbox{where sign =} \left\{ \begin{array}{ll}
+			+1 & \mbox{if } \frac{F_{x}(P)}{F_{y}(P)} \leq 0 \\
+			-1 & \mbox{otherwise}
+			\end{array}
+			\right.
+	\end{array}
+\right. \]
+%
+\end{lemma}
+%
+\begin{proof}
+$G(x,y) = F(p_{1}+x,p_{2}+y)$ is the equation of $F(x,y)$ translated so that
+P becomes the origin.
+Let \( \theta \in [-\frac{\pi}{2},\frac{\pi}{2}) \) be the angle
+that the origin's tangent of $G(x,y)$ makes with the positive x-axis.
+We wish to rotate the curve $G(x,y)$ by $-\theta$, so that the origin's
+tangent becomes the x-axis.
+\( G(\mbox{cos}(-\theta)*x + \mbox{sin}(-\theta)*y,
+    -\mbox{sin}(-\theta)*x + \mbox{cos}(-\theta)*y) \)
+is the equation of $G(x,y)$ rotated by $-\theta$.
+\hence $H(x,y) = G(\mbox{cos}(\theta)*x - \mbox{sin}(\theta)*y,
+    \mbox{sin}(\theta)*x + \mbox{cos}(\theta)*y) \)
+is the equation of $G(x,y)$ rotated so that the origin's tangent is the 
+x-axis.
+\hence $H(x,y) = F(p_{1} + \mbox{cos}(\theta)*x - \mbox{sin}(\theta)*y,
+    p_{2} + \mbox{sin}(\theta)*x + \mbox{cos}(\theta)*y)$\\
+We must determine sin($\theta$) and cos($\theta$).
+$G(x,y)$'s tangent to the origin is parallel to $F(x,y)$'s tangent to P,
+since $G(x,y)$ is only a translation of $F(x,y)$.
+\hence $\theta$ = the angle that $F(x,y)$'s tangent to P makes with the
+positive x-axis.
+By Lemma~\ref{tangenteqn}, the equation of $F(x,y)$'s tangent to P is
+\[ F_{x}(P)*x + F_{y}(P)*y + F_{0}(P) = 0 , \mbox{ where } F_{0} = F - 
+\mbox{highest degree terms of F} \]
+$\equiv \left\{ \begin{array}{ll}
+y = -\frac{F_{x}(P)}{F_{y}(P)}*x - \frac{F_{0}(P)}{F_{y}(P)}
+& \tab \mbox{if } F_{y}(P) \neq 0 \\
+x = -\frac{F_{0}(P)}{F_{x}(P)} & \tab \mbox{otherwise} 
+\end{array} \right. $
+\\
+Thus, if $F_{y}(P) = 0$, then F's tangent to P is vertical, so
+\( \theta = -\frac{\pi}{2} \) and\\
+\mbox{\( H(x,y) = F(p_{1}+y,p_{2}-x) \)}.
+Now assume $F_{y}(P) \neq 0$.
+The slope of F's tangent to P 
+%
+\fig{B.3}
+%
+is then $-\frac{F_{x}(P)}{F_{y}(P)}$.\\
+If the slope is positive, then
+\( \mbox{sin}(\theta) = \frac{|\frac{F_{x}(P)}{F_{y}(P)}|}{+\sqrt{\frac{F_{y}^{2}(P) + F_{x}^(2)(P)}{F_{y}^{2}(P)}}} 
+= \frac{|F_{x}(P)|}{\sqrt{F_{x}^{2}(P)+F_{y}^{2}(P)}} \).
+If the slope is negative, \( \mbox{sin}(\theta) 
+= -\frac{|F_{x}(P)|}{\sqrt{F_{x}^{2}(P) + F_{Y}^{2}(P)}} \).
+Regardless of slope, 
+\mbox{\( \mbox{cos}(\theta) = \frac{1}{\sqrt{\frac{F_{y}^{2}(P) + F_{x}^{2}(P)}{F_{y}^{2}(P)}}}
+= \frac{|F_{y}(P)|}{\sqrt{F_{x}^{2}(P) + F_{y}^{2}(P)}} \)}
+\end{proof}

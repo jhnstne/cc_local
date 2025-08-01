@@ -1,0 +1,31 @@
+\title{Convex hulls and visibility graphs of plane curves from bitangents}
+
+Once the bitangents of a collection of curves are known,
+it becomes feasible to build many secondary structures at a reasonable cost,
+such as the convex hull and the visibility graph.
+These algorithms have been classically developed for polygons,
+but we consider their construction for plane curves.
+The calculation of the convex hull and visibility graph 
+in a smooth environment, as opposed
+to a polygonal environment built from a discrete sampling of the smooth
+environment, can significantly simplify the structures and improve 
+their accuracy.
+
+A bitangent is a line that is tangent to a collection of curves
+at two or more distinct points.
+We have recently developed a new algorithm for the computation
+of bitangents of plane curves, as well as the tangents 
+of a curve through a given point.
+These bitangents and tangents define the edges of a visibility graph
+of a collection of curves.
+The visibility graph is an important structure in motion planning
+and visibility analysis.
+We discuss the details of this construction and the improvements
+over a polygonal visibility graph.
+A special subset of the bitangents also define the convex hull.
+We show how to find this subset efficiently, using a smooth analog
+of giftwrapping.
+Finally, we show how the local extrema of a curve can be easily found
+using a variation of our construction of bitangents.
+
+

@@ -1,0 +1,65 @@
+Wenping, Gershon and Myung-Soo,
+
+I finally have a solution to the kernel problem in dual space,
+resolving the issue of how to find the center of duality
+so that the convex hull can be robustly computed in dual space.
+You may recall that Wenping observed that the kernel 
+can be computed through the convex hull in dual space.
+However, before mapping to dual space, you need to choose
+a valid duality: you must dualize with respect to a point of the
+kernel so that the tangential curve in dual space is bounded.
+This leads to an apparent circularity: to compute the kernel,
+you must know a point of the kernel!
+However, I discovered a way of bootstrapping the process
+and finding such a point of the kernel.
+Interestingly, it heavily uses the tangential curve.
+
+I apologize for the delay but before I could think about kernels, 
+I had to clean up some loose ends and write up the work
+on tangential curve and surface issues
+(such as robust clipping of tangential surfaces),
+which I needed to get done anyway before I could use them for kernels.
+Since this involved a lot of implementation in the surface case
+(such as a full implementation of Sederberg's piecewise algebraic curves!) 
+and writing in the curve case, this took longer than expected.
+
+So two weeks ago I started into the kernel problem.
+I discovered that finding the first point of the kernel to bootstrap the process
+can be done using inflection points in primal space (or cusps in dual space).
+In short, the intersections of the inflection tangents of C with each other
+and with the curve C provide a finite set of candidates for a kernel point.
+That is, the kernel is nonempty iff this finite set contains a kernel point.
+From these candidates, true kernel points are the ones whose dual lines
+do not intersect the tangential curve.
+So you can quickly determine a kernel point, if one exists.
+The argument and proof of this observation is integrally tied up with the
+convex hull, incidentally.
+But there's more.
+The kernel points that you find from this set of candidates
+all lie on the boundary of the kernel, and can be immediately used 
+to fully define the kernel!
+In other words, you don't need to compute the convex hull after all.
+
+I will write this up to explain the details and send it to you soon.
+
+Best regards,
+John
+
+P.S. Gershon, as part of the cleanup of tangential curves and surfaces,
+I answered an interesting question that you had posed about mapping 
+the tangential curve back to primal space.
+Take a curve C, compute its tangential curve C^*, and then compute
+the tangential curve of C^*.
+The degree of C^* is twice the degree of C, and the degree of (C^*)^*
+is four times the degree of C.
+But isn't (C^*)^* = C?
+Yes, (C^*)^* does equal C and the degree explosion is due (as you
+might expect) to a redundant factor.
+In particular, in applying the tangential curve operation twice
+to the rational curve (c_0(t) / c_2(t), c_1(t) / c_2(t)),
+the following redundant factor is introduced:
+c_0(c''_1c'_2 - c'_1c''_2) + 
+c'_0(c_1c''_2 - c''_1c_2) + 
+c''_0(c'_1c_2 - c_1c'_2).
+Thank you for motivating me to understand this issue better.
+

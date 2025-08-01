@@ -1,0 +1,47 @@
+# File: Dual Chaikin curve software Makefile
+# Author: J.K. Johnstone
+# Last Modified: 3 July 2001
+
+ARCH       = SGI
+SHELL      = /bin/csh
+CC         = CC
+CLASSBASE  = ${HOME}/Cbin
+
+LIBRARIES  = -lglut -lGLU -lGL -lXmu -lXext -lX11 -lm
+LDFLAGS    = -cckr -float -I${CLASSBASE}
+
+PROGRAMS = ${CLASSBASE}/Miscellany.o ${CLASSBASE}/Vector.o \
+	${CLASSBASE}/Curve.o ${CLASSBASE}/BezierCurve.o ${CLASSBASE}/RatBezierCurve.o \
+	${CLASSBASE}/Surf.o ${CLASSBASE}/BezierSurf.o 
+all: bichai
+
+chai: chai.c++
+	${CC} -g -o chai chai.c++  \
+	${CLASSBASE}/Miscellany.o \
+	${CLASSBASE}/Vector.o \
+	${CLASSBASE}/LineTri.o \
+	${LIBRARIES} ${LDFLAGS}
+
+bichai: bichai.c++
+	${CC} -g -o bichai bichai.c++  \
+	${CLASSBASE}/Miscellany.o \
+	${CLASSBASE}/Vector.o \
+	${CLASSBASE}/LineTri.o \
+	${LIBRARIES} ${LDFLAGS}
+	
+dualchai: dualchai.c++
+	${CC} -g -o dualchai dualchai.c++  \
+	${CLASSBASE}/Miscellany.o \
+	${CLASSBASE}/Vector.o \
+	${CLASSBASE}/LineTri.o \
+	${LIBRARIES} ${LDFLAGS}
+
+# ########################################################################
+	
+clean :
+	rm -f *.o *~ a.out core
+	ls -l
+
+touch :
+	touch bichai.c++
+	

@@ -1,0 +1,877 @@
+\documentstyle [titlepage]{article}
+%
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{conjecture}{Conjecture}
+%
+\newcommand{\arc}[1]{\mbox{$\stackrel{\frown}{#1}$}}
+\newcommand{\lyne}[1]{\mbox{$\stackrel{\leftrightarrow}{#1}$}}
+\newcommand{\ray}[1]{\mbox{$\vec{#1}$}}
+\newcommand{\seg}[1]{\mbox{$\overline{#1}$}}
+\newcommand{\hence}{\\ \mbox{$.\raisebox{1.5ex}{.}.$}\ } % three-dot therefore
+                                             % symbol is desired
+\newcommand{\qed}{\nopagebreak\begin{flushright}\mbox{$\Box$}\end{flushright}}
+                                       % put a box on the
+                                       % righthand side of the page
+\newcommand{\se}{\mbox{$_{\epsilon}$}}  % subscript epsilon
+\newcommand{\proof}{{\bf Proof}:\nopagebreak\\}
+\newcommand{\defn}{{\bf Definition}:\ }
+\newcommand{\wlogg}{\mbox{w.\ l.\ o.\ g.\ }}
+\newcommand{\wrt}{\mbox{w.\ r.\ t.\ }}
+\newcommand{\pq}{\arc{PQ}}
+%
+\begin{document}
+\title{Sorting Points on a Plane Curve} % From Conics to Octics
+\date{\today}
+\author{}
+\maketitle
+%
+{\bf Terminology and Definitions}:
+\begin{itemize}
+\item
+    We shall say 'curve' when we mean 'algebraic curve'.
+I deal only with irreducible plane curves in this paper.
+\item
+    A {\em limb} of a curve is a maximal set of points
+such that the curve joins any pair of them.  For example, an hyperbola has two limbs.
+********Limb is shorthand for the more formal term
+********'a connected component of the real locus of the curve'.
+\item
+    A point is said to be {\em strictly inside} a region if it is inside
+the region and not on its boundary.
+\end{itemize}
+{\bf Notation}:
+\begin{itemize}
+   \item If P and Q are distinct points of the same limb of a curve,
+then \arc{PQ} is the segment of the curve joining P to Q.  (If the curve
+is closed so that there is a choice of segments, then the context should 
+make clear which is meant.)
+    \item dist(P,Q) $\equiv \ $ Cartesian distance between P and Q
+    \item $dist_{c}(P,Q) \equiv\ $ distance from P to Q along C
+\end{itemize}
+\begin{theorem}[Bezout]\nopagebreak
+Two plane curves of orders m and n with no common components have
+exactly mn intersections.
+\end{theorem}
+{\bf Proof}: [Wa, p. 111].
+****\begin{lemma}[Sorting on a Conic]\nopagebreak
+*Let C be an irreducible conic.  Let P and Q be distinct points of the 
+*same limb of C.  Let \arc{PQ} be a segment of C joining
+*P and Q.  Let $\vec{T}_{p}$ (resp. $\vec{T}_{q}$) be the tangent
+*ray at P (resp. Q) pointing in the direction of \arc{PQ}.
+*Each of \lyne{PQ}, $\vec{T}_{p}$, and $\vec{T}_{q}$ splits the plane
+*into two halfplanes.  Let R be a point of C, $R \neq P$, $R \neq Q$.
+*Then, R is on \arc{PQ} \ $\Leftrightarrow$ \  R is strictly inside
+*(1)~the \lyne{PQ} halfplane pointed to by the tangents and
+*(2)~the $T_{p}$ halfplane containing Q.
+*This region looks like
+*\begin{center}
+*FIGURE 10
+*\end{center}
+*\end{lemma}
+*\proof
+*$\Rightarrow$: (1) If there are points of \arc{PQ} on opposite sides of
+*\lyne{PQ}, then, since the conic is continuous, there is a third point of
+*\arc{PQ} (and thus the conic) which intersects the line \lyne{PQ},
+*contradicting Bezout's Theorem.
+*\hence All of \arc{PQ} lies on one side of \lyne{PQ}.
+
+*\ (2) Since a tangent represents two intersections with a curve, the same
+*argument as used in (1) forces all of \arc{PQ} to lie on one side of 
+*$\stackrel{\leftrightarrow}{T}_{p}$,
+*namely the side containing Q.
+*(By Bezout again, Q cannot lie on $\stackrel{\leftrightarrow}{T}_{p}$, so the
+*side containing Q is well defined.)\vspace{.25in}\\
+*$\Leftarrow$ : Let R be a point of the conic C in the region
+* defined by (1) and (2). Suppose
+*that R is not on \arc{PQ}.
+*%
+*% put figure here
+*%
+*Consider the line \lyne{PR}.
+*I claim that it intersects \arc{PQ} at a point other
+*than P.  Since the curve is continuous, by definition
+*of tangent [TF, p. 28],
+*slope~$T_{p} = \lim_{s \rightarrow 0}$~(slope~of~line~through~P~and~P+s),
+*where P+s is a point on \arc{PQ} s.t. $dist_{\arc{PQ}}$(P,P+s) = s\ .
+*Since slope(\lyne{PR}) $\neq$ slope($T_{p}$) and all points of \arc{PQ}
+lie on the same side of $T_{p}$, $\exists\ V \in \arc{PQ}$ such that
+\ray{PV} lies in between $\vec{T}_{p}$ and \ray{PR}; i.e., V
+is in the region bounded by $\vec{T}_{p}$ and \ray{PR}.
+\begin{center}
+FIGURE 1
+\end{center}
+Q does not lie in this region, since R is in the region defined by
+$\vec{T}_{p}$ and \ray{PQ}.
+\hence The points Q and V of the conic C lie on opposite sides
+of \lyne{PR}.
+\hence Since the conic is continuous, $\exists\ W \in C$ such that W
+lies on \lyne{PR} and the segment \arc{VQ} of the conic.
+\hence \lyne{PR} intersects the conic in at least three points: P,
+R, and W.  Contradiction.
+\hence R must lie on \arc{PQ}.
+\qed
+\begin{lemma}[A preview of Lemma~\ref{flexorsi}]\nopagebreak
+Let C be a ''functional'' cubic (i.e., its equation is
+$y = f(x) = x^{3} + Dx^{2} + Ex + F)$ and let L be a line that intersects C
+in three distinct, real, finite points P, Q, and R, where Q is on
+\arc{PR}.  Then the segment \arc{PR} of C contains an inflection point.
+\end{lemma}
+{\bf Proof}:\nopagebreak\\
+Since a line can intersect an irreducible cubic in only three points,
+ where a point of tangency or singularity counts as two or more points,
+ the cubic cannot stay entirely on one side of L.  L cannot
+be vertical since a vertical line strikes a function in at most one
+ finite real point.  Let the slope of L
+ be s.  Assume w.l.o.g. that the curve rises
+above L between P and Q and remains below between Q and R.
+By two applications of the mean value theorem, $\exists\ p_{1} \in C$
+strictly between P and Q and $p_{2} \in C$ strictly between Q and R
+such that $f'(p_{1}) = s = f'(p_{2})$.
+\begin{center}
+FIGURE 2
+\end{center}
+Since f is a polynomial, all derivatives of f exist and are continuous
+everywhere.  Since the line L has slope s, if $f'$ (the slope of the cubic)
+remains constant at s between $p_{1}$ and $p_{2}$, then the curve
+ will remain on the same side of L between these two points.
+But $p_{1}$ and $p_{2}$ are on opposite sides of L, so $f'$ is not constant
+but rather must increase and decrease between $p_{1}$ and $p_{2}$.
+Hence, $\exists\ q_{1} \in C$ and $q_{2} \in C$ between $p_{1}$ and
+$p_{2}$ such 
+that $f''(q_{1}) > 0$ and $f''(q_{2}) < 0$.
+\hence Since $f''$ is continuous, $\exists\ r \in C$ between $q_{1}$ and
+$q_{2}$ such that $f''(r) = 0$ and $f''$ changes sign at r.
+By definition, r is an inflection point [TF, p.\ 133].
+Moreover, r is on \arc{PR}.
+\qed
+\section{The convexity of Polygons and Curves}
+\subsection{Three equivalent definitions of convexity for a polygon}
+The two common definitions for convexity of a polygon P are:
+\begin{itemize}
+  \item $v,w \in P \Rightarrow tv + (1-t)w \in P,$ if $0<t<1$
+  \item $P = \{ \sum_{i=1}^{n} \lambda _{i}v_{i} \mid 
+     \sum_{i=1}^{n} \lambda _{i} = 1, 0 \leq \lambda _{i} \leq 1,
+     i = 1, \ldots ,n \},$ where $v_{1}, \ldots ,v_{n}$ are the 
+     vertices of P.
+\end{itemize}
+We present an alternative characterization of convexity which works
+with the boundary rather than the interior of the polygon, and therefore
+serves better to motivate the definition of convexity for curves.
+(This lemma is also useful in a later proof.)
+\begin{lemma}[A third definition of convexity]\nopagebreak 
+\label{conv3}
+Let P be a connected polygon with vertices $v_{1}, \ldots ,v_{n}$ such that
+no edge touches any other edge except at endpoints.
+Then P is convex $\Leftrightarrow$
+\\
+for any edge E = 
+\marginpar{(*)}
+\seg{v_{i}v_{j}}, the continuation \lyne{v_{i}v_{j}}
+of E does not strike any other edge of the polygon outside of E.
+\end{lemma}
+{\bf Proof}:\nopagebreak\\
+$\Rightarrow$:\ \ Assume that P is convex.  Let \seg{v_{i}v_{j}}
+be an edge of P.  Suppose that the continuation \lyne{v_{i}v_{j}}
+strikes P outside of \seg{v_{i}v_{j}}.  Let w be the first such intersection
+and assume w.l.o.g. that w lies on the ray \ray{v_{i}v_{j}}.
+Then, since dist($v_{j},w) > 0$ and w is the first intersection,
+$\exists\ x \in$ \seg{v_{j}w} s.t. $x \not\in P.$
+This contradicts the first definition of convexity above.
+\hence \lyne{v_{i}v_{j}} cannot strike another edge of P.\vspace{.25in} \\
+$\Leftarrow$:\ \ Assume (*).  Let $v,w \in P$ and suppose 
+$\exists\ t, 0<t<1$ s.t. $tv + (1-t)w \not\in P.$
+Then there must be an edge E that strikes \seg{vw}.
+The line defined by E separates v from w,
+ so some edge F must cross over it; i.e., the line intersects F
+in between its endpoints, say at x.
+x cannot be a point of E.
+Thus, the continuation of E strikes an edge of P outside of E, a 
+contradiction of (*).
+\hence $\forall\ t, 0<t<1 , tv + (1-t)w \in P$, so P is convex.
+\qed
+\subsection{A definition for curve convexity}
+We translate the last characterization of convexity into an analogue
+for curves.\vspace{.25in} \\
+{\bf Definition}: A segment \pq\ of an irreducible curve is {\em convex} if 
+$\pq \setminus \{P,Q\}$ is nonsingular and the 
+tangent at any point of
+$\pq \setminus \{P,Q\}$ does not further intersect \pq.
+Note: under this definition, the segment 
+\center{FIGURE 2A of cubic.tex}
+is not convex.
+(Note: this definition was changed on 9/19/86 to exclude the endpoints of 
+the segment.  I hope that this doesn't affect other proofs.)
+\begin{lemma}[Monotonicity of the tangent on convex curves]\nopagebreak
+\label{mono}
+Fix a ray in the plane from which to measure angles from.  Let
+the measurement of angles be continuous: for example, as an angle
+approaches 0 from the positive side and passes through 0, the angle becomes 
+negative rather than jumping to a value just under $2\pi$.
+Let C be a convex, singularity-free segment of an irreducible curve.
+Then, as one moves along C in a given direction, the angle of the 
+directed tangent (pointing in the direction one is moving) will change 
+strictly monotonically.  (Equivalently, modulo jumps at $\pm\infty$, the
+slope of the tangent changes strictly monotonically.)
+\end{lemma}
+{\bf Proof}:\nopagebreak\\
+Since C contains no singularities, the tangent changes smoothly on C
+(Lemma~\ref{tangcont} of lemma9.tex).
+Suppose that the angle of the tangent is not monotonic.
+Then we can assume w.l.o.g. that $\exists$ a point P of C and 
+$\delta > 0$ s.t. 
+$\angle$ tangent at Q $\leq \angle$ tangent at P, $\forall\ Q \in C$
+   s.t. $dist_{c}(P,Q) < \delta$ .
+Pick any $\epsilon$ neighbourhood of P, $0< \epsilon \leq \delta$.
+This neighbourhood will contain two points $R_{\epsilon},S_{\epsilon}
+\in C$ on opposite sides of P which have parallel tangent slopes:
+\begin{quote}
+	Let $P_{-\epsilon}$ and $P_{+\epsilon}$ be the points of C s.t. 
+	\mbox{$dist_{C}(P,P_{-\epsilon})=\epsilon=dist_{C}(P,P_{+\epsilon})$}
+	Let $A_{1}$ and $A_{2}$ be the angles of the tangent 
+        at $P_{-\epsilon}$
+	and $P_{+\epsilon}$, respectively. Assume w.l.o.g. $A_{1} \leq A_{2}$.
+	Since $A_{1} \leq A_{2} \leq \angle$ tangent at P and the tangent
+	is continuous, $\exists$ a point of \arc{P_{-\epsilon} P} 
+        whose tangent's
+	angle is $A_{2}$.
+\end{quote}
+Because C is convex, all of it must lie on one side of the tangent
+at $R_{\epsilon}$.  Similarly on one side of $S_{\epsilon}$'s tangent.
+But the tangents at $R_{\epsilon}$ and $S_{\epsilon}$ are parallel, and 
+yet not the same (otherwise this tangent intersects the cubic four times).
+\hence All of C must lie in between $R_{\epsilon}$ and $S_{\epsilon}$'s
+tangents.\\
+$dist(R\se,S\se) \leq dist_{C}(R\se,S\se) = dist_{C}(R\se,P) + dist_{C}
+(P,S\se) \leq \epsilon + \epsilon = 2\epsilon$\\
+But $\epsilon$ was chosen arbitrarily s.t. $0 < \epsilon \leq \delta$.
+\hence C is sandwiched in between two parallel lines that lie arbitrarily
+close together.
+\hence C is a line, contradicting the convexity of C and the irreducibility
+of the curve.
+\hence The angle of the tangent must change monotonically.\\
+Moreover, the angle of the tangent cannot ever 
+remain constant as one moves along
+the cubic curve, otherwise two points would share the same tangent, 
+contradicting Bezout.  Thus, the angle of the tangent must change strictly
+monotonically.
+\qed
+\subsection{Some useful lemmas: an interlude}
+We digress to present three results that become necessary later:
+\begin{lemma}[A bound to the number of singularities on an
+irreducible curve]\nopagebreak
+\label{singbound}
+If an irreducible curve of order n has
+multiplicities $r_{i}$, then
+ \[ (n-1)(n-2) \geq \sum r_{i}(r_{i}-1) \]
+\end{lemma}
+\proof
+\cite[p.\ 65]{wa}
+\qed
+{\bf Corollary}\ \ 
+{\em An irreducible cubic can have at most one singularity, and this
+singularity is a double point.}
+\begin{lemma}\nopagebreak 
+\label{nonbounded}
+An infinitely long segment of an algebraic curve is not contained within any
+closed region.
+\end{lemma}
+\proof
+Lichtenbaum verifies that this is indeed true, but does not know, offhand,
+a theorem to quote.  It is probably a basic enough fact to state as a fact
+without proof.\\
+Intuition:  Curve cannot wiggle too many times, o.w. you can throw a line
+through it that contradicts Bezout.  But it must wiggle infinitely often
+if it is to avoid crossing the boundaries.
+\qed
+\begin{lemma}\nopagebreak 
+\label{planarcutsthru}
+A line L cuts through a plane curve C at a nonsingular point P
+iff the multiplicity of intersection of L with C at P is odd.
+\end{lemma}
+\proof
+Assume WLOG that L is the y-axis and P is the origin. (Rigid
+transformations---rotations and translations---do not affect the 
+multiplicity or singularity of the curve at an intersection.)
+Let $N_{\epsilon}(0)$ = {$c\in C |$dist$_{C}(c,(0,0)) < \epsilon$}
+where dist$_{C}(c_{1},c_{2})$ is the length of the curve C between
+two points $c_{1},\ c_{2}$ on it (already defined in cubic.tex).
+That is, $N_{\epsilon}(0)$ is a small part of the curve near the
+origin.  We claim that $\exists \epsilon > 0$ such that $N_{\epsilon}(0)$
+can be represented by a function y = g(x) (i.e., $\not\exists
+c_{1},\ c_{2} \in N_{\epsilon}(0)$ with the same abscissa).
+The directed tangent at the origin is ($\pm$1,0), depending upon
+the direction that you are travelling.  
+The tangent to an algebraic curve
+\marginpar{Prove! This proof is also needed in Lemma 10 of cubic.tex}
+changes continuously except at singularities.
+Thus, it takes some positive distance from the nonsingular origin for
+the directed tangent vector of a point to reverse the sign of its
+abscissa from 1 to $-\delta$ (or -1 to $+\delta$).
+In other words, $\exists \epsilon > 0$ such that the curve does not
+change directions (or become constant) with respect to x for an
+$\epsilon$ distance along the curve.
+\hence $\exists \epsilon > 0$ such that $\not\exists c_{1},\ c_{2} \in
+N_{\epsilon}(0)$ with the same abscissa.
+Within this neighbourhood, 
+\marginpar{We should show that g(x) is a polynomial, since I think
+that you need this in order to take the Taylor series as we have.}
+the curve can be represented by a function,
+say y = g(x).\vspace{.25in} \\
+Expand g(x) into a Taylor series:
+\begin{equation}
+\label{eq:Taylor}
+g(x) = g(0) + g'(0)x + g''(0)x^2 + \ldots  
+\end{equation}
+Since $y-g(x) = 0$ represents the curve C near to the origin
+and $x=t,\ y=0$ is a parameterization of L, the intersections of L
+with C near to the origin are associated with the roots of $0-g(t)=0$
+(substituting the parameterization into the curve equation).
+In particular, using (\ref{eq:Taylor}) above, we can see that the
+multiplicity of the intersection of L with C at the origin is
+min ${i|g^{(i)}(0) \neq 0}$.
+Now, we know that g(x) changes sign as x changes sign $\Leftrightarrow$
+C cuts through L, the y-axis, at P, the origin.
+Also, as x $\rightarrow$ 0 the lowest order term in (\ref{eq:Taylor})
+dominates all other terms.
+Thus, g(x) changes sign as x changes sign $\Leftrightarrow$ the lowest
+order term in (\ref{eq:Taylor}) is odd.
+\hence C cuts through L at P $\Leftrightarrow$ the lowest order term
+in (\ref{eq:Taylor}) is odd.
+\hence C cuts through L at P $\Leftrightarrow$ the multiplicity
+of intersection of L with C at P is odd.
+\qed
+\subsection{More on convexity}
+Back to the main development.\vspace{.25in} \\
+{\bf Definition}: A {\em flex} of a curve F is
+a nonsingular point $P \in F$ such that P's tangent has
+three or more intersections with F at P.  
+The number of intersections of the flex's tangent with the curve at the
+flex will be called the {\em order} of the flex.
+A flex of odd order will be called a {\em flox}.
+For example, the origin of $y=x^{3}$ is a flex and a flox.
+The property of flexes that interests us is that they are the only
+places where the curve can change from concave to convex (or vice versa) or,
+in other words, where the curve about a point P can lie on both sides of P's
+tangent.
+For this reason, we will only be interested in floxes, since flexes of even
+order do not exhibit this property (by Lemma~\ref{planarcutsthru}).
+For example, the origin of $y=x^{4}$ is a flex of even order:
+\begin{center}
+Figure 6 of lemma9.tex
+\end{center}
+We shall try to use the term `flox' to underline the fact that we are
+concerned with flexes of odd order only.
+However, this is rather a clumsy term so we shall often refer to floxes
+simply as flexes.
+Unless we explicitly say 'flex of even order', we shall always be 
+referring to floxes (just as `curve' implicitly means 
+`irreducible algebraic curve').
+\begin{lemma}[A characterization of convexity] \nopagebreak
+\label{convmeans2}
+Let C be a segment of an irreducible cubic curve, or a 
+singularity-free segment of an arbitrary irreducible curve.
+C is convex and has no flexes \ $\Leftrightarrow$ \  no line has more
+than two real intersections with C.
+\end{lemma}
+{\bf Proof}:\nopagebreak\\
+$\Leftarrow$:\ \ Assume that no line intersects C more than twice in the real
+plane.  C must be nonsingular (otherwise, consider 
+the tangent at the singularity)
+and contain no flexes.
+Since a tangent intersects C twice at its point of tangency, it cannot 
+further intersect the curve.  Hence, C is convex.\vspace{.25in} \\
+$\Rightarrow$:\ \ Assume that C is convex and has no flexes.
+Suppose that line L has at least three real intersections with C.  If 
+two of these intersections are at the same point, then L is tangent 
+to a point of the curve and intersects another point, contradicting convexity.
+If all three are at the same point, then this point is a flex.
+\hence L's intersections with C are at distinct points: say R, S, and T
+are three of them.
+Assume w.l.o.g. that S lies on \arc{RT}.  Since the tangent changes
+continuously except at singularities of the curve, and an irreducible
+cubic has at most
+one singularity, we can further assume w.l.o.g. that the tangent changes
+continuously on \arc{RS}. (None of R, S, T can be singularities,
+otherwise the cubic intersects \lyne{RT} more than three times.)
+By linear transformations of the coordinate system, move the curve so that 
+\ray{RT} is the positive x-axis.  Assume w.l.o.g. that \arc{RS} is above the
+x-axis.
+\begin{center}
+FIGURE 3
+\end{center}
+We wish to show that there is a point of 
+\arc{RS} whose tangent strikes \arc{ST},
+thus contradicting convexity.
+
+We shall apply lemma~\ref{mono}.  Measure angles from the positive
+x-axis (\ray{RT}) counterclockwise.\\
+$\angle$(tangent~at~R~directed~toward~\arc{RS})~$\in (0,\pi)$, since \arc{RS}
+lies above the x-axis.
+Similarly, $\angle$(tangent~at~S~directed~toward~\arc{ST})~$\in (\pi,2\pi)$
+[or $(-\pi,0)$].
+By the convexity of C, all of \arc{RT} lies on one side of the tangent
+at R.
+\hence The angle of the tangents decreases as you leave R along \arc{RS}, 
+otherwise the curve would move to the opposite side of R's tangent from T.
+Thus, by lemma~\ref{mono}, $\exists~p \in \arc{RS}$ whose tangent has
+angle 0.  As the tangent sweeps from angle 0 (parallel to \lyne{RT}) at p
+to an angle less than 0 at S, the intersection of the tangent with the 
+x-axis \lyne{RT} sweeps from a point at $\infty$ to S, through T.
+\hence Some point of \arc{RS} (actually infinitely many) strikes \seg{ST}.
+Since the curve is continuous, any line separating the two points S and T
+of the curve must intersect the curve somewhere on \arc{ST}.  Hence, the 
+tangent of some point of \arc{RS} strikes \arc{ST}, 
+contradicting convexity.
+We conclude that no line can have more than two real intersections
+with C.
+\qed
+\begin{corollary}
+An irreducible quadratic curve is convex.
+\end{corollary}
+\proof
+A quadratic curve is always nonsingular (Lemma~\ref{singbound}.
+Any line hits an irreducible quadratic curve in at most two real
+points (Bezout).  Apply the previous lemma.
+\qed
+\begin{lemma}[Sorting on a convex segment]\nopagebreak
+Let \arc{AB} be a convex segment of a curve.  Let $p_{1},\ldots,p_{n}$
+be distinct points of \arc{AB}, and let H be the convex hull of A, B, 
+$p_{1},\ldots,p_{n}$.  Then the order of the points on H is the same
+ as the order of the points on \arc{AB}.  (Thus, one can use a convex hull
+algorithm to sort the points on a convex segment of a curve.)
+\end{lemma}
+{\bf Proof}:\nopagebreak\\
+Since the convex hull of a set of points is unique, it is sufficient to
+ show that the polygon created by joining the points $p_{i}$ in sorted
+order is their convex hull.  Let this polygon 
+be $P = r_{0}r_{1}\ldots r_{n+1}$\ , where $r_{0} = A$, $r_{n+1} = B$, and
+$r_{1},\ldots ,r_{n}$ is the sorted order of the $p_{i}$ on the curve.
+Let $E = \seg{r_{i}r_{i\oplus 1}}$ be an edge of P, \lyne{E}~=~line~through~E,
+and \arc{E}~=~segment of \arc{AB} from $r_{i}$ to $r_{i\oplus 1}$.
+All of \arc{E} stays on the same side of \lyne{E}, otherwise \lyne{E} strikes
+\arc{E} in more than two points, contradicting the convexity of \arc{AB}
+(Lemma~\ref{convmeans2}).
+Let s $\in$ \arc{AB}, s $\not\in$ \arc{E}.  If s lies on the same side of
+\lyne{E} as \arc{E}, then \lyne{E} intersects \arc{AB} in at least three
+points (\arc{AB} must either be tangent at $r_{i}$ or $r_{i\oplus 1}$
+to stay on the \arc{E} side of \lyne{E} or cut \lyne{E} again to get 
+back to this side after leaving it), again contradicting convexity.
+\hence All of \arc{E} lies on one side of \lyne{E} and all the rest of
+\arc{AB} on the other.  Thus, since E joins consecutive points on the
+curve, all of the points $r_{j}$ lie on one side of a halfplane defined
+by the polygon edge E, and only the endpoints of E lie on \lyne{E}.
+If the continuation \lyne{E} of E intersects another edge
+\seg{r_{j}r_{j\oplus 1}}, then either $r_{j}$ or $r_{j\oplus 1}$ lies
+on \lyne{E} or $r_{j}$ and $r_{j\oplus 1}$ lie on opposite sides of \lyne{E},
+a contradiction.
+\hence By lemma~\ref{conv3}, the polygon P is convex.
+\hence P is the convex hull of the $r_{i}$'s, since a convex polygon is
+the convex hull of its vertices.  
+\marginpar{Clinch.}
+\qed
+\begin{lemma}\nopagebreak
+\label{flexorsi}
+Let C be a nonconvex segment of an irreducible, cubic curve.
+Then C contains a flex or a singularity.
+\end{lemma}
+{\bf Proof}:\nopagebreak\\
+Let $P \in C$ be a point whose tangent strikes C again at a point
+$Q \in C, Q \neq P$.
+Suppose that \arc{PQ} contains no singularity.
+We wish to show that \arc{PQ} contains a flex.
+\arc{PQ} is confined to one side of \lyne{PQ} since \lyne{PQ} already
+has three intersections with the cubic. 
+Shift the coordinate system so that P is the origin and \lyne{PQ} is the
+positive x-axis (only to make the argument simpler).
+Assume w.l.o.g. that \arc{PQ} lies below \lyne{PQ}.
+Since all of \arc{PQ} lies below \lyne{PQ} (the x-axis) and the tangent
+\marginpar{Prove that the tangent changes continuously except at sings.}
+changes continuously except at singularities (Lemma~\ref{tangcont} of 
+lemma9.tex), in some 
+$\epsilon$-neighbourhood of P, the directed tangent sweeps smoothly
+down below the x-axis, clockwise in one direction and counterclockwise
+ in the other.
+Let S be the infinite segment of C starting at P and proceeding in the
+direction away from Q.  
+Suppose that the directed tangent sweeps clockwise as one leaves
+P along S.  Then, since S can neither hit \lyne{PQ} again (Bezout) nor
+hit \arc{PQ} (\arc{PQ} is singularity-free), S is bounded within the region 
+defined by \lyne{PQ} and \arc{PQ}.
+\begin{center}
+FIGURE 4
+\end{center}
+This contradicts Lemma~\ref{nonbounded}.
+\hence The directed tangent sweeps clockwise as one 
+\marginpar{(*)}
+leaves P along \arc{PQ}.\\
+$\forall\ \epsilon > 0$, let $Q_{\epsilon} \in \arc{PQ}$ s.t.
+$dist_{C}(Q,Q_{\epsilon}) = \epsilon$.
+$Q_{\epsilon}$ is below, but within $\epsilon$ of, the x-axis.
+By (*), $\exists\ \epsilon > 0$ and $P' \in \arc{PQ}$ (near P) s.t. the
+tangent from $P'$ hits $Q_{\epsilon}$.
+Notice that $dist_{C}(P',Q_{\epsilon}) < dist_{C}(P,Q)$.
+Also, notice that as long as $P' \neq Q_{\epsilon}$, 
+one can repeat the entire argument used above, replacing P by
+$P'$ and Q by $Q_{\epsilon}$, to find two points on \arc{PQ} that
+are even closer together such that the tangent at one strikes the other.
+And so on.
+That is, as you go along \arc{PQ} towards Q, the third point of intersection
+of the tangent moves along \arc{PQ} towards P, until they meet.
+When the point of tangency and the third point of intersection meet, 
+\marginpar{Make this rigorous.}
+the tangent strikes the curve three times at that point.
+Moreover, this point is nonsingular since \arc{PQ} does not
+contain a singularity, by assumption.  Hence, it is a flex.
+\qed
+This proof yielded an interesting result, which we should record formally:
+\begin{lemma}\nopagebreak
+Let C be an irreducible cubic.  Let $P \in C$ and let Q be the third 
+intersection of P's tangent with C.  Then, if C connects P to Q
+and \arc{PQ} is nonsingular,
+\arc{PQ} contains a flex.
+\end{lemma}
+We also have the following corollary:
+\begin{corollary}\nopagebreak
+If a segment of an irreducible, cubic curve contains no flexes or 
+singularities, then it must be convex.
+\end{corollary}
+This suggests splitting a cubic curve into limbs and then partitioning 
+each limb at flexes and singularities.  This yields a group of convex
+segments, each of which can be sorted by creating convex hulls.
+\section{The limbs of a cubic}
+{\bf Definition}:\ \ A {\em closed} limb is a limb that is a 'cycle'.
+That is, starting from any point P of the limb and proceeding along the
+limb in either direction, one eventually returns to P.  
+A limb is {\em open} if it is not closed.
+\begin{lemma}\nopagebreak
+A singular, irreducible cubic has one limb, and this limb is open.
+\end{lemma}
+{\bf Proof}:\nopagebreak \\
+An irreducible curve of order n with points of multiplicity $r_{i}$
+has a rational 
+\marginpar{is rational = has a rational parameterization (see Wa)?}
+parameterization(?) if\footnote{\cite[p.\ 67]{wa}}
+\[ (n-1)(n-2) = \sum r_{i}(r_{i} - 1) \]
+By the corollary to Lemma~\ref{singbound},
+a singular, irreducible cubic has one
+singularity, a double point.  Hence, substituting above, we discover
+that it must have a rational parameterization.
+\hence It has only 
+\marginpar{Clinch, using Ganguli (unicursal $\Rightarrow$ unipartite),
+pp. 206-7.}
+one limb.\\
+Prove that limb is open, using an argument that allows generalization.
+(See scribbles on old page 8.)
+\qed
+{\bf Notation}:  We write homogeneous coordinates as (w,x,y), following
+Walker. [Note: Fulton's (x,y,z) notation is much more intuitive
+ (because of its
+correspondence with the line through (x,y,z) and O) so it should be used
+in future.]
+\begin{lemma}\nopagebreak
+A nonsingular, irreducible cubic C has two limbs, one of which is closed.
+\end{lemma}
+{\bf Proof}: [Relies on normal forms]\nopagebreak \\
+We first show that C can have at most one 'open' limb.
+By linear transformations (which do not affect the number or structure
+\marginpar{Convince myself that linear transformations do not change the
+number of pts. at infinity.}
+of limbs: they only translate and/or rotate), the equation of C
+can be put into the
+normal form:
+\[ y^{2} = g(x) = x^{3} + ax^{2} + bx \]
+where g(x) has three distinct roots [Wa, p.\ 72].
+In homogeneous coordinates, this equation is
+\[ y^{2}w = x^{3} + ax^{2}w + bxw^{2} \]
+Let the curve represented by this normal-form equation be called $C'$.
+How many points at infinity does $C'$ have?
+The w term of a point at $\infty$ is 0.  Substituting $w=0$
+into the above equation yields $x^{3} = 0$, i.e. $x=0$.
+Thus, points at $\infty$ of $C'$ are of the form (0,0,y).
+There is only one point of this form: \mbox{(0,0,1)}.
+\hence $C'$ has one point at $\infty$.  
+But each open limb contains at least one point at $\infty$ since, going in
+either direction along the limb, the limb does not loop back on itself 
+\marginpar{Review this argument.}
+(it is nonsingular and not closed) so it is of infinite length and 
+thus unbounded (Lemma~\ref{nonbounded}).
+(It will have {\em two} points at $\infty$ unless it is asymptotic to the 
+same line in both directions.)
+Moreover, limbs are disjoint, even at points at $\infty$: if two limbs
+\marginpar{Verify this.}
+share a point at $\infty$, then there is a singularity 
+there(??): contradiction.
+\hence $C'$ has at most one open limb, otherwise it would contain more than
+two points at infinity.
+
+When $C'$ has been put in the above normal form, it is symmetrical w.r.t.
+the x-axis and strikes the x-axis in three distinct points.
+If two of these three points belong to the same limb, then the
+limb joins these points so, by symmetry, the limb joins the two points
+in mirror image, and the limb is closed.
+%
+% put figure here?
+%
+\hence An open limb of $C'$ hits the
+\marginpar{(1)}
+x-axis at most once.\\
+Conversely, a closed limb of $C'$ must intersect the x-axis twice:
+\begin{quote}
+	A line intersects a closed limb an even number of times, since after 
+	it goes inside the limb it must eventually leave.  Thus, the x-axis
+	hits a closed limb of a cubic either twice or never.  
+	If a closed limb lies entirely on one side of the x-axis, then there
+	is a mirror-image closed limb on the opposite side of the x-axis due
+	to symmetry.  But a cubic cannot have two closed limbs because
+	a line joining two points of the limbs, one from each, would
+	intersect the cubic at least four times.  Thus, the x-axis 
+\marginpar{(2)}
+        hits a
+	closed limb twice.
+\end{quote}
+Thus, since $C'$ intersects the x-axis three times, by $(1)$ and $(2)$ it
+must either have
+\begin{itemize}
+\item
+at least three open limbs, or
+\item
+one closed limb and at least one open limb
+\end{itemize}
+But we have shown that $C'$ has at most one open limb.
+\hence $C'$ has one closed limb and one open limb.\\
+Moreover, C and $C'$ have the same number and type of limbs.\\
+(Note that, from comments made above, the open limb has only one point
+at infinity and so, as one proceeds along it in either direction, one
+asymptotically approaches the same line.)
+\qed
+Let C be an arbitrary curve.
+Let $F(x) = 0$ be the homogeneous equation of C, 
+$f(x) = 0$ the affine equation.\vspace{.25in} \\
+\underline{Identifying singularities}
+\begin{lemma} \nopagebreak
+P is a singularity of F $\Leftrightarrow\ f_{x}(P) = 0 = f_{y}(P).$
+\end{lemma}
+{\bf Proof}:
+[Fu, p. 64] and [Wa, pp. 53-4].\vspace{.25in} \\
+Thus, finding singularities involves solving a system of two
+\marginpar{Is this at all feasible?}
+degree $n-1$ equations (where n is the degree of the curve).
+One can distinguish nodes from cusps for double points (which
+is all we are concerned with in the case of cubics) using the 
+following fact:
+\begin{lemma} \nopagebreak
+If P is a double point of F, then \\
+( P is a node $\Leftrightarrow\ F_{xy}(P)^{2} \neq F_{xx}(P)F_{yy}(P)$ ).
+\end{lemma}
+{\bf Proof}:
+[Fu, p. 68].\vspace{.25in} \\
+\underline{Identifying real, finite flexes}\vspace{.25in} \\
+Compute the Hessian of the curve: $H(\vec{x}) = |F_{ij}(\vec{x})| = 0.$
+Let $h(\vec{x}) = H(1,x,y)$ be the affine version of H.
+Find the finite,real points of intersection of h with the curve.
+Throw out all singular points.
+You are left with the desired flexes.
+(See [Wa, p. 71].)
+
+The bottleneck is the intersection of the curve with its Hessian.  
+\marginpar{Is this entirely prohibitive?}
+The Hessian of a degree n equation is of degree $3(n-2)$.
+Thus, in the case of a cubic, one must solve a system of two cubics,
+which is already a daunting prospect.\vspace{.25in} \\
+\underline{Flexes on cubics}\vspace{.25in} \\
+\marginpar{Characterize the three classes of cubics here.}
+A nonsingular cubic has  three real flexes, looking like so on
+$y^{2} = x^{3} - x$:
+\begin{center}
+FIGURE 5
+\end{center}
+Nodal and cuspidal cubics both have one flex.  The normal forms
+$y^{2} = x^{2}(x+1)$ [nodal] and $y^{2} = x^{3}$ [cuspidal] both
+have their flex at a point of infinity.\vspace{.25in} \\
+\underline{Partitioning at a flex}\vspace{.25in} \\
+Since a flex is a nonsingular point, only two convex segments meet there.
+By Lemma~\ref{planarcutsthru}, the two convex segments that meet at a flex lie
+on opposite sides of the tangent to the flex.
+Moreover, the curve only crosses this tangent at the flex (by Bezout).
+\hence The flex's tangent effectively segregates the two convex
+segments that it bounds.\vspace{.25in} \\
+\underline{Partitioning at a singularity (for cubics only; uses
+normal forms)}\vspace{.25in} \\
+We wish to show that the tangents at a cubic's singularity do the job.
+Consider the nodal cubic first.
+Since every nodal cubic is projectively equivalent to
+$y^{2} = x^{2}(x+1)$,\footnote{\cite[p.\ 128]{namba}}
+and 'P is a singularity',
+'T is tangent to P' are projective properties (i.e., properties 
+preserved under projective equivalence)
+\marginpar{give ref. or prove}
+we need only show the result for $y^{2} = x^{2}(x+1)$.
+The node is at the origin.  Let A, B, C be the three convex segments
+that meet at the node: B the loop, A the segment totally above the 
+y-axis,  and C the segment totally below.
+The two tangents to the node are $y+x=0$ and $y-x=0$ (the factors
+of the lowest degree form of the equation). Thus,\\
+\begin{center}
+FIGURE 6
+\end{center}
+Since the tangent at a double point strikes the curve three times
+at that point (two for the singularity, one more for being tangent)
+a cubic
+\marginpar{(*)}
+cannot intersect either of the tangents at a double point again.
+But the segments A, B, and C are separated from one another by the
+node's tangents:
+\begin{itemize}
+\item A and B are on opposite sides of $y=x$
+\item B and C are on opposite sides of $y= -x$
+\item A and C are on opposite sides of $y=x$ (and $y= -x$)
+\end{itemize}
+Thus, the tangents at a node of a cubic segregate the convex segments
+that meet there.
+
+For the cusp, we need only consider the normal form $y^{2} = x^{3}$,
+since every cubic with cusp is projectively equivalent to this 
+equation.\footnote{\cite[p.\ 128]{namba}}
+The cusp is at the origin and the two coincident tangents at the cusp
+are $y=\pm 0$.
+$y^{2} = x^{3}$ looks like:
+\begin{center}
+FIGURE 7
+\end{center}
+Clearly the two convex segments that meet at the cusp are on opposite
+sides of the y-axis near the origin.
+\hence By (*), they are always on opposite sides of the tangent(s) to
+ the cusp.\vspace{.25in} \\
+\underline{Fulton algorithm to find tangents to a point}
+\marginpar{$\leftarrow$}
+\\ 
+%
+% A GENERAL TECHNIQUE FOR SHOWING THAT THE TANGENTS SEPARATE
+%
+% For a cubic, there are at most three convex segments bordering on a
+% singularity:[there are at most two crossing segments at the singularity,
+% since the sing. is double, and there is an incoming and outgoing part to
+% each of these segments, i.e., before and after the sing.  This limits the 
+% # of bordering convex segments to 4.  Exactly two of the parts are joined,
+% otherwise the nonsing. cubic is not ONE OPEN limb: > 2 => closed, < 2 =>
+% two limbs.]
+% You don't have to worry about separating the two joined parts: if they
+% are two different convex segments, then they will contain a flex at which
+% they will be split.
+\underline{Sorting the convex segments}\vspace{.25in} \\
+There is no problem sorting the convex segments that meet
+at a flex or a cubic's cusp, since there are only two of them.
+The three convex segments that meet at a cubic's node can be easily sorted:
+the looped segment must be the middle one (see picture of $y^{2} = x^{2}(x+1)$
+).
+\marginpar{how do you recognize the looped segment?}
+\begin{conjecture} \nopagebreak
+A convex segment contains no flex, except possibly at a 
+boundary.
+\end{conjecture}
+N.B. This would allow Lemma~\ref{convmeans2} to be simplified.
+\begin{corollary} \nopagebreak
+\label{noflexonclosed}
+The closed limb of a nonsingular cubic contains no flexes.
+\end{corollary}
+{\bf Proof}: \ A line hits a closed limb an even number of times.
+Thus, a tangent to the closed limb of a nonsingular cubic does not hit
+the closed limb again.
+\hence The closed limb is convex.
+\qed
+\begin{conjecture} \nopagebreak
+\label{2tantoclosed}
+Let C be a closed, nonsingular segment or curve. \\
+Let $P \in \Re^{2} \setminus (C \cup Interior(C)).$
+Then
+\begin{enumerate}
+\item $\exists$ two points Q,R of C whose tangents strike P.
+\item The region defined by \ray{PQ} and \ray{PR} contains all C.
+\end{enumerate}
+\end{conjecture}
+\underline{Quick sketch of how to separate the two limbs of a
+nonsingular cubic}\vspace{.25in} \\
+Let N be a nonsingular cubic.
+Let $L_{1}$ and $L_{2}$ be the open limb and closed limb of N, respectively.
+Let $\alpha$ be one of the finite flexes of N.
+By Corollary~\ref{noflexonclosed} and Conjecture~\ref{2tantoclosed},
+$\exists$ P, Q on the closed limb $L_{2}$ s.t. the tangents at P
+and Q both hit $\alpha$.
+\begin{lemma} \nopagebreak
+\label{isolate}
+The tangents at P and Q properly isolate the two limbs $L_{1}$ and $L_{2}$.
+\end{lemma}
+{\bf Proof}: \ To come.
+\marginpar{!}
+\vspace{.25in} \\
+We wish to develop an algorithm to find these two tangents.
+It is a fact that there are three 
+\marginpar{Develop some 'class' theory to motivate this.}
+points whose tangents hit a flex of a cubic.
+Let A, B, C be the points whose tangents $T_{A}, T_{B}, T_{C}$ hit
+the flex $\alpha$.
+We can find $T_{A}, T_{B},$ and $T_{C}$, since there is an algorithm
+\marginpar{write this AlgX.}
+to find all tangents that hit a given point.
+Here is a picture of the situation:
+\begin{center}
+FIGURE 8
+\end{center}
+We need to eliminate one of the tangents.
+The three tangents define three regions.  
+Let $R_{AB}$ be the region defined by $T_{A}$ and $T_{B}$, and so on.
+Let $\delta \neq \alpha$ be another finite flex 
+\marginpar{Show that {\em any} nonsingular cubic has two finite flexes.}
+of the cubic N.
+$\delta$ cannot lie on the boundary of a region:
+\begin{quote}
+	By Bezout, the only points of N that lie on a boundary are
+	A, B, C, and $\alpha$.  By Bezout again, $\delta$ is not
+	A, B, or C.
+\end{quote}
+Assume w.l.o.g. that $\delta$ lies inside $R_{AB}$.
+Then, by Corollary~\ref{noflexonclosed} and Lemma~\ref{isolate},
+$R_{AB}$ is not the region that contains the closed limb.
+\hence Either $T_{A}$ or $T_{B}$ is not tangent to the closed limb.
+\hence $T_{C}$ is tangent to the closed limb.\vspace{.25in} \\
+{\bf Claim}: \ $T_{B}$ is the other closed limb tangent $\Leftrightarrow$
+the third intersection of \lyne{BA} or the third intersection of \lyne{BC}
+with the cubic N lies inside the region $R_{BC}$.\vspace{.25in} \\
+{\bf Proof of claim}: \ The pivotal fact is that a line either hits the
+closed limb twice or never.
+Let R~=~3rd intersection of \lyne{BA} with N,
+S~=~3rd intersection of \lyne{BC} with N.
+\begin{center}
+FIGURE 9
+\end{center}
+C lies on the closed limb and one of A, B also does.
+Thus, both \lyne{BA} and \lyne{BC} must hit the closed limb twice,
+R must lie on the closed limb, and S lies on the closed limb iff B
+does not.\vspace{.25in} \\
+$\Rightarrow$: \ Assume that B is on the closed limb.
+R lies on the closed limb $\Rightarrow$ R lies in $R_{BC}$.\vspace{.25in} \\
+$\Leftarrow$: (contrapositive of $\Rightarrow$) \ Assume that
+B does not lie on
+the closed limb.  Then R and S lie on the closed limb, and
+the region containing the closed limb must be $R_{AC}$.
+\hence R and S lie in $R_{AC}$, not $R_{BC}$.
+\qed
+This gives us a quick and easy method of finding two tangents that
+segregate the two limbs of a nonsingular cubic.
+\begin{thebibliography}{The longest}
+\bibitem[Fu]{fu} Fulton, William.
+{\em Algebraic Curves}.
+Menlo Park, California: Benjamin/Cummings, 1974.
+\bibitem[Namba]{namba} Namba, Makoto.
+{\em Geometry of Projective Algebraic Curves}.
+New York: Marcel Dekker, 1984.
+\bibitem[TF]{calc} Thomas, George B., and Finney, Ross L.
+{\em Calculus and Analytic Geometry}.
+Reading, Mass.\ :  Addison-Wesley, 1979.
+\bibitem[Wa]{wa} Walker, Robert J. 
+{\em Algebraic Curves}.
+New York: Springer Verlag, 1978.
+\end{thebibliography}
+\end{document}

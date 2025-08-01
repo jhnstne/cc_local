@@ -1,0 +1,495 @@
+\chapter{The Sorting of Points}
+\section{Introduction}
+\label{chap1-sec1}
+
+The area of geometric modeling is concerned with the creation of 
+computationally efficient models 
+of solid physical objects to facilitate their design, assembly, and analysis.
+Geometric models of physical objects  are needed in many disciplines, including robotics,
+computer vision, computer-aided design/computer-aided 
+manufacturing, and graphics.
+In a geometric modeling system,
+a solid such as a robot hand or a coffee cup is modeled by a collection
+of points, curves, and surfaces.
+The creation and manipulation of a solid model requires 
+a variety of high-level operations, such as the combination of models by 
+the boolean operations of union, intersection, and
+difference; the addition of blending surfaces to a model to smooth off sharp
+connections between edges and faces; the detection of interference between
+models; and the pictorial display of a model.
+The implementation of these high-level operations requires a
+number of basic tools,
+such as finding tangents to curves and surfaces; 
+parameterizing lines, curves, and surfaces; 
+measuring distances; and finding roots of equations. 
+The development of efficient ways to perform these fundamental
+tasks will benefit all of the applications that use them.
+
+The sorting of points along an algebraic curve, as evidenced by its
+numerous applications, is a basic tool for the manipulation of
+geometric models.
+Curve sorting has a natural definition.
+If S is a set of points on a curve and \arc{AB}\ is a segment of this curve,
+then to sort the points of S from A to B along \arc{AB} 
+means to put them into the
+order that they would be encountered in travelling continuously from A to B 
+along \arc{AB} (Figure~\ref{1.1}).
+Any of the points that do not lie on \arc{AB}\ are ignored.
+%
+\figg{1.1}{The sorted order from A to B is III, II, IV}{1.5in}
+%
+
+Curve sorting has many applications in geometric modeling.
+We offer two examples and postpone the discussion of
+further applications until Chapter~\ref{chap-5}.
+An edge of a solid model is defined by a 
+curve and a pair of endpoints.
+A point lies on the edge if and only if it lies on the curve and 
+between the endpoints.
+The problem of deciding 
+whether a point lies between two other points is a sorting 
+problem.
+A more elaborate application of sorting arises 
+in computing the intersection of two solid models. 
+An important step of this computation
+is to find the segments of an edge of one model that lie in the intersection.
+This is done by finding and sorting the points of intersection 
+of this edge with a face of the other model. 
+The segments of the edge between the $i^{th}$ and $i+1^{st}$ intersections,
+for $i$ odd, are contained in the intersection of the models.
+
+There is no serious study of curve sorting in the literature.
+This can be explained by the fact that,
+until recently, almost all of the curves in solid models were linear
+or quadratic, and the sorting of a curve of these low degrees is 
+trivial (Corollary~\ref{easyconic}).
+However, as the science of geometric modeling matures and grows more
+ambitious, curves of degree three and higher are becoming quite common.
+For example, the introduction of blending surfaces
+into a model creates curves and surfaces of high degree.
+Therefore, the sorting of points along an edge of a solid model has become
+an important and difficult problem.
+
+The lack of a study of curve sorting can also be explained 
+by the presence of an obvious method for sorting points.
+This obvious method, which uses a parameterization of the curve, a tool
+with which the geometric modeler is familiar, tends to obviate a
+search for any other method.
+
+This thesis will present a thorough investigation of curve sorting.
+We will show that there are at least three methods for sorting
+points along an algebraic curve.
+One of these methods is entirely new and particularly appealing.
+It will be shown to be the method of choice in many situations.
+The thesis is organized as follows.
+The next section gives a formal definition of curve sorting, and the
+remainder of the chapter discusses the two conventional methods of
+sorting.
+Chapters~2 and~3 present our new method.
+Chapter~4 is devoted to an analysis of the complexity of the new
+method, experimental results, and a comparison of the three methods.
+Applications of curve sorting, future research, and conclusions can
+be found in Chapter~5.
+Finally, there are three appendices, for definitions, technical lemmas,
+and a survey of parameterization algorithms.
+%
+\section{The Sorting of Points Along a Curve}
+\label{a-chap1-sec}
+
+In this section, we give a formal
+explanation of the sorting of points along a curve.
+Let C be an irreducible,\footnote{Terms such as these
+are defined in Appendix~\ref{app-defn}.} algebraic
+curve described by a polynomial \( f(x,y) = 0 \) or the
+intersection of two polynomial surfaces \( f_{1}(x,y,z) = 0 \) and
+\( f_{2}(x,y,z) = 0 \).
+(The primary representation of curves and surfaces in many solid modelers
+is the implicit equation.
+This representation is convenient for deciding if a point lies on the
+curve or surface, and for applying techniques from algebraic geometry,
+as in the creation of blending surfaces~\cite{hof-hop}.)
+Let \arc{AB}\ be a segment of C, such that both A and B are
+nonsingular points.
+If $S \subset C$ is a set of nonsingular points on the curve, then
+(as we have said) to sort the
+points of S from A to B along \arc{AB} means to put the points into the
+order that they would be encountered in travelling continuously
+from A to B along \arc{AB}.
+Points of S that do not lie on \arc{AB} are never encountered
+and are thus ignored.
+In order to avoid confusion, a vector at A is provided to indicate the
+direction in which the sort is to proceed from A.
+This is especially important when the curve is closed, since
+there are then two segments between A and B to choose from.
+
+A is called the {\bf start point}, B the {\bf end point}, and 
+\arc{AB}\ is the {\bf sort segment}.
+The points that are to be sorted (the points of S) are called the
+{\bf sortpoints}.
+We shall often refer to the sorting of points along a curve 
+as {\bf curve sorting}.
+
+The sorting of points along a curve 
+is more sophisticated than the sorting of numbers or names.
+In particular, start and end points are necessary, and the sorted set is often
+a strict subset of the unsorted set.
+These changes are necessary in order to resolve the ambiguity of sorting 
+on a closed curve, where order is cyclic.
+The changes are also useful for geometric modeling applications, since only
+a part of the curve (viz., the edge) is of interest.
+
+\begin{figure}[htbp]\vspace{4.5in}\caption{Some sorts are ambiguous}\label{1.1.5}\end{figure}
+%\figg{1.1.5}{}
+
+Every curve in this thesis can be assumed to be both algebraic 
+and irreducible.
+We also assume that all of the sortpoints of a sorting problem
+lie on the connected component
+that contains the sort segment, since the order of a set of points 
+is unclear if the points lie on different connected 
+components (Figure~\ref{1.1.5}(a) and Section~\ref{manycomponents}).
+Finally, we assume that the start point, the end point, and the
+sortpoints are nonsingular points,
+because the order of a set of points that includes singularities
+can be ambiguous (Figure~\ref{1.1.5}(b-c)).
+%
+%
+
+%When curve sorting is applied to geometric modeling,
+%the sort segment will be an edge of a model.
+%A typical edge of a solid model will be smooth
+%and will not cross itself.
+%For example, the segment \arc{CE}\ of Figure~1B would be split
+%into two edges, \arc{CD}\ and \arc{DE}, and 
+%the segment \arc{AB}\ of Figure~1A would not be an edge.
+%This explains why the sort segment is nonsingular.
+%
+%\fig{1A}{chap-1}
+%\fig{1B}{chap-1}
+%
+\section{The Parameterization Method}
+\label{sec-param}
+
+A natural way to sort points along a curve is to use a rational
+parameterization of the curve (i.e., a parameterization \mbox{($x(t)$,$y(t)$)}
+or \mbox{($x(t)$,$y(t)$,$z(t)$)}
+such that $x(t)$, $y(t)$, and $z(t)$ 
+can each be expressed as the quotient of two polynomials in $t$).
+The parameter values $t_{i}$ of the points $(x_{i},y_{i})$ are computed and sorted by increasing $t_{i}$ values. 
+The points 
+that occur before the start point or after the end point of the sort segment
+are discarded.
+%
+\begin{example}
+\label{pedalPRAM}
+Consider the curve \( x^{3} + xy^{2} + 16x^{2} - 4y^{2} \) (a pedal of 
+a parabola) with start point \( A = (1,\sqrt{\frac{17}{3}}) \),
+end point \( B = (3,-3\sqrt{19}) \), sortpoints 
+\( I = (3,3\sqrt{19}) \), 
+\( II = (-1,\sqrt{3}) \),
+\( III = (-2,-2\sqrt{\frac{7}{3}}) \), and
+\( IV = (1,-\sqrt{\frac{17}{3}}) \),
+and direction $V_{A}$ from A, as shown in Figure~\ref{1.1}.
+A parameterization of the curve is
+\( x = \frac{4t^{2} - 16}{t^{2}+1} \),
+\( y = \frac{4t^{3} - 16t}{t^{2}+1} \).
+We compute a point d on the curve close to A in the direction 
+$V_{A}$.\footnote{d is found by crawling 
+from A, a technique that is described in Section~\ref{sec-crawl}.}
+The parameter value of d indicates the order (increasing or decreasing)
+in which the parameter values should be sorted: the values are sorted
+in increasing order if and only if the parameter value of d is greater 
+than that of A.
+For this example, \( d = (0.9,\sqrt{\frac{13.689}{3.1}}) \).
+The parameter value associated with 
+\mbox{\( I = (3,3\sqrt{19}) \)} is determined by solving the system
+\mbox{\( \{ 3 = \frac{4t^{2} - 16}{t^{2}+1}, 
+3\sqrt{19} = \frac{4t^{3} - 16t}{t^{2}+1} \} \),}
+yielding \mbox{\( t = \sqrt{19} \)}.
+The parameter values
+\mbox{[II\ ,\ $t = -\sqrt{3}$],}
+\mbox{[III\ ,\ $t = \sqrt{\frac{7}{3}}$],}
+\mbox{[IV\ ,\ $t = -\sqrt{\frac{17}{3}}$],}
+\mbox{[A\ ,\ $t = \sqrt{\frac{17}{3}}$],}
+\mbox{[B\ ,\ $t = -\sqrt{19}$],} and
+\mbox{[d\ ,\ $t = \sqrt{\frac{16.9}{3.1}}$]}
+are computed in an analogous fashion.
+After sorting by parameter values, the point list becomes 
+B, IV, II, III, d, A, I.
+Sorting from A to B in the appropriate direction yields the
+desired sorted list III, II, IV.
+\end{example}
+%
+
+There are three reasons that we insist that the curve's 
+parameterization be rational.
+Consider a parameterization that involves $n^{th}$ roots,
+such as \mbox{$x(t) = \sqrt{t} + 2 \sqrt[3]{t}$}.
+In solving such a parameterization for the parameter value of a
+given point, it can be unclear which $n^{th}$ root to use.
+Another inconvenient property of non-rational parameterizations is
+that their representation is difficult.
+They cannot be represented by the coefficients of the parameterization:
+they must be represented symbolically (as in a computer algebra system like
+MACSYMA), which is less efficient.
+For example,
+a parameterization of the devil's curve
+$y^{4} - x^{4} - y^{2} + 4x^{2} = 0$ is 
+\[ x = \mbox{cos}(t)\sqrt{\frac{sin^{2}(t)-4cos^{2}(t)}{sin^{2}(t) - cos^{2}(t)}},
+\ y=\mbox{sin}(t)\sqrt{\frac{sin^{2}(t)-4cos^{2}(t)}{sin^{2}(t) - cos^{2}(t)}}\]
+%
+Finally, there is no algorithm for the automatic parameterization
+of curves that do not have a rational parameterization.
+Thus, there are problems with all three aspects of a non-rational
+parameterization: computation, representation, and solution.
+%
+\subsection{Parameterization}
+\label{subsec-par}
+
+%
+\begin{definition}
+A curve is {\bf rational} if it has a rational parameterization.
+\end{definition}
+
+The translation of an implicit representation of a curve into a parametric
+representation, which is one of the key steps of the parameterization method
+of sorting, has received some attention in the literature.
+There are constructive methods for the parameterization of plane curves of low
+order (viz., two and three) \cite{abba1,abba2,hopcroft-hoffmann}
+and rational plane curves \cite{abba3}.
+There are also constructive methods for the parameterization of surfaces
+of low degree (again, two and three) \cite{abba1,abba2,levin76}, but not 
+of high degree even if the surface has a rational parameterization.
+(The parameterization of surfaces is important because, as shown below,
+a space curve's parameterization can be developed from 
+a parameterization of one of the surfaces that defines the space curve.)
+Appendix~\ref{app-D} presents various 
+methods for the parameterization of low degree
+curves and surfaces.
+
+A rational plane curve of order $n$ can be parameterized by
+establishing a one-to-one correspondence 
+between the points of the curve and a one-parameter family of curves 
+of degree max($n-2$,1) through well-chosen single and
+double points of the curve \cite{abba3}.
+%
+\begin{example}
+Consider the parameterization of the circle \( x^{2}+y^{2}-1=0 \).
+Let P be a point of the circle (say $P = (-1,0)$)
+and let $L_{t}$ be the line through P of slope t.
+There is a one-to-one correspondence between the lines through P and the
+points of the circle, which can be used to construct a parameterization:
+the parameter value of a point Q is the slope of the line through P that
+hits Q.
+The equation of $L_{t}$ is \( y = tx + t \).
+The point of the circle associated with $L_{t}$ satisfies 
+{ \( y = tx + t \mbox{ and } x^{2} + y^{2} - 1 = 0 \)}, so
+\( x^{2} + (tx+t)^{2} - 1 = 0 \).
+Using the quadratic formula, \( x = -1 \mbox{ or } \frac{1-t^{2}}{1+t^{2}} \).
+The latter root is clearly the one of interest.
+Therefore, 
+\[ y = tx + t = t(\frac{1-t^{2}}{1+t^{2}})+t = \frac{2t}{1+t^{2}} \]
+and a parameterization of the circle is
+$(\frac{1-t^{2}}{1+t^{2}},\frac{2t}{1+t^{2}})$.
+\end{example}
+%
+
+A space curve's parameterization can sometimes be derived from a 
+parameterization of one of its two constituent 
+surfaces~\cite{hopcroft-krafft,levin79}.
+We illustrate the method with an example.
+%
+\begin{example}
+Consider the space curve $S \cap T$, where 
+$S \equiv x^{2} + y^{2} - 1 = 0$ and
+$T \equiv 2x^{2} + y^{2} - z^{2} = 0$ are surfaces.
+We find a parameterization for S,
+$\{ x = \frac{1-t^{2}}{1+t^{2}}, y = \frac{2t}{1+t^{2}}, z=s\}$, and
+substitute these parametric equations into the implicit equation for T, 
+yielding $\frac{2(1-t^{2})^{2} + 4t^{2}}{(1+t^{2})^{2}} - s^{2} = 0$.
+We then solve for s in terms of t: $s = \frac{\sqrt{2t^{4}+2}}{1+t^{2}}$.
+We conclude that a parameterization for 
+the intersection of the two surfaces is 
+$\{ x = \frac{1-t^{2}}{1+t^{2}}, y = \frac{2t}{1+t^{2}}, 
+z= \frac{\sqrt{2t^{4}+2}}{1+t^{2}}\}$.
+Notice that this parameterization is not appropriate for sorting, 
+because it is not rational.
+\end{example}
+%
+Unfortunately, it may be hard or impossible to find a parameterization
+for either of the surfaces, and it may be 
+impossible to solve for s in terms of t (and vice versa) after
+substituting the parametric equations of one surface into the implicit
+equation of the other.
+In particular, problems will arise when the degree of s is five or more,
+since there is no general formula for the solution of equations of degree 
+greater than four~\cite{hernstein}.
+Therefore, this technique of space curve parameterization is quite 
+restricted.
+
+We conclude that plane curves of low degree, rational plane curves, and
+a restricted class of rational space curves can be automatically
+parameterized.
+%
+\subsection{Weaknesses of the Parameterization Method}
+
+The two main steps of the parameterization method of sorting are to find
+a rational parameterization of the curve and to find the parameter
+values of the sortpoints by solving this parameterization.
+We shall show that there are problems with both of these steps.
+
+Only a strict subclass of 
+algebraic curves are rational, and the proportion
+of algebraic curves that are rational decreases as the order of 
+the curve increases.
+Therefore, there are many curves that 
+cannot be sorted by the parameterization method, simply because they do not
+have a rational parameterization.
+These facts are established by considering the genus of a curve.
+%
+\begin{definition}
+The {\bf genus} of an irreducible, algebraic, plane curve is
+\[ \frac{(n-1)(n-2)}{2} - \sum\frac{r_{i}(r_{i}-1)}{2}\]
+where n is the order of the curve,
+the sum is over the singularities $P_{i}$ of the curve,\footnote{Singularities
+must be counted properly and singularities at infinity must be included.
+See \cite[pp. 80-84]{wa}.}
+and $r_{i}$ is the multiplicity of the curve at the singularity $P_{i}$.
+The genus is nonnegative, and it
+is zero if and only if 
+the curve has the maximum number of singularities allowed
+for a curve of its order.
+\end{definition}
+%
+\begin{theorem}[{\cite[p. 180]{wa}}]
+\label{thm-rational}
+A plane curve is rational if and only if its genus is 0.
+\end{theorem}
+%
+\begin{example}
+
+It can be shown that any irreducible quartic (degree four) 
+space curve that is generated by the intersection
+of two degree two surfaces is non-rational.
+
+The genus of any quartic plane curve with an ordinary double point
+is 1, so no curve of this type has a rational parameterization.
+For example, the lemniscate of Bernoulli
+\( (x^{4} + y^{4} + 2x^{2}y^{2} - 4x^{2} + 4y^{2} = 0) \) 
+is such a curve, and its parameterization is
+\mbox{\( x = \frac{2cos(t)}{1+sin^{2}(t)} \)},
+\mbox{\( y = \frac{2sin(t)cos(t)}{1+sin^{2}(t)} \)},
+\mbox{\( -\pi \leq t \leq +\pi \)} \cite{lawrence}.
+\end{example}
+
+Even if a rational parameterization for the curve can be found, it is still
+necessary to solve for the parameter values associated with the set of points
+that are to be sorted.
+This is another weakness of the parameterization method,
+because the solution of a polynomial of high degree is usually expensive.
+Even for the tame example of the 
+pedal of a parabola (Example~\ref{pedalPRAM}),
+%\( x^{3} + xy^{2} + 16x^{2} - 4y^{2} \) (Example~\ref{pedalPRAM}),
+which has a parameterization involving degree three polynomials,
+each solution for the parameter value of a sortpoint consumes
+on the order of 120 milliseconds.\footnote{Using Common Lisp on a 
+Symbolics Lisp Machine, and the ZEROIN algorithm of Dekker and Brent
+for solving nonlinear equations \cite{forsythe}.}
+%Used rootpkg-zeroin on pedal of parabola to get results.
+We shall see in Chapter~\ref{chap-results} that this is a nontrivial expense.
+%Possible comment: it seems that the computation of any radical (square root,
+%cube root, ...) is expensive.
+We conclude that the parameterization method of sorting is limited and slow.
+
+There are two fundamental ways of representing a curve: the implicit equation
+and the parameterization. 
+The difficulties that arise with the 
+parameterization method of sorting reflect the difficulty of working
+with the parameterization representation of a curve in an environment
+where the implicit equation is the original representation.
+%
+\section{The Crawling Method}
+\label{sec-crawl}
+
+Another method of sorting points along a curve is the crawling method.
+%(This method is inherently inefficient, so it can be essentially ruled
+%out as a viable method.
+%However, we present it for two reasons:
+%to discourage its use by revealing its weakness, and to explain how to
+%crawl from a point to another close to it, a technique that 
+%is useful as a subroutine
+%in both of the other sorting methods.)
+This is a brute-force method that sorts a set of points by tracing along
+the sort segment and recording the order in which the sortpoints
+are encountered during this trace.
+The curve is traced by making small jumps along it, using
+Newton's method.
+For example, consider a small jump of size $\epsilon$ 
+from the point \( P = (x_{0},y_{0}) \) of the 
+curve \( f(x,y) = 0 \).
+Depending upon the behaviour of the curve in the neighbourhood
+of P, $x_{0}$ or $y_{0}$ is incremented or decremented by $\epsilon$.
+Suppose that $x_{0}$ is incremented, effectively jumping off of the curve to 
+\( (x_{0} + \epsilon\ ,\ y_{0}) \).
+A root $y'$ of \( f(x_{0}+\epsilon,y) \) is found by applying
+Newton's method, with initial guess $y_{0}$.
+\( (x_{0}+\epsilon,y')\) is a point of the curve that
+lies close to $(x_{0},y_{0})$, but it is a step
+further along the curve from the original point.
+
+%
+\figg{1.2}{Tracing a curve from P to Q}{1.5in}
+%
+
+Progress is made along the curve by these small jumps.
+For example, in Figure~\ref{1.2}, a tracing of the curve from P to Q 
+may involve jumping to $P_{1}$, $P_{2}$, $P_{3}$, and $P_{4}$.
+The details of tracing along a curve, including a discussion of how to trace
+robustly through a singularity, are presented in \cite{bhh}.
+%
+%WE MAY *CANCEL* THE TECHNICAL DISCUSSION OF THE CRAWLING METHOD ALTOGETHER.
+%We shall postpone the technical results related to the crawling method, 
+%such as
+%how one makes the choice between the four possibilities of step (ii) and 
+%exactly how Newton's method works, until Appendix~\ref{chap-technical}.
+%
+
+
+If a jump is made to a point within some ball of radius~$\delta$ about a
+sortpoint $x$, then we assume that the trace has reached $x$ and we insert
+$x$ into the sorted list that is being accumulated.
+If $\delta$ is small, then this is a reasonable assumption.
+However, this assumption is not entirely robust (Figure~\ref{1.2A}).
+%
+\figg{1.2A}{x may be sorted improperly by the crawling method}{1.5in}
+%
+
+The major weakness of the crawling method is that it must make small jumps, 
+in order to ensure that the crawl proceeds smoothly along the curve and does 
+not get confused.
+If $\epsilon$ is large, then it is possible to jump discontinuously to 
+another part of the curve (Figure~\ref{1.3}(a)), 
+or even to jump completely off of the end of the curve (Figure~\ref{1.3}(b)).
+The jumps must also be small in order to avoid jumping over two or more 
+sortpoints at the same time, which would cause problems in sorting,
+and to avoid ignoring a sortpoint x by tracing through it without jumping into
+the $\delta$-ball about x that triggers x's insertion into the sort.
+As a result, the crawling method is 
+very slow unless the sort segment is short.
+
+%
+\begin{figure}[htbp]\vspace{2.25in}\caption{Jumps must be small}\label{1.3}\end{figure}
+%\figg{1.3}{Jumps must be small}
+%
+
+Another undesirable property of the crawling method 
+is that its speed depends upon the length of
+the sort segment rather than upon the number of points to be sorted.
+The crawling method does have the advantage that it does not require any
+preprocessing, such as the computation of a parameterization.
+
+The weaknesses that we have observed in the 
+parameterization and crawling methods of sorting points along a curve
+suggest that another method is necessary: one that will perform more
+efficiently on a wider selection of algebraic curves.
+The next chapter presents such a method.

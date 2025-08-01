@@ -1,0 +1,2989 @@
+\newif\ifFull
+\Fulltrue
+% \Fullfalse
+\documentstyle[11pt]{article} 
+%
+\input{macros}
+% \newtheorem{definition}{Definition}
+%
+% Page format
+%
+\DoubleSpace
+%\SingleSpace
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\topmargin}{0pt}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+%
+%
+\title{SORTING POINTS ALONG AN ALGEBRAIC CURVE}
+\author{
+JOHN K. JOHNSTONE\thanks{Department of Computer Science, The Johns Hopkins University, 
+Baltimore, MD 21218.
+The work of this author was supported in part by National Science Foundation grant 
+IRI-8910366.
+While the author was a graduate
+student in the Department of Computer Science, Cornell University, he was supported
+by a Natural Sciences and Engineering
+Research Council of Canada 1967 Graduate 
+Fellowship and an Imperial Esso Graduate Fellowship.}
+\ and \ 
+CHANDERJIT L. BAJAJ\thanks{Department of Computer Science, Purdue University, 
+W. Lafayette, IN  47907.
+The work of this author was supported in part by National Science Foundation grant
+MIP-88-16286, 
+% 85-21356 
+ARO contract DAAG 29-85-C0018 under Cornell MSI, and
+ONR grant N00014-88-0402.}
+}
+%
+\begin{document}
+\maketitle
+
+{\bf Abstract.}
+An operation that is frequently needed during the creation and manipulation of geometric 
+models is the sorting of points along an algebraic curve.
+Given a segment \arc{AB} of an algebraic curve, a set of points on the curve is sorted
+from A to B along \arc{AB} by putting them into the order that they would be encountered 
+in travelling continuously from A to B along \arc{AB}.
+A new method for sorting points along a plane or space algebraic curve is presented.
+Key steps in this method are the decomposition of a plane algebraic curve into convex 
+segments and point location in this decomposition.
+% The decomposition is accomplished by the tangents at the singularities and points of 
+% inflection of the curve.
+This new method can sort points on an arbitrary algebraic curve 
+(including points spread over several connected components)
+and it is particularly efficient 
+because of its preprocessing, both of which make it superior to conventional methods.
+The complexity of the new method is analyzed, and execution times of various sorting
+methods on a number of algebraic curves are presented.
+The theory developed for sorting can also be used to locate points on an arbitrary 
+segment of an algebraic curve and to decide whether two points lie on the same connected 
+component.
+
+{\bf Key words.} Sorting, decomposition, point location, convexity, algebraic curves,
+geometric modeling, solid modeling.
+
+{\bf AMS(MOS) subject classifications.} 68U05, 68Q25, 68P10, 14H99.
+
+\section{Introduction}
+%
+The sorting of numbers into increasing order or words 
+into alphabetical order is one of the basic problems of computer science.  
+The purpose of this paper is to establish that the sorting of points
+along a curve is a basic problem in geometric modeling and computational geometry,
+and to present a universal and efficient method for this sorting.
+This method relies upon the solution of two problems that are very useful in their
+own right: convex decomposition of a curve and point location on a segment.
+
+To sort a set of points from A to B along the curve segment \arc{AB} means to
+put the points into the order that they would be encountered in travelling
+continuously from A to B along \arc{AB} (Figure~\ref{1.1}).
+Points that do not lie on \arc{AB} are never encountered and are thus ignored.
+A tangent vector at A is provided to indicate the direction in which the sort is to
+proceed from A. 
+This vector is especially important when the curve is closed, since
+there are then two segments between A and B to choose from.
+All of the points, including A and B, are assumed to be nonsingular,
+since otherwise their order might be ambiguous.
+%
+\figg{1.1}{The sorted order from A to B is III, II, IV}{1.5in}
+% figure 1.1, p. 2
+
+Our treatment shall be of irreducible algebraic plane curves (a curve that 
+lies in a plane and is described by an irreducible polynomial\footnote{The coefficient
+	domain of the polynomial can be the integers, rationals, algebraic real numbers,
+	or any other set of numbers that has a finite representation.}
+$f(x,y)=0$); 
+in the rest of this paper, all curves are assumed to be of this type and nonlinear.
+An extension of the methods to algebraic space curves is possible using 
+a suitable projection of the space curve to a plane curve, as described in \cite{jj}.
+
+The next section establishes that sorting is a fundamental operation of 
+geometric modeling.
+After discussing previous sorting methods in
+Section~\ref{sp},
+we introduce our new sorting method in
+Section~\ref{co}.
+Convex decomposition of a curve
+and point location on a convex segment 
+are discussed in Sections~\ref{s-dec} 
+and \ref{s-loc}.
+Complexity issues and execution times of the
+various sorting methods are presented in Sections~\ref{s-c} and 
+\ref{data}, and Section~\ref{sco} provides some conclusions.
+The paper ends with an appendix.
+% containing several algorithms and lemmas that are important
+% to the development of the theory of sorting, but which due to their 
+% technical nature are more conveniently placed in an appendix.
+
+
+\section{The importance of sorting}
+The sorting of points along a curve has many applications 
+in geometric modeling. 
+The following problem is the most natural application.\\[.25in]
+%
+{\bf Restriction}\\
+INSTANCE: A set S of points on a curve C and a segment $\arc{E_{1}E_{2}}$ of C.\\
+QUESTION: Which points of S lie on $\arc{E_{1}E_{2}}$? \\
+SOLUTION: One solution is to sort S $\cup \{\mbox{endpoints } E_{1},E_{2}\}$ along the curve
+	and discard the points that do not lie between $E_{1}$ and $E_{2}$.
+	However, a more efficient solution is simply to sort S along $\arc{E_{1}E_{2}}$, 
+	starting at $E_{1}$.  
+	The output of this sort is the set of points on $\arc{E_{1}E_{2}}$ (in sorted order).
+	During this sort, the points of S that do not lie on $\arc{E_{1}E_{2}}$ are either 
+	not encountered or they are encountered but eventually discarded. 
+	(This will be easier to understand after a description of the sorting algorithm.)
+\\[.25in]
+%
+Since an edge of a solid model is often defined by a curve and a pair of endpoints,
+restriction is a very basic problem in geometric modeling.
+For example, the following edge intersection and bounding box problems are two important 
+problems that can be solved with restriction.\\[.25in]
+%
+{\bf Edge intersection}\\
+INSTANCE: Edges E and F on curves C and D, respectively.\\
+QUESTION: What is $E \cap F$?\\
+SOLUTION: Compute $C \cap D$ by well-known methods and restrict to the edges.
+	That is, restrict $C \cap D$ to E and then restrict this $C \cap D \cap E$ 
+	to F.\\[.25in]
+%
+{\bf Bounding box}\\
+INSTANCE: Edge E on curve C with endpoints $E_{1}$ and $E_{2}$.\\
+QUESTION: Find the smallest rectangle with sides parallel to the coordinate axes that
+contains E.\\
+SOLUTION: Compute the local extrema of the curve and restrict to the edge, yielding S.
+Find the minimum x-value ($x_{\mbox{min}}$) in $S \cup \{E_{1},E_{2}\}$, and so on.
+The desired box is defined by the lines $x = x_{min}$, $x = x_{max}$, $y = y_{min}$, 
+and $y = y_{max}$.\\[.25in]
+%
+The bounding box (see \cite[p. 372]{NS}) is useful for interference detection: 
+the expensive intersection of edges can be reserved for those situations when the edges
+are close enough that their bounding boxes interfere.
+Bounding regions are also useful for problems such as the restriction problem, 
+because they allow points that clearly do not satisfy a condition to be discarded
+quickly.
+
+Another fundamental use of sorting\footnote{In this paper, `sorting' will always
+refer to 
+the sorting of points along a curve, not the conventional sorting of numbers or
+words.} is to introduce an even-odd parity to a
+set of points, as illustrated by the following problem.\\[.25in]
+%
+{\bf Solid model intersection}\\
+INSTANCE: Two solid models M and N.\\
+QUESTION: What is the intersection of M and N?\\
+SOLUTION: An important step of this computation
+is to find the segments of an edge of one model that lie in the intersection.
+This is done by finding and sorting the points of intersection 
+of this edge with a face of the other model. 
+The segments of the edge between the $i^{th}$ and $i$+1$^{st}$ intersections,
+for $i$ odd, are contained in the intersection of the models.\\[.25in]
+%
+Another application of even-odd parity 
+is to decide whether a point lies within a piecewise-algebraic plane patch
+(or a piecewise-algebraic convex surface patch).
+% see Mortenson, Geometric Modeling, p. 545 for a good picture
+This problem, which is fundamental to the display of a geometric model, 
+is fully discussed in \cite{jj}.
+Having established the importance of sorting, in the next section 
+we proceed to a discussion of methods for sorting.
+
+\section{Previous work on sorting}
+\label{sp}
+%
+There is no serious study of sorting in the literature.
+This can be explained by the fact that nontrivial sorting problems
+arise only with curves of degree three or more, and until recently, 
+almost all of the curves in solid models were linear or quadratic.  
+However, as the science of geometric modeling matures and grows more
+ambitious, curves of degree three and higher are becoming common.
+For example, the introduction of blending surfaces \cite{hh87}
+into a model creates curves and surfaces of high degree.
+
+The lack of a study of sorting can also be explained 
+by the presence of an obvious method for sorting points, 
+which tends to obviate a search for any other method.
+This obvious method uses a rational parameterization of the curve
+(i.e., a parameterization ($x(t)$, $y(t)$) such that both 
+$x(t)$ and $y(t)$ can be expressed as the quotient of two polynomials in $t$),
+sorting a set of points S along \arc{AB} as follows.
+
+\clearpage
+
+\begin{center}{\bf The parameterization method of sorting}\end{center}
+\begin{description}
+\item[{[Preprocessing]}] \ \ \ 
+\begin{description}
+\item[1.] Parameterize the curve.
+\end{description}
+%
+\item[{[Solve]}] \ \ \ 
+\begin{description}
+\item[2.]
+	Find the parameter values of A and B, say $t_{1}$ and $t_{2}$.
+\item[3.]
+	Find the parameter value of each point in S.
+\end{description}
+%
+\item[{[Sort numbers]}] \ \ \ 
+\begin{description}
+\item[4.]
+	Sort the parameter values of S from $t_{1}$ to $t_{2}$, discarding
+	those outside this interval.
+\end{description}
+\end{description}
+%
+We insist upon a rational parameterization because a nonrational 
+parameterization is difficult to represent and difficult to solve. 
+With a nonrational parameterization (such as $x(t) = \sqrt{t}$ or 
+$x(t) = \sin(t)$),
+two different points may have the same parameter value, which complicates sorting.
+Finally, there is no algorithm for the automatic parameterization of a curve 
+that does not have a rational parameterization, whereas there is such an algorithm
+for rational curves \cite{abba3}.
+
+There are many reasons to be dissatisfied with the parameterization method.
+It is not a universal method, since not all algebraic curves have a 
+rational parameterization.
+Indeed, a plane algebraic curve has a rational parameterization if and only if its
+genus is zero, if and only if it has the maximum number of singularities 
+allowable for a curve of its degree \cite{walker}.  
+Secondly, even for those curves that do have rational parameterizations, 
+the parameterization method will be slow if the degree of the parameterization 
+is high, since the computation of the parameter values of the points will 
+be expensive.
+Other weaknesses of the parameterization method will become clear as we compare
+it with the new method, such as its difficulty with sorting points that are
+spread over several connected components of a curve (Section~\ref{sec-cc}).
+% namely, not clear that it can distinguish connected components 
+
+There is also a brute-force sorting method, which uses techniques for
+tracing along a curve \cite{bhhl}.
+The order of the points is the order in which they are encountered during
+a trace of the segment.
+This method is not satisfactory, because its implementation, although robust, is 
+inherently very slow.
+Moreover, its complexity depends upon the length of the segment that is being
+sorted rather than upon the number of points in the sort, which is 
+undesirable.
+
+The weaknesses of the parameterization and tracing methods of sorting 
+suggest that another method is necessary: one that will perform more
+efficiently on a wider selection of algebraic curves.
+The next section presents such a method.
+This method works with the implicit representation $f(x,y)=0$ of a curve
+(as opposed to the parametric representation),
+thus allowing the use of tools from algebraic geometry.
+
+\section{The convex segment method of sorting}
+\label{co}
+
+The observation that motivates the new method is that 
+a convex segment can be sorted easily.
+Since every curve is a collection of convex segments,
+this suggests a divide and conquer strategy.
+A segment of a plane algebraic curve is {\em convex} if no line has more than 
+two distinct intersections with it.
+Alternatively, a planar segment is convex if it lies entirely on one side of
+the closed halfplane determined by the tangent line at any point of
+the segment \cite{Do}.
+The following theorem shows that sorting a convex segment is simple.
+
+\begin{theorem}
+\label{T-s}
+Let $p_{1},\ldots,p_{n}$ be points on a convex segment \arc{AB}, 
+and let H be the convex hull of A, B, $p_{1},\ldots,p_{n}$ (Figure~2).
+The order (from A to B) of $p_{1},\ldots,p_{n}$ is simply 
+the order (from A to B) of the vertices on the boundary of H.
+\end{theorem}
+\Heading{Proof:}
+\cite[p. 19]{jj}.
+\QED
+
+\begin{figure}[htbp]\vspace{2.25in}\label{2.3}\caption{The sorting of a convex 
+segment}\end{figure}  % Figure 2.3, p. 20
+
+Suppose that a curve can be decomposed into convex segments.
+Also suppose that the convex segments in this decomposition can be ordered
+so that it is simple to determine the predecessor and successor (if any) of each
+convex segment.
+Finally, suppose that, given a query point, 
+we can identify the convex segment 
+that contains the query point (point location in a convex decomposition).
+These key problems will be discussed in 
+Sections~\ref{s-dec} and \ref{s-loc}.
+The following algorithm shows how to sort a set of points S 
+along the segment \arc{AB}.
+
+\clearpage
+
+\begin{center}{\bf The convex segment method of sorting}\end{center}
+\begin{description}
+\item[{[Preprocessing]}] \ \ \ 
+\begin{description}
+\item[1.] Decompose the curve into convex segments
+	(say $S_{1}$, $S_{2}$, $\ldots$, $S_{k}$).
+\end{description}
+%
+\item[{[Locate first convex segment]}] \ \ \ 
+\begin{description}
+\item[2.]
+	Find the convex segment that contains A (say $S_{i} = \arc{\wo\wt}$).
+\item[3.]
+	Decide whether \arc{AB} leaves A along \arc{AW_{1}} or \arc{AW_{2}}
+	(say \arc{AW_{1}}).\footnote{If V is the vector at A that is given as 
+		part of the input, then \arc{AB} leaves A along \arc{AW_{1}} if 
+\label{alg-page}
+		and only if V points to the halfplane defined by \lyne{AW_{1}} 
+		that contains \arc{AW_{1}}.}
+\item[4.]
+	PresentConvSeg := \arc{AW_{1}} ;
+	SortedSet := $\emptyset$ ;
+	FoundB := false
+\end{description}
+%
+\item[{[Sort one convex segment at a time]}] \ \ \ 
+\begin{description}
+\item[5.]
+	Repeat until FoundB
+\begin{description}
+\item[(a)]
+	Find the points of S that lie on PresentConvSeg.\\
+	If B is one of these points, then FoundB := true.
+\item[(b)]
+	Sort these points along PresentConvSeg, 
+	using Theorem~\ref{T-s}.
+\item[(c)]
+	If not FoundB,\\
+	then SortedSet := Append(SortedSet,\{sorted points on PresentConvSeg\})\\
+	else \mbox{SortedSet := Append(SortedSet,\{sorted points on PresentConvSeg before B\})}
+\item[(d)]
+	PresentConvSeg := appropriate neighbouring segment of 
+	PresentConvSeg
+\end{description}
+\end{description}
+%
+\item[{[Output]}] \ \ \ 
+\begin{description}
+\item[6.]
+	Return SortedSet.
+\end{description}
+\end{description}
+
+The expense of this method is concentrated in the preprocessing phase, which
+is done once off-line. 
+The run-time operations (locating a point on a convex segment and
+sorting a set of points along a convex segment) are usually simple.
+Therefore, the efficiency of this method is very competitive.
+The coverage of the convex segment method is the entire set of algebraic curves,
+since it works directly from the implicit representation of the curve.
+
+\begin{example}
+Consider the sorting of points $P_{1}, \ldots, P_{6}$ 
+along the segment \arc{AB} of Figure~\ref{2.12a}.
+The curve is decomposed into convex segments by the dotted lines 
+(Section~\ref{s-dec}).
+A lies on \arc{W_{1}W_{8}} and
+the vector at A identifies that \arc{AW_{1}} is the first convex segment.
+There are no points on \arc{AW_{1}}, so we move on.
+The next convex segment is \arc{\wo\wt}.
+Only $P_{1}$ lies on \arc{\wo\wt} and it becomes the first element of the 
+sorted list.
+We jump to the next convex segment \arc{W_{2}W_{3}} and
+sort the two points $P_{2}$ and $P_{3}$ 
+by creating the convex hull of $W_{2}$, $W_{3}$, $P_{2}$, and $P_{3}$.
+$P_{2}$ and $P_{3}$ are added to the global sort.
+We move on to the next convex segment \arc{W_{3}W_{4}}, and then \arc{W_{4}W_{5}}.
+The presence of B indicates that this is the last convex segment.
+Upon sorting B and $P_{4}$, $P_{4}$ is discarded because it comes after B.
+The final sorted list is $P_{1},P_{2},P_{3}$.
+\end{example}
+
+\begin{figure}[htbp]\vspace{2.75in}\caption{Sorting a curve by convex segments}\label{2.12a}\end{figure}
+% picture revised from Figure 2.10 of thesis in the way outlined in my thesis copy
+
+It remains to discuss how a curve can be decomposed into convex segments and
+how a point can be located in this convex decomposition.
+These two problems, which are at the heart of the convex segment method 
+of sorting, are solved in the following two sections.
+
+\section{Convex decomposition of a curve}
+\label{s-dec}
+%
+The decomposition of an object into simple objects is an important theme
+in computational geometry.
+Decomposition proves to be particularly useful in divide-and-conquer algorithms, 
+since simple objects are easily conquered.
+There has been a good deal of work on the decomposition of 
+(simple, multiply connected, or rectilinear) polygons into simple components
+(e.g., triangles \cite{CI,G,H,T}, quadrilaterals \cite{S}, 
+trapezoids \cite{As}, convex polygons  \cite{cd,tm}, and star-shaped 
+polygons \cite{Av}), sometimes with added criteria (e.g., minimum decomposition 
+\cite{cd,keil}, minimum covering \cite{O}, no Steiner points \cite{keil}).
+However, all of this work has been in the polygonal (or at best polyhedral) 
+domain.
+The decomposition of a plane algebraic curve of arbitrary degree into convex 
+segments is an extension of decomposition to the curved world.
+
+A version of Bezout's Theorem states that two irreducible plane algebraic curves 
+of degree $m$ and $n$ have exactly $mn$ intersections (properly counted),
+unless the curves are identical \cite{walker}.
+Therefore, all plane algebraic curves of degree one (lines) and two (conics) 
+are already convex.
+For the convex decomposition of curves of degree three and higher, the 
+singularities and points of inflection are instrumental.
+A {\em singularity} of the curve $f(x,y)=0$ is a point P of the curve
+such that $f_{x}(P) = f_{y}(P) = 0$ (where $f_{x}$ is the derivative of $f$ with
+respect to $x$).
+It is a point where the curve crosses itself or changes direction sharply.
+A nonsingular point is also called a {\em simple} point.
+A {\em point of inflection} is a simple point P of the curve
+whose tangent has three or more intersections with the curve at P.  
+(It is also a point of zero curvature.)
+We restrict our attention to points of inflection P such that P's tangent 
+has an odd number of intersections with the curve at P, which we call
+\label{restriction}
+{\em flexes} for short.
+Fundamental in algebraic and differential geometry, singularities and flexes
+form a skeleton of the curve and can be used in many useful ways.
+(For example, singularities can be used to parameterize a plane algebraic curve 
+\cite{abba3}.)
+Their use in convex decomposition underlines their importance to
+computational geometry of higher degrees.
+
+The tangents at the singularities and flexes of a curve form an arrangement 
+of lines that subdivide the plane of the curve into several regions 
+(Figures~\ref{2.12a}-\ref{2.8}).
+The regions, which are closed and two-dimensional, are called {\em cells},
+and the entire collection of cells is called a {\em cell partition} of the plane.
+For example, the cell partition defined by the curve of Figure~\ref{2.8} consists of
+four unbounded cells.
+The line segments that bound a cell are called {\em (cell) walls} and are part of the
+cell.
+
+The tangents also split the curve into several segments.
+The following theorem establishes that each of these segments is convex.
+
+\figg{2.8}{Convex segmentation of limacon of Pascal}{1.75in}
+% Figure 2.8(a), p. 27
+
+\clearpage
+
+\begin{theorem}
+\label{deke}
+The tangents of the singularities and flexes of a plane algebraic curve slice
+the curve into convex segments.  That is, if \arc{PQ} is a nonconvex 
+segment, then some tangent of a singularity or flex will intersect 
+\arc{PQ}.\footnote{The simple points at which a singularity/flex 
+	tangent touches, but does not cross, the curve are redundant and should 
+	not be treated as convex segment endpoints in the decomposition.}
+\end{theorem}
+%
+% \figg{2.9}{\wt\ should be ignored and this should be treated as a 
+% single convex segment \arc{\wo W_{3}}}{.1in}  % thesis, 2.9
+%
+\figg{2.7}{(a) \xotha\ and R (b) travelling from \xo\ to \seg{\xo\xth}}{2.25in}
+% Figure 2.6(b) and Figure 2.7, pp. 25-6
+% only need 1.75 inches for (c) if we have to split it off
+%
+\ifFull
+\Heading{Proof:}
+
+Let \arc{PQ} be a nonconvex segment of an algebraic curve.
+Assume without loss of generality that \pq\ does not contain a singularity or 
+a flex.
+It can be shown that there exists a line L that crosses \pq\ at three 
+(or more) distinct points \cite[p. 117]{jj}.\footnote{Already, by the definition
+	of convexity, there must exist a line that intersects \arc{PQ} three
+	(or more) times.}
+% by Lemma~\ref{threecross} 
+Let \xo, \xt, and \xth\ be three of these points, such that $\xt \in \xotha$ 
+and \mbox{$\xotha \cap L = \{ \xo,\xt,\xth\}$}.
+\xotha\ does not change its direction of curvature, since there is no 
+singularity or flex on \pq.
+\xotha\ is not a line segment, otherwise Bezout's Theorem would imply that
+the algebraic curve that contains \xotha\ is a line, which it cannot be since
+it contains a nonconvex segment.
+Therefore, it can be assumed without loss of generality that \xotha\ looks like 
+Figure~\ref{2.7}(a).
+Let R be the region bounded by \xotha\ and \seg{\xo\xth}.
+We will show that R contains a singularity or a flex.
+This will complete the proof, since the tangent
+of a point inside R must intersect $\xotha \subset \pq$ at least once.
+(The tangent must cross the boundary of R twice, and at most one of these
+intersections can be with 
+\seg{\xo\xth}.)
+The curve lies inside of R as it leaves \xotha\ from \xo\ and outside 
+of R as it leaves \xotha\ from \xth.
+Therefore, the curve must cross the boundary of R after it leaves \xotha\
+from \xo, either because it must join with \xth\ (if the curve is bounded)
+or because an infinite segment of an algebraic curve
+cannot remain within a bounded region (if the curve is unbounded) \cite[p. 116]{jj}.
+The curve cannot intersect the \xotha\ boundary of R, since
+\mbox{$\xotha \subset \pq$} is nonsingular by assumption.
+Therefore, the curve must cross \seg{\xo\xth} after it leaves
+\xotha\ from \xo.
+
+As the curve leaves \xotha\ from \xo,
+it lies on the opposite side of \xo's tangent from \seg{\xo\xth}.
+Therefore, after the curve leaves \xotha\ from \xo\ and before it leaves
+R, the curve must cross \xo's tangent inside of R, in order to reach 
+\seg{\xo\xth}.
+In order to cross over \xo's tangent, the curve
+must cross itself or change its curvature inside of R (Figure~\ref{2.7}(b)),
+otherwise it will spiral around inside R forever.
+Therefore, R contains a singularity or a flex.
+\QED
+\else
+\Heading{Sketch of Proof:}
+
+Assume w.l.o.g. that \arc{PQ}\ does
+\marginpar{(*)}
+not contain a singularity or flex.
+Since \arc{PQ}\ is not convex, we can find a line that crosses it at
+three distinct points: $x_{1}, x_{2}, x_{3}$.
+By (*), \arc{x_{1}x_{3}}\ must be a spiral.
+Consider the region R bounded by \arc{x_{1}x_{3}}\ and \seg{x_{1}x_{3}}.
+It is sufficient to show that R contains a flex or singularity S,
+since then S's tangent must cross the \arc{x_{1}x_{3}}\ boundary of R.
+It can be shown that the curve must enter R as it leaves $x_{1}$ and
+must eventually leave R via \seg{x_{1}x_{3}}.
+However, in order to do this, the curve must cross itself or change its
+curvature inside of R.
+\QED
+\fi
+
+We include here a word about robustness.
+Consider the accuracy required in the computation of the singularities, flexes, 
+and their tangents in order to guarantee a true division into convex segments.
+Suppose that, in the proof of Theorem~\ref{deke}, the tangent of a 
+singularity/flex inside the region R is used to split a nonconvex segment.
+Any line through a point in the interior of R would work equally well in splitting
+the nonconvex segment.
+Thus, in this case the method is robust under slight errors in tangents, singularities,
+and flexes.
+The other case is if a nonconvex segment S is split into convex segments by a 
+singularity or flex lying on S. 
+The computed convex segment will differ from the actual convex segment by the same
+amount as the computed flex (say) differs from the actual flex.
+The only points that might be treated improperly are those that lie on the segment
+between the computed and actual flex.
+In other words, points that are within (some function of) machine precision 
+of each other cannot be distinguished by the method and must be considered 
+equivalent.
+This equivalence of points within machine precision is inherent to any sorting 
+algorithm.
+
+Theorem~\ref{deke} does not solve the convex decomposition problem,
+because it yields a confused collection of endpoints of convex segments, 
+not a collection of convex segments.
+The more challenging step of pairing up the endpoints remains, where
+two endpoints are {\em partners} if they define a convex segment of the 
+decomposition.
+This pairing problem will be attacked in Sections~\ref{ssp} 
+and \ref{sspII}, but first the collection of convex segments must be 
+refined.
+
+\subsection{Refinement of convex segments I: Singularities}
+\label{sec-refine1}
+
+Many of the endpoints of the convex segments created by Theorem~\ref{deke} 
+are singularities.  However, singular endpoints
+cause problems in pairing.\footnote{Unless otherwise noted, in the rest of the paper
+	the term {\em endpoint} will be synonymous with 
+	`an endpoint of one of 
+	the convex segments created by the cell partition of a curve'.
+	Once we have discussed how to refine convex segments, we shall
+	assume that all convex segments are refined and subsequently
+	the term {\em endpoint} will refer to 
+	`an endpoint of one of the refined convex segments', while
+	{\em original endpoint} will refer to
+	an endpoint of a convex segment before refinement.}
+Consider a convex segment whose two endpoints are the same point,
+which might occur around a singularity (Figure~\ref{2.8}).
+This situation is to be avoided, since pairing will turn out to be easier if 
+the two endpoints of a convex segment are different.
+It is also possible for a singularity to have more than two
+partners and, in particular, two partners in the same cell (e.g., singularity 
+A in Figure~\ref{2.12}).
+This situation is also to be avoided, since it is easier to find the partner 
+of an endpoint in a cell if this partner is unique.
+A third problem with singular endpoints is that the ordering of points about
+a singularity can be ambiguous.
+Does $P_{2}$ or $P_{3}$ follow A in Figure~\ref{2.11}(a)?
+What is the order of the points in Figure~\ref{2.11}(b): 
+$S, P_{1}, P_{2}, P_{3}, S$ or $S, P_{3}, P_{2}, P_{1}, S$?
+
+\figg{2.11}{Ambiguity about a singularity}{2.5in}
+% Fig 2.11 of thesis, with added S
+
+As a result of these problems, all convex segments with singular endpoints 
+will be replaced by shorter segments with nonsingular endpoints.
+This is only a renaming procedure: although a segment $\arc{AB}$ may be replaced
+by a segment $\arc{A'B'} \subset \arc{AB}$,
+\arc{A'B'} still represents the convex segment $\arc{AB}$.
+This is best seen in the next phase, point location.
+Singular endpoints pose the same problems for locating points on convex segments as they
+do for pairing endpoints.
+However, although we work with $\arc{A'B'} \subset \arc{AB}$, if a point $x$ lies 
+on $\arc{AB} \setminus \arc{A'B'}$ (a segment of the curve that
+one might wrongly worry has been cut out of the curve),
+$x$ is still located on the convex segment named $\arc{A'B'}$.
+
+The endpoint $A'$ that replaces $A$ is called a {\em refined} endpoint,
+while $A$ is called an {\em original} endpoint.
+A link is maintained between $A'$ and $A$.
+Before refinement, a convex segment is called an {\em original} convex segment.
+After refinement (both of any singular endpoints and of any infinite parts as discussed in 
+the next subsection), a convex segment is called a {\em refined} convex segment.
+Note that many segments will not require refinement, so their refined segments
+will be identical to their original segments.
+
+The process of replacing convex segments with singular endpoints
+by convex segments with nonsingular endpoints 
+is achieved by replacing singularities by nonsingular points.
+For each branch of the curve that passes through a singularity, 
+a pair of nonsingular points are found: one on either side of (and usually close to) 
+the singularity.
+As we shall see, the exact position of the nonsingular point is not important and
+is quite flexible.
+
+\begin{example}
+\label{eg-pseudo}
+The original convex segments \arc{PA}, \arc{AQ}, \arc{RA}, and \arc{AS}
+of Figure~\ref{2.12} are replaced by the refined convex segments
+\arc{PV_{1}}, \arc{V_{2}Q}, \arc{RW_{1}}, and \arc{W_{2}S}.
+This is done by refining the singularity $A$ into four points:
+$V_{1}$ and $V_{2}$ from one branch, and $W_{1}$ and $W_{2}$ from the other.
+A link is maintained between $V_{1}$ and $V_{2}$ (as well as between \wo\ and \wt),
+so that it is clear that $\arc{PV_{1}}$ is followed by $\arc{V_{2}Q}$.
+Note that this refinement makes it clear that Q (not S) must follow P.
+\end{example}
+
+\figg{2.12}{The refinement of a singularity}{3in}
+% Figure 2.12(b) of thesis,p. 35
+
+Consider the problem of finding two points on each branch of a singularity, one on either 
+side of the singularity.
+We would like to do this by tracing \cite{bhhl} a small distance along the branch
+in both directions from the singularity.
+However, there is no reliable way of tracing along a branch as it passes
+through a singularity, because the other branches create too much confusion.
+Therefore, each branch of the singularity must be isolated so that it can 
+be traced robustly.
+This isolation is accomplished by blowing up the curve at the singularity by 
+a series of quadratic transformations \cite{bhhl,walker,abhy}, as follows.
+(Section~\ref{ssc}, on the computation
+of singularities and flexes, is relevant to this discussion.)
+
+The first step in blowing up a singularity is to translate it to the 
+origin.\footnote{Since the quadratic transformation does not map the line $x=0$ 
+	properly, the curve should also be rotated if necessary so that it is 
+	not tangent to $x=0$ at the origin (see \cite{jj}).}
+%	This is ensured by applying a nonsingular linear transformation 
+%	$x = \alpha\hat{x}+\beta\hat{y}$ and $y = \delta\hat{x} + \gamma\hat{y}$, 
+%	such that neither $\alpha\hat{x}+\beta\hat{y}$ nor 
+%	$\delta\hat{x} + \gamma\hat{y}$ are tangents to the curve at the origin.
+Let the new equation of the curve be $f(x,y)=0$.
+A quadratic transformation is now applied to the curve.
+The {\em (affine) quadratic transformation} $x = x_{1},\ y = x_{1}y_{1}$
+\cite{abhy} has three important properties:
+\begin{itemize}
+\item
+It maps the origin to the entire $y_{1}$-axis and the rest of 
+the $y$-axis to infinity: $y_{1} = \frac{y}{x}$ so $(0,b)$ maps to 
+$(0,\frac{b}{0})$, which is a point at infinity unless $b=0$.
+\item
+It is one-to-one for all points $(x,y)$ with $x \neq 0$.
+\item
+$y = mx$, a line  through the origin, is mapped to the horizontal line $y_{1}=m$:\\
+$y=mx \rightarrow  x_{1}y_{1} = mx_{1}  \rightarrow  y_{1}=m$.
+\end{itemize}
+Thus, a quadratic transformation maps distinct tangent directions of the
+various branches of $f$ at the origin to different points on the 
+{\em exceptional line} $x_{1} =0$.
+The intersections of the transformed branches with the exceptional line
+correspond to the transformed points of the origin (Figure~\ref{2.17}).
+If a point of $f(x_{1},x_{1}y_{1})$ on the exceptional line is singular, 
+then the procedure is applied recursively (Figure~\ref{18}).
+The following lemma establishes that the various branches of the curve 
+in the neighbourhood of the singularity eventually get transformed to separate 
+branches.
+
+\begin{lemma}[{\cite{abhy,abba3,walker}}]
+A singularity can be reduced to a number of simple points by 
+a finite number of applications of the quadratic transformation.
+An ordinary singularity can be reduced to simple points by a 
+single quadratic transformation, where a singularity of multiplicity 
+$r$ is ordinary if its $r$ tangents are all distinct.
+\end{lemma}
+
+\figg{2.17}{(a) node and (b) its quadratic transformation}{1.75in}
+% Figure 2.13, p. 38
+
+\figg{18}{(a) the original singularity (b) after one quadratic transformation
+(c) after a second transformation: the original singularity successfully 
+transformed into two simple points}{5.25in}
+% Figure 2.14, p. 39
+
+To summarize, each singularity is translated to the origin and transformed 
+into a set of nonsingular points through the application of a series of quadratic 
+transformations.  Each branch of the transformed curve intersects the 
+exceptional line in a simple point, so this image branch can be traced
+from the image singularity without confusion.
+Therefore, upon each image branch, two points are found by tracing a 
+short distance in either direction from the image singularity.
+Finally, these points are mapped back to the original curve
+to become refined endpoints, replacing the singularity.
+These new endpoints clarify the branch connectivity at the singularity
+and simplify the job of pairing.
+
+% *******************************************************************
+
+The renaming of singularities has only two purposes: to clarify branch
+connectivity at the singularity and to simplify pairing.
+Since neither of these purposes depends on the exact position of the refined endpoints,
+the position of refined endpoints is quite flexible.
+\label{page-flex}
+In particular, one must only ensure that no convex segment is refined away.
+Thus, during the refinement of a convex segment \arc{AB} through the refinement
+of the singularity $A$, one must ensure that $A$ is replaced by 
+$A' \in \arc{AB}$.
+	% \footnote{This is only a concern if
+	% 	\arc{AB} is very short, since $A'$ is always chosen close to $A$.}
+Suppose $A \neq B$.
+Certainly $A' \in \arc{AB}$ if the trace to $A'$ remains inside
+the circle of radius $\frac{||A - B||}{2}$ centered at $A$.
+Therefore (not yet knowing $B$), we restrict the trace to the circle
+of radius $\frac{||A - E||}{2}$ centered at $A$, where $E \neq A$ is the closest endpoint
+to $A$ that is not a refined endpoint associated with $A$.\footnote{The consideration of 
+	refined endpoints
+	associated with $A$ forces $A'$ artificially close to $A$.
+	Note that $B$ is not 
+	a refined endpoint associated with $A$, since \arc{AB} 
+	existed before the refinement of A began.}
+Note that traces can be reversed and made arbitrarily short.
+Now suppose $A = B$ (i.e., \arc{AB} is a loop).
+In this case, $A$ and $B$ are associated with different images 
+of the singularity on the image curve, say $i_{1}$ and $i_{2}$ respectively, and 
+the image of \arc{AB} on the image curve is \arc{i_{1}i_{2}}.
+Certainly $A' \in \arc{AB}$ if the image of $A'$ is on \arc{i_{1}i_{2}}.
+Therefore, we restrict the trace on the image curve to the
+inside of the circle of radius
+$\frac{||i_{1} - i_{j}||}{2}$ centered at $i_{1}$, 
+where $i_{j} \neq i_{1}$ is the closest image of the singularity to $i_{1}$.
+\Comment{
+	after tracing a short distance from image($A$) to image($A'$) on the image curve and
+	mapping back to the curve, if $A'$ lies too far from $A$, we return to the image curve
+	and reverse the trace until it is short enough.  
+	Note that traces can be made arbitrarily short.
+}
+
+\Comment{ (from above paragraph)
+Thus, $\arc{AB}$ is a loop and the two sides of this loop are bounded by two tangents at $A$,
+say $T_{1}$ and $T_{2}$.
+Let $L$ be the line that bisects $T_{1}$ and $T_{2}$.
+We can restrict $A'$ to $\arc{AB}$ by restricting it to the appropriate side of $L$ (Figure).
+}
+
+\subsection{Refinement of convex segments II: Infinite segments}
+\label{sec-refine2}
+
+Convex segments with singular endpoints are not the only ones that must
+be refined: infinite convex segments are also problematic.
+The pairing process is simplified if each convex segment has two endpoints,
+but an infinite convex segment has only one endpoint.
+Therefore, a second endpoint is added to each infinite segment, as follows.
+Once again, this is only a renaming procedure.
+
+We shall artificially bound each unbounded cell by a collection of line segments,
+called {\em artificial (cell) walls} (Figure~\ref{3.9}).
+These artificial walls are chosen carefully so that they only intersect 
+infinite convex segments (if any) in the cell, and each of these exactly once 
+(unless the infinite segment does not touch the original cell boundary at all
+and thus proceeds
+to infinity at both ends, in which case two intersections are allowed).
+The walls should also be chosen so that the resulting artificially-bounded cell 
+is a convex polygon.
+The creation of artificial walls that satisfy all of these properties
+is discussed in the appendix (Section~\ref{sec-caa}).
+
+\figg{3.9}{\seg{PQ} and \seg{QR} are artificial walls}{2.75in}
+% Figure 3.9, p. 64 of thesis
+
+After every unbounded cell has been artificially bounded, a second endpoint
+is added to each infinite convex segment by making an {\em (artificial) endpoint} 
+at its point of intersection with an artificial wall (Figure~\ref{3.egg}).
+Subsequently, each infinite convex segment is represented by a finite convex
+segment with two endpoints.
+Once convex segments have been identified by pairing endpoints, 
+a pair that contains an artificial endpoint will be recognized as an infinite convex 
+segment.\footnote{A pair that contains two artificial endpoints will be recognized as 
+	an entire connected component that does not cross any of the singularity/flex 
+	tangents. See the discussion of nude components in Section~\ref{sec-pI}.}
+
+After refining both singularities and infinite segments, there are 
+three types of endpoint: 
+(a) endpoints defined by the original cell decomposition, called original
+endpoints: those that are nonsingular are still endpoints of refined
+segments;
+(b) endpoints refined from singularities, called refined endpoints,
+and (c) endpoints added to infinite segments, called artificial endpoints.
+From now on, when we speak of all of the endpoints of the decomposition, 
+we are referring only to the collection of 
+nonsingular original, refined, and artificial endpoints, 
+unless otherwise stipulated.
+Singularities are no longer considered to be endpoints.
+After refinement, endpoints and cells assume the following normal form:
+\begin{quote}
+\begin{description}
+\item[(i)]
+	 every endpoint has exactly two partners
+\nopagebreak
+\item[(ii)]
+	 every cell is a bounded polygon
+\end{description}
+\end{quote}
+Refinement will not only make the pairing of endpoints easier.
+It will also create
+a cleaner set of convex segments that better reflects the curve.
+In particular, due to the endpoint normal form, the pairing of endpoints 
+will create a collection of convex segments that can be ordered very easily.
+
+\subsection{Pairing of endpoints I: Properties of the partner}
+\label{ssp}
+
+We are now ready to show how to pair the endpoints of convex segments.
+Consider a convex segment in cell C and an endpoint E of this segment.
+E's partner in C must obviously be another endpoint in C.
+Therefore, the determination of partners in all single-segment cells is trivial.
+Corollary~\ref{Cp} will present other conditions that E's partner must satisfy
+and Theorem~\ref{Tpner} will show how to isolate the partner if several endpoints
+satisfy all of these conditions.
+In preparation, some terminology must be introduced and a crucial lemma proved.
+\\[3pt]
+%
+\figg{3.2}{The inside of P's tangent}{1.75in}
+	% Figure 3.2, p. 56, originally 2.25in
+% \figg{3.3}{E is the outside wallpoint of P's wall w.r.t.\ C}{1.75in}
+%
+\Heading{Definition}:
+Let P be a point on a curve F, and let C be the cell (or one
+of the cells) of F's cell partition that contains P 
+(Figures~\ref{3.2} and \ref{3.2.5}).
+If P is a singularity or flex, then the 
+{\em inside of P's tangent} w.r.t.\ (with respect to) C is the 
+halfplane bounded by P's tangent that contains C (which is unambiguous, because P's 
+tangent defines a wall of C).  
+If P is neither a singularity nor a flex, 
+the inside of P's tangent is the halfplane bounded by P's tangent that 
+contains all of the curve in the immediate neighbourhood of P.\footnote{The 
+	inside of P's tangent
+	can be determined by tracing from P.
+	The trace is restricted to C,
+	in order to guarantee that it stays on the same side of the tangent.}
+The inside includes the tangent, while the strict inside does not.
+
+\figg{3.2.5}{P faces both $Q_{1}$ and $Q_{2}$ with respect to C}{1.75in}
+	% Figure 3.4, p. 58, originally 2in
+
+Let P be a flex that lies on the wall W of cell C, and 
+let $P_{\epsilon}$ be a point of the curve inside C at distance
+$\epsilon > 0$ from P.
+($P_{\epsilon}$ may be found by tracing the curve into C from P.)
+The {\em outside wallpoint} of W w.r.t.\ C is the endpoint of W that 
+lies outside of $P_{\epsilon}$'s tangent, for $\epsilon$ small (E in Figure~\ref{3.2.5}).
+
+Let P and Q be points on a curve.
+If P is not a flex, then P {\em faces} Q if Q lies on the inside of 
+P's tangent (Figure~\ref{3.2}).
+If P is a flex lying on a wall of cell C, then
+P faces Q w.r.t.\ C if (1) Q lies on the strict inside of P's tangent 
+w.r.t.\ C or (2) Q lies on P's tangent and on the opposite side of P from 
+the outside wallpoint of P's wall w.r.t.\ C (Figure~\ref{3.2.5}).
+
+\begin{notation}
+\#\{S\}\ is the number of elements in the set S and
+\seg{xy} is the line segment strictly between x and y.
+It is important to note that 
+\seg{xy} does not include its \mbox{endpoints x and y}.
+\end{notation}
+
+The following lemma captures the fact that, if \seg{\x\y} is a line segment 
+satisfying some simple properties, the intersections of the curve with 
+\seg{\x\y} must pair up into couples that face each other.
+
+\begin{lemma}
+\label{Ls}
+Consider the cell partition of a curve F.
+Let \x\ and \y\ be two nonsingular points of a convex segment in the cell C.
+Then
+\begin{enumerate}
+\item The curve crosses\footnote{If P is a point of intersection of the curve 
+	with \seg{\x\y}, then the curve {\em crosses} \seg{\x\y} at P if it lies 
+	on both sides of \seg{\x\y} in any neighbourhood of P; otherwise it 
+	only touches \seg{\x\y} at P.}
+\seg{\x\y} at an even number of points, ignoring singularities.
+\item $\#\{P \in \seg{\x\y} \cap F: P \mbox{ faces \x\ w.r.t.\ C}\} = 
+\#\{P \in \seg{\x\y} \cap F: P \mbox{ faces \y\ w.r.t.\ C}\}$
+\item $\forall \alpha \in \seg{\x\y}$,\ \ \nopagebreak
+$\#\{P \in\seg{\x\alpha}\cap F: P \mbox{ faces \x\ w.r.t.\ C}\} \leq 
+\#\{P \in \seg{\x\alpha}\cap F: P \mbox{ faces \y\ w.r.t.\ C}\} $
+\end{enumerate}
+\end{lemma}
+%
+\begin{example}
+Figure~\ref{4} is a hypothetical example for Lemma~\ref{Ls}.
+The curve F crosses \seg{\x\y} an even number of times.
+$\{ P \in \seg{\x\y} \cap F:\mbox{ P faces \x\ \} = \{}P_{2},P_{5},P_{6}\}$
+is of the same size as \\
+$\{ P \in \seg{\x\y} \cap F:\mbox{ P faces \y } \} = \{P_{1},P_{3},P_{4}\}$.
+Moreover,
+$\{ P \in \seg{\x\alpha} \cap F: \mbox{ P faces \x } \} = \{P_{2}\}$
+is smaller than
+$\{ P \in \seg{\x\alpha} \cap F: \mbox{ P faces \y } \} = \{P_{1},P_{3},P_{4}\}$.
+\end{example}
+%
+\figg{4}{An illustration of Lemma 2}{2.25in}
+%\begin{figure}[htbp]\vspace{2.25in}\caption{An illustration of Lemma~\ref{Ls}}\label{4}\end{figure}
+% Figure 3.5, p. 59
+%
+Condition~3 of Lemma~\ref{Ls} may look ominous, but it is not difficult to test.  
+It is only shorthand for the fact that
+the number of intersections that face \y\ must always dominate the number that
+face \x.  
+In other words, one need only calculate information at the points
+of intersection $P \in \seg{\x\y} \cap F$, not at an infinite number of 
+$\alpha \in \seg{\x\y}$.
+%
+\Heading{Proof of Lemma~\ref{Ls}:}
+
+Consider the closed region $R_{\x\y}$ bounded by \seg{\x\y}\ and \arc{\x\y}.
+% (Figure~\ref{3.3.5}).
+Since \arc{\x\y} lies in the cell C and C is a convex polygon, \seg{\x\y} 
+must also lie in C.
+Therefore, again by convexity, $R_{\x\y}$ must lie in C.
+% \figg{3.3.5}{The region $R_{\x\y}$}{1.5in}
+%
+Since \x\ and \y\ are nonsingular and the rest of \arc{\x\y} lies in the
+interior of the cell, \arc{\x\y} does not contain a singularity.
+Therefore, the curve can only cross into $R_{\x\y}$ through \seg{\x\y}.
+If the curve enters $R_{\x\y}$, then it must also leave, since an infinite 
+segment cannot remain within a bounded region and an algebraic curve of finite
+length is closed (viz., the curve cannot stop short in the middle of $R_{\x\y}$).
+We claim that the point of departure $D$ must be distinct from the point of 
+entry $E$, unless all of the tangents at $D=E$ are \lyne{XY}, as in 
+Figure~\ref{3.ex}.
+In particular, if $D=E$ and some tangent at $D$ is not \lyne{XY}, 
+then at least one of the tangents of the singularity $D$ 
+will cross into $R_{\x\y}$ and form a wall of the cell partition which will 
+split $R_{\x\y}$ in two, contradicting the fact that all of $R_{\x\y}$ 
+lies in the same cell.
+Therefore, with the exception of the special singularities of 
+Figure~\ref{3.ex}, the crossings of \seg{\x\y} by the curve occur in pairs,
+called {\em couples}.
+This establishes condition (1) of the lemma.
+
+\figg{3.ex}{The only type of singularity that can lie on \seg{\x\y} }{1.5in}
+% Figure 3.7, p. 61
+
+Consider condition (2).
+The special singularities of Figure~\ref{3.ex} (as well as the points where
+the curve only touches \seg{XY}) can be ignored during 
+the consideration of conditions (2) and (3), since they face both \x\ and 
+\y\ and contribute the same amount to the left-hand side and right-hand side 
+of the expressions of conditions (2) and (3).
+Therefore, we can concentrate on the remaining crossings of \seg{\x\y}:
+the distinct couples.
+Let $A,B\in \seg{\x\y}$ be a couple and assume, without loss of generality, 
+that A lies closer to \x\ than B does.
+\arc{AB} is a convex segment since it lies within a cell of the cell
+partition.
+Therefore, A and B face each other (w.r.t.\ cell C).
+Since A faces B, A faces \y.
+Similarly, since B faces A, B faces \x.
+Therefore, one member of each couple faces \x\ and the other faces \y,
+yielding condition (2).
+Moreover, the point of a couple that faces \y\ (A) is closer to \x\ than the point 
+that faces \x\ (B), yielding condition (3).
+\QED
+%
+\begin{corollary}
+\label{Cp}
+Let $W_{1}$ be an endpoint of a convex segment that lies in the cell C of the cell partition of a curve F.
+$W_{1}$'s partner $W_{2}$ in C must satisfy the following properties:
+\begin{enumerate}
+\item 
+	$W_{1}$ and $W_{2}$ face each other (w.r.t.\ C)
+\item
+	$\#\{P \in \seg{W_{1}W_{2}} \cap F: P \mbox{ nonsingular,
+	F crosses } \seg{\wo\wt} \mbox{ at } P\} = 2k$, $k \in {\cal Z}$.
+\item 	
+	$\#\{P \in \seg{W_{1}W_{2}} \cap F: P \mbox{ faces \wo\ (w.r.t.\ C)}\} = 
+	 \#\{P \in \seg{W_{1}W_{2}} \cap F: P \mbox{ faces \wt\ (w.r.t.\ C)}\}$
+\item
+	$\forall \alpha \in \seg{\wo\wt}$,\ \ \nopagebreak
+	$\#\{P \in\seg{\wo\alpha}\cap F: P \mbox{ faces \wo\ }\} \leq 
+ 	 \#\{P \in\seg{\wo\alpha}\cap F: P \mbox{ faces \wt\ }\} $
+\end{enumerate}
+\end{corollary}
+
+\noindent The conditions of Corollary~\ref{Cp} will often isolate the partner.
+
+\begin{example}
+Consider the cell partition of Figure~\ref{3.12} and the cell containing
+the convex segments \arc{\wo\wt} and \arc{W_{3}W_{4}}.
+Suppose that we wish to find the partner of \wo.
+$W_{3}$ violates condition (1) and $W_{4}$ violates condition (2), 
+so \wt\ must be \wo's partner.
+\end{example}
+
+\begin{figure}[htbp]\vspace{2.25in}\caption{\wt\ must be \wo's partner}\label{3.12}\end{figure}
+%Figure 3.12, p. 69
+
+We add two practical notes to Corollary~\ref{Cp}.
+In the sequel,
+there will be many situations in which the conditions of Corollary~\ref{Cp}
+must be checked.
+During this computation, it is useful to keep in mind that the exact location of the
+refined endpoints is not important (see page~\pageref{page-flex}).
+This can be used to improve the ease or robustness of pathological computations.
+For example, if many refined endpoints are clustered close together about a singularity,
+it may be useful to spread these endpoints out.
+
+The second note also concerns the checking of conditions in Corollary~\ref{Cp}.
+Conditions~3 and 4 remain true 
+if $\#\{P \in \seg{W_{1}W_{2}} \cap F:\ \mbox{$<$cond$>$} \}$ 
+is replaced by $\#\{P \in \seg{W_{1}W_{2}} \cap F:\ \mbox{$<$cond$>$},
+P \mbox{ nonsingular},\\ \ P \mbox{ is a crossing}\}$.  
+Moreover, the restriction to nonsingular crossings does not change any of the 
+proofs that
+use this corollary.
+For conciseness, we do not use the restriction.
+However, for practical reasons it is advisable to use it,
+because of the large potential for error in computing the direction that
+singularities on $\seg{\wo\wt}$, as well as points that touch $\seg{\wo\wt}$, face.
+(In theory, these singularities and touching points face both $\wo$ and $\wt$.)
+
+\begin{figure}[htbp]\vspace{3.5in}\caption{Sending refined points to the boundary}\label{3.J}\end{figure}
+% Figure 3.10, p. 66 of dissertation
+
+\subsection{Pairing of endpoints II: Distinguishing between candidates}
+\label{sspII}
+
+The remaining question in endpoint-pairing is how to find the partner 
+of an endpoint $\wo$ in C if several endpoints in C satisfy all of the 
+conditions of Corollary~\ref{Cp}.  
+This will be done by sorting the candidates about the cell boundary
+(Theorem~\ref{Tpner}).
+Unfortunately, the refinement of singularities moved some of the endpoints 
+of convex segments into the interior of cells.  
+Therefore, in order to allow sorting about the boundary, we must associate 
+a point $W'$ on the cell boundary with each refined endpoint W, as follows
+(Figure~\ref{3.J}).
+If $W \neq \wo$,  then $W'$ is the intersection of the ray \ray{\wo W} 
+with the cell boundary.
+%
+% \footnote{One might fear that the
+% 	distance of a refined endpoint W from its singularity would affect the 
+%	location of $W'$, and thus the behaviour of theorems that use $W'$,
+%	namely Theorem~\ref{Tpner}.
+%	However, the specific position of a refined endpoint upon its convex segment
+%	is never important in Theorem~\ref{Tpner}: the fact that W lies somewhere 
+%	on the appropriate convex segment is sufficient.}
+%
+If $W = \wo$, then $W'$ is one of the two intersections of \wo's tangent with
+the cell boundary: the one that lies on a tangent of the singularity
+from which \wo\ was derived.
+% we can assume that W1's tangent does hit T: simply ensure that singularity 
+% refinement does not move W1 too far from V
+For notational consistency, $W' = W$ if $W$ is not a refined endpoint.
+
+The following theorem shows how to find the partner of $\wo$ when Corollary~\ref{Cp} cannot.
+
+\begin{theorem}
+\label{Tpner}
+Let $\wo$ be an endpoint in cell C of the cell partition of a curve F,
+R(\wo) the set of endpoints
+in C that satisfy the conditions of 
+Corollary~\ref{Cp},
+%That is, $R(\wo)$ := \{endpoints \mbox{W $\neq \wo$} in cell C $\mid$\nopagebreak
+%\begin{enumerate}
+%\item W and \wo\ face each other (w.r.t.\ C) 
+%\item $\#\{P \in\seg{\wo W}\cap F: P \mbox{ faces \wo\ (w.r.t.\ C)}\}=$\\
+%$\#\{P \in \seg{\wo W}\cap F: P \mbox{ faces W (w.r.t.\ C)\} }$\nopagebreak
+%\item for all $\alpha \in \seg{\wo W}$, \\\nopagebreak
+%$ \#\{P \in\seg{\wo\alpha}\cap F: P \mbox{ faces \wo\ (w.r.t.\ C)}\} \leq$\\
+%$ \#\{P \in\seg{\wo\alpha}\cap F: P \mbox{ faces W (w.r.t.\ C)\} }  $
+%\}
+%\end{enumerate}
+%
+and S(\wo) the set of endpoints in R(\wo) that lie {\em strictly} inside of \wo's 
+tangent.
+% \footnote{Recall that
+%	`endpoints' refers to all nonsingular original, refined, and artificial endpoints.}
+There are two cases to consider in finding the partner of \wo.
+
+(a) Suppose that $S(\wo) \neq \emptyset$. 
+Let \mbox{$S'(\wo) := \{\ W':W \in S(\wo)\ \}$} and, 
+if \wo\ is not a flex, let $X \neq \wo '$ be the other intersection of \wo's 
+tangent with the cell boundary, otherwise let X be the outside wallpoint of \wo's 
+wall w.r.t.\ C (Figure~\ref{3.8A}).
+$\wo '$ and X split the cell boundary into two halves.
+Since every endpoint in $S'(\wo)$ will lie on the same half of the boundary,
+a sort of $S'(\wo)$ from $\wo '$ to X is well-defined.
+Let $S_{1}',S_{2}',\ldots,S_{p}'$ be the result of this sort
+(i.e., $S_{i}'$ is encountered before $S_{i+1}'$ in a traversal of the cell boundary 
+from $\wo '$ to X).
+The partner of \wo\ in C is $S_{p}$ (the endpoint associated with $S_{p}'$).
+
+(b) Suppose that $S(\wo) = \emptyset$, and 
+let T(\wo) be the set of endpoints in R(\wo) that lie on 
+the same wall as \wo.
+The partner of \wo\ in C is the element of T(\wo) that is closest to \wo.
+\end{theorem}
+
+\begin{figure}[htb]\vspace{2.1in}\caption{Partitioning the boundary in two halves}\label{3.8A}\end{figure}
+% Figure 3.11, page 68: switch the order to b,c,a
+
+\begin{example}
+Consider the computation of \wo's partner in Figure~\ref{3.egg}, 
+where \wo\ is the endpoint of an infinite convex segment.
+\mbox{$R(\wo) = S(\wo) = \{\wt,W_{3},W_{4}\}$} and
+\mbox{$S'(\wo) = \{\wt,W_{3},W_{4}'\}$}.
+The sorted order of $S'(\wo)$ along the boundary from $\wo '$ to X
+is $W_{3},W_{4}',\wt$, so \wt\ is the partner of \wo.  
+Since \wt\ is an artificial endpoint, \wo\ must be the endpoint of an 
+infinite convex segment.
+
+Consider the computation of the partner of \wo\ in Figure~\ref{3.8},
+where $S(\wo) = \emptyset$.
+$V_{1}$, $V_{2}$ and $V_{4}$ are ruled out by condition (1) of R(\wo),
+while $V_{3}$ and $V_{6}$ are ruled out by condition (2).
+Therefore, $T(\wo) = \{V_{5},W_{2}\}$.
+\wt\ is the closest element of T(\wo) to \wo, so it is \wo's partner.
+\end{example}
+
+\figg{3.egg}{The partner of \wo\ is \wt}{2.25in}
+% Figure 3.13, page 70
+
+\figg{3.8}{The partner of \wo\ is again \wt}{2.125in}
+% Figure 3.14, p. 71
+
+\Heading{Proof of Theorem~\ref{Tpner}:}
+A key lemma in this proof (as well as others) is Lemma~\ref{lem-645} of the appendix.
+The reader is urged to refer to this lemma and its proof when it is used below.
+
+(a) Suppose that $S(\wo) \neq \emptyset$.
+Let \wt\ be \wo's partner, and let \wwh\ be the boundary of the cell 
+from $W_{1}'$ to $W_{2}'$, such that $X \not\in \wwh$ (Figure~\ref{6}).
+%
+\figg{6}{\wwh\ is dotted}{2in}
+% (a) is Figure 3.15(a)  KEEP THIS EVEN THOUGH IT LOOKS SIMPLE: 
+% 	IT HELPS AS A REFERENCE FOR IMPORTANT THINGS IN THE PROOF
+% (b) is forge(a) (additional figure)
+% (c) is Figure 3.15(b)
+%
+It is sufficient to show that (i) $\wt ' \in S'(\wo)$ and (ii) $S'(\wo) \subset \wwh$.
+Indeed, suppose that $\wt ' \in S'(\wo) \subset \wwh$
+and consider a traversal of the cell boundary from $\wo '$ to $X$. 
+Since $\wo '$ and $\wt '$ are extreme points of \wwh\ and
+$X \not \in \wwh$ (by definition of $\wwh$), 
+% the cell boundary between $\wt '$ and $X$ is not in $\wwh$.
+% In particular, it is not in $S'(\wo) \subset \wwh$.
+% Therefore, 
+$\wt '$ is the last element of $S'(\wo)$ that is met during this traversal.
+% from $\wo '$ to $X$.
+In other words, $W_{2}' = S_{p}'$ ($W_{2} = S_{p}$) as desired.
+(There is no ambiguity in choosing the last member of $S'(\wo)$ or in associating
+$S_{i}'$ with $S_{i}$, since it can be shown that $S_{i}' \neq S_{j}'$ 
+whenever $i \neq j$ \cite[p. 75]{jj}.)  % p. 75
+
+We will first show that (ii) $S'(\wo) \subset \wwh$. Let $s \in S(\wo)$.
+By Lemma~\ref{lem-645} of the appendix, 
+$\ray{\wo s}$ does not cross $\wwa \setminus \{\wt\}$.
+In particular, \seg{\wo s'} does not cross $\wwa \setminus \{\wt\}$.
+Therefore, $s'$ must either lie outside of \wo's tangent or on \wwh\ (Figure~\ref{6}).
+Since $s$, as a member of S(\wo), lies on the strict inside of \wo's tangent,
+so must $s'$.
+Therefore, $s' \in \wwh$ and $S'(\wo) \subset \wwh$, as desired.
+
+\Comment{
+REPLACED BY LEMMA LEM-645.
+Suppose, for the sake of contradiction, that $\ray{\wo s}$ crosses \wwa\
+\label{thpr}
+at $y \neq \wt$ (Figure~\ref{6}(b-c)).
+There are two cases to consider: $y \in \seg{\wo s}$ and $s \in \seg{\wo y}$.
+Suppose that $y \in \seg{\wo s}$ (Figure~\ref{6}(b)).
+By Lemma~\ref{Ls}, 
+\[ \#\{P \in \seg{\wo y} \cap F: \mbox{ P faces \wo}\} = 
+\#\{P \in \seg{\wo y} \cap F: \mbox{ P faces y}\} \]
+But recall that $\seg{\wo y}$ does not contain $y$ and
+y faces \wo, since \wo\ and y are on the same convex segment.
+Therefore, if we choose $\alpha \in \seg{ys}$ such that \seg{y\alpha} does not
+contain any intersections with the curve, then 
+\[ \#\{P \in \seg{\wo\alpha} \cap F: \mbox{ P faces \wo}\} 
+> \#\{P \in \seg{\wo\alpha} \cap F: \mbox{ P faces s}\} \]
+in contradiction of $s \in S(\wo)$ (condition 4).
+Now suppose that $s \in \seg{\wo y}$ (Figure~\ref{6}(c)).
+Recall an argument used at the beginning of Lemma~\ref{Ls}.
+In particular, since \arc{\wo y} is a convex segment lying in a cell,
+the nonsingular points of entry and departure of the curve into
+the closed region bounded by $\seg{\wo y}$ and \arc{\wo y}
+must be along $\seg{\wo y}$ and must pair up into couples.
+Let $s$ and $t$ be a couple.
+Since \arc{st} is convex, s faces t; since $s \in S(\wo)$, s faces \wo. 
+Therefore, $t \in \seg{\wo s}$.
+Since \mbox{$s \in S(\wo)$}, 
+\[ \#\{P \in \seg{\wo s} \cap F: \mbox{ P faces \wo}\}
+= \#\{P \in \seg{\wo s} \cap F: \mbox{ P faces s}\} \]
+Noting that $\seg{\wo s} = \seg{\wo t}\ \cup\ \seg{ts}\ \cup\ \{t\}$ and 
+t faces s, this becomes 
+\[ \#\{P \in \seg{\wo t} \cap F: \mbox{ P faces \wo}\} +
+\#\{P \in \seg{ts} \cap F: \mbox{ P faces \wo}\} + 0 =  \]
+\nopagebreak
+\[ \#\{P \in \seg{\wo t} \cap F: \mbox{ P faces s}\} +
+\#\{P \in \seg{ts} \cap F: \mbox{ P faces s}\} + 1\ \ \  \]
+Moreover, by Lemma~\ref{Ls} (\arc{st} is convex),
+\[ \#\{P \in \seg{ts} \cap F: \mbox{ P faces s}\} = \]
+\[ \#\{P \in \seg{ts} \cap F: \mbox{ P faces t}\} = \]
+\[ \#\{P \in \seg{ts} \cap F: \mbox{ P faces \wo} \} \]
+Upon cancelling terms in the above equation, we conclude that
+\[ \#\{P \in \seg{\wo t} \cap F: \mbox{ P faces \wo}\} > \]
+\[ \#\{P \in \seg{\wo t} \cap F: \mbox{ P faces s}\} =\  \]
+\[ \#\{P \in \seg{\wo t} \cap F: \mbox{ P faces y}\}\ \  \]
+But this contradicts condition (3) of Lemma~\ref{Ls} 
+(convex segment \wwa, $\x = \wo$, $\y = y$).
+These contradictions lead us to conclude that \ray{\wo s} does not cross 
+$\wwa \setminus \{\wt\}$.
+}
+
+We now show that $\wt \in S(\wo)$ (which implies (i) $\wt ' \in S'(\wo)$).
+$\wt \in R(\wo)$ by Corollary~\ref{Cp},
+so it suffices to show that \wt\ lies strictly inside of \wo's tangent.
+Since \wwa\ is a convex segment, \wt\ lies on the inside of \wo's 
+tangent, and we must only show that \wt\ does not lie on \wo's tangent.
+Suppose that \wt\ lies on \wo's tangent.
+Since $\seg{\wo\wt}$ is a subsegment of \wo's tangent,
+$S(\wo) \cap \seg{\wo\wt} = \emptyset$.  
+Since $S'(\wo)$ is found
+by following rays from \wo\ through elements of $S(\wo)$,
+we also have $S'(\wo) \cap \seg{\wo\wt} = \emptyset$.
+Finally, since \seg{\wo\wt} is part of a cell wall (Lemma~\ref{Ll} of the appendix),
+we have $\wwh = \seg{\wo\wt}$.
+The combination of $S'(\wo) \cap \seg{\wo\wt} = \emptyset$ and
+$S'(\wo) \subset \wwh = \seg{\wo\wt}$ forces $S'(\wo) = \emptyset$, which
+contradicts our initial assumption.
+Thus, \wt\ does not lie on \wo's tangent and $\wt \in S(\wo)$.
+
+(b) The statement of the theorem has been verified if $S(\wo) \neq \emptyset$.
+Now suppose that $S(\wo) = \emptyset$.
+We first show that $T(\wo)$ is well-defined and contains $\wt$.
+If \wo\ does not lie on a cell wall,
+then $\wt \in S(\wo)$:
+$\wt \in R(\wo)$ (as \wo's partner);
+\wt\ does not lie on \wo's tangent (Lemma~\ref{Ll});
+and \wt\ lies inside \wo's tangent (because \wwa\ is convex).  
+Thus, \wo\ must lie on a cell wall and T(\wo) is well-defined.
+If \wt\ lies strictly inside \wo's wall (w.r.t.\ C), it also lies strictly
+inside \wo's tangent (Lemma~\ref{Ll}).
+That is, if $\wt \not \in T(\wo)$, then $\wt \in S(\wo)$.
+Therefore, $\wt \in T(\wo)$.
+
+Suppose that \wt\ is not the closest member of $T(\wo)$ to \wo, and let 
+\mbox{$U \neq \wt$} be the closest.  
+Since \wo\ faces $U$, $U$ must lie on $\seg{\wo\wt}$.
+Using a familiar argument from Lemma~\ref{Ls}, the nonsingular points of entry
+and departure of the curve into the closed region bounded by $\seg{\wo\wt}$
+and \arc{\wo\wt} must pair up along $\seg{\wo\wt}$, such that each pair
+defines a convex segment.
+In particular, each nonsingular point of the curve on $\seg{\wo U}$ 
+that faces \wo\ must pair with a nonsingular point on $\seg{\wo U}$ that faces \wt.
+But, 
+since $U \in R(\wo)$, the number of nonsingular points on $\seg{\wo U}$ that face \wt\ is
+exactly 
+equal to the number of nonsingular points on $\seg{\wo U}$ that face \wo\ 
+(Corollary~\ref{Cp}).
+Thus, each nonsingular point on \seg{\wo U} that faces \wt\ is paired with 
+some nonsingular point on $\seg{\wo U}$.
+In particular, no nonsingular point on \seg{\wo U} that faces \wt\ is paired with
+a point on $\{U\} \cup \seg{U\wt}$.
+But this leads to a contradiction:
+$U$ is nonsingular (since it is an endpoint after the refinement stage)
+and it faces \wo\ (since $U \in R(\wo)$), so it should
+pair with a nonsingular point of the curve on $\seg{\wo U}$ that faces \wt.
+We conclude that \wo's partner \wt\ must be the 
+closest element of T(\wo) to \wo, completing the proof of this pairing theorem.
+\QED
+
+A plane algebraic curve can now be properly decomposed into convex segments,
+since the endpoints of the convex segments can be properly paired together.
+Note that it is now simple to sort the convex segments.
+The endpoints form a doubly linked list
+that defines the order of the convex segments
+and makes it easy to traverse the curve, convex segment by convex segment.
+
+\subsection{Computation of Singularities and Flexes}
+\label{ssc}
+
+The above convex decomposition of an algebraic curve requires the singularities 
+and flexes of the curve, as well as their tangents.
+The singularities of a curve $f(x,y)=0$ are the solution set of the system
+$\{f_{x}=0,f_{y}=0,f=0\}$, while the points of inflection are the nonsingular 
+intersections of the curve with its Hessian (the determinant 
+of the matrix of double derivatives of the curve's equation) \cite{walker}.
+%
+% BAJAJ ADDITION
+These systems of polynomial equations can be solved efficiently 
+for all of their point solutions by using $U$-resultant schemes \cite[p. 74]{Ca}. 
+Furthermore, using bounds on the minimum gap between roots of a polynomial, 
+and bounds on the
+size of the coefficients and degree of the original curve, one can straightforwardly
+estimate the bits of accuracy required in computing the solution 
+to ensure that the error in the value of the curve's derivatives is within the gap. 
+This in turn ensures the correctness of the quadratic transformations applied to the 
+curve and centered at the singularity.
+
+The restriction of points of inflection to flexes (see page~\pageref{restriction} above)
+is straightforward \cite[p. 44]{jj}.
+The tangents of a singularity of the curve $f=0$ can be found by translating 
+the singularity to the origin.
+The equations of the tangents are the factors of the translated $f$'s order
+form (the polynomial consisting of the terms of lowest degree) \cite{walker}.
+Finally, after the curve has been translated to projective space by homogenizing 
+its equation to $f(x,y,z)=0$ (where $z$ is the homogenizing variable),
+the tangent of a flex P is $f_{x}(P)x + f_{y}(P)y + f_{z}(P)z= 0$ \cite{walker}.
+This completes our description of the convex decomposition of an algebraic curve.
+
+\section{Point location}
+\label{s-loc}
+
+The second key problem in the convex segment method of sorting is
+point location in a convex decomposition: given a point, we must identify
+the convex segment that contains it.
+This is an extension to the curved domain of the well-known problem of point 
+location in a planar subdivision. 
+We will show how to locate a point on a convex segment (Section~\ref{sec-pI}), 
+a general curve segment (Section~\ref{sec-pII}), and a connected component of a curve
+(Section~\ref{sec-cc}).
+
+\subsection{Point location I: On a convex segment}
+\label{sec-pI}
+
+A decomposition is not very useful unless it is possible to locate points in it. 
+In the case of sorting, point location is necessary in order to partition a set of points
+into convex segments.
+Since a convex segment is identified by its endpoints, finding the convex 
+segment that contains a point is equivalent to finding the endpoints that bound 
+this convex segment.
+This problem is analogous to finding the partners of a given
+endpoint (Section~\ref{sspII}), since both problems are 
+instances of the more general question: ``what are the two endpoints associated 
+with a given point?''
+We continue to use refined segments for point location, 
+because it is important for 
+an endpoint in a cell $C$ to uniquely identify a convex segment in $C$.
+However, recall that points that do not lie on any refined segment are still located
+on a convex segment: if $x \in \arc{AB} \setminus \arc{A'B'}$, where $\arc{A'B'}$ 
+is the refined segment associated with the original segment \arc{AB}, 
+then $x$ is located on $\arc{A'B'}$.
+
+It is easy to locate a point in the proper cell, using well-known algorithms 
+for point location in a planar subdivision \cite{kirk,PS}.
+Artificial walls are ignored during this step: a point
+is considered to lie in an artificially bounded cell C as long as it lies
+in the unbounded cell associated with C.
+If, as is often the case, a point lies in a cell with only one convex segment, 
+then it is obvious which convex segment it belongs to.
+Otherwise, Theorem~\ref{Tps} and Lemma~\ref{Ln} can be used 
+to locate a point on the proper convex segment.
+Lemma~\ref{Ln} shows how to locate points on a special type of convex segment,
+a nude component.
+Theorem~\ref{Tps} shows how to locate points on other convex segments.
+Before we get to these results, we must define a nude component and the type of
+a convex segment.
+\\[3pt]
+%
+\Heading{Definition}:
+A {\em connected component} of a curve is a maximal subset of the curve such that 
+there exists a continuous path on the curve between any two points of the subset.
+
+\vspace{.1in}
+
+\noindent For example, a hyperbola has two connected components.
+A connected component that
+lies entirely inside of a cell, intersecting none of the walls (including
+artificial walls) of the cell partition, is called a {\em nude component} 
+(Figure~\ref{nude}).
+It is nude because, unlike other connected 
+components, it does not contain any endpoints of convex segments.
+This lack of endpoints makes nude components a special case for point location.
+A nude component is convex, since it does not contain any singularities or flexes.
+\\[3pt]
+%
+\figg{nude}{$x$ lies on a nude component}{2.25in}
+% `nude' picture of nonsingular cubic with x on nude component:
+%	use walker picture of nonsingular cubic
+%
+\Heading{Definition}:
+Let \arc{P\infty} be an infinite convex segment before refinement, $x \in \arc{P\infty}$.
+$x$'s tangent defines two directions:
+the {\em finite (resp., infinite) direction from $x$}
+is the direction along $x$'s tangent that the curve leaves $x$ in travelling
+to the endpoint $P$ (resp., to infinity).
+Let $R$ be the ray along $x$'s tangent in the infinite direction from $x$.
+%
+The {\em type of an infinite convex segment} is 
+clockwise-convex or counterclockwise-convex.
+\arc{P\infty} is {\em clockwise-convex} if and only if 
+$R$ enters the halfplane defined by the inside of $x$'s tangent as it rotates 
+clockwise (Figure~\ref{fig-cc}).
+(Since the clockwise direction of rotation depends on one's perspective,
+a perspective from a fixed side of the plane containing the curve must be maintained for 
+all type computations.)
+
+The type of an infinite convex segment is well-defined, because it is independent of $x$.
+The computation of this type is straightforward.
+The only nontrivial step is the computation of the infinite direction from a point,
+which is discussed in Lemma~\ref{lem-ty} of the appendix.
+
+\figg{fig-cc}{A clockwise-convex segment}{2in}
+
+% ********************************************************************
+
+\vspace{.2in}
+
+We are finally ready to show how to locate a point on the proper convex segment.
+There are three main cases to this point location:
+(i) the point lies inside the bounded cell and on a refined segment,
+(ii) the point lies inside the bounded cell and not on a refined segment, and 
+(iii) the point lies outside the bounded cell.
+
+\newpage
+
+\begin{theorem}
+\label{Tps}
+Let $x$ be a point of curve F that lies in cell C.\footnote{Recall that, 
+	if C is an artificially bounded cell,
+	a point is considered to lie in C as long as it lies in the unbounded cell
+	associated with C.}
+If $x$ is an endpoint or a singularity,
+it is located on one and only one of the refined segments in C associated with this point.\\
+Let $S(x)$ = \{endpoints W in C $\mid$
+\begin{quote}
+\begin{enumerate}
+\item x lies on the strict inside of W's tangent
+\item W lies on the strict inside of x's tangent 
+\item \mbox{$\#\{P \in\seg{xW}\cap F: P \mbox{ faces x}\} =
+\#\{P \in \seg{xW}\cap F: P \mbox{ faces W} \}$}
+\item $\forall\ \alpha \in \seg{xW}$,
+$\#\{P \in\seg{x\alpha}\cap F: P \mbox{ faces x}\} \leq
+\#\{P \in \seg{x\alpha}\cap F: P \mbox{ faces W}\} $
+\}
+\end{enumerate}
+\end{quote}
+%
+and let $S''(x) = \{\ W'' : W \in S(x)\ \}$, where $W''$ is the intersection 
+of \ray{xW} with the boundary of C.
+($S(x)$ should be computed by the method described in Section~\ref{ss-speeeeed}.)
+If $S(x) = \emptyset$, then x lies on a nude connected component and Lemma~\ref{Ln}
+is used to locate $x$ on the correct nude component.
+
+(i) Suppose that $x$ lies inside the bounded cell C.
+Let $x_{1}$ and $x_{2}$ be the two points of intersection of x's tangent with the
+boundary of C, and let $S_{1}'',S_{2}'',\ldots,S_{p}''$ be the result of a sort of $S''(x)$ 
+from $x_{1}$ to $x_{2}$ along the cell boundary.
+$x$ either lies on $S_{1}$'s or $S_{p}$'s convex segment,
+% 
+% If $S''(x)$ has only one element $S_{1}''$, $x$ lies on $S_{1}$'s convex segment.
+% IMPOSSIBLE SINCE INFINITE CONVEX SEGMENTS WILL STILL HAVE TWO ENDPOINTS
+%
+and there are three cases to consider:
+(a) if $S_{1}$ and $S_{p}$ are partners,\footnote{We will see that $S_{1}$ and $S_{p}$ 
+	are partners whenever $x$ lies on a refined segment.}
+$x$ lies on \arc{S_{1}S_{p}};
+(b) otherwise, if $S_{1}$ is a refined endpoint and 
+$S_{p}$ is not, $x$ lies on $S_{1}$'s convex segment;
+(c) if both $S_{1}$ and $S_{p}$ are refined,
+$x$ lies on $S_{1}$'s convex segment if and only if 
+$S_{1}''$ is one of the extreme points of the sort
+of $\{S_{1}'',S_{p}'',T_{1},T_{p}\}$ from $x_{1}$ to $x_{2}$, where
+$T_{1}$ and $T_{p}$ are the singularities
+associated with $S_{1}$ and $S_{p}$.
+
+% *******************************************************************************
+
+(ii) Suppose that $x$ lies outside of C.
+Let $A(x) = \{ W \in S(x) : W \mbox{ is an artificial endpoint}\}$ and
+let $Q \in A(x)$ be the unique endpoint in $A(x)$ whose convex segment is of the
+same type as $x$'s segment.
+Then $x$ lies on $Q$'s convex segment.
+%
+\Comment{
+Let $A(x) = \{ W \in S(x) : W \mbox{ is an artificial endpoint (i.e., an endpoint lying
+	on an artificial wall)}\} = \{A_{1},A_{2},\ldots,A_{k}\}$.
+If $k=1$, then $x$ lies on $A_{1}$'s convex segment.
+If $k \geq 2$,
+let $\theta_{1,i} \in [0,2\pi]$ be the angle of the tangent at the artificial
+endpoint $A_{i} \in A(x)$ ($i = 1,2,\ldots,k$),
+let $\theta_{2,i} \in [0,2\pi]$ be the angle of the wall at $A_{i} \in A(x)$,
+and let $\theta$ be the angle of $x$'s tangent (Figure~\ref{fig.fiddle}).
+(Since it is ambiguous whether a tangent defines the angle $\theta$ or $\theta + \pi$,
+it is actually necessary to measure rays rather than lines:
+for $A_{i}$'s tangent, we use the ray that points out of the artificially bounded cell;
+for $A_{i}$'s wall, we use the ray that points into the halfplane defined by $A_{i}$'s 
+tangent that does not contain $A_{i}$'s partner (i.e., the halfplane that does not 
+contain $A_{i}$'s convex segment);
+for x's tangent, we use the 
+)
+Then $x$ lies on $A_{j}$'s convex segment, where $j$ is the unique one such that
+$\theta \in [\theta_{1,j},\theta_{2,j} + \pi]$ (?? could be $\ldots - \pi$ i think ??).
+}
+% *******************************************************************************
+\end{theorem}
+%
+%
+\begin{example}
+In Figure~\ref{nude}, $S(x) = \emptyset$ and x lies on a nude component.
+
+Consider the cell of Figure~\ref{3.12} that contains the convex segments 
+\wwa\ and \arc{W_{3}W_{4}}.
+\wo\ does not satisfy condition~(2) of $S(x)$ and \wt\ does not satisfy condition~(3).
+Thus, $S(x) = \{W_{3},W_{4}\}$ and x must lie on \arc{W_{3}W_{4}}.
+
+Consider the cell partition of Figure~\ref{2.12a}.
+$S(P_{1}) = \{W_{1},W_{2},W_{5},W_{6}\}$, which does not resolve the question
+of $P_{1}$'s convex segment.
+Let \xo\ and \xt\ be the two points of intersection of $P_{1}$'s tangent
+with the cell boundary.
+Since the sort of $S''(P_{1})$ from \xo\ to \xt\ is (\wo, $W_{6},\ W_{5}$, \wt),
+and \wo\ and \wt\ are partners, $P_{1}$ must lie on \wwa.
+
+In Figure~\ref{fig-4a2}, the sort of $S''(x)$ from $x_{1}$ to $x_{2}$ is ($\wo''$,
+\wt, $W_{3}$, $W_{4}''$), \wo\ and $W_{4}$ are not partners,
+and both of them are refined. 
+Since the sort of $\wo''$, $W_{4}''$, $T_{1}$, and $T_{p}$ from $x_{1}$ to
+$x_{2}$ is $\{\wo'',W_{4}'',T_{1} = T_{p}\}$, we conclude that $x$ lies on \wo's segment.
+
+In Figure~\ref{fig-4a3}, $x$ lies outside of the bounded cell and
+$A(x) = \{\wo,W_{3}\}$.
+$x$'s and $\wo$'s segment are
+clockwise-convex, but $W_{3}$'s segment is counterclockwise-convex.
+Thus, $x$ must lie on \wo's segment.
+\end{example}
+\figg{fig-4a2}{$x$ lies on \wo's convex segment}{2.8in}
+\figg{fig-4a3}{$x$ lies on \wo's convex segment}{3in}
+%
+\Heading{Proof of Theorem~\ref{Tps}:}
+Consider the decomposition of the curve into convex segments before refinement
+of singularities and infinite segments.
+In particular, consider the convex segment SEG in this decomposition that contains $x$.
+After refinement of the convex segments, SEG is represented by a refined segment
+$\arc{\wo\wt} \subset \mbox{SEG}$.
+When $x \in  \arc{\wo\wt}$, the proof is very similar to that of Theorem~\ref{Tpner}.
+(Note that it will usually be the case that $x \in  \arc{\wo\wt}$.
+Indeed, in many cases $\arc{\wo\wt} = \mbox{SEG}$.)
+However, new ideas are required when $x \in \mbox{SEG} \setminus \arc{\wo\wt}$, 
+in which case
+$x$ either lies on a segment of the curve that was removed while refining a singularity,
+or it lies on a segment that was removed while refining an infinite convex segment.
+In the former case, 
+assume without loss of generality that $x \in \arc{W_{sing}\wo}$,
+where $W_{sing}$ is the singularity that was refined to make \wo.
+In the latter case, assume without loss of generality that \wo\ is the artificial endpoint
+of $x$'s infinite segment and $x \in \arc{\wo\infty}$.
+
+We first notice that $\wo,\wt \in S(x)$:
+%
+\begin{description}
+\item[(1-2)] 
+	$x$, \wo, and \wt\ lie on the same convex segment and $x \neq \wo,\wt$.
+\item[(3-4)]
+	Lemma~\ref{Ls} ($\x = x$, $\y = \wo \mbox{ or } \wt$)
+\end{description}
+%
+Thus, if $S(x) = \emptyset$, then $x$ must lie on a nude component containing no endpoints.
+% (One can also quite easily establish the converse: if x lies on a nude 
+% component, then $S(x) =  \emptyset$.)
+%
+% Let x be a point on a nude component in cell C, and consider an endpoint E of a 
+% convex segment in C.
+% E certainly does not lie on the nude component.
+% If E lies on or outside of x's tangent, then condition (4) of S(x) is violated.
+% If E lies strictly inside of x's tangent, then the first intersection of \seg{xE}
+% with the curve after x is another point of x's nude component (since this 
+% component is closed and convex).  
+% But this intersection faces x (again by the convexity of nude components),
+% violating condition (3) of S(x).
+%
+Suppose $S(x) \neq \emptyset$.
+Notice that a sort of $S''(x)$ 
+from $x_{1}$ to $x_{2}$ along the cell boundary is well-defined, 
+since all of $S''(x)$ lies on the same side of $x$'s tangent
+(condition 2 of $S(x)$).
+
+(i) Suppose that $x$ lies inside C.
+Thus, $x \in \arc{\wo\wt}$ or $x \in \arc{W_{sing}\wo}$.
+In either case, 
+$\wo''$ is either the first or last element of the sort of $S''(x)$
+from $x_{1}$ to $x_{2}$, by Corollary~\ref{cor-645} of the appendix.
+That is, $\wo'' = S_{1}'' \mbox{ or } S_{p}''$; or
+$\wo = S_{1} \mbox{ or } S_{p}$, 
+since $S_{i}'' = S_{j}''$ if and only if $S_{i}=S_{j}$ \cite[p. 75]{jj}.
+We conclude that $x$ lies on $S_{1}$'s convex segment or 
+$S_{p}$'s convex segment.
+We must decide which one.
+
+If $S_{1}$ and $S_{p}$ are partners, then $S_{1}$'s convex segment is the same as
+$S_{p}$'s convex segment, and the decision is easy.
+Notice that this is the case whenever $x \in \arc{\wo\wt}$.
+Indeed, if $x \in \arc{\wo\wt}$,
+Corollary~\ref{cor-645} can be applied to \wt\ just as it was to \wo, yielding
+$\wt'' = S_{1}'' \mbox{ or } S_{p}''$.
+That is, $\{\wo,\wt\} = \{S_{1},S_{p}\}$, and $S_{1}$ and $S_{p}$ are partners.
+
+Assume that $S_{1}$ and $S_{p}$ are not partners.
+Thus, $x \in \arc{W_{sing}\wo}$ ($x \not\in \arc{\wo\wt}$)
+and  \wo\ is a refined endpoint (i.e., an endpoint derived from a singularity).
+If $S_{1}$ is refined and $S_{p}$ is not, then it is clear that $\wo = S_{1}$ and that
+$x$ lies on $S_{1}$'s convex segment.
+
+Thus, further assume that both $S_{1}$ and $S_{p}$ are refined
+and $x$ lies on $S_{1}$'s segment, $\arc{S_{1}T_{1}}$.
+We shall establish that $S_{1}''$ is, while $S_{p}''$ is not, an extreme point
+in the sort of $\{S_{1}'',S_{p}'',T_{1},T_{p}\}$ from $x_{1}$ to $x_{2}$.
+This will complete the proof of case (i).
+First note that $S_{p}''$ is not an extreme point in this sort:
+$S_{1}''$ is closer to $x$'s tangent than $S_{p}''$,
+because \ray{xs} does not cross $\arc{xS_{1}} \setminus \{S_{1}\}$ 
+for any $s \in S(x)$ (Lemma~\ref{lem-645});
+similarly, on the other side, $T_{1}$ is closer to $x$'s tangent than $S_{p}''$,
+because \ray{xs} does not cross $\arc{xT_{1}} \setminus \{T_{1}\}$ 
+for any $s \in S(x)$ (Lemma~\ref{lem-645}).
+Finally, note that $S_{1}''$ {\bf is} an extreme point in the sort (Figure~\ref{fig-too}).
+$T_{1}$ clearly does not lie between $S_{1}''$ and $x$'s tangent.
+Suppose, for the sake of contradiction, that $T_{p}$ lies between $S_{1}''$ and $x$'s 
+tangent.
+The original convex segment that contains $x$ divides the cell into two regions:
+let $R_{out}$ be the region that contains the outside of $x$'s tangent.
+The entire segment $\arc{S_{p}T_{p}}$ must lie in $R_{out}$, because
+$T_{p}$ does and $\arc{S_{p}T_{p}}$ cannot cross
+$x$'s segment without making a singularity.
+However, $S_{p} \in R_{out}$ implies that $S_{p}$ lies outside $x$'s tangent
+or $x$'s segment crosses $\seg{xS_{p}}$, both of which contradict $S_{p} \in S(x)$
+(using condition 2 of $S(x)$ and Lemma~\ref{lem-argh}, respectively).
+Therefore,
+we conclude that $S_{p}''$, $T_{1}$, and $T_{p}$ do not 
+lie between $S_{1}''$ and $x$'s tangent,
+forcing $S_{1}''$ to be an extreme point in the sort of $\{S_{1}'',S_{p}'',T_{1},T_{p}\}$.
+
+\figg{fig-too}{An illegal position for $T_{p}$}{3.5in}
+
+% ***********************************************************************
+
+\clearpage
+
+(ii) Suppose that $x$ lies outside of C.
+That is, $x$ lies on the infinite segment $\arc{\wo\infty}$,
+according to the assumptions at the beginning of the proof.
+We wish to show that we can locate $x$ on \wo's convex segment
+by finding an artificial endpoint
+in $A(x)$ whose convex segment is of the same type as $x$'s segment.
+That is, we wish to show that
+\mbox{$\{a \in A(x): \mbox{a's convex segment is of the same type as $x$'s}\}$} $=$ 
+$\{\wo\}$.
+One direction is simple: $\wo \in A(x)$ since we have shown that $\wo \in S(x)$,
+and \wo's convex segment is certainly of the same type as $x$'s, because it is the same
+segment.
+For the other direction, let $a \in A(x)$ such that $a$'s convex segment 
+is of the same type as $x$'s.
+The idea of the proof is to show that $a$'s convex segment
+enters a bounded region and cannot legally leave except through $x$.
+This will prove $x \in \arc{a\infty}$, implying $a = \wo$ as desired.
+
+The first step of the proof is to find a region that contains
+\arc{x\infty} and \arc{a\infty}, where \arc{x\infty} (resp., \arc{a\infty}) is the part of
+$x$'s (resp., $a$'s) segment starting at $x$ (resp., $a$) and proceeding to infinity.
+Note that \arc{x\infty} and \arc{a\infty} lie outside of the artificially bounded cell.
+We shall show that a containing region for \arc{x\infty} and \arc{a\infty} is 
+$R_{xa}$, the intersection of the inside of $x$'s tangent and the inside of $a$'s tangent 
+(Figure~\ref{fig-ax}).
+%
+\begin{figure}[tbp]\vspace{2in}\caption{A region that contains \arc{x\infty} and \arc{a\infty}}\label{fig-ax}\end{figure}
+%
+$R_{xa}$ is nonempty because $x$ and $a \in A(x) \subset S(x)$ face each other.
+We shall only show $\arc{x\infty} \subset R_{xa}$, since the proof of 
+$\arc{a\infty} \subset R_{xa}$ is entirely analogous, 
+\arc{x\infty} cannot leave $R_{xa}$ through $x$'s tangent, by the convexity of \arc{x\infty}.
+Suppose that \arc{x\infty} leaves $R_{xa}$ through
+$y$ on $a$'s tangent (Figure~\ref{fig.chick}).
+We shall establish a contradiction, thus proving that $\arc{x\infty}$ is restricted
+to $R_{xa}$.
+Let $R_{xya}$ be the region bounded by \seg{xa}, \arc{xy}, and $a$'s tangent.
+$a$'s segment cannot pass through \arc{xy}
+(it would cause a singularity inside the cell), $a$'s tangent (by 
+the convexity of $a$'s segment), or \seg{ax} (Lemma~\ref{lem-argh}),
+and it cannot double back through $a$
+(this would cause a singularity inside the cell again).
+Thus, when $a$'s segment enters $R_{xya}$, it cannot leave.
+This leads to a contradiction.
+If \arc{a\infty} enters $R_{xya}$, we get the contradiction that an infinite, 
+unbounded segment lies in the finite, bounded region $R_{xya}$.
+If the other half of $a$'s segment enters $R_{xya}$,
+we get the contradiction that this segment cannot reach the boundary of the 
+cell C ($R_{xya}$ lies in the interior of C by the convexity of C), 
+although all convex segments originally start on a cell boundary.
+
+\begin{figure}[bp]\vspace{2in}\caption{\arc{x\infty} cannot intersect $a$'s tangent}\label{fig.chick}\end{figure}
+
+We now try to restrict \arc{x\infty} and \arc{a\infty} to even smaller regions.
+$R_{xa}$ is split into two subregions by the line segment \seg{xa}:
+let $R_{x}^{\infty}$ (resp., $R_{a}^{\infty}$) be the subregion that contains 
+the infinite direction from $x$ (resp., $a$), as shown in Figure~\ref{fig-ax}(b).
+$\arc{x\infty}$ is restricted to $R_{x}^{\infty}$:
+it starts out in $R_{x}^{\infty}$, it cannot intersect \seg{xa}
+(Lemma~\ref{lem-argh}), 
+it cannot pass through $x$ again (since this would cause
+a singularity inside the cell),
+and it cannot intersect $a$ (since the unique intersection of $x$'s convex segment 
+with the artificial boundary occurs before \arc{x\infty}).
+By the same proof, \arc{a\infty} is restricted from passing out of $R_{a}^{\infty}$,
+with one exception: it can escape through $x$.
+Thus, $\arc{a\infty} \subset R_{a}^{\infty}$ unless $x \in \arc{a\infty}$.
+
+We shall finish the proof by showing
+that $R_{a}^{\infty}$ is a finite, bounded region.
+This will establish that $\arc{a\infty} \subset R_{a}^{\infty}$
+is impossible (since \arc{a\infty} is an infinite segment) and 
+imply $x \in \arc{a\infty}$ as desired.
+To show that $R_{a}^{\infty}$ is bounded, 
+it is sufficient to show that $R_{x}^{\infty} \neq R_{a}^{\infty}$:
+only one of the two subregions of $R_{xa}$ is unbounded (the 
+	two lines bounding $R_{xa}$ are not parallel,
+	since \arc{x\infty} could not stay both convex
+	and infinite while remaining entirely between 
+	$x$'s tangent and another parallel line)
+and $R_{x}^{\infty}$ is certainly unbounded (since
+it contains the infinite segment \arc{x\infty}).
+Let $V_{1}$ (resp., $V_{2}$) be the tangent ray from $x$ (resp., $a$) 
+in the infinite direction, and assume without loss of generality 
+that $x$'s and $a$'s convex segments 
+(which are of the same type) are counterclockwise-convex.
+Thus, as $V_{1}$ and $V_{2}$ rotate counterclockwise, they both enter $R_{xa}$.
+If $V_{1}$ and $V_{2}$ point to the same side of \seg{xa},
+then as they both rotate counterclockwise, one of them will leave $R_{xa}$.
+(Refer to Figure~\ref{fig-ax}(a).)
+Therefore, $V_{1}$ and $V_{2}$ must point to opposite sides of $\seg{xa}$,
+implying $R_{x}^{\infty} \neq R_{a}^{\infty}$.
+
+In conclusion, since $R_{a}^{\infty} \neq R_{x}^{\infty}$ and only one of 
+the two subregions of $R_{xa}$ is unbounded, 
+$R_{a}^{\infty}$ must be bounded and \arc{a\infty} must escape from it through
+$x$, implying $a = \wo$.
+Therefore, $\{a \in A(x): 
+\mbox{$a$'s convex segment is of the same type as $x$'s}\} = \{\wo\}$.
+\QED
+
+\vspace{.2in}
+
+If there is only one nude component in a cell, then Theorem~\ref{Tps} 
+can successfully locate a point on this convex segment.
+However, if there is more than one nude component in the cell, then the following
+lemma must be used to locate points on these nude components.
+
+\begin{lemma}
+\label{Ln}
+Let P and Q be points that lie on nude components in the same cell.
+P and Q lie on the same nude component if and only if 
+Q lies in S(P), where S() is as in Theorem~\ref{Tps}.
+\end{lemma}
+\Heading{Proof:}
+Let P and Q lie on nude components M and N, respectively.
+If $M=N$, then P and Q lie on the same convex segment, so $Q \in S(P)$ by
+Lemma~\ref{Ls}.
+Suppose that $M \neq N$.
+Nude components do not intersect, since they do not contain any singularities.
+Therefore, there are only three cases to consider: M lies inside N, N lies 
+inside M, and neither lies inside the other.
+In all three cases, it is straightforward to show that Q violates one of the conditions
+of S(P).
+\QED
+
+\subsubsection{Speeding up Point Location}
+\label{ss-speeeeed}
+
+Point location can be made faster if the set $S(x)$ of Theorem~\ref{Tps} can be
+computed more quickly.
+Indeed, this is the only computation in the theorem that could be expensive.
+Since the expense is concentrated in testing conditions 3 and 4 (which involve
+line-curve intersections, whereas Conditions 1 and 2 are simple to test),
+one must avoid testing conditions 3 and 4.
+The idea is to eliminate as many endpoints as possible from $S(x)$ without using
+conditions 3 and 4.
+First, eliminate any endpoints in the cell that do not satisfy conditions 1 and 2 of $S(x)$.
+Next observe that if $x$ is located on \arc{\wo\wt}
+(whether on the refined segment or not), then $\wo,\wt \in S(x)$.
+(Refer to the proof of Theorem~\ref{Tps}.)
+Thus, if $W \not\in S(x)$, we can eliminate $W$'s partner from $S(x)$ as well,
+since $x$ cannot lie on $W$'s segment.
+As many endpoints as possible should be eliminated using this observation.
+If only two endpoints (say $V$ and $W$) remain after these two rounds of elimination,
+we can immediately conclude that $x$ lies on $V$'s segment.
+If more than two endpoints remain, we are forced to use conditions 3 and 4 to test
+their membership in $S(x)$.
+However, we have avoided testing these conditions on many endpoints.
+As above, whenever an endpoint fails condition 3 or 4, its partner should also be
+immediately eliminated from $S(x)$.
+
+This completes our description of techniques that are needed for sorting by 
+the convex segment method.
+We digress for a moment to show how the theory that we have developed can be used
+to solve two important problems (although they are not needed for sorting):
+locating a point on an arbitrary segment and deciding whether two points lie on the
+same connected component.
+
+\subsection{Point location II: On an arbitrary segment}
+\label{sec-pII}
+
+Once it is known how to locate a point on a convex segment of a curve's
+convex decomposition, it is straightforward to solve the more
+general problem of locating a point on an arbitrary segment of the curve.
+Consider a segment \arc{AB} of curve C and a point P on C.
+To decide if P lies on \arc{AB}, we decompose C into an ordered set of convex
+segments and compute the convex segments 
+that contain P, A, and B (say $C_{p}$, $C_{a}$, and $C_{b}$, respectively).
+If $C_{p}$, $C_{a}$, and $C_{b}$ are distinct,
+P lies on \arc{AB} if and only if $C_{p}$ lies in between $C_{a}$ and $C_{b}$.
+Degenerate cases occur if $C_{p}$, $C_{a}$, and $C_{b}$ are not distinct,
+and require more subtlety.
+For example, if $C_{p} = \arc{EF} = C_{a} \neq C_{b}$,
+then the decision is made by sorting P, A, E, and F along \arc{EF}, 
+using Theorem~\ref{T-s}:
+$P \in \arc{AB}$ if and only if the order is E, P, A, F (resp., E, A, P, F) and
+\arc{AB} leaves A towards E (resp., F).
+(A method for deciding whether \arc{AB} leaves A towards E or F is described in a footnote 
+on page~\pageref{alg-page}.)
+%	We assume that we are given a directed tangent at A that indicates the 
+%	direction of \arc{AB} from A.
+Other cases are similar.
+In short, point location on an arbitrary segment is easily reducible to point
+location on a convex segment.
+
+%NO USE REPEATING THIS
+%Point location could be done with a rational parameterization:
+%the points that lie on the curve segment \arc{AB} are simply those
+%with parameter values that occur between the parameter values of A and B.
+%However, this has the same disadvantages as those of parameterizations for 
+%sorting: lack of universality and inefficiency of solving the parameterization.
+
+\subsection{Curves with many connected components}
+\label{sec-cc}
+
+It should now be clear that the convex segment method can sort points on any
+algebraic curve.
+In particular, it can sort points that are strewn over several connected 
+components of a curve, with no more difficulty than sorting points on a single
+component.
+This is another advantage of the convex segment method over the parameterization
+method, because it is not clear how the latter method could deal with points
+on several components, even if we allow nonrational parameterizations.
+%
+% Harnack's Theorem~\cite{lang1} states that a nonsingular plane curve of
+% genus g can have at most $g+1$ connected components.
+% Therefore, a nonsingular plane curve with more than one component is nonrational.
+% This doesn't say much, since not many curves are nonsingular.
+% Bajaj hypothesizes that a plane curve has most connected components when it
+% is nonsingular, so that this result actually applies to all curves (i.e., 
+% nonsingular plane curves are the only ones you have to consider because they
+% establish the maximum)
+%
+Would each connected component have a separate parameterization?
+If so, how would the single equation of a curve produce several independent 
+parameterizations?
+If not, how would one determine the range of parameter values that is associated 
+with each connected component?
+% The second question might be answered by considering the complex curve which
+% is the zero set of the curve's equation over the field of complex numbers.
+% The connected components of the real curve are, in effect, the different
+% components of the real plane's cross-section of the complex curve.
+% (The complex curve lies in two-dimensional complex space, which is 
+% of dimension four over $\Re$, so the complex curve behaves like a surface
+% rather than a curve.)
+% The parameterizations of the connected components of the real curve
+% might be realized as the different components of the real plane's
+% 'cross-section' of the (complex) parameterization of the complex curve.
+
+A very useful test for a curve with several components is whether two points 
+lie on the same connected component.
+For example, with this capability it is reasonable to define an edge of a solid model 
+as a particular connected component of a multi-component curve, since the test allows 
+you to restrict intersections with the curve to this connected component.
+The following lemma shows that our decomposition of 
+the curve into convex segments makes it simple to decide whether two points lie on
+the same connected component.
+
+\clearpage
+
+\begin{lemma}
+Let P and Q be two points of a curve.
+If both P and Q lie on nude components, use Lemma~\ref{Ln}.
+Otherwise, let P and Q lie on convex segments \arc{AB} and \arc{CD}, respectively.
+Define $v \equiv w$ if \arc{vw} is a convex segment 
+or $v$ and $w$ are linked refined endpoints (such as $V_{1}$ and $V_{2}$ in 
+Example~\ref{eg-pseudo}), and extend this relation into an equivalence relation 
+on endpoints by taking its reflexive, symmetric, and transitive closure.
+Then P and Q lie on the same connected component if and only if $A \equiv C$.
+\end{lemma}
+
+\noindent Two other decompositions of an algebraic curve, Collins' cylindrical algebraic 
+decomposition \cite{Co75,arnon83} and Canny's stratification \cite{Ca}, 
+can also be used to separate a curve into connected components and thus decide whether
+two points lie on the same connected component.
+% The topology of an algebraic curve can be determined from this decomposition
+% \cite{arnon83,kozen}.
+% It should be straightforward to determine boundaries for each connected 
+% component from this topological information.
+% The weakness of these approaches is the exponential, double-exponential, or 
+% parallel-exponential complexity of the algorithms that compute the 
+% decompositions.
+
+\subsection{Broad comparison of methods}
+
+Let us compare the convex segment method of sorting with the tracing and 
+parameterization methods.
+The convex segment method leaps along the curve (by convex segments)
+like the brute-force tracing method.
+However, its jumps are large while the tracing method's jumps must be very small.
+Moreover, once the convex segments have
+been computed (which can be done once and for all in a preprocessing step),
+each jump of the convex segment method can be done very quickly; whereas, the tracing
+method must grope for some time (by applying Newton's method) to find the destination 
+of each jump.
+In short, the convex segment method 
+makes large, bold jumps while the tracing method makes small, timid ones.
+
+The convex segment method is similar to the parameterization method because
+they both reduce the sorting problem to an easier one.
+The parameterization method observes that the sorting of points 
+on a line is simple and tries to unwind the curve into a line by parameterizing it.
+Rather than trying to reduce the entire problem, the convex segment method divides 
+the problem up into many smaller ones (viz., the sorting of points on a convex 
+segment).
+We shall see that the many small reductions of the convex segment method
+can be done more quickly than the single, large reduction of
+the parameterization method.
+
+The convex segment method incorporates preprocessing, since the convex decomposition
+of a curve can be precomputed.
+As a result, the actual sorting is usually very efficient.
+One might consider the parameterization of a curve to be preprocessing, but
+the subsequent runtime steps (solving for the parameter value of each point)
+are usually more expensive than those for the convex segment method (following pointers
+and locating points).
+
+\section{Complexity}
+\label{s-c}
+
+In this section, we analyze the complexity of the convex segment method of sorting.
+We base our complexity analysis on the RAM model, where basic arithmetic operations
+are of unit cost \cite{ahu}.
+
+It must be emphasized that the $n$ of the following analysis is the degree of the curve.
+This makes the analysis fundamentally different from those that we
+are familiar with, such as O($n \log n$) for sorting numbers (where
+$n$ is the number of points) or O($n \log \log n$) for triangulating a simple
+polygon (where $n$ is the number of edges of the polygon).
+For example, in the following analysis, $n$ is the constant 1 for all polygons.
+As a result, the complexity of an operation such as the convex decomposition of an
+algebraic curve can be misleading, since it is very easy (although wrong) to 
+compare it with familiar complexities of discrete (rather than continuous) algorithms 
+such as number sorting or polygon manipulation.
+
+It should also be noted that the following analysis is pessimistic.
+The worst case time will be reached only by the most pathological curves: the time to 
+decompose and sort points on curves that arise in practice 
+in geometric modeling is much more reasonable.
+This is a major reason why complexity analyses of solid modeling algorithms are rare
+and more valuable for their insight into the algorithm than their reflection of its
+performance.
+For example, a typical endpoint will lie on the boundary of a single-segment cell and its 
+partner will be computed in O(1), not O($k \beta[n]$), time (see below).
+In particular, the O($n^{6}\beta[n]$) term in Theorem~\ref{thm-5} will often be
+closer to $n^{3}$ than $n^{6}\beta[n]$ in reality.
+This observation has been borne out in practice, with the testing of the algorithms on
+various curves (see Section~\ref{data}).
+The efficiency will be even further improved by the fact that the singularities and 
+flexes of the curve, which are important to other geometric algorithms, may already 
+be available in many cases.
+
+\subsection{Complexity of convex decomposition}
+
+\begin{theorem}
+\label{thm-5}
+A curve of degree $n$ (a curve whose defining polynomial is degree $n$) 
+can be decomposed into convex segments in
+O($\beta[n^{2}] + n^{2}\beta[MAX * n] + n^{6}\beta[n]$) time, 
+where $\beta[n]$ is the time required to find the 
+real roots of a univariate polynomial equation of degree $n$, and MAX is the 
+maximum number of quadratic transformations that are necessary to decompose any 
+singularity of the curve into simple points.\footnote{MAX is 1 if each 
+	singularity has distinct tangents, and MAX will usually be 1 or 2
+	in geometric modeling applications. }
+\end{theorem}
+
+\clearpage
+\Heading{Proof:}
+
+{\em Computation of singularities, flexes.} 
+%
+Consider the curve $f(x,y) = 0$ of degree $n$.
+Its singularities are found by solving the simultaneous system
+of equations \mbox{$\{f_{x} = 0, f_{y}=0, f = 0\}$}.
+One method is to use resultants \cite{walker}.
+The resultant of two polynomials with respect to the variable $x_{n}$ is a polynomial
+whose roots are the projection onto the hyperplane $x_{n} = 0$
+of the intersections of the two polynomials.
+Let $X$ (resp., $Y$) be the real roots of the resultant of $f_{x}$ and $f_{y}$ 
+with respect to $y$ (resp., $x$), which is a univariate polynomial in $x$ (resp., $y$)
+of degree O($n^{2}$).\footnote{Since 
+	singularities at infinity are not of interest, those roots in X (resp., Y)
+	that cause the terms of highest degree of \mbox{$\{f_{x} = 0, f_{y}=0\}$} to 
+	simultaneously vanish are not of interest.
+	(The terms of highest degree of a polynomial are intimately related to its 
+	solutions at infinity, since they dominate the polynomial as solutions get large.)
+	Therefore, before computing the roots of the resultant, the GCD of the leading term
+	polynomials of $f_{x}$ and $f_{y}$ is computed and divided out of the 
+	resultant, all in O($n\ log^{2}\ n$) time \cite{ahu}.}
+X (resp., Y) is the collection of abscissae (resp., ordinates)
+of the solution set of \mbox{$\{f_{x} = 0, f_{y}=0\}$}.
+X (and Y) can be computed in O($n^{4}\ log^{3}\ n + \beta[n^{2}]$) time, since
+the resultant of a pair of polynomials of degree at most $n$ in $r$ variables 
+can be computed in O($n^{2r}\ log^{3}\ n$) time \cite{bajj}.
+% O($n^{5}\ log\ n + \beta[n^{2}]$) time, since
+% the resultant of a pair of polynomials of degree at most $d$ in $v$ variables 
+% can be computed in O($d^{2v+1}\ log\ d$) time \cite{col}.
+The singularities of the curve are
+\mbox{$\{\ (x,y)\ :\ x\in X,\ y \in Y \mbox{ and } f(x,y) = f_{x}(x,y) = f_{y}(x,y) = 
+0\ \}$.}
+This pairwise substitution takes O($n^{6}$) 
+time, since X and Y are each of size O($n^{2}$) and the evaluation of an equation of 
+degree $n$ requires O($n^{2}$) time.
+Hence, all singularities of the curve can be computed in O($\beta[n^{2}] + n^{6}$)
+time.
+With similar techniques, the flexes can also be computed in O($\beta[n^{2}] + n^{6}$)
+time.
+
+{\em Computation of their tangents.} 
+%
+Recall from Section~\ref{ssc} that the tangents at a singularity ($a, b$) are computed by 
+translating the singularity to the origin and factoring the polynomial consisting of 
+the terms of lowest degree of the translated f(x,y) into linear factors.
+(For example, the lines $y-x=0$ and $y+x=0$ are the tangents of the curve
+$y^{2} + x^{3} - x^{2} = 0$ at the origin.)
+A translation is simply a linear substitution $x_{t} = x - a ,\ y_{t} = y - b$,
+which takes O($n^{4}$) time for a bivariate equation of degree $n$.
+% Proof: there are O(n^4) terms to compute: there are O(i^3) terms generated by 
+% the terms of degree i: consider the terms generated by the terms of degree n:
+% there are n terms for (x-a)^n, n-1 terms for (x-a)^n-1 * y, (n-2)*2 terms for
+% (x-a)^n-2 * y^2, and in general (n-i) * i terms for (x-a)^n-i * y^i, which sums
+% to O(n^3) terms generated by the terms of degree n
+The factorization of a homogeneous bivariate polynomial is equivalent to the
+solution of a univariate polynomial.
+Therefore, the computation of the tangents at a singularity requires
+O($n^{4} + \beta[n]$) time.
+A curve of degree $n$ has at most O($n^2$) singularities \cite{walker},
+so all of the tangents at singularities can be computed in O($n^{6} + n^{2}\beta[n]$)
+time.
+The computation of the tangent at a flex is easier, only involving the O($n^{2}$)
+operation of bivariate (or homogeneous trivariate) polynomial evaluation 
+(Section~\ref{ssc}).
+A curve of degree $n$ also has at most O($n^{2}$) flexes \cite{walker},
+so all of the tangents at flexes can be computed in O($n^{4}$) time.
+
+{\em Computation of intersections of singularity/flex tangents with curve.}
+%
+The intersections of the singularity/flex tangents with the curve are needed to
+create the convex decomposition.
+Consider the number of tangents.
+There are at most O($n^{2}$) tangents at flexes.
+A curve of order $n$ has at most $\frac{(n-1)(n-2)}{2}$ double points, where
+a singularity of multiplicity $t$ counts as $\frac{t(t-1)}{2}$ double points 
+and has O(t) tangents \cite{walker}.
+Consequently, there are $t / \frac{t(t-1)}{2} < 2$ tangents per double point,
+or at most O($n^{2}$) singularity tangents.
+The intersection of a tangent with the curve involves a linear substitution
+and a solution of the resulting polynomial, thus O($n^{4} + \beta[n]$) time or
+O($n^{6} + n^{2}\beta[n]$) for all tangents.
+Note that the O($n^{2}$) tangents generate O($n^{3}$) endpoints on the curve, since
+each tangent intersects the curve in at most $n$ points (Bezout's Theorem).
+
+{\em Refinement of singularities and infinite segments.}
+%
+A singularity of multiplicity $t$ is refined into O($2t$) endpoints, meaning
+$2t / \frac{t(t-1)}{2} \leq 4$ refined endpoints per double point,
+or a total of $O(n^{2})$ refined endpoints at singularities.
+Thus, the number of endpoints of convex segments 
+(and thus the number of convex segments) remains O($n^{3}$) after refinement.
+Consider the time that is required to refine the singularities.
+Each singularity is translated to the origin and subjected to quadratic transformations
+(perhaps translating the singularity back to the origin after certain quadratic 
+transformations).
+O($n^{2}$) quadratic transformations are sufficient to reduce all of the singularities 
+to simple points, since the singularities of a curve of degree $n$ account in total for 
+O($n^{2}$) double points and the application of each quadratic transformation 
+removes at least one double point, in a global amortized counting \cite{abba3}. 
+We have seen that the translation of a curve requires $O(n^{4})$ time, 
+amounting to a total of O($n^{6}$) translation time. 
+% By suitable choice of coordinates, it can be arranged that as long as the 
+% multiplicity of a singularity is not reduced on application of a quadratic 
+% transformation, no translation needs to be performed.
+% Such a choice of coordinates (which takes $O(n^{4})$ time) can be determined 
+% {\em a priori} for each singularity of the curve \cite{abhy}.
+% As this is going to be applied for at most O($n^{2}$) singularities representing
+% O($n^{2}$) double points,
+% the total time taken by all of the translations is O($n^{6}$) time. 
+Each quadratic substitution $x = x_{1},\ y = x_{1}y_{1}$ takes O($n^{2}$) time 
+(there are O($n^2$) terms in the original equation of the curve).
+Therefore, all of the quadratic transformations take O($n^{4}$) time.
+
+During the reduction of a singularity to simple points, each quadratic
+transformation can increase the degree of the curve's equation, since
+$x^{i}y^{j}$ becomes $x^{i}(x^{j-d}y^{j}) = x^{i+j-d}y^{j}$, where $d$ is the 
+multiplicity of the singularity.\footnote{It might appear that 
+	$x^{i}y^{j}$ should become $x^{i}(x^{j}y^{j})$.  However,  
+	redundant factors must be removed from the polynomial.
+	For example, $x^{2} - y^{3} = 0$
+	becomes $1-xy^{3} = 0$, not $x^{2} - x^{3}y^{3} = 0$.
+	The equation of a curve with a singularity of multiplicity $d$ 
+	at the origin has no terms of degree less than $d$, so a factor of $x^{d}$ can
+	always be removed.}
+In other words, the degree of the polynomial can increase by $O(j)$, where
+$j$ is the highest degree of $y$ in any term of the polynomial undergoing 
+quadratic transformation. 
+Since $j=n$ for the polynomial of the original curve and the $y$-degree of every term
+remains invariant under quadratic transformation (and does not increase under
+translation of the curve either), the degree of the polynomial can only increase
+by $O(n)$ with each quadratic transformation.
+Therefore, by the end of the reduction of a singularity to simple points, 
+the curve's equation can be at most degree $O(MAX * n)$.
+
+Finally, after a quadratic transformation where the multiplicity of the singularity 
+drops, one computes the intersections of the new curve of degree $i$ with the y-axis, 
+which takes $\beta[i]$ time.
+Again, since this is computed after at most O($n^{2}$) quadratic transformations,
+the total time taken by all of the intersection computations is at most 
+O($n^{2} \beta[MAX * n]$) time.
+% Can't get asymptotically better even if you analyze more carefully by considering
+% \frac{n^2}{MAX} iterations of \beta[n] + \beta[2n] + ... + \beta[(MAX+1)n].
+We conclude that a bound on the time for refining the
+convex segment endpoints at singularities is O($n^{6} + n^{2} \beta[MAX * n]$).
+The refinement of infinite segments is simple compared to the refinement of singularities.
+
+{\em Pairing endpoints.}
+%
+Consider the time required to compute the partners of the O($n^{3}$) endpoints.
+The dominating expense is the computation of the set R(\wo) of 
+Theorem~\ref{Tpner} for each endpoint \wo.
+It takes O($k\beta[n]$) time to compute R(\wo) for an endpoint in a cell
+with $k$ endpoints, O($k^{2}\beta[n]$) time to compute R(\wo) for every 
+endpoint in a cell with $k$ endpoints, and O($\sum k_{i}^{2}\beta[n]$)
+time to compute R(\wo) for every endpoint in every cell, where $k_{i}$ is the
+number of endpoints in cell $C_{i}$ and the sum is over all cells $C_{i}$.
+Since $\sum k_{i} = O(n^{3})$, $O(\sum k_{i}^{2}\beta[n]) = O(n^{6}\beta[n])$.
+Therefore, partner computation takes $O(n^{6}\beta[n])$ time.
+\QED
+
+\subsection{Complexity of sorting}
+
+We now consider the complexity of sorting points along a curve after its convex
+decomposition is available.
+This sorting is usually very efficient, because the traversal of a curve by
+convex segments has been reduced to the traversal of a doubly linked list, and
+it is usually simple to find the points on each convex segment.
+Once again, the following worst-case analysis is unrealistically pessimistic
+for geometric modeling applications.
+
+\begin{theorem}
+After the curve has been decomposed into convex segments,
+$m$ points on a plane algebraic curve of degree $n$ can be sorted
+by the convex segment method in O($m n^{3} \beta[n] + m\log m$) time.
+\end{theorem}
+%
+\Heading{Proof}:
+The dominating expense of sorting is to locate every point on a convex segment,
+since the convex segments are already implicitly sorted (by endpoint pairing) and 
+the sorting of points along a convex segment is simple
+(by Theorem~\ref{T-s}, it is equivalent to the $O(k \log k)$ operation of finding
+and sorting a set of angles). 
+A point can easily be located in the proper cell of the cell partition, as follows.
+A vector of size $O(n^{2})$ is associated with each of the $m$ points and each
+cell: this vector specifies the side (inside or outside) of each singularity/flex tangent
+that the point or cell lies on.
+A point lies in a cell if and only if their two vectors match.\footnote{The vector
+	of a cell need not, and will not, be complete.  Only the entries for the
+	cell's walls are necessary.}
+Therefore, the only potentially challenging step is locating the convex segment
+that contains the point.
+
+In the worst case, it requires $O(k \beta[n])$ time to compute the set 
+S($x$) of Theorem~\ref{Tps} for a point in a cell with $k$ endpoints, since
+the intersection of line segments with the curve is required.
+There are $O(n^{3})$ endpoints, so point location requires $O(n^{3}\beta[n])$ time per
+point and $O(mn^{3}\beta[n])$ time for all points.\footnote{Observe the worst-case
+	pessimism of this analysis, which assumes that each point is located in a cell
+	with O($n^{3}$) endpoints.
+	It is unlikely that there are $O(n^{3})$
+	real endpoints, since many of the $n$ intersections of a singularity/flex
+	tangent with the curve will be complex.  
+	Moreover, it is extremely unlikely that O($n^{3}$)
+	of these endpoints lie in the same cell and that all points to be sorted
+	lie in such a cell.
+	Finally, it is very unlikely that each point location in this cell will 
+	require the more expensive conditions
+	of $S(x)$ to test the membership of all O($n^{3}$) endpoints in $S(x)$.}
+After adding $O(m \log m)$ time for sorting the points along the convex segments,
+the convex segment method requires worst-case O($mn^{3}\beta[n] + m \log m$) 
+time to sort $m$ points by traversing $O(n^{3})$ convex segments.
+\QED
+
+\section{Execution times}
+\label{data}
+This section presents execution times for the sorting of some representative
+curves by the convex segment and parameterization methods.
+These empirical results are a good complement to the complexity analysis 
+of Section~\ref{s-c}, since they capture the expected case, rather than 
+the worst case, behaviour of the methods.
+The source code was written in Common Lisp and
+execution times are in seconds on a Symbolics Lisp Machine, 
+not including time for disk faults and garbage collection.
+Times for the convex segment method are the average of twelve trials, 
+while times for the parameterization method are the average of three trials.
+Preprocessing time is the time required to create the cell partition 
+and find the partners of all of the endpoints.
+Five curves are examined: two rational cubic and three non-rational quartic.
+
+We do not consider the time required to find a parameterization of the
+curve or to find the flexes and singularities of the curve.
+Each of these computations is a preprocessing step that is 
+entirely independent of sorting, and often the parameterization, singularities, 
+and flexes of a curve will already be available.
+Moreover, the computation of a curve's parameterization is of approximately the same
+complexity as the computation of a curve's singularities and flexes,
+so our comparison of sorting methods should not be biased.
+
+The first example illustrates the superiority of the convex segment method:
+even when the preprocessing time is added to the sorting time, it is more efficient.
+Also notice that the rate of growth of the convex segment method is much smaller.
+The inferiority of the tracing method (see end of Section~\ref{sp})
+is obvious from this example, and we do not consider it further.
+
+\clearpage
+%
+\begin{example}
+A semi-cubical parabola\\
+Equation of the curve: $27 y^{2} - 2x^{3} = 0$\\
+Preprocessing time: 0.27 seconds\\
+Parameterization: \{$x(t) = 6t^{2}$,\vspace{.5in} $y(t) = 4t^{3}\ :\ 
+t \in (-\infty, +\infty) \}$\\
+% -\infty\ <\ t\ <\ +\infty \}$\\
+%
+\begin{tabular}{|l|c|c|c|}  \hline
+number of sortpoints & 1 & 2 & 6 \\ \hline \hline
+convex segment &           .01 & .03 & .03 \\ \hline
+%\footnote{The results should 
+%only be compared vertically, not horizontally.
+%The reason that sorting times sometimes decrease as more points are sorted
+%is that completely different sets of points may be used in each column
+%(e.g., the five points of column 3
+%are not a subset of the six points of column 4)
+%or different start and end points may be used.
+%Thus, for example, sorting many points that are close together on a short
+%sort segment may be faster than sorting a few points that are spread out
+%on a long sort segment.} 
+convex segment + preprocessing & .28 & .30 & .30 \\ \hline
+parameterization & .47 & .63 & 1.04 \\ \hline
+tracing         & 3.14 & 2.89 & 4.77 \\ \hline
+\end{tabular}
+\end{example}
+
+% \figg{"A picture of the semi-cubical parabola"}{Semi-cubical Parabola}{3in}
+
+\vspace{.2in}
+
+The second example illustrates the tradeoff between a very fast sort 
+that requires preprocessing (convex segment method) and a moderately fast 
+sort that does not require preprocessing (parameterization method).
+%
+\begin{example}
+\label{eg-folium}
+Folium of Descartes\\
+Equation of the curve: $x^{3} + y^{3} - 15xy = 0$\\
+Preprocessing time: 2.81 seconds\\
+Parameterization: \{$x(t) = \frac{15t}{1+t^{3}}$, \vspace{.5in}$y(t) = 
+\frac{15t^{2}}{1+t^{3}}\ :\ t \in (-\infty, +\infty) \}$ \\
+% -\infty\ <\ t\ <\ +\infty \}$ \\
+%
+\begin{tabular}{|l|c|c|c|c|} \hline
+number of sortpoints & 1 & 2 & 5 & 9 \\ \hline \hline
+convex segment &           0.01 & 0.01 & 0.05 & 0.04 \\ \hline
+convex segment + preprocessing & 2.82 & 2.82 & 2.85 & 2.85 \\ \hline
+parameterization & 1.01 & 1.07 & 1.76 & 3.17 \\ \hline
+\end{tabular}
+%
+\end{example}
+% \figg{"A picture of the folium"}{Folium of Descartes}{2in}
+%
+
+\vspace{.2in}
+
+The remaining three curves are non-rational, so they are only 
+sorted with the convex segment method.
+
+\clearpage
+
+\begin{example}
+\label{eg-devil}
+Devil's Curve (with several connected components)\\
+Equation of the curve: $y^{4} - 4y^{2} - x^{4} + 9x^{2} = 0$\\
+Preprocessing time: 2.20 \vspace{.5in}seconds\\
+%
+\begin{tabular}{|l|c|c|c|} \hline
+number of sortpoints & 1 & 4 & 7 \\ \hline \hline
+convex segment & 0.09 & 0.09 & 0.10 \\ \hline
+convex segment + preprocessing & 2.29 & 2.29 & 2.30 \\ \hline
+\end{tabular}
+\end{example}
+
+% \figg{"A picture of the devil"}{Devil's curve}{2in}
+
+\vspace{.2in}
+
+\begin{example}
+\label{eg-limacon}
+Limacon\\
+Equation of the curve: $x^{4} + y^{4} + 2x^{2}y^{2} - 12x^{3} - 12xy^{2} + 27x^{2} - 9y^{2} = 0$\\
+Preprocessing time: 4.62\vspace{.5in} seconds\\
+%
+\begin{tabular}{|l|c|c|c|} \hline
+number of sortpoints & 2 & 5 & 8 \\ \hline \hline
+convex segment & .09 & .30 & .55 \\ \hline
+convex segment + preprocessing & 4.70 & 4.92 & 5.17 \\ \hline
+\end{tabular}
+\end{example}
+
+% \figg{"A picture of the limacon"}{Limacon}{1.75in}
+
+\vspace{.2in}
+
+\begin{example}
+\label{eg-Cassinian}
+Cassinian oval\\
+Equation of the curve: $x^{4} + y^{4} + 2x^{2}y^{2} + 50y^{2} - 50x^{2}-671 = 0$\\
+Preprocessing time: 5.36\vspace{.5in} seconds\\
+%
+\begin{tabular}{|l|c|c|c|} \hline
+number of sortpoints & 2 & 4 & 6 \\ \hline \hline
+convex segment & .14 & .17 & .19 \\ \hline
+convex segment + preprocessing & 5.50 & 5.53 & 5.55 \\ \hline
+\end{tabular}
+\end{example}
+% \figg{"A picture of the Cassinian oval"}{Cassinian oval}{2.25in}
+
+\vspace{.2in}
+
+We finish this section by considering the relative merits of the parameterization and 
+convex segment methods of sorting.
+Certain curves cannot, or should 
+not, be sorted by the parameterization method: curves that 
+do not possess a rational parameterization and curves for which
+a rational parameterization cannot be efficiently obtained.
+Therefore, the convex segment method is often 
+the only viable way to sort points along an algebraic curve.
+
+For those curves that can be sorted in either way, the convex segment method 
+is generally far more efficient than the parameterization method at the actual 
+sorting of the points.
+However, the parameterization method does not have the expense of 
+preprocessing that the convex segment method does.
+Therefore, when only a few points need to be sorted (over the entire lifetime 
+of the curve) and the sorting of these points must be done soon after the 
+definition of the (rational) curve, the parameterization method will usually 
+be the method of choice.
+(However, we have seen an example where the convex segment method is superior
+to parameterization even when we include preprocessing time.)
+The expense of preprocessing will be warranted whenever sorting time is a 
+valuable resource, as in a real-time application, or when the number of points 
+that will be sorted is large.
+The convex segment method will also be preferable when the curve is defined 
+long before it is ever sorted (as with a complex solid model that requires 
+several days, weeks, or even months to develop), since the preprocessing can 
+be done at any time that processing time becomes available before the sort.
+We conclude that the convex segment method is an effective new method for
+sorting points along an algebraic curve, and that in many situations it is 
+either the only or the best method.
+
+\section{Conclusions}
+\label{sco}
+We have developed a new method of sorting points along an algebraic curve
+that is superior to the conventional methods of sorting.
+Many curves that could not be sorted, or that could only be sorted slowly,
+can now be sorted efficiently.
+% The convex segment method of sorting can even be extended to curves defined by an
+% arbitrary non-polynomial function, by truncating the power series expansion
+% (e.g., Taylor series expansion) of the function about the points to be sorted,
+% thereby yielding piecewise algebraic curve approximations to the original curve.
+%%%%  The approximations are controlled by the number of terms considered in the 
+%%%%  truncated expansion.
+The development of our new method has also illustrated how an algebraic curve can 
+be decomposed into convex segments, how to locate points on segments 
+of algebraic curves, and how to decide whether two points lie on the same
+connected component of an algebraic curve.
+These results are of interest in a more general context than sorting.
+
+This work is one of the first solutions
+of a computational geometry problem that is applicable to curves of arbitrary degree.
+Methods are usually restricted to curves/surfaces of some specific or 
+bounded degree, such as polygons/polyhedra or quadrics.
+The creation and manipulation of curves and surfaces is of major importance 
+to geometric modeling.
+A sophisticated geometric modeling system should offer 
+a rich collection of tools to aid this manipulation.
+This paper has been an examination of one of these tools.
+The progress of geometric modeling depends upon the development of more tools and upon 
+the extension of more computational geometry algorithms from polygons to curves and 
+surfaces of higher degree.
+
+\section{Appendix}
+\label{sec-append}
+
+\subsection{Constructing artificial walls}
+\label{sec-caa}
+
+Section~\ref{sec-refine2} defined the artificial walls of an unbounded cell,
+and discussed the properties that these walls must satisfy.
+We now give an algorithm for constructing the artificial walls of an unbounded
+cell C.
+Recall that artificial walls must be chosen so that 
+(i)~they intersect any infinite convex segment in C exactly once,
+(ii)~they do not intersect any finite convex segments, and
+(iii)~the resulting artificially bounded cell is convex.
+Let P and Q be two extremal points on the boundary of C, such that all original endpoints
+on C's cell boundary lie between P and Q (Figure~\ref{fig-ab}).
+The artificial boundary that we construct shall consist of two or three walls:
+a wall touching P, a wall touching Q, and occasionally a wall joining these two walls.
+We call these added walls $W_{P}$, $W_{Q}$, and $W_{PQ}$, respectively.
+We must show how to create $W_{P}$, $W_{Q}$, and $W_{PQ}$.
+
+Consider the set of tangents from points of the curve inside C.
+Let $T$ be the finite subset consisting of tangents that intersect P
+and make a larger angle than \ray{PQ} with P's wall 
+(measuring from the side of P's wall that contains endpoints).
+(A method for finding these tangents is discussed below.)
+If $T = \emptyset$ and P and Q lie on different walls,
+$W_{P}$ can be $\seg{PQ}$ (Figure~\ref{fig-ab}(b)), 
+because if a curve segment crosses \seg{PQ} 
+twice, then the tangent of some point outside of \seg{PQ} intersects P and Q.
+\Comment{
+	If $T = U = \emptyset$ and 
+	P and Q lie on the same wall, then three artificial walls are necessary:
+	the three walls that complete a square with \seg{PQ} as one side 
+	(Figure~\ref{fig-ab}(a)).
+}
+If $T = \emptyset$ and P and Q lie on the same wall, 
+then $W_{P}$ can be the normal to $P$'s wall.
+If $T \neq \emptyset$, $W_{P}$ will be
+the tangent in $T$ that makes the largest angle with P's wall,
+but rotated about P so that
+it makes an even larger angle with P's wall, thus avoiding the creation of a redundant
+new endpoint at the point of tangency with the curve (Figure~\ref{fig-ab}(a)).
+$W_{Q}$ is created in an entirely analogous way.
+The only wall remaining to define is $W_{PQ}$, the wall joining $W_{P}$ and $W_{Q}$.
+If $W_{P}$ and $W_{Q}$ intersect inside the cell C, then no $W_{PQ}$ is needed.
+% (Figure~\ref{fig-ab}(c)).
+Otherwise, let $V$ be the tangents (from points of the curve inside C) that are
+parallel to \seg{PQ}.
+If $V = \emptyset$, let $W_{PQ}$ be an arbitrary line segment connecting $W_{P}$
+and $W_{Q}$.
+If $V \neq \emptyset$, $W_{PQ}$ will be a segment of the tangent in $V$ 
+that lies furthest from \seg{PQ}, translated some distance away from \seg{PQ}
+(Figure~\ref{fig-ab}(c)).
+
+\figg{fig-ab}{Constructing artificial walls}{5.75in}
+
+As part of the above construction, it is necessary to compute the tangents of nonsingular
+points that intersect a given point, as well as those that are parallel to a given line.
+The tangent at the nonsingular point $\alpha$ of the plane
+curve $f(x,y,w)=0$ (where $w$ is the homogeneous coordinate, placing the curve in
+projective space) is $\sum_{i=1}^{3} f_{x_{i}}(\alpha) x_{i}$, where $x_{1} = x$,
+$x_{2} = y$, $x_{3} = w$, and $f_{x_{i}}$ is the derivative of $f$ with respect to $x_{i}$
+\cite[p. 55]{walker}.
+Thus, the nonsingular points $\alpha = (\alpha_{1}, \alpha_{2}, 1)$ of a curve $f(x,y,w)=0$
+whose tangents intersect an arbitrary point $P = (p_{1},p_{2},p_{3}) = (p_{1},p_{2},1)$
+of the plane can be computed by solving the pair of equations 
+$\{f(\alpha) = 0, \sum_{i=1}^{3} f_{x_{i}}(\alpha) p_{i} = 0 \}$ 
+for $\alpha_{1}$ and $\alpha_{2}$, and eliminating singularities.
+For the second problem, note that the slope of the tangent at $\alpha$ is 
+$\frac{-f_{x}(\alpha)}{f_{y}(\alpha)}$, unless the line is vertical in which case 
+$f_{y}(\alpha) = 0$.
+Thus, the nonsingular points $\alpha = (\alpha_{1}, \alpha_{2}, 1)$ of a curve $f(x,y,w)=0$
+whose tangents are parallel to the vector $(a,b)$
+can be computed by solving the pair of equations 
+$\{f(\alpha) = 0,\ a f_{x}(\alpha) + b f_{y}(\alpha) = 0 \}$ 
+for $\alpha_{1}$ and $\alpha_{2}$ and eliminating singularities.
+
+% ***************************************
+
+\subsection{Three key lemmas}
+
+We present three important lemmas in this section.
+The first lemma is used in the proof of the point location theorem (Theorem~\ref{Tps}),
+as well as the proof of the second lemma below.
+The second lemma is crucial in the proofs of both of the main theorems 
+(Theorems~\ref{Tpner} and \ref{Tps}).
+The third lemma is used in Theorem~\ref{Tpner}.
+
+\begin{lemma}
+\label{lem-argh}
+Let $x$ be any nonsingular point of the curve $F$ in cell C.\\
+Let $\SSo(x)$ = \mbox{\{endpoints $W$ in C $\mid$}
+\begin{quote}
+\begin{enumerate}
+% IF YOU ADD A CONDITION, CHANGE NUMBERING IN LAST LINE OF first paragraph of PROOF
+\item \mbox{$\#\{P \in\seg{xW}\cap F: P \mbox{ faces x}\} =
+\#\{P \in \seg{xW}\cap F: P \mbox{ faces W} \}$}
+\item $\forall\ \alpha \in \seg{xW}$,
+$\#\{P \in\seg{x\alpha}\cap F: P \mbox{ faces x}\} \leq
+\#\{P \in \seg{x\alpha}\cap F: P \mbox{ faces W}\} $
+\}
+\end{enumerate}
+\end{quote}
+(Note that $\SSo(x)$ is a superset of the $S(x)$ of Theorems~\ref{Tpner} and \ref{Tps}.)
+If $s \in \SSo(x)$, then neither $s$'s convex segment nor $x$'s convex 
+segment can cross \seg{sx}.
+\end{lemma}
+\Heading{Proof:}
+Suppose that $s$'s convex segment crosses \seg{sx} at $y$ (Figure~\ref{fig-27a}).
+Then, using Lemma~\ref{Ls}, $\#\{P \in \seg{sy} \cap F: \mbox{ P faces $s$}\} = 
+\#\{P \in \seg{sy} \cap F: \mbox{ P faces $y$}\} =
+\#\{P \in \seg{sy} \cap F: \mbox{ P faces $x$}\}$.
+Since $y$ faces $s$ and $y \not\in \seg{sy}$, 
+if we choose $\alpha \in \seg{yx}$ such that \seg{y\alpha} 
+does not contain any intersections with the curve, 
+$\#\{P \in \seg{s\alpha} \cap F: \mbox{ P faces $s$}\} >
+\#\{P \in \seg{s\alpha} \cap F: \mbox{ P faces $x$}\}$.
+Since $s \in \SSo(x)$, we know that 
+$\#\{P \in \seg{sx} \cap F: \mbox{ P faces $s$}\} =
+\#\{P \in \seg{sx} \cap F: \mbox{ P faces $x$}\}$.
+Therefore, the above inequality 
+becomes $\#\{P \in \seg{\alpha x} \cap F: \mbox{ P faces $s$}\} <
+\#\{P \in \seg{\alpha x} \cap F: \mbox{ P faces $x$}\}$, 
+which contradicts $s \in \SSo(x)$ (condition 2).
+
+\figg{fig-27a}{$s$'s segment cannot cross \seg{sx}}{1.25in}
+
+The proof for $x$'s convex segment is similar.
+Suppose that $x$'s segment crosses \seg{sx} at $y$.
+% A similar proof to the one for $s$'s segment, only simpler, establishes the contradiction.
+Then $\#\{P \in \seg{xy} \cap F: \mbox{ P faces $x$}\} = 
+\#\{P \in \seg{xy} \cap F: \mbox{ P faces $y$}\} = 
+\#\{P \in \seg{xy} \cap F: \mbox{ P faces $s$}\}$.
+Since $y$ faces $x$, if we choose $\alpha \in \seg{ys}$ such that \seg{y\alpha} 
+does not contain any intersections with the curve, 
+$\#\{P \in \seg{x\alpha} \cap F: \mbox{ P faces $x$}\} 
+> \#\{P \in \seg{x\alpha} \cap F: \mbox{ P faces $s$}\}$,
+in contradiction of $s \in \SSo(x)$.
+\QED
+
+\begin{lemma}
+\label{lem-645}
+Let $x$ be any nonsingular point of the curve $F$ in cell C,
+and let $z$ be any point such that $z$ lies on $x$'s convex segment
+and \arc{xz} does not contain any endpoints in its interior (Figure~\ref{fig645}).
+Let $\SSt(x)$ = \{endpoints $W$ in C $\mid$
+\begin{quote}
+\begin{enumerate}
+\item $W$ faces $x$
+\item \mbox{$\#\{P \in\seg{xW}\cap F: P \mbox{ faces x}\} =
+\#\{P \in \seg{xW}\cap F: P \mbox{ faces W} \}$}
+\item $\forall\ \alpha \in \seg{xW}$,
+$\#\{P \in\seg{x\alpha}\cap F: P \mbox{ faces x}\} \leq
+\#\{P \in \seg{x\alpha}\cap F: P \mbox{ faces W}\} $
+\}
+\end{enumerate}
+\end{quote}
+(Note that $\SSt(x)$ is a superset of the $S(x)$ of Theorems~\ref{Tpner} and \ref{Tps}.)
+Then \ray{xs} does not cross $\arc{xz} \setminus \{z\}$ 
+for any $s \in \SSt(x)$.
+\end{lemma}
+%
+\figg{fig645}{\ray{xs} does not cross \arc{xz}}{2.6in}
+%
+\Heading{Proof:}
+Let $s \in \SSt(x)$.
+Suppose, for the sake of contradiction, that $\ray{xs}$ crosses 
+$\arc{xz} \setminus \{z\}$ at $y$.
+\label{thpr}
+There are three cases to consider: $y \in \seg{xs}$, $y = s$, and $y \not\in \seg{xs}$
+(i.e., $s \in \seg{xy}$).
+$y \in \seg{xs}$ contradicts Lemma~\ref{lem-argh}.
+$y = s$ is also contradictory, since \arc{xz} does not contain any endpoints in its 
+interior.
+$s \in \seg{xy}$ is the only nontrivial case (Figure~\ref{66}).
+Recall an argument used at the beginning of Lemma~\ref{Ls}:
+since \arc{xy} is part of a convex segment lying in a cell
+and $x$ and $y$ are nonsingular points,
+the points of entry and departure of the curve into
+the closed region bounded by $\seg{xy}$ and \arc{xy}
+must be along $\seg{xy}$ and must pair up into couples.
+In particular, $s$ must pair with another point, say $t \in \seg{xy}$.
+We shall use $t$ to develop a contradiction of Lemma~\ref{Ls} for the convex 
+segment \arc{xy}.
+Since \arc{st} is convex, $s$ faces $t$; and since $s \in \SSt(x)$, $s$ also faces $x$. 
+Therefore, $t \in \seg{xs}$.
+Since \mbox{$s \in \SSt(x)$}, 
+\[ \#\{P \in \seg{xs} \cap F: \mbox{ P faces $x$}\}
+= \#\{P \in \seg{xs} \cap F: \mbox{ P faces $s$}\} \]
+Noting that $\seg{xs} = \seg{xt}\ \cup\ \seg{ts}\ \cup\ \{t\}$ and 
+$t$ faces $s$, this becomes 
+\[ \#\{P \in \seg{xt} \cap F: \mbox{ P faces $x$}\} +
+\#\{P \in \seg{ts} \cap F: \mbox{ P faces $x$}\} + 0 =  \]
+\nopagebreak
+\[ \#\{P \in \seg{xt} \cap F: \mbox{ P faces $s$}\} +
+\#\{P \in \seg{ts} \cap F: \mbox{ P faces $s$}\} + 1\ \ \  \]
+Moreover, by Lemma~\ref{Ls},
+\[ \#\{P \in \seg{ts} \cap F: \mbox{ P faces $s$}\} = \]
+\[ \#\{P \in \seg{ts} \cap F: \mbox{ P faces $t$}\} = \]
+\[ \#\{P \in \seg{ts} \cap F: \mbox{ P faces $x$} \} \]
+Upon cancelling terms in the above equation, we conclude that
+\[ \#\{P \in \seg{xt} \cap F: \mbox{ P faces $x$}\} > \]
+\[ \#\{P \in \seg{xt} \cap F: \mbox{ P faces $s$}\} =\  \]
+\[ \#\{P \in \seg{xt} \cap F: \mbox{ P faces $y$}\}\ \  \]
+But this contradicts condition (3) of Lemma~\ref{Ls} 
+($\x = x$, $\y = y$).
+These contradictions lead us to conclude that \ray{xs} does not cross 
+$\arc{xz} \setminus \{z\}$.
+\QED
+
+\figg{66}{$s \in \seg{xy}$}{1.25in}
+
+\begin{corollary}
+\label{cor-645}
+Let $x$, $z$, C and $\SSt(x)$ be as in the previous lemma.
+Let $z'$ be the intersection of \ray{xz} with the boundary of C,
+let $\SSt'(x) =$ \{$s'$:$s'$ is the intersection of \ray{xs} with the 
+boundary of C, $s \in \SSt(x)$\},
+and let $x_{1},x_{2}$ be the intersections of $x$'s tangent with the cell boundary
+(Figure~\ref{fig645}).
+If $\SSt'(x)$ is sorted along the boundary of C from $x_{1}$ to $x_{2}$,
+$z'$ is either the first or the last element.
+\end{corollary}
+
+\begin{lemma}[{\cite[p. 119]{jj}}]   % Lemma B.8, p. 119
+\label{Ll}
+Let \wo\ and \wt\ be partners.
+If \wt\ lies on \wo's tangent, then \wo\ must be a flex.
+In other words, if \wt\ lies on \wo's tangent, 
+then \wo\ and \wt\ lie on the same cell wall.
+\end{lemma}
+
+\subsection{Computing the infinite direction from a point}
+
+In order to compute the type of an infinite convex segment (Section~\ref{sec-pI}), 
+it is necessary to compute the infinite direction from a point of that infinite segment.
+As seen in Theorem~\ref{Tps}, for our purposes the point will either be an artificial
+endpoint or a point outside the bounded cell.
+The following lemma shows how to perform this computation.
+
+\begin{lemma}
+\label{lem-ty}
+Let $x$ be a point that lies on an infinite convex segment,
+and let $T_{x}^{+}$ and $T_{x}^{-}$ be the two rays from $x$ along its tangent.
+Let C be the unbounded cell (before refinement) that contains $x$, and 
+let $C' \subset C$ be the associated artificially bounded cell (after refinement).\\
+(i) If $x$ is an artificial endpoint,
+$T_{x}^{+}$ is the infinite direction from $x$ if 
+$T_{x}^{+}$ points into $C'$.\\
+(ii) If $x$ lies outside $C'$, then 
+$T_{x}^{+}$ is the infinite direction from $x$ if and only if
+\begin{quote}
+\begin{description}
+\item[(a)] $T_{x}^{+}$ does not intersect the boundary of C, or
+\item[(b)] both $T_{x}^{+}$ and $T_{x}^{-}$ intersect the boundary of C, but $T_{x}^{+}$ 
+does not enter $C'$
+\end{description}
+\end{quote}
+\end{lemma}
+\Heading{Proof:}
+(i) is clear, so assume that $x$ lies outside $C'$.
+It is simple to show that at least one of the rays must intersect the boundary
+of C, and we leave this as an exercise for the reader.
+
+(a) Suppose that $T_{x}^{+}$ does not intersect the boundary of C and $T_{x}^{-}$ does.
+If $T_{x}^{+}$ is the finite direction,
+then the convex segment must travel to a cell wall after leaving $x$ along $T_{x}^{+}$
+(Figure~\ref{fig-shouldIuse}).
+But, in so doing, it will block the other half of the convex segment 
+(leaving $x$ along $T_{x}^{-}$) from travelling to infinity.
+Therefore, $T_{x}^{+}$ must be the infinite direction.
+
+(b) Suppose that both $T_{x}^{+}$ and $T_{x}^{-}$ intersect the boundary of C.
+Let $T_{x}$ be the entire tangent at $x$, which 
+divides C into a bounded and an unbounded half.
+Let \arc{P\infty} be $x$'s infinite convex segment before refinement.
+Since \arc{P\infty} must lie entirely on one side of $x$'s tangent (by convexity)
+and in an unbounded region (because \arc{P\infty} is infinite), it must lie
+on the unbounded half.
+In particular, the unbounded half must contain the original endpoint $P$, which
+lies in $C'$ on an original wall.
+Thus, $T_{x}$ must enter $C'$.
+If both $T_{x}^{+}$ and $T_{x}^{-}$ enter $C'$, then 
+all of $T_{x}$ (and in particular $x$) must lie in $C'$, by the
+convexity of $C'$.
+Thus, since $x \not\in C'$, exactly one of $T_{x}^{+}$ and $T_{x}^{-}$
+enters $C'$.
+The unique ray that enters $C'$ must be the finite direction, otherwise 
+the segment leaving $x$ in the infinite direction will be blocked, just as in (a).
+\QED
+
+\figg{fig-shouldIuse}{$T_{x}^{+}$ cannot be the finite direction}{2.5in}
+
+\section{Acknowledgements}
+This work formed part of the Ph.D. thesis of John Johnstone, who is very grateful for
+the guidance of his advisor, John Hopcroft.
+The thorough and insightful reading of the main referee is also much appreciated.
+%
+
+% ARE THESE ABBREVIATIONS CORRECT?
+% CORRECT HERTEL/MEHLHORN REFERENCE (E.G., WHAT DOES FTC STAND FOR? WHAT LNCS # IS IT?)
+
+\begin{thebibliography}{Abhyankar 87b}
+
+\bibitem{abhy} Abhyankar, S., (1983),
+``Desingularization of Plane Curves,''
+{\em Proc. of Symposia in Pure Mathematics}, AMS, 40, 1, 1--45.
+
+% \bibitem{abba1} Abhyankar, S., and Bajaj, C. (1987),
+% ``Automatic Rational Parameterization of Curves and Surfaces I:
+% Conics and Conicoids,'' {\em Computer Aided Design}
+% 19:1, 11-14.
+% % Jan. 1987
+
+% \bibitem{abba2} Abhyankar, S., and Bajaj, C. (1987),
+% ``Automatic Rational Parameterization of Curves and Surfaces II:
+% Cubics and Cubicoids,'' {\em Computer Aided Design}
+% 19:9, 499-502.
+% % Nov. 1987
+
+\bibitem{abba3} S. S. Abhyankar and C. Bajaj,
+{\em Automatic parameterization of rational curves and surfaces III:
+algebraic plane curves},
+Computer Aided Geometric Design, 5, 1988, 309--321.
+% Tech. Rep. CSD-TR-619, Dept. of CS, Purdue Univ.
+% Aug. 1986
+
+% \bibitem{abba4} Abhyankar, S., and Bajaj, C., (1987),
+% ``Automatic Rational Parameterization of Curves and Surfaces IV: Algebraic Space Curves,''
+% Computer Aided Geometric Design, to appear.
+%% Tech. Rept. 703, Comp. Science, Purdue University.
+
+\bibitem{ahu} 
+A. Aho, J. Hopcroft, and J. Ullman, 
+{\em The Design and Analysis of Computer Algorithms},
+Addison-Wesley, Reading, MA, 1974.
+
+\bibitem{arnon83}
+D. S. Arnon, {\em Topologically reliable display of algebraic curves},
+J. Computer Graphics, 17(1983), 219--227.
+
+\bibitem{As} 
+T. Asano, T. Asano, and H. Imai,
+{\em Partitioning a polygonal region into trapezoids},
+Res. Mem. RMI84-03, Dept. Math. Eng. and Instrumentation Physics, Univ. of 
+Tokyo, 1984.
+
+\bibitem{Av} 
+D. Avis and G. T. Touissant,
+{\em An efficient algorithm for decomposing a polygon into star-shaped
+components},
+Pattern Recognition, 13(1981), 395--398.
+
+% \bibitem{bhh} Bajaj, C., Hoffmann, C., and Hopcroft, J.,
+% ``Tracing Planar Algebraic Curves,''
+% Tech. Rep. CSD-TR-637, Dept. of Computer Science, Purdue Univ,
+% September 1987.
+
+\bibitem{baj}
+C. Bajaj,
+{\em Geometric Modeling with Algebraic Surfaces},
+in Mathematics of Surfaces III, Oxford University Press, to appear.
+
+\bibitem{bhhl} 
+C. Bajaj, C. Hoffmann, J. Hopcroft, and B. Lynch,
+{\em Tracing surface intersections},
+Computer Aided Geometric Design, 5, 1988, 285--307.
+% Tech. Rept. 725, Comp. Science, Purdue University. 
+
+% \bibitem{BK87a} Bajaj, C., and Kim, M., (1987),
+% Convex Decomposition of Objects Bounded by Algebraic Curves.
+% Tech. Rept. 677, Comp. Science, Purdue University.
+
+% \bibitem{bajkim87b}
+% Bajaj, C., and Kim, M., (1987),
+% Convex Hull of Objects Bounded by Algebraic Curves.
+% Tech. Rept. 697, Comp. Science, Purdue University.
+
+\bibitem{bajj}
+C. Bajaj and A. Royappa,
+% {\em Note on an efficient implementation of Sylvester's resultant for multivariate 
+% polynomials},
+% Technical Report CSD-TR-718, Dept. of Computer Science, Purdue University, 1987. 
+{\em GANITH: An Algebraic Geometry Package},
+Technical Report CSD-TR-914, Dept. of Computer Science, Purdue University.
+
+\bibitem{Ca}
+J. F. Canny, 
+{\em The Complexity of Robot Motion Planning},
+MIT Press, Cambridge, MA, 1987.
+% Ph.D. Thesis, Dept. of Electrical Engineering and Computer Science, MIT, 1987.
+
+\bibitem{cd} 
+B. Chazelle and D. P. Dobkin, (1985).
+{\em Optimal convex decompositions},
+in Computational Geometry, G. T. Toussaint, ed., North-Holland, New York, 1985, 
+63--133.
+
+\bibitem{CI} B. Chazelle and J. Incerpi, 
+{\em Triangulation and shape-complexity},
+ACM Trans. on Graphics, 3(1984), 135--152.
+% April 1984
+
+\bibitem{Co75}
+G. E. Collins, 
+{\em Quantifier elimination for real closed fields by cylindrical 
+algebraic decomposition}, 
+Proc. 2nd GI Conference on Automata Theory and Formal Languages, 
+Lecture Notes in Computer Science 35, Springer, Berlin, 1975, 134--183.
+
+% \bibitem{col}
+% G. E. Collins, ``The Calculation of Multivariate Polynomial Resultants,''
+% {\it Journal of the ACM} 18:4 (October 1971), 515--532.
+%% especially page 527
+
+\bibitem{Do}
+M. P. Do Carmo, 
+{\em Differential Geometry of Curves and Surfaces},
+Prentice-Hall, Englewood Cliffs, NJ, 1976.
+
+% \bibitem{edelsbrunner} Edelsbrunner, H. (1987).
+% Algorithms in Combinatorial Geometry.
+% New York: Springer-Verlag.
+
+\bibitem{G} 
+M. Garey, D. S. Johnson, F. P. Preparata, and R. E. Tarjan,
+{\em Triangulating a simple polygon},
+Info. Proc. Lett., 7(1978), 175--80.
+% 7(4)
+
+% \bibitem{gj87} Goodrich, M. T., \& Johnstone, J. K. (1987).
+% Coordinated Walking: A Method for Intersecting Algebraic Curve Segments.
+% Manuscript.
+
+\bibitem{H} 
+S. Hertel and K. Mehlhorn, 
+{\em Fast triangulation of simple polygons},
+Proc. FCT'83, Borgholm, Lecture Notes in Computer Science, 
+Springer, Berlin, 1983, 207--218.
+
+\bibitem{hh87}
+C. Hoffmann and J. Hopcroft, 
+{\em The potential method for blending surfaces and corners},
+in Geometric Modeling: Algorithms and New Trends, G. Farin, ed.,
+SIAM, Philadelphia, 1987, 347--365.
+
+\clearpage
+
+\bibitem{jj} 
+J. Johnstone, 
+{\em The sorting of points along an algebraic curve}, 
+Technical Report 87-841, Ph.D. thesis, Dept. of Computer Science, 
+Cornell University, Ithaca, NY, 1987.
+
+\bibitem{keil} 
+J. M. Keil, 
+{\em Decomposing polygons into simpler components}, 
+Technical Report 163/83, Ph.D. thesis, Dept. of Computer Science, 
+Univ. of Toronto, 1983.
+% April 1983
+
+\bibitem{kirk} 
+D. Kirkpatrick, 
+{\em Optimal search in planar subdivisions}, 
+this Journal, 12(1983), 28--35.
+
+\bibitem{law}
+J. D. Lawrence, 
+{\em A Catalog of Special Plane Curves}, 
+Dover, New York, 1972.
+
+% \bibitem{levi} Levin, J. (1979):
+% {\em Mathematical Models for Determining the Intersections of Quadric Surfaces},
+% Computer Graphics and Image Processing, 11, 73-87.
+
+\bibitem{NS}
+W. M. Newman and R. F. Sproull, 
+{\em Principles of Interactive Computer Graphics},
+McGraw-Hill, New York, 1979.
+
+% \bibitem{ock} Ocken, S., Schwartz, S., and Sharir, M. (1986):
+% {\em Precise Implementation of CAD Primitives Using Rational Parameterization 
+% of Standard Surfaces}, in {\em Planning, Geometry, and Complexity of Robot
+% Motion}, Schwartz, Sharir, and Hopcroft, eds., 245-266.
+
+\bibitem{O} 
+J. O'Rourke, 
+{\em The complexity of computing minimum convex covers for polygons},
+Proc. 20th Annual Allerton Conf. on Comm. Control and Comput., 1982, 75--84.
+
+\bibitem{PS} 
+F. Preparata and M. Shamos, 
+{\em Computational Geometry: An Introduction},
+Springer-Verlag, New York, 1985.
+
+\bibitem{S} 
+J. R. Sack,
+{\em An $O(n \log n)$ algorithm for decomposing simple rectilinear polygons
+into convex quadrilaterals}.
+Proc. 20th Annual Allerton Conf. on Comm. Control and Comput., 1982, 64--74.
+
+\bibitem{T} 
+R. E. Tarjan and C. J. Van Wyk,
+{\em An $O(n \log \log n)$-time algorithm for triangulating a simple polygon},
+this Journal, 17(1988), 143--178.
+
+\bibitem{tm} 
+S. B. Tor and A. E. Middleditch,
+{\em Convex decomposition of simple polygons},
+ACM Trans. on Graphics, 3(1984), 244--265.
+
+\bibitem{walker} 
+R. J. Walker,
+{\em Algebraic Curves},
+Springer-Verlag, New York, 1950.
+
+\end{thebibliography}
+%
+\end{document}
+FIGURES:
+\figg{2}{added endpoints at a sing: RB', B'B'',B''S}{.1in}  % 2nd
+	For example, the two segments \arc{RS} and \arc{ST} in Figure~\ref{2}
+	will be replaced by \arc{RB'}, \arc{B'B''}, and \arc{B''S}.
+\figg{2.13}{Figure 2.13, p. 38}{.1in}                       % 3rd
+\figg{3.2}{Figure 3.2, p. 56}{.1in} % not strictly necessary, 5th
+\figg{3.4}{Figure 3.4, p. 58 with an example of Q3 
+        which P does *not* face}{.1in} % again not necessary, 6th
+\figg{3.5}{Figure 3.5, p. 59}{.1in}                         % 7th
+\figg{3.12}{Figure 3.12, p. 69}{.1in}                       % 8th
+\figg{3.13}{Figure 3.13, p. 70}{.1in}                       % 9th

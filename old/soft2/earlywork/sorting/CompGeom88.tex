@@ -1,0 +1,715 @@
+\documentstyle[12pt]{article} 
+%
+\input{macros}
+%
+% Page format
+%
+\DoubleSpace
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\topmargin}{0pt}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+%
+%
+\title{Convex decomposition and point location for algebraic curves}
+\author{$\begin{array}{lcl}
+\mbox{Chanderjit Bajaj\thanks{Supported in part by NSF Grants 85-21356 and
+CCR 86-19817.}} & &
+\mbox{John K. Johnstone\thanks{Supported by an NSERC 1967 Graduate
+Fellowship and an Imperial Esso Graduate Fellowship.}} \\
+\mbox{Purdue University} & \mbox{ and\ \ \ } & \mbox{The Johns Hopkins University} \\
+\mbox{W. Lafayette, IN\ \  47907} & & \mbox{Baltimore, MD\ \ 21218} \end{array}$}
+\begin{document}
+%
+\maketitle
+%
+\begin{summary}{Summary of Results}
+In this paper, we present a method for decomposing an arbitrary plane
+algebraic
+curve into convex segments. This decomposition is then used to solve
+the problem of point location on plane algebraic curves. 
+\end{summary}
+\section{Introduction}
+%
+The decomposition of an object into simple objects is an important theme
+in computational geometry.
+It finds application in geometric modeling, robotics,
+%(e.g., motion planning \cite{lozano-perez grown-obstacles}), 
+vision,
+% (e.g., shape recognition), 
+and graphics.
+% (e.g., interference detection)
+Decomposition proves to be particularly
+useful in divide-and-conquer algorithms, 
+since simple objects are easily conquered.
+There has been a good deal of work on the decomposition of 
+(simple, multiply connected, rectilinear) polygons 
+into simple components
+(triangles \cite{garey,hertel,incerpi,tarjan}, 
+quadrilaterals \cite{sack}, 
+trapezoids \cite{asano}, 
+convex polygons  \cite{cd,tm},
+star-shaped polygons \cite{avis}), 
+sometimes with added criteria (minimum decomposition \cite{cd,keil}, 
+minimum covering \cite{orourke}, 
+decomposition with no Steiner points \cite{keil}).
+However, all of this work has been in the polygonal (or at best polyhedral)
+world.
+This paper considers a decomposition of  a {\em plane algebraic curve} 
+(of arbitrary degree) into convex segments, thus extending the idea of
+decomposition from polygons to curved objects.
+
+Another problem that has received considerable attention in computational
+geometry is planar point location (see \cite{prepsham85} for a good
+survey). 
+Here we consider an extension of this problem, again to the curved domain.
+Given an edge E of an algebraic curve C,
+defined by the implicit equation $f(x,y) = 0$ of C together with
+two endpoints $V_{a}$ and $V_{b}$, and
+given a set of points S on C, we wish to determine the points of S
+which lie on E.
+This is a fundamental problem in geometric modeling whose complexity stems
+from the implicit representation of the edge E.
+One solution is to trace the edge E from $V_{a}$ to $V_{b}$,
+marking the points of $S$ which are encountered in the trace \cite{bhhl}.
+However, this method is slow and has other 
+disadvantages.
+We present a more efficient solution which uses the curve decomposition as
+a preprocessing step.
+
+Curve decomposition and point location on curve segments are both
+operations of a fundamental nature and prove useful in the solution of many 
+problems, such as the sorting of points along an algebraic curve \cite{jj},
+the intersection of algebraic curve segments \cite{gj87}, and the convex hull 
+and convex decomposition of objects bounded by plane algebraic curves 
+\cite{bajkim87a,bajkim87b}.
+Note that these methods can also extend to space curves defined as the
+intersection of two algebraic surfaces \cite{abba4,jj}.
+
+In the next section, we describe our convex decomposition method.
+In subsequent sections, this decomposition is used to develop a new
+method for point location, the complexity of convex decomposition is analyzed,
+and the usefulness of a convex decomposition is motivated by an example.
+
+\section{Convex Decomposition}
+
+A segment is {\em convex} if no line has more than two intersections with it.
+We wish to decompose an arbitrary plane algebraic curve into convex segments.
+Note that all curves of degree one (lines) and two (conics) are already convex,
+by Bezout's Theorem \cite{walker}.
+It is implicit in this paper that all curves being discussed are algebraic,
+irreducible, and planar.
+
+The singularities and points of inflection (or flexes) of a
+curve are instrumental in its convex decomposition.
+A {\em singularity} of the curve $f(x,y)=0$ is a point P of the curve
+such that $f_{x}(P) = f_{y}(P) = 0$.
+It is a point where the curve crosses itself or changes direction sharply.
+A {\em flex} (or point of inflection) is a nonsingular point P 
+whose tangent has three or more intersections with the curve at P.
+Equivalently, it is a point of zero curvature.
+These points, which are fundamental in algebraic geometry, form a skeleton
+of the curve, and can be used in many useful ways.
+(For example, singularities can be used for curve parameterization 
+\cite{abba3}).
+Their use in convex decomposition underlines their importance to
+computational geometry of higher degrees.
+The flexes and singularities of an algebraic curve can be thought of as
+the analogues of the vertices of a polygon.
+They will form many of the endpoints in the convex decomposition.
+%
+\begin{theorem}
+\label{deke}
+The tangents of the singularities and flexes of an algebraic curve slice
+the curve into convex segments.\footnote{Strictly speaking,
+	the tangents of flexes of {\em even} order are not necessary.
+	See \cite{jj} for details.}
+That is, if \arc{PQ} is a nonconvex segment of the curve, then some tangent of 
+a singularity or flex intersects \arc{PQ} (Figure~\ref{2.8}).
+\end{theorem}
+\Heading{Sketch of Proof:}
+Assume w.l.o.g. that \arc{PQ}\ does
+\marginpar{(*)}
+not contain a singularity or flex.
+Since \arc{PQ}\ is not convex, we can find a line that crosses it at
+three distinct points: $x_{1}, x_{2}, x_{3}$.
+By (*), \arc{x_{1}x_{3}}\ must be a spiral.
+Consider the region R bounded by \arc{x_{1}x_{3}}\ and \seg{x_{1}x_{3}}.
+It is sufficient to show that R contains a flex or singularity S,
+since then S's tangent must cross the \arc{x_{1}x_{3}}\ boundary of R.
+It can be shown that the curve must enter R as it leaves $x_{1}$ and
+must eventually leave R via \seg{x_{1}x_{3}}.
+However, in order to do this, the curve must cross itself or change its
+curvature inside of R.
+\QED
+
+It is necessary to compute the singularities and flexes of the curve, 
+as well as their tangents.
+We outline succinctly how this is done.
+The singularities of a curve $f(x,y)=0$ are the solution set of the system
+$\{f_{x}=0,f_{y}=0,f=0\}$,
+while the flexes of a curve are the intersections of the
+Hessian of the curve (the determinant of the matrix of double derivatives of 
+the curve's equation) with the curve \cite{walker}.
+The tangents of a singularity of the curve $f=0$ 
+can be found by translating the singularity to
+the origin. The factors of the order form (the polynomial
+consisting of the terms of lowest degree in the translated $f$) are the equations of the tangents to the singularity \cite{walker}.
+The tangent at a flex is computed as follows.
+The curve is placed into projective space (normal affine
+space with an added line at infinity) by homogenizing its equation to
+$f(x,y,z)=0$ (where $z$ is the homogenizing variable).
+Then the tangent 
+of a flex P is $f_{x}(P) + f_{y}(P) + f_{z}(P) = 0$ \cite{walker}.
+
+Theorem~\ref{deke} does not yet solve our problem, because it only yields a
+confused collection of endpoints of convex segments, not a collection of 
+convex segments.
+(The endpoints of the convex segments are the singularities, the flexes, and
+the other points\footnote{In the spirit 
+	of polygonal decomposition algorithms and our description 
+	of the singularities and flexes as the vertices of the curve,
+	these `other points of intersection' play the role of Steiner points.}
+of intersection of the tangents with the curve.)
+The more challenging step of pairing up the endpoints must yet be described.
+Before we can attack this pairing problem, we must pause to
+refine our collection of convex segments.
+
+The tangents at the singularities and flexes of a curve form an
+arrangement of lines \cite{edelsbrunner}, subdividing the plane
+of the curve into several cells, which we collectively call a 
+{\em cell partition}.
+Some of the cells contain a convex segment of the curve, 
+others contain several convex segments, and the rest
+do not contain any of the curve (Figure~\ref{2.8}).
+Two points of the curve are said to be {\em partners} if they 
+define a convex segment of the decomposition.
+\ifFull
+For each cell of the partition, we record the tangents that bound it
+and the convex segment endpoints that lie on its boundary.
+\fi
+
+The present collection of convex segments may have to be refined at 
+singularities.
+Consider a convex segment whose two endpoints are the same 
+point (i.e., a loop), which might occur around a 
+singularity (Figure~\ref{2.8}(a)).
+We want to avoid this situation, since pairing will turn out to be easier if 
+the two endpoints of a convex segment are different points.
+Consider a singularity at which three or more convex segments meet.
+This singularity has several partners and, more importantly,
+there exists a cell C such that the singularity has two partners in C.
+We want to avoid this situation, as well, since
+it is easier to find the partner of a point in a cell if this 
+partner is unique.
+(There are other reasons to dislike endpoints with identical partners or 
+too many partners: in the former case, 
+the segment defined by two endpoints is no longer unambiguous, and in the
+latter, the order of the convex segments along the curve is no longer
+implicit from the endpoint pairings.)
+Therefore, all convex segments with singular endpoints shall be replaced by
+convex segments with nonsingular endpoints.
+
+For each branch that passes through a singularity S, a pair of points will
+be found, one on either side of the singularity.
+Consider a branch B and its two added points $B',B''$.
+The added points for branch B 
+will receive the convex segments that enter the singularity along B.
+For example, if there are two such segments \arc{RS} and \arc{ST} (as will
+usually be the case), these segments will be replaced by \arc{RB'},
+\arc{B'B''}, and \arc{B''S} (Figure~\ref{2}).
+
+The first step in finding the added points is to blow up the curve at the 
+singularity, by a series of quadratic transformations \cite{walker}.
+This reduces the singularity to a number of simple points and, in particular,
+isolates each branch of the singularity (Figure~\ref{2.13}).
+Once a branch is isolated, it is simple to 
+walk \cite{bhhl} along it robustly.
+(It would be unclear how to walk from the singularity along the desired branch
+on the original curve. This problem is resolved by walking from the image
+singularity along the isolated image branch.)
+Therefore, upon each image branch, two points are found by walking (a very 
+short distance) in either direction from the image singularity.
+Finally, these points are mapped back to the original curve
+to become new endpoints, replacing the singularity.
+The segment between a pair of added points is not a bonafide convex segment.
+It is implicitly split into two parts by the two cells that it straddles,
+and each of these halves is treated as 
+a subsegment of the convex segment that it neighbours.
+
+%The added points will be chosen very close to the 
+%singularity.\footnote{In particular, certainly 
+%	close enough that no endpoint is walked
+%	over between the singularity and an added point.}
+%Therefore, the segment between each pair of added points is very short.
+%This segment is implicitly split into two parts:
+%one part for each of the two cells that it straddles.
+%The segment between added points is not a bonafide convex segment:
+%each of its halves is treated as 
+%a subsegment of the convex segment that it neighbours.
+%In other words, the two added points on a branch 
+%are treated as extensions of the singularity.
+
+% The added points should be chosen as close as possible to the singularity,
+% since the segments between the added points will be invisible to our
+% point-location technique. In particular, suppose that the added point
+% is at a (Euclidean) distance \alpha from the singularity.
+% Then we shall have to assume that any point within the disc of radius
+% \alpha (and in the proper cell) lies on the added segment.
+% Note: the added segment adjacent to convex segment C should be considered
+% part of C. That is, if S is the set of points on the added segment
+% and T is the set of points on C, then we should act as if SuT all lie
+% on the same convex segment.
+% Therefore, we do not have to worry about mistakenly
+% assigning points to an added segment neighbouring C rather than C.
+% But we certainly want to ensure that no convex segment other than C
+% lies in the disc of radius \alpha about the singularity.
+% Therefore, we should choose \alpha to be small.
+
+
+The final preparation for pairing concerns infinite convex segments.
+An infinite convex segment has only one endpoint.
+However, it turns out that the pairing process is simplified if each 
+convex segment has two endpoints.
+Therefore, an artificial endpoint is added to each infinite segment,
+as follows.
+Infinite segments lie in open cells. 
+Every open cell is artificially closed by a line 
+segment (Figure~\ref{3.9}).\footnote{The line segment is chosen so that it
+	only intersects infinite convex segments in the cell,
+	and each of those exactly once.}
+The point of intersection of an infinite convex segment and the closing
+line segment of its cell is now considered an (artificial) endpoint.
+All pairs that include an artificial endpoint are discarded at the end of
+the pairing phase.
+
+After the above preparatory steps, 
+the set of endpoints of convex segments assumes the following normal form:
+\begin{itemize}
+\item
+	 every endpoint has exactly two partners
+\item
+	 every cell is a closed polygon
+\end{itemize}
+Notice that the normalization stage not only makes pairing easier:
+it also creates a cleaner set of convex segments that better reflect the curve.
+For example, when (and only when) the first normal condition is satisfied,
+pairing will create a collection of convex segments with an implicit order.
+
+Let us develop some terminology (viz., what it means for a point to 
+`face' another).
+Let T be a tangent of a point P that lies on the boundary of cell C.
+T splits the plane into two halfplanes.
+If P is a singularity or flex, then the {\em inside} of T w.r.t. C 
+is the halfplane that contains C, otherwise it is the halfplane that contains
+all of the curve in the neighbourhood of P (Figure~\ref{3.2}).
+If P is not a flex, then P {\em faces} another point Q w.r.t. C 
+if Q lies on the inside of P's tangent w.r.t. C.
+If P is a flex, then the definition is more complicated,
+but Figure~\ref{3.4} captures its essence.
+
+We are ready to show how to pair up the endpoints.
+Let E be an endpoint (of a convex segment).
+The problem is to find the partners of E.
+Suppose that E is the endpoint of convex segment S in cell C (so E lies on
+the boundary of C).
+E's partner must certainly lie in C (so the determination of partners 
+in all single-segment cells is trivial), but we can say more.
+The partner F must satisfy the following conditions (exhibited in 
+Figure~\ref{3.5}), which capture the fact that 
+the intersections of the curve with \seg{EF}
+will pair up into couples that face each other:
+\begin{enumerate}
+\item 
+	E and F face each other (w.r.t. C)
+\item
+	the curve must cross \seg{EF} at an even number of points (ignoring
+	singularities)
+\item 	
+	the number of these crossings that face E (w.r.t. C)
+	is equal to the number that face F (w.r.t. C)
+\item
+	for any $\alpha \in \seg{EF}$, the number of crossings in the
+	interval $\seg{E\alpha}$ that face E is less than or equal to
+	the number of crossings in this interval that face F
+\end{enumerate}
+%
+These conditions will often isolate the partner.
+%
+\begin{example}
+Consider the cell partition of Figure~\ref{3.12} and the cell containing
+the convex segments \arc{\wo\wt} and \arc{W_{3}W_{4}}.
+Suppose that we wish to find the partner of \wo.
+$W_{3}$ violates condition (1) and $W_{4}$ violates condition (2), 
+so \wt\ must be \wo's partner.
+\end{example}
+%
+If (in the worst case) the cell contains several endpoints that satisfy
+the above conditions, then the following theorem must be used
+to isolate the partner.
+
+\begin{theorem}
+\label{thm-pair}
+Let E be an endpoint in cell C.
+Let S(E) be the set of endpoints in C that satisfy the above four conditions.
+Let $S'(E)$ be the subset of S(E) consisting of endpoints that lie 
+strictly inside E's tangent (w.r.t. C).
+\begin{enumerate}
+\item
+	If $S'(E)$ is not empty, 
+then sort $S'(E)$ along the boundary of the cell 
+and let F be the last endpoint.
+(A complete definition of this sort involves details that are beyond 
+the scope of this abstract, but it reduces to the sorting of points
+around the boundary of a polygon, which is very simply done.)
+%
+%	ASSOCIATING A POINT ON THE CELL BOUNDARY WITH EVERY PSEUDO CURVE POINT
+%\footnote{Care must be
+%	taken with the endpoints added near singularities, because they do 
+%	not lie on the boundary.  Points on the boundary are associated 
+%	with these endpoints as follows:... These boundary points are used 
+%	in the sorting.}
+%
+%	THE TWO BOUNDARIES OF THE CELL
+%\footnote{The direction of the sort is defined by 
+%	distinguishing two boundaries of the cell, as follows:...}
+%
+\item
+	If $S'(E)$ is empty, then let $S''(E)$ be the subset of S(E) consisting
+of those endpoints that lie on E's wall of the cell, and
+let F be the element of $S''(E)$ that is closest to E.
+\end{enumerate}
+F is the partner of E in cell C.
+\end{theorem}
+\Heading{Proof}:
+Omitted due to lack of space.
+\QED
+%
+\begin{example}
+Consider the cell of Figure~\ref{3.13} and the computation of \wo's partner
+in this cell.
+(We need to associate a point $W_{4}'$ with $W_{4}$, since $W_{4}$ does
+not lie on the cell boundary.)
+$S'(\wo) = \{\wt,W_{3},W_{4}\}$. We sort \wt, $W_{3}$, and $W_{4}'$ 
+along the boundary of the cell from \wo\ to X (the intersection
+of \wo's tangent with the boundary), yielding $W_{3}$, $W_{4}'$, \wt.
+The last element, \wt, must be \wo's partner.
+Since \wt\ is an artificial endpoint, we deduce that \wo\ is actually
+the endpoint of an infinite segment in this cell.
+\end{example}
+
+%WHAT IF E DOES NOT HAVE A PARTNER IN C?
+%THIS NEVER HAPPENS: E EITHER LIES ON THE BOUNDARY OF EXACTLY TWO CELLS
+%(IF IT IS A FLEX OR INCIDENTAL CURVE POINT) OR IT IS A PSEUDO CURVE POINT
+%(ORIGINALLY A SINGULARITY) STRICTLY *INSIDE* A CELL
+
+This completes our outline of the convex decomposition of an
+algebraic curve.
+
+\section{Point Location}
+%
+A decomposition is not very useful unless it is possible to locate points
+in it. 
+In other words, given a point P on a curve (and a convex decomposition of 
+the curve), a method for deciding which convex segment P 
+lies on is very important.
+(Otherwise, a set of points cannot be divided into convex segments
+for conquering.)
+Fortunately, this problem 
+is entirely analogous to finding the partners of a given endpoint, as explained
+in the earlier section.
+This becomes clear upon noticing that both problems are instances of 
+the more general question:
+``what are the two endpoints associated with a given point?''
+We add that improvements can be made to the solution of the 
+point location problem 
+(viz., the avoidance of expensive condition-testing)
+that make it even faster in practice.
+(Both the convex decomposition and point location algorithms have
+been implemented by J. Johnstone on a LispMachine.)
+
+Once it is known how to locate a point on a convex segment of a curve's
+convex decomposition, it is quite straightforward to solve the more
+general problem of locating a point on an arbitrary segment of the curve.
+Recall that every endpoint of a convex segment in our (normalized) convex
+decomposition has exactly two partners.
+Therefore, every convex segment has a unique predecessor and successor,
+and it is very easy to order the convex segments.
+Consider a segment \arc{AB} of an algebraic curve C and a point P on C.
+To decide if P lies on \arc{AB}, we compute the convex segments
+of C's decomposition that contain P, A, and B (say $C_{p}$, $C_{a}$, and
+$C_{b}$, respectively).
+Then, P lies on \arc{AB} if and only if $C_{p}$ lies in between $C_{a}$ and
+$C_{b}$.
+If P lies on the same convex segment as A and/or B, then the decision
+requires a bit more subtlety.
+(For example, if A and P lie on the same convex segment \arc{EF},
+the decision is made by sorting A, P, E, and F along the curve--using 
+Theorem~\ref{thm-sort} below.
+If \arc{AB} leaves A towards E--which is a separate 
+decision upon which we do not elaborate, then P lies on \arc{AB} 
+if and only if the order is E, P, A, F.)
+
+
+%We assume that A is nonsingular\footnote{If not, one can perturb it slightly
+%using quadratic transformation techniques outlined above}
+%and that we are given a directed tangent at A that indicates the direction of 
+%\arc{AB} from A.
+
+Before we leave point location, it is important
+to explain why the above method is important despite the
+existence of other methods.
+In particular, a natural way to locate a set of points S on an algebraic 
+curve segment is to use a rational parameterization
+of the curve (i.e., a parameterization ( $x(t)$ , $y(t)$ ) such that both
+$x(t)$ and $y(t)$ can be expressed as the quotient of two polynomials in $t$). 
+This point location method proceeds as follows.
+The endpoints of the curve segment are given by distinct parameter 
+values, say, ${t_a}$ and ${t_b}$, with parameter values $t$ defining the 
+curve segment, satisfying ${t_a} \leq t \leq {t_b}$ . 
+The parameter values $t_{i}$ of the points $(x_{i},y_{i})$ of S 
+are computed.
+Then, the points that lie on the curve segment are simply those
+with parameter values that occur between $t_a$ and $t_b$.
+Since there are general algorithms for the 
+automatic parameterization of rational curves (curves with a rational
+parameterization) \cite{abba3}, and
+various efficient methods for obtaining rational
+parameterizations for special low degree algebraic 
+curves \cite{abba1,abba2,levi,ock}, this is a reasonable method.
+However, it has two disadvantages.
+First, only a subset of algebraic curves have rational 
+parameterizations \cite{walker}, so this is not a universal method.
+Secondly, even if the curve is rational, the parameterization method will be 
+slow if the degree of the parameterization is high, since the computation
+of the parameter values of the points will be expensive.
+
+%
+%
+%An assumption must be made about points very close to singularities:
+%Note that Theorem 3.2 does not work 
+%if the point lies on one of the epsilon-length convex segments 
+%that contain singularities (i.e., the segments between 'pseudo curve points').
+%It obviously cannot, because the two endpoints of this segment lie in
+%different cells and our technique only chooses from endpoints in the
+%same segment.
+%For these points, we must make the following additions.
+%Make sure that the added points
+%are chosen extremely close to the singularity, so that they are at a very
+%small $\epsilon$ from the singularity.
+%Then assume that if a point P is within %$\epsilon$ of a singularity S 
+%and in cell C, then it must lie on the added segment of S in C.
+%
+%finding (the two endpoints of) the convex segment of a given point 
+%Thm 3.2 (p.78) and Example 3.3.1 (p.79)
+%a method of avoiding expensive computations (p.81)
+%
+\section{Complexity}
+
+\begin{theorem}
+The worst case time for a convex decomposition of a plane algebraic
+curve of degree $n$ is 
+O($S(n^{2}) + n^{6}S(n) + n^{2}S(2^{\mbox{MAX}}n) + n^{4}2^{\mbox{MAX}}$),
+where $S(n)$ is the time required to find the real roots of a univariate
+polynomial equation of degree $n$, and MAX is the maximum number
+of quadratic transformations that are necessary to decompose any
+singularity of the curve into simple points.\footnote{MAX will usually
+be 1 or 2.  For example, MAX is 1 if each singularity has distinct
+tangents.}
+\end{theorem}
+\Heading{Sketch of Proof}:
+The curve has O($n^{2}$) singularities and flexes, which 
+(along with their tangents) can be computed in O($S(n^{2}) + n^{6}$) time.
+O($n^{2}S(n)$) time is required to find the O($n^3$) intersections of the
+tangents with the curve.
+Resolving the O($n^{2}$) singularities into simple points (using quadratic 
+transformations) requires O($n^{2} S(2^{\mbox{MAX}}n) + n^{4}2^{\mbox{MAX}}$)
+time.
+Finally, computing the partners of the O($n^{3}$) endpoints of convex segments
+requires O($n^{6}S(n)$) time.
+\QED
+
+This complexity analysis is very pessimistic.
+That is, the worst case time will only be reached by the most
+pathological curves, while the time to decompose 
+curves that arise in practice in geometric modeling
+is much more reasonable.
+This observation has been borne out in practice, with the testing of 
+the algorithms on various curves.
+\Comment{
+For example, the pairing of most endpoints requires O(1) time.
+Moreover, once the singularities and flexes of a curve are computed,
+they are useful for many other algorithms.}
+
+\section{An application of convex decomposition}
+Once the convex decomposition of a curve is available, it is possible
+to use it in divide-and-conquer algorithms, since convex segments are
+often easily conquered.
+We offer the example of sorting points along an algebraic curve.
+The following theorem shows that sorting a convex segment is simple.
+
+\begin{theorem}
+\label{thm-sort}
+Let $p_{1},\ldots,p_{n}$ be points on a convex segment \arc{AB}, 
+and let H be the convex hull of A, B, $p_{1},\ldots,p_{n}$.
+The order of the points on \arc{AB} is simply 
+the order of the vertices on the boundary of H (from A to B).
+\end{theorem}
+
+Using this observation and the convex decomposition method, 
+it is possible to derive an effective sorting method \cite{jj}.
+%
+\section{Conclusions}
+A method for decomposing an algebraic curve into convex segments 
+has been presented.
+This continues the work on decomposition of a geometrical object into
+simpler objects.
+However, this work is unique in that it is one of the first solutions
+of a computational geometry problem for curves of arbitrary degree.
+We have also outlined a new method for point location on algebraic curves,
+based upon the convex decomposition.
+There is a need for more work on the extension of computational
+geometry algorithms past polygons to curves and surfaces of higher degree.
+%
+\section{Acknowledgements}
+This work formed part of the thesis of J. Johnstone, who acknowledges
+the guidance of his advisor, John Hopcroft.
+%
+\begin{thebibliography}{Abhyankar 87b}
+%
+\bibitem{abba1} Abhyankar, S., and Bajaj, C. (1987),
+``Automatic Rational Parameterization of Curves and Surfaces I:
+Conics and Conicoids,'' {\em Computer Aided Design}
+19:1, 11-14.
+% Jan. 1987
+
+\bibitem{abba2} Abhyankar, S., and Bajaj, C. (1987),
+``Automatic Rational Parameterization of Curves and Surfaces II:
+Cubics and Cubicoids,'' {\em Computer Aided Design}
+19:9, 499-502.
+% Nov. 1987
+
+\bibitem{abba3} Abhyankar, S. S., \& Bajaj, C. (1986).
+``Automatic Parameterization of Rational Curves and Surfaces III:
+Algebraic Plane Curves,''
+Tech. Rep. CSD-TR-619, Dept. of CS, Purdue Univ.
+% Aug. 1986
+
+\bibitem{abba4} Abhyankar, S., and Bajaj, C., (1987),
+``Automatic Rational Parameterization of Curves and Surfaces IV: Algebraic Space Curves,''
+Tech. Rept. 703, Comp. Science, Purdue University.
+
+\bibitem{bhhl} Bajaj, C., Hoffmann, C., Hopcroft, J., Lynch, B., (1987),
+Tracing Surface Intersections.
+Tech. Rept. 725, Comp. Science, Purdue University. 
+
+\bibitem{bajkim87a} Bajaj, C., and Kim, M., (1987),
+Convex Decomposition of Objects Bounded by Algebraic Curves.
+Tech. Rept. 677, Comp. Science, Purdue University.
+
+\bibitem{bajkim87b}
+Bajaj, C., and Kim, M., (1987),
+Convex Hull of Objects Bounded by Algebraic Curves.
+Tech. Rept. 697, Comp. Science, Purdue University.
+
+\bibitem{asano} Asano, T., Asano, T., \& Imai, H. (1984).
+Partitioning a polygonal region into trapezoids.
+(Res. Mem. RMI84-03). Dept. Math. Eng. \& Instrumentation Physics, Univ. of 
+Tokyo.
+%
+\bibitem{avis} Avis, D., \& Touissant, G. T. (1981).
+An efficient algorithm for decomposing a polygon into star-shaped
+components.
+{\em Pattern Recognition}, 13, 395-398.
+
+%\bibitem{bhh} Bajaj, C., Hoffmann, C., and Hopcroft, J.,
+%``Tracing Planar Algebraic Curves,''
+%Tech. Rep. CSD-TR-637, Dept. of Computer Science, Purdue Univ,
+%September 1987.
+
+\bibitem{cd} Chazelle, B., \& Dobkin, D. P. (1985).
+Optimal Convex Decompositions.
+In {\em Computational Geometry}, G.T.Toussaint, editor.
+
+\bibitem{incerpi} Chazelle, B., \& Incerpi, J. (April 1984).
+Triangulation and shape-complexity. 
+{\em ACM Trans. on Graphics}, 3(2), 135-152.
+
+\bibitem{edelsbrunner} Edelsbrunner, H. (1987).
+Algorithms in Combinatorial Geometry.
+New York: Springer-Verlag.
+
+\bibitem{garey} Garey, M., Johnson, D. S., Preparata, 
+F. P., \& Tarjan, R.E. (1978).
+Triangulating a simple polygon.
+{\em Info. Proc. Lett.}, 7(4), 175-80.
+
+\bibitem{gj87} Goodrich, M. T., \& Johnstone, J. K. (1987).
+Coordinated Walking: A Method for Intersecting Algebraic Curve Segments.
+Manuscript.
+
+\bibitem{hertel} Hertel, S., \& Mehlhorn, K. (1983).
+Fast triangulation of simple polygons.
+{\em Proc. FCT'83}, Borgholm, LNCS Springer-Verlag, 207-218.
+
+
+\bibitem{jj} Johnstone, J. (June 1987).
+The sorting of points along an algebraic curve.
+(Tech. Rep. 87-841). Ph.D. Thesis, Cornell Univ.
+%
+\bibitem{keil} Keil, J. Mark. (April 1983).
+Decomposing Polygons into Simpler Components.
+(Tech. Rep. 163/83). Ph.D. Thesis, Univ. of Toronto.
+
+\bibitem{levi} Levin, J. (1979):
+{\em Mathematical Models for Determining the Intersections of Quadric Surfaces},
+Computer Graphics and Image Processing, 11, 73-87.
+%
+\bibitem{ock} Ocken, S., Schwartz, S., and Sharir, M. (1986):
+{\em Precise Implementation of CAD Primitives Using Rational Parameterization 
+of Standard Surfaces}, in {\em Planning, Geometry, and Complexity of Robot
+Motion}, Schwartz, Sharir, and Hopcroft, eds., 245-266.
+
+\bibitem{orourke} O'Rourke, J. (1982).
+The complexity of computing minimum convex covers for polygons.
+{\em Proc. 20th Annual Allerton Conf. on Comm. Control and Comput.}, 75-84.
+
+\bibitem{prepsham85} Preparata, F., and Shamos, M., (1985):
+{\em Computational Geometry: An Introduction},
+Springer Verlag, New York.
+
+\bibitem{sack} Sack, J. R. (1982).
+An $O(n \log n)$ algorithm for decomposing simple rectilinear polygons
+into convex quadrilaterals.
+{\em Proc. 20th Annual Allerton Conf. on Comm. Control, and Comput.},
+64-74.
+%
+\bibitem{tarjan} Tarjan, R. E., \& Van Wyk, C. J. (February 1988).
+An $O(n \log \log n)$-time algorithm for triangulating a simple polygon.
+{\em SIAM Journal on Computing}, 17, 1.
+%
+\bibitem{tm} Tor, S.B. and Middleditch, A. E. (October 1984).
+Convex Decomposition of Simple Polygons.
+{\em ACM Trans. on Graphics}, 3(4), 244-265.
+%
+\bibitem{walker} Walker, R. J. (1950).
+Algebraic Curves.
+New York: Springer-Verlag.
+\end{thebibliography}
+%
+\clearpage
+FIGURES:
+\figg{2.8}{Figure 2.8(a) and (c), p. 27}{.1in}              % 1st
+\figg{2}{added endpoints at a sing: RB', B'B'',B''S}{.1in}  % 2nd
+\figg{2.13}{Figure 2.13, p. 38}{.1in}                       % 3rd
+\figg{3.9}{Figure 3.9, p. 64}{.1in}                         % 4th
+\figg{3.2}{Figure 3.2, p. 56}{.1in} % not strictly necessary, 5th
+\figg{3.4}{Figure 3.4, p. 58 with an example of Q3 
+        which P does *not* face}{.1in} % again not necessary, 6th
+\figg{3.5}{Figure 3.5, p. 59}{.1in}                         % 7th
+\figg{3.12}{Figure 3.12, p. 69}{.1in}                       % 8th
+\figg{3.13}{Figure 3.13, p. 70}{.1in}                       % 9th
+\end{document}
+

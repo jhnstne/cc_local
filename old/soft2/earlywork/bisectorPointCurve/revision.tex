@@ -1,0 +1,2640 @@
+\documentstyle[12pt]{article}
+
+\begin{document}
+
+\newcommand{\single}{\def\baselinestretch{1.0}\large\normalsize}
+\newcommand{\double}{\def\baselinestretch{1.5}\large\normalsize}
+\newcommand{\triple}{\def\baselinestretch{2.2}\large\normalsize}
+
+\newcommand{\rd}{{\rm d}}
+\newcommand{\re}{{\rm e}}
+\newcommand{\ri}{{\rm i}}
+\newcommand{\sgn}{{\rm sign}}
+\newcommand{\half}{\textstyle{1 \over 2}\displaystyle}
+\newcommand{\quarter}{\textstyle{1 \over 4}\displaystyle}
+\newcommand{\dist}{{\rm dist}}
+\newcommand{\cross}{\!\times\!}
+\newcommand{\dotpr}{\!\cdot\!}
+\newcommand{\vhat}{\hat {\bf v}}
+\newcommand{\what}{\hat {\bf w}}
+\newcommand{\zhat}{\hat {\bf z}}
+\newcommand{\ldash}{\vrule height 3pt width 0.35in depth -2.5pt}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\ba}{\begin{eqnarray}}
+\newcommand{\ea}{\end{eqnarray}}
+\newcommand{\seg}[1]{\mbox{$\overline{#1}$}}
+
+\newtheorem{dfn}{Definition}[section]
+\newtheorem{rmk}{Remark}[section]
+\newtheorem{lma}{Lemma}[section]
+\newtheorem{propn}{Proposition}[section]
+\newtheorem{exmpl}{Example}[section]
+\newtheorem{conjec}{Conjecture}[section]
+\newtheorem{claim}{Claim}[section]
+\newtheorem{notn}{Notation}[section]
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{crlry}{Corollary}[section]
+
+\newcommand{\prf}{\noindent{{\bf Proof} :\ }}
+\newcommand{\QED}{\vrule height 1.4ex width 1.0ex depth -.1ex\ \medskip}
+
+\newcommand{\ACMTOG}{{\sl ACM Trans.\ Graph.\ }}
+\newcommand{\AMM}{{\sl Amer.\ Math.\ Monthly\ }}
+\newcommand{\BIT}{{\sl BIT\ }}
+\newcommand{\CACM}{{\sl Commun.\ ACM\ }}
+\newcommand{\CAD}{{\sl Comput.\ Aided Design\ }}
+\newcommand{\CAGD}{{\sl Comput.\ Aided Geom.\ Design\ }}
+\newcommand{\CGIP}{{\sl Comput.\ Graph.\ Image Proc.\ }}
+\newcommand{\CJ}{{\sl Computer\ J.\ }}
+\newcommand{\DCG}{{\sl Discrete\ Comput.\ Geom.\ }}
+\newcommand{\IBMJRD}{{\sl IBM\ J.\ Res.\ Develop.\ }}
+\newcommand{\IJCGA}{{\sl Int.\ J.\ Comput.\ Geom.\ Applic.\ }}
+\newcommand{\IEEECGA}{{\sl IEEE Comput.\ Graph.\ Applic.\ }}
+\newcommand{\IEEETPAMI}{{\sl IEEE Trans.\ Pattern Anal.\ Machine Intell.\ }}
+\newcommand{\JACM}{{\sl J.\ Assoc.\ Comput.\ Mach.\ }}
+\newcommand{\JAT}{{\sl J.\ Approx.\ Theory\ }}
+\newcommand{\MC}{{\sl Math.\ Comp.\ }}
+\newcommand{\MI}{{\sl Math.\ Intelligencer\ }}
+\newcommand{\NM}{{\sl Numer.\ Math.\ }}
+\newcommand{\SIAMJNA}{{\sl SIAM J.\ Numer.\ Anal.\ }}
+\newcommand{\SIAMR}{{\sl SIAM Review\ }}
+
+\newcommand{\figg}[3]{\begin{figure}[htbp]\vspace{#3}\caption{#2}\label{#1}\end{figure}}
+
+\title{
+The bisector of a point \\
+and a plane parametric curve
+}
+
+\author{
+Rida~T.~Farouki \\
+IBM Thomas~J.~Watson Research Center, \\
+P.~O.~Box 218, Yorktown Heights, NY 10598. \\ \\
+John~K.~Johnstone \\
+Department of Computer Science, \\
+The Johns Hopkins University, Baltimore, MD 21218.
+}
+
+\date{}
+
+\maketitle
+\thispagestyle{empty}
+
+\begin{abstract}
+The {\it bisector\/} of a fixed point ${\bf p}$ and a smooth
+plane curve $C$ --- {\it i.e.}, the locus traced by a point
+that remains equidistant with respect to ${\bf p}$ and $C$ ---
+is investigated in the case that $C$ admits a regular polynomial
+or rational parameterization. It is shown that the bisector may be
+regarded as (a subset of) a ``variable--distance'' offset curve to
+$C$ which has the attractive property, unlike fixed--distance offsets,
+of being {\it generically\/} a rational curve. This ``untrimmed
+bisector'' usually exhibits irregular points and self--intersections
+similar in nature to those seen on fixed--distance offsets. A {\it
+trimming procedure}, which identifies the parametric subsegments
+of this curve that constitute the true bisector, is described in
+detail. The bisector of the point ${\bf p}$ and any finite segment
+of the curve $C$ is also discussed.
+\end{abstract}
+
+\newpage\thispagestyle{empty}\mbox{}\vfill\eject
+\pagenumbering{arabic}
+\setcounter{page}{1}
+\thispagestyle{plain}
+
+\section{Introduction}
+\label{intro}
+
+In descriptive geometry \cite{coxeter69} the parabola is
+characterized as the locus traced by a point that remains
+equidistant with respect to a fixed point ${\bf p}$ (the
+{\it focus\/}) and a given straight line $L$ (the {\it
+directrix\/}). Thus, points of the plane that lie to one
+side of the parabola are closer to ${\bf p}$ than to $L$,
+while those that lie on the other side are closer to $L$
+than to ${\bf p}$. In this sense, the parabola may be
+regarded as the ``bisector'' of the point ${\bf p}$ and
+the line $L$.
+
+If we substitute a smooth plane curve $C$ in place of the
+straight line $L$, the bisector locus is of a more subtle
+nature. This paper is concerned with investigating the
+geometric properties of such loci, and formulating tractable
+representations for them. Point/curve bisectors arise in a
+variety of geometric ``reasoning'' and geometric decomposition
+problems ({\it e.g.}, planning paths of maximum clearance
+in robotics, or computing Voronoi diagrams for areas with
+curvilinear boundaries). Although they are simpler than
+other loci --- {\it e.g.}, curve/curve bisectors --- that
+arise in these contexts, no systematic analysis of the
+properties of point/curve bisectors is currently available.
+
+However, there has recently been considerable interest in
+the general topic of bisectors. They play a key r\^ole in
+computing the {\it medial axis transform\/} or ``skeleton''
+of planar shapes (see, for example, Bookstein \cite{bookstein79}
+and Lee \cite{lee82}). Yap \cite{yap87} discusses the bisectors
+of points, lines, and circles in the context of Voronoi diagrams.
+Also in the context of Voronoi diagrams, Held \cite{Held91}
+treats the construction of bisectors in numerical--control
+machining applications. Yap and Alt \cite{yap89} analyze
+the complexity of the bisector computation for two algebraic
+curves, quoting an upper bound of $16m^6$ on the degree of
+the bisector for curves of degree $m$. Nackman and Srinivasan
+\cite{nackman91} discuss generic properties of the bisector of
+two linearly--separable sets of arbitrary dimension, from the
+perspective of point--set topology.
+
+Hoffmann and Vermeer \cite{HV91} develop systems of equations
+that define ``equal--distance'' curves and surfaces (another
+term for bisectors, viewed as offsets from given curves/surfaces).
+Voronoi surfaces --- {\it i.e.}, the bisectors of two given
+surfaces --- are also discussed by Hoffmann \cite{H90} and Dutta
+and Hoffmann \cite{DH90}. Finally, we note that the notion of
+the ``offset'' to a given curve or surface (see Farouki and Neff
+\cite{farouki90}) is closely related to that of bisectors; this
+relationship will be directly exploited in the present development.
+
+This paper, which has been condensed from a longer technical
+report \cite{farouki91}, is organized as follows. \S1 outlines
+basic properties of regular parametric curves, the point/curve
+distance function, and point/curve bisectors. After reviewing
+the notion of an offset curve in \S2.1, we show in \S2.2 how to
+represent the untrimmed bisector --- which is a superset (see \S2.4)
+of the true bisector --- as a ``variable--distance'' offset. In
+\S2.3 we analyze the irregular points of this locus. The trimming
+procedure, whereby the true bisector is culled from the untrimmed
+bisector, is the subject of \S3. A key step in the trimming process
+is the computation of self--intersections of the untrimmed bisector
+(see \S3.3). Finally, \S4 summarizes our main results.
+
+\subsection{Regular parametric curves}
+
+We focus here on the case where the curve $C$ is defined
+parametrically, ${\bf r}(u)=$ $\{x(u),y(u)\}$, having continuous
+derivatives
+%${\bf r}'(u)=\{x'(u),y'(u)\}$,
+%${\bf r}''(u)=\{x''(u),y''(u)\}$, {\it etc.},
+of arbitrary order on some finite, semi--infinite, or infinite
+parameter domain $I$ of interest. We assume that the parameterization
+of ${\bf r}(u)$ is {\it proper\/} ({\it i.e.}, there is a one--to--one
+correspondence between parameter values $u$ and points $(x,y)$ of the
+curve locus, except for finitely many self--intersections) and that
+it is {\it regular\/}:
+
+%Since improper parameterizations arise rather infrequently in
+%practice, and identifying them is not in general a straightforward
+%matter (see \cite{sederberg84,sederberg86}), we shall not dwell on
+%this issue. However, we do need to impose an additional constraint
+%on the parameterization of ${\bf r}(u)$ --- namely, that it be
+%{\it regular\/} over the parameter domain of interest:
+
+\begin{dfn}
+The parametric speed of ${\bf r}(u)=\{x(u),y(u)\}$ is the
+function
+\be \label{sigma}
+\sigma(u) = |{\bf r}'(u)| = \sqrt{x'^2(u)+y'^2(u)}
+\ee
+of the parameter $u$, and the curve is said to have a {\it
+regular\/} parameterization on the interval $I$ if and only if
+$\sigma(u)\not=0$ for all $u \in I$.
+\end{dfn}
+
+It should be noted that curves with
+irregular parameterizations do not, in general, exhibit smooth
+loci: points where $\sigma(u)=0$ correspond to {\it cusps\/}
+%(sudden tangent reversals)
+or, exceptionally, discontinuities
+in higher--order differential characteristics \cite{farouki92b}.
+
+%We denote by $|{\bf v}|$ the Euclidean norm $\sqrt{v_x^2
+%+v_y^2}$ of a vector ${\bf v}=(v_x,v_y)$. Thus, we shall also
+%write $|{\bf r}'(u)|$ for the parametric speed of ${\bf r}(u)$,
+%to suit the context. Since we are concerned solely with {\it
+%real\/} functions $x(u)$ and $y(u)$ of a {\it real\/} parameter
+%$u$, we note that $\sigma(u)=0\;\Longleftrightarrow\;x'(u)=
+%y'(u)=0$.
+
+Although much of the ensuing discussion holds for any regular
+parametric curve, we focus on the two functional forms most often
+used in practice: the {\it polynomial\/} curve ${\bf r}(u)=\{X(u),
+Y(u)\}$ of degree $n$ defined by
+\be \label{polycurve}
+X(u) = \sum_{k=0}^n a_k u^k \,, \quad
+Y(u) = \sum_{k=0}^n b_k u^k
+\ee
+where it is understood that $(a_n,b_n)\not=(0,0)$,
+%the coefficients $\{a_k,b_k\}$ being real numbers that satisfy
+%$a_n^2+b_n^2\not=0$,
+and the {\it rational\/} curve ${\bf r}(u)=
+\{X(u)/W(u),Y(u)/W(u)\}$ of degree $n$ given by
+\be \label{ratcurve}
+X(u) = \sum_{k=0}^n a_k u^k \,, \quad
+Y(u) = \sum_{k=0}^n b_k u^k \,, \quad
+W(u) = \sum_{k=0}^n c_k u^k
+\ee
+where $(a_n,b_n,c_n)\not=(0,0,0)$.
+%being again real numbers such that $a_n^2+b_n^2\not=0$ or $c_n\not=0$.
+In (\ref{ratcurve}) we assume there are no factors common
+to {\it all three\/} of the polynomials $X,Y,W$, {\it i.e.},
+$\gcd(X,Y,W) ={\rm constant}$.
+%($\gcd(\cdots)$ denotes the ``greatest common divisor'' of
+%the indicated set of polynomials, as determined by one or more
+%applications of Euclid's algorithm \cite{uspensky48}.)
+%Since polynomial curves are a special class of rational curves
+%with $W(u)$ constant, when we speak specifically of rational
+%curves it will be understood that $W(u)\not={\rm constant}$. Roots
+%of $W(u)$ correspond to ``points at infinity'' on the curve (\ref
+%{ratcurve}) --- in most applications, we are concerned only with
+%the {\it affine\/} part of a rational curve, {\it i.e.}, its locus
+%for all parameter values $u$ such that $W(u)\not=0$.
+
+\begin{rmk}
+{\rm
+A sufficient and necessary condition for the polynomial curve
+$(\ref{polycurve})$ to have a regular parameterization is that
+\be \label{regpoly}
+\gcd(X',Y')={\rm constant} \,,
+\ee
+while for the affine locus of the rational curve $(\ref{ratcurve})$
+to be regular we require
+\be \label{regrat}
+{\gcd(WX'-W'X,WY'-W'Y) \over \gcd(W,W')}={\rm constant} \,.
+\ee
+}
+\end{rmk}
+
+\begin{exmpl}
+{\rm
+%We have already noted the simple nature of the bisector of a point
+%and a straight line.
+Another ``elementary'' bisector arises when the curve $C$ is a {\it
+circle}. Assume that $C$ is of unit radius and centered on the origin,
+and let ${\bf p}=(\alpha,\beta)$. Then the bisector locus evidently
+satisfies
+\be
+\left|\,\textstyle{\sqrt{x^2+y^2}}-1\,\right|
+\,=\, \sqrt{(x-\alpha)^2+(y-\beta)^2} \,,
+\ee
+where the left-- and right--hand sides represent the distance of
+the variable point $(x,y)$ from the circle $C$ and the fixed point
+${\bf p}$, respectively. Squaring twice to clear radicals, we see
+that the bisector has the implicit equation
+\ba \label{ellipse}
+& & (1-\alpha^2)\,x^2 \,+\, (1-\beta^2)\,y^2
+ \,-\, 2\alpha\beta\,xy \nonumber \\
+& & \quad +\ (\alpha^2+\beta^2-1)\,(\alpha x+\beta y)
+ \,-\, \quarter(\alpha^2+\beta^2-1)^2 \,=\, 0 \,,
+\ea
+It can be verified that (\ref{ellipse}) represents an ellipse or
+a hyperbola according to whether ${\bf p}$ lies {\it inside\/} or
+{\it outside\/} the circle $C$ (see Figure~\ref{fig:circle}). When
+${\bf p}$ lies {\it on\/} $C$, equation (\ref{ellipse}) becomes
+$(\beta x-\alpha y)^2=0$, and the bisector degenerates into a
+straight line --- the normal to $C$ at ${\bf p}$ --- counted
+twice.
+}
+%\be
+%k \,=\, (1-\alpha^2)(1-\beta^2) - \alpha^2\beta^2 \,,
+%\ee
+%which simplifies to $k=1-(\alpha^2+\beta^2)$, and
+%\be
+%D \,=\,
+%\left| \begin{array}{ccc}
+%1-\alpha^2 &
+%-\,\alpha\beta &
+%\half(\alpha^2+\beta^2-1)\alpha \\ \\
+%-\,\alpha\beta &
+%1-\beta^2 &
+%\half(\alpha^2+\beta^2-1)\beta \\ \\
+%\half(\alpha^2+\beta^2-1)\alpha &
+%\half(\alpha^2+\beta^2-1)\beta &
+%-\quarter(\alpha^2+\beta^2-1)^2
+%\end{array} \right| \,,
+%\ee
+%which yields $D=-\,\quarter[\,1-(\alpha^2+\beta^2)\,]^2=-\,\quarter k^2$
+%on expansion.
+\end{exmpl}
+
+\figg{fig:circle}{Representative bisectors of a point and a circle.}
+{2.5in}
+
+\subsection{The point/curve distance function}
+
+In characterizing the parabola as the bisector of a point
+${\bf p}$ and a straight line $L$, the meaning of the ``distance''
+of any point from $L$ is clear: it is simply the length of the
+{\it unique\/} perpendicular from the point in question to the
+straight line $L$. In substituting a smooth parametric curve $C$
+in place of $L$, we need to generalize this notion of distance
+(see \cite{kelly79}):
+
+\begin{dfn}
+The distance of a point ${\bf q}$ from a regular parametric curve
+${\bf r}(u)$ $=\{x(u),y(u)\}$ defined on the parameter interval
+$I$ is given by
+\be \label{distance}
+\dist({\bf q},{\bf r}(u)) \,=\,
+\inf_{u \,\in\, I} \, |\,{\bf q}-{\bf r}(u)\,| \,,
+\ee
+{\it i.e.}, it is the greatest lower bound, for all $u \in I$, on the
+distance measured between the specified point ${\bf q}$ and each point
+${\bf r}(u)$ along the curve.
+\end{dfn}
+
+If ${\bf r}(u)$ is a polynomial curve, of course, the bound (\ref
+{distance}) is always attained at a {\it finite\/} parameter value
+$u$ regardless of whether $I$ has finite or infinite extent. When
+${\bf r}(u)$ is a rational curve and $I$ is not finite, however,
+it is possible that (\ref{distance}) will be attained only in the
+limit $|u|\to\infty$ if the degree of $W(u)$ is not less than the
+greater of the degrees of $X(u)$ and $Y(u)$.
+
+%Consider, for example, the point ${\bf q}=(-2,0)$ and the unit circle
+%centered on the origin, ${\bf r}(u)=\{\,(1-u^2)/(1+u^2),2u/(1+u^2)\,\}$
+%for $u \in (-\infty,+\infty)$. The closest point on ${\bf r}(u)$ to
+%${\bf q}$ is clearly ${\bf r}(\pm\infty)=(-1,0)$.
+
+%Note that as $|u|\to\infty$ the rational curve (\ref{ratcurve})
+%converges to an affine point $(x_\infty,y_\infty)$, where
+%$|x_\infty|=|a_n/c_n|$ and $|y_\infty| =|b_n/c_n|$, if and only
+%if ${\rm deg}(W)\ge\max({\rm deg}(X),{\rm deg}(Y))$; otherwise it
+%has a point at infinity at infinite values of $u$. In the former
+%case it is always possible to re--parameterize (\ref{ratcurve})
+%by a bilinear transformation of the parameter so as to make
+%$(x_\infty,y_\infty)$ correspond to a {\it finite\/} parameter
+%value.
+
+\begin{propn} \label{polydist}
+For the point ${\bf q}=(a,b)$ and the regular polynomial curve ${\bf r}(u)$
+given by $(\ref{polycurve})$, let $\{u_1,\ldots,u_N\}$ be the set of
+distinct odd--multiplicity roots of the polynomial
+\be \label{Pperp}
+P_\perp(u) \,=\,
+[\,a-X(u)\,]\,X'(u) \,+\, [\,b-Y(u)\,]\,Y'(u)
+\ee
+of degree $2n-1$ on the interior of the interval $I$, augmented by
+the finite end points, if any, of $I$. Then the distance function
+$(\ref{distance})$ may be expressed as
+\be \label{distance2}
+\dist({\bf q},{\bf r}(u)) \,=\,
+\min_{1 \le k \le N} \, |\,{\bf q}-{\bf r}(u_k)\,| \,.
+\ee
+\end{propn}
+
+\prf On differentiating the expression
+\be \label{distsq}
+|\,{\bf q}-{\bf r}(u)\,|^2 \,=\,
+[\,a-X(u)\,]^2 \,+\, [\,b-Y(u)\,]^2 \,,
+\ee
+we see that the distance $|\,{\bf q}-{\bf r}(u)\,|$ will attain a
+``stationary'' value whenever $[\,a-X(u)\,]\,X'(u)\,+\,[\,b-Y(u)\,]
+\,Y'(u)=0$, {\it i.e.}, at the roots of the polynomial $P_\perp(u)$.
+%(Note that, by virtue of the constraint (\ref {regpoly}), this
+%equation will never be satisfied in the degenerate case $X'(u)=
+%Y'(u)=0$.)
+Only those roots of $P_\perp(u)$ that are of {\it odd\/}
+multiplicity identify local {\it extrema\/} of $|\,{\bf q}-{\bf r}
+(u)\,|$, however. To evaluate (\ref{distance}) we must compare
+the values of $|\,{\bf q}-{\bf r}(u)\,|$ at each odd root of
+$P_\perp(u)$ on the parameter interval $I$ and at its end points
+{\it if\/} they are finite (since $|\,{\bf q}-{\bf r}(u)\,| \to
+\infty$ for any polynomial curve as $|u|\to\infty$). Then $\dist
+({\bf q},{\bf r}(u))$ is given by the smallest of these values.
+\QED
+
+An analogous result holds for regular rational curves, provided we
+replace the odd roots of the polynomial (\ref{Pperp}) by those of
+\ba \label{Rperp}
+P_\perp(u) \!
+&=& \! [\,aW(u)-X(u)\,]\,[\,W(u)X'(u)-W'(u)X(u)\,] \nonumber \\
+&+& \! [\,bW(u)-Y(u)\,]\,[\,W(u)Y'(u)-W'(u)Y(u)\,]
+\ea
+satisfying $W(u)\not=0$ on the interval $I$.
+%(Such roots never correspond to the degenerate case $W(u)X'(u)-
+%W'(u)X(u)=W(u)Y'(u)-W'(u)Y(u)=0$ with $W(u)\not=0$ if the constraint
+%(\ref{regrat}) is imposed.)
+Thus, in computing $\dist({\bf q},{\bf r}(u))$ for a
+rational curve, we compare the values of $|\,{\bf q}-{\bf r}(u)\,|$
+at each odd root of (\ref{Rperp}) and at finite end points of the
+interval $I$ satisfying $W(u)\not=0$ and/or at infinite end points
+if ${\rm deg}(W)\ge\max({\rm deg}(X),{\rm deg}(Y))$.
+
+
+\begin{rmk}
+{\rm
+Note that equations (\ref{Pperp}) and (\ref{Rperp}) have an
+obvious geometric interpretation: in each case, the roots of the
+polynomial $P_\perp(u)$ identify points of the curve where lines
+drawn from ${\bf q}$ meet ${\bf r}(u)$ orthogonally. The distance
+(\ref{distance}) is then simply the smallest of the lengths of these
+perpendiculars (and the chords drawn from ${\bf q}$ to the affine
+end points of ${\bf r}(u)$, if any). Even--multiplicity roots of
+$P_\perp(u)$ are ignored, since they identify points of ${\bf r}
+(u)$ where the distance $|\,{\bf q}-{\bf r}(u)\,|$ ``levels off''
+but then continues to increase or decrease, {\it i.e.}, it is not
+an extremum. Insisting that ${\bf r}(u)$ be regular guarantees
+that $P_\perp(u)$ cannot vanish in degenerate cases where
+${\bf r}'(u)={\bf 0}$.
+%(which do not, in general, identify perpendiculars to ${\bf r}(u)$
+%from ${\bf q}$).
+}
+\end{rmk}
+
+%The preceding characterization of the point/curve distance function
+%for polynomial and rational curves extends to any smooth analytic
+%curve. In general, we write
+%\be \label{distance3}
+%\dist({\bf q},{\bf r}(u)) \,=\,
+%\min_{k \,\in\, \{1,\ldots,N\}} \, |\,{\bf q}-{\bf r}(u_k)\,| \,,
+%\ee
+%where $u_1,\ldots,u_N$ identify all the points on the analytic
+%curve ${\bf r}(u)$ where a line drawn from ${\bf q}$ meets the curve
+%orthogonally, as well as the affine end points (if any) of ${\bf r}(u)$.
+%In the case of general analytic curves, of course, the determination
+%of these parameter values will usually be more difficult than computing
+%the odd roots of the polynomials (\ref{Pperp}) and (\ref{Rperp}) in
+%the case of polynomial and rational curves.
+
+%\begin{rmk}
+%{\rm
+%For an algebraic curve $C$ defined by the implicit polynomial equation
+%$f(x,y)=0$, we have
+%\be
+%\dist({\bf q},C) \,=\,
+%\min_{k \,\in\, \{1,\ldots,N\}} \, |\,{\bf q}-{\bf r}_k\,| \,,
+%\ee
+%where ${\bf r}_1=(x_1,y_1),\ldots,{\bf r}_N=(x_N,y_N)$ identify all
+%points on the curve ({\it i.e.}, $f(x_k,y_k)=0$) that satisfy
+%\be
+%(a-x)\,f_y(x,y) \,-\, (b-y)\,f_x(x,y) \,=\, 0 \,,
+%\ee
+%$f_x$ and $f_y$ being the partial derivatives of $f$ with respect to
+%$x$ and $y$. The points ${\bf r}_k$ are either singular points of
+%$f(x,y)=0$ (in the sense of an algebraic curve) or identify locations
+%on $f(x,y)=0$ where the line drawn from ${\bf q}$ meets the curve
+%orthogonally (since the tangent at a point of $f(x,y)=0$ is parallel
+%to the vector $(f_y,-f_x)$ evaluated there \cite[p.~55]{W50}).
+%}
+%\end{rmk}
+
+\begin{exmpl}
+{\rm
+It is interesting to observe that the method of Proposition~\ref
+{polydist} for computing $\dist({\bf q},{\bf r}(u))$ can run
+counter to geometric intuition. One might expect, for example,
+that at the discrete parameter values $u_1,\dots,u_N$ entering
+on the right--hand side of (\ref{distance2}) the curve ${\bf r}(u)$
+will lie {\it locally to one side of its tangent line}. However,
+a simple counter--example to this notion is provided by the case
+${\bf q}=(0,h)$ and ${\bf r}(u)=\{u,u^3\}$, for which $u=0$ is
+always an odd--multiplicity root of $P_\perp(u)$ that should enter
+in (\ref{distance2}), although the tangent line cuts the curve
+at this point.
+%Moreover, in certain cases ${\bf r}(0)$ is actually the closest
+%point of ${\bf r}(u)$ to ${\bf q}$.
+}
+\end{exmpl}
+
+%We now note an important property of the distance function:
+
+\begin{propn}
+When ${\bf r}(u)$ is a regular curve, the function $\dist({\bf q},
+{\bf r}(u))$ is continuous --- but not always differentiable ---
+with respect to ${\bf q}$.
+\end{propn}
+
+\prf The continuity of $\dist({\bf q},{\bf r}(u))$ follows from
+a more general theorem concerning the distance between a point
+${\bf q}$ and any non--empty set ${\cal S}$ in a metric space (see
+\cite{kelly79}, Theorem 3, p.~53); its non--differentiability at
+certain points is a consequence of the fact that the foot of the
+perpendicular from ${\bf q}$ to ${\bf r}(u)$ at which $\dist({\bf q},
+{\bf r}(u))$ is realized may suddenly ``jump'' as ${\bf q}$ moves.
+A more detailed discussion may be found in \cite{farouki91}. \QED
+
+%However, it is instructive to examine this property
+%in greater detail within the present context. For the sake of brevity
+%we discuss only the case of a polynomial curve ${\bf r}(u)$ below; the
+%extension to rational curves is relatively straightforward.
+
+%Consider expression (\ref{Pperp}) as a polynomial in {\it three\/}
+%variables, namely, the parameter value $u$ and the coordinates
+%$(a,b)$ of the point ${\bf q}$:
+%\be \label{Pperp2}
+%P_\perp(u,a,b) \,=\,
+%[\,a-X(u)\,]\,X'(u) \,+\, [\,b-Y(u)\,]\,Y'(u) \,.
+%\ee
+%At the reference point $(a_0,b_0)$, let $u_{k,0} \in I$ be a
+%simple\footnote{For multiple roots the analysis is more involved;
+%we shall not embark on it here.} root of (\ref{Pperp2}), so that
+%$\partial P_\perp/\partial u\not=0$ when $u=u_{k,0}$. Then by
+%the {\it implicit function theorem\/} \cite [p.~362]{buck78} we
+%infer the existence of a function $\phi_k(a,b)$, analytic in some
+%two--dimensional neighborhood ${\cal N}_k$ of $(a_0,b_0)$, such
+%that $\phi_k(a_0,b_0)=u_{k,0}$ and
+%\be
+%P_\perp(\phi_k(a,b),a,b) \equiv 0
+%\quad {\rm for\ all\ } (a,b) \in {\cal N}_k \,.
+%\ee
+%Intuitively, the function $\phi_k(a,b)$ describes how the root $u_k$
+%of $P_\perp(u)$ moves in the vicinity of its nominal value $u_{k,0}$
+%as the point ${\bf q}=(a,b)$ executes any path within the neighborhood
+%${\cal N}_k$ of its nominal location ${\bf q}_0=(a_0,b_0)$.
+
+%(If $u_k$ represents a finite end point of the parameter interval $I$
+%on which ${\bf r}(u)$ is defined, rather than a simple root of (\ref
+%{Pperp2}), it can be incorporated into the above framework by simply
+%taking $\phi_k(a,b) \equiv u_k$.)
+
+%Thus, about any nominal location ${\bf q}_0=(a_0,b_0)$, we may
+%invoke (\ref{distance2}) to formulate the distance function in a
+%neighborhood of that location as
+%\be \label{distance4}
+%\dist({\bf q},{\bf r}(u)) \,=\,
+%\min_{k \,\in\, \{1,\ldots,N\}} \,
+%|\,{\bf q}-{\bf r}(\phi_k({\bf q}))\,|
+%\quad {\rm for\ all\ } {\bf q} \in {\cal N} \,,
+%\ee
+%where ${\cal N}=\bigcap\,{\cal N}_k$ represents the area common
+%to each of the neighborhoods of ${\bf q}_0=(a_0,b_0)$ in which the
+%root functions $\phi_k({\bf q})=\phi_k(a,b)$ are analytic.
+
+%In the formulation (\ref{distance4}), the continuity of $\dist
+%({\bf q},{\bf r}(u))$ with respect to ${\bf q}=(a,b)$ at the
+%(arbitrary) reference point ${\bf q}_0=(a_0,b_0)$ is now apparent
+%--- each of the terms
+%\be \label{distancek}
+%|\,{\bf q}-{\bf r}(\phi_k({\bf q}))\,| \,=\,
+%\sqrt{ \, [\,a-X(\phi_k(a,b))\,]^2 + [\,b-Y(\phi_k(a,b))\,]^2 }
+%\ee
+%is continuous with respect to ${\bf q}$ at $(a_0,b_0)$, since the
+%functions $\phi_k(a,b)$ are analytic there and the curve ${\bf r}(u)=
+%\{X(u),Y(u)\}$ is continuous everywhere, and although the index $k$
+%that achieves the minimum in (\ref{distance4}) may suddenly jump
+%--- from $i$ to $j$, say --- as we move through $(a_0,b_0)$, we
+%nevertheless have $|\,{\bf q}-{\bf r}(\phi_i({\bf q}))\,|=|\,{\bf q}
+%-{\bf r}(\phi_j({\bf q}))\,|$ at any such jump.
+
+%If such a jump occurs in traversing $(a_0,b_0)$, however, $\dist
+%({\bf q},{\bf r}(u))$ will not (in general) be differentiable with
+%respect to ${\bf q}$ there. To see why, we consider the {\it
+%directional derivative}
+%\be \label{vnabla}
+%{\bf v}\cdot\!\nabla_{\bf q} \; \dist({\bf q},{\bf r}(u))
+%\,=\, \left[\, \lambda\,{\partial \over \partial a}
+%+ \mu\,{\partial \over \partial b} \;\right]
+%\dist({\bf q},{\bf r}(u)) \,,
+%\ee
+%which measures the rate of change of the distance function in the
+%direction of the unit vector ${\bf v}=(\lambda,\mu)$ at the point
+%$(a_0,b_0)$ at which the partial derivatives in (\ref{vnabla}) are
+%evaluated. Now by formal differentiation using the chain rule, and
+%noting that $P_\perp(\phi_k(a,b),a,b)=0$, the partial derivatives of
+%the functions $\Delta_k(a,b)=|\,{\bf q}-{\bf r}(\phi_k({\bf q}))\,|$
+%given by (\ref{distancek}) may be expressed as
+%\be \label{pderivs}
+%{\partial\Delta_k \over \partial a}
+%= {a-X(\phi_k(a,b)) \over \Delta_k(a,b)}
+%\quad {\rm and} \quad
+%{\partial\Delta_k \over \partial b}
+%= {b-Y(\phi_k(a,b)) \over \Delta_k(a,b)} \,.
+%\ee
+%In (\ref{pderivs}) it is understood that $k$ represents the index
+%minimizing $\Delta_k(a,b)$, and if $k$ jumps from $i$ to $j$ on
+%passing through $(a_0,b_0)$ in the direction ${\bf v}$, it is in
+%general true that
+%\be
+%X(\phi_i(a_0,b_0)) \not= X(\phi_j(a_0,b_0))
+%\quad {\rm and} \quad
+%Y(\phi_i(a_0,b_0)) \not= Y(\phi_j(a_0,b_0)) \,,
+%\ee
+%although $\Delta_i(a_0,b_0)=\Delta_j(a_0,b_0)$. Therefore, the
+%magnitude of the derivative (\ref{vnabla}) is discontinuous in
+%general whenever we traverse a point $(a_0,b_0)$ for which there
+%is a jump in the index $k$ that realizes the mimimum value on the
+%right--hand side of expression (\ref{distance2}). \QED
+
+\subsection{Point/curve bisectors}
+
+We are now ready to give a formal definition of point/curve bisectors:
+
+\begin{dfn} \label{defbsctr}
+The bisector $B({\bf p},C)$ of a fixed point ${\bf p}$ and a plane
+curve $C$ is the locus traced by a point that remains equidistant
+with respect to ${\bf p}$ and $C$, in the sense of the distance
+function $(\ref{distance})$.
+\end{dfn}
+
+That the bisector of ${\bf p}$ and ${\bf r}(u)$ is indeed a
+continuous locus can be seen as follows. If ${\bf q}=(a,b)$ is a
+point of the bisector for which $\dist({\bf q},{\bf r}(u))$ is
+realized by a {\it unique\/} index $k$ on the right--hand side of
+(\ref{distance2}), then the direction ${\bf v}=(\lambda,\mu)$ of
+a small displacement along the bisector --- {\it i.e.}, the {\it
+tangent\/} to the bisector at ${\bf q}$ --- is uniquely determined
+by the requirement of maintaining equal distances with respect to
+${\bf p}$ and ${\bf r}(u)$, namely
+\be \label{equidist}
+{\bf v}\cdot\!\nabla_{\bf q} \; |\,{\bf q}-{\bf p}\,| \,=\,
+{\bf v}\cdot\!\nabla_{\bf q} \; \dist({\bf q},{\bf r}(u)) \,,
+\ee
+where ${\bf v}\cdot\nabla_{\bf q}=\lambda\partial/\partial a +
+\mu\partial/\partial b$ denotes the directional derivative with
+respect to ${\bf q}=(a,b)$ moving along ${\bf v}=(\lambda,\mu)$.
+Now $\nabla_{\bf q}\,|\,{\bf q}-{\bf p}\,|$ is a unit vector
+in the direction of ${\bf q}-{\bf p}$, while $\nabla_{\bf q}\,
+\dist({\bf q},{\bf r}(u))$ is the curve normal ${\bf n}(u_k)$
+at the point $u_k$ where $\dist({\bf q},{\bf r}(u))$ is realized.
+Thus, to satisfy (\ref{equidist}), the bisector tangent ${\bf v}$
+at ${\bf q}$ must {\it bisect the angle between
+the vectors ${\bf q}-{\bf p}$ and ${\bf n}(u_k)$} (see
+Figure~\ref{fig:Btangent}). This offers a basis for numerically
+tracing the bisector, if we can determine the value $u_k$
+at which $\dist({\bf q},{\bf r}(u))=|\,{\bf q}-{\bf r}(u_k)\,|$
+for each ${\bf q}$ --- if $u_k$ is not unique, however, a more
+sophisticated approach is required.
+
+\figg{fig:Btangent}{Local tangent direction for the bisector
+of ${\bf p}$ and ${\bf r}(u)$.}{2.5in}
+
+
+\section{Offset curves and bisectors}
+\label{offsets}
+
+In formulating a representation for the bisector of a point ${\bf p}$
+and a curve ${\bf r}(u)$, it is useful to recall \cite{farouki90}
+some basic properties of the {\it offset curves\/} to ${\bf r}(u)$.
+
+\subsection{Constant--distance offsets}
+
+We begin by noting that if the curve ${\bf r}(u)$ is regular on
+the interval $u \in I$, it has a continuous unit normal vector for
+$u \in I\,$:
+\be \label{normal}
+{\bf n}(u) \,=\, {(y'(u),-x'(u)) \over \sqrt{x'^2(u)+y'^2(u)}}
+\ee
+
+\begin{dfn}
+The ``untrimmed'' offset at (signed) distance $d$ to a regular parametric
+curve ${\bf r}(u)$ is the locus defined by
+\be \label{offset}
+{\bf r}_o(u) \,=\, {\bf r}(u) + d\,{\bf n} (u) \,.
+\ee
+\end{dfn}
+
+Note that when ${\bf r}(u)$ is a polynomial or rational curve, the
+offset ${\bf r}_o(u)$ is {\it not}, in general, a polynomial or
+rational curve, because of the radical in the denominator of (\ref
+{normal}). Consequently, offset curves are often approximated by
+piecewise--polynomial forms \cite{hoschek88,klass83} in CAD
+applications
+%to render them compatible with existing representational and
+%algorithmic infrastructures.
+(the ``interior'' and ``exterior'' offsets, at distance $-d$ and
+$+d$, together constitute an {\it algebraic curve\/} described by
+an implicit equation $f_o(x,y)=0$ \cite{farouki90} --- see also
+\cite{farouki90b} for a special class of polynomial curves whose
+offsets {\it are\/} rational).
+
+We call the locus (\ref{offset}) the ``untrimmed'' offset for the
+following reason: {\it Corresponding points\/} ${\bf r}(u)$ and
+${\bf r}_o(u)$ on the given curve and its untrimmed offset are
+evidently distance $d$ apart, measured along their mutual normal
+direction. However, the point ${\bf r}_o(u)$ of the untrimmed offset
+is not necessarily distance $d$, in the sense of the distance function
+(\ref{distance}), from the {\it entire curve\/} ${\bf r}(u)$. The
+locus having this latter property is the ``trimmed'' offset to
+${\bf r}(u)$, since it is obtained by deleting certain continuous
+segments of (\ref{offset}):
+
+%The trimming procedure may be characterized by the following
+%property of the untrimmed offset curve (\ref{offset}):
+
+\begin{propn} \label{offtrim}
+For a regular curve ${\bf r}(u)$ defined on the interval $u \in I$,
+let $i_1,\ldots,i_M$ be the parameter values on $I$ corresponding
+to self--intersections of its untrimmed offset ${\bf r}_o(u)$ at
+distance $d$, {\it i.e.}, ${\bf r}_o(i_j)={\bf r}_o(i_k)$ for some
+$j \not= k$. Then, denoting the end points of $I$ by $i_0$ and
+$i_{M+1}$, we have either
+\be
+\dist({\bf r}_o(t),{\bf r}(u)) \,\equiv\, d \quad {\rm for\ all\ }
+t \in (i_k,i_{k+1})
+\ee
+or
+\be
+\dist({\bf r}_o(t),{\bf r}(u)) \,<\, d \quad {\rm for\ all\ }
+t \in (i_k,i_{k+1})
+\ee
+on each span $(i_k,i_{k+1})$ for $k=0,\ldots,M$ between successive
+self--intersections.
+\end{propn}
+
+\prf See Theorem 4.4 in \cite{farouki90}. \QED
+
+Proposition \ref{offtrim} indicates that if we dissect the
+untrimmed offset ${\bf r}_o(u)$ into the subsegments delineated by
+its self--intersections, then each subsegment should be retained
+or discarded in its entirety in forming the trimmed offset. It is
+sufficient to test the distance of a single point interior to each
+span $(i_k,i_{k+1})$ of ${\bf r}_o(u)$ from the given curve ${\bf r}
+(u)$ (the mid point $\half(i_k+i_{k+1})$, say) to determine whether
+or not that span should be eliminated (see Figure~\ref{fig:offsets}).
+
+\figg{fig:offsets}{Untrimmed and trimmed offsets to a parabola.}
+{2.5in}
+
+Note that trimming is a problem in the {\it global topology\/}
+of the curve (\ref{offset}); we know of no simpler approach than
+the methodical dissect--and--test process described above. The
+self--intersection parameter values ${i_1,\ldots,i_M}$ are roots
+of certain polynomials of rather high degree \cite{farouki90}.
+We shall encounter a similar ``trimming'' problem in computing
+point/curve bisectors.
+
+\begin{rmk}
+{\rm
+The trimmed offsets at distance $\pm d$ to a given curve ${\bf r}(u)$
+are the ``level curves'' for the point/curve distance function $(\ref
+{distance})$, {\it i.e.}, they are the loci of points ${\bf q}$ that
+satisfy $\dist({\bf q},{\bf r}(u))=|d\;\!|$.
+}
+\end{rmk}
+
+\subsection{The ``untrimmed'' point/curve bisector}
+\label{sec:untrim}
+
+We can generalize the notion of an (untrimmed) offset curve at fixed
+distance $d$ to a given regular curve ${\bf r}(u)$ by substituting
+any continuous function $d(u)$ of the parameter $u$ in place of the
+constant $d\,$:
+%The differentiability of the {\it variable--distance offset curve}
+\be \label{varoffset}
+{\bf r}_o(u) \,=\, {\bf r}(u) + d(u) {\bf n}(u) \,.
+\ee
+%is then constrained by that of the ``displacement function'' $d(u)$.
+We shall find the form (\ref{varoffset}) to be valuable in analyzing
+point/curve bisectors.
+
+%Consider the {\it family of normal lines\/} to a given regular curve
+%${\bf r}(u)$. These lines may be parameterized in the form
+%\be \label{nline}
+%{\bf r}(u) + \lambda\,{\bf n}(u) \,,
+%\ee
+%where $u$ selects a point on the curve, and $\lambda$ measures the
+%signed distance along the normal line from that point. Given any point
+%${\bf p}$ not on ${\bf r}(u)$, the location ${\bf q}$
+%along (\ref{nline}) that is equidistant from ${\bf p}$ and
+%the curve point ${\bf r}(u)$ is uniquely identified by the condition
+%$|\,{\bf q}-{\bf r}(u)\,|=|\,{\bf q}-{\bf p}\,|$, which reduces to
+%\be \label{lambda}
+%|\lambda\:\!| \,=\, |\,{\bf r}(u)+\lambda\,{\bf n}(u)-{\bf p}\,| \,.
+%\ee
+
+Now for each $u$, let $d(u)$ be such that ${\bf q}={\bf r}(u)+d(u)
+{\bf n}(u)$ is the {\it unique\/} point on the curve normal line at
+${\bf r}(u)$ that is equidistant from the fixed point ${\bf p}$ and
+the curve point ${\bf r}(u)$. Referring to Figure~\ref{fig:du}, and
+noting that ${\bf p}$, ${\bf q}$, ${\bf r}(u)$ define an isosceles
+triangle, we have
+\be \label{du0}
+d(u) \,=\, \half\,|\,{\bf p}-{\bf r}(u)\,|\sec\psi(u) \,,
+\ee
+where $\psi(u)$ is the angle between the vector from ${\bf r}(u)$
+to ${\bf p}$ and the normal ${\bf n}(u)$, measured in the usual
+right--handed sense.
+%by using the law of cosines.
+Since $({\bf p}-{\bf r}(u))\cdot{\bf n}(u)=|\,{\bf p}-{\bf r}(u)\,|
+\cos\psi(u)$, we can also express $d(u)$ as
+\be \label{du}
+d(u) \,=\, {|\,{\bf p}-{\bf r}(u)\,|^2 \over
+2\,({\bf p}-{\bf r}(u))\cdot{\bf n}(u)} \,.
+\ee
+If we regard the tangent line to the curve at ${\bf r}(u)$ as dividing
+the plane into two halves, it is evident from (\ref{du}) that $d(u)$
+will be positive or negative according to whether or not ${\bf p}$
+lies in the half--plane that ${\bf n}(u)$ points into.
+
+\figg{fig:du}{Definition of the displacement function $d(u)$.}{2.5in}
+
+%Note that (\ref{du}) is {\it not\/} (in general) a rational function
+%of $u$, because of the radical incurred in computing the unit normal
+%vector ${\bf n}(u)$.
+
+\begin{dfn}
+The {\it untrimmed bisector\/} of a point ${\bf p}$ and a regular
+curve ${\bf r}(u)$ is the variable--distance offset $(\ref{varoffset})$
+%to ${\bf r}(u)$
+with the displacement function $(\ref{du})$.
+\end{dfn}
+
+Thus, the untrimmed bisector is simply the locus of points on
+the curve normal lines that are equidistant from each curve point
+${\bf r}(u)$ and the given point ${\bf p}$ (see Figure~\ref{fig:du}).
+%We will show below that it is appropriately named, {\it i.e.}, it
+%is a {\it superset\/} of the true bisector $B({\bf p},{\bf r}(u))$.
+Figure~\ref{fig:varoffset} illustrates the notion of untrimmed
+point/ curve bisectors as variable--distance offsets, in the simple
+case of a parabola.
+
+\begin{rmk}
+{\rm
+When ${\bf r}(u)$ is a polynomial or rational curve, the untrimmed
+bisector defined by $(\ref{varoffset})$ and $(\ref{du})$ has a {\it
+rational\/} parameterization, since the radicals in $d(u)$ and
+${\bf n}(u)$ cancel each other.
+}
+\end{rmk}
+
+\figg{fig:varoffset}{Untrimmed bisectors as variable--distance offsets.}
+{2.5in}
+
+Note that
+%the displacement function satisfies
+$d(u)\not=0$ for all
+$u$ if the
+%given
+point ${\bf p}$ does not lie on the curve ${\bf r}(u)$.
+However, the untrimmed bisector will exhibit a ``point at infinity''
+for each parameter value $\tau$ that satisfies $({\bf p}-{\bf r}(\tau))
+\cdot{\bf n}(\tau)=0$ ({\it i.e.},
+%the curve normal ${\bf n}(\tau)$ is orthogonal to the vector from
+%${\bf r}(\tau)$ to ${\bf p}$ or, equivalently,
+the tangent line at ${\bf r}(\tau)$ passes through
+${\bf p}$). For the polynomial curve (\ref{polycurve}),
+the parameter values corresponding to these points
+at infinity are roots of the polynomial
+\be \label{Pinf}
+P_\infty(u) \,=\,
+[\,\alpha-X(u)\,]\,Y'(u) \,-\, [\,\beta-Y(u)\,]\,X'(u) \,,
+\ee
+which is of degree $2n-2$ (at most) when ${\bf r}(u)$ is of degree
+$n$. Similarly, for the rational curve (\ref{ratcurve}), the points
+at infinity are roots of the polynomial
+\ba \label{Rinf}
+P_\infty(u) \!
+&=& \! [\,\alpha W(u)-X(u)\,]\,[\,W(u)Y'(u)-W'(u)Y(u)\,] \nonumber \\
+&-& \! [\,\beta  W(u)-Y(u)\,]\,[\,W(u)X'(u)-W'(u)X(u)\,] \,,
+\ea
+of degree $3n-2$ (at most).
+However, the roots of (\ref{Rinf}) identify only {\it affine\/} points of
+${\bf r}(u)$ that induce points at infinity on the untrimmed bisector
+--- the latter will also have points at infinity corresponding to
+the roots of $W(u)$.
+
+We denote by ${\bf b}(u)$ the rational untrimmed bisector defined
+by equations (\ref{varoffset}) and (\ref{du}). Its homogeneous
+coordinates $X_b(u),Y_b(u),W_b(u)$ are given by
+\ba \label{pbsctr}
+X_b \! &=& \! [\,\alpha^2-X^2+(\beta-Y)^2\,]\,Y'
+ \,-\, 2(\beta-Y)XX' \,, \nonumber \\
+Y_b \! &=& \! 2(\alpha-X)YY'
+ \,-\, [\,(\alpha-X)^2+\beta^2-Y^2\,]\,X' \,, \nonumber \\
+W_b \! &=& \! 2\,[\,(\alpha-X)Y'-(\beta-Y)X'\,] \,,
+\ea
+for the polynomial curve (\ref{polycurve}), while for the rational
+curve (\ref{ratcurve}) we have
+\ba \label{rbsctr}
+X_b \! &=& \! [\,\alpha^2W^2-X^2+(\beta W-Y)^2\,]\,V
+ \,-\, 2(\beta W-Y)XU \,, \nonumber \\
+Y_b \! &=& \! 2(\alpha W-X)YV
+ \,-\, [\,(\alpha W-X)^2+\beta^2W^2-Y^2\,]\,U \,, \nonumber \\
+W_b \! &=& \! 2W\,[\,(\alpha W-X)V-(\beta W-Y)U\,] \,,
+\ea
+where $U=WX'-W'X$ and $V=WY'-W'Y$. Note that $W_b \propto P_\infty$
+in the case of a polynomial curve, while $W_b \propto WP_\infty$ in
+the rational case.
+
+\begin{rmk}
+{\rm
+It may be verified from (\ref{pbsctr}) and (\ref{rbsctr}) that when
+${\bf r}(u)$ is a {\it polynomial\/} curve of degree $n$, the untrimmed
+bisector ${\bf b}(u)$ is a rational curve of degree $3n-1$ at most,
+whereas if ${\bf r}(u)$ is a {\it rational\/} curve of degree $n$, the
+untrimmed bisector is of degree $4n-2$ at most.
+}
+\end{rmk}
+
+\begin{exmpl}
+\label{exmpl:prbla}
+{\rm
+%The simplest polynomial curve, other than a straight line, is the
+%parabola.
+For the point ${\bf p}=(\alpha,\beta)$ and the parabola ${\bf r}(u)
+=\{u,u^2\}$, equations (\ref{pbsctr}) give the representation
+\ba \label{Bprbla}
+X_b(u) \! &=& \! 2u\,(u^4-2\beta u^2+\alpha^2+\beta^2-\beta) \,,
+\nonumber \\
+Y_b(u) \! &=& \! -\ 3u^4+4\alpha u^3-u^2+2\alpha u-\alpha^2-\beta^2 \,,
+\nonumber \\
+W_b(u) \! &=& \! -\ 2\,(u^2-2\alpha u+\beta)
+\ea
+of the untrimmed bisector, which is evidently a rational curve of
+degree {\it five}. Note that the roots of the denominator polynomial
+$W_b(u)$ are simply
+\be \label{uinfprbla}
+u \,=\, \alpha \pm \sqrt{\alpha^2-\beta}
+\ee
+which identify real points at infinity of (\ref{Bprbla}) at
+{\it finite\/} parameter values when $\beta<\alpha^2$, {\it i.e.},
+${\bf p}$ lies ``outside'' the parabola. Since $\max({\rm deg}(X_b),
+{\rm deg}(Y_b))>{\rm deg}(W_b)$, the values $u=\pm\infty$ also
+identify points at infinity on (\ref{Bprbla}) for any $(\alpha,
+\beta)$. Figure~\ref{fig:parabola} shows representative examples
+of the curves defined by (\ref{Bprbla}).
+}
+\end{exmpl}
+
+\figg{fig:parabola}{Untrimmed bisectors of a point and a parabola.}
+{2.5in}
+
+\begin{exmpl}
+\label{exmpl:ellps}
+{\rm
+As an example of the untrimmed bisector of a point and a rational
+curve, consider ${\bf p}=(\alpha,\beta)$ and the ellipse
+\be \label{pellipse}
+X(u) \,=\, 1-u^2 \,, \quad
+Y(u) \,=\, 2k\,u \,, \quad
+W(u) \,=\, 1+u^2
+\ee
+centered on the origin, with semi--axes 1 and $k$.
+Substituting the above into (\ref{rbsctr}), we see that the untrimmed
+bisector is a rational curve of degree {\it six\/}:
+\ba \label{Bellps}
+X_b(u) \! &=& \! (1-u^2)\,
+[\, k(\alpha^2+\beta^2-1)u^4 \,+\, 4(1-k^2)\beta u^3 \nonumber \\
+&& \!\!\!+\ 2k(\alpha^2+\beta^2-3+2k^2)u^2
+\,+\, 4(1-k^2)\beta u \,+\, k(\alpha^2+\beta^2-1) \,] \,, \nonumber \\
+Y_b(u) \! &=& \! 2u\,
+[\, (\alpha^2+\beta^2+2(1-k^2)\alpha+1-2k^2)u^4 \nonumber \\
+&& \!\!\!+\ 2(\alpha^2+\beta^2-1)u^2 \,+\, \alpha^2+\beta^2
+-2(1-k^2)\alpha+1-2k^2 \,] \,, \nonumber \\
+W_b(u) \! &=& \! 2(1+u^2)^2\,
+[ -\,k(\alpha+1)u^2 \,+\, 2\beta u \,+\, k(\alpha-1) \,] \,.
+\ea
+Some examples are shown in Figure~\ref{fig:ellipse}. In this case,
+the untrimmed bisector has real points at infinity only when the
+condition $\alpha^2+(\beta/k)^2>1$ is satisfied, {\it i.e.}, ${\bf p}$
+lies {\it outside\/} the ellipse. They occur at the parameter values
+\be \label{uinfellps}
+u \,=\, {\beta \pm \displaystyle{\sqrt
+{k^2\alpha^2+\beta^2-k^2}} \over k(\alpha+1)} \,.
+\ee
+}
+\end{exmpl}
+
+\figg{fig:ellipse}{Untrimmed bisectors of a point and an ellipse.}
+{5.2in}
+
+\subsection{Irregular points of the untrimmed bisector}
+\label{sec:irregpts}
+
+It is evident from Figures~\ref{fig:parabola} and \ref{fig:ellipse}
+that, in general, the untrimmed bisector of a point ${\bf p}$ and
+a regular ({\it i.e.}, smooth) curve ${\bf r}(u)$ is {\it not\/}
+smooth itself. We now analyze the irregular points of untrimmed
+point/curve bisectors.
+%Apart from
+%their intrinsic interest, an understanding of the irregular points
+%or ``cusps'' of the untrimmed bisector is important for the trimming
+%procedure (see \S3 below).
+
+Recall \cite{kreyszig59} that the differential characteristics of a
+regular curve ${\bf r}(u)$ can be expressed in terms of its parametric
+derivatives as
+%${\bf r}'(u),{\bf r}''(u),\ldots$ there as
+\be \label{diffchar}
+{\bf t} \,=\, {{\bf r}' \over |{\bf r}'|} \,, \quad
+{\bf n} \,=\, {\bf t} \cross {\bf z} \,, \quad
+\kappa \,=\, {({\bf r}' \cross {\bf r}'') \cdot {\bf z}
+  \over |{\bf r}'|^3} \,,
+\ee
+${\bf z}$ being a unit vector orthogonal to the plane of ${\bf r}(u)$.
+The {\it normal\/} ${\bf n}(u)$ and {\it tangent\/} ${\bf t}(u)$ form
+an orthonormal basis $({\bf n},{\bf t},{\bf z})$ with ${\bf z}$ at each
+point, while $\kappa(u)$ is the (signed) {\it curvature}. The variation
+of the ${\bf t}$ and ${\bf n}$ along the curve is described by the
+{\it Frenet equations}
+\be \label{frenet}
+{\bf t}' \,=\, -\,\sigma\kappa\,{\bf n}
+\quad {\rm and} \quad
+{\bf n}' \,=\, \sigma\kappa\,{\bf t} \,,
+\ee
+where the parametric speed $\sigma(u)$ is given by (\ref{sigma}).
+Higher derivatives
+%of ${\bf t}(u)$ and ${\bf n}(u)$
+are easily
+expressed in terms of ${\bf t},{\bf n}$ and the functions
+$\sigma,\kappa$ and their derivatives, {\it e.g.},
+\ba \label{frenet2}
+{\bf t}'' \! &=& \! -\,\sigma^2\kappa^2\,{\bf t} \,-\,
+(\sigma'\kappa+\sigma\kappa')\,{\bf n} \,, \nonumber \\
+{\bf n}'' \! &=& \! (\sigma'\kappa+\sigma\kappa')\,{\bf t}
+ \,-\, \sigma^2\kappa^2\,{\bf n} \,.
+\ea
+
+If ${\bf b}(u)$ denotes the parametric form of the untrimmed
+bisector obtained by substituting (\ref{du}) into (\ref{varoffset}),
+its derivatives may be written as
+\ba \label{bderivs}
+{\bf b}' \! &=& \! {\bf r}' \,+\,
+  d'\,{\bf n} \,+\, d\,{\bf n}' \,, \nonumber \\
+{\bf b}'' \! &=& \! {\bf r}'' \,+\,
+  d''\,{\bf n} \,+\, 2d'\,{\bf n}' \,+\, d\,{\bf n}'' \,,
+\ea
+$\ldots$ etc. Setting ${\bf r}'=\sigma{\bf t}$ and ${\bf r}''=\sigma'
+{\bf t}-\sigma^2\kappa{\bf n}$ and substituting from (\ref{frenet}) and
+(\ref{frenet2}), we can re--write (\ref{bderivs}) as
+\ba \label{bderivs2}
+{\bf b}' \! &=& \! \sigma(1+\kappa d\,)\,{\bf t} \,+\, d'\,{\bf n} \,,
+ \nonumber \\
+{\bf b}'' \! &=& \!
+[\,\sigma'(1+\kappa d\,)+\sigma(\kappa'd+2\kappa d')\,]\,{\bf t}
+ \nonumber \\
+ & & \quad +\ [\,d''-\sigma^2\kappa(1+\kappa d\,)\,]\,{\bf n} \,,
+\ea
+where, using the form (\ref{du0}), the derivatives of the displacement
+function $d(u)$ appropriate to the untrimmed bisector are most conveniently
+expressed as
+\ba \label{dderivs}
+d'  \! &=& \! \sigma(1+\kappa d\,)\tan\psi \,,
+\nonumber \\
+d'' \! &=& \! [\,\sigma'(1+\kappa d\,)+\sigma\kappa'd\,]\tan\psi
+\nonumber \\
+    & & \quad +\ {\sigma^2(1+\kappa d\,) \over 2d}
+    \,[\,1+2\kappa d+(1+4\kappa d)\tan^2\psi\,] \,,
+\ea
+$\ldots$ etc. In deriving (\ref{dderivs}), we make use of the fact that
+the angle $\psi$ between the vector from ${\bf r}(u)$ to ${\bf p}$ and
+the curve normal ${\bf n}(u)$ changes at the rate
+\be \label{psideriv}
+\psi' \,=\, {\sigma(1+2\kappa d\,) \over 2d} \,,
+\ee
+%with respect to $u$,
+as may be deduced by differentiating
+%the relation
+$\cos\psi=({\bf p}-{\bf r}(u))\cdot{\bf n}(u)\,/\,|\,{\bf p}-{\bf r}(u)\,|$.
+
+Using the above expression for $d'$, we now see that the first parametric
+derivative of the untrimmed bisector has the form
+\be \label{bprime}
+{\bf b}' \,=\, \sigma(1+\kappa d\,)\,({\bf t}+{\bf n}\tan\psi) \,.
+\ee
+At each value of $u$ such that ${\bf b}'(u)\not={\bf 0}$, the tangent
+${\bf t}_b(u)$ to the untrimmed bisector is a unit vector in the direction
+of (\ref{bprime}). Note that the magnitude of (\ref{bprime}), {\it i.e.},
+the {\it parametric speed\/} $\sigma_b(u)$ of the untrimmed bisector, is
+simply
+\be \label{magbprime}
+|{\bf b}'| \,=\, \sigma\,|\;\!1+\kappa d\,|\,|\sec\psi\;\!| \,.
+\ee
+
+%Since the given curve
+Now if ${\bf r}(u)$ is regular,
+%its tangent
+${\bf t}$
+and
+%normal
+${\bf n}$
+are defined and linearly independent at each $u$,
+and ${\bf t}+{\bf n}\tan\psi\not={\bf 0}$. Moreover,
+this vector varies continuously with $u$ except at those values
+where $\psi(u)=\pm\pi/2$, which correspond to
+%the roots of the polynomial (\ref{Pinf}), {\it i.e.}, the
+points at infinity on ${\bf b}(u)$. Hence,
+at each $u$ such that $P_\infty(u)\not=0$, the unit vector
+\be \label{vvector}
+{\bf v}(u) \,=\, |\cos\psi(u)\;\!| \;
+[\,{\bf t}(u)+{\bf n}(u)\tan\psi(u)\,]
+\ee
+in the direction of ${\bf t}+{\bf n}\tan\psi$ is defined and
+varies continuously with $u$. Since $\sigma(u)\not=0$ for
+a regular curve, we see that the tangent ${\bf t}_b(u)={\bf b}'(u) /
+|{\bf b}'(u)|$ to the untrimmed bisector is given in terms of ${\bf v}
+(u)$ by
+\be \label{btangent}
+{\bf t}_b(u) \,=\,
+{1+\kappa(u)d(u) \over |\,1+\kappa(u)d(u)\,|} \; {\bf v}(u) \,.
+\ee
+
+\begin{lma}
+The untrimmed bisector ${\bf b}(u)$ exhibits a {\rm cusp}, or sudden
+tangent reversal, at those parameter values where $P_\infty(u)\not=0$
+and the curvature $\kappa(u)$ of the given curve ${\bf r}(u)$ attains
+the local critical value
+\be \label{kappacrit}
+\kappa_{\rm crit}(u) \,=\, -\ {1 \over d(u)} \,=\,
+-\ {2\cos\psi(u) \over |\,{\bf p}-{\bf r}(u)\,|} \,,
+\ee
+without being an extremum, {\it i.e.}, $\kappa'(u)\not=0$.
+\end{lma}
+
+\prf Let $\tau$ be such that $P_\infty(\tau)\not
+=0$ --- {\it i.e.}, ${\bf b}(\tau)$ is an affine point ---
+and the curvature of ${\bf r}(u)$ satisfies
+$\kappa(\tau)=-1/d(\tau)$ and $\kappa'(\tau)\not=0$. Then $\tan
+\psi(\tau)$ is finite, and the unit vector ${\bf v}(\tau)$ given by
+(\ref{vvector}) is defined and continuous at $u=\tau$. On the other
+hand, the scalar factor multiplying ${\bf v}(u)$ in (\ref{btangent})
+is a ``step function,'' which changes abruptly from $-1$ to $+1$,
+or vice--versa,
+%at $u=\tau$
+whenever $\rd/\rd u\,[\,1+\kappa(u)d(u)\,]
+\not=0$ at $u=\tau$, {\it i.e.}, $\kappa'(\tau)d(\tau)+\kappa(\tau)
+d'(\tau)\not=0$. But from (\ref{dderivs}) we observe that $d'(\tau)
+=0$ whenever $\kappa(\tau)=-1/d(\tau)$, and since $d(\tau)\not=0$
+if ${\bf p}$ does not lie on ${\bf r}(u)$, the
+condition $\rd/\rd u\,[\,1+\kappa(u)d(u)\,]\not=0$ at $u=\tau$ is
+exactly equivalent to $\kappa'(\tau)\not=0$. \QED
+
+\begin{rmk}
+{\rm
+It is interesting to note that the criteria $\kappa(u)=-1/d(u)$ and
+$\kappa'(u)\not=0$ identifying the cusps of the ``variable--distance''
+offset $(\ref{varoffset})$ are identical to those for fixed--distance
+offsets ($\kappa(u)=-1/d$ and $\kappa'(u)\not=0$) with $d(u)={\rm constant}$
+$\cite{farouki90}$. This is not a {\it generic} feature of variable
+offsets, but arises rather from the specific form $(\ref{du})$ of
+$d(u)$ for the untrimmed bisector.
+}
+\end{rmk}
+
+Using $(\ref{du})$ and $(\ref{diffchar})$, we see that for the
+polynomial curve (\ref{polycurve}), the local critical curvature
+(\ref{kappacrit}) will be attained at those roots of the polynomial
+%\be \label{cuspeqn}
+%\left[\;
+%|\,{\bf p}-{\bf r}(u)\,|^2\,{\bf r}'(u)\cross{\bf r}''(u) \,+\,
+%2\,|{\bf r}'(u)|^2\,[\,{\bf p}-{\bf r}(u)\,]\cross{\bf r}'(u)
+%\;\right] \cdot {\bf z}
+%\,=\, 0
+%\ee
+\ba \label{Pcusp}
+P_c \! &=& \! [\,(\alpha-X)^2+(\beta-Y)^2\,]\,(X'Y''-X''Y') \nonumber \\
+&& +\ 2\,({X'}^2+{Y'}^2)\,[\,(\alpha-X)Y'-(\beta-Y)X'\,]
+\ea
+of degree $4n-4$ (at most) that satisfy $\kappa'(u)\not=0$. These
+parameter values correspond to cusps on the untrimmed bisector ${\bf b}
+(u)$. For the rational curve (\ref{ratcurve}) the ``cusp'' polynomial
+is of degree $7n-6$ (at most):
+\ba \label{Rcusp}
+P_c \! &=& \! W\,[\,(\alpha W-X)^2+(\beta W-Y)^2\,]\,(U_1V_2-U_2V_1)
+\nonumber \\
+&& +\ 2\,(U_1^2+V_1^2)\,[\,(\alpha W-X)V_1-(\beta W-Y)U_1\,] \,,
+\ea
+where we denote $(WX'-W'X,WY'-W'Y)$ and $(WX''-W''X,WY''-W''Y)$ by
+$(U_1,V_1)$ and $(U_2,V_2)$, respectively, for brevity.
+
+Consider now the curvature of the untrimmed bisector. Substituting
+from (\ref{bderivs2}), (\ref{dderivs}), and (\ref{magbprime}) into
+the expression $\kappa_b(u)=|{\bf b}'(u)|^{-3}[\,{\bf b}'(u)\cross
+{\bf b}''(u)\,]\cdot{\bf z}$, a straightforward but laborious
+calculation yields the following relationship between the curvature
+$\kappa_b(u)$ of ${\bf b}(u)$ and the displacement function $d(u)$,
+the angle $\psi(u)$, and the curvature $\kappa(u)$ of the given
+curve ${\bf r}(u)$:
+%\be
+%({\bf b}'\cross{\bf b}'')\cdot{\bf z}
+%\,=\, -\ {\sigma^3(1+\kappa d\,)^2 \over 2d}\,\sec^2\psi \,,
+%\ee
+%and together with
+%for the curvature of the untrimmed bisector reduces to
+\be \label{bkappa}
+\kappa_b \,=\, -\ {|\cos\psi\;\!| \over 2d\,|\;\!1+\kappa d\,|} \,.
+\ee
+
+\begin{lma}
+The untrimmed bisector ${\bf b}(u)$ has an {\rm extraordinary point}
+--- a tangent--continuous point of infinite curvature --- at parameter
+values $u$ where $P_\infty(u)\not=0$ and the curvature of ${\bf r}(u)$
+attains an extremum, $\kappa'(u)=0\not=\kappa''(u)$, equal in value
+to the critical curvature $\kappa_{\rm crit}(u)$ defined by $(\ref
+{kappacrit})$.
+\end{lma}
+
+\prf Let $\tau$ be such that $P_\infty(\tau)\not=0$ and the curvature
+of ${\bf r}(u)$ satisfies $\kappa(\tau)=-1/d(\tau)$ with $\kappa'(\tau)
+=0\not=\kappa''(\tau)$. From equations (\ref{dderivs}) it is clear that
+\be
+1+\kappa(\tau)d(\tau) \,=\, \kappa'(\tau) \,=\, 0
+\;\;\Rightarrow\;\; d'(\tau) \,=\, d''(\tau) \,=\, 0
+\ee
+so the first derivative $\kappa'(\tau)d(\tau)+\kappa(\tau)
+d'(\tau)$ of the quantity $1+\kappa d$ at $u=\tau$ is zero, whereas
+the second derivative $\kappa''(\tau)d(\tau)+2\kappa'(\tau)d'(\tau)+
+\kappa(\tau)d''(\tau)$ is not (since $\kappa''(\tau)\not=
+0$ and $d(u)\not=0$ for all $u$). Thus the factor $(1+\kappa d\,)
+/ |\;\!1+\kappa d\,|$ multiplying the unit vector ${\bf v}(\tau)$
+in expression (\ref{btangent}) has the {\it same\/} sign on either
+side of $\tau$, and the bisector tangent ${\bf t}_b(u)$ is
+{\it continuous\/} at $u=\tau$. However, since $1+\kappa
+(\tau)d(\tau)=0$, it can be seen from expression (\ref{bkappa})
+for the bisector curvature that $|\kappa_b(u)|\to\infty$ as
+$u\to\tau$ (note that $P_\infty(\tau)\not=0 \Rightarrow
+\cos\psi\not=0$).
+\QED
+
+We may regard irregular points of ${\bf b}(u)$ corresponding to
+points of ${\bf r}(u)$ that satisfy $\kappa(u)=-1/d(u)$ and $\kappa'
+(u)=\cdots=\kappa^{(r)}(u)=0\not=\kappa^{(r+1)}(u)$ for $r \ge 1$
+as ``higher--order'' cusps; the occurrence of such points is
+exceptional.
+
+\begin{exmpl}
+{\rm
+In the case of the parabola ${\bf r}(u)=\{u,u^2\}$ of Example~\ref
+{exmpl:prbla}, the polynomial (\ref{Pcusp}) is the quartic
+\be
+P_c(u) \,=\, 3u^4 - 8\alpha u^3
+ + 6\beta u^2 - (\alpha^2+\beta^2-\beta) \,.
+\ee
+Although $P_c(u)$ is quartic, {\it Descartes Law of Signs\/}
+\cite{uspensky48} and a careful analysis of the behavior of its
+coefficients reveals that it has just two distinct real roots
+when $\alpha^2+\beta^2-\beta>0$, and none when $\alpha^2+\beta^2
+-\beta<0$. Exceptionally, if $\alpha^2 +\beta^2-\beta=0$, $P_c(u)$
+has a double root at $u=0$, corresponding to an extraordinary point
+of the untrimmed bisector; this occurs when $(\alpha,\beta)$ {\it
+lies on the circle of curvature to the vertex\/} $(0,0)$ of the
+parabola.
+
+For the ellipse (\ref{pellipse}) in Example~\ref{exmpl:ellps}, the
+``cusp polynomial'' becomes
+\ba
+P_c(u) \!\! &=& \!\! k\,[\,\alpha^2+\beta^2+2(1-k^2)\alpha+1-2k^2\,]\,u^6
+ \nonumber \\
+&+& \!\! 3k\,[\,\alpha^2+\beta^2-2(1-k^2)\alpha-3+2k^2\,]\,u^4
+ \nonumber \\
+&+& \!\! 16\,(1-k^2)\beta\,u^3
+ \nonumber \\
+&+& \!\! 3k\,[\,\alpha^2+\beta^2+2(1-k^2)\alpha-3+2k^2\,]\,u^2
+ \nonumber \\
+&+& \!\! k\,[\,\alpha^2+\beta^2-2(1-k^2)\alpha+1-2k^2\,] \,.
+\ea
+%\ba
+%P_c(u) \!\! &=& \!\! k\,[\,(\alpha+1-k^2)^2+\beta^2-k^4\,]\,u^6
+% \nonumber \\
+%&+& \!\! 3k\,[\,(\alpha-1+k^2)^2+\beta^2-(2-k^2)^2\,]\,u^4
+% \nonumber \\
+%&+& 16\,(1-k^2)\beta\,u^3
+% \nonumber \\
+%&+& \!\! 3k\,[\,(\alpha+1-k^2)^2+\beta^2-(2-k^2)^2\,]\,u^2
+% \nonumber \\
+%&+& k\,[\,(\alpha-1+k^2)^2+\beta^2-k^4\,] \,.
+%\ea
+In this case the maximum number of distinct real roots is four, again
+less than is suggested by the degree of $P_c(u)$. Note that we have
+double roots at zero or infinity, giving rise to extraordinary points,
+if $(\alpha,\beta)$ is such that the coefficient of $u^0$ or $u^6$
+vanishes (theses coefficients define the {\it circles of curvature\/}
+to the ellipse at $u=0$ and $u=\pm\infty$; see Example~\ref
+{exmpl:trimellps} below.)
+}
+\end{exmpl}
+
+\begin{rmk}
+{\rm
+Since the cusps of ${\bf b}(u)={\bf r}(u)+d(u){\bf n}(u)$ arise
+when $\kappa(u)=-1/d(u)$, they must lie on the locus defined by
+${\bf e}(u)={\bf r}(u)-\kappa^{-1}(u){\bf n}(u)$. The latter is
+the {\it evolute}, or locus of centers of curvature, of the
+curve ${\bf r}(u)$ --- note that $\rho(u)=\kappa^{-1}(u)$ is
+the radius of curvature and, according to (\ref{diffchar}),
+$\kappa(u)$ is positive when ${\bf n}(u)$ points {\it away\/}
+from the center of curvature.
+}
+\end{rmk}
+
+\subsection{The true bisector}
+
+We now show that the untrimmed bisector given by (\ref{varoffset})
+and (\ref{du}) is a superset of the ``true'' bisector (Definition~\ref
+{defbsctr}). Note that the ``true'' bisector of ${\bf p}$ and ${\bf r}
+(u)$ can be visualized as follows. Consider a circle through ${\bf p}$,
+%increasing in size
+expanding in some direction
+until it just touches the curve ${\bf r}(u)$. Now
+consider all such circles, inflating outward from ${\bf p}$
+in every direction
+until they touch ${\bf r}(u)$ --- the bisector is the {\it locus of centers
+of these maximal circles}. In the following discussion, it is useful to
+keep this representation in mind.
+
+\begin{dfn}
+\label{d:Cq}
+Let $C_{\bf q}$ denote the circle with center ${\bf q}$ and radius
+$|\,{\bf q}-{\bf p}\,|$.
+\end{dfn}
+
+\begin{lma}
+\label{lma:bis}
+{\rm
+A point ${\bf q}$ lies on the bisector of ${\bf p}$ and the regular
+curve ${\bf r}(u)$ if and only if (see Figure~\ref{fig:bis}):
+\begin{itemize}
+\item
+$C_{\bf q}$ is ``empty'' --- no point of ${\bf r}(u)$ lies in its
+interior; and
+\item
+$C_{\bf q}$ is tangent to ${\bf r}(u)$ in at least one point.
+\end{itemize}
+%       If ${\bf r}(u)$ is not regular,
+%       then the second condition should instead be
+%       that the boundary of the circle $C_{\bf q}$
+%       contains at least one point of ${\bf r}(u)$.
+}
+\end{lma}
+\prf
+${\bf q}$ lies on the bisector if and only if the closest point
+of ${\bf r}(u)$ to ${\bf q}$ is at distance $|\,{\bf q}-{\bf p}\,|$.
+If $C_{\bf q}$ is tangent to ${\bf r}(u)$ at $u=u_0$ but otherwise
+empty, then ${\bf r}(u_0)$ is closest to ${\bf q}$ and is at distance
+$|\,{\bf q}-{\bf r}(u_0)\,|=|\,{\bf q}-{\bf p}\,|$.
+\QED
+
+\figg{fig:bis}{Condition for a point ${\bf q}$ to lie on the bisector
+$B({\bf p},{\bf r}(u))$.}{2.5in}
+
+(Note that if we are computing the bisector of a point and a finite
+curve segment, the circle $C_{\bf q}$ may contain curve points that
+correspond to parameter values outside the domain $I$ that defines
+the segment of interest.)
+
+\begin{propn}
+\label{p:superset}
+The untrimmed bisector of ${\bf p}$ and ${\bf r}(u)$ is a superset
+of the true bisector of ${\bf p}$ and ${\bf r}(u)$.
+\end{propn}
+\prf
+Let ${\bf q}$ be a point of the bisector of ${\bf p}$ and ${\bf r}(u)$.
+By Lemma~\ref{lma:bis}, there exists a point ${\bf r}(u_{0})$ of the
+curve that lies on the circle $C_{\bf q}$, such that the curve is tangent
+to the circle at ${\bf r}(u_{0})$ or, equivalently, such that the normal
+at ${\bf r}(u_{0})$ passes through the center ${\bf q}$ of the circle
+$C_{\bf q}$. Thus, ${\bf r}(u_{0}) + d(u_{0}){\bf n}(u_{0}) = {\bf q}$
+(recall that $d(u_0)=|\,{\bf q}-{\bf p}\,|={\rm radius\ of\ } C_{\bf q}$).
+\QED
+
+Since the second condition of Lemma~\ref{lma:bis} is satisfied for
+{\it all\/} points ${\bf q}$ of the untrimmed bisector (by definition),
+a point ${\bf q}$ of the untrimmed bisector is a point of the true
+bisector if and only if the interior of $C_{\bf q}$ is empty.
+
+\section{The trimming procedure}
+\label{trimming}
+
+The untrimmed bisector ${\bf b}(u)$ is ``trimmed'' down to the true
+bisector by deleting a finite number of segments. As with the untrimmed
+offset, this is done by finding certain ``special'' points that identify
+possible deviations of ${\bf b}(u)$ from the true bisector. There are
+three classes of these special points (Definitions~\ref{d:trim} and
+\ref{d:cri}), and we split the trimming process into two stages. We
+now describe the first stage, which removes ``inactive'' segments.
+
+\subsection{Active and inactive segments}
+
+\begin{dfn}
+The points ${\bf r}(u_0)$ and ${\bf b}(u_0)={\bf r}(u_0)+d(u_0){\bf n}
+(u_0)$ are called {\rm corresponding points} of the given curve and the
+untrimmed bisector.
+\end{dfn}
+
+Along the normal line to every curve point ${\bf r}(u_0)$, there is
+a corresponding point ${\bf b}(u_0)$ of the untrimmed bisector. The
+point ${\bf b}(u_0)$ does not necessarily belong to the true bisector,
+however, because other parts of the curve ${\bf r}(u)$ may be closer
+to it than the point ${\bf r}(u_0)$.
+%(see Figure~\ref{fig:notclosest}).
+
+%\figg{fig:notclosest}{${\bf r}(u_0)$ is {\it not\/} closest on ${\bf r}
+%(u)$ to its corresponding point ${\bf b}(u_0)$.}{2.5in}
+
+\begin{dfn} \label{dfn:active}
+The point ${\bf q} = {\bf b}(u_{0})$ of the untrimmed bisector
+is {\rm active} if either of the following conditions holds (see
+Figure~\ref{fig:active}):
+\begin{description}
+\item[{\rm (1)}]
+        ${\bf q}$ has more than one corresponding point on the
+        curve\footnote{There are a finite number of such points;
+        we will have more to say about them below.}
+\item[{\rm (2)}]
+        ${\bf q}$ has only one corresponding point ${\bf q}' =
+        {\bf r}(u_0)$ on the curve, and either
+\begin{description}
+\item[{\rm (a)}]
+        the circle of curvature at ${\bf q}'$ contains the point ${\bf p}$
+        --- i.e., ${\bf p}$ lies on or inside the circle of curvature, or
+\item[{\rm (b)}]
+        the point ${\bf p}$ and the circle of curvature at ${\bf q}'$
+        lie on opposite sides of the tangent at ${\bf q'}$
+\end{description}
+\end{description}
+A segment $S$ of ${\bf b}(u)$ is active if every point of $S$ is active.
+\end{dfn}
+
+\figg{fig:active}{Active and inactive points on the untrimmed bisector.}
+{2.5in}
+
+To understand the significance of such ``active'' points on the untrimmed
+bisector, we need the following result:
+
+\begin{lma} \label{lma:circles}
+Let ${\bf q}$ and ${\bf q}'$ be corresponding points on the untrimmed
+bisector and the given curve. Then the circle $C_{\bf q}$ lies entirely
+inside/outside the circle of curvature at ${\bf q}'$ according to whether
+the point ${\bf p}$ lies inside/outside this circle of curvature.
+\end{lma}
+\prf
+Let ${\cal C}$ denote the circle of curvature to ${\bf r}(u)$ at the
+point ${\bf q}'$. Then the normal line to ${\bf r}(u)$ at ${\bf q}'$
+is a diameter of ${\cal C}$, and the point ${\bf q}$ corresponding
+to ${\bf q}'$ lies on this normal line. Noting that ${\bf q}$ is
+the center of the circle $C_{\bf q}$ and that (by construction) both
+${\bf q}'$ and ${\bf p}$ lie on this circle, we consider a variable
+circle constrained to pass through ${\bf q}'$ whose center moves away
+from ${\bf q}'$ along the normal line there. Such a circle evidently
+lies entirely inside or outside of (or coincides with) the circle of
+curvature ${\cal C}$ at ${\bf q}'$. $C_{\bf q}$ is an instance of
+such a circle, and the inclusion/exclusion of any point of $C_{\bf q}$
+--- such as ${\bf p}$ --- in ${\cal C}$ is sufficient to guarantee
+that all of $C_{\bf q}$ lies inside/outside ${\cal C}$.
+\QED
+
+\begin{rmk}
+\label{r:active}
+{\rm
+We observe that an active point appears to lie on the bisector, at least
+locally. To see this, let ${\bf q}$ be an active point of ${\bf b}(u)$
+with only one corresponding point ${\bf q}'$. If ${\bf p}$ lies inside or
+on the circle of curvature at ${\bf q}'$, then by Lemma~\ref{lma:circles}
+all of $C_{\bf q}$ also lies in the circle of curvature at ${\bf q}'$ and,
+in particular, the curve in some neighborhood of ${\bf q}'$
+% ({\it i.e.}, the image of a neighborhood of $t'$ where ${\bf q}' = {\bf r}(t')$)
+lies completely outside of $C_{\bf q}$ \cite[p.~176]{H52}.
+On the other hand, if ${\bf p}$ (and thus $C_{\bf q}$) lies on the opposite side
+of the tangent at ${\bf q}'$ from the circle of curvature at ${\bf q}'$,
+then again the curve in some neighborhood of ${\bf q}'$ lies completely outside of
+$C_{\bf q}$.
+Thus, in a neighborhood of any point ${\bf q}'$ (assumed unique)
+that corresponds to an
+active point ${\bf q}$, the curve
+lies completely outside of $C_{\bf q}$.
+In other words, active points act ``locally''
+like points of the true bisector (Lemma~\ref{lma:bis}).
+}
+\end{rmk}
+
+\begin{propn}
+An inactive point of the untrimmed bisector of ${\bf p}$ and ${\bf r}(u)$
+does not lie on the true bisector of ${\bf p}$ and ${\bf r}(u)$.
+\end{propn}
+\prf
+Let ${\bf q}$ be an inactive point of ${\bf b}(u)$ and let ${\bf q}'$
+be the point of ${\bf r}(u)$ corresponding to ${\bf q}$. By definition,
+${\bf p}$ and the circle of curvature at ${\bf q}'$ lie on the same side
+of the tangent at ${\bf q}'$, but ${\bf p}$ lies outside this circle
+(Figure~\ref{fig:active}(iii)). $C_{\bf q}$ and the circle of curvature
+at ${\bf q}'$ are both circles that are tangent to ${\bf q}'$ (or,
+equivalently, circles through ${\bf q}'$ with centers on the normal
+line there), and they both lie on the same side of the tangent at
+${\bf q}'$. Moreover, by Lemma~\ref{lma:circles}, $C_{\bf q}$ must
+be strictly larger than (and strictly contain) the circle of curvature
+at ${\bf q}'$. But all circles tangent at ${\bf q}'$ that are larger
+than the circle of curvature there must lie on one side of the curve
+in some neighborhood of ${\bf q}'$ \cite[p.~176]{H52}, and consequently
+$C_{\bf q}$ must contain some points of the curve in its interior. By
+Lemma~\ref{lma:bis}, we conclude that ${\bf q}$ is not on the true
+bisector.
+\QED
+
+Since, for each $u$, the definition of whether or not the point
+${\bf q}$ of ${\bf b}(u)$ is active depends on which ``side'' of the
+tangent line and circle of curvature --- at the corresponding point
+${\bf q}'$ of ${\bf r}(u)$ --- that ${\bf p}$ lies on, we are interested
+in points of ${\bf r}(u)$ where the tangent line or circle of curvature
+moves through ${\bf p}$.
+
+\begin{dfn}
+\label{d:trim}
+A point of the curve ${\bf r}(u)$
+%is an {\rm inflection} if the curvature is zero at that point;
+% regular curve => no cusps, no advantage in avoiding self-intersections
+% concavity of the curve changes at this point
+%a point of ${\bf r}(u)$
+is a {\rm class}\footnote
+       {This term is chosen in allusion to the class of a curve,
+        which is the number of tangents that pass through a typical point
+        not on the curve \cite[p.~115]{W50}.}
+{\rm point} if the tangent line at that point passes through ${\bf p}$.
+A point of ${\bf r}(u)$ is
+a {\rm circular point} if the circle of curvature at that
+point passes through ${\bf p}$ --- equivalently, a point of ${\bf r}(u)$ is
+circular if the center of curvature there coincides with the corresponding
+point ${\bf b}(u)$ of the untrimmed bisector.
+\end{dfn}
+
+%(To be more precise, an inflection of ${\bf r}(u)$ is a point where the
+%curvature {\it changes sign\/} --- so that $\kappa(u)=0$ and
+%$\kappa'(u)\not=0$ or, more generally, the lowest--order non--vanishing
+%derivative of $\kappa(u)$ is {\it odd}. For example, whereas $\kappa$
+%vanishes at $u=0$ on both ${\bf r}(u)=\{u,u^3\}$ and ${\bf r}=\{u,u^4\}$,
+%it changes sign in the former case but not in the latter. For simplicity
+%we adhere to the definition given above, thereby occasionally
+%including some points where the circle of curvature does not move from
+%one side of the curve to the other.)
+
+We have already encountered ``class'' points and ``circular'' points,
+in a somewhat different guise (\S\ref{sec:untrim} and \ref
+{sec:irregpts}): they are, respectively, points of ${\bf r}(u)$ that
+induce points at infinity and cusps on the untrimmed bisector. Thus,
+for fixed $u$, equations (\ref{Pinf}) and (\ref{Rinf}) may be regarded
+as expressing the condition for the point ${\bf p}=(\alpha,\beta)$ to
+lie on the tangent line to the point ${\bf r}(u)$ of a polynomial or
+rational curve. Likewise, for fixed $u$, equations (\ref{Pcusp}) and
+(\ref{Rcusp}) are satisfied when ${\bf p}=(\alpha,\beta)$ lies on
+the circle of curvature at the point ${\bf r}(u)$ of a polynomial or
+rational curve.
+
+\begin{thm}
+\label{thm:active}
+Let ${\bf b}(u)$ be the untrimmed bisector of the point ${\bf p}$
+and the regular curve ${\bf r}(u)$ defined on the interval $u \in
+I$. Then if $\{i_{1},\ldots,i_{M}\}$ is the ordered set of values
+on $I$ that correspond to class points and circular points of
+${\bf r}(u)$, and we denote the end points of $I$ by $i_{0}$ and
+$i_{M+1}$, we have either
+\be
+{\bf b}(u) {\rm \ is\ active\ }
+\quad {\rm for\ all\ } u \in (i_k,i_{k+1})
+\ee
+or
+\be
+{\bf b}(u) {\rm \ is\ inactive\ }
+\quad {\rm for\ all\ } u \in (i_k,i_{k+1})
+\ee
+on each span $(i_k,i_{k+1})$ for $k=0,\ldots,M$.
+\end{thm}
+\prf
+Consider a point ${\bf q}$ moving along the untrimmed bisector
+%({\it i.e.}, such that its parameter value changes smoothly),
+and let ${\bf q}'$ be the (unique) corresponding point of ${\bf r}(u)$.
+By definition, for ${\bf q}$ to change from active to inactive
+or vice--versa, the tangent line or the circle of curvature to ${\bf r}
+(u)$ at ${\bf q}'$ must sweep through ${\bf p}$. The points of ${\bf r}
+(u)$ associated with these occurrences are, respectively, class points
+and circular points. Thus, if the motion of ${\bf q}$ is such that
+its corresponding point ${\bf q}'$ is never a class point or circular
+point, the status (active/inactive) of ${\bf q}$ remains constant.
+\QED
+
+The above proof requires a technical addendum to cover cases
+where ${\bf p}$ lies {\it simultaneously\/} on the tangent line
+and circle of curvature at ${\bf q}'$. Ordinarily, this implies
+that ${\bf p}$ {\it coincides\/} with the point ${\bf q}'$ of
+${\bf r}(u)$, a configuration that we specifically exclude.
+But it may also occur with ${\bf p}$ not on ${\bf r}(u)$ if
+${\bf q}'$ is an {\it inflection\/} of ${\bf r}(u)$. As we pass
+through an inflection, however, the ``interior'' of the circle
+of curvature jumps suddenly from one of the half--planes
+delineated by the tangent line to the other one. It is then
+clear from Definition~\ref{dfn:active} that ${\bf q}$ remains
+active as ${\bf q}'$ traverses an inflection.
+
+\subsection{Critical points (self--intersections)}
+
+Deleting ``inactive'' segments eliminates points
+${\bf q}$
+%={\bf b}(u)$
+on the untrimmed bisector that are denied
+membership in the true bisector on the grounds that their circles
+$C_{\bf q}$ are occupied ``locally'' by points of ${\bf r}(u)$,
+{\it i.e.}, the curve crosses $C_{\bf q}$ in some neighborhood of
+the corresponding point ${\bf q}'$ on ${\bf r}(u)$. In the second
+stage of the trimming process, we identify points
+${\bf q}$ that must be eliminated because their circles $C_{\bf q}$
+become occupied in a ``global'' sense --- {\it i.e.}, the curve
+${\bf r}(u)$ enters $C_{\bf q}$ at some point {\it other\/} than
+the corresponding point ${\bf q}'$.
+
+\begin{dfn}
+\label{d:cri}
+A point ${\bf q}$ of the untrimmed bisector is a {\rm critical point}
+if the circle $C_{\bf q}$ is tangent to ${\bf r}(u)$ at two or more
+points (Figure~\ref{fig:critical}).
+\end{dfn}
+
+Although defined somewhat differently, critical points are actually
+self--intersections of the untrimmed bisector.
+
+\figg{fig:critical}{Critical point (self--intersection) of the untrimmed
+bisector.}{2.5in}
+
+\begin{propn}
+\label{prop:cri}
+A point ${\bf q}$ of the untrimmed bisector is a critical point if and
+only if it is a self--intersection of ${\bf b}(u)$.
+\end{propn}
+
+\prf Let ${\bf q} \in {\bf b}(u)$ be a critical point, and let the
+circle $C_{\bf q}$ be tangent to ${\bf r}(u)$ at the two points
+${\bf r}(u_1)$ and ${\bf r}(u_2)$. Then the normal at ${\bf r}(u_1)$
+passes through the center of $C_{\bf q}$ and, since both ${\bf r}
+(u_1)$ and ${\bf p}$ lie on the boundary of this circle, a point
+of the normal is equidistant from these two points at the center
+(Figure~\ref{fig:critical}). Thus, ${\bf b}(u_{1}) = {\bf q}$. By
+the same argument, we also have ${\bf b}(u_{2}) = {\bf q}$. Hence
+${\bf q}$ must be a self--intersection of ${\bf b}(u)$.
+
+Conversely, let ${\bf q}={\bf b}(u_{1})={\bf b}(u_{2})$ be a
+self--intersection. Then ${\bf r}(u_{1})$, ${\bf r}(u_{2})$, and
+${\bf p}$ are all equidistant from ${\bf q}$. Thus, ${\bf r}(u_{1})$
+and ${\bf r}(u_{2})$ lie on the circle $C_{\bf q}$. Moreover, since
+the curve normals at ${\bf r}(u_{1})$ and ${\bf r}(u_{2})$ pass
+through the center ${\bf q}$ of this circle, the circle is also
+tangent to the curve at the points ${\bf r}(u_{1})$ and ${\bf r}
+(u_{2})$. Hence ${\bf q}$ is a critical point. \QED
+
+Proposition~\ref{prop:cri} allows us to trim using self--intersections
+while arguing the validity of this trim using critical points.
+
+\begin{thm}
+\label{thm:trim2}
+Let ${\bf b}(u)$ be the untrimmed bisector of the point ${\bf p}$
+and the regular curve ${\bf r}(u)$ defined on $u \in I$, and let
+$\{i_{1},\ldots,i_{M}\}$ be the ordered set of parameter values
+on $I$ that correspond to endpoints of active segments on ${\bf b}
+(u)$ or self--intersections of ${\bf b}(u)$, i.e., ${\bf b}(i_j)=
+{\bf b}(i_k)$ for $1 \leq j \neq k \leq M$. Then for each active
+segment $u \in [\,i_j,i_k\,]$ $(where\ i_j < i_k)$, we have either
+%       Let $i_{j} < i_{k}$ be the parameter values of the endpoints of an
+%       active segment. Then, either
+\be
+{\bf b}(u) {\rm \ is\ on\ the\ bisector\ }
+\quad {\rm for\ all\ } u \in (i_l,i_{l+1})
+\ee
+or
+\be
+{\bf b}(u) {\rm \ is\ not\ on\ the\ bisector\ }
+\quad {\rm for\ all\ } u \in (i_l,i_{l+1})
+\ee
+on each span $(i_l,i_{l+1})$ for $l=j,\ldots,k-1$ between successive
+self--intersections on that active segment.
+\end{thm}
+
+\prf
+Let ${\bf q}_1={\bf b}(u_{1})$ and ${\bf q}_2={\bf b}(u_{2})$ (where
+$u_1<u_2$) be two points on an active segment of the untrimmed bisector,
+neither of them self--intersections, such that ${\bf q}_1$ belongs to
+the bisector but ${\bf q}_2$ does not. We will show that the segment
+$u \in (u_1,u_2)$ of ${\bf b}(u)$ must contain a self--intersection
+(critical point). In other words, if an active segment of ${\bf b}(u)$
+contains no self--intersections, that entire segment is or is not part
+of the true bisector.
+
+Since ${\bf q}_1$ lies on the bisector, $C_{{\bf q}_1}$ touches
+the curve at the point ${\bf q}'_1={\bf r}(u_{1})$ corresponding to
+${\bf q}_1$ {\it and} $C_{{\bf q}_1}$ is empty (Lemma~\ref{lma:bis}).
+As a point ${\bf q}$ moves along the untrimmed bisector from ${\bf q}
+_1$ towards ${\bf q}_2$, the radius of the circle $C_{\bf q}$ changes
+smoothly while it continues to pass through ${\bf p}$, and at all times
+the curve in some neighborhood of the corresponding point ${\bf q}'$
+lies completely outside $C_{\bf q}$ (since ${\bf q}$ is active; see
+Remark~\ref{r:active}). Now in order for ${\bf q}$ to leave the
+bisector, the circle $C_{\bf q}$ must become occupied, {\it i.e.},
+the curve must enter $C_{\bf q}$ (Lemma~\ref{lma:bis}). We also know
+that this happens eventually, because ${\bf q}_2$ is {\it not\/} on
+the bisector. Since in the neighborhood of ${\bf q}'$ the curve does
+not enter $C_{\bf q}$,
+% this is important because otherwise in the limit the curve might touch
+% {\it and} enter at ${\bf q}'$, {\it e.g.}, inflection.
+%
+%and the curve is regular, the curve cannot enter $C_{\bf q}$ at ${\bf q}'$ and
+%
+it must first enter $C_{\bf q}$ at some other point ${\bf q}'' \neq
+{\bf q}'$. In order for the curve to enter $C_{\bf q}$, it must first
+become tangent to $C_{\bf q}$, and the location of ${\bf q}$ when
+this occurs is a critical point of the untrimmed bisector, since its
+circle $C_{\bf q}$ has {\it two\/} points of tangency with the curve
+--- one at ${\bf q}'$ and one at the other point ${\bf q}''$ where the
+curve is about to enter the circle (Figure~\ref{fig:critical}). Thus,
+the segment $u \in (u_1,u_2)$ of ${\bf b}(u)$ contains a critical point.
+\QED
+
+The computation of parameter values that correspond to critical points is
+rather involved; we defer a full discussion to \S\ref{sec:slfint} below.
+
+\begin{rmk}
+{\rm
+If the desired interpretation for the bisector of a point ${\bf p}$ and
+a curve segment $S={\bf r}(I)$, defined on a {\it finite\/} parameter
+domain $I$, is
+\ba \label{bsctr1}
+        \{\,{\bf q}\!\! &|& \!\!
+                {\rm dist}({\bf q},{\bf r}(u))
+                \,=\, |\,{\bf q}-{\bf p}\,|
+                \nonumber \\
+                && \!\!\! {\rm \ and\ the\ closest\ point\ of\ }
+                {\bf r}(u) {\rm \ to\ } {\bf q} {\rm \ lies\ on\ } S \,\} \,,
+\ea
+rather than its usual meaning
+\be \label{bsctr2}
+        \{\,{\bf q}\ \,|\,\ {\rm dist}({\bf q},S)
+        \,=\, |\,{\bf q}-{\bf p}\,| \,\} \,,
+\ee
+then the statement of Theorem~\ref{thm:trim2} is unchanged except that,
+rather than using just the self--intersections of the segment ${\bf b}
+(I)$, {\it i.e.}, self--intersections ${\bf b}(u_1) = {\bf b}(u_2)$
+where $u_1, u_2 \in I$, one should use {\it all\/} self--intersections
+of ${\bf b}(u)$ that lie on the segment ${\bf b}(I)$, {\it i.e.},
+self--intersections ${\bf b}(u_1) = {\bf b}(u_2)$ where $u_1 \in I$
+but $u_2$ need not lie on $I$. (The bisector according to definition
+(\ref{bsctr1}) is generally a {\it subset\/} of the ``usual'' bisector
+given by (\ref{bsctr2}), since in the former case we wish to prevent
+${\bf b}(u)$ from encroaching upon ``phantom'' parts of ${\bf r}(u)$
+--- those that lie {\it outside\/} the nominal parameter domain $I$).
+}
+\end{rmk}
+
+Note also that when dealing with a finite curve segment ${\bf r}(I)$,
+it will be necessary to ``complete'' the untrimmed bisector ${\bf b}
+(I)$. This is accomplished by extending along the tangent lines to
+${\bf b}(I)$ at its affine end points, {\it i.e.}, end points whose
+parameter values are {\it not\/} roots of (\ref{Pinf}) or (\ref{Rinf}),
+as appropriate; see Figure~\ref{fig:completion}. Recall that the
+unit tangent at each point of ${\bf b}(u)$ is given by expressions
+(\ref{vvector}) and (\ref{btangent}). Alternately, one may note that
+the tangent lines at the endpoints ${\bf b}_0$ and ${\bf b}_1$ of
+${\bf b}(I)$ are simply the {\it perpendicular bisectors\/} of the
+given point ${\bf p}$ and the corresponding end points, ${\bf r}_0$
+and ${\bf r}_1$, of the segment ${\bf r}(I)$.
+If these tangent--extensions cross each other, it will be necessary
+to include their point of intersection among the ``critical points''
+in the trimming procedure. The true bisector after trimming may
+contain all, part, or none of the tangent--extensions to a finite
+point/curve bisector ${\bf b}(I)$.
+
+\figg{fig:completion}{Completing the bisector of a point and a {\it
+finite\/} curve segment.}{2.5in}
+
+We now have an algorithm for computing the bisector of a fixed point
+${\bf p}$ and a regular parametric curve ${\bf r}(u)$:
+
+\begin{enumerate}
+\item
+        Formulate the untrimmed bisector of ${\bf p}$ and ${\bf r}(u)$,
+        as given by equations (\ref{pbsctr}) and (\ref{rbsctr}) for
+        polynomial and rational curves, respectively.
+\item
+        Find the class points and circular points of ${\bf r}(u)$ with
+        respect to ${\bf p}$, given by the roots of (\ref{Pinf}) and
+        (\ref{Pcusp}), or (\ref{Rinf}) and (\ref{Rcusp}), as appropriate.
+\item
+        For each segment on the untrimmed bisector delineated by these
+        special points, compare the distances of the segment midpoint
+        to ${\bf p}$ and ${\bf r}(u)$, using (\ref{distance2}), and
+        discard the segment if these distances are unequal.
+\item
+        Find the critical points (self--intersections) of the untrimmed
+        bisector, using the methods described in \S\ref{sec:slfint}
+        below.
+\item
+        Split each remaining segment of the untrimmed bisector at these
+        self--intersections. For each of the resulting segments, compare
+        the distances of the midpoint to ${\bf p}$ and ${\bf r}(u)$,
+        using (\ref{distance2}), and discard the segment if they are
+        unequal. The remaining segments constitute the true bisector.
+\end{enumerate}
+
+%We conclude this section with some remarks on the general nature of
+%the loci generated by the above algorithm:
+
+\begin{rmk}
+{\rm
+The true bisector of a point and any (finite or infinite) curve always
+encloses a convex, simply--connected region of the plane, which may
+be finite or infinite (see, for example, Figures~\ref{fig:trimprbla}
+and \ref{fig:trimellps} below). This is because the region in question
+can be regarded as the set--intersection of an infinite family of
+half--planes ${\cal S}(u)$ where, for each $u$, ${\cal S}(u)$ contains
+the given point ${\bf p}$ and is bounded by the perpendicular bisector
+of ${\bf p}$ and the curve point ${\bf r}(u)$. (The set--intersection
+of a family of half--planes always yields a convex set; see \cite
+{kelly79}, Theorem 7, p.~112).
+}
+\end{rmk}
+
+The convexity of the true bisector
+%and the simple examples presented below
+suggests that splitting the untrimmed bisector at
+parameter values corresponding to ``circular'' points --- {\it
+i.e.}, at the cusps of ${\bf b}(u)$ --- might be a redundant step
+in the trimming process; a convex curve cannot have a (simple)
+cusp. However, we are currently unaware of any geometric proof
+that corroborates this observation.
+
+\subsection{Computing the self--intersections}
+\label{sec:slfint}
+
+A self--intersection of the untrimmed bisector ${\bf b}(u)$ arises
+if two (or more) {\it distinct\/} parameter values correspond to the
+same geometric point on its locus (with this definition, we include
+the exceptional cases where ${\bf b}(u)$ just ``touches'' itself among
+the self--intersections). Thus, we are interested in identifying all
+parameter values $u$ that satisfy the vector equation
+\be \label{selfint}
+{\bf b}(u+\xi) \,=\, {\bf b}(u) \quad {\rm for\ some\ } \xi\not=0 \,,
+\ee
+where ${\bf b}(u)=\{\,X_b(u)/W_b(u),Y_b(u)/W_b(u)\,\}$ is the rational
+curve defined by equations (\ref{pbsctr}) or (\ref{rbsctr}), as
+appropriate.
+
+A number of approaches to constructing the minimal polynomial whose
+roots identify self--intersections are possible.
+That described below was found empirically to be the most ``economical,''
+in the sense of generating the least extraneous intermediate data,
+and also offers a clear geometric interpretation. For brevity we
+discuss only the case of polynomial curves, the rational case being a
+straightforward but tedious generalization.
+
+If ${\bf b}(u)$ is the untrimmed bisector of the point ${\bf p}=(\alpha,
+\beta)$ and the regular polynomial curve ${\bf r}(u)=\{X(u),Y(u)\}$, we
+know that corresponding points of ${\bf b}(u)$ and ${\bf r}(u)$ lie on
+the normal lines to the latter. Given distinct parameter values $u$ and
+$v$, we may express the point of intersection $(x_i,y_i)$ of the normal
+lines at ${\bf r}(u)$ and ${\bf r}(v)$ in homogeneous coordinates as
+\be \label{pi}
+x_i(u,v) \,=\, {X_i(u,v) \over W_i(u,v)} \quad {\rm and} \quad
+y_i(u,v) \,=\, {Y_i(u,v) \over W_i(u,v)} \,,
+\ee
+where the polynomials $X_i$, $Y_i$, $W_i$ are defined by
+\ba \label{Pi}
+X_i(u,v) \!\! &=& \!\! Z(u)Y'(v)-Z(v)Y'(u) \,, \nonumber \\
+Y_i(u,v) \!\! &=& \!\! Z(v)X'(u)-Z(u)X'(v) \,, \nonumber \\
+W_i(u,v) \!\! &=& \!\! X'(u)Y'(v)-X'(v)Y'(u) \,.
+\ea
+For brevity, we have introduced the notation $Z(u)=X(u)X'(u)+Y(u)Y'(u)$
+in (\ref{Pi}). Note that if $W_i(u,v)$ vanishes, the normal lines at
+${\bf r}(u)$ and ${\bf r}(v)$ are parallel --- they intersect in a
+``point at infinity.''
+
+\begin{rmk}
+\label{coincident}
+{\rm
+Expressions (\ref{pi}--\ref{Pi}) fail if $X_i(u,v)=Y_i(u,v)=W_i(u,v)
+=0$, a situation that arises when the normal lines at ${\bf r}(u)$ and
+${\bf r}(v)$ are {\it coincident}. Now the vanishing of {\it any two\/}
+of the polynomials (\ref{Pi}) at a point $(u_0,v_0)$ establishes the
+equality of the ratios
+\be \label{ratios}
+X'(u_0) : X'(v_0) \,=\, Y'(u_0) : Y'(v_0) \,=\, Z(u_0) : Z(v_0)
+\ee
+(provided none of these are of the form $0 : 0$), which in turn
+indicates that the {\it third\/} polynomial must also vanish at
+$(u_0,v_0)$. Therefore, it suffices to consider any two of (\ref{Pi})
+if we ensure that none of the ratios (\ref{ratios}) are indeterminate.
+If we set $v=u+\xi$ in (\ref{Pi}), discard the trivial solution $\xi
+=0$, and then eliminate the variable $\xi$ between the denominator
+and each component of the numerator, {\it i.e.}, if we compute the
+resultants
+\ba \label{LxLy}
+\Lambda_x(u) \! &=& \!
+{\rm Resultant}_{\,\xi}\,(\,X_i(u,\xi),W_i(u,\xi)\,) \,,
+\nonumber \\
+\Lambda_y(u) \! &=& \!
+{\rm Resultant}_{\,\xi}\,(\,Y_i(u,\xi),W_i(u,\xi)\,) \,,
+\ea
+then the roots of the polynomial
+\be \label{L}
+\Lambda(u) \,=\, \gcd(\,\Lambda_x(u),\Lambda_y(u)\,)
+\ee
+will identify pairs of points on ${\bf r}(u)$ that have coincident
+normal lines. Note that $\Lambda_x(u)$ may have ``extraneous''
+roots, corresponding to the satisfaction of $X_i(u,v)=W_i(u,v)=0
+\not=Y_i(u,v)$ in the degenerate case $Y'(u)=Y'(v)=0$. Likewise,
+roots of $\Lambda_y(u)$ may correspond to $Y_i(u,v)=W_i(u,v)=0
+\not=X_i(u,v)$ in the case $X'(u)=X'(v)=0$. But these extraneous
+roots of $\Lambda_x(u)$ and $\Lambda_y(u)$ are necessarily distinct
+when dealing with regular curves, for which it is impossible that
+$X'(u)=Y'(u)=0$ or $X'(v)=Y'(v)=0$. Therefore they cannot be roots
+of (\ref{L}). (The vanishing of the ``resultant'' of two polynomials
+with respect to any variable expresses a sufficient and necessary
+condition for them to be satisfied at some value of that variable
+--- see, for example, \cite{uspensky48}.)
+}
+\end{rmk}
+
+In order for the point (\ref{pi}) to identify a self--intersection
+of the untrimmed bisector --- corresponding to parameter values $u$
+and $v$ --- $(x_i,y_i)$ must be equidistant from the three points
+${\bf r}(u)$, ${\bf r}(v)$, and ${\bf p}$. This condition requires
+the simultaneous satisfaction of the equations
+\ba
+{[\,x_i-X(u)\,]^2 \,+\, [\,y_i-Y(u)\,]^2} \! &=& \!
+{[\,x_i-\alpha\,]^2 \,+\, [\,y_i-\beta\,]^2} \,, \nonumber \\
+{[\,x_i-X(v)\,]^2 \,+\, [\,y_i-Y(v)\,]^2} \! &=& \!
+{[\,x_i-\alpha\,]^2 \,+\, [\,y_i-\beta\,]^2} \,.
+\ea
+Cancelling $x_i^2+y_i^2$ from both sides of these equations and
+substituting from (\ref{pi}--\ref{Pi}), we see that $u$ and $v$ must
+be simultaneous roots of the polynomials
+\ba \label{RStilde}
+{\tilde R}(u,v) \!\!
+&=& \!\! 2\,[\,\alpha-X(u)\,]\,[\,Z(u)Y'(v)-Z(v)Y'(u)\,] \nonumber \\
+&+& \!\! 2\,[\,\beta-Y(u)\,]\,[\,Z(v)X'(u)-Z(u)X'(v)\,] \nonumber \\
+&+& \!\! [\,X^2(u)+Y^2(u)-\alpha^2-\beta^2\,]
+ \, [\,X'(u)Y'(v)-X'(v)Y'(u)\,] \,, \nonumber \\
+{\tilde S}(u,v) \!\!
+&=& \!\! 2\,[\,\alpha-X(v)\,]\,[\,Z(u)Y'(v)-Z(v)Y'(u)\,] \nonumber \\
+&+& \!\! 2\,[\,\beta-Y(v)\,]\,[\,Z(v)X'(u)-Z(u)X'(v)\,] \nonumber \\
+&+& \!\! [\,X^2(v)+Y^2(v)-\alpha^2-\beta^2\,]
+ \, [\,X'(u)Y'(v)-X'(v)Y'(u)\,] \,.
+\ea
+
+A further reduction of expressions (\ref{RStilde}) is necessary before
+proceeding. Each of the three terms comprising ${\tilde R}(u,v)$ and
+${\tilde S}(u,v)$ exhibits a factor that vanishes on setting $v=u$. Thus,
+$v-u$ is an overall factor of both ${\tilde R}(u,v)$ and ${\tilde S}(u,v)$.
+This factor must be extracted since we are interested only in non--trivial
+solutions that satisfy $v\not=u$. Hence we take
+\be \label{RS}
+R(u,v) \,=\, {{\tilde R}(u,v) \over v-u}
+\quad {\rm and} \quad
+S(u,v) \,=\, {{\tilde S}(u,v) \over v-u}
+\ee
+as our working polynomials. We now set $v=u+\xi$ in (\ref{RS}) and
+re--write these polynomials in the form
+\be \label{RS2}
+R(u,\xi) \,=\, \sum_{k=0}^r a_k(u)\,\xi^k
+\quad {\rm and} \quad
+S(u,\xi) \,=\, \sum_{k=0}^s b_k(u)\,\xi^k \,,
+\ee
+{\it i.e.}, as polynomials in $\xi$ whose coefficients are polynomials
+in $u$. Then if any particular value of $u$ is to be a parameter value
+at which a self--intersection occurs, the polynomials (\ref{RS2}) must
+have a common root $\xi$ at that value of $u$.
+
+The expressions for the coefficients $\{a_k(u)\}$ and $\{b_k(u)\}$ in
+(\ref{RS2}) in terms of $X(u)$, $Y(u)$, and their derivatives and the
+coordinates $(\alpha,\beta)$ of ${\bf p}$ are rather complicated, so
+we shall not present them explicitly here --- they are readily derived
+using a computer algebra system.
+
+\begin{propn}
+Let the polynomials $a_k(u)$ and $b_k(u)$ be given by {\rm (\ref{RS2})},
+and let $\Gamma(u)$ be the polynomial defined in terms of them by the
+determinant
+\be \label{G}
+\Gamma \;=\; \left|\, \matrix{
+ a_r &\cdot &\cdot &a_2   &a_1   &a_0   &{}    &{} &{} &{} \cr
+ {}  &\cdot &\cdot &\cdot &\cdot &\cdot &\cdot &{} &{} &{} \cr
+ {}  &{}    &a_r   &\cdot &\cdot &a_2   &a_1   &1  &{} &{} \cr
+ {}  &{}    &{}    &a_r   &\cdot &\cdot &a_2   &0  &1  &{} \cr
+ {}  &{}    &{}    &{}    &a_r   &\cdot &\cdot &0  &0  &1  \cr
+ b_s &\cdot &\cdot &b_2   &b_1   &b_0   &{}    &{} &{} &{} \cr
+ {}  &\cdot &\cdot &\cdot &\cdot &\cdot &\cdot &{} &{} &{} \cr
+ {}  &{}    &b_s   &\cdot &\cdot &b_2   &b_1   &1  &{} &{} \cr
+ {}  &{}    &{}    &b_s   &\cdot &\cdot &b_2   &0  &1  &{} \cr
+ {}  &{}    &{}    &{}    &b_s   &\cdot &\cdot &0  &0  &1
+ } \,\right| \,,
+\ee
+where there are $s$ rows of $a_k\!$'s followed by $r$ rows of $b_k\!$'s
+and it is understood that blank areas are filled with zeros. Then
+$\Lambda(u)$ defined by {\rm (\ref{LxLy})} and {\rm (\ref{L})} is a
+factor of $\Gamma(u)$, and the roots of the polynomial
+\be \label{Pslfint}
+P_i(u) \,=\, {\Gamma(u) \over \Lambda(u)}
+\ee
+that remains on extracting this factor identify those parameter values
+at which the untrimmed bisector suffers a self--intersection.
+\end{propn}
+
+\prf
+The resultant of the two polynomials (\ref{RS2}) with respect to $\xi$
+can be expressed as a Sylvester determinant \cite{uspensky48}, identical
+to (\ref{G}), except that in the last three columns we have replaced
+each occurrence of $a_0$ by 1, and each occurrence of $a_1$ or $a_2$ by
+0. The motivation for this substitution is that the three lowest--order
+coefficients of $\xi$ in (\ref{RS2}) are actually identical
+\be \label{c012}
+a_k(u) \,\equiv\, b_k(u) \quad ( = c_k(u), {\rm\ say} )
+ \quad {\rm for\ } k=0,1,2 \,,
+\ee
+as can be seen by straightforward but laborious calculation from (\ref
+{RStilde}), (\ref{RS}), and (\ref{RS2}). Because of this, $[\,c_0(u)\,]^3$
+is a factor of the resultant of $R(u,\xi)$ and $S(u,\xi)$ with respect to
+$\xi$, and expression (\ref{G}) is what remains on extracting this factor
+(by performing elementary column operations on the last three columns of
+the Sylvester determinant).
+
+Now it may be verified that, apart from a multiplicative constant,
+$c_0(u)$ is actually identical to the polynomial $P_c(u)$, given by
+(\ref{Pcusp}), that identifies {\it cusps\/} on the untrimmed bisector.
+This factor must be discarded since we have already dealt with cusps,
+and are concerned here only with {\it proper\/} self--intersections
+(a cusp may be regarded as the limiting case $u_2 \to u_1$ of a
+self--intersection ${\bf b}(u_2)={\bf b}(u_1)$ with $u_2 \not= u_1$).
+
+Now by construction --- see equations (\ref{LxLy}--\ref{L}) --- roots
+of the polynomial $\Lambda(u)$ identify pairs of parameter values at
+which {\it all three\/} of the quantities (\ref{Pi}) vanish. This
+implies in turn that expressions (\ref{RStilde}) and (\ref{RS}) vanish
+at these values, so $\Lambda(u)$ must be a factor of the resultant
+of the two polynomials (\ref{RS2}) with respect to the variable $\xi$.
+
+However, we know (by Remark~\ref{coincident}) that the roots of
+$\Lambda(u)$ identify pairs of points on ${\bf r}(u)$ that have {\it
+identical normal lines\/} --- ordinarily, such pairs do {\it not\/}
+yield self--intersections of ${\bf b}(u)$. Thus, the factor $\Lambda(u)$
+must be eliminated from $\Gamma(u)$. Unfortunately, there does not appear
+to be any simple {\it a priori\/} means of achieving this by modification
+of the Sylvester determinant.
+
+Paired roots of the remaining polynomial (\ref{Pslfint}) then identify
+distinct points ${\bf r}(u)$ and ${\bf r}(v)$ whose normal lines are
+distinct and intersect in a point $(x_i,y_i)$ equidistant from ${\bf r}
+(u)$, ${\bf r}(v)$, and ${\bf p}$ --- {\it i.e.}, a self--intersection
+of ${\bf b}(u)$. \QED
+
+There are interesting parallels between the above formulation and
+that for the ``self--intersection'' polynomial of fixed--distance
+offsets; see \cite{farouki90}.
+
+\begin{rmk}
+{\rm
+A word of caution regarding the polynomial $\Lambda(u)$ is in order.
+We stated above that points ${\bf r}(u)$ and ${\bf r}(v)$ of the
+given curve with {\it identical normal lines\/} do not ``ordinarily''
+yield self--intersections of the untrimmed bisector. This is evident
+if ${\bf r}(u)$ and ${\bf r}(v)$ are distinct, since for any ${\bf q}$
+it is impossible that $|\,{\bf q}-{\bf p}\,|=|\,{\bf q}-{\bf r}(u)\,|=
+|\,{\bf q}-{\bf r}(v)\,|$ with collinear points ${\bf r}(u)$, ${\bf r}
+(v)$, and ${\bf q}$ when ${\bf r}(u)\not={\bf r}(v)$. Exceptionally,
+however, we may have {\it coincident\/} points ${\bf r}(u)={\bf r}(v)$
+(where $u\not=v$) with {\it identical normal lines}, corresponding to
+points where the given curve ``touches'' itself. Such points yield
+tangential self--intersections of ${\bf b}(u)$ identified by roots
+of $\Lambda(u)$, but they are not pertinent to the trimming process.
+%since a transition
+%from points on the true bisector to those not on the true bisector
+%must occur at a critical point, whose circle $C_{\bf q}$ is tangent
+%to the curve ${\bf r}(u)$ at two or more {\it distinct\/} points,
+%not simply tangent to the curve at a double point --- see the proof
+%of Theorem~\ref{thm:trim2}).
+}
+\end{rmk}
+
+Note that the distinct real roots $u_1,u_2,\ldots$ of the polynomial
+$P_i(u)$ satisfy pair--wise correspondences, defined by ${\bf b}(u_j)
+={\bf b}(u_k)$ with $j\not=k$. Some of these may occur ``at infinity,''
+{\it i.e.}, we have $W_b(u_j)=W_b(u_k)=0$ and $(0,0)\not=(X_b(u_j),
+Y_b(u_j)) \propto (X_b(u_k),Y_b(u_k))$. Exceptionally, {\it three or
+more\/} of the parameter values $u_1,u_2,\ldots$ may yield the same
+point on ${\bf b}(u)$, identifying a self--intersection of higher
+multiplicity. Determining these correspondences is not essential to
+the trimming process, however, since the distance from ${\bf r}(u)$
+of a point on each arc $u\in[\,u_k,u_{k+1}\,]$ of ${\bf b}(u)$ will
+be explicitly tested.
+
+\figg{fig:trimprbla}{True bisectors of a point and a parabola.}{2.5in}
+
+\begin{exmpl}
+\label{exmpl:trimprbla}
+{\rm
+Consider the ``self--intersection'' polynomial (\ref{Pslfint}) for
+the case of Example \ref{offsets}.1 --- {\it i.e.}, the bisector of the
+point ${\bf p}=(\alpha,\beta)$ and the parabola ${\bf r}(u)=\{u,u^2\}$.
+In this case $\Lambda(u)$ is just a constant, while $P_i(u)$ is given by
+\be \label{Iprbla}
+P_i(u) \,=\, u^4-2\beta u^2+\alpha^2+\beta^2-\beta \,.
+\ee
+Since (\ref{Iprbla}) is of biquadratic form, its roots can be written
+down explicitly as
+\be \label{uselfint}
+u \,=\, \pm \, \sqrt{ \beta \pm \sqrt{\beta-\alpha^2} } \,.
+\ee
+All four roots are complex if $\alpha^2>\beta$, {\it i.e.}, the point
+$(\alpha,\beta)$ lies ``outside'' the parabola. In this case, however,
+it is necessary to trim the untrimmed bisector at the parameter values
+(\ref{uinfprbla}) corresponding to its points at infinity.
+
+If $(\alpha,\beta)$ lies ``inside'' the parabola $(\alpha^2<\beta)$,
+we have either two or four real roots (and, correspondingly, one or two
+real self--intersections) according to whether $\beta$ is less than or
+greater than $\sqrt{\beta-\alpha^2}$. The latter condition gives
+\be
+\alpha^2+\beta^2-\beta \,=\, 0
+\ee
+as the locus defining the transition between regimes of one and two
+self--intersections of the untrimmed bisector as the point $(\alpha,
+\beta)$ is varied --- this locus is simply the {\it circle of curvature\/}
+at the vertex $(0,0)$ of the parabola. (When $(\alpha,\beta)$ lies on
+this circle, $u=0$ becomes a {\it double root\/} of (\ref{Iprbla}) and
+the corresponding point $(x,y)=(0,\half)$ is an {\it extraordinary
+point\/} of the untrimmed bisector; the remaining roots of (\ref
+{Iprbla}) are then simply $u=\pm\sqrt{2\beta}$.)
+
+Figure~\ref{fig:trimprbla} shows the true point/parabola bisectors that
+correspond to the untrimmed bisectors seen in Figure~\ref{fig:parabola},
+obtained by trimming the latter at the self--intersection points (\ref
+{uselfint}) or points at infinity (\ref{uinfprbla}), as appropriate.
+}
+\end{exmpl}
+
+\begin{exmpl}
+\label{exmpl:trimellps}
+{\rm
+For the ellipse (\ref{pellipse}), the self--intersection polynomial
+$P_i(u)$ is the product of two quartic factors given by
+\ba \label{Iellps}
+P_{i,1}(u) \! &=& \!
+(\alpha^2+\beta^2+2(1-k^2)\alpha+1-2k^2)u^4 \nonumber \\
+&& \!\!\!+\ 2(\alpha^2+\beta^2-1)u^2 \,+\, \alpha^2+\beta^2
+-2(1-k^2)\alpha+1-2k^2 \,, \\
+P_{i,2}(u) \! &=& \!
+k(\alpha^2+\beta^2-1)u^4 \,+\, 4(1-k^2)\beta u^3 \nonumber \\
+&& \!\!\!+\ 2k(\alpha^2+\beta^2-3+2k^2)u^2
+\,+\, 4(1-k^2)\beta u \,+\, k(\alpha^2+\beta^2-1) \,. \nonumber
+\ea
+In order to clarify the meaning of these equations, note that (\ref
+{pellipse}) has radii of curvature $r=k^2$ at the vertices $u=0$ and
+$u=\pm\infty$, and $r=1/k$ at the vertices $u=+1$ and $u=-1$. Thus,
+the corresponding circles of curvature are given by the equations
+\ba \label{ecircles}
+C_0(x,y) \! &=& \! (x-1+k^2)^2 + y^2 - k^4 \,=\, 0 \,, \nonumber \\
+C_\infty(x,y) \! &=& \! (x+1-k^2)^2 + y^2 - k^4 \,=\, 0 \,, \nonumber \\
+C_{+1}(x,y) \! &=& \! x^2 + (y^2-k+1/k)^2 - 1/k^2 \,=\, 0 \,, \nonumber \\
+C_{-1}(x,y) \! &=& \! x^2 + (y^2+k-1/k)^2 - 1/k^2 \,=\, 0 \,.
+\ea
+
+Consider first $P_{i,1}(u)$, which we regard as a quadratic in $u^2$.
+Making use of the polynomials defined in (\ref{ecircles}), we see
+that $P_{i,1}(u)$ can be expressed as
+\be \label{Iellipse2}
+P_{i,1}(u) \,=\, C_\infty(\alpha,\beta)u^4
+\,+\, 2(\alpha^2+\beta^2-1)u^2 \,+\, C_0(\alpha,\beta) \,.
+\ee
+Evidently there are no real values of $u^2$ (and hence of $u$)
+satisfying $P_{i,1}(u)=0$ unless its discriminant, given by $\Delta_1
+=(\alpha^2+\beta^2-1)^2-C_\infty(\alpha,\beta)C_0(\alpha,\beta)$, is
+non--negative. From (\ref{ecircles}) it can be seen that $\Delta_1$
+factors to yield
+\be \label{discrim1}
+\Delta_1 \,=\, 4(1-k^2)(k^2-k^2\alpha^2-\beta^2) \,,
+\ee
+and hence the condition $\Delta_1 > 0$ may be interpreted geometrically
+as follows: either (i) the point $(\alpha,\beta)$ lies {\it inside\/}
+the ellipse and the $x$--axis is the major axis of the ellipse ($k<1$),
+or (ii) the point $(\alpha,\beta)$ lies {\it outside\/} the ellipse
+and the $y$--axis is its major axis ($k>1$). Exceptionally, we have
+$\Delta_1=0$ when $(\alpha,\beta)$ lies {\it on\/} the ellipse (note
+that $k\not=1$ by assumption).
+
+Case (i): $k<1$ and $k^2\alpha^2+\beta^2<k^2$ (major axis along
+$x$--axis, point inside ellipse; note that $C_0(x,y)$ and $C_\infty(x,y)$
+overlap if $k>1/\sqrt{2}$, and otherwise are disjoint). Since we are
+interested only in non--negative roots $u^2$ to (\ref{Iellipse2}), we
+may invoke Descartes' Law of Signs \cite[p.~121]{uspensky48} to deduce
+the number of {\it positive\/} roots merely by inspecting its coefficients.
+Specifically, when $k<1$ and $k^2\alpha^2+\beta^2<k^2$, the middle term
+of (\ref{Iellipse2}) is necessarily negative, and the signature of the
+coefficients of $P_{i,1}$ is given by:
+\begin{itemize}
+\item
+$\{+-+\}$, indicating {\it two\/} positive values for $u^2\!$, when
+$(\alpha,\beta)$ {\it lies outside both\/} $C_0(x,y)$ {\it and\/}
+$C_\infty(x,y)\,$;
+\item
+or either $\{--+\}$ or $\{+--\}$, indicating {\it one\/} positive
+value for $u^2\!$, when $(\alpha,\beta)$ {\it lies inside just one
+of\/} $C_0(x,y)$ {\it and\/} $C_\infty(x,y)\,$;
+\item
+or (if $k>1/\sqrt{2}\,$) $\{---\}$, indicating {\it no\/} positive
+values for $u^2\!$, when $(\alpha,\beta)$ {\it lies inside both\/}
+$C_0(x,y)$ {\it and\/} $C_\infty(x,y)\,$.
+\end{itemize}
+Exceptionally, there is a real root $u^2$ to (\ref{Iellipse2}) at
+zero or at infinity if $(\alpha,\beta)$ lies {\it on\/} $C_0(x,y)$ or
+$C_\infty(x,y)$, respectively.
+
+\smallskip
+
+Case (ii): $k>1$ and $k^2\alpha^2+\beta^2>k^2$ (major axis along
+$y$--axis, point outside ellipse --- here the circles of curvature
+$C_0(x,y)$ and $C_\infty(x,y)$ intersect, the ellipse being contained
+within their common area). In this case the middle term of (\ref
+{Iellipse2}) is necessarily positive, and we again have three
+possibilities for the number of positive real roots $u^2$:
+\begin{itemize}
+\item
+signature $\{-+-\}$, and thus {\it two\/} positive roots, if
+$(\alpha,\beta)$ {\it lies inside both\/} $C_0(x,y)$ {\it and\/}
+$C_\infty(x,y)$ (yet outside the ellipse);
+\item
+or signature $\{-++\}$ or $\{++-\}$, and thus {\it one\/} positive
+root, if $(\alpha,\beta)$ {\it lies inside just one of\/} $C_0(x,y)$
+{\it and\/} $C_\infty(x,y)\,$;
+\item
+or signature $\{+++\}$, and thus {\it no\/} positive roots, if
+$(\alpha,\beta)$ {\it lies outside both\/} $C_0(x,y)$ {\it and\/}
+$C_\infty(x,y)\,$.
+\end{itemize}
+As before, there is a zero or infinite root $u^2$ to (\ref{Iellipse2})
+when $(\alpha,\beta)$ lies {\it on\/} $C_0(x,y)$ or $C_\infty(x,y)$,
+respectively.
+
+\smallskip
+
+(In the above we have glossed over the fact that Descartes' Law
+actually indicates either {\it two\/} or {\it zero\/} roots in the case
+of two sign variations. The latter possibility may be discounted in both
+Case (i) and Case (ii) by noting that, in instances with two sign variations,
+the extremum of $P_{i,1}(u^2)$ necessarily occurs at a positive value of
+$u^2$ and is opposite in sign to $P_{i,1}(0)$ and $P_{i,1}(\infty)$.)
+
+When $\Delta_1>0$, the parameter values that identify self--intersections
+of the untrimmed bisector are given explicitly by the formula
+\be
+u \,=\, \pm \; \sqrt{ 1-\alpha^2-\beta^2 \,\pm\,
+\sqrt{\Delta_1} \over C_\infty(\alpha,\beta) } \,,
+\ee
+which defines zero, one, or two pairs of real values of equal magnitude
+and opposite sign, according to the criteria enumerated above.
+
+\figg{fig:trimellps}{True bisectors of a point and an ellipse.}
+{5.2in}
+
+Consider next $P_{i,2}(u)$. We claim that $P_{i,2}(u)$ has real roots
+(other than zero and infinity) only when $P_{i,1}(u)$ has none, and
+conversely. To see this, we find by ``completing the square'' that
+$P_{i,2}(u)$ may be re--written in the form
+\be \label{I2new}
+P_{i,2}(u) \,=\, {
+\left[\,k(\alpha^2+\beta^2-1)(u^2+1)+2(1-k^2)\beta u\,\right]^2
+\,+\, \Delta_1 u^2 \over k(\alpha^2+\beta^2-1) } \,,
+\ee
+where $\Delta_1$ denotes the discriminant (\ref{discrim1}) introduced
+previously. For fixed $\alpha$ and $\beta$, expression (\ref{I2new}) is
+evidently of constant sign for all real $u$ when $\Delta_1>0$, and thus
+it has no real roots. If $\Delta_1<0$, however, the two terms in the
+numerator of (\ref{I2new}) are of opposite sign, and there are real
+values of $u$ that will cause them to cancel precisely. These values
+identify the self--intersections of the untrimmed bisector when (i)
+the point $(\alpha,\beta)$ lies {\it outside\/} the ellipse and the
+$x$--axis is the major axis ($k<1$), or (ii) the point $(\alpha,\beta)$
+lies {\it inside\/} and the $y$--axis is its major axis ($k>1$).
+
+When $\Delta_1<0$, the real roots of $P_{i,2}(u)$ can be computed using
+the two quadratic equations obtained from (\ref{I2new}), namely
+\be \label{I2new2}
+k(\alpha^2+\beta^2-1)\,(u^2+1) \,+\,
+[\,2(1-k^2)\beta \pm \textstyle{\sqrt{-\Delta_1}}\;]\,u \,=\, 0 \,,
+\ee
+whose real solutions are readily determined. However, it will be
+found --- not unexpectedly --- that the number and locations of the
+self--intersections identified by (\ref{I2new2}), in relation to the
+ellipse and the untrimmed bisector, are actually identical to those
+obtained through an appropriate rotation and scaling of the results
+for $\Delta_1>0$. Thus, regardless of the orientation of the ellipse,
+we may summarize as follows:
+
+When $(\alpha,\beta)$ is located {\it inside\/} the ellipse, we will
+have zero, one, or two self--intersections of the untrimmed bisector,
+according to whether $(\alpha,\beta)$ lies inside both, just one, or
+neither of the circles of curvature to the ellipse at the vertices on
+its major axis, respectively (the first case being possible only when
+the circles of curvature actually overlap). If $(\alpha,\beta)$ is {\it
+outside\/} the ellipse, we have zero, one, or two self--intersections
+when $(\alpha,\beta)$ lies inside neither, just one, or both of the
+circles of curvature to the ellipse at the vertices on its minor axis,
+respectively. In the latter case, the untrimmed bisector must also be
+trimmed at its points at infinity, as identified by (\ref{uinfellps}).
+}
+\end{exmpl}
+
+The above analysis clarifies the behavior that was seen in
+Figure~\ref{fig:ellipse} --- the corresponding true bisectors are
+shown in Figure~\ref{fig:trimellps}.
+Beyond the conics, the degree of the self--intersection polynomial
+grows very rapidly. For the (polynomial) cubics, for example,
+%a number of examples suggest that
+$P_i(u)$ is of degree 26 in general, while the
+extraneous factor $\Lambda(u)$ given by (\ref{L}) is of degree 6. Also,
+the polynomials (\ref{Pinf}) and (\ref{Pcusp}) identifying
+points at infinity and cusps of the untrimmed bisector are of degree
+4 and 8 for cubics.
+In view of the high degree of $P_i(u)$, the trimming process
+for higher--order curves than cubics may prove too ill--conditioned
+to yield consistently reliable results in floating point arithmetic.
+
+%\begin{rmk}
+%{\rm
+%Note that for the parabola, $P_i(u)$ is a factor of the polynomial
+%$X_b(u)$ in the parameterization (\ref{Bprbla}) of the untrimmed
+%bisector, while for the ellipse $P_{i,1}(u)$ and $P_{i,2}(u)$ are
+%factors of $Y_b (u)$ and $X_b(u)$ in the parametric form (\ref{Bellps}).
+%This means that the self--intersections of the untrimmed bisector lie on
+%{\it axes of symmetry\/} of the curves under consideration, namely, $x=0$
+%in the case of the parabola, and the major or minor axis of the ellipse
+%(according to whether $(\alpha,\beta)$ lies inside or outside of it).
+%}
+%\end{rmk}
+
+%The above observation is perhaps not unexpected, since we already know
+%that for any self--intersection ${\bf q}$ of the untrimmed bisector,
+%the circle $C_{\bf q}$ (see Definition~\ref{d:Cq}) must meet the given
+%curve tangentially in at least two points (Proposition~\ref{prop:cri}
+%and Definition~\ref{d:cri}) --- and the center of any inscribed circle
+%of a conic must lie on an axis of symmetry of that conic.
+
+
+\begin{exmpl}
+{\rm
+A sobering example of how complicated the self--intersection polynomial
+can grow is provided by the ``simple'' cubic ${\bf r}(u)=\{u,u^3\}$. In
+this case the extraneous factor $\Lambda(u)$ is a quartic, while $P_i(u)$
+is of degree 24:
+\ba \label{P3slfint}
+P_i(u)
+\!\!\! &=& \!\!\!
+    675\,u^{24} \,+\,
+    1620\alpha\,u^{23} \,-\,
+    3888\alpha^2\,u^{22} \,-\,
+    8100\beta\,u^{21}
+\nonumber \\
+&+& \!\!\!
+    540\,(6\alpha\beta-1)\,u^{20} \,+\,
+    108\alpha\,(144\alpha\beta-1)\,u^{19}
+\nonumber \\
+&+& \!\!\!
+    108\,(23\alpha^2+235\beta^2)\,u^{18} \,+\,
+    108\,[\,3\alpha(11\alpha^2-101\beta^2)-5\beta\,]\,u^{17}
+\nonumber \\
+&-& \!\!\!
+    54\,[\,144\alpha^2(\alpha^2+3\beta^2)-100\alpha\beta-7\,]\,u^{16}
+\nonumber \\
+&-& \!\!\!
+    108\,[\,\beta(241\alpha^2+305\beta^2)+\alpha\,]\,u^{15}
+\nonumber \\
+&+& \!\!\!
+    108\,[\,36\alpha\beta(5\alpha^2+17\beta^2)
+      -31\alpha^2+101\beta^2\,]\,u^{14}
+\nonumber \\
+&+& \!\!\!
+    36\,[\,432\alpha^2\beta(\alpha^2+\beta^2)
+      +12\alpha(7\alpha^2-57\beta^2)-43\beta\,]\,u^{13}
+\nonumber \\
+&+& \!\!\!
+    2\,[\,27(79\alpha^4+894\alpha^2\beta^2+303\beta^4)
+      +5724\alpha\beta-86\,]\,u^{12}
+\nonumber \\
+&-& \!\!\!
+    12\,[\,27\alpha(5\alpha^4+186\alpha^2\beta^2+181\beta^4)
+      +18\beta(117\alpha^2+85\beta^2)-53\alpha\,]\,u^{11}
+\nonumber \\
+&-& \!\!\!
+    36\,[\,108\alpha^2(\alpha^2+\beta^2)^2
+      -24\alpha\beta(29\alpha^2+45\beta^2)-7\alpha^2+5\beta^2\,]\,u^{10}
+\nonumber \\
+&-& \!\!\!
+    4\,[\,27\beta(253\alpha^4+234\alpha^2\beta^2-19\beta^4)
+      +945\alpha(\alpha^2+\beta^2)+293\beta\,]\,u^9
+\nonumber \\
+&+& \!\!\!
+    9\,[\,2664\alpha\beta(\alpha^2+\beta^2)^2
+      +12(57\alpha^4+234\alpha^2\beta^2+65\beta^4)+520\alpha\beta+3\,]\,u^8
+\nonumber \\
+&-& \!\!\!
+    108\,[\,\alpha(57\alpha^4+290\alpha^2\beta^2+233\beta^4)
+      +\beta(57\alpha^2+41\beta^2)+2\alpha\,]\,u^7
+\nonumber \\
+&+& \!\!\!
+    12\,[\,9(59\alpha^6+77\alpha^4\beta^2-23\alpha^2\beta^4-41\beta^6)
+\nonumber \\
+&& \qquad\qquad\qquad
+  +\ 36\alpha\beta(13\alpha^2+17\beta^2)+63\alpha^2-89\beta^2\,]\,u^6
+\nonumber \\
+&-& \!\!\!
+    36\,[\,99\alpha(\alpha^2+\beta^2)^3
+      +3\beta(81\alpha^4+50\alpha^2\beta^2-31\beta^4)
+\nonumber \\
+&& \qquad\qquad\qquad
+  +\ 2\alpha(21\alpha^2-19\beta^2)\,]\,u^5
+\nonumber \\
+&+& \!\!\!
+    18\,[\,324\alpha\beta(\alpha^2+\beta^2)^2
+      +105\alpha^4+210\alpha^2\beta^2+41\beta^4\,]\,u^4
+\nonumber \\
+&+& \!\!\!
+    4\,[\,243\beta(\alpha^2+\beta^2)^3
+      -54\alpha(7\alpha^4+22\alpha^2\beta^2+15\beta^4)-224\beta^3\,]\,u^3
+\nonumber \\
+&+& \!\!\!
+    12\,[\,9(7\alpha^6-3\alpha^4\beta^2-27\alpha^2\beta^4-17\beta^6)
+      +64\alpha\beta^3\,]\,u^2
+\nonumber \\
+&-& \!\!\!
+    72\,(\alpha^2+\beta^2)\,[\,3\alpha(\alpha^2+\beta^2)^2-16\beta^3\,]\,u
+\nonumber \\
+&+& \!\!\! 27(\alpha^2+\beta^2)^4-256\beta^4 \,.
+\ea
+Examples of the untrimmed bisector are shown in Figure~\ref{fig:cubic}.
+The points at infinity and cusps are roots of the polynomials
+\[
+P_\infty(u) \,=\, 2u^3 - 3\alpha u^2 + \beta \,,
+\]
+\be
+P_c(u) \,=\, 15u^7 - 27\alpha u^6 + 15\beta u^4 - u^3
+ + 3\alpha u^2 - 3(\alpha^2+\beta^2)u + \beta \,.
+\ee
+}
+\end{exmpl}
+
+\figg{fig:cubic}{Untrimmed bisectors of a point and ${\bf r}(u)=\{u,u^3\}$.}
+{2.5in}
+
+%The reader may care to compare equation (\ref{P3slfint}) with the
+%self--intersection polynomial for the constant--distance offset to
+%${\bf r}(u)=\{u,u^3\}$ quoted in \cite[equation~(100)]{farouki90}. As
+%a further example, we find for the ``superbola'' ${\bf r}(u)=\{u,u^4\}$
+%that $P_i(u)$ factors into two components, of degree 10 and 48. Figure~\ref
+%{fig:sprbla} shows some examples of the untrimmed bisector in this case.
+
+Note that the number of real, affine self--intersections of the untrimmed
+bisector cannot exceed one--half the degree of the polynomial $P_i(u)$,
+since by definition two distinct parameter values must be associated with
+each. In most cases, however, there are far fewer than this, since some
+roots of $P_i(u)$ correspond to self--intersections of conjugate branches
+of the complex locus of ${\bf b}(u)$, and others to self--intersections
+``at infinity.''
+%Nevertheless, $P_i(u)$ is irreducible in general --- there
+%is no simpler representation of just the real, affine self--intersection
+%parameter values.
+
+%\figg{fig:sprbla}{Untrimmed bisectors of a point and ${\bf r}(u)=\{u,u^4\}$.}
+%{2.5in}
+
+\section{Concluding remarks}
+\label{conclusion}
+
+The locus of a point that remains equidistant with respect
+to a fixed point ${\bf p}$ and a polynomial or rational curve
+${\bf r}(u)$ is amenable to a simple, exact ({\it i.e.}, rational)
+parameterization. Such point/curve bisectors are thus
+more compatible with existing CAD systems than other
+``procedurally--defined'' curves --- notably the fixed--distance
+{\it offsets\/} to polynomial or rational curves \cite{farouki90}.
+The main difficulty in computing point/curve bisectors is
+undoubtedly the  ``trimming'' procedure, {\it i.e.}, identifying
+the parametric subsegments of the untrimmed
+bisector that constitute the ``true'' bisector. Nevertheless,
+%as shown in \S\ref{trimming},
+it is possible to attack this problem in
+an algorithmic manner, and for simple curves ({\it e.g.}, conics)
+closed--form expressions for the trim points may even be
+written down {\it a priori}.
+Once the ordered set of trim points $u_1,u_2,\ldots$ is known, the
+bisector can be represented by a single rational expression ${\bf b}(u)$,
+restricted to disjoint domains $[\,u_1,u_2\,]$,
+$[\,u_3,u_4\,]$, $\ldots\,$, or by a set of rational B\'ezier arcs
+with matched end points, individually mapped to $u \in [\,0,1\,]$.
+The problem of curve/curve bisectors is more formidable than that
+of the point/curve bisectors discussed here; we hope to address it
+in future studies.
+
+\begin{thebibliography}{99}
+
+\bibitem{bookstein79}
+F.~L.~Bookstein (1979), The line--skeleton, \CGIP{\bf 11}, 123--137.
+
+%\bibitem{buck78}
+%R.~C.~Buck (1978) {\it Advanced Calculus}, Third edition, McGraw--Hill,
+%New York, 362--367.
+
+\bibitem{coxeter69}
+H.~S.~M.~Coxeter (1969), {\it Introduction to Geometry}, Wiley,
+New York.
+
+\bibitem{DH90}
+D.~Dutta and C.~M.~Hoffmann (1990), A geometric investigation of the
+skeleton of CSG objects, {\it Technical Report UM--MEAM--90--02},
+Dept.\ of Mechanical Engineering, The University of Michigan.
+
+%\bibitem{eisenhart60}
+%L.~P.~Eisenhart (1960), {\it Coordinate Geometry}, Dover, New York.
+
+\bibitem{farouki90}
+R.~T.~Farouki and C.~A.~Neff (1990), Analytic properties of plane
+offset curves \& Algebraic properties of plane offset curves,
+\CAGD{\bf 7}, 83--99 \& 100--127.
+
+\bibitem{farouki90b}
+R.~T.~Farouki and T.~Sakkalis (1990), Pythagorean hodographs,
+\IBMJRD{\bf 34}, 736--752.
+
+\bibitem{farouki91}
+R.~T.~Farouki and J.~K.~Johnstone (1991), The bisector of a point and
+a plane parametric curve, {\it IBM Research Report RC17381}.
+
+%\bibitem{farouki92a}
+%R.~T.~Farouki (1992), Pythagorean--hodograph curves in practical use,
+%{\it Geometry Processing for Design and Manufacturing\/} (R.~E.~Barnhill,
+%ed.), SIAM, Philadelphia, 3-33.
+
+\bibitem{farouki92b}
+R.~T.~Farouki (1992), Watch your (parametric) speed! {\it The
+Mathematics of Surfaces IV\/} (A.~Bowyer, ed.), Oxford University
+Press, to appear.
+
+\bibitem{Held91}
+M.~Held (1991), {\it On the Computational Geometry of Pocket Machining},
+Springer--Verlag, Berlin.
+
+\bibitem{H52}
+D.~Hilbert and S.~Cohn--Vossen (1952), {\it Geometry and the Imagination},
+Chelsea, New York.
+
+\bibitem{H90}
+C.~M.~Hoffmann (1990), A dimensionality paradigm for surface interrogations,
+\CAGD{\bf 7}, 517--532.
+
+\bibitem{HV91}
+C.~M.~Hoffmann and P.~Vermeer (1991), Eliminating extraneous solutions in
+curve and surface operations, \IJCGA{\bf 1}, 47--66.
+
+%\bibitem{hoschek85}
+%J.~Hoschek (1985), Offset curves in the plane, \CAD{\bf 17}, 77--82.
+
+\bibitem{hoschek88}
+J.~Hoschek (1988), Spline approximation of offset curves, \CAGD{\bf 5},
+33--40.
+
+\bibitem{kelly79}
+P.~J.~Kelly and M.~L.~Weiss (1979), {\it Geometry and Convexity}, Wiley,
+New York.
+
+\bibitem{klass83}
+R.~Klass (1983), An offset spline approximation for plane cubic splines,
+\CAD{\bf 15}, 297--299.
+
+\bibitem{kreyszig59}
+E.~Kreyszig (1959), {\it Differential Geometry}, University of Toronto
+Press.
+
+\bibitem{lee82}
+D.~T.~Lee (1982), Medial axis transformation of a planar shape,
+\IEEETPAMI{PAMI--{\bf 4}}, 363--369.
+
+\bibitem{nackman91}
+L.~R.~Nackman and V.~Srinivasan (1991), Bisectors of linearly separable
+sets, \DCG{\bf 6}, 263--275.
+
+%\bibitem{pham88}
+%B.~Pham (1988), Offset approximation of uniform B-splines, \CAD{\bf 20},
+%471--474.
+
+%\bibitem{preparata85}
+%F.~P.~Preparata and M.~I.~Shamos (1985), {\it Computational Geometry},
+%Springer, New York.
+
+%\bibitem{sederberg84}
+%T.~W.~Sederberg (1984), Degenerate parametric curves, \CAGD{\bf 1},
+%301--307.
+
+%\bibitem{sederberg86}
+%T.~W.~Sederberg (1986), Improperly parameterized rational curves,
+%\CAGD{\bf 3}, 67--75.
+
+%\bibitem{stoker69}
+%J.~J.~Stoker (1969), {\it Differential Geometry}, Wiley, New York.
+
+%\bibitem{tiller84}
+%W.~Tiller and E.~G.~Hanson (1984), Offsets of two-dimensional profiles,
+%\IEEECGA{\bf 4} (Sept.), 36--46.
+
+\bibitem{uspensky48}
+J.~V.~Uspensky (1948), {\it Theory of Equations}, McGraw--Hill,
+New York.
+
+\bibitem{W50}
+R. J. Walker (1950), {\it Algebraic Curves}, Springer--Verlag, New York.
+
+\bibitem{yap87}
+C.--K.~Yap (1987), An ${\rm O}(n\log n)$ algorithm for the Voronoi
+diagram of a set of simple curve segments, \DCG{\bf 2}, 365--393.
+
+\bibitem{yap89}
+C.--K.~Yap and H.~Alt (1989), Motion planning in the {\it
+CL\/}--Environment, in {\it Lecture notes in computer science 382\/}
+(F.~Dehne, J.--R.~Sack, and N.~Santoro, eds.), Springer, New York,
+373--380.
+%(Proceedings of the Workshop on Algorithms and Data
+%Structures WADS~'89, Ottawa, Canada, August 17--19, 1989).
+
+\end{thebibliography}
+
+\end{document}
+

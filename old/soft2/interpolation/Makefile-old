@@ -1,0 +1,30 @@
+# File: interpolation Makefile
+# Author: J.K. Johnstone
+# Last Modified: 7/29/04
+# History: 3/31/03: ported from SGI Irix to Linux
+#          7/29/04: added CLAPACK (BsplineCurve::fitCurveClosed depends on it)
+
+ARCH	   = LINUX
+SHELL      = /bin/csh
+CC         = g++
+HOME	   = /home/jj
+BASIC      = ${HOME}/software/Cbin/basic
+BASIC2     = ${HOME}/software/Cbin/basic2
+CURVE      = ${HOME}/software/Cbin/curve
+CLAPACK    = $(HOME)/software/CLAPACK
+CLAPACKARC = $(CLAPACK)/lapack_LINUX.a \
+	         $(CLAPACK)/blas_LINUX.a \
+	         $(CLAPACK)/F2CLIBS/libF77.a
+LIBRARIES  = -lglut -lGLU -lGL -lm
+LDFLAGS    = -I${BASIC} -I${BASIC2} -I${CURVE} $(CLAPACKARC) -funroll-all-loops -O3
+
+all: interpolate
+.cpp: 
+	${CC} -Wno-deprecated -g -o $@ $< ${LIBRARIES} ${LDFLAGS}
+clean :
+	rm -f *.o *~ a.out core
+	ls -l
+
+touch :
+	touch interpolate.cpp
+

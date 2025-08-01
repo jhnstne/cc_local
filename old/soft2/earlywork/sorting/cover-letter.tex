@@ -1,0 +1,177 @@
+\documentstyle[11pt]{bletter}
+\signature{John K. Johnstone}
+\newcommand{\arc}[1]{\mbox{$\stackrel{\frown}{#1}$}}
+\pagestyle{empty}
+\begin{document}
+\begin{letter}
+{Fachbereich Mathematik\\
+Freie Universtitaet Berlin\\
+Arnimallee 2-6\\
+D-1000 Berlin 33\\
+Federal Republic of Germany}
+
+\opening{Dear Chee:}
+
+Here is the revised version finally.
+Please pardon the delay.
+I have made all of the clarifications and additions that the main referee asked for.
+I address these now one at a time.
+(Note: due to Crystal Norris' advice at SIAM,
+I have pasted figures into one of your copies and not sent
+you the original figures.  See the end of this letter for clarification.)
+
+Page numbers are from the original version.
+Page numbers in brackets are from the revised version.
+Obvious corrections (e.g., typos) are not mentioned.
+
+\begin{enumerate}
+\item
+	p. 3: Elaboration on solutions to Restriction and Edge Intersection problems.
+\item
+	p. 4 comment: The method of the paper does apply to space curves, using projection.
+	See comment on p. 2.
+\item
+	p. 9: Cell and cell partition have been defined more carefully.
+\item
+	p. 11 [pp. 11-12]: Explanation of singularity refinement has been 
+	substantially changed to better motivate this procedure.
+	But note that it {\bf is} necessary to refine endpoints for pairing, 
+	as in distinguishing the following segments: \\
+	\vspace{4in}
+
+	and: 
+	\vspace{2in}
+
+	The most natural way to store this information is in refined and artificial 
+	endpoints.
+	Once pairing is done, refined and artificial endpoints are still necessary.
+	For example, locating $x$ in the following example (refinement of singularity):\\
+	\vspace{2in}
+	
+	recognizing when a point lies on an infinite segment so that one can use a different
+	point location scheme (see note on [pp. 27-35] and point location below):\\
+	\vspace{2in}
+
+	and making the order of points around a loop clear:\\
+	\vspace{2in}
+
+	Finally, nonsingular points are often necessary, as in Lemma 5.2.
+\item	
+	p. 15 [p. 16]: The exact position of refined endpoints is not important.
+	[p. 16] has a discussion of the amount of flexibility that is possible.
+	Also refer to [p. 12].
+	On \mbox{[p. 21]} a practical note has been added, based on this flexibility of refined 
+	endpoints.
+\item
+	p. 15: An explicit algorithm for choosing the artificial walls has been added in 
+	an appendix (Section 10.1, [p. 46]).
+\item
+	p. 15 [pp. 16-17]: Parts extending to infinity after an artificial endpoint
+	are not discarded (since we might want to sort points on these segments).
+	The infinite segment \arc{A\infty} is simply represented by a finite segment 
+	\arc{AB}.  For example, a point on \arc{A\infty} but after the artificial
+	endpoint $B$ will still be located on \arc{AB}, 
+	since that is the representative of \arc{A\infty}.
+	See the discussion on [pp. 16-17].
+\item
+	p. 16 [p. 18]: Definition of `inside' and `face' has been improved.
+\item
+	p. 19: 	Restriction to nonsingular crossings is optional.
+		See the second note at the top of [p. 22].
+\item
+	p. 20 [pp. 22-23]:  Theorem 5.2 and its proof does not depend upon the exact position
+	of the refined endpoint; it only depends on the fact that the refined endpoint
+	lies on the appropriate convex segment incident to the singularity.
+	For example, Lemma 5.2 can be applied as long as two points lie on the same convex 
+	segment.
+\item	
+	comment on p. 21: Counting along boundary would work in this case
+	but not in others.
+\item
+	p. 21 [p. 24]: First paragraph of proof clarified.
+\item
+	p. 22: Proof is invariant under restriction to nonsingular P, although
+	this restriction is not necessary in theory. 
+	Again see the second note on [p. 22]. 
+\item
+	p. 22 `Therefore, there exists $\alpha \ldots$': 
+	This part of the proof is now in Lemma 10.1 \mbox{[p. 48]} and the choice of $\alpha$
+	has been explained more carefully.
+\item
+	p. 22, `By the argument of Lemma 2': This section of the proof has been moved
+	to Lemma 10.2 of the appendix [p. 49], where the argument has been made explicit.
+\item
+	p. 24 [p. 25]: Paragraph beginning `We now show that $W_{2} \in S(W_{1})$'
+	has been rewritten to make the argument clearer (e.g., the equality
+	that referee circled is better explained).
+\item
+	p. 24 [p. 25]: The term `refined singularity' is not used anymore
+	(it was undefined as referee noted).
+\item
+	p. 25 [p. 25]: The argument from Lemma 2 (Lemma 5.2) is now explicitly reviewed.
+\item	
+	p. 26 [p. 28]: We no longer claim that nude components are always closed.
+\item
+	p. 26: Since the checking of condition 4 of Theorem 4 [Theorem 6.1] may
+	look misleadingly expensive,
+	an explanatory note has been added on [p. 19].
+\item
+	p. 31 [p. 39]: Corrected.  Note that we are using the RAM model, where basic
+	arithmetic operations are of unit cost.
+\end{enumerate}
+\vspace{1in}
+
+\noindent We now enumerate some additions that were not requested by the referees, but
+which were motivated in the process of the above changes.
+
+\begin{enumerate}
+\item
+	Note that the title has been changed.
+\item
+	{[p. 6]}: Preamble to general algorithm for convex segment method has been 
+	slightly changed.
+\item
+	{[p. 11]}: Footnote added.
+\item
+	{[p. 17]}: Review of types of endpoint added.
+\item
+	{[p. 48ff.]} For clarity and elegance, some key facts have been factored out from 
+	the proofs into lemmas, and these lemmas placed in an appendix (Section 10.2).
+\item
+	{[pp. 27-35]}: The section on point location has been elaborated.
+	The last two examples of Example 6.1 illustrate the two additions.
+	We must deal with points that do not lie on a refined segment, either
+	points on an infinite segment outside the bounded cell
+	or points between a singularity and one of its refinements.
+	For example in Figure 24, $S(x) = \{W_{1},W_{2},W_{3},W_{4}\}$ and 
+	the two that are closest to $x$'s tangent are $W_{1}$ and $W_{3}$, 
+	but one cannot distinguish whether $x$ lies on $W_{1}$'s or $W_{3}$'s 
+	segment without considering the type of the two infinite segments.
+\item
+	{[p. 26]}: A small addition has been made to first paragraph of Section 5.5
+	on computation of singularities and flexes.
+\item
+	{[p. 37]}: Definition of equivalence relation in Lemma 6.2 has been better defined.
+\item
+	{[p. 38]}: Discussion of complexity analysis has been moved up before Theorem 7.1.
+\end{enumerate}
+
+\vspace{1in}
+
+Some administrative details. 
+In talking with Rao Kosaraju, I have discovered that the publishing
+process is expedited if I help with the typesetting (which will be simple
+since I am already using LaTeX).
+I have spoken with Crystal Norris at SIAM, who is in charge of these things,
+and she has agreed to let me do this.
+Related to this, she has advised me to keep the originals of the figures, and
+send them directly to her later.
+Therefore, I have pasted copies of the figures directly into the copy that I 
+have sent you, and have not sent you the originals.
+So that I know when to get in touch with Crystal Norris,
+would you please send me e-mail when you send the paper into SIAM?
+Thanks.
+
+\closing{All of the best,}
+\end{letter}
+\end{document}

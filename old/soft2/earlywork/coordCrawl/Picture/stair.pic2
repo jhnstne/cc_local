@@ -1,0 +1,67 @@
+.sp 1i
+.PS
+scale=100
+box invis ht 530 wid 266 with .sw at 0,0
+line  from 242,218 to 242,218 
+line  from 209,222 to 209,222 
+line  from 114,530 to 114,530 
+line  from 66,522 to 74,522 
+line  from 130,490 to 130,490 
+line  from 209,110 to 209,222 dashed
+line  from 77,6 to 77,111 dashed
+spline -> from 84,0\
+to 96,36\
+to 128,47\
+to 157,59\
+to 170,88\
+to 197,93\
+to 210,100
+spline -> from 0,61\
+to 6,86\
+to 32,108\
+to 56,111\
+to 63,115
+spline -> from 71,121\
+to 79,146\
+to 106,160\
+to 137,164\
+to 143,194\
+to 168,226\
+to 211,233
+"\f1\s10\&1\f1\s0" at 7,112
+"\f1\s10\&2\f1\s0" at 164,39
+"\f1\s10\&3\f1\s0" at 130,209
+spline  from 80,320\
+to 80,320\
+to 80,320
+spline  from 77,6\
+to 93,46\
+to 148,57\
+to 161,100\
+to 222,111\
+to 221,158\
+to 250,234
+line  from 209,222 to 209,222 
+line  from 209,222 to 209,222 
+spline  from 6,51\
+to 22,91\
+to 77,102\
+to 90,145\
+to 151,156\
+to 150,203\
+to 266,234
+line  from 78,110 to 209,110 dashed
+line  from 242,218 to 242,218 
+line  from 229,224 to 229,224 
+line  from 242,218 to 242,218 
+"\f1\s10\&5\f1\s0" at 227,252
+"\f1\s10\&4\f1\s0" at 258,147
+spline -> from 219,233\
+to 219,233\
+to 245,241
+spline <-> from 218,106\
+to 218,107\
+to 234,123\
+to 260,213\
+to 260,223
+.PE

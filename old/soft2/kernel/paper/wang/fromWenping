@@ -1,0 +1,103 @@
+John, 
+
+	You gave a clear discussion of the main idea.
+I enjoyed reading it. Maybe some parts can be made 
+more rigorous. I believe more basics about duality is 
+needed to make it readable by an ordinary CAGD reader. 
+
+Best, 
+
+Wenping
+
+==========================
+
+	
+Main comments:
+
+1) The definition of *kernel* should be made rigorous, by stating clearly 
+that the kernel is a closed set (i.e. including the boundary points.)
+In Lemma 2, it is implied that the kernel does *not* include boundary points, 
+while in the subsequent discussion it allows the boundary points to be 
+part of the kernel. These inconsistences can be removed easily. 
+
+2) In Section 4 (page 6), the reason provided for not considering self-intersecting 
+curve is not convincing. Considering a crunode on a planar cubic curve, it is not 
+immediately clear why the points inside the knot has to be passed by some tangent 
+of the curve. I think the key is that the insideness of the curve is not well-defined, 
+so neither is the kernel. (Another interesting problem is to consider the kernel 
+of an open and non-self-intersecting planar curve).
+
+3) I believe the final algorithm can be stated entirely in the prime space with 
+referring to the dual space for trimming $C^*$. See below. 
+
+4) Some key results should/can be established rigorously and stated as theorems, 
+such as the following. 
+
+Let $h$ be the closed half-plane defined by an inflectional tangent, 
+containing the interior points of the region bounded by curve C 
+in the neighborhood of the tangential point. Let $H$ be the set of 
+all these half-planes. Let $G$ be the intersection of the $h$'s in $H$.
+
+Theorem. Kernel(C) = Int(C) \cap G. 
+
+Theorem. $G$ is empty iff Kernel(C) is empty. (i.e. $G$ is a kernel set.)
+
+Theorem. The boundary of kernel(C) consists of line segments on inflectional 
+tangents and convex segments from curve $C$. 
+
+Although these results have been stated or mentioned in the paper, 
+I feel they need to be put down as theorems 
+with rigoruous proof so as to tighten the logical argument. 
+
+5) The points in the set K defined in step 2 of algorithm 3 (page 9) and 
+computed through trimming in the dual space can be computed by simply computing 
+the intersection of all half-planes in the set H as defined in (4) above 
+in the prime space. Computing the common intersection of $n$ half-planes takes 
+$O(nlogn)$ time. So trimming, hence the dual space, is not needed in the final 
+algorithm, and it will be used in theoretical understanding. (The appearance of 
+$\epsilon$ in section 4.1 does not look harmonic in the paper). 
+Then there arises a new problem: Gershon Elber knows that the kernel can be 
+computed by intersecting all the inflectional tangents, as he indicated
+at Dagsthul. If this is the case, I don't know what remains is new. 
+Maybe you can check with him. 
+
+A remark, the dual version of computing the intersection of a set of half-planes
+is the problem of computing the convex hull of a set of points. 
+
+Detailed comments: 
+
+1) Definition 1.1 (page 2) a planar curve --> a closed planar curve.
+	 Maybe even non-self-intersection can be assumed here. 
+
+2) Defintion 2.1. (a/c/ b/c) --> (a/c, b/c, 1). 
+	I feel using the homogeneous coordinates is better since it leaves 
+a place for points at infinity. 
+
+3) Section 3 (page 5): The leading paragraph about the shrinking and 
+expanding to get kernel and convex hull is too vague to make a valid point. 
+I don't see how the discussion that follows supports or relates 
+to this interpretation of the relationship between the two. 
+
+4) Proof of Theorem 3.1 (page 5). It seems that only one direction has 
+been proved. It is not mentioned why
+a tangent to the convex hull of $C^*$ gives a boundary point of the kernel. 
+
+5) page 5, line -5: *bitangent* has not been defined up to this point. 
+Also, a line segment on the boundary of the kernel should correspond to a 
+bundle of tangents supported at a cusp of the convex hull of $C^*$, 
+instead of a bitagnent. 
+
+6) The term *concave curve* is not a standard one. *Nonconvex* sounds better. 
+
+7) page 5, line -4: *every concavity must contain an inflection points". 
+What is *a concavity*? This statement is not rigoruous. 
+
+8) Proof of Lemma 4.3 (page 8): The description of pivoting used here 
+is a bit loose. A more rigorous proof from the viewpoint of differetial 
+geometry should be given.
+
+9) page 9, line 18: Although the kernel (or its interior, for this matter) is convex, 
+it needs to be shown that the kernel points in $S$ are not collinear, so their centroid can be 
+an interior point of the kernel. 
+
+10) Please indicate the location of the origin in the left figure of Figure 4. 

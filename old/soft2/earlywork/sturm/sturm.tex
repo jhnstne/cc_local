@@ -1,0 +1,723 @@
+\documentstyle[12pt,titlepage]{article} 
+\input{macros}
+\input{ruledmacros}
+\input{pageformat-double}
+\renewenvironment{definition}{\begin{quote}{\bf Definition}\ \ \em}{\end{quote}}
+\begin{document}
+\bibliographystyle{unsrt}
+\newcommand{\xii}{x_{i}}  
+\newcommand{\xj}{x_{j}}
+\newcommand{\yi}{y_{i}}
+\newcommand{\yj}{y_{j}}
+\renewcommand{\choose}[2]{(\stackrel{#1}{#2})}
+
+% Tech report 1
+% \title{An extension of Newton's formulas for computing symmetric sums}
+
+% Tech report 2
+\title{Counting the intersections of two curves:\\ a two-dimensional Sturm Theorem}
+\author{John K. Johnstone \\ The Johns Hopkins University}
+\date{April 1990}
+
+\maketitle
+
+\begin{abstract}
+The following problem is addressed: how are complicated sums
+of the form $\sum_{i} \xii^{p} \yi^{q}$ found without knowing any $\xii$ or $\yi$?
+\end{abstract}
+
+\section{Introduction}
+
+We wish to count the intersections of two curves in a rectangular box,
+without computing them.
+Consider two curves $f(x,y) = 0$ and $g(x,y) = 0$ of degree $m$.
+Hermite has a counting method that assumes knowledge of sums
+of powers of the coordinates of the intersections.
+In particular, if the intersections are 
+$(x_{1},y_{1}), \ldots,(x_{m^{2}},y_{m^{2}})$,
+then the method assumes knowledge of 
+\[
+	\sum_{i} x_{i}^{p}y_{i}^{q}
+	= x_{1}^{p}y_{1}^{q} + x_{2}^{p}y_{2}^{q} + \ldots + 
+	  x_{m^{2}}^{p}y_{m^{2}}^{q} 
+\]
+for $p = 1, \ldots, 2m-1$ and $q = 1, \ldots, 2m-1$.
+Our hope is that it is possible to compute these sums from
+the coefficients of $f$ and $g$ rather than from the intersections.
+
+\section{Motivation}
+
+Sturm theorem is extremely useful in univariate root finding.
+2D Sturm theorem should be useful in bivariate intersection.
+
+Accuracy: distinguishing false from true intersections.
+This may not be natural in solid modeling for the following reason:
+if two curves come within $\epsilon$, then it is equally good (perhaps better)
+to say that they intersect, because the models aren't exact.
+(One might even want to assume they were meant to intersect, under Cornell's
+philosophy of maximizing degeneracies.)
+Rotation and resultant computation are just two operations that introduce error.
+For the moment, view it this way:
+If exact arithmetic is always being used, then the 2d Sturm could be used to 
+maintain exactness.
+
+
+\section{Pure powers}
+
+This is possible in the one-dimensional case,
+where the sums are $\sum_{i} x_{i}^{p}$.
+Consider a monic polynomial $f(x)$ of degree $n$.
+It is well known that the coefficient of $x^{n-1}$ is $(-1)^{1}\sum x_{i}$
+(the sum of the roots $x_{i}$ of $f(x)$),
+the coefficient of $x^{n-2}$ is $(-1)^{2} \sum_{i < j} x_{i}x_{j}$,
+$\ldots$, and the constant term is $(-1)^{n}x_{1}x_{2}\ldots x_{n}$.
+This can be seen by considering the factorization of $f$ into linear factors
+%
+\[ f(x) = (x - x_{1})(x - x_{2})\ldots(x - x_{n}) 
+\]
+%
+
+\begin{lemma}
+Let $f(x) = x^{n} + a_{n-1}x^{n-1} + \ldots + a_{0}$ be a 
+monic polynomial of degree $n$ with roots $x_{1}, \ldots, x_{n}$.
+Then
+\[ a_{n-1} = - \sum x_{i} \]
+\[ a_{n-2} =   \sum_{i < j} x_{i}x_{j} \]
+\[ \vdots \]
+\[ a_{0}   = (-1)^{n} x_{1}\ldots x_{n} \]
+That is, the coefficients of $f(x)$ are the elementary symmetric sums of the roots.
+$\sum x_{i}$, $\sum_{i < j} x_{i} x_{j}$, $\ldots$, $x_{1}x_{2} \ldots x_{n}$.
+\end{lemma}
+
+Notation: $\sum_{i \neq j,\ i \neq k} x_{i}x_{j}x_{k}$ is shorthand for
+	  $\sum_{i=1}^{n} \sum_{j=1,\ j \neq i}^{n} \sum_{k=1,\ k \neq i}^{n}
+		x_{i}x_{j}x_{k}$.
+
+From this, it is possible to derive the sums of pure powers, $\sum_{i} x_{i}^{p}$.
+% For example, $\sum x_{i}^{2} = (\sum x_{i})^{2} - 2\sum_{i < j} x_{i}x_{j}$
+% and $\sum x_{i}^{3} = 4(\sum x_{i})^{3} - 3\sum x_{i}^{2} \sum x_{i} 
+% - 6\sum_{i < j < k} x_{i}x_{j}x_{k}$.
+\begin{lemma}[Close to Newton's formula]
+\label{lem:pure}
+Let $f(x) = x^{n} + a_{n-1}x^{n-1} + \ldots + a_{0}$ be a 
+monic polynomial of degree $n$ with roots $x_{1}, \ldots, x_{n}$.
+From the elementary symmetric sums $\sum x_{i}, \sum_{i < j} x_{i} x_{j}, \ldots,
+x_{1}x_{2} \ldots x_{n}$, one can find the pure powers $\sum_{i} x_{i}^{p}$.
+\end{lemma}
+\Heading{Proof:}
+$\sum x_{i}$ is known.
+Finding $\sum x_{i}^{p},\ p \geq 2$:
+\begin{equation}
+\label{eq1}
+\sum x_{i}^{p} = \sum x_{i} \sum x_{i}^{p-1} - \sum_{i \neq j} x_{i} x_{j}^{p-1} 
+	       = -a^{n-1}   \sum x_{i}^{p-1} - \sum_{i \neq j} x_{i} x_{j}^{p-1} 
+\end{equation}
+If $p=2$, this is sufficient.
+If $p \geq 3$, it is necessary to find $\sum_{i \neq j} x_{i} x_{j}^{p-1}$:
+\[ \sum_{i < j} x_{i} x_{j} \sum x_{i}^{p-2} = 
+   \sum_{i \neq j} x_{i} x_{j}^{p-1} 
+   + \sum_{i < j,\ i \neq k,\ j \neq k} x_{i} x_{j} x_{k}^{p-2}
+\]
+implying
+\[
+\sum_{i \neq j} x_{i} x_{j}^{p-1}  =  \sum_{i < j} x_{i} x_{j} \sum x_{i}^{p-2} 
+	- \frac{1}{2} \sum_{\mbox{distinct }i,j,k} x_{i} x_{j} x_{k}^{p-2}
+\]
+\begin{equation}
+\label{eq2}
+ 				   = a_{n-2} \sum x_{i}^{p-2} 
+	- \frac{1}{2} \sum_{\mbox{distinct }i,j,k} x_{i} x_{j} x_{k}^{p-2}
+\end{equation}
+Notice that the last sum is zero if $n < 3$.
+
+Therefore, we have to find
+$\sum_{\mbox{distinct }i_{1},i_{2},i_{3}} x_{i_{1}}^{p} x_{i_{2}} x_{i_{3}}$,
+$p \geq 2$
+(all the following sums are over `distinct $i_{1}, \ldots$'):
+\[ \sum x_{i_{1}}^{p} x_{i_{2}} x_{i_{3}} = 
+   \sum x_{i_{1}} x_{i_{2}} x_{i_{3}} \sum x_{i}^{p-1}
+   - \sum x_{i_{1}}^{p-1} x_{i_{2}} x_{i_{3}} x_{i_{4}}
+\]
+Similarly, 
+\[ \sum x_{i_{1}}^{p-1} x_{i_{2}} x_{i_{3}} x_{i_{4}} = 
+   \sum x_{i_{1}} x_{i_{2}} x_{i_{3}} x_{i_{4}} 	\sum x_{i}^{p-2}
+   - \sum x_{i_{1}}^{p-2} x_{i_{2}} x_{i_{3}} x_{i_{4}} x_{i_{5}}
+\]
+Continuing in this fashion until the power of $x_{i_{1}}$ decreases to 1, we get:
+
+\[ \sum_{\mbox{distinct }i_{1},i_{2},i_{3}} x_{i_{1}}^{p} x_{i_{2}} x_{i_{3}} = 
+   \sum x_{i_{1}} x_{i_{2}} x_{i_{3}} \sum x_{i}^{p-1}
+   - \sum x_{i_{1}} x_{i_{2}} x_{i_{3}} x_{i_{4}} 	\sum x_{i}^{p-2}
+\]
+\[ + \sum x_{i_{1}} x_{i_{2}} x_{i_{3}} x_{i_{4}} x_{i_{5}} \sum x_{i}^{p-3}
+   - \ldots
+   + (-1)^{p} \sum x_{i_{1}} x_{i_{2}} \ldots x_{i_{p+1}} \sum x_{i}
+   + (-1)^{p+1} \sum x_{i_{1}} x_{i_{2}} \ldots x_{i_{p+2}}
+\]
+
+\begin{equation}
+\label{eq3}
+= 3! \sum_{i_{1} < i_{2} < i_{3}} x_{i_{1}} x_{i_{2}} x_{i_{3}} 
+	\sum x_{i}^{p-1}
+- 4! \sum_{i_{1} < i_{2} < i_{3} < i_{4}} x_{i_{1}} x_{i_{2}} x_{i_{3}} x_{i_{4}}
+	\sum x_{i}^{p-2} 
+\end{equation}
+\[ + \ldots
+   + (-1)^{p+1} (p+2)! \sum x_{i_{1}} x_{i_{2}} \ldots x_{i_{p+2}}
+\]
+\[ = \left\{ \begin{array}{ll}
+		- 3! a_{n-3} \sum x_{i}^{p-1}
+	 	- 4! a_{n-4} \sum x_{i}^{p-2}
+		- \ldots
+		- (p+2)! a_{n-(p+2)}			& \mbox{if $n \geq p+2$} \\
+		
+		- 3! a_{n-3} \sum x_{i}^{p-1}
+	 	- 4! a_{n-4} \sum x_{i}^{p-2}
+		- \ldots
+		- n!a_{0}    \sum x_{i}^{(p+2)-n}	& \mbox{if $n < p+2$}
+	     \end{array}
+     \right.  \]
+
+In conclusion, using~(\ref{eq1}), (\ref{eq2}), and (\ref{eq3}):
+\begin{equation}
+\label{eq4}
+\sum x_{i}^{p} = \left\{ \begin{array}{ll}
+		- a^{n-1} \sum x_{i} - 2 a_{n-2}  & \mbox{if $p = 2$} \\
+		- a^{n-1} \sum x_{i}^{p-1} 
+	 	- a_{n-2} \sum x_{i}^{p-2} 
+	    - \frac{3!}{2} a_{n-3} \sum x_{i}^{p-3}
+	    - \ldots
+	    - \frac{\alpha !}{2} a_{n-\alpha} \sum x_{i}^{p-\alpha} \\
+							& \mbox{if $p \geq 3$}
+			  \end{array} \right. 
+\end{equation}
+where $\alpha = \mbox{min}(n,p)$ and $\sum x_{i}^{0} :=0$.
+This offers a way of building $\sum x_{i}^{2}$, then $\sum x_{i}^{3}$, and so on,
+in general finding $\sum x_{i}^{p}$ from $\sum x_{i}, \ldots, \sum x_{i}^{p-1}$.
+\QED
+
+The existence of this result is not surprising, 
+since the fundamental theorem on symmetric polynomials \cite{Hernstein}
+says that any symmetric polynomial is a polynomial in the elementary symmetric polynomials
+and the sums of pure powers is certainly a symmetric polynomial.
+However, its construction is interesting.
+(Define symmetric polynomial.)
+
+The formula (\ref{eq4}) is very similar to one of Newton's formulas \cite[p. 323]{Kurosh}.
+% Kurosh, Higher Algebra, Mir Publishers, Moscow
+I think that it should be identical, 
+however Newton's formula does not have the $i!/2$ multipliers and has an alternation
+of plus and minus!
+I cannot explain the discrepancy at this time.
+
+I should explain why we are always working with real numbers and real roots, 
+because you might be concerned about complex roots.
+This property remains true in the two dimensional case, through the use of resultants.
+
+\section{Hermite's version of the original Sturm Theorem}
+
+\begin{example}
+Let $f(x) = x^{2} - 1$.
+$f(x+\epsilon) = x^{2} + 2\epsilon x + (\epsilon^{2} - 1)$.
+Using Lemma~\ref{lem:pure}, the sums of pure powers of the roots of $f(x+\epsilon)$ are
+$\sum x_{i} = -2\epsilon$, 
+$\sum x_{i}^{2} = 2\epsilon^{2} + 2$, and 
+$\sum x_{i}^{3} =-2\epsilon^{3} - 6\epsilon$.
+Therefore, 
+\[ \Lambda_{\epsilon}(\lambda) = \left| \begin{array}{ll}
+	\sum x_{i} - \lambda    &   \sum x_{i}^{2}  \\
+	\sum x_{i}^{2}		&   \sum x_{i}^{3} - \lambda
+	\end{array} \right| = 
+			\left| \begin{array}{ll}
+	-2\epsilon - \lambda    &  2\epsilon^{2} + 2 \\
+	2\epsilon^{2} + 2 	&  -2\epsilon^{3} - 6\epsilon - \lambda
+	\end{array} \right|
+\]
+\[	= \lambda^{2} + (8\epsilon + 2\epsilon^{3})\lambda + (4\epsilon^{2} - 4) 
+\]
+$v(\epsilon)$ is the number of sign variations in the coefficients of 
+$\Lambda_{\epsilon}(\lambda)$, $(1,\epsilon(8+2\epsilon^{2}),4(\epsilon^{2} - 1)$.
+The signs of the coefficients are 
+\[
+\begin{array}{ll}
+	(+,-,+)  	& \mbox{if $\epsilon < -1$} \\
+	(+,-,-)  	& \mbox{if $\epsilon \in (-1,0)$} \\
+	(+,+,-)  	& \mbox{if $\epsilon \in (0,1)$} \\
+	(+,+,+)  	& \mbox{if $\epsilon > 1$}
+\end{array}
+\]
+Therefore, 
+\[ v(\epsilon) = \left\{
+\begin{array}{ll}
+	2  	& \mbox{if $\epsilon < -1$} \\
+	1  	& \mbox{if $\epsilon \in (-1,1)$} \\
+	0  	& \mbox{if $\epsilon > 1$}
+\end{array} \right.
+\]
+In short, noting that the roots of $f(x)$ are $\pm 1$, 
+it is clear that $v(\epsilon_{1}) - v(\epsilon_{2})$ is indeed the number
+of roots in the interval $(\epsilon_{1}, \epsilon_{2})$.
+\end{example}
+
+\section{Pure powers in 2D}
+
+First of all, note that $\sum_{i} \xii^{p} \yi^{q}$ is not a symmetric polynomial,
+because it is not invariant under any permutation of the $\xii$ among themselves
+and of the $\yi$ among themselves.
+Therefore, the theory of symmetric polynomials cannot be used.
+
+Consider the two-dimensional case.
+Resultants are used to isolate the coordinates of intersections.
+The roots of $\mbox{Res}_{y}(f,g)$ are the $x$-coordinates of the intersections.
+SEE NOTE IN FILE.
+% If two intersections have the same $x$-coordinate, are things screwed up a bit?
+% If this situation is indeed troublesome, it might be possible to avoid it
+% by a method used in Garrity and Warren.
+Therefore, the coefficients of $\mbox{Res}_{y}(f,g)$ give the elementary symmetric 
+and pure powers of $x_{i}$: 
+$\sum x_{i}$,
+$\sum x_{i}^{2}$,
+$\sum_{i < j} x_{i}x_{j}$,
+$\sum x_{i}^{3}$,
+$\sum_{i < j < k} x_{i}x_{j}x_{k},\ \ \ldots$.
+Similarly, the coefficients of $\mbox{Res}_{x}(f,g)$ give the elementary symmetric and pure
+powers of $y_{i}$.
+
+It turns out that the elementary symmetric and pure powers of $(x_{i} - y_{i})$ and
+$(x_{i} + y_{i})$ are also needed.
+Consider the powers of $(x_{i} - y_{i})$ first.
+Note that the projection of an intersection $(x_{i},y_{i})$ 
+onto the line $x + y = 0$ is $(\frac{x_{i}-\yi}{2},-\frac{\xii-\yi}{2})$.
+We want to use resultants to find these projections.
+If we rotate the coordinate frame and the curves by $\frac{\pi}{4}$ about the origin, 
+the line $x + y = 0$ becomes the $x$-axis
+and the old projections onto the line $x+y=0$ become the new projections onto the $x$-axis.
+Under this rotation, the point $(\frac{x-y}{2},-\frac{x-y}{2})$ becomes the point 
+$(\frac{\sqrt{2}}{2}(x-y),0)$.
+In other words, if the two curves are rotated by $\frac{\pi}{4}$ about the origin,
+the projections of the intersections onto the $x$-axis are 
+$(\frac{\sqrt{2}}{2}(x_{i}-y_{i}),0)$.
+Therefore, the roots of $\mbox{Res}_{y}(\mbox{Rot}_{\pi/4}f,\mbox{Rot}_{\pi/4}g)$
+are $\frac{\sqrt{2}}{2}(x_{i}-y_{i})$, and the coefficients of 
+$\mbox{Res}_{y}(\mbox{Rot}_{\pi/4}f,\mbox{Rot}_{\pi/4}g)$ 
+give the elementary symmetric and pure powers of $(x_{i}-y_{i})$.
+
+Now consider the powers of $(x_{i} + y_{i})$.
+The projection of an intersection $(x_{i},y_{i})$ 
+onto the line $x - y = 0$ is $(\frac{x_{i}+\yi}{2},\frac{\xii+\yi}{2})$.
+Therefore, using the above argument, 
+the roots of $\mbox{Res}_{y}(\mbox{Rot}_{-\pi/4}f,\mbox{Rot}_{-\pi/4}g)$
+are $\frac{\sqrt{2}}{2}(x_{i}+y_{i})$, and the coefficients of 
+$\mbox{Res}_{y}(\mbox{Rot}_{-\pi/4}f,\mbox{Rot}_{-\pi/4}g)$ 
+give the elementary symmetric and pure powers of $(x_{i}+y_{i})$.
+
+In general, $\mbox{Res}_{y}(\mbox{Rot}_{-\theta}f,\mbox{Rot}_{-\theta}g)$ can be
+used to compute powers of $\xii + \tan\theta \yi$, as follows.
+Since the vector perpendicular to the line $y = ax$ is $(1,-\frac{1}{a})$,
+the projection of $(\xii,\yi)$ onto $y = ax$ is $(\xii + \delta, \yi - \frac{1}{a} \delta)$.
+Substituting this point into $y=ax$ and solving for $\delta$,
+one finds that the projection of $(\xii,\yi)$ is 
+$(\frac{\xii + a\yi}{a^{2} + 1},
+ \frac{a(\xii + a\yi)}{a^{2} + 1})$.
+If the coordinate frame and the curves are rotated by $-\tan^{-1}(a)$
+about the origin, the line $y = ax$ becomes the $x$-axis and the point of projection
+$(\frac{\xii + a\yi}{a^{2} + 1}, \frac{a(\xii + a\yi)}{a^{2} + 1})$ on the line
+$y = ax$ becomes the point $(\frac{1}{\sqrt{a^{2}+1}}(\xii + a\yi), 0)$.
+Thus, the roots of $\mbox{Res}_{y}(\mbox{Rot}_{-\tan^{-1}(a)}f,\mbox{Rot}_{-\tan^{-1}(a)}g)$
+are $\frac{1}{\sqrt{a^{2}+1}}(\xii + a\yi)$,
+and the coefficients of 
+$\mbox{Res}_{y}(\mbox{Rot}_{-\tan^{-1}(a)}f,\mbox{Rot}_{-\tan^{-1}(a)}g)$
+give the elementary symmetric and pure powers of $(\xii + a\yi)$.
+
+Note that $\mbox{Res}_{x}(f,g)$, which is used to compute the powers of $\yi$,
+is equivalent to \\
+$\mbox{Res}_{y}(\mbox{Rot}_{\frac{\pi}{2}}f,\mbox{Rot}_{\frac{\pi}{2}}g)$.
+
+\begin{lemma}
+The pure powers $\sum_{i} x_{i}^{p}y_{i}^{q}$ can be found from the elementary symmetric
+and pure powers of $(\xii + a\yi)$.
+These elementary symmetric and pure powers can be found from the
+resultants $\mbox{Res}_{y}(\mbox{Rot}_{-\tan^{-1}(a)}f,\mbox{Rot}_{-\tan^{-1}(a)}g)$.
+This resultant can be computed symbolically once.
+Actually, only elementary symmetric
+and pure powers of $x_{i}$, $y_{i}$, $x_{i}-y_{i}$, $x_{i}+y_{i}$, and $\xii + 2\yi$ 
+are needed.
+\end{lemma}
+\Heading{Proof:}
+By symmetry, assume without loss of generality that $p \geq q$.
+First notice that we can reduce the problem to finding $\sum_{i \neq j} x_{i}^{p} y_{j}^{q}$.
+\[ \sum_{i} x_{i}^{p}y_{i}^{q} = 
+   \sum_{i} x_{i}^{p} 	\sum_{i} y_{i}^{q} -  	\sum_{i \neq j} x_{i}^{p} y_{j}^{q}
+\]
+Let $(p,q)_{1}$ be shorthand for $\sum_{i \neq j} x_{i}^{p} y_{j}^{q}$.
+
+Assume for now that $p > 1,\ q > 1$.
+In order to compute $(p,q)_{1}$, 
+we express it in three different ways, by removing a factor
+of $\sum \xii$, $\sum \yi$, and $\sum \xii\yi$, respectively.
+\begin{equation}
+\sum_{i \neq j} x_{i}^{p} y_{j}^{q} = 
+   \sum_{i \neq j} x_{i}^{p-1} y_{j}^{q}	\sum_{i} x_{i}  	-
+   \sum_{i_{1} \neq i_{2},\ i_{1} \neq j} x_{i_{1}}^{p-1} x_{i_{2}}  y_{j}^{q} 
+% That is, sum over all i, j, and k where $i \neq j$ and $j \neq k$.
+\end{equation}
+or, in shorthand,
+\begin{equation}
+\label{eq5}
+(p,q)_{1} =  (p-1,q)_{1} \sum_{i} x_{i}  -
+	\sum_{i_{1} \neq i_{2},\ i_{1} \neq j} x_{i_{1}}^{p-1} x_{i_{2}}  y_{j}^{q} 
+\end{equation}
+
+\noindent Secondly, 
+\begin{equation}
+\label{eq6}
+(p,q)_{1} = 
+  (p,q-1)_{1} \sum_{i} y_{i}  	-  
+  \sum_{j_{1} \neq j_{2},\ i \neq j_{1}} x_{i}^{p} y_{j_{1}}^{q-1} y_{j_{2}}
+% \sum_{i} \xii^{p} \sum_{i} y_{i} - \sum_{i} \xii^{p} \yi	& \mbox{if $q = 1$}
+\end{equation}
+
+\noindent Thirdly, 
+\begin{equation}
+\label{eq7}
+(p,q)_{1} = 
+   (p-1,q-1)_{1}	\sum_{i \neq j} x_{i} y_{j}  - 
+   \sum_{i_{1} \neq i_{2},\ i_{1} \neq j} x_{i_{1}}^{p-1} x_{i_{2}}  y_{j}^{q} 	-
+   \sum_{j_{1} \neq j_{2},\ i \neq j_{1}} x_{i}^{p} y_{j_{1}}^{q-1} y_{j_{2}}
+\end{equation}
+\[
+	- \sum_{i_{1} \neq j_{1},\ i_{1} \neq i_{2},\ j_{1} \neq j_{2}} 
+	x_{i_{1}}^{p-1} x_{i_{2}} y_{j_{1}}^{q-1} y_{j_{2}}
+\]
+% \sum_{i} \xii^{p-1} \sum_{i \neq j} x_{i} y_{j}  - 
+% \sum_{i_{1} \neq j,\ i_{1} \neq i_{2}} x_{i_{1}}^{p-1} x_{i_{2}}  y_{j} 	-
+% \sum_{i_{1} \neq i_{2}} x_{i_{1}}^{p-1} x_{i_{2}}  y_{i_{1}} 
+% 	& \mbox{if $q = 1$}
+%
+These three equations can be combined in a nice way:
+\[ \mbox{LHS}\{(\ref{eq5}) + (\ref{eq6}) - (\ref{eq7})\} = 
+   \mbox{RHS}\{(\ref{eq5}) + (\ref{eq6}) - (\ref{eq7})\} \]
+\[  (p,q)_{1} = 
+   (p-1,q)_{1}	\sum_{i} x_{i} 
+\]
+\[ + (p,q-1)_{1}	\sum_{i} y_{i}  \]
+\[ - (p-1,q-1)_{1} \sum_{i \neq j} x_{i} y_{j} \]
+\[ + \sum_{i_{1} \neq j_{1},\ i_{1} \neq i_{2},\ j_{1} \neq j_{2}} 
+	x_{i_{1}}^{p-1} x_{i_{2}} y_{j_{1}}^{q-1} y_{j_{2}}
+\]
+% \[  (p,1)_{1} = (p-1,1)_{1} \sum_{i} \xii - 
+% 	\sum_{i_{1} \neq j,\ i_{1} \neq i_{2}} x_{i_{1}}^{p-1}x_{i_{2}}y_{j}
+% \]
+
+The first three terms can be found recursively but the last term
+is more difficult.
+Using the same idea again, we try to simplify it by finding 
+three different expressions for it.
+Using the shorthand 
+\[(p,q)_{\alpha} := 
+\sum_{i_{1} \neq i_{2}, \ldots,\ i_{1} \neq i_{\alpha},\ j_{1} \neq j_{2}, \ldots,
+	\ j_{1} \neq j_{\alpha},\ i_{1} \neq j_{1}}
+	x_{i_{1}}^{p} x_{i_{2}} \ldots x_{i_{\alpha}}
+ 	y_{j_{1}}^{q} y_{j_{2}} \ldots y_{j_{\alpha}}
+\]
+we are trying to find $(p-1,q-1)_{2}$.
+\[
+(p-1,q-1)_{2} = 
+\sum_{i_{1} \neq i_{2},\ j_{1} \neq j_{2},\ i_{1} \neq j_{1}}
+	 x_{i_{1}}^{p-1} x_{i_{2}} y_{j_{1}}^{q-1} y_{j_{2}}
+\]
+\begin{equation}
+\label{eq8}
+ = 	(p-2,q-1)_{2} \sum_{i} x_{i}
+     -  \sum_{i_{1} \neq i_{2},\ i_{1} \neq i_{3},\ j_{1} \neq j_{2},\ i_{1} \neq j_{1}} 
+		x_{i_{1}}^{p-2} x_{i_{2}} x_{i_{3}} y_{j_{1}}^{q-1} y_{j_{2}}
+\end{equation}
+(Notice that the relationship between $i_{2}$ and $i_{3}$ is unrestricted:
+both $i_{2} = i_{3}$ and $i_{2} \neq i_{3}$ are allowed.)
+Secondly, 
+\begin{equation}
+\label{eq9}
+(p-1,q-1)_{2} 
+ = 	(p-1,q-2)_{2} \sum_{i} y_{i}
+     -  \sum_{i_{1} \neq i_{2},\ j_{1} \neq j_{2},\ j_{1} \neq j_{3},\ i_{1} \neq j_{1}} 
+		x_{i_{1}}^{p-1} x_{i_{2}} y_{j_{1}}^{q-2} y_{j_{2}} y_{j_{3}} 
+\end{equation}
+And thirdly, 
+\begin{equation}
+\label{eq10}
+(p-1,q-1)_{2} 
+ = 	(p-2,q-2)_{2} \sum_{i \neq j} x_{i}y_{j}
+     -  \sum_{i_{1} \neq i_{2},\ i_{1} \neq i_{3},\ j_{1} \neq j_{2},\ i_{1} \neq j_{1}} 
+		x_{i_{1}}^{p-2} x_{i_{2}} x_{i_{3}} y_{j_{1}}^{q-1} y_{j_{2}}
+\end{equation}
+\[
+     -  \sum_{i_{1} \neq i_{2},\ j_{1} \neq j_{2},\ j_{1} \neq j_{3},\ i_{1} \neq j_{1}} 
+		x_{i_{1}}^{p-1} x_{i_{2}} y_{j_{1}}^{q-2} y_{j_{2}} y_{j_{3}} 
+     -  (p-2,q-2)_{3}
+\]
+Combining these equations into $(\ref{eq8}) + (\ref{eq9}) - (\ref{eq10})$:
+\[
+(p-1,q-1)_{2} 
+ =    (p-2,q-1)_{2} \sum_{i} x_{i}
+\]
+\[
+      + (p-1,q-2)_{2} \sum_{i} y_{i}
+\]
+\[
+      -  (p-2,q-2)_{2} \sum_{i \neq j} x_{i}y_{j} 
+\]
+\[
+      + (p-2,q-2)_{3}
+\]
+Continuing this argument, the following recurrence relation is generated:
+\[	(p,q)_{i} = (p-1,q)_{i} \sum x_{i}
+\]
+\[
+			+ (p,q-1)_{i} \sum y_{i}
+\]
+\[
+		     	- (p-1,q-1)_{i} \sum x_{i}y_{j}
+\]
+\[
+			+ (p-1,q-1)_{i+1}
+\]
+
+Unrolling this recurrence relation (and recalling that $p \geq q$),
+
+\[ (p,q)_{1} = (p-1,q)_{1} \sum x_{i} + (p,q-1)_{1} \sum y_{i} -
+			(p-1,q-1)_{1} \sum x_{i}y_{j}
+\]
+\[		+ (p-2,q-1)_{2} \sum x_{i} + (p-1,q-2)_{2} \sum y_{i} -
+			(p-2,q-2)_{2} \sum x_{i}y_{j}
+\]
+\[	+ \ldots + (p-q+1,2)_{q-1} \sum x_{i} + (p-q+2,1)_{q-1} \sum y_{i} -
+			(p-q+1,1)_{q-1} \sum x_{i}y_{j}
+\]
+\[	+ (p-q+1,1)_{q} 
+\]
+\begin{equation}
+\label{eq11}
+(p,q)_{1} = (p-q+1,1)_{q} + 
+	\sum_{\alpha = 1}^{q-1} (p-\alpha,q-\alpha+1)_\alpha \sum x_{i}
+\end{equation}
+\[
+	+ \sum_{\alpha = 1}^{q-1} (p-\alpha+1,q-\alpha)_\alpha \sum y_{i}
+\]
+\[
+	+ \sum_{\alpha = 1}^{q-1} (p-\alpha,q-\alpha)_\alpha \sum x_{i}y_{j}
+\]
+
+We need to show how to compute the base cases.
+We begin by showing how to compute the base case $(1,1)_{1}$.
+\[ (1,1)_{1} = \sum_{i \neq j} x_{i}y_{j} = 
+\frac{1}{2} (\sum_{i \neq j} x_{i}x_{j} + \sum_{i \neq j} y_{i}y_{j} 
+	     - \sum_{i \neq j} (x_{i} - y_{i})(x_{j} - y_{j})) \]
+
+For the remaining base cases, we revert to finding $\sum_{i} \xii^{p}\yi^{q}$
+rather than $\sum_{i \neq j} \xii^{p}\yj^{q}$,
+recalling that one can easily by found from the other.
+The shorthand $[p,q]_{1}$ will be used for $\sum_{i} \xii^{p}\yi^{q}$.
+
+\[ [2,1]_{1} = \sum x_{i}^{2} \yi 
+	     = \frac{\sum_{i}(\xii + \yi)^{3} - \sum_{i}(\xii - \yi)^{3}}{6} \]
+
+\[ [1,2]_{1} = 
+   \frac{\sum_{i}(\xii + \yi)^{3} - \sum x_{i}^{3} - \sum \yi^{3} - 3*[2,1]_{1}}{3} \]
+
+This result can be generalized.
+Suppose that $[p,q]_{1}$ is known whenever $p < M$ and $q < M$, 
+even for $p < q$.
+We will show that 
+$\sum_{i}(\xii+\yi)^{M+1}$, 
+$\sum_{i}(\xii-\yi)^{M+1}$, $\sum \xii^{M+1}$, and $\sum \yi^{M+1}$
+can be used 
+to bootstrap to the next level and find $[M,1]_{1}$ and $[1,M]_{1}$,
+after which (\ref{eq11}) can be used to fill out this level.
+In particular, using the expansion of $(\xii+\yi)^{M+1}$,
+\[ (\xii+\yi)^{M+1} - \xii^{M+1} - \yi^{M+1} 
+	- \sum_{\alpha = 2}^{M-1} \choose{M+1}{\alpha} \xii^{M+1-\alpha}\yi^{\alpha}
+   = \choose{M+1}{1} \xii^{M}\yi + \choose{M+1}{1} \xii\yi^{M}
+\]
+or
+\begin{equation}
+\label{eq12}
+\scriptsize{
+\sum_{i} (\xii+\yi)^{M+1} - \sum \xii^{M+1} - \sum \yi^{M+1} 
+	- \sum_{\alpha = 2}^{M-1} \choose{M+1}{\alpha} [M+1-\alpha,\alpha]_{1}
+   = \choose{M+1}{1} [M,1]_{1} + \choose{M+1}{1} [1,M]_{1}
+}
+\end{equation}
+Similarly, using the expansion of $(\xii-\yi)^{M+1}$,
+\begin{equation}
+\label{eq13}
+\scriptsize{
+\sum (\xii-\yi)^{M+1} - \sum \xii^{M+1} - \sum \yi^{M+1}
+   - \sum_{\alpha = 2}^{M-1} (-1)^{\alpha} \choose{M+1}{\alpha} [M+1-\alpha,\alpha]_{1}
+   = - \choose{M+1}{1} [M,1]_{1} + (-1)^{M} \choose{M+1}{1} [1,M]_{1}
+}
+\end{equation}
+Therefore, if $(-1)^{M} = 1$, (\ref{eq12}) and~(\ref{eq13}) 
+can be added to find $[1,M]_{1}$:
+\begin{equation}
+\label{eq14}
+\scriptsize{
+[1,M]_{1} = \frac{\sum_{i} (\xii+\yi)^{M+1} + \sum_{i} (\xii-\yi)^{M+1} - 
+	2\sum \xii^{M+1} - 2\sum \yi^{M+1} 
+	- 2\sum_{\alpha = 1}^{\lfloor \frac{M-1}{2} \rfloor} \choose{M+1}{2\alpha} 
+		[M+1-2\alpha,2\alpha]_{1}}{2 \choose{M+1}{1}}
+}
+\end{equation}
+Equation~(\ref{eq12}) can then be used again to find $[M,1]_{1}$.
+
+If $(-1)^{M} = -1$, 
+then the expansion of $(\xii+2\yi)^{M+1}$ should be used,
+rather than the expansion of $(\xii-\yi)^{M+1}$:
+\begin{equation}
+\label{eq15}
+\scriptsize{
+\sum_{i} (\xii+2\yi)^{M+1} - \sum \xii^{M+1} - 2^{M+1} \sum \yi^{M+1} 
+	- \sum_{\alpha = 2}^{M-1} 2^{\alpha} \choose{M+1}{\alpha} [M+1-\alpha,\alpha]_{1}
+   = 2 \choose{M+1}{1} [M,1]_{1} + 2^{M} \choose{M+1}{1} [1,M]_{1}
+}
+\end{equation}
+Therefore, $[1,M]_{1}$ can be found from 
+$(\ref{eq15}) + 2 * (\ref{eq13})$:
+\begin{equation}
+\label{eq16}
+\scriptsize{
+[1,M]_{1} = \frac{\sum_{i} (\xii+2\yi)^{M+1} + 2 \sum (x_{i} - y_{i})^{M+1}
+	- 3 \sum \xii^{M+1} - (2^{M+1}+2) \sum \yi^{M+1}}{(2^{M}-2)\choose{M+1}{1}}
+}
+\end{equation}
+\[
+\scriptsize{
+	- \frac{\sum_{\alpha = 1}^{\lfloor \frac{M-1}{2} \rfloor} (2^{2\alpha} + 2) 
+	\choose{M+1}{2\alpha} [M+1-2\alpha,2\alpha]_{1}
+	- \sum_{\alpha = 1}^{\lfloor \frac{M-1}{2} \rfloor} (2^{2\alpha + 1} - 2) 
+	\choose{M+1}{2\alpha + 1} [M-2\alpha,2\alpha+1]_{1}}{(2^{M}-2)\choose{M+1}{1}}
+}
+\]
+
+
+Now consider the easiest base case in the second dimension, $(1,1)_{2}$.
+We shall prove that
+\[ (1,1)_{2} = \sum x_{i}x_{j} \sum y_{i}y_{j} 
+\]
+\[
+		+ [1,2]_{1} \sum x_{i}
+\]
+\[
+		+ [2,1]_{1} \sum y_{i}
+\]
+\[
+		- [1,1]_{1} \sum x_{i} \sum y_{i}
+\]
+\[
+		- [2,2]_{1}
+\]
+In particular, 
+\[ (1,1)_{2} = \sum_{i_{1} \neq i_{2},\ j_{1} \neq j_{2},\ i_{1} \neq j_{1}} 
+		x_{i_{1}} x_{i_{2}} y_{j_{1}} y_{j_{2}}
+      = \sum_{i \neq j} x_{i}x_{j} \sum_{i \neq j} y_{i}y_{j} 
+      - \sum_{i \neq j,\ i \neq k} \xii\xj\yi y_{k}
+\]
+\[ = \sum_{i \neq j} x_{i}x_{j} \sum_{i \neq j} y_{i}y_{j} 
+      - (\sum \xii\yi  \sum \xii  \sum \yi  
+       - \sum_{i \neq j} \xii^{2} \yi \yj
+       - \sum_{i \neq j} \xii  \xj \yi^{2}
+       - \sum \xii^{2} \yi^{2})
+\]
+\[ = \sum_{i \neq j} x_{i}x_{j} \sum_{i \neq j} y_{i}y_{j} 
+      - \sum \xii\yi  \sum \xii  \sum \yi  
+      + (\sum \xii^{2} \yi \sum \yi  - \sum \xii^{2} \yi^{2})
+\]
+\[
+      + (\sum \xii \yi^{2} \sum \xii  - \sum \xii^{2} \yi^{2})
+      - \sum \xii^{2} \yi^{2} 
+\]
+\[ = \sum x_{i}x_{j} \sum y_{i}y_{j} \ 
+		- [1,1]_{1} \sum x_{i} \sum y_{i} \ \ 
+		+ [2,1]_{1} \sum y_{i} \ \ 
+		+ [1,2]_{1} \sum x_{i} \ \ 
+		- [2,2]_{1}
+\]
+
+GO ON TO COMPUTE $(M,1)_{2}$.
+
+Trying to find $(1,1)_{3}$:
+\[ (1,1)_{3} = \sum_{\mbox{distinct }i,j,k} x_{i} x_{j} x_{k}
+	       \sum_{\mbox{distinct }i,j,k} y_{i} y_{j} y_{k}
+	     - \sum x_{i} x_{j} x_{k} y_{i} y_{l} y_{m}
+\]
+Factoring out the $x_{i}y_{i}$:
+\[
+\scriptsize{
+(1,1)_{3}    =      \sum x_{i} x_{j} x_{k}   \sum y_{i} y_{j} y_{k}
+	     - (\sum x_{i} y_{i} \sum x_{j} x_{k} \sum y_{l} y_{m}
+		- 2 \sum \xii^{2} x_{k} y_{i} y_{l} y_{m}
+		- 2 \sum \xii x_{j} x_{k} y_{i}^{2} y_{m}	
+		- 4 \sum \xii^{2} x_{k} y_{i}^{2} y_{m})
+}
+\]
+\[
+	=      \sum x_{i} x_{j} x_{k} \sum y_{i} y_{j} y_{k}
+	     - \sum x_{i} y_{i} \sum x_{j} x_{k} \sum y_{l} y_{m}
+\]
+\[
+	     + 2 (\sum \xii^{2} x_{k} y_{i} y_{l} \sum y_{i}
+		  - \sum \xii^{2} x_{k} y_{i}^{2} y_{l}
+		  - \sum \xii^{2} x_{k} y_{i} y_{l}^{2})
+\]
+\[
+	     + 2 \sum \xii x_{j} x_{k} y_{i}^{2} y_{m}	
+	     + 4 \sum \xii^{2} x_{k} y_{i}^{2} y_{m}
+\]
+If we let $[p,q]_{\alpha} := \sum x_{i}^{p} x_{i_{2}} \ldots x_{i_{\alpha}} 
+			    y_{i}^{q} y_{j_{2}} \ldots y_{j_{\alpha}}$, 
+then:
+\[ 
+(1,1)_{3}
+=      \sum x_{i} x_{j} x_{k} \sum y_{i} y_{j} y_{k}
+     - [1,1]_{1} \sum x_{i} x_{j} \sum y_{i} y_{j}
+\]
+\[
+     + 2 ([2,1]_{2} \sum y_{i}
+     	- [2,2]_{2}
+	- \sum \xii^{2} x_{k} y_{i} y_{l}^{2})
+\]
+\[
+     + 2 ([1,2]_{2} \sum x_{i}
+     	- [2,2]_{2}
+	- \sum \xii x_{j}^{2} y_{i}^{2} y_{l})
+\]
+\[
+     + 4 [2,2]_{2}
+\]
+What is $\sum \xii^{2} x_{k} y_{i} y_{l}^{2}$?
+\QED
+
+\section{Hermite's two-dimensional version of Sturm's Theorem}
+
+\section{Conclusions}
+
+Note that although Hermite had done a great deal of the work on the 2D sturm theorem,
+the work that we have done is also substantial. 
+It was nontrivial to find the pure powers of roots, in the 1D case and especially
+in the 2D case.
+Hermite's method has also been made entirely algorithmic and straightforward.
+
+\section{Future directions}
+
+This work might be incorporated into previous work on coordinated crawling.
+
+This work could be coded up and tested for practicality.
+If we use Mathematica, it would be easy.
+If we use C, need evaluation of polynomial, sum, determinant.
+If we use Macsyma, it is tedious.
+
+\section{Acknowledgements}
+
+I would like to thank J. Davenport for alerting me to Hermite's 
+work on extensions of the Sturm theorem.
+
+\end{document}

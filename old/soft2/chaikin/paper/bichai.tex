@@ -1,0 +1,532 @@
+\documentclass[12pt]{article}
+\usepackage[pdftex]{graphicx}
+% \usepackage{latex8}
+\usepackage{times}
+\input{header}
+
+\newif\ifVideo
+\Videofalse
+\newif\ifTalk
+\Talkfalse
+\newif\ifJournal
+\Journalfalse
+
+\newcommand{\plucker}{Pl\"{u}cker\ }
+\newcommand{\tang}{tangential curve\ }
+\newcommand{\tangs}{tangential curves\ }
+\newcommand{\Tang}{Tangential curve\ }
+\newcommand{\atang}{tangential $a$-curve\ }
+\newcommand{\btang}{tangential $b$-curve\ }
+\newcommand{\ctang}{tangential $c$-curve\ }
+\newcommand{\acurve}{$a$-curve\ }
+\newcommand{\bcurve}{$b$-curve\ }
+\newcommand{\ccurve}{$c$-curve\ }
+\newcommand{\atangs}{tangential $a$-curves\ }
+\newcommand{\btangs}{tangential $b$-curves\ }
+\newcommand{\ctangs}{tangential $c$-curves\ }
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{-1in}	% should be 0pt for 1in
+% \setlength{\headsep}{.5in}
+\setlength{\textheight}{8.6in}
+\setlength{\textwidth}{6.875in}
+\setlength{\columnsep}{5mm}	% width of gutter between columns
+
+% \markright{Chaikin: \today \hfill}
+% \pagestyle{myheadings}
+
+% \SingleSpace
+
+% -----------------------------------------------------------------------------
+
+\title{Stability allows laziness: the stability of Chaikin curves in dual space}
+% Lazy subdivision and Chaikin bitangents
+% The many uses of dual subdivision curves
+% Primal Evaluation of Dual Chaikin Curves
+% Dual Chaikin curves, primal evaluation, and bitangents
+\author{J.K. Johnstone\\
+	Geometric Modeling Lab\\
+	Computer and Information Sciences\\
+	University of Alabama at Birmingham\\
+	University Station, Birmingham, AL 35294}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We develop an algorithm for the construction of bitangents of Chaikin curves.
+The computation is performed in dual space, using dual Chaikin curves.
+An adaptive subdivision strategy is used, controlled by the search
+for bitangents, which we call lazy subdivision.
+
+This paper is also an advertisement for dual Chaikin curves,
+whose stationary vertex property leads to efficient intersection
+and interpolation of the initial data points defining the Chaikin polygon.
+% and predictable interpolation from early stages of the subdivision.
+Upon developing a direct subdivision step for dual Chaikin curves,
+the direct use of dual Chaikin curves is shown to be expensive, 
+suggesting the use of the associated Chaikin curve to support operations
+on the dual Chaikin curve.
+\end{abstract} 
+
+\clearpage
+
+% -----------------------------------------------------------------------------
+
+\section{Introduction}
+
+Bitangents are important.
+Subdivision curves are swiftly becoming a standard smooth curve representation.
+Bitangents can be computed as intersections in dual space.
+A lazy subdivision technique guarantees efficient convergence to the bitangent.
+
+% -----------------------------------------------------------------------------
+
+\section{Subdivision curves}
+
+A subdivision curve is defined as the limit of a series of subdivision steps.
+Each subdivision step can itself be expressed as a splitting step followed
+by an averaging step \cite{stollnitz96}.
+Consider a subdivision curve initially defined by vertices 
+$(c_0^0, c_1^0, \ldots, c_{n-1}^0)$
+(Figure~\ref{fig:splitavg}).
+The splitting step, which effectively adds the midpoint to each edge, is 
+\[
+%	\stackrel{\circ}{c}
+\begin{array}{ll}
+	\bar{c}_{2i}^j   & = c_i^{j-1} \\
+	\bar{c}_{2i+1}^j & = \frac{c_i^{j-1} + c_{i+1}^{j-1}}{2} \\
+\end{array}
+\]
+yielding $(\bar{c}_0^1, \ldots, \bar{c}_{2n-1}^1)$ after the first split.
+The averaging step
+\[
+	c_i^j 	= \sum_k r_k \bar{c}_{i+k}^j
+\]
+where $\{r_k\}_k$ is called the averaging mask,
+yields $(c_0^1,\ldots,c_{2n-1}^1)$ after the first subdivision step.
+% This splitting and averaging must be performed for each coordinate.
+This representation in terms of splitting and averaging has the advantage of defining any subdivision curve.
+The averaging mask is the only element that distinguishes two subdivision curves.
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics*[scale=.3]{img/splitavg.jpg}
+\end{center}
+\caption{Chaikin subdivision. Top left: original Chaikin polygon.
+	Top right: After splitting; Bottom left and right: After averaging}
+\label{fig:splitavg}
+% splitavg.rgb
+\end{figure}
+
+% -----------------------------------------------------------------------------
+
+\section{Chaikin curves}
+
+The Chaikin curve is the simplest subdivision curve,
+independently invented by \cite{chaikin74} and \cite{deRham47,deRham56}.
+The averaging mask for the Chaikin curve is $(r_0,r_1) = (\frac{1}{2},\frac{1}{2})$.
+That is,
+\[
+	c_i^j 	= \frac{\bar{c}_i^j + \bar{c}_{i+1}^j}{2}
+\]
+The entire subdivision step is:
+\[
+\]
+This yields the local subdivision matrix for the Chaikin curve:
+\[
+\frac{1}{4} \left[
+\begin{array}{cc}
+3 & 1 \\
+1 & 3
+\end{array}
+\right]
+\]
+Through eigenanalysis of this matrix, an evaluation mask can be found \cite{stollnitz96}. % p. 72
+The vertex $c^0$, with neighbours $c_{-}^0$ and $c_{+}^0$,
+converges to the point:
+\[
+	c^{\infty} = \frac{c_{-}^0 + c^0}{2}
+\]
+{\bf Is this correct: shouldn't it be $\frac{c^0 + c_{+}^0}{2}$?}
+
+Through further eigenanalysis of the local subdivision matrix (using the second
+left eigenvector rather than the dominant left eigenvector \cite{halstead93}),
+a tangent mask can also be developed:
+\[
+\]
+
+% put fig:splitavg here
+
+Riesenfeld showed that Chaikin curves generate quadratic B-spline curves 
+\cite{riesenfeld75}.
+
+\clearpage
+
+% -----------------------------------------------------------------------------
+
+\section{Dualization}
+
+We deal with closed Chaikin polygons, so every vertex has 2 adjacent edges.
+
+The line $ax+by+c=0$ is $a$-dual to the point $(c,b,a)$ in projective 2-space
+and $b$-dual to the point $(a,c,b)$.
+Horizontal lines are mapped to infinity under $a$-duality,
+while vertical lines are mapped to infinity under $b$-duality.
+The edge PQ of a Chaikin polygon is mapped to the vertex dual(PQ) of a dual Chaikin polygon,
+in both a-dual space and b-dual space.
+Horizontal lines are not mapped under a-duality and
+vertical lines are not mapped under b-duality.
+The vertex V common to edges E and F of a Chaikin polygon is mapped to the edge between
+the vertices dual(E) and dual(F).
+This edge of the dual Chaikin polygon is not defined (and should not be drawn)
+if either vertex dual(E) or dual(F) is at infinity
+(or if a sweep from the edge E to F passes through a line that will map to infinity,
+since as the curve is subdivided further, an 'infinite' line will eventually appear in primal space,
+separating these two vertices in dual space).
+Consider a test if a sweep from E to F passes through a horizontal line.
+--- [see straddleHoriz].
+
+\section{Dual Chaikin curves}
+\label{sec:dualchai}
+
+\cite{sabin87,dyn92,levin00}.
+What is the closed form for the added vertex in dual Chaikin?
+
+% -----------------------------------------------------------------------------
+
+\subsection{Dual Chaikin subdivision is corner adding}
+
+Insights: 
+\begin{enumerate}
+\item Corner adding adds a new edge between two existing edges.
+	In dual space, a new vertex is added between two existing vertices
+	(and the edge connecting the two old vertices becomes
+	a pair of edges).
+\item {\bf Chaikin curves are built as an envelope of lines in the limit.}
+	The envelope is sampled more and more heavily as the subdivision
+	continues.  The final curve is the envelope of all of the lines
+	defined by the edges.  (Notice that edges are stationary throughout
+	a subdivision process.)
+	{\bf Dual Chaikin curves are the dual: they are built as a locus of a point
+	in the limit, sampling this locus more and more densely as the subdivision
+	continues.}
+\item While subdivision of Chaikin curves involves corner cutting, 
+	subdivision of dual Chaikin curves involves corner {\em adding}
+	(see \cite[p. 212, Fig. 1]{dyn92}).
+	
+      The effect of a primal subdivision step is the introduction of a new edge
+	joining two interpolated vertices (cutting a corner).
+	The effect of a dual subdivision step is the introduction of a new vertex
+	at the intersection of two 'interpolated lines' (adding a corner).
+\end{enumerate}
+
+The joining of 2 new vertices by a new edge in primal Chaikin
+is replaced in dual Chaikin by the intersection of 2 new lines, 
+yielding a new vertex.
+In primal space, splitting and averaging are the construction of new vertices
+through linear interpolation of old vertices.
+In dual space, splitting and averaging are the construction of new lines
+through the intersection point of old lines.  
+{\bf What is it called when you create a new line in a pencil?}
+
+
+% -----------------------------------------------------------------------------
+\subsection{The stationary vertices of dual Chaikin curves}
+
+{\bf In primal space}, all vertices change from one step to the next,
+but {\bf the edges remain constant} (i.e., the lines defining the edges remain
+constant, as well as an interior part of the edge).
+{\bf In dual space}, all edges change from one step to the next, but 
+{\bf the vertices remain constant and stationary}.
+Vertices are added by subdivision, but once introduced, they never move.
+Similarly, in primal space, each edge remains stationary (although it shortens,
+eventually to a line of zero length, or a point) and defines a tangent in the
+final subdivision curve.
+In other words, in dual space, position data is always correct, 
+and is refined in each subsequent subdivision,
+while, in primal space, tangent data is always correct but continually expanded.
+The position-preservation property in dual space is useful,
+since position is often more important than tangent information.
+The description of a Chaikin curve in primal space is fundamentally
+as an envelope of lines, with continually increasing information on the defining lines,
+but complete information about points only in the limit.
+Whereas {\bf the description of a Chaikin curve in dual space is fundamentally
+as a collection of points, with a continually increasing sampling of these
+points} (and thus complete information about tangents only in the limit).
+Since the latter description is more standard, the dual Chaikin curve is
+in many ways a more natural description.
+
+Another way of expressing the stationary vertex property of dual Chaikin curves 
+is that dual Chaikin curves are an interpolatory subdivision scheme.
+This makes them comparable to other interpolatory subdivision schemes
+like DLG curves \cite{dyn87}.
+
+\begin{claim}
+Any (non-interpolatory, corner-cutting) subdivision scheme can be made into an interpolatory scheme using
+its dual scheme.
+For example, all of Lane-Riesenfeld's subdivision schemes.
+\end{claim}
+
+Dealing with infinity.
+(Notice that we cannot clip at diagonal tangents as with parametric curves,
+since we only have discrete information about a subdivision curve.)
+
+\begin{itemize}
+\item	Must turn off infinite dual points (e.g., a = 0 for a-duality)
+	and dual edges incident to them.
+\item	In initial (any other?) case, primal vertices whose dihedral angle
+	straddles the x-axis (a horizontal tangent)
+	must have their associated a-dual edge turned off (since
+	it represents an edge through infinity).
+	Same for b-duality.
+	See code for how to test if a dihedral angle straddles the x-axis.
+\end{itemize}
+
+\clearpage
+
+% -----------------------------------------------------------------------------
+
+\section{Designing with dual Chaikin curves}
+
+Given some vertex input, we would like to design a curve or surface interpolating this input.  
+The design of interpolating curves is a difficult task 
+for subdivision curves and surfaces: 
+they are better suited to building approximating curves.
+For example, consider the natural shapes built by Catmull-Clark surfaces,
+and the loss of continuity and relative reduction in shape quality 
+when a Catmull-Clark surface is replaced by an interpolating butterfly surface.
+The discussion of Section~\ref{sec:dualchai} helps us to understand this phenomenon
+[lift the above arguments to Catmull-Clark surfaces]:
+primal subdivision is naturally an approximating method, or equivalently
+an interpolating method for tangents, not points.
+This suggests the following approach: design approximating curves and surface in primal space
+(classical subdivision curves and surfaces) but design interpolating curves and surfaces
+in dual space.
+
+\subsection{Evaluating dual Chaikin curves in primal space}
+
+We would like to be able to design with dual Chaikin curves
+because of their natural interpolatory properties.
+However, evaluation of subdivision curves is more natural in primal space
+than dual space, which leads to some difficulties, which we now elaborate.
+
+Dyn et. al. and Levin et. al. present dual Chaikin as a line-based version of 
+the point-based Chaikin algorithm:
+\[
+  l_{2i} = 3/4 l_i + 1/4 l_{i+1} \\
+  ---
+\]
+However, this is expensive to evaluate.
+
+Direct evaluation of dual Chaikin.
+
+It is more efficient to evaluate them in the original primal space
+and dualize the result.
+This requires some elaboration.
+
+----
+Pseudo-horizontal edges must be refined in b-primal space.
+Pseudo-vertical edges in a-primal space.
+Intermediate edges in either.
+
+Only have to dualize even edges (2j-1,2j) since 
+edges (2j,2j+1) remain the same as previous stage.
+
+And what about concave polygons? (Not covered by Dyn/Levin/Liu.)
+
+\clearpage
+
+% -----------------------------------------------------------------------------
+
+\section{Intersecting dual Chaikin curves}
+
+Some computations with Chaikin curves are more easily handled by translating
+to their dual Chaikin brothers.
+An example is the computation of bitangency:
+\begin{quote}
+The bitangents of a pair of Chaikin curves can be found using the intersections
+of the corresponding pair of dual Chaikin curves.
+\end{quote}
+This simplification of a problem by translating to the dual world is analogous
+to the Fourier analysis of signals.
+Many operations on a signal are simplified by mapping to the frequency domain,
+the tool for which is the Fourier transform.
+For example, convolution reduces from integration in the time domain
+to multiplication in the frequency domain.
+In this sense, the translation of subdivision curves/surfaces from the primal to
+dual representation is analogous to Fourier analysis.
+
+The advantage of mapping bitangency to the dual world is that intersection is a simpler
+operation than bitangency.
+Moreover, we shall see that {\bf intersection in dual space is even simpler than intersection
+in primal space}.
+
+\subsection{Bitangency is intersection}
+
+\subsection{Intersection in dual space using lazy subdivision}
+% Chaikin and dual Chaikin intersection
+
+You never compute intersection points in dual space:
+if you know two dual edges intersect (without computing their intersection),
+then the associated primal vertices define a bitangent.
+
+This leads to a different definition of bitangent:
+a bitangent is an edge AB between vertices A and B of two Chaikin curves
+such that edges $A^*$ and $B^*$ of the associated dual Chaikin curves intersect.
+There is no need to evaluate tangents of the Chaikin curves using tangent masks.
+This is a multiresolution definition of bitangent.
+The definition is correct at the present level of granularity.
+In the limit, this is a true bitangent.
+
+\begin{defn2}
+Lazy subdivision during intersection.
+\end{defn2}
+
+See Sabin tutorial notes.
+{\bf An intersection of Chaikin curves at stage $i$ 
+may disappear in future stages as the curve contracts inward.}
+FIGURE.
+Thus, lazy subdivision is not fruitful in Chaikin intersection.
+
+{\bf However, an intersection of dual Chaikin curves at stage $i$ indicates
+a corresponding intersection in all future stages, including the limit.}
+The position of the intersection will change, but not its presence.
+This can be seen using the stationary property of dual Chaikin vertices.
+An intersection is an edge crossing.
+Suppose that edge ab of dual Chaikin C1 crosses edge AB of dual Chaikin C2.
+In future stages, C1 will still travel from a to b.
+FORMALIZE THE PROOF.
+
+\begin{defn2}
+An edge in dual space is active if and only if it contains an intersection point
+with the other tangential curve in dual space
+(or it is an infinite edge, which we cannot diagnose for intersection yet).
+Don't want to discard an infinite edge yet, since 
+one of its finite children may intersect.
+\end{defn2}
+
+Active edges in dual space correspond to active corners in primal space
+(Figure).
+
+\begin{theorem}
+If a segment is inactive in stage $i$, it remains inactive in stage $j>i$.
+(With the exception of anomalies at infinity, which are probably concentrated
+in the first stages of subdivision.  For example, see bichai1.pts.)
+\end{theorem}
+
+Try to only subdivide the active segments.
+Will the subdivision process allow it?
+Must we store the entire array of vertices, even though only some are active.
+Think of a way to condense the array, storing only the active vertices,
+but allowing simple access to the correct index item.
+
+Statistics on efficiency improvement.
+Compare the number of active segments to the total number of segments
+in several examples.
+Analyze the convergence of the 2 bases of the bitangent through subdivision
+levels.
+
+-----
+
+Tangents of a Chaikin curve are fixed (once introduced) in primal space,
+while vertices of the dual Chaikin curve are fixed in dual space.
+Edges are not fixed in dual space, so if two edges intersect in stage i,
+their children edges may not intersect in stage i+1.
+{\bf We want a condition that guarantees that the intersection will be preserved in
+the next stage (and then eventually in the limit).}
+In terms of one curve, we want to know how far a new point can move from its parent edge
+in dual space.
+{\bf Instead of a condition that guarantees that 2 edges continue to intersect in the next stage,
+it may be better to develop a condition that guarantees that 2 curve segments continue to
+intersect in the next stage.}
+
+It is also important to understand how a subdivision curve (in dual space) can be split
+into 2 halves.
+Actually, this is trivial since the curve is defined simply by a polygon,
+so splitting the polygon in two is sufficient.
+
+% -----------------------------------------------------------------------------
+
+\section{A bitangent mask}
+
+Can we build a bitangent mask?  Involves 2 curves, so very difficult.
+
+Other subdivision curves: usually split/average generalization of Chaikin
+in Stollnitz et.al. (Restrict to Chaikin in conference paper.)
+See \cite{lane80} for extensions of Chaikin as well.
+
+% -----------------------------------------------------------------------------
+
+\clearpage
+
+\section{Future work}
+
+Dual Loop surfaces and bitangent developables.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bibliographystyle{unsrt}
+\begin{thebibliography}{Lozano-Perez 83}
+
+\bibitem[Chaikin 74]{chaikin74}
+Chaikin, G. (1974)
+An Algorithm for High-Speed Curve Generation.
+Computer Graphics and Image Processing 3, 346--349.
+
+\bibitem[de Rham 47]{deRham47}
+de Rham, G. (1947)
+Un peu de mathematique a propos d'une courbe plane.
+Elemente der mathematik 2, 73--76, 89--97.
+
+\bibitem[de Rham 56]{deRham56}
+de Rham, G. (1956)
+Sur une courbe plane.
+J. Math. Pures Appl. 39, 25--42.
+
+\bibitem[Dyn 87]{dyn87}
+Dyn, N. and D. Levin and J. Gregory (1987)
+A 4-point interpolatory subdivision scheme for curve design.
+Computer-Aided Geometric Design 4(4), 257--268.
+
+\bibitem[Dyn 92]{dyn92}
+Dyn, N. and D. Levin and D. Liu (1992)
+Interpolatory convexity-preserving subdivision schemes for curves and surfaces.
+Computer-Aided Design 24(4), 211--216.
+
+\bibitem[Halstead 93]{halstead93}
+Halstead, M. and M. Kass and T. DeRose (1993)
+Efficient, Fair Interpolation using Catmull-Clark Surfaces.
+SIGGRAPH '93, 35--44.
+
+\bibitem[Lane 80]{lane80}
+Lane, J. and R. Riesenfeld (1980)
+A Theoretical Development for the Computer Generation and Display of
+Piecewise Polynomial Surfaces.
+IEEE Transactions on Pattern Analysis and Machine Intelligence 2(1), 35--46.
+
+\bibitem[Levin 00]{levin00}
+Levin, D. and I. Wartenberg (2000)
+Convexity-preserving Interpolation by Dual Subdivisions Schemes.
+Proceedings of Saint-Malo Curves and Surfaces Conference, 1--10.
+
+\bibitem[Riesenfeld 75]{riesenfeld75}
+Riesenfeld, R. (1975)
+On Chaikin's Algorithm.
+Computer Graphics and Image Processing 4, 304--310.
+
+\bibitem[Sabin 87]{sabin87}
+Sabin, M. (1987)
+Envelope Curves and Surfaces.
+In 'The Mathematics of Surfaces', R. Martin, editor, 413--418.
+
+\bibitem[Stollnitz 96]{stollnitz96}
+Stollnitz, E. and T. DeRose and D. Salesin (1996)
+Wavelets for Computer Graphics: Theory and Applications.
+Morgan Kaufmann, San Francisco.
+
+\end{thebibliography}
+
+\section{Visibility graphs of subdivision curves}
+
+\end{document}

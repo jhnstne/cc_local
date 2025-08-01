@@ -1,0 +1,253 @@
+\documentstyle [titlepage]{article}
+%
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{conjecture}{Conjecture}
+%
+\newcommand{\arc}[1]{\mbox{$\stackrel{\frown}{#1}$}}
+\newcommand{\lyne}[1]{\mbox{$\stackrel{\leftrightarrow}{#1}$}}
+\newcommand{\ray}[1]{\mbox{$\vec{#1}$}}
+\newcommand{\seg}[1]{\mbox{$\overline{#1}$}}
+\newcommand{\hence}{\\ \mbox{$.\raisebox{1.5ex}{.}.$}\ } % three-dot therefore
+                                             % symbol is desired
+\newcommand{\qed}{\nopagebreak\begin{flushright}\mbox{$\Box$}\end{flushright}}
+                                       % put a box on the
+                                       % righthand side of the page
+\newcommand{\se}{\mbox{$_{\epsilon}$}}  % subscript epsilon
+\newcommand{\proof}{{\bf Proof}:\nopagebreak\\}
+\newcommand{\wlogg}{\mbox{w.\ l.\ o.\ g.\ }}
+\newcommand{\wrt}{\mbox{w.\ r.\ t.\ }}
+\newcommand{\st}{\mbox{s.\ t.\ }}
+\newcommand{\ie}{\mbox{i.\ e.\ }}
+\newcommand{\pq}{\arc{PQ}}
+\newcommand{\pqi}{\mbox{$\pq_{in}$}}
+\newcommand{\tx}{\mbox{$T_{x}$}}
+\newcommand{\e}{\mbox{$\epsilon$}}
+\newcommand{\eo}{\mbox{$\epsilon_{1}$}}   % note:\e1 gets confused with \e
+\newcommand{\et}{\mbox{$\epsilon_{2}$}}   % \e2 gets confused with \e
+\newcommand{\xeo}{\mbox{$x_{\epsilon,1}$}}
+\newcommand{\xet}{\mbox{$x_{\epsilon,2}$}}
+\newcommand{\xya}{\arc{xy}}
+\newcommand{\lep}{\mbox{$L_{\epsilon}$}}  % note: \le is already taken
+\newcommand{\xpe}{\mbox{$x_{+\epsilon}$}}
+\newcommand{\xme}{\mbox{$x_{-\epsilon}$}}
+\newcommand{\ye}{\mbox{$y_{\epsilon}$}}
+\newcommand{\xo}{\mbox{$x_{1}$}}
+\newcommand{\xt}{\mbox{$x_{2}$}}
+\newcommand{\xth}{\mbox{$x_{3}$}}
+\newcommand{\yo}{\mbox{$y_{1}$}}
+\newcommand{\xotha}{\arc{\xo\xth}}
+\newcommand{\fxo}{\mbox{$F_{x1}$}}
+\newcommand{\fig}[2]{\begin{center}Figure #1\ of #2 \end{center}}
+\newcommand{\defn}{{\bf Definition}:\ }
+%
+\begin{document}
+% 
+\begin{lemma}\nopagebreak
+\label{tangcont}
+The tangent of an algebraic curve changes continuously, except possibly at 
+singularities (even at singularities
+if we consider the correct tangent (?)).
+\end{lemma}
+\proof\marginpar{Prove this.}
+? (Note: put this lemma early on in the presentation, since, for instance,
+Lemma~\ref{planarcutsthru} of Cosmosort.tex uses it.)
+\qed
+We need a technical lemma about nonconvex segments for the next theorem.\\
+{\bf Notation:}\ \pqi\ is shorthand for $\pq \setminus \{P,Q\}$.
+\begin{lemma}\nopagebreak
+\label{threecross}
+Let \pq\ be a nonconvex segment of a curve F such that
+\pqi\ contains no singularities or floxes.
+Then one can find a line L such that \pqi\ {\em crosses} L at three
+distinct points.
+\end{lemma}
+\proof
+(Warning: this is a grundgy proof.)
+\pq\ is not convex and \pqi\ is nonsingular
+$\Rightarrow \exists\ x \in \pqi$
+\st x's tangent, \tx, strikes \pq\ at another point.
+Note that x is not a flox or singularity.\\
+Let $y \neq x$ be an intersection of \tx\ with \pq\ \st \xya\ lies strictly
+inside \tx\ (\ie, y is the `closest' intersection to x).
+$\forall\ \e > 0$, let \lep\ be the line that (i) is parallel to \tx,
+(ii) lies inside \tx, and (iii) is at a distance of \e\ from \tx.
+We will show that, for some $\e > 0$, \lep\ crosses the curve at least three
+times.\\
+$\forall\ \e > 0$, if $\lep \cap \xya \neq \emptyset$, then let \xpe\ be the
+intersection of \lep\ with \xya\ \st $\arc{x\xpe} \cap \lep = \{\xpe\}$
+(\ie, \xpe\ is the `first' intersection of \xya\ with \lep\ after x); and, if 
+$\lep \cap (F \setminus \xya) \neq \emptyset$, then 
+let \xme\ be the intersection
+of \lep\ with $F \setminus \xya$ \st $\arc{x\xme} \cap \lep = \{\xme\}$.
+\begin{center}
+Figure 4 of lemma9.tex
+\end{center}
+The points of the curve
+\marginpar{    (*)}
+F which have tangents parallel to \tx\ are isolated, otherwise some line
+parallel to \tx\ would strike the curve in an infinite number of points and
+thus be a reducible component of the irreducible curve F.
+Let 
+\[ \mbox{dist} = \left\{ \begin{array}{ll}
+	\mbox{$+\infty$}  &\mbox{if there are no points P of F} \\
+                          &\mbox{with tangents parallel to \tx} \\
+			  &\mbox{\st P lies strictly inside \tx}\\
+	\mbox{min\{$\e >0\ |$\lep\ is tangent to the curve\}}&\mbox{otherwise}
+	\end{array}
+	\right.  \]
+By (*), dist is well-defined.\\
+Since x is not a flox or singularity, the curve does not cross \tx\ at x
+(by Lemma~\ref{planarcutsthru}), so there is a neighbourhood of x that lies
+inside \tx.
+By (*), the curve must actually lie {\em strictly} inside \tx\ in some
+neighbourhood of x, and $\exists\ \eo > 0$ \st $\forall\ \e < \eo$,
+\xpe\ and \xme\ exist.
+Thus, \mbox{$\forall\ 0 < \e < $ min\{\eo,dist\} }, \xpe\ and \xme\ exist
+{\em and} \lep\ crosses the curve at \xpe\ and \xme\ (\ie, \lep\ is not
+tangent to \xpe\ or \xme).
+We have two of our desired three crossings.\\
+Now consider the intersections of \lep\ with \xya\ close to y.\\
+$\forall\ \e > 0$, if $\lep \cap \xya \neq \emptyset$, then let \ye\ be the
+intersection of \lep\ with \xya\ \st $\arc{y\ye} \cap \lep = \{\ye\}$.
+\xya\ lies strictly inside \tx, by the choice of y, so
+$\exists\ \et > 0$ \st \ye\ exists $\forall\ \e < \et$.
+Thus, \mbox{$\forall\ 0 < \e <$ min \{\et,dist\} }, \ye\ exists {\em and}
+\lep\ crosses the curve at \ye.
+\hence \mbox{$\forall\ 0 < \e <$ min \{\eo,\et,dist\} }, \xpe, \xme\ and
+\ye\ exist and \lep\ crosses the curve at these points.\\
+Note that if \xya\ crosses \lep\ once, then it must do so again, in order
+to return to \tx.
+Thus, if \lep\ crosses the curve at \xpe\ and \ye, then $\xpe \neq \ye$,
+because \xpe\ is the closest crossing to x, while \ye\ is the closest
+crossing to y.
+Clearly, $\xme \neq \xpe$ and $\xme \neq \ye$.
+Thus, \mbox{$\forall\ 0 < \e <$ min \{\eo,\et,dist\} }, \lep\ crosses F at 
+three {\em distinct} points.\\
+$\xpe, \ye \in \xya_{in} \subset \pqi$, but it is possible 
+that $\xme \not\in \pq$.
+However, since $x \neq P$ or Q, if we choose \e\ small enough, \xme\ will
+be close enough to x that it will remain on \pqi.
+\hence $\exists\ \e > 0$ \st line \lep\ crosses \pqi\ at 
+three distinct points.
+\qed
+We cannot prove a result as strong as Lemma~\ref{flexorsi} for curves of
+degree $\geq 4$. 
+The following curve provides a counterexample:
+\begin{center}
+Figure 5 of lemma9.tex
+\marginpar{Find the equation of this curve.}
+\end{center}
+The following result will show that the boundaries of convex segments must
+now include {\em all} intersections of the curve with the tangents at floxes
+and singularities.
+Lemma~\ref{flexorsi} is a special case of this result, since the tangents
+at floxes and singularities of cubic curves only intersect the curve at those
+floxes and singularities (by Bezout's Theorem).\\
+\defn A singularity is {\em ordinary} if its tangents are distinct.
+A singularity is {\em extraordinary} if it is not ordinary.
+For example, a node is ordinary while a cusp is not.
+Notice that as the curve passes through an ordinary singularity,
+it will cross one of the singularity's tangents;
+however, the curve need not cross the tangent of an extraordinary singularity,
+as witnessed by the tacnode and the rhampoid cusp:
+\fig{5A}{lemma9.tex}
+\defn A {\em cell partition} of a curve F is the partitioning of the plane
+into convex polygons by the tangents of F's floxes and singularities.
+\begin{theorem}\nopagebreak
+Let S be a nonconvex segment of the curve F.
+If S contains no extraordinary singularities, then some wall
+of the cell partition of F will cross $S_{in}$.
+If S contains an extraordinary singularity, then some wall of the 
+cell partition of F will either touch or cross $S_{in}$.
+\end{theorem}
+\proof
+Let $S=\pq$ be a nonconvex segment of F.
+Assume \wlogg that P and Q lie in the same cell (otherwise, clearly some
+wall crosses \pq).
+Call the cell C.
+We shall show that \pqi\ contains a flox,
+singularity, or incidental point.
+Then the wall through this point will cross \pqi\ if the point
+is not an extraordinary singularity; and the wall
+will touch \pqi\ otherwise.\\
+Assume \wlogg that \pqi\  does not contain a flox or 
+singularity.
+By Lemma~\ref{threecross}, $\exists$ line L \st \pqi\ crosses L at at least
+three distinct points.
+Choose three points \xo,\xt,\xth\ at which \pqi\ crosses L and 
+\st $\xt \in \xotha$ and
+the only points of $\xotha \cap L$ are \xo,\xt,\xth\ (\ie, \xo,\xt,\xth\ 
+are as close together as possible on \pqi).
+Since $\xotha \subset \pq$ does not contain a flox, it 
+does not change its direction
+of curvature, and so, in order to strike L three times,
+\xotha\ must spiral around:
+\begin{center}
+Figure 7 of lemma9.tex
+\end{center}
+or \xotha\ must be a straight line segment.
+If \xotha\ is a line segment, then this line is a component of the curve
+since it intersects the curve at an infinite number of points
+(Lemma~\ref{Bezout}).
+But then the curve (which is nonconvex and thus not simply 
+a line) is reducible, a 
+contradiction.\footnote{Remember that at the very beginning, we made the
+implicit assumption that `curve' means `irreducible curve'.}
+\hence \xotha\ spirals around exactly as in one of the above pictures.
+We can assume \wlogg that $\xo \in \seg{\xt\xth}$
+(by exchanging the names of \xo\ and \xth, if necessary).
+Let R be the closed region bounded by \xotha\ and \seg{\xo\xth}:
+\fig{8}{lemma9.tex}
+We wish to show that R contains a flox or a singularity.
+If we can do this, then we are finished because a line through any point of R
+must cross \xotha\ at least once.
+Thus, in particular, the tangent (which will be a wall) of a flox (or
+ a singularity) inside R would cross $\xotha \subset \pqi$, creating an
+incidental point.\\
+Let 
+\[ \fxo = \left\{ \begin{array}{ll}
+	\mbox{$F \setminus \xotha$}  &  \mbox{if the curve F is closed}\\ \\
+	\mbox{the segment of $F\setminus\xotha$}   &\mbox{if F is open}\\
+        \mbox{\ \ \ with endpoint \xo}
+	\end{array}
+	\right.   \]
+Suppose that F is open, so that \fxo\ is an infinite segment.
+As \fxo\ leaves \xo\ it lies in the closed region R, but 
+it cannot remain there (by Lemma~\ref{nonbounded}).
+Since \xotha\ does not contain a singularity (by assumption),
+\fxo\ must leave R through \seg{\xo\xth}.\\
+If F is closed, then \fxo\ is inside of R as it leaves \xo\ and outside 
+of R as it leaves \xth.
+Thus, again because \xotha\ is nonsingular,
+\fxo\ must pass through \seg{\xo\xth} as it travels from \xo\ to \xth.
+\hence \fxo\ crosses \seg{\xo\xth}.\\
+Note that \xth\ lies outside of \xo's tangent (since $(i)$ \xo\ 
+is in between \xt\
+and \xth\ on \seg{\xt\xth}, $(ii)$ \xo's tangent 
+crosses the line $\lyne{\xo\xth} = L$, and
+$(iii) \xt \in \xotha$ ---\ie, \xt\ is met before \xth\ as you spiral from \xo).
+Let \yo\ be the point where \xo's tangent crosses $\xotha \setminus \{\xo\}$:
+\fig{9}{lemma9.tex}
+Consider the region $R_{x1y1}$ bounded by \arc{\xo\yo}\ and \seg{\xo\yo}.
+If there is a singularity within $R_{x1y1} \subset R$, then we have shown
+what we wanted.
+Thus, assume that $R_{x1y1}$ does not contain a singularity.
+If \fxo\ does not change its direction of curvature within $R_{x1y1}$,
+it will be forced to spiral around in $R_{x1y1}$ forever 
+(in ever smaller circles),
+since it cannot cross \arc{\xo\yo}\ ($\arc{\xo\yo} \subset \xotha$ is
+nonsingular) or itself within $R_{x1y1}$
+($R_{x1y1}$ is nonsingular);
+in particular, \fxo\ will not cross \seg{\xo\xth}.
+\hence \fxo\ must change its direction of curvature within $R_{x1y1}$.
+\hence $R_{x1y1} \subset R$ contains a flox.
+\marginpar{We had better make a formal statement that the direction of
+curvature can only change at a flex.}
+\qed
+\begin{corollary}
+The cell partition of a curve without extraordinary singularities splits
+the curve into convex segments.
+\end{corollary}
+\end{document}

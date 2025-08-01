@@ -1,0 +1,647 @@
+\documentstyle[12pt]{article}
+\begin{document}
+
+\newcommand{\single}{\def\baselinestretch{1.0}\large\normalsize}
+\newcommand{\double}{\def\baselinestretch{1.5}\large\normalsize}
+\newcommand{\triple}{\def\baselinestretch{2.2}\large\normalsize}
+
+\newcommand{\rd}{{\rm d}}
+\newcommand{\re}{{\rm e}}
+\newcommand{\ri}{{\rm i}}
+\newcommand{\sgn}{{\rm sign}}
+\newcommand{\half}{\textstyle{1 \over 2}\displaystyle}
+\newcommand{\quarter}{\textstyle{1 \over 4}\displaystyle}
+\newcommand{\dist}{{\rm distance}}
+\newcommand{\cross}{\!\times\!}
+\newcommand{\dotpr}{\!\cdot\!}
+\newcommand{\vhat}{\hat {\bf v}}
+\newcommand{\what}{\hat {\bf w}}
+\newcommand{\zhat}{\hat {\bf z}}
+\newcommand{\ldash}{\vrule height 3pt width 0.35in depth -2.5pt}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\ba}{\begin{eqnarray}}
+\newcommand{\ea}{\end{eqnarray}}
+\newcommand{\seg}[1]{\mbox{$\overline{#1}$}}
+
+\newtheorem{dfn}{Definition}[section]
+\newtheorem{rmk}{Remark}[section]
+\newtheorem{lma}{Lemma}[section]
+\newtheorem{propn}{Proposition}[section]
+\newtheorem{exmpl}{Example}[section]
+\newtheorem{conjec}{Conjecture}[section]
+\newtheorem{claim}{Claim}[section]
+\newtheorem{notn}{Notation}[section]
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{crlry}{Corollary}[section]
+
+\newcommand{\prf}{\noindent{{\bf Proof} :\ }}
+\newcommand{\QED}{\vrule height 1.4ex width 1.0ex depth -.1ex\ \medskip}
+
+\newcommand{\ACMTOG}{{\sl ACM Trans.\ Graph.\ }}
+\newcommand{\AMM}{{\sl Amer.\ Math.\ Monthly\ }}
+\newcommand{\BIT}{{\sl BIT\ }}
+\newcommand{\CACM}{{\sl Commun.\ ACM\ }}
+\newcommand{\CAD}{{\sl Comput.\ Aided Design\ }}
+\newcommand{\CAGD}{{\sl Comput.\ Aided Geom.\ Design\ }}
+\newcommand{\CJ}{{\sl Computer\ J.\ }}
+\newcommand{\DCG}{{\sl Discrete\ Comput.\ Geom.\ }}
+\newcommand{\IBMJRD}{{\sl IBM\ J.\ Res.\ Develop.\ }}
+\newcommand{\IEEECGA}{{\sl IEEE Comput.\ Graph.\ Applic.\ }}
+\newcommand{\IEEETPAMI}{{\sl IEEE Trans.\ Pattern Anal.\ Machine Intell.\ }}
+\newcommand{\JACM}{{\sl J.\ Assoc.\ Comput.\ Mach.\ }}
+\newcommand{\JAT}{{\sl J.\ Approx.\ Theory\ }}
+\newcommand{\MC}{{\sl Math.\ Comp.\ }}
+\newcommand{\MI}{{\sl Math.\ Intelligencer\ }}
+\newcommand{\NM}{{\sl Numer.\ Math.\ }}
+\newcommand{\SIAMJNA}{{\sl SIAM J.\ Numer.\ Anal.\ }}
+\newcommand{\SIAMR}{{\sl SIAM Review\ }}
+
+% *************************************************************
+
+\clearpage
+
+INSERTION, ABSTRACT, AFTER FIRST SENTENCE
+
+The bisector of ${\bf p}$ and any segment of $C$ can also be computed.
+(Remove ``In such a case''.)
+
+% *************************************************************
+
+\clearpage
+
+P. 3, FINAL PARAGRAPH BEFORE EXAMPLE 1.1
+
+I think that it would be useful to move the paragraph before
+Example 1.1 back to a position immediately after Definition 1.1, 
+so that the reader will immediately have a geometric characterization of 
+regularity.  I think that otherwise there is a potential for confusion 
+among readers with an algebraic geometry background, 
+since these readers will be used
+to equating $f_x = f_y = 0$ (similar to $x' = y' = 0$) with singularities on
+an algebraic curve, which of course are not equivalent to irregular points.
+
+% *************************************************************
+
+INSERTION: P.3, penultimate sentence
+
+an ellipse or (one branch of a) hyperbola ...
+
+% *************************************************************
+
+\clearpage
+
+INSERTION JUST BEFORE `NOTE THAT AS $|U| -> \infty$' ON P. 4
+
+For example, consider the point ${\bf p} = (-2,0)$ and the circle
+${\bf r}(u) = 
+(\frac{1-u^{2}}{1+u^{2}},\frac{2u}{1+u^{2}})$, $u \in (-\infty,\infty)$,
+which is the unit circle centered at the origin with 
+${\bf r}(\infty) = (-1,0)$.
+
+% *************************************************************
+
+\clearpage
+
+INSERTION, P. 5, MIDDLE, PARAGRAPH BEGINNING `THUS'
+
+at each odd root of (15) and at finite end points ...
+
+% *************************************************************
+
+\clearpage
+
+INSERTION, P. 6, JUST BEFORE `WE NOW NOTE' PARAGRAPH
+
+\begin{exmpl}
+For an algebraic curve ${\bf f}(x,y) = 0$,
+\be 
+\dist({\bf p},{\bf f}(x,y)) \,=\,
+\min_{k \,\in\, \{1,\ldots,N\}} \, |\,{\bf p}-{\bf f}(x_k,y_k)\,| \,,
+\ee
+where $Q_1 = (x_1,y_1),\ldots,Q_N = (x_N,y_N)$ identify all of the roots
+$Q = (x,y)$ on the algebraic curve $f(x,y)$ of
+\be 
+[\,\alpha-x\,]\,f_y(Q) \,-\, [\,\beta-y\,]\,f_x(Q) = 0
+\ee
+where $f_x$ and $f_y$ are the derivatives of $f$ with respect to $x$ and $y$.
+These are the points where the curve is either singular (in the sense
+of an algebraic curve) or the line drawn from $p$ meets the curve orthogonally
+(since the tangent at a point $Q$ is parallel to the vector $(f_y(Q),-f_x(Q))$
+\cite[p. 55]{W50}).
+\end{exmpl}
+
+% *************************************************************
+
+\clearpage
+
+INSERTION JUST BEFORE SECTION 2.1 ON P. 8
+
+\begin{dfn}
+The bisector ${\bf B}({\bf p},{\bf C})$ of a point ${\bf p}$ and a curve 
+${\bf C}$ is the locus
+traced by a point that remains equidistant from ${\bf p}$ and ${\bf C}$.
+\end{dfn}
+
+% *************************************************************
+
+\clearpage
+
+CORRECTION ON P. 9, STATEMENT OF PROP. 2.1
+
+`denoting the end points of $I$ by $i_{0}$ and $i_{M+1}$'
+
+FIGURE ON P. 9, JUST BEFORE `NOTE THAT TRIMMING' PARAGRAPH
+
+PICTURE OF UNTRIMMED VS. TRIMMED OFFSET OF, SAY, A PARABOLA
+
+% *************************************************************
+
+\clearpage
+
+INSERTION AFTER FIRST SENTENCE FOLLOWING (30) ON P. 10:
+
+% FIGURE: \figg{fig:du}{}{.5in}
+Referring to Figure~\ref{fig:du},
+by the law of cosines,
+\be
+	d(u)^{2} = d(u)^{2} + |{\bf p} - {\bf r}(u)|^{2} - 
+		   2d(u) \ |{\bf p} - {\bf r}(u)| \ \cos \theta
+\ee
+	% a^{2}  = b^{2} + c^{2} - 2bc cos A, [A-18]{TF81}
+or 
+\be
+	d(u) = \frac{|{\bf p} - {\bf r}(u)|^{2}}
+		    {2|{\bf p} - {\bf r}(u)|\cos \theta}.
+\ee
+Since $\cos \theta$ is the dot product of its two defining unit vectors,
+\be
+\label{eq:cos}
+	\cos \theta = \frac{({\bf p}-{\bf r}(u)) \cdot {\bf n}(u)}
+			   {|{\bf p} - {\bf r}(u)|}.
+\ee
+	% \cos \theta = (A \cdot B)/(||A|| ||B||)  [20]{LA71}
+and
+\be
+\label{eq:du}
+	d(u) = \frac{|{\bf p} - {\bf r}(u)|^{2}}{2 ({\bf p} - {\bf r}(u)) 
+		\cdot {\bf n}(u)}.
+\ee
+(In the figure, we are assuming that $d(u)$ is positive, {\em i.e.}, 
+${\bf n}(u)$ points towards
+${\bf p}$'s halfplane.
+(\ref{eq:du}) still holds if $d(u)$ is negative,
+because the sign change of $d(u)$ is balanced by the sign
+change of ${\bf n}(u)$ in (\ref{eq:cos}).)
+
+% REMOVE `USING (24), IT MAY BE VERIFIED THAT' and have replaced (31)
+
+Note that (31) is evidently {\em not} (in general) ...
+
+% *************************************************************
+
+\clearpage
+
+CHANGE TO THE PARAGRAPH BEFORE REMARK 2.2 ON P. 11
+
+As before: The curve defined ... (Figure~\ref{fig:du}).
+REPLACE 2ND SENTENCE:
+We will show below that it is appropriately named, {\em i.e.}, it
+is a superset of the bisector ${\bf B}({\bf p},{\bf r}(u))$ 
+(Proposition~\ref{p:superset}).
+
+% *************************************************************
+
+\clearpage
+
+INSERTION, P. 11, AT END OF SENTENCE AFTER (32)
+
+(Figure~\ref{fig:sec}).
+
+% FIGURE: \figg{fig:sec}{}{.5in}
+
+% *************************************************************
+
+\clearpage
+
+INSERTION ON P. 11, 4TH LINE OF MIDDLE PARAGRAPHE
+
+({\em i.e.}, ... or, equivalently, the tangent at ${\bf r}(\tau)$ intersects 
+${\bf p}$)
+
+% *************************************************************
+
+\clearpage
+
+INSERTION JUST AFTER REMARK 2.3, P. 12
+
+We now show that the untrimmed bisector is a superset of the bisector.
+
+\begin{dfn}
+Let $C_{q}$ be the circle with center $q$ and radius $||{\bf p}-q||$.
+\end{dfn}
+
+\begin{rmk}
+\label{rmk:bis}
+$q$ lies on the bisector of ${\bf p}$ and the regular curve 
+${\bf r}(u)$ if and only if 
+\begin{itemize}
+\item
+$C_q$ does not contain any 
+points of ${\bf r}(u)$ in its interior ($C_q$ is ``empty''), and 
+\item
+$C_q$ is tangent to ${\bf r}(u)$ in at least one 
+point.
+\end{itemize}
+(Figure~\ref{fig:bis}.)
+% 	If ${\bf r}(u)$ is not regular, 
+% 	then the second condition should instead be
+%  	that the boundary of the circle ${\bf C}_q$ 
+%	contains at least one point of ${\bf r}(u)$.
+\end{rmk}
+\prf
+$q$ lies on the bisector if and only if the closest point of ${\bf r}(u)$
+to $q$ is at distance $||{\bf p}-q||$.
+\QED
+
+% FIGURE: \figg{fig:bis}{}{.5in}
+
+Note that when we are computing the bisector for a curve segment,
+the circle $C_q$ may contain points of the curve outside of the segment.
+
+\begin{propn}
+\label{p:superset}
+The untrimmed bisector of ${\bf p}$ and ${\bf r}(u)$
+is a superset of the bisector of ${\bf p}$ and ${\bf r}(u)$.
+\end{propn}
+\prf
+Let $q$ be a point of the bisector of ${\bf p}$ and ${\bf r}(u)$.
+By Remark~\ref{rmk:bis}, there exists a point ${\bf r}(u_{0})$ of the curve 
+that lies on the circle ${\bf C}_q$,
+such that the curve is tangent
+to the circle at ${\bf r}(u_{0})$ or, equivalently, 
+such that the normal at ${\bf r}(u_{0})$ 
+intersects the center $q$ of the circle ${\bf C}_q$.
+Thus, ${\bf r}(u_{0}) + d(u_{0}) {\bf n}(u_{0}) = q$.
+\QED
+
+Since the second condition of Remark~\ref{rmk:bis}
+is satisfied for all points $q$ of the untrimmed bisector (by definition),
+a point $q$ of the untrimmed bisector
+is a point of the bisector if and only if the interior of ${\bf C}_q$ is empty.
+
+% *************************************************************
+
+\clearpage
+
+CORRECTION, p. 12
+
+$2\alpha u$ should be $4 \alpha u$ in equation for $W_{b}(u)$ in (37).
+
+% *************************************************************
+
+\clearpage
+
+INSERTION TO FIRST SENTENCE OF EXAMPLE 2.2, P. 12
+
+As a simple example of the untrimmed bisector of a point
+
+% *************************************************************
+
+\clearpage
+
+Perhaps the term `critical point' is badly chosen, since I just remembered
+that you used it in your `Hierarchical segmentation' paper to mean a 
+different thing.
+
+% *************************************************************
+
+\clearpage
+
+INSERTION JUST BEFORE SECTION 3.1 ON P. 16
+
+The untrimmed bisector is trimmed down to the bisector by deleting
+a finite number of segments.
+Like with the untrimmed offset, this is done by finding
+a finite number of special points that identify possible
+deviations of ${\bf b}(u)$ from the bisector.
+There are four classes of these special points on the untrimmed bisector
+(Definitions~\ref{d:trim} and \ref{d:cri}), 
+and we split the trimming into two stages.
+We now describe the first stage, which removes ``inactive'' segments.
+
+Every point ${\bf r}(u_0)$ of the curve has a corresponding point 
+${\bf b}(u_0)$ of its normal on the untrimmed bisector.
+However, many of these points ${\bf b}(u_0)$ are clearly not on the bisector,
+because ${\bf r}(u_0)$ is clearly not the closest point of the curve to 
+${\bf b}(u_0)$ (Figure~\ref{fig:notclosest}).
+
+% FIGURE: \figg{fig:notclosest}{}{.5in}
+
+\begin{dfn}
+The points ${\bf r}(u_0)$ and 
+${\bf b}(u_0) = {\bf r}(u_0) + d(u_0){\bf n}(u_0)$ are called
+{\bf corresponding} points.
+\end{dfn}
+
+\begin{dfn}
+The point $q = {\bf b}(u_{0})$ of the untrimmed bisector
+is {\bf active} if either one of the following conditions holds:
+\begin{description}
+\item[(1)]
+	$q$ has more than one corresponding point on the curve\footnote{There
+		are only a finite number of such points, and we will have
+		much more to say about them below.}
+\item[(2)]
+	$q$ has only one corresponding point $q' = {\bf r}(u_0)$ on the curve,
+	and either:
+\begin{description}
+\item[(a)]
+	${\bf p}$ and the circle of curvature at $q'$
+	lie on opposite sides of the tangent at $q'$, or
+\item[(b)]
+	the circle of curvature at $q'$ contains ${\bf p}$
+	({\em i.e.}, ${\bf p}$ lies on or inside the circle of curvature).
+\end{description}
+\end{description}
+(See Figure~\ref{fig:active}.)
+A segment $S$ of ${\bf b}(u)$ is active if every point of $S$ is active.
+\end{dfn}
+
+% FIGURE \figg{fig:active}{}{.5in}
+
+\begin{rmk}
+\label{r:active}
+We observe that an active point appears to lie on the bisector,
+at least locally.
+To see this, 
+let $q$ be an active point of ${\bf b}(u)$ with only one corresponding
+point $q'$.
+If ${\bf p}$ lies inside or on the circle of curvature at $q'$,
+then all of $C_q$ also lies in the circle of curvature at $q'$ 
+and, in particular, there exists a neighborhood of $q'$ 
+% ({\em i.e.}, the image of a neighborhood of $t'$ where $q' = {\bf r}(t')$)
+that lies completely outside of $C_q$ \cite[p. 176]{H52}.
+On the other hand, if ${\bf p}$ (and thus $C_q$) lies on the opposite side 
+of the tangent at $q'$ from the circle of curvature at $q'$,
+then again the curve in a neighborhood of $q'$ lies completely outside of
+$C_q$.
+Thus, the curve in some neighborhood of an active point (with one corresponding
+point) lies completely outside of $C_q$.
+In other words, an active point acts at least locally
+like a point of the bisector (Remark~\ref{rmk:bis}).
+\end{rmk}
+
+\begin{propn}
+An inactive point of the untrimmed bisector of ${\bf p}$ and ${\bf r}(u)$
+does not lie on the bisector of ${\bf p}$ and ${\bf r}(u)$.
+\end{propn}
+\prf
+Let $q$ be an inactive point of ${\bf b}(u)$ 
+and let $q'$ be the point corresponding to $q$.
+By definition, ${\bf p}$ and the circle of curvature at $q'$ lie
+on the same side of the tangent at $q'$, but ${\bf p}$ lies outside this
+circle (Figure~\ref{fig:active}(ii)).
+$C_q$ and the circle of curvature at $q'$ are both circles that are
+tangent to $q'$ (or equivalently, circles with a center on the normal at $q'$)
+and they both lie on the same side of this tangent.
+Moreover, $C_q$ must be strictly larger than (and strictly contain)
+the circle of curvature at $q'$, because it reaches ${\bf p}$ while the circle
+of curvature does not.
+But all circles tangent at $q'$ that are larger than the circle of curvature
+at $q'$ must lie on one side of the curve in the neighborhood of $q'$
+\cite[p. 176]{H52} and consequently $C_q$ must contain some points of the curve
+in its interior.
+We conclude that $q$ is not on the bisector (Remark~\ref{rmk:bis}).
+\QED
+
+Since the definition of an active point depends on the side of the tangent
+(at $q'$) that ${\bf p}$ and the circle of curvature lie on, 
+we are interested in points where this can change.
+
+\begin{dfn}
+\label{d:trim}
+A point ${\bf r}(u_{0})$ of a curve is an {\bf inflection} point
+if it is not a self-intersection or a cusp, and the tangent at 
+${\bf r}(u_{0})$ intersects the curve three or more times at ${\bf r}(u_{0})$.
+% concavity of the curve changes at this point
+A point of the curve ${\bf r}(u)$ is a {\bf class}
+point if its tangent intersects the point ${\bf p}$.\footnote{This
+	term is chosen in allusion to the class of a curve, which is the
+	number of tangents that hit a typical point not on the curve.}
+A point of the curve ${\bf r}(u)$ is a {\bf circular} point
+if its circle of curvature intersects ${\bf p}$.
+Equivalently, a point ${\bf r}(u_{0})$ is circular 
+if its center of curvature is ${\bf b}(u_{0})$.
+\end{dfn}
+
+We have already encountered class points: they are the points of the curve 
+associated with points at infinity on the untrimmed bisector 
+(Section~\ref{sec:untrim}).
+
+\begin{thm}
+For a regular polynomial or rational curve or curve segment
+${\bf r}(u)$ defined on the interval
+$u \in I$, and a point ${\bf p}$ not on ${\bf r}(u)$, 
+let ${\bf b}(u)$ be the untrimmed bisector of ${\bf p}$ and ${\bf r}(u)$,
+and let $\{i_{1},\ldots,i_{M}\}$ be the ordered set of parameter values on $I$
+that correspond to inflection points, class points, and circular points
+of ${\bf r}(u)$.
+Then, denoting the end points of $I$ by $i_{0}$ and $i_{M+1}$, we have
+either
+\be
+{\bf b}(t) {\rm \ is\ active\ } \quad {\rm for\ all\ } t \in (i_k,i_{k+1})
+\ee
+or
+\be
+{\bf b}(t) {\rm \ is\ not\ active\ } \quad {\rm for\ all\ } t \in (i_k,i_{k+1})
+\ee
+on each span $(i_k,i_{k+1})$ for $k=0,\ldots,M$.
+\end{thm}
+\prf
+Consider moving a point $q$ smoothly along the untrimmed bisector
+({\em i.e.}, such that the parameter value changes smoothly).
+By definition, in order to change from an active point to an inactive point,
+or vice versa, one of the following must occur:
+${\bf p}$ must move to a different side of the tangent at $q'$,
+the circle of curvature at $q'$ must move to a different side of the tangent
+at $q'$, or ${\bf p}$ must move to a different side of the circle of curvature
+at $q'$ ({\em i.e.}, from inside to outside or vice versa).
+The points associated with these occurrences are, respectively, 
+the class points, inflection points, and circular points.
+Therefore, if $q$ does not pass through a point with parameter value associated
+with one of these special points, its active/inactive status will not change.
+\QED
+
+In order to make the second (and final) refinement from active segments 
+to segments on the bisector,
+recall that a point $q$ of the untrimmed bisector is in the bisector
+if and only if its associated circle $C_q$ is empty.
+A boundary between the bisector and the rest of the untrimmed bisector
+is marked by a transition from points with empty circles to points 
+with non-empty circles.
+These transitions are associated with critical points.
+
+\begin{dfn}
+\label{d:cri}
+A point ${\bf b}(u_{0})$ of the untrimmed bisector is a {\bf critical} point 
+if the circle ${\bf C}_{{\bf b}(u_0)}$
+is tangent to ${\bf r}(u)$ at two or more points (Figure~\ref{fig:critical}).
+\end{dfn}
+
+% FIGURE: \figg{fig:critical}{}{.5in}
+
+Although defined differently, critical points are actually self-intersections
+of the untrimmed bisector.
+
+\begin{propn}
+\label{prop:cri}
+A point ${\bf b}(u_0)$ of the untrimmed bisector is a
+critical point if and only if it is a self-intersection of ${\bf b}(u)$.
+\end{propn}
+
+\prf Let ${\bf q} \in {\bf b}(u)$ be a critical point, and let 
+the circle ${\bf C}_{\bf q}$
+be tangent to ${\bf r}(u)$ at the two points ${\bf r}(u_1)$ and ${\bf r}(u_2)$.
+The normal at ${\bf r}(u_1)$ intersects the center of 
+${\bf C}_{\bf q}$ and, since both ${\bf r}(u_1)$
+and ${\bf p}$ lie on the boundary of this circle, a point of 
+the normal is equidistant
+from these two points at the center (Figure~\ref{fig:critical}).
+Thus, ${\bf b}(u_{1}) = {\bf q}$.
+Similarly, ${\bf b}(u_{2}) = {\bf q}$; so ${\bf q}$ is a self-intersection
+of ${\bf b}(u)$.
+
+Let ${\bf b}(u_{1}) = {\bf b}(u_{2})$ be a self-intersection.
+${\bf p}$, ${\bf r}(u_{1})$, and ${\bf r}(u_{2})$ are all equidistant from 
+${\bf b}(u_{1})$.
+Thus, the circle ${\bf C}_{{\bf b}(u_{1})}$
+contains ${\bf r}(u_{1})$ and ${\bf r}(u_{2})$.
+Moreover, since the normals at ${\bf r}(u_{1})$ and ${\bf r}(u_{2})$
+intersect the center ${\bf b}(u_{1})$ of this circle,
+the circle is also tangent to the curve at 
+${\bf r}(u_{1})$ and ${\bf r}(u_{2})$.
+\QED
+
+Proposition~\ref{prop:cri} allows us to trim using self-intersections
+while arguing the validity of this trim using critical points.
+
+\begin{thm}
+\label{thm:trim2}
+For a regular polynomial or rational curve or curve segment
+${\bf r}(u)$ defined on the interval
+$u \in I$, and a point ${\bf p}$ not on ${\bf r}(u)$, 
+let ${\bf b}(u)$ be the untrimmed bisector of ${\bf p}$ and ${\bf r}(u)$,
+and let $\{i_{1},\ldots,i_{M}\}$ be the ordered set of parameter values on $I$
+that correspond to endpoints of active segments on ${\bf b}(u)$ 
+or self-intersections of ${\bf b}(u)$,
+{\em i.e.}, ${\bf b}(i_j) = {\bf b}(i_k)$ for some $1 \leq j \neq k \leq M$.
+On an active segment $(b(i_j), b(i_k))$, $i_{j} < i_{k}$,
+% 	Let $i_{j} < i_{k}$ be the parameter values of the endpoints of an 
+% 	active 	segment. Then, either
+\be
+{\bf b}(t) {\rm \ is\ on\ the\ bisector\ }
+\quad {\rm for\ all\ } t \in (i_l,i_{l+1})
+\ee
+or
+\be
+{\bf b}(t) {\rm \ is\ not\ on\ the\ bisector\ }
+\quad {\rm for\ all\ } t \in (i_l,i_{l+1})
+\ee
+on each span $(i_l,i_{l+1})$ for $l=j,\ldots,k-1$ between successive
+self-intersections on the active segment.
+\end{thm}
+
+\prf
+Let ${\bf b}(u_{1})$ and ${\bf b}(u_{2})$ be two points
+on an active segment of the untrimmed bisector ($u_1 < u_2$),
+neither of them self-intersections,
+${\bf b}(u_{1})$ on the bisector but
+${\bf b}(u_{2})$ not on the bisector.
+We shall show that the segment ${\bf b}(u_1,u_2)$ between ${\bf b}(u_{1})$ 
+and ${\bf b}(u_{2})$
+must contain a self-intersection ({\em i.e.}, a critical point) $\alpha$.
+In other words, if an active subsegment of ${\bf b}(u)$ does not contain a 
+self-intersection, it either lies entirely on or entirely off the bisector.
+
+Since ${\bf b}(u_{1})$ lies on the bisector,
+$C_{{\bf b}(u_{1})}$ touches the curve at the point ${\bf r}(u_{1})$ 
+corresponding to ${\bf b}(u_{1})$
+{\em and} $C_{{\bf b}(u_{1})}$ is empty (Remark~\ref{rmk:bis}).
+As a point $q$ moves along the untrimmed bisector from ${\bf b}(u_{1})$ 
+towards ${\bf b}(u_{2})$,
+the radius of the circle $C_q$ changes smoothly 
+while maintaining contact with $p$,
+and at all times the neighborhood of the corresponding point $q'$ lies
+completely outside of $C_q$ (Remark~\ref{r:active}).
+In order to leave the bisector, the circle $C_q$ must become full, {\em i.e.}, 
+the curve must enter $C_q$ (Remark~\ref{rmk:bis}).
+We also know that this eventually happens, because ${\bf b}(u_{2})$ 
+is not on the bisector.
+Since the curve in the neighborhood of $q'$ does not enter $C_q$ 
+% this is important because otherwise in the limit the curve might touch
+% {\em and} enter at $q'$, e.g., inflection.
+and the curve is regular, 
+the curve cannot enter $C_q$ at $q'$
+and must first enter $C_q$ at $q'' \neq q'$.
+In order to enter $C_q$, the curve must first become tangent to $C_q$, 
+and this position of $q$ is a critical point of the untrimmed
+bisector, since its circle has two points of tangency with the curve, one
+at $q'$ and one at the point where the curve is about to enter the circle
+(Figure~\ref{fig:critical}).
+Thus, the segment ${\bf b}(u_1,u_2)$ contains a critical point.
+\QED
+
+\begin{rmk}
+If the desired interpretation for the bisector of a point ${\bf p}$ 
+and a curve segment $S = r(I)$ of ${\bf r}(u)$ is 
+\be
+	\{y\ |\ {\rm dist}(y,{\bf p}) = {\rm dist}(y,{\bf r}(u)) 
+		{\rm \ and\ the\ closest\ point\ of\ } {\bf r}(u) 
+		{\rm \ to \ } y {\rm \ lies\ on\ } S \}
+\ee
+rather than its usual meaning
+\be
+	\{y|{\rm \ dist}(y,{\bf p}) = 
+	    {\rm \ dist}(y,S\}
+\ee
+then the statement of Theorem~\ref{thm:trim2} is unchanged except that,
+rather than using self-intersections of the segment ${\bf b}(I)$ 
+({\em i.e.}, self-intersections ${\bf b}(u_1) = {\bf b}(u_2)$
+where $u_1, u_2 \in I$),
+one should use all self-intersections of ${\bf b}(u)$ that lie on 
+the segment ${\bf b}(I)$ 
+({\em i.e.}, self-intersections ${\bf b}(u_1) = {\bf b}(u_2)$
+where $u_1 \in I$ but $u_2$ need not lie on $I$).
+\end{rmk}
+
+We now have an algorithm for computing the bisector of a point
+${\bf p}$ and a regular parametric curve ${\bf r}(u)$.
+
+\begin{enumerate}
+\item
+	Compute the untrimmed bisector of ${\bf p}$ and ${\bf r}(u)$,
+	using (\ref{varoffset}) and (\ref{du}).
+	For the polynomial and rational curve, this untrimmed bisector
+	is given by (\ref{pbsctr}) and (\ref{rbsctr}), respectively.
+\item
+	Find the inflection points, class points, and circular points 	
+	of the curve ${\bf r}(u)$.
+\item
+	For each segment on the untrimmed bisector defined by these 
+	special points, compare the distance of the midpoint of this
+	segment from ${\bf p}$ and ${\bf r}(u)$ (using (\ref{distance2}))
+	and discard the segment if these distances are not equal.
+\item
+	Find the self-intersections of the untrimmed bisector
+	(using (\ref{Iresltnt})).
+\item
+	Split each remaining segment of the untrimmed bisector
+	at these self-intersections, and for each of the resulting
+	segments: compare the distance of the midpoint of this
+	segment from ${\bf p}$ and ${\bf r}(u)$ (using (\ref{distance2}))
+	and discard the segment if these distances are not equal.
+	The remaining segments are the bisector.
+\end{enumerate}
+
+\end{document}

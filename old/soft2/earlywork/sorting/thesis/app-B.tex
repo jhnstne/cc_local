@@ -1,0 +1,576 @@
+\chapter{Lemmas}
+
+This appendix presents various lemmas and theorems that are
+important to the development of the theory of sorting.
+Due to their technical nature, we find it more convenient
+to place these results in an appendix.
+%
+\begin{theorem}[Bezout's Theorem {\cite[p. 59]{wa}}]
+\label{bezout}
+If two algebraic plane curves, of orders m and n, have more than mn common
+points, then they have a common component.
+\end{theorem}
+%
+\begin{lemma}[{\cite[pp. 25, 26, 59]{wa}}]
+\label{resultant}
+Let $R(x_{1},\ldots,x_{r-1})$ be the resultant of $f(x_{1},\ldots,x_{r})$
+and $g(x_{1},\ldots,x_{r})$ with respect to $x_{r}$.
+\mbox{$R(\alpha_{1},\alpha_{2},\ldots,\alpha_{r-1}) = 0$} if and only if
+there exists $\alpha_{r}$ such that
+\mbox{$f(\alpha_{1},\ldots,\alpha_{r})
+= g(\alpha_{1},\ldots,\alpha_{r}) = 0 $}.
+%That is, the zero set of the resultant identifies the common roots of f
+%and g "modulo" $x_{r}$.
+\end{lemma}
+%
+\begin{lemma}
+\label{tangcont}
+The tangent of an algebraic curve changes continuously on nonsingular
+segments of the curve.
+\end{lemma}
+\begin{proof}
+Since all polynomial functions are continuous, this is a corollary of 
+Lemma~\ref{tangenteqn}.
+\end{proof}
+%
+\begin{definition}
+A polygon is {\bf simple} if (i) any pair of edges of the polygon are either
+disjoint or intersect only at their endpoints, and (ii) no more than two edges
+intersect at each endpoint.
+\end{definition}
+
+The two common definitions for convexity of a polygon P are:
+\begin{quote}
+\begin{itemize}
+  \item if $v,w \in P$, then $\{tv + (1-t)w \mid 0\leq t \leq 1\} \subset P$
+  \item $P = \{ \sum_{i=1}^{n} \lambda _{i}v_{i} \mid 
+     \sum_{i=1}^{n} \lambda _{i} = 1,\ 0 \leq \lambda _{i} \leq 1\ \},$ 
+     where $v_{1}, \ldots ,v_{n}$ are the 
+     vertices of P.
+\end{itemize}
+\end{quote}
+
+We present an alternative characterization of convexity that works
+with the boundary rather than the interior of the polygon.
+%
+%
+\begin{lemma}
+\label{conv3}
+Let P = $v_{1} \ldots v_{n}$ be a simple polygon.
+P is convex if and only if, 
+for every edge E = 
+\seg{v_{i}v_{j}}, the line \lyne{v_{i}v_{j}} does not intersect
+$P \setminus E$.
+\end{lemma}
+%
+\begin{proof}
+$\Rightarrow$:\ \ Assume that P is convex.  
+Suppose, for the sake of contradiction, that \seg{v_{i}v_{j}}
+is an edge of P such that the line \lyne{v_{i}v_{j}}
+intersects $P\setminus E$.
+Let $w$ be the first such intersection
+and assume, without loss of generality, 
+that $w$ lies on the ray \ray{v_{i}v_{j}}.
+Then there exists $x \in$ \seg{v_{j}w} such that $x \not\in P$,
+which contradicts the first definition of polygonal convexity.\\
+$\Leftarrow$:\ \ Assume that, for every edge E = 
+\seg{v_{i}v_{j}}, the line \lyne{v_{i}v_{j}} does not intersect
+$P \setminus E$.
+Suppose, for the sake of contradiction, that there exists \mbox{$v,w \in P$} and 
+\mbox{$t \in [0,1]$} such that \mbox{\(X = tv + (1-t)w \not\in P\)} 
+(Figure~\ref{B.first}).
+Since $v \in P$ and $X \not\in P$,
+$\seg{vX} \cup \{v\}$ must cross the boundary of P, say at $e$ on edge E.
+$v$ (or, if $v=e$, the polygon in the neighbourhood of $v$) 
+and $w$ lie on opposite sides of the line defined by E.
+Therefore, since $v,w \in P$,  some edge of P must cross over
+E's line, say at Y.
+Since P is a simple polygon, Y cannot be a point of E.
+Thus, the continuation of E intersects $P \setminus E$, a
+contradiction.
+Therefore, for all $v,w \in P$ and $t \in [0,1]$, 
+\mbox{$tv + (1-t)w \in P$}, and P is convex.
+\end{proof}
+%
+\figg{B.first}{An example for Lemma~B.3}{2in}
+
+Recall from Section~\ref{sec-divide} what it means for a line to cross
+a curve.
+\begin{lemma}
+\label{planarcutsthru}
+A plane curve C crosses a line L at a nonsingular point P
+if and only if the number of intersections of L with C at P is odd.
+\end{lemma}
+%
+\begin{proof}
+Assume, without loss of generality, that L
+is the x-axis and P is the origin.
+Let $N_{\epsilon}(0)$ be a small segment of the curve near the
+origin: i.e., $N_{\epsilon}(0)$ = \{$\ c\in C\ |\ $dist$_{C}(c,0) < \epsilon$\ \},
+where dist$_{C}(c_{1},c_{2})$ is the length of the curve segment between
+two points $c_{1},\ c_{2}$ of C.
+Since the directed tangent to the nonsingular origin is ($\pm$1,0)
+and the tangent to an algebraic curve
+changes continuously on nonsingular segments (Lemma~\ref{tangcont}),
+there exists $\epsilon\ > 0$ such that no two points of
+$N_{\epsilon}(0)$ have the same abscissa.
+Within this neighbourhood, 
+the curve can be represented by a function \mbox{$y = g(x)$}.
+We expand $g(x)$ into a Taylor series:
+\begin{equation}
+\label{eq:Taylor}
+g(x) = g(0) + g'(0)x + g''(0)x^2 + \ldots  
+\end{equation}
+Since the lowest order term in (\ref{eq:Taylor})
+dominates all other terms \mbox{as $x \rightarrow 0$},
+$g(x)$ changes sign as $x$ changes sign if and only if
+\mbox{min$\{\ i\ |\ g^{(i)}(0) \neq 0\}$} is odd.
+Also, $g(x)$ changes sign as $x$ changes sign if and only if
+C crosses L (the x-axis) at P (the origin).
+Therefore, C crosses L at P if and only if
+\mbox{min$\{\ i\ |\ g^{(i)}(0) \neq 0\}$} is odd.
+
+Since $y-g(x) = 0$ represents the curve C near the origin
+and \mbox{$x=t,\ y=0$} is a parameterization of L, the intersections of L
+with C near the origin are associated with the roots of $g(t)=0$.
+In particular, using (\ref{eq:Taylor}) above, the
+multiplicity of the intersection of L with C at the origin is
+\mbox{min$\{\ i\ |\ g^{(i)}(0) \neq 0\}$}.
+Therefore, C crosses L at P if and only if the multiplicity
+of intersection of L with C at P is odd.
+\end{proof}
+%
+\begin{lemma}
+\label{nonbounded}
+An infinite segment of an algebraic curve cannot be bounded within a
+closed region.
+\end{lemma}
+%
+\begin{proof}
+Let S be an infinite segment of an algebraic curve and
+suppose that S lies in a closed region.
+Since S must twist infinitely often to avoid crossing the boundaries
+of the region,
+a line can be found that intersects S in an arbitrarily large
+number of points, contradicting Bezout's Theorem (Theorem~\ref{bezout}).
+\end{proof}
+%
+%\begin{lemma}[Monotonicity of the tangent on convex curves]
+%\label{mono}
+%The
+%change in slope
+%of the tangent of a convex segment is strictly monotonic,
+%with the exception of a possible discontinuity at $\pm\infty$.
+%Equivalently, as one moves along a convex segment in a given direction,
+%the angle of the directed tangent (pointing in the direction that one is
+%moving) changes strictly monotonically.
+%\end{lemma}
+%%
+%\begin{proof}
+%Let C be a convex segment of an irreducible curve.
+%Fix a ray in the plane from which to measure angles from.  Let
+%the measurement of angles be continuous.\footnote{That is, as an angle
+%approaches 0 from the positive side and passes through 0, the angle becomes 
+%negative rather than jumping to $2\pi - \epsilon$.}
+%Since C is convex and thus nonsingular, the tangent changes smoothly on C
+%(Lemma~\ref{tangcont}).
+%Suppose that the angle of the tangent is not monotonic.
+%Then we can assume, without loss of generality, that
+%$\exists$ a point P of C and 
+%$\delta > 0$ such that
+%\mbox{$\angle$ tangent at Q} $\leq \angle$ tangent at P, $\forall\ Q \in C$
+%such that $\mbox{dist}_{c}(P,Q) < \delta$ .
+%Pick any $\epsilon$ neighbourhood of P, $0< \epsilon \leq \delta$.
+%This neighbourhood will contain two points $R_{\epsilon},S_{\epsilon}
+%\in C$ on opposite sides of P that have parallel tangent slopes:
+%\begin{quote}
+%	Let $P_{-\epsilon}$ and $P_{+\epsilon}$ be the points of C such that
+%	\mbox{dist$_{C}(P,P_{-\epsilon})=\epsilon$} \\
+%        $= \mbox{dist}_{C}(P,P_{+\epsilon})$.
+%	Let $A_{1}$ and $A_{2}$ be the angles of the tangent 
+%        at $P_{-\epsilon}$
+%	and $P_{+\epsilon}$, respectively. Assume, without loss of generality,
+%        that \mbox{$A_{1} \leq A_{2}$}.
+%	Since \mbox{$A_{1} \leq A_{2} \leq \angle$ (tangent at P)} and the tangent
+%	is continuous, $\exists$ a point of \arc{P_{-\epsilon} P} 
+%        whose tangent's
+%	angle is $A_{2}$.
+%\end{quote}
+%Because C is convex, all of it must lie on one side of the tangent
+%at $R_{\epsilon}$.  Similarly on one side of $S_{\epsilon}$'s tangent.
+%But the tangents at $R_{\epsilon}$ and $S_{\epsilon}$ are parallel, and 
+%yet not equal (otherwise this tangent intersects the cubic four times).
+%\hence All of C must lie in between $R_{\epsilon}$ and $S_{\epsilon}$'s
+%tangents.\\
+%dist$(R\se,S\se) \leq \mbox{dist}_{C}(R\se,S\se) 
+%= \mbox{dist}_{C}(R\se,P) + \mbox{dist}_{C}
+%(P,S\se) \leq \epsilon + \epsilon = 2\epsilon$\\
+%But $\epsilon$ was chosen arbitrarily such that $0 < \epsilon \leq \delta$.
+%\hence C is sandwiched in between two parallel lines that lie arbitrarily
+%close together.
+%\hence C is a line, contradicting the convexity of C and the irreducibility
+%of the curve.
+%\hence The angle of the tangent must change monotonically.\\
+%Moreover, the angle of the tangent cannot ever 
+%remain constant as one moves along
+%the cubic curve, otherwise two points would share the same tangent, 
+%contradicting Bezout's Theorem.
+%Thus, the angle of the tangent must change strictly
+%monotonically.
+%\end{proof}
+
+%We translate Lemma~\ref{conv3}'s characterization of polygonal convexity 
+%into an analogue for curves.
+%
+%\begin{lemma}
+%\label{convmeans2}
+%Let C be a segment of an irreducible plane curve.
+%C is convex $\Leftrightarrow$ \  no line has more
+%than two intersections with C.
+%\end{lemma}
+%
+%\begin{proof}\\
+%$\Leftarrow$:\ \ Trivial: a tangent is a line.
+%Moreover, C will be nonsingular: if S is a singularity and $P \in C$,
+%then \seg{SP}\ has at least three intersections with C.\\
+%$\Rightarrow$:\ \ Suppose that C is convex and line L intersects C 
+%three times.
+%If any two of these intersections are at the same point, then L is a tangent 
+%to the curve and has three intersections with it, contradicting convexity.
+%\hence L's intersections with C are at distinct points: say R, S, and T.
+%Assume, without loss of generality, that S lies on \arc{RT}.  
+%We will show that there is a point of 
+%\arc{RS} whose tangent strikes \arc{ST},
+%thus contradicting convexity.
+%
+%Rotate and translate the curve so that \ray{RT} is the positive x-axis.  
+%Assume, without loss of generality, that \arc{RS} lies above the x-axis.
+%Consider the tangent at R, directed toward \arc{RS}\ (call it $L_{R}$),
+%and the tangent at S, directed toward \arc{ST}\ (call it $L_{S}$).
+%(Whenever we speak of a tangent, consider it to be pointed in the direction
+%of travel from R to T.)
+%
+%\fig{B.1}
+%\fig{3withadditions}{cubic.tex}
+%
+%If we measure angles counterclockwise from the positive x-axis, then
+%\mbox{$\angle L_{R} \in (0,\pi)$}, since \arc{RS} lies above the x-axis,
+%and \mbox{$\angle L_{S} \in (-\pi,0)$}.
+%By Lemma~\ref{mono}, the angle of the tangent must either increase or 
+%decrease monotonically from R to S.
+%By the convexity of C, all of \arc{RT}\ lies on the same side of R's
+%tangent.
+%In particular, as the curve leaves R along \arc{RS}, it lies on
+%T's side of the tangent at R.
+%Therefore, the angle of the tangent must decrease as the curve leaves R,
+%since T lies on the positive x-axis and $\angle L_{R} \in (0,\pi)$.
+%Thus, $\exists~p \in \arc{RS}$ whose tangent has angle 0 (again by
+%Lemma~\ref{mono}).
+%As the tangent sweeps from angle 0 (parallel to \lyne{RT}) at p
+%to an angle less than 0 at S, the intersection of the tangent with the 
+%x-axis \lyne{RT} sweeps from a point at $\infty$ to S, through T.
+%\hence Some tangent of \arc{RS} (actually infinitely many) strikes \seg{ST}.
+%Since the curve is continuous, any line separating the two points S and T
+%of the curve must intersect the curve somewhere on \arc{ST}.  Hence, some
+%tangent of \arc{RS} strikes \arc{ST}, 
+%contradicting the convexity of \arc{RT}.
+%We conclude that no line can intersect C more than twice.
+%\end{proof}
+%
+\begin{lemma}
+\label{threecross}
+Let \pq\ be a nonconvex segment of a curve F such that
+\pq\ contains no singularities or floxes.
+There exists a line L that crosses
+\pq\ in at least three distinct points.
+\end{lemma}
+%
+\begin{proof}
+Since \pq\ is nonconvex, there exists a line ${\cal L}$ that
+intersects \arc{PQ} at least three times, such that not all
+of the intersections occur at a flex of even order.
+There are three cases to consider.
+%
+\begin{quote}
+\begin{description}
+\item[\underline{Case 1}] If ${\cal L}$ crosses \arc{PQ} in at least three
+distinct points, then we are done.
+\item[\underline{Case 2}] Suppose that ${\cal L}$ intersects \arc{PQ} at less
+than three distinct points.  
+Since \arc{PQ} contains no floxes, ${\cal L}$ must intersect \pq\ at two
+distinct points.
+By the pigeon-hole principle, two of the intersections must occur at the
+same point. 
+That is, ${\cal L}$ is tangent to the curve at some point.
+\item[\underline{Case 3}]
+Suppose that ${\cal L}$ intersects \pq\ at three or more
+distinct points but crosses \pq\ at less than three points.
+Thus, ${\cal L}$ touches but does not cross \pq\ at some point $x$.
+Since \pq\ is nonsingular, the tangent changes continuously, so ${\cal L}$
+must be tangent to \pq\ at $x$ in order to touch but not cross \pq.
+\end{description}
+\end{quote}
+%
+Therefore, either ${\cal L}$ already satisfies the requirements or
+there exists $x \in \arc{PQ}$ such that $x$'s
+tangent $T_{x}$ strikes \arc{PQ} at another point (Figure~\ref{B.eps}).
+Let $y \neq x$ be an intersection of \tx\ with \pq\ such that 
+\xya\ lies strictly
+inside \tx\ (\ie, y is the closest intersection to x).
+For any $\e > 0$, let \lep\ be the line such that (i) \lep\ 
+is parallel to \tx,
+(ii) \lep\ lies inside \tx, and (iii) \lep\ is at a distance of \e\ from \tx.
+It can easily be shown that there exists an $\e > 0$ such that 
+\lep\ crosses the curve at least three times.
+%$\forall\ \e > 0$, if $\lep \cap \xya \neq \emptyset$, then let \xpe\ be the
+%intersection of \lep\ with \xya\ such that $\arc{x\xpe} \cap \lep = \{\xpe\}$
+%(\ie, \xpe\ is the first intersection of \xya\ with \lep\ after x); and, if 
+%$\lep \cap (F \setminus \xya) \neq \emptyset$, then 
+%let \xme\ be the intersection
+%%
+%\fig{B.2}
+%%Figure 4 of lemma9.tex
+%%
+%of \lep\ with $F \setminus \xya$ such that $\arc{x\xme} \cap \lep = \{\xme\}$.\\
+%The points of the curve
+%\marginpar{    (*)}
+%F that have tangents parallel to \tx\ are isolated, otherwise some line
+%parallel to \tx\ would strike the curve in an infinite number of points and
+%thus be a reducible component of the irreducible curve F.
+%Let 
+%\[ \mbox{dist} = \left\{ \begin{array}{ll}
+%	\mbox{$+\infty$}  &\mbox{if there are no points P of F} \\
+%                          &\mbox{with tangents parallel to \tx} \\
+%			  &\mbox{such that P lies strictly inside \tx}\\
+%	\mbox{min\{$\e >0\ |\ $\lep\ is tangent to the curve\}}&\mbox{otherwise}
+%	\end{array}
+%	\right.  \]
+%By (*), dist is well-defined.\\
+%Since x is not a flox or singularity, the curve does not cross \tx\ at x
+%(by Lemma~\ref{planarcutsthru}), so there is a neighbourhood of x that lies
+%inside \tx.
+%By (*), the curve must actually lie {\em strictly} inside \tx\ in some
+%neighbourhood of x, and $\exists\ \eo > 0$ such that $\forall\ \e < \eo$,
+%\xpe\ and \xme\ exist.
+%Thus, \mbox{$\forall\ 0 < \e < $ min\{\eo,dist\}}, \xpe\ and \xme\ exist
+%and \lep\ {\em crosses} the curve at \xpe\ and \xme\ (\ie, \lep\ is not
+%tangent to \xpe\ or \xme).
+%We have two of our desired three crossings.\\
+%Now consider the intersections of \lep\ with \xya\ close to y.\\
+%$\forall\ \e > 0$, if $\lep \cap \xya \neq \emptyset$, then let \ye\ be the
+%intersection of \lep\ with \xya\ such that $\arc{y\ye} \cap \lep = \{\ye\}$.
+%\xya\ lies strictly inside \tx, by the choice of y, so
+%$\exists\ \et > 0$ such that \ye\ exists $\forall\ \e < \et$.
+%Thus, \mbox{$\forall\ 0 < \e <$ min \{\et,dist\} }, \ye\ exists and
+%\lep\ {\em crosses} the curve at \ye.
+%\hence \mbox{$\forall\ 0 < \e <$ min \{\eo,\et,dist\} }, \xpe, \xme\ and
+%\ye\ exist and \lep\ crosses the curve at these points.\\
+%Note that if \xya\ crosses \lep\ once, then it must do so again, in order
+%to return to \tx.
+%Thus, if \lep\ crosses the curve at \xpe\ and \ye, then $\xpe \neq \ye$,
+%because \xpe\ is the closest crossing to x, while \ye\ is the closest
+%crossing to y.
+%Clearly, $\xme \neq \xpe$ and $\xme \neq \ye$.
+%Thus, \mbox{$\forall\ 0 < \e <$ min \{\eo,\et,dist\}}, \lep\ crosses F at 
+%three {\em distinct} points.\\
+%$\xpe, \ye \in \xya \subset \pqi$, but it is possible 
+%that $\xme \not\in \pq$.
+%However, since $x \neq P$ or Q, if we choose \e\ small enough, \xme\ will
+%be close enough to x that it will remain on \pq.
+%%\hence $\exists\ \e > 0$ such that line \lep\ crosses \pq\ at 
+%three distinct points.
+\end{proof}
+\figg{B.eps}{Some $L_{\epsilon}$ will cross the curve at least three times}{1.5in}
+%
+\begin{lemma}
+\label{lem-face}
+If \arc{\wo\wt}\ is a convex segment in the cell C, 
+then \wo\ and \wt\ face each other (with respect to C).
+\end{lemma}
+%
+\begin{proof}
+If \wo\ is not a flox, then \wo\ faces \wt\ simply because 
+\wt\ must lie inside of \wo's tangent by convexity.
+
+Suppose that \wo\ is a flox and \wt\ lies on \wo's tangent 
+(Figure~\ref{fig-flox}).
+The convexity of \arc{\wo\wt}\ implies that a point of
+\arc{\wo\wt} lies inside the tangent of any other point of \arc{\wo\wt}.
+Therefore, $W_{2}$ 
+will lie strictly inside of the curve's tangent as the curve
+leaves $W_{1}$ along \arc{\wo\wt}.
+That is,
+\wt\ and the outside endpoint of \wo's \cellsegment\ with respect to C
+will lie on opposite sides of \wo.
+Therefore, $W_{1}$ faces $W_{2}$ with respect to C.
+
+By symmetry, $W_{2}$ faces $W_{1}$ (with respect to C).
+\end{proof}
+\figg{fig-flox}{\wt\ lies on \wo's tangent}{1.5in}
+%
+\begin{lemma}
+\label{lem-lies.on}
+Let \wo\ and \wt\ be partners.
+If \wt\ lies on \wo's tangent, then \wo\ must be a flox.
+(Thus, if \wt\ lies on \wo's tangent, then \wt\ must lie on \wo's wall.)
+\end{lemma}
+\begin{proof}
+Assume that \wt\ lies on \wo's tangent.
+Suppose that \wo\ is an incidental \wallpoint.
+Since \wwa\ is convex, it must look like Figure~\ref{3.K}(a).
+Thus, since \wo's tangent is not the same as \wo's wall,
+\wo's wall must cross \wwa\ and split \wwa\ over two cells,
+which is a contradiction.
+
+Suppose that \wo\ is a \pseudo.
+Let V be the singularity from which \wo\ was derived.
+Either the singularity's tangents cross \wwa\ (Figure~\ref{3.K}(b)),
+a contradiction as in the incidental case, 
+or \wwa\ intersects \arc{V\wo} (Figure~\ref{3.K}(c)),
+causing a singularity in the
+interior of the cell, which is also a contradiction (since singularities
+will only occur on the boundaries of a cell, by the definition of a cell
+partition).
+\end{proof}
+%
+\figg{3.K}{(a) incidental \wo\ (b-c) pseudo \wo}{2in}
+%
+%
+\begin{lemma}
+\label{lem-forthmsamewalls}
+Let x be a point of a curve such that the tangent of x strikes the curve
+again at y.
+Let $z \in \lyne{xy} \setminus \ray{xy}$.
+Suppose that y lies strictly outside of the curve's tangent as the curve
+leaves x along \arc{xy} (Figure~\ref{B.4}(a)).
+Then $\arc{xy}$ must contain a flox, a singularity, or a point 
+of \ray{xz}.
+\end{lemma}
+%
+\figg{B.4}{(a) $x$, $y$, and $z$ in Lemma~B.9 (b) $\arc{xy}$ without singularities or floxes}{1.5in}
+%
+\begin{proof}
+Suppose that $\arc{xy}$ does not contain a flox or a singularity.
+Thus, the curve cannot cross itself on $\arc{xy}$ and there cannot be
+any point on $\arc{xy}$ where the curvature changes from concave to
+convex or vice versa.
+In other words, $\arc{xy}$ must spiral around in ever larger 
+circles (Figure~\ref{B.4}(b)).
+Since $y$ lies strictly outside of the curve's tangent as the curve leaves
+$x$ along $\arc{xy}$, the curve must spiral by an angle of at least $2\pi$ to 
+get from $x$ to $y$.
+Therefore, \arc{xy}\  must cross \ray{xz}.
+\end{proof}
+%
+%\begin{lemma}
+%\label{Sempty}
+%Let x be a point on a connected component CC of a curve such that CC
+%has no \wallpoints.
+%Then $S(x) = \emptyset$.
+%\end{lemma}
+%\begin{proof}
+%Let $W_{i}$ be a \wallpoint of the curve.
+%Assume without loss of generality that $W_{i}$ lies strictly inside of
+%x's tangent (otherwise $W_{i}$ violates condition (1) of S(x)).
+%CC is
+%\end{proof}
+%
+%
+%\begin{lemma}
+%\label{lem-not2bachelors}
+%Suppose that U and V lie in the cell C and neither of them has a partner in C.
+%Then (U,V) is not mistaken for a pair.
+%\end{lemma}
+%\begin{proof}
+%We will show that either U is not the computed partner of V or 
+%V is not the computed partner of U.
+%Let $S^{U}$ (resp., $S^{V}$) be the S set of Theorem~\ref{thm-assocwpts}\
+%with $x = U$ (resp., $x=V$).
+%\begin{description}
+%   \item[{\underline{Case 1 [$S^{U} \neq \emptyset$]}}]  Suppose that V is
+%computed to be the partner of U.
+%Thus, $V \in S^{U} \Rightarrow$ V does not lie on U's cell wall (by conditions
+%(1)-(2) of $S^{U}$) $\Rightarrow$ U will never be computed as V's partner
+%via step (ii) of partner computation.
+%Therefore, it is sufficient to show that U is not computed to be V's partner
+%in step (iii).
+%In other words, we must show that $U \not\in S^{V}$.
+%
+%Let $U_{2}$ be the intersection of U's open convex segment with a wall that
+%has been added to close up the cell and let $\hat{UU_{2}}$ be the appropriate
+%portion of the cell boundary, as defined in Theorem~\ref{thm-assocwpts}.
+%By the proof of Theorem~\ref{thm-assocwpts}, $S^{U} \subset \hat{UU_{2}}$,
+%so $V \in \hat{UU_{2}}$.
+%That is, V lies in the region bounded by the cell walls $\hat{UU_{2}}$ and
+%the curve segment $\arc{UU_{2}}$.
+%
+%\fig{5}{app-B}
+%
+%V's open segment cannot cross $\arc{UU_{2}}$ since this would cause a 
+%singularity in the middle of the cell.
+%Therefore, the intersection $V_{2}$ of V's open segment with the cell
+%boundary (complete with added walls) must lie in $\hat{UU_{2}}$.
+%That is, if $\hat{VV_{2}}$ is the appropriate portion of the cell
+%boundary, $\hat{VV_{2}} \subset \hat{UU_{2}}$ and, in particular,
+%$U \not\in \hat{VV_{2}} \supset S^{V}$.
+%   \item[{\underline{Case 2 [$S^{U} = \emptyset$ and U is 
+%an ordinary singularity]}}] Consider the two convex segments in cell C 
+%that
+%are associated with U and V: that is, the two ends of the curve.\\
+%INCOMPLETE
+%The two ends of an open curve intersect at a point at infinity, since every
+%plane curve is closed in the projective plane.
+%Therefore, the two ends of the curve are asymptotic to the same line.
+%The four ways in which the two ends of a curve can approach the same
+%line asymptotically are:
+%\fig{6}{app-B}
+%\mbox{$.\raisebox{1.5ex}{.}.$}\ It is impossible for the two ends of the
+%curve to both lie in the same cell and originate from wallpoints of the
+%same ordinary singularity.
+%\hence If U is an ordinary singularity, then V will not be a wallpoint 
+%of this same singularity.
+%\hence V will not be computed to be U's partner.
+%   \item[{\underline{Case 3 [$S^{U} = \emptyset$ and U is a flox or incidental
+%wallpoint]}}] Let $T^{U}$ (resp., $T^{V}$) be the T set of 
+%Theorem~\ref{thm-samewall}\ with $W_{1} = U$ (resp., $W_{1} = V$).
+%From the four cases above, it can be seen that if the two ends of the curve
+%lie in the same cell
+%and originate from the same wall of the cell partition, then these 
+%originating wallpoints do not face each other.
+%Therefore, $V \not\in T^{U}$ and V is not computed to be U's partner.
+%\end{description}
+%\end{proof}
+%
+%\begin{lemma}
+%\label{lem-noconfusion}
+%Let W be a wallpoint of a cell C that is the source of an open convex segment
+%in C, and let x be a sortpoint on this open convex segment.
+%Suppose that \mbox{$\{S_{1},S_{p}\}$} are the first and last elements of the
+%sorted set $S^{x}$ of Theorem~\ref{thm-assocwpts}.
+%Then only one of $S_{1},S_{p}$ lacks a partner in C.
+%Thus, there is no confusion in the choice of the wallpoint associated with x.
+%\end{lemma}
+%
+%\begin{proof}
+%By Case 2 of Theorem~\ref{thm-assocwpts}, we know that
+%$W \in \{S_{1},S_{p}\}$, so at least one of $S_{1},S_{p}$ lacks a 
+%partner in C.
+%Let V be the other wallpoint of the curve that is an endpoint of an open
+%segment, and suppose that V lies in C.
+%We must show that $V \not\in \{S_{1},S_{p} \}$.
+%
+%Let $W_{1}$ be the intersection of W's open convex segment with the cell 
+%wall that has been added to close up cell C (see Theorem~\ref{thm-assocwpts}),
+%and let $\hat{WW_{1}}$ be the appropriate portion of the boundary of C, as
+%defined in Theorem~\ref{thm-assocwpts}.
+%By the proof of Theorem~\ref{thm-assocwpts}, $S^{x} \subset \hat{WW_{1}}$.
+%Therefore, it is sufficient to show that 
+%$V \not\in \hat{WW_{1}} \supset S^{x} \supset \{ S_{1}, S_{p} \}$.\\
+%Lemma~\ref{lem-not2bachelors} revealed that the two ends of an open curve 
+%are asymptotic to the same line, leaving four cases to consider:
+%
+%\fig{7 (this is fig 6 with V,W labels}{app-B}
+%
+%It can be shown in all four cases that $V \not\in \hat{WW_{1}}$.
+%INCOMPLETE
+%\end{proof}

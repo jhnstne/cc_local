@@ -1,0 +1,92 @@
+\chapter{Parameterization Algorithms}
+\label{app-D}
+%
+(NOTE: this may not be exactly like the thesis copy because
+I accidentally axed the tex copy and this is a checkpointed version.
+Check it over before using it.)
+
+This appendix considers several algorithms that 
+have been developed for the parameterization of 
+plane curves and surfaces of degree two and three.
+The first method proceeds by linearizing the implicit equation
+of the curve or surface 
+with respect to one of its variables \cite{abba1,abba2}.
+For example, 
+to parameterize a degree two curve, a linear transformation of the form
+\[ X = \frac{a_{1}x + b_{1}y + c_{1}}{a_{3}x + b_{3}y + c_{3}},\ \ \ 
+   Y = \frac{a_{2}x + b_{2}y + c_{2}}{a_{3}x + b_{3}y + c_{3}} \]
+is applied to the equation of the curve, where $b_{1},\ b_{2},$ and $b_{3}$
+are chosen so that the $y^{2}$ term is eliminated, and $a_{i}$ and $c_{i}$
+are chosen so as to make the transformation well-defined (by ensuring
+that the matrix
+\[ \left[ \begin{array}{ccc}
+a_{1} & b_{1} & c_{1} \\
+a_{2} & b_{2} & c_{2} \\
+a_{3} & b_{3} & c_{3}
+\end{array}   \right] \]
+is nonsingular) well-defined \cite{abba1}.
+The resulting equation is linear in $y$ and easy to parameterize.
+%(Theoretically, their technique generalizes to degrees four and five.
+%However, it is not practical for these degrees.---remove these
+%statements if Bajaj hasn't developed the algorithm rigorously for
+%degree four and five.)
+%
+\begin{example}
+\label{eg-appC}
+Consider the steps that are taken by this algorithm to parameterize 
+the circle \mbox{\( x^{2} + y^{2} - 1 = 0 \).}
+We linearize the equation with respect to y by applying the transformation
+\mbox{\( x = \frac{x_{n} + y_{n}}{y_{n}} \)},
+\mbox{\( y = \frac{1}{y_{n}} \)}:
+\[ \begin{array}{ll}
+x^{2} + y^{2} - 1 = 0 & \rightarrow (\frac{x_{n}+y_{n}}{y_{n}})^{2} + 
+  \frac{1}{y_{n}^{2}} - 1 = 0 \\
+& \equiv \frac{x_{n}^{2} + y_{n}^{2} + 2x_{n}y_{n} + 1 - y_{n}^{2}}{y_{n}^2}
+ = 0 \\
+& \equiv x_{n}^{2} + 2x_{n}y_{n} + 1 = 0
+\end{array} \]
+This equation is simple to parameterize because we can solve for $y_{n}$
+in terms of $x_{n}$ (\(y_{n} = \frac{-x_{n}^{2}-1}{2x_{n}} \)),
+yielding the parameterization 
+\( x_{n} = t \),
+\( y_{n} = \frac{-t^{2}-1}{2t} \).
+A parameterization of the original circle is found by substituting back
+into the transformation equations:
+\[ x = \frac{x_{n}}{y_{n}} + 1 = \frac{t(2t)}{-t^{2}-1} + 
+  \frac{-t^{2}-1}{-t^{2}-1} = \frac{t^{2}-1}{-t^{2}-1} = 
+  \frac{1-t^{2}}{1+t^{2}} \]
+\[ y = \frac{1}{y_{n}} = \frac{-2t}{1+t^{2}} \]
+\end{example}
+
+The parameterization of plane curves of degree three and of surfaces of
+degree two and three by the linearizing technique is analogous.
+The linearizing technique becomes impractically slow for 
+degrees four and five \cite{bajcomm},
+and it does not generalize to higher degrees (because of the lack of a
+general formula for the solution of equations of degree five or 
+more \cite{hernstein}).
+
+Another method for parameterizing curves of degree two
+involves solving for the variables in a 
+template parameterization \cite{hopcroft-hoffmann}.
+Since a plane curve of order two can be parameterized in homogeneous
+coordinates by four polynomials of degree two \cite{abba1},
+a template for the parameterization can be created:
+\[ x(t) = \frac{a*t^{2} + b*t + c}{d*t^{2} + e*t + f} \]
+\[ y(t) = \frac{g*t^{2} + h*t + j}{k*t^{2} + l*t + m} \]
+We assume that two points of the curve and the tangents at these
+points are known.
+These points and tangents, along with some other conditions, are used to
+solve for the variables in the template parameterization by
+substituting into the equation of the curve.
+It is not clear whether this technique can be generalized to higher
+degrees, but the preliminary evidence is not encouraging.
+
+A surface of degree two can be parameterized by normalizing the surface's
+equation
+to one of a number of forms for which a parameterization is already known
+(such as \( x^{2} + y^{2} - 1 = 0 \) if the surface 
+is an elliptic cylinder) \cite{levin76}.
+This technique collapses for surfaces of higher degree,
+since no exhaustive classification, and thus no class of normal forms, 
+is available for these surfaces.

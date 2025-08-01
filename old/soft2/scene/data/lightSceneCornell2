@@ -1,0 +1,9 @@
+[ FILE: lightSceneCornell2
+  A 2D scene for umbra/penumbra of one object, A surrounding L.
+  Call: umbra -S data/scene/lightSceneCornell2
+  Created: 6/4/03
+]
+{
+../../interpolation/data/circleOne.pts     1 0   0  0
+../../interpolation/data/arch/cornell2.pts 2 0	32 -22
+}

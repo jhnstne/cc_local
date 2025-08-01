@@ -1,0 +1,10 @@
+[ FILE: lightSceneSondica
+  A 2D test scene for area light shadows.
+  Call: umbra -r 20 -S data/umbra/lightSceneSondica
+  Created: 5/1/03
+]
+{
+../../interpolation/data/circleOne.pts      .5 0   -9  2
+../../interpolation/data/arch/sondica.pts   .5 0    0 0
+}
+.08	0 0

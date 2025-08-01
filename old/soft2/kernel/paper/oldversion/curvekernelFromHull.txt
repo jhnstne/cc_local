@@ -1,0 +1,18 @@
+\title{Kernels from hulls}
+
+\begin{abstract}
+The kernel of a plane curve $C$ is the locus of points that can see every point of $C$. (4)
+Since a point of the kernel maximizes visibility of an object, the kernel is a fundamental
+structure in the development of a theory of visibility for lighting, motion and efficient rendering. (2)
+In computational geometry, the kernel of a polygon has long been an object of study.(1)
+In this paper, we consider the kernel of a plane curve. (3)
+The kernel of a curve can be studied in dual space, using the classical geometric duality between lines and points. (5)
+Much is revealed about the kernel's structure by mapping it to dual space.
+In particular, the kernel in primal space becomes the convex hull in dual space.
+Using this dual relationship, any kernel computation can be reduced to a convex hull computation.
+Equally importantly, the structure of the kernel can be understood from the structure of the hull.
+
+Since curves with nontrivial kernels are mapped to curves in dual space that necessarily contain cusps,
+the degenerate hull ...
+
+\end{abstract}

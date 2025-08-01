@@ -1,0 +1,506 @@
+\documentstyle [titlepage]{article}
+%
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{conjecture}{Conjecture}
+%
+\newcommand{\arc}[1]{\mbox{$\stackrel{\frown}{#1}$}}
+\newcommand{\lyne}[1]{\mbox{$\stackrel{\leftrightarrow}{#1}$}}
+\newcommand{\ray}[1]{\mbox{$\vec{#1}$}}
+\newcommand{\seg}[1]{\mbox{$\overline{#1}$}}
+\newcommand{\hence}{\\ \mbox{$.\raisebox{1.5ex}{.}.$}\ } % three-dot therefore
+                                             % symbol is desired
+\newcommand{\qed}{\nopagebreak\begin{flushright}\mbox{$\Box$}\end{flushright}}
+                                       % put a box on the
+                                       % righthand side of the page
+\newcommand{\se}{\mbox{$_{\epsilon}$}}  % subscript epsilon
+\newcommand{\proof}{{\bf Proof}:\nopagebreak\\}
+\newcommand{\wlogg}{\mbox{w.\ l.\ o.\ g.\ }}
+\newcommand{\wrt}{\mbox{w.\ r.\ t.\ }}
+\newcommand{\ww}{\mbox{$W_{1}W_{2}$}}
+\newcommand{\wwa}{\arc{\ww}}
+\newcommand{\wwh}{\mbox{$\widehat{\ww}$}}
+\newcommand{\wone}{\mbox{$W_{1}$}}
+\newcommand{\wtwo}{\mbox{$W_{2}$}}
+\newcommand{\xone}{\mbox{$x_{1}$}}
+\newcommand{\xtwo}{\mbox{$x_{2}$}}
+\newcommand{\Rxy}{\mbox{$R_{xy}$}}
+\newcommand{\defn}{{\bf Definition}:\ }
+\newcommand{\fig}[2]{\begin{center}Figure #1 of #2\end{center}}
+\newcommand{\ie}{i.\ e.\ }
+% text of the two Grand Theorems
+\begin{document}
+%
+When you consider plane curves of degree $> 3$, it 
+is no longer true that a nonconvex segment must contain either a 
+singularity or flex.
+Consider \arc{PQ}\ in the following curve:
+\begin{center}
+Figure 1 of grand.tex
+\end{center}
+It will still be true that by using the tangents at flexes and singularities
+to create a cell partition of the curve, we can break the curve up into
+convex segments.
+However, now a cell 
+may contain several distinct convex segments:
+\begin{center}
+Figure 2 of grand.tex
+\end{center}
+This did not occur in the cubic case because the curve could cross a wall
+only once, at the flex/singularity defining it.
+Now that we have multi-segment cells, when given a sort-point in such a cell,
+we shall require a nontrivial computation to determine which segment
+the sort-point lies on.
+We shall also have to determine which wall-points pair up in a multi-segment
+cell.
+That is, given a wall-point where a segment enters the cell, find the 
+associated wall-point where it leaves the cell (if it does indeed leave).
+\section{Methods}
+The following methods for solving the above problems concerning
+multi-segment cells are elegant because they are applicable to curves of
+arbitrary degree.
+We first attack the problem of deciding which segment a curve-point 
+(probably a sort-point) in the middle of a cell lies on.
+Before the statement of the theorem, we need a definition and a lemma.
+\\ \defn If x is not a singularity or a flex, then the {\em inside of x's
+tangent} is the side that all of the curve in the neighbourhood of x lies on.
+The inside includes the tangent, but the "strict inside" does not.
+If x is a singularity, then x's tangent is the line that the branch of the 
+curve corresponding to x (as a wall-point) is tangent to.
+If x is a singularity or a flex, then the inside of x's tangent (which is
+ a wall) \wrt a cell C is the inside of that wall \wrt C.
+{\bf Notation}: $\seg{xy}_{in}$ is equivalent to $\seg{xy} \setminus \{x,y\}$.
+Similarly, $\arc{xy}_{in}$ is equivalent to $\arc{xy} \setminus \{x,y\}$.
+\begin{lemma}\nopagebreak
+\label{alpha}
+Let SEG be one of the convex segments of a cell of the cell partition of a
+curve F.
+Let x,y be two points of SEG, such that x and y are not wall-points on the
+same wall.
+Then
+\begin{enumerate}
+\item  \seg{xy}\ hits the curve F in an even number of points.
+	(Points on \seg{xy}\ which are tangent to the curve are either
+	counted as 0 or 2 points of intersection.  It is easier to
+	ignore such points by counting them as 0 points.)
+\item  As you travel from x to y along $\seg{xy}_{in}$,
+	the count of curve points P that face x (i.e., x lies
+	inside P's tangent) never exceeds the count of curve points
+	that face y.
+\item  The total number of curve points on $\seg{xy}_{in}$
+        that face x equals the total
+	number that face y.
+\end{enumerate}
+\begin{center}
+Figure 4 of grand.tex
+\end{center}
+\end{lemma}
+\proof
+Consider the closed region \Rxy\ bounded by \seg{xy}\ and the convex segment
+\arc{xy}.
+\begin{center}
+Figure 5 of grand.tex
+\end{center}
+$\Rxy \setminus \{x,y\}$ lies entirely in the interior of 
+\arc{xy}'s cell (where the interior of a cell 
+is the cell without its boundary):
+\begin{quote}
+	$\arc{xy} \setminus \{x,y\}$ lies in the interior of the cell
+	$\Rightarrow \seg{xy} \setminus \{x,y\}$ lies in the interior 
+	of the cell, since the cell is convex and x and y do not lie on
+	the same wall $\Rightarrow$ the region bounded by \arc{xy}\ and 
+	\seg{xy}\ lies in the interior of the cell, except possibly for x
+	and y, again by cell convexity.
+\end{quote}
+Thus, $\Rxy \setminus \{x,y\}$ cannot contain 
+\marginpar{(*)}
+a flox or a singularity---floxes and singularities only lie on cell
+boundaries of a cell partition.
+Moreover, if the curve crosses into \Rxy\ at x (or y), then x must be a
+singularity and the tangent of the branch that crosses into \Rxy\
+at x will form a wall of the cell partition which will split \Rxy\ in
+two, contradicting the fact that all of \Rxy\ lies in the same cell.
+\hence The curve can only cross into (or out of) \Rxy\ through 
+$\seg{xy} \setminus \{x,y\}$.
+Moreover, if the curve enters \Rxy, then, since 
+it cannot cycle back into itself 
+within \Rxy\ (by Lemma~\ref{nochoice} [OF PAIR.TEX's PRELIMINARY LEMMATA])
+and it cannot travel around this closed region forever
+(by Lemma~\ref{nonbounded}), it must also leave \Rxy.
+And (*) tells us that this point of departure must be distinct from the point
+of entry.
+\hence The intersections of the curve with $\seg{xy}_{in}$
+pair up, into what we shall couples, so there must be an even
+number of them.
+However, we can say more than that to every point P where
+the curve enters the region
+there corresponds a point Q where the curve leaves \Rxy,
+such that \arc{PQ} lies entirely inside \Rxy.
+Since the region \Rxy\ lies within one cell, all of the segments within
+\Rxy\ are convex, so P and Q lie on the same convex segment.
+\hence The points of a couple face each other.
+(That is, if P,Q are a couple, then P lies inside Q's tangent, and
+vice versa.)
+Let P,Q be a couple.
+Assume \wlogg that P is closer to x than Q.
+\begin{center}
+Figure 6 of grand.tex
+\end{center}
+Then, P faces Q $\Rightarrow$ P faces y, and Q faces P $\Rightarrow$ Q
+faces x.\footnote{Note that P is not a flex (by (*)), so
+all of the curve in a neighbourhood of P is on one 
+side of P's tangent.
+Thus, since the curve crosses over \seg{xy} at P, P's tangent
+is not \lyne{xy}, so P cannot face both x and y.  Similarly with Q.}
+\hence The number of curve points on $\seg{xy}_{in}$ that face
+x is equal to the number that face y.
+Also, as you travel from x to y along \seg{xy}, 
+you always meet the point of a couple that faces y before you meet the point
+of the couple that faces x.
+\hence As you travel from x to y along $\seg{xy}_{in}$
+the count of curve
+points that face y is always at least equal to the count of curve
+points that face x.
+\qed
+\begin{theorem}[How to find the wall-points associated with a
+point of the curve inside of a cell]\nopagebreak
+\label{grandnonwall}
+Let C be a cell of the cell partition of the curve F.\\
+Let \wone, \wtwo\ be paired wall-points of C.
+(That is, \arc{\ww}\ is a convex segment in C.)\\
+Let $x \in \arc{\ww}_{in}$.\\
+Let \mbox{S = \{ wall-points W of C $\mid$ }
+\begin{enumerate}
+	\item W lies on the strict inside of x's tangent;
+	\item \seg{xW}\ hits the curve F in an even number of points (ignoring
+points of tangency); and
+	\item as you travel from x to W along $\seg{xW}_{in}$,
+the count of curve points P that `face' x (i.e., x lies inside P's
+tangent) never exceeds the count of curve points that `face' W.\}
+\end{enumerate}
+Let \xone, \xtwo\ be the two points at which x's tangent strikes the cell 
+walls.
+(If cell C is open, then place a temporary wall segment across its opening in
+order to close it up: this ensures that both \xone\ and \xtwo\ exist.)
+Finally, order the points of S from \xone\ to \xtwo.
+That is, $S = \{S_{1},\ldots,S_{p}\}$ where $S_{i}$ is encountered before
+$S_{i+1}$ as one travels from \xone\ to \xtwo\ along the cell walls.
+(The direction of travel from \xone\ to \xtwo\ is clear, since
+all of S lies on
+one side of x's tangent.)
+Then $\{S_{1},S_{p}\} = \{\wone,\wtwo\} $.
+(Computationally speaking, if we create the convex hull of
+$S \cup \{\xone,\xtwo\}$, then \xone\ will be connected to \xtwo\ and either
+\wone\ or \wtwo\ (say \wone), and \xtwo\ will be connected to \xone\ and
+\wtwo.)
+\end{theorem}
+As the statement of this theorem is rather daunting, 
+an illustrative example is appropriate before the proof.
+\begin{center}
+Figure 3 of grand.tex
+\end{center}
+\proof
+We start by showing that $\wone,\wtwo \in S$.
+Since $x \in \wwa$ and \wwa\ is a convex segment, $\wwa \setminus \{x\}$
+and, in particular, \wone\ and \wtwo\ lie on the inside of
+x's tangent.
+By Lemma~\ref{alpha} (letting SEG = \wwa, $x=x$, $y=W_{i}$), 
+conditions 2) and 3) of S are satisfied by $W=\wone,\wtwo$.
+Thus, $\wone,\wtwo \in S$.\\
+Let \wwh\ be the perimeter of the cell from \wone\ to \wtwo, 
+such that $\xone,\xtwo \not\in\wwh$ (i.e., \wwh\ does
+not cross x's tangent).\footnote{Since \wwa\ is a convex segment, both \wone\ 
+and \wtwo\ lie on the same 
+side---the inside---of x's tangent, so \wwh\ is well-defined.}
+\begin{center}
+Figure 7 of grand.tex
+\end{center}
+We wish to show that $S \subset \wwh$.
+Let $s \in S$.
+Suppose that $\seg{xs} \setminus \{x,s\}$ strikes \wwa, say at y.
+\begin{center}
+Figure 8 of grand.tex
+\end{center}
+An application of Lemma~\ref{alpha} (with SEG = \wwa\ and x,y)
+tells you that the number of curve points 
+on $\seg{xy} \setminus \{x,y\}$ that face x is equal to the number that 
+face y.
+But y faces x, since x and y are on the same convex segment.
+Thus, as you travel from x to s along $\seg{xs} \setminus \{x,s\}$,
+the count of curve points that face x {\em does} exceed the count
+of those that face s at some point, namely y.
+This contradicts $s\in S$.
+\hence $\seg{xs} \setminus \{x,s\}$ cannot strike \wwa.
+This implies that s either lies on the outside of x's tangent or
+inside the region bounded by \wwh\ and \wwa:\footnote{We are also
+making use here of the fact that s cannot lie outside of the cell.}
+\begin{center}
+Figure 9 of grand.tex
+\end{center}
+But condition 1) of S ensures that s lies on the inside of
+x's tangent, so either s lies on  x's tangent or s lies inside
+the region bounded by \wwh\ and \wwa.
+Hence, either $s = \xone,\xtwo$ or s lies on \wwh, since s is a wall-point.
+\mbox{$.\raisebox{1.5ex}{.}.$}\ Indeed, once we have removed \xone and/or \xtwo,$S \subset \wwh$.\\
+We know that $\xone,\xtwo \not\in \wwh$ (by definition), 
+so clearly, in order to travel
+along the cell perimeter from \xone\ or \xtwo\ to a point of $s \in \wwh$,
+one must pass through \wone\ or \wtwo.
+\hence $\{S_{1},S_{p}\} = \{\wone,\wtwo\}$.
+\qed
+\begin{theorem}[An extension of theorem~\ref{grandnonwall}]\nopagebreak
+\label{extension}
+Let C be a cell of the cell partition of the curve F.\\
+Let \wone be the source of an open segment of C.\\
+Let x lie on the interior of this open segment.\\
+Let \mbox{S = \{ wall-points W of C $\mid$ }
+\begin{enumerate}
+	\item W lies on the strict inside of x's tangent;
+	\item \seg{xW}\ hits the curve F in an even number of points (ignoring
+points of tangency); and
+	\item as you travel from x to W along $\seg{xW}_{in}$,
+the count of curve points P that `face' x (i.e., x lies inside P's
+tangent) never exceeds the count of curve points that `face' W.\}
+\end{enumerate}
+Let \xone, \xtwo\ be the two points at which x's tangent strikes the cell 
+walls.
+Finally, order the points of S from \xone\ to \xtwo.
+Then $\wone \in \{S_{1},S_{p}\} $.
+\end{theorem}
+\proof
+See the proof of Theorem~\ref{grandnonwall}.
+Let \wtwo\ be the appropriate tangent intersection \xone\ or \xtwo.
+We must only show that there are no points of S between \xone\ and \wone.
+The proof is exactly like that of Theorem~\ref{grandnonwall}.
+\qed
+We can use a similar technique to solve the equally important problem of
+pairing wallpoints in a multi-segment cell.
+\begin{theorem}[How to find the partner of a flox/incidental wallpoint]
+\label{newgrand}
+Let F be a curve with no cusps of the second kind (Hilbert, p.173).\\
+(This isn't quite enough: we also need to restrict tacnodes and the like.)
+Let C be a cell of the cell partition of F.\\
+Let SEG be a convex segment in C.\\
+Let x be a wallpoint of SEG such that x is a flox, incidental point (or 
+singularity with one distinct tangent such that
+the curve crosses the tangent at the singularity?).
+Let \mbox{S = \{ wall-points W of C $\mid$ }
+\begin{enumerate}
+	\item W lies on the strict inside of x's tangent;
+        \item x lies on the strict inside of W's tangent;
+	\item $\seg{xW}_{in}$ hits the curve F in an even number of points (ignoring
+points of tangency); 
+	\item as you travel from x to W along $\seg{xW}_{in}$,
+the count of curve points P that `face' x (i.e., x lies inside P's
+tangent) never exceeds the count of curve points that `face' W; and
+        \item the total number of curve points on $\seg{xW}_{in}$ that face x\\
+= the total number of curve points on $\seg{xW}_{in}$ that face W.\}
+\end{enumerate}
+Then
+\begin{enumerate}
+        \item[(a)] if x has a partner wallpoint on a 
+different wall, then S contains this partner;
+        \item[(b)] if x either has a partner on the 
+same wall or no partner at all, then $S=\emptyset$.
+\end{enumerate}
+\end{theorem}
+As the statement of this theorem is rather daunting, 
+an illustrative example is appropriate before the proof.
+\begin{center}
+Figure 14 of grand.tex
+\end{center}
+\proof
+Let s be a point that satisfies conditions (1),(3),(4), and (5) of set S.
+Suppose that s is not a wallpoint of SEG.
+We shall show that s does not satisfy condition (2).
+\begin{enumerate}
+      \item[Case 1.] Suppose that s has a partner t.\\
+Since s is not a wallpoint of SEG, neither is t.
+Suppose, for purposes of contradiction, that x lies strictly inside
+of s's tangent.
+Thus, $\seg{xs}_{in}$ strikes \arc{st} (if it didn't, then SEG would have
+to cross \arc{st}\ in order to reach x), say at $\lambda$.
+\begin{center}
+Figure 15 of grand.tex
+\end{center}
+An application of Lemma~\ref{alpha} (with SEG = \arc{st}, x = s, y = $\lambda$)
+tells us that the number of curve points on $\seg{\lambda s}_{in}$ that face
+s is equal to the number that face $\lambda$ (and thus x).
+\hence the number on $\seg{\lambda s}_{in} \cup \{\lambda\}$ that face s exceeds
+the number that face x, since $\lambda$ faces s.
+\hence By condition (5), the number of curve points on $\seg{x\lambda}_{in}$
+that face s is less than the number that face x, which contradicts 
+condition (4).
+\hence x does not lie strictly inside of s's tangent.
+\hence $s \not\in S$.
+     \item[Case 2.] Suppose that s has no partner (\ie, it is the source of an
+open segment).
+Again suppose that x lies strictly inside s's tangent.
+The open side of the cell must lie inside s's tangent, since s's curve segment
+is convex and it must go off to infinity through that open side.
+Thus, s's open segment must cross \lyne{xs}\ in order to get to the open side.
+Thus, since the open segment cannot cross SEG,
+$\seg{xs}_{in}$ must strike s's open curve segment.
+Proceed as in case 1 to yield the conclusion that $s \not\in S$.
+\end{enumerate}
+$.\raisebox {1.5ex}{.}. S \subset$ {the wallpoints of SEG}
+If x is not a wallpoint, then the convexity of SEG ensures that
+conditions (1) and (2), and Lemma~\ref{alpha} ensures that 
+conditions (3), (4), and (5), are satisfied by the wallpoints of SEG.
+If x is a wallpoint with a partner on a different wall, then similarly
+all five conditions are satisfied by the partner, but of course x does not
+satisfy conditions (1) or (2).
+If x is a wallpoint with a partner on the same wall, then condition (1) and
+(2) are violated by the partner, so S is empty.
+If x is a wallpoint with no partner, then S is again empty because x violates
+conditions (1) and (2).
+\qed
+\begin{theorem}[How to find the partner of a singular wallpoint]\nopagebreak
+\label{grandwall}
+Let \wone,\wtwo\ be paired wall-points on {\em different} walls of a cell C,
+such that \wone\ is a singularity with distinct tangents.
+Let \mbox{S = \{ wall-points W of C $\mid$ }
+pt(W)$ = $pt(\wone)  OR
+\begin{enumerate}
+	\item W lies on the strict inside of \wone's tangent;
+	\item \seg{\wone W} hits the curve F in an
+even number of points (ignoring
+points of tangency); and
+	\item as you travel from \wone\ to W 
+along $\seg{\wone W} \setminus \{\wone,W\}$, the count of curve points
+that face \wone\ never exceeds the count of curve points that face W.\}
+\end{enumerate}
+pt(\wone) will be an endpoint of two segments
+of the cell: let \xone be the other endpoint of the segment that \wone's
+branch is tangent to.
+\fig{12}{grand.tex}
+If $S = \emptyset$, then \wone's partner is the other wallpoint of the
+singularity (\ie, $pt(\wtwo) = pt(\wone)$).
+Otherwise, if we create the convex hull of $S \cup \{\xone,\wone\}$,
+then \xone\ will be connected to \wone\ and \wtwo.
+That is, \wtwo\ is the first member of S encountered as one travels
+around the cell from \wone\ in the direction that the curve leaves \wone.
+\fig{10A}{grand.tex}
+\end{theorem}
+\proof
+Since \wone\ and \wtwo\ lie on different walls of a convex cell,
+\wtwo\ lies on the strict inside of \wone's tangent.
+By Lemma~\ref{alpha} (letting SEG = \wwa, $x = \wone$, $y=\wtwo$),
+conditions 2) and 3) of S are satisfied by $W = \wtwo$.
+Thus, $\wtwo \in S $.\\
+Let \wwh\ be the perimeter of the cell from \wone\ to \wtwo
+such that $\xone \not\in \wwh$.
+(This is well defined since $\xone \neq \wone,\wtwo$: \wtwo is not
+on \wone's wall, by assumption, and is not on \wone's tangent, by convexity,
+so $\wtwo \neq \xone$.)
+We wish to show that $S \subset \wwh$.
+Let $s\in S$.
+Suppose that $\seg{\wone s} \setminus \{\wone,s\}$ strikes \wwa, say at y.
+An application of Lemma~\ref{alpha} (with SEG = \wwa, $x = \wone$, $y = y$)
+tells you
+that the number of curve points
+on  $\seg{\wone y} \setminus \{\wone,y\}$ 
+that face \wone\ is equal to the number that face y.
+But y faces \wone, since $y \in \wwa$ implies that y and \wone\ lie on the
+same convex segment.
+Thus, as you travel from \wone\ to s
+along  $\seg{\wone s} \setminus \{\wone,s\}$, the count of curve
+points that face \wone\ {\em does} exceed the count of those that face s
+at some point, y.
+This contradicts $s\in S$.
+\hence $\seg{\wone s} \setminus \{\wone,s\}$ cannot strike \wwa.
+\hence Using a picture as motivation rather than a formal proof,
+\marginpar{Add rigour.}
+$s \in \wwh$. (Any line segment from \wone\ to a point 
+of the picture's hashed region 
+will strike \wwa.)
+\begin{center}
+Figure 11 of grand.tex
+\end{center}
+Thus, $S \subset \wwh$.\\
+$\xone \not\in \wwh$ (by definition of \wwh), so in order to travel 
+along the cell perimeter from \xone\ to a point of S on \wwh,
+one must pass through \wone\ or \wtwo.
+\hence \xone\ is connected to \wone\ and \wtwo\ in the convex hull of 
+$S \cup \{\xone,\wone\} $.
+\qed
+\begin{theorem}
+Let \wone,\wtwo\ be paired wallpoints on the same wall of a cell C.
+Let \mbox{S = \{ wall-points W of C $\mid$ }
+\begin{enumerate}
+	\item W lies on the strict inside of \wone's tangent;
+	\item \seg{\wone W} hits the curve F in an
+even number of points (ignoring
+points of tangency); and
+	\item as you travel from \wone\ to W 
+along $\seg{\wone W} \setminus \{\wone,W\}$, the count of curve points
+that face \wone\ never exceeds the count of curve points that face W.\}
+\end{enumerate}
+Then $S=\emptyset$.
+\end{theorem}
+\proof
+By the same reasoning as used in the proof of Theorem~\ref{grandwall},
+$S \subset \wwh$.
+However, if \wone\ and \wtwo\ lie on the same wall, then \wwh\ is a subsegment
+of this wall.
+But condition (1) of S ensures that no point of S lies on \wone's wall.
+\hence $S \cap \wwh = \emptyset$
+\hence $S = \emptyset$
+\qed
+\begin{theorem}[Pairing wallpoints on the same wall]\nopagebreak
+Let $\wone \neq \wtwo$ be paired wallpoints on the same wall of cell C.\\
+(Note: \wone cannot be a singularity, since the curve cannot loop back to pair
+with \wtwo on the same wall, by convexity:
+\fig{13}{grand.tex}
+Let \mbox{S = \{ wall-points W of C on \wone's wall $\mid$ }
+\begin{enumerate}
+	\item W lies inside of \wone's tangent (if \wone\ is incidental) or
+{\em not} in the curve direction from \wone \wrt C (if \wone\ is a flox)
+        \item \wone lies inside of W's tangent (if \wone\ is incidental) or
+{\em not} in the curve direction from W \wrt C (if W is a flox), and
+        \item there are an even number of wallpoints between W and \wone \}
+\end{enumerate}
+Then $\wtwo \in S$ and \wtwo is the closest element of S to \wone.
+\end{theorem}
+\proof
+Write this up!
+\qed
+\begin{itemize}
+\item Implicit in all of the above is the basic assumption that we are
+dealing with a single connected component X of the curve.
+Thus, for example, `the curve points on $\seg{xy} \setminus \{x,y\}$'
+is to be read `the points on $\seg{xy} \setminus \{x,y\}$ which
+intersect the connected component X of the curve'.
+Certainly, many curves will only have a single component.
+When dealing with multi-component curves, hopefully either the other
+components will not interfere or points of undesired components will be
+able to be readily distinguished.
+We have done some preliminary work on segregation of one component from
+others, and have even solved the problem for cubics.
+The multi-component problem is not peculiar to the convex-segment method.
+If one opts for parameterizing such a curve, one will require a different
+parameterization for each component.
+\end{itemize}
+\subsection{A Warning}
+Unfortunately, elegance does not always translate into efficiency.
+Theorems~\ref{grandnonwall} and \ref{grandwall} are elegant but they can
+probably be beaten when efficiency becomes the overriding concern.
+In being general, they may not take advantage of local idiosyncracies of
+particular degrees.
+For example, in the case of quartic curves, Theorem~\ref{grandwall}'s 
+method is probably (much) slower than another method 
+\marginpar{I hope to clinch and write up this method soon.}
+that decides \wone's partner simply on the basis of where 
+the second intersection
+of \wone's wall (with the curve) lies.
+And we can probably improve Theorem~\ref{grandwall}'s method 
+for quartics by making 
+use of a result that tells us that a wall-point of a quartic curve 
+always pairs up with a neighbouring wall-point ; unless finding those
+neighbours takes more time than considering all wall-points.
+However, since it is infeasible  to examine each degree for idiosyncracies,
+and since the degree-specific methods may only beat the general methods by
+an insignificant margin (especially if multi-segment cells are rare),
+the general methods are still very useful.
+\end{document}

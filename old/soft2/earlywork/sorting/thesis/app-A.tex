@@ -1,0 +1,136 @@
+\chapter{Definitions}
+\label{app-defn}
+%
+%\subsection{Notation}
+%$\arc{PQ}_{in}$:\\
+%$\seg{PQ}_{in}$:\\
+%\subsection{Definitions}
+The primary sources for the definitions of this appendix are Lawrence
+\cite{lawrence} and Walker \cite{wa}.
+
+An {\bf algebraic plane curve} is the zero set of a bivariate polynomial
+of positive degree over a field K (in our case, $K = \Re$).
+That is, a typical algebraic plane curve is 
+\{ (x,y) $|$ F(x,y) = 0 and F(x,y) is a polynomial of degree $n>0$ in x,y with
+coefficients in a field K\}.
+The {\bf order} of an algebraic plane curve is the degree of 
+its defining polynomial.
+A {\bf conic} is a plane curve of order two.
+
+A {\bf space curve} is a curve that does not lie in a plane.
+An {\bf algebraic space curve} is the intersection of two 
+surfaces, each of which is represented by a trivariate polynomial of
+positive degree over a field K.
+%We only deal with space curves that are the intersection of two surfaces.
+%Although some space curves can only be represented by the 
+%intersection of more than two surfaces \cite[p. 22]{kreyszig}, these curves
+%are rare and especially unlikely to arise in solid models.
+%Descartes' definition of an algebraic curve simply states that a curve
+%is algebraic if it can be represented by two implicit equations.
+%See Kreyszig, p.22. 
+
+The {\bf implicit representation} of a curve or surface is its representation
+in terms of the zero set of a system of equations.
+
+Let P be a point of the curve $f(x,y) = 0$.
+Suppose that 
+all derivatives of $f$ up to and including the $\mbox{r}-1^{st}$ vanish at P,
+but that at least one $\mbox{r}^{th}$ derivative does not vanish at P.
+P is called a point of {\bf multiplicity} r.
+Every line through P has at least r intersections with the curve at P,
+and precisely r such lines, properly counted, have more than r intersections.
+The exceptional lines are called the {\bf tangents} to the curve at P.
+
+A {\bf singularity} (or {\bf singular} point) is a point of multiplicity
+two or more.
+A singularity is a point where two different branches of the same
+connected component of a curve touch or a point where the curve changes
+direction sharply.
+A {\bf simple} (resp., {\bf double}) point is a point of multiplicity one
+(resp., two).
+A singularity of multiplicity r is {\bf ordinary} if its r tangents are
+distinct.
+A singularity is {\bf extraordinary}\footnote{This term is not from the 
+literature.}
+if it is not ordinary (Figure~\ref{A.1}(c)).
+A {\bf node} is an ordinary double point, and a {\bf cusp} is an
+extraordinary double point (Figure~\ref{A.1}).
+A segment is {\bf nonsingular} if it does not contain any singularities.
+
+\figg{A.1}{(a) node (b) cusp (c) extraordinary singularity}{2.75in}
+
+Any polynomial $F(x,y)$ of degree n has a factorization 
+$F = F_{1}F_{2}\ldots F_{r}$ into irreducible polynomials, unique to within
+constant multiples.
+The curves $F_{1}(x,y) = 0,\ \ldots,\ F_{r}(x,y) = 0$ are called the
+{\bf irreducible components} of the curve $F(x,y)=0$.
+An {\bf irreducible} curve is a curve with one irreducible component.
+
+Two points of a curve are {\bf connected} if they can be joined by a 
+continuous path on the curve.
+A {\bf connected component} of a curve is a maximal subset of the
+curve such that any two points of the subset are connected.
+A connected component of an algebraic curve is either unbounded
+or it forms a closed cycle.
+A curve is {\bf closed} if all of its connected components are
+closed cycles, otherwise it is {\bf open}.
+
+g : $I \subseteq \Re\rightarrow\Re^{2}$ 
+is a {\bf parameterization} of the 
+plane curve C if it puts the points of the curve
+into an almost one-to-one
+correspondence with the points of a line segment,
+by expressing the coordinates
+of the curve independently as functions of a single variable t:
+\mbox{x=j(t),\ y=k(t)}.
+More formally, \mbox{g(t) = (x(t),y(t)) : I $\subseteq\Re\rightarrow\Re^{2}$}
+is a parameterization of the plane curve f(x,y) = 0 if and only if
+%
+\begin{quote}
+\begin{description}
+\item{(i)} with only a finite number of exceptions,
+if $t_{0} \in I$, then f(x($t_{0}$),y($t_{0}$)) = 0
+(\ie, almost all of g(I) is contained in the curve); and
+\item{(ii)} with only a finite number of exceptions,
+if ($x_{0}$,$y_{0}$) is a point of the curve, then
+there is a unique $t_{0}\in I$ such that 
+\mbox{$x_{0}$ = x($t_{0}$)}, \mbox{$y_{0}$ = y($t_{0}$)}
+(\ie, g is one-to-one and onto almost everywhere).
+\end{description}
+\end{quote}
+The definition of a parameterization g(t) = (x(t),y(t),z(t)) of a space curve
+is similar.
+
+A function f(x) is {\bf rational} if it can be expressed as 
+the ratio of two polynomials: $f(x) = \frac{g(x)}{h(x)}$.
+A parameterization (x(t),y(t)) is {\bf rational} if both x(t) and
+y(t) are rational.
+
+Let \[ f(x_{1},\ldots,x_{r}) = a_{0} + a_{1}x_{r} + \ldots + a_{n}x_{r}^{n} \]
+    \[ g(x_{1},\ldots,x_{r}) = b_{0} + b_{1}x_{r} + \ldots + b_{m}x_{r}^{m} \]
+where $a_{i},b_{i} \in \Re[x_{1},\ldots,x_{r-1}],\ a_{n}b_{m} \neq 0, 
+\mbox{ and } n,m > 0$.
+The {\bf resultant} of f and g with respect to $x_{r}$ is 
+%
+\[ R(x_{1},\ldots,x_{r-1}) = \left| \begin{array}{cccccc}
+a_{0} & a_{1} & \ldots & a_{n} \\
+      & a_{0} & \ldots & a_{n-1} & a_{n} \\
+      &       &	\ldots \\
+      &       &        & a_{0} & \ldots & a_{n} \\
+b_{0} & b_{1} & \ldots & b_{m} \\
+      & \ldots& \ldots \\
+      &       &        & b_{0}  & \ldots & b_{m} \\
+\end{array} \right| \]
+%
+where there are m rows of a's and n rows of b's, the rows being filled out by 
+zeros.
+
+Let $\arc{W_{1}W_{2}}$ be a convex segment.
+The {\bf inside} of the chord $\lyne{W_{1}W_{2}}$ is the halfplane that
+contains $\arc{W_{1}W_{2}}$.
+The inside of the chord \lyne{\wo\wt}\ is found by crawling from \wo\ to
+a point on \arc{\wo\wt}
+and determining the side of \lyne{\wo\wt}\ that this point lies on.
+The computation of the inside of the chord of each convex segment that
+lies in a multisegment cell of the cell partition is 
+a preprocessing step.

@@ -1,0 +1,12 @@
+[ FILE: lightSceneCornell3
+  A 2D scene of building footprints.
+  Call: umbra -r 20 -S ../../interpolation/data/scene/lightSceneCornell3
+  Illustrates outer sweep and large difference between local/global umbra.
+  Created: 5/1/03
+]
+{
+../../interpolation/data/circleOne.pts     3 0      -12  -1
+../../interpolation/data/arch/cornell1.pts 1 0	     8  -8
+../../interpolation/data/arch/lipstick.pts  .75 80  -4 1
+}
+.08	0 0

@@ -1,0 +1,12 @@
+[ FILE: lightSceneCornell2
+  A 2D scene of building footprints.
+  Call: umbra -r 20 -S data/umbra/lightSceneCornell2
+  Illustrates subtle difference between local and global back umbra.
+  Created: 5/1/03
+]
+{
+../../interpolation/data/circleOne.pts 3 0   -7  -1
+../../interpolation/data/arch/cornell1.pts 1 0	8  -8
+../../interpolation/data/arch/lipstick.pts  .5 45  -1 2
+}
+.08	0 0

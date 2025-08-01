@@ -1,0 +1,51 @@
+%
+% coor.tex		M. Goodrich and J. Johnstone
+%
+\newif\ifFull
+\Fullfalse		% This disables some proofs, etc.
+% \Fulltrue		
+%
+% Define document style
+%
+\ifFull
+  \documentstyle[12pt,titlepage]{article}
+\else
+  \documentstyle[11pt]{article} 
+\fi
+%
+\input{macros}
+%
+% Page format
+%
+\DoubleSpace
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\topmargin}{0pt}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+\begin{document}
+\section*{Figures}
+									% 1st
+\figg{fig.stair}{A staircase crawl}{1.5in}
+%series of coordinated subcrawls
+%		 (b) a compact representation of a staircase crawl}{3.5in}
+%		 (c????) a coordinated crawl to the end of a segment}{.1in}
+%
+									% 2nd
+\figg{fig-skip}{An intersection may be overlooked unless each subcrawl
+		ends by backing up a step}{1.5in}
+									% 3rd
+\figg{fig.simul}{A simultaneous crawl}{1.5in}
+%		 (b) a grid of vertical lines}{.1in}
+									% 4th
+							% picture is in countereg.pic
+%\figg{countereg}{The first subcrawl of a staircase crawl from A 
+%would continue right on past the intersection to B}{2.5in}
+									% 5th
+						        % picture is in skipover.pic
+%\figg{skip}{A simultaneous crawl would not notice that it had skipped over
+%these two intersections}{2.5in}
+%\figg{fig1onsheet}{old Figure 1 on sheet}{.1in}
+%
+\end{document}

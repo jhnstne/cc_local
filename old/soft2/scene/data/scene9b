@@ -1,0 +1,9 @@
+[ FILE: scene9b
+  A 2D test scene for umbral analysis.
+  Created: 5/1/03 from vg9....pts
+]
+{
+../../interpolation/data/circleOne.pts .5  0   1 -5
+../../interpolation/data/curve9b.pts    1  0	 0  0
+}
+.18	0 0

@@ -1,0 +1,8 @@
+kernel -p -d 10 data/curve/ob1b.pts
+kernel -p -d 10 -x .5 data/curve/ob1b.pts
+kernel -p data/curve/banana1.pts
+kernel -p data/curve/banana4.pts
+kernel -p -d 10 data/curve/ob1a.pts
+kernel -p data/curve/complexKernel.pts
+kernel -p data/curve/open.pts
+

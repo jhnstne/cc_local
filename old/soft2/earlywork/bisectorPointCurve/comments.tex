@@ -1,0 +1,143 @@
+Rida, 
+
+	Here it is finally.   I think we should congratulate ourselves on a 
+very elegant paper.  There are some beautiful results and it all ties 
+together into an impressive package.  Please pardon the delay: it was tough 
+slogging to reread everything (plus the new material).
+
+After wading through my comments scrawled over the paper and 
+elsewhere, they reduce to the following list, starting with the more 
+interesting points.  I will enclose the paper, with the minor changes 
+incorporated, in a subsequent mail.
+
+I have checked most of the formulas through by hand,
+but didn't get through some of the longer ones.
+I have not checked the following formulas: 
+(10), (39), (43), (50) and (51), (58) and (59), (60) and (61), (63) and (64),
+(82), (83), (86), (87)-(93).
+
+It would help to have a review of the sections at the end of p. 1.
+I will write one and send it to you tomorrow.
+
+
+
+p. 21, Lemma 2.1: Should the restriction on the curvature be relaxed
+	to `the lowest-order non-vanishing derivative of $\kappa(u)$ is odd'
+	rather than `\kappa '(u) \neq 0$?
+	This would also affect Lemma 2.2.
+	Is the concentration on the cusps `\kappa '(u) \neq 0$'
+	due to the remark after 2.2?
+
+p. 35: I have only convinced myself that (75) is a *superset* of the
+	coincident normal lines.
+	For example, suppose Xi(4,5) = Wi(4,5) = 0
+	and Yi(4,3) = Wi(4,3) = 0, but Yi(4,5) \neq 0.
+	Then 4 would be a root of (75) but r(4) would not necessarily have
+	coincident normals?
+	If this is true, it would affect the second paragraph on p. 38.
+
+p. 38, addition to end of Remark 3.5: 
+	`However, these exceptional self-intersections should be ignored,
+	because a switch from a point on the true bisector to a point not 
+	on the true bisector must occur at a critical point whose circle 
+	$C_{\bf q}$ is tangent to the curve ${\bf r}(u)$ at two or more 
+	distinct points, not simply tangent to the curve at a double point 
+	(see the proof of Theorem~\ref{thm:trim2}).'
+	
+	Note that I could change the definition of critical point
+	accordingly (2 or more *distinct* points), 
+	but this has repercussions elsewhere that
+	I don't want to worry about for now.
+
+p. 38, bottom of page: 
+	I'm not sure why `the appropriate correspondences between the 
+	distinct real roots *must* be established'.
+	The algorithm simply checks each segment [b(u1),b(u2)],
+	[b(u2),b(u3)], etc. for validity (last step of algorithm on p. 34),
+	so it doesn't seem necessary to pair self-intersections.
+
+% **************************************
+
+The following comments/changes are minor:
+
+p. 3, equation (6): I get a denominator of $W^2$ rather than 
+	GCD(W,W') when I take GCD((x/w)',(y/w)').  I'm sure I'm missing
+	something.
+
+p. 8: last line of example 1.2: `Moreover, the closest point of 
+${\bf r}(u)$ to ${\bf p}$ can be the point ${\bf r}(0)$.'
+
+p. 14, Figure 4: I think it would help to add the marking `d(u)'
+to the side pq of the triangle (complementing this mark on the qr(u) side).
+
+p. 14, formula (33): right hand side $\lambda$ should be $|\lambda|$
+			(i.e., adding absolute value)
+
+p. 14: directly after (34): `by using the law of cosines.'
+	That is, `... we have <(34)> by using the law of cosines.  Since ...'
+
+p. 16 and 22:
+	the degrees of formula (36), (58), and (59) seem to be of degree 
+	2n-1, 4n-3, and 7n-3, rather than 2n-2, 4n-4, and 7n-6 (as specified)
+	respectively.
+	I assume that this is because higher degree terms cancel,
+	and not a miscalculation.
+
+p. 17: end of Example 2.1: `regardless of the location *of* $(\alpha,\beta)$'
+
+p. 18: end of first paragraph: `The cusps of the untrimmed bisector become
+	important for trimming in later sections.'
+
+P. 18, formula (45): I think I mentioned this before, but I forget the answer:
+	the expression for curvature that I know about is 
+	$\frac{|{\bf r}'(u) \times {\bf r}''(u)|}{|{\bf r}'(u)|^3}$,
+	(i.e., $z$ is not involved).
+	e.g., Millman and Parker, p. 46, or Kreyszig, p. 35.
+	Where does the form in (45) come from?
+
+(51): although (51) is one of the formulae I have not checked (see below),
+	the use of 1+2\kappa d looks suspicious, since 1+\kappa d is the norm.
+	Perhaps it bears checking.
+
+p. 21, just after (54): `in the direction of $t(u) + n(u) tan \psi(u)$'.
+	Note the addition replacing the subtraction.
+
+p. 21, (56): I'm not sure that the second equation adds anything,
+	and actually might confuse the issue.
+	It's just a substitution from (34) and the important
+	thing is the first equality.  If you agree, you could remove it,
+	otherwise it's fine for it to remain.
+
+p. 22, sentence before (57): add a clause:
+	`Using (35) and (45), the local critical curvature (56) 
+		is attained ... etc.'
+
+p. 26, switch order of (2a) and (2b) in Definition 3.2
+	(this adds to the clarity)
+
+p. 29: addition just before Defn 3.3: 
+	`We are also interested in points where the position of ${\bf p}$
+	 relative to the circle of curvature can change.'
+
+p. 30: just before `Note that': I added `(see Remark 3.2 below).'
+	Also, since the comment about center and radius of curvature is
+	only used at the end of Remark 3.2, I thought it more appropriate
+	to put it there (I found that it was confusing encountering this
+	comment in its present context).
+	I rearranged the discussion there to make it fit.
+	By the way, within this comment, I cannot figure out how to establish
+	that the curvature is positive when the normal $n(u)$ points away from
+	the center of curvature.
+
+p. 34: addition to step 2.
+
+p. 39: `a just` -> `just a'
+
+p. 44: I added parentheses to aid the understanding of the end of Remark 3.6.
+
+
+
+I am starting to think about which parts to condense into an extended
+abstract for conference submission.  We can talk about that at Tempe.
+
+					John

@@ -1,0 +1,380 @@
+\documentstyle[12pt]{article} 
+%
+\input{macros}
+%
+% Page format
+%
+\DoubleSpace
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\topmargin}{0pt}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+%
+%
+\title{The bisector of two plane algebraic curves}
+\begin{document}
+
+{\bf Abstract.}
+We solve the problem of finding the bisector of two plane algebraic curves.
+These bisectors are important to the construction of Voronoi diagrams of 
+algebraic curves.
+The key technique is to build a superset of the bisector and then pare it down.
+
+\section{Previous work}
+
+Yap \cite{Y85} has considered some simple bisectors, as outlined in 
+Table~\ref{yap-table} gleaned from Yap \cite[p. 371--72]{Y87}.
+
+\begin{table}
+\label{yap-table}
+\centering
+\begin{tabular}{|l|c|c|}
+\hline
+			& bisector \\ \hline
+two points 		& line \\ \hline
+line and point (on line)& line\footnotemark[6] \\ \hline
+line and point (not on line) &	parabola \\ \hline
+two lines 		& line\footnotemark[7] \\ \hline
+two line segments	& piecewise linear/parabolic curve (up to seven 
+			  pieces) \\ \hline
+two circles (disjoint interiors) & 1 branch of hyperbola\footnotemark[8]
+		\\ \hline
+two circles (one inside other) & ellipse\footnotemark[9]	\\ \hline
+two circles (intersecting) & ellipse + 1 branch of hyperbola\footnotemark[10]
+	\\ \hline
+circle and point (inside) & ellipse \\
+{[degenerate form of two circles]} &  \\ \hline
+circle and point (outside) & 1 branch of hyperbola \\
+{[degenerate form of two circles]} & \\ \hline
+circle and point (on)	  & ray\footnotemark[11] \\ \hline
+circle and line (not intersecting)
+			& parabola\footnotemark[12]	\\ \hline
+circle and line (intersecting)     & 2 parabolas\footnotemark[13] \\ \hline 
+\end{tabular}
+\caption{Bisectors of points and curves in 2D}
+
+\end{table}
+\footnotetext[6]{Through point and normal to line.} 
+\footnotetext[7]{Through intersection (possibly at infinity)
+			  and bisecting the angle between the lines.}
+\footnotetext[8]{The branch loops around
+	the smaller circle.  In the degenerate case of equal radii, the 
+	hyperbolic branch becomes a line.}
+\footnotetext[9]{The foci of the ellipse are the two centers of the circles.}
+\footnotetext[10]{Both ellipse and
+	hyperbola pass through the two intersections of the circles.
+	(Foci of ellipse are again the centers of the circles??)
+	Degenerate cases arise when circles are tangent:
+	ellipse becomes line segment between two centers when circles 
+	are almost disjoint,
+	hyperbola becomes ray away from both centers when one circle 
+	is almost inside other.}
+\footnotetext[11]{From center of circle through point.}
+\footnotetext[12]{This bisector is closely related to that of a
+		point and a line. In particular, if C is a circle of 
+		center $p_{C}$ and radius r and
+		L is a line not intersecting C, then bisector(C,L) is 
+		equivalent to
+		bisector($p_{C}$, line parallel to L but distance r further 
+		away from C).}
+\footnotetext[13]{Both parabolas pass through 
+	the two intersections of circle and line.
+	Directrices of two parabolas are the two lines parallel to given 
+	line and at 
+	a distance of the circle's radius away.
+	Degenerate case arises when line is tangent to circle:
+	one parabola becomes a ray from the point of tangency away from 
+	the circle.}
+
+
+DISCUSS MEDIAL AXIS LITERATURE.
+
+\section{A superset of the point-curve bisector}
+\label{sec-sup1}
+
+% Picture of the bisector of a point and an algebraic curve 
+% [with P,C,$\alpha$,Q marked]
+
+Let $B(C,\alpha)$ be the bisector of the plane algebraic curve C and the 
+point $\alpha \not \in C$.
+By definition, $P \in B(C,\alpha)$ if and only if 
+$\mbox{dist}(P,C) = \mbox{dist}(P,\alpha)$.
+Since the algebraic curve C is closed in the Euclidean topology of the plane,
+dist(P,C) := inf \{dist(P,c) : $c \in C$\} = min \{dist(P,c) : $c \in C$\}.
+% If S is closed, then the infimum will be attained by some point,
+Therefore, 
+\[ P \in B(C,\alpha) \Leftrightarrow \exists\ Q \in C \mbox{ s.t. } 
+\mbox{dist}(P,C) = \mbox{dist}(P,Q) = \mbox{dist}(P,\alpha) \]
+The goal is to find the locus of all P that satisfy these properties, and 
+the way to do this is to translate the conditions on P into a system 
+of equations.
+This is simple for the criteria $Q \in C$ and 
+$\mbox{dist}(P,Q) = \mbox{dist}(P,\alpha)$:
+%
+\begin{eqnarray}
+	f(q_{1},q_{2})=0 \\
+%
+	(q_{1} - p_{1})^{2} + (q_{2} - p_{2})^{2} - (\alpha_{1} - p_{1})^{2} - 
+	(\alpha_{2} - p_{2})^{2} = 0
+\end{eqnarray}
+%
+where $P = (p_{1},p_{2})$, $Q = (q_{1},q_{2})$, 
+$\alpha = (\alpha_{1},\alpha_{2})$,
+and C is defined by $f(x,y) = 0$.
+However, it is hard 
+% perhaps impossible except in the theory of the reals, 
+% where inequalities are allowed?
+to express the minimal condition dist(P,Q) = min \{dist(P,c) : $c \in C$\} 
+analytically.
+Therefore, it is best to replace this condition, and the following lemma 
+offers the means.
+
+\begin{lemma}
+\label{lem1}
+If Q is the closest point on the curve C to the point P,
+then Q is a singularity
+or \seg{PQ} is perpendicular to the tangent to C at Q (Figure 3.1).
+% Could make stronger statement: ` If ..., then Q is a cusp or \seg{PQ} 
+% is perpendicular to each of the tangents to C at Q.'?
+\end{lemma}
+\Heading{Proof:}
+Let Q be the closest point on C to P.
+Thus, $B_{\mbox{dist(P,Q)}}(P) \cap C = \emptyset$, 
+where $B_{\mbox{dist(P,Q)}}(P)$
+is the open ball of radius dist(P,Q) about P.
+Assume without loss of generality that Q is a nonsingular point.
+If \seg{PQ} is not perpendicular to Q's tangent, then Q's tangent must 
+intersect $B_{\mbox{dist(P,Q)}}(P)$.
+But, since the tangent is continuous in the neighbourhood of the nonsingular 
+point Q,
+this implies the contradiction that the curve in the neighbourhood of Q 
+intersects $B_{\mbox{dist(P,Q)}}(P)$.
+Therefore, \seg{PQ} must be perpendicular to Q's tangent.
+\QED
+
+\vspace{.25in}
+\noindent This characterization can certainly be translated into an equation.
+
+\begin{corollary}
+\label{cor}
+If dist(P,Q) = dist(P,C), then 
+\begin{equation}
+(P-Q) \cdot (f_{y}(Q),-f_{x}(Q)) = 0
+\end{equation}
+where $f_{x}$ (resp., $f_{y}$) is the derivative of $f$ with respect to $x$ 
+(resp., $y$).
+\end{corollary}
+\Heading{Proof:}
+If Q is a singularity, then $f_{x}(Q) = 0 = f_{y}(Q)$ \cite{W50}.
+% [p. 54]
+Suppose that Q is a nonsingular point.
+The tangent of $f(x,y)=0$ at Q is parallel to the line 
+$f_{x}(Q)x + f_{y}(Q)y = 0$ \cite[p. 55]{W50}.
+Since this line passes through the origin and $(f_{y}(Q),-f_{x}(Q))$, 
+the tangent at Q is parallel to the vector $(f_{y}(Q),-f_{x}(Q))$.
+Thus, \seg{PQ} is perpendicular to the tangent to C at Q if and only if
+$(P-Q) \cdot (f_{y}(Q),-f_{x}(Q)) = 0$.
+\QED
+
+\begin{example}
+The condition of Lemma~\ref{lem1} is not sufficient, as shown by Figure 3.2 where
+$Q'$ satisfies the conditions but is not the closest point of $C$ to $P'$.
+However, it is difficult to find a condition that discards $P'$ from the bisector set.
+As a result, we shall leave $P'$ in the preliminary set, and only discard it later.
+\end{example}
+
+% Example: Figure 3.2 shows a point P' that satisfies the conditions 
+% but does not lie on the bisector.
+
+\vspace{.25in}
+\noindent Since equation (3) is a necessary but not sufficient condition for 
+dist(P,Q) = dist(P,C),
+the simultaneous solution set of equations (1)-(3) will be a superset of 
+the bisector.
+In particular, since these three equations in four variables can be reduced 
+to one 
+equation in two variables, the solution set of 
+equations (1)-(3) is a plane algebraic curve S that contains the bisector.
+The next section shows how to strip away the points of S that do not lie on 
+the bisector.
+
+The complexity of the computation of the point-curve bisector superset for a 
+curve of degree $d$ is the complexity of solving a system of two equations 
+of degree $d$ and an equation of degree 2.
+Using resultants to reduce the system to a single equation in one variable,
+an upperbound is the complexity of solving a univariate equation of 
+degree $2d^{2}$.
+
+\section{Collapsing the superset of the point-curve bisector}
+\label{sec-col1}
+
+Idea: the superset consists of several segments, each separated by a singularity.
+Each segment is either entirely within the bisector or entirely without.
+Thus, it only requires checking one point of a segment to determine the status
+of the entire segment.
+
+The first observation is that the bisector of $\alpha$ and $C$ will 
+not intersect the curve $C$.
+Therefore, a point $x \neq \alpha$ of intersection of the superset S and C is 
+clearly not on the bisector.
+These points of intersection will guide us to the entire extraneous set 
+$S \setminus B(C,\alpha)$, since the segments that may potentially have 
+to be removed from S are those between two of these intersections.
+The following lemma establishes that the segment between two intersections 
+is in the bisector if and only if an arbitrary point of this segment is in 
+the bisector.
+
+We shall use these observations to winnow S down to the bisector as follows.
+The intersections of the curves C and S are computed.
+% This step requires resultants [analyze its complexity].
+% Discuss methods for curve-curve intersection.
+The superset curve S is split into segments between intersections with C, by
+sorting the intersections along S \cite{jj}.
+The bisector is the union of some of these segments.
+A single point of each segment is tested for membership in the bisector
+and the appropriate segments are discarded.
+In order to test if a point P is in the bisector,
+we test if the point is equidistant from $\alpha$ and C, as follows:
+find all points Q such that \seg{PQ} is perpendicular to Q's tangent 
+(by solving an equation similar to equation (3)),
+find the closest one to P, and check if its distance from P is equal to 
+dist(P,$\alpha$).
+
+\section{Bisector of point and algebraic curve SEGMENT}
+
+\section{A superset of the bisector of two plane algebraic curves}
+\label{sec-sup2}
+
+% Picture of bisector of two curves
+
+The curve-curve bisector computation is analogous to that of the point-curve bisector.
+
+Let $C_{1}$ and $C_{2}$ be two plane algebraic curves defined by $f(x,y)=0$ 
+and $g(x,y)=0$, respectively, and consider their bisector $B(C_{1},C_{2})$.
+$P \in B(C_{1},C_{2})$ if and only if there exists Q and R such that
+\begin{enumerate}
+\item
+	$Q$ lies on curve $C_{1}$
+\item
+	$R$ lies on curve $C_{2}$
+\item
+	dist(P,Q) = dist(P,R)
+\item
+	dist(P,Q) = dist(P,$C_{1}$) = min \{ dist(P,s) : $s \in C_{1}$ \}
+\item
+	dist(P,R) = dist (P,$C_{2}$) = min \{ dist(P,s) : $s \in C_{2}$ \}
+\end{enumerate} 
+Once again, we want to replace the conditions (4) and (5), 
+which involve minima, with more tractable conditions.
+
+\begin{enumerate}
+\item
+	$f(q_{1},q_{2})=0$
+\item
+	$g(r_{1},r_{2})=0$
+\item
+	$(q_{1} - p_{1})^{2} + (q_{2} - p_{2})^{2} - (r_{1} - p_{1})^{2} - 
+	(r_{2} - p_{2})^{2} = 0$
+\item
+	$(p_{2} - q_{2}) f_{x}(q_{1},q_{2}) - 
+	(p_{1} - q_{1}) f_{y}(q_{1},q_{2}) = 0$
+\item
+	$(p_{2} - r_{2}) g_{x}(r_{1},r_{2}) - 
+	(p_{1} - r_{1}) g_{y}(r_{1},r_{2}) = 0$
+\end{enumerate}
+
+Since these conditions are weaker, the resulting solution set will be a 
+superset of the bisector.
+
+\section{Bisector of two algebraic curve SEGMENTS}
+
+\section{Solution of system of equations}
+\label{sec-system-soln}
+
+Must show that the equations are independent (and thus can be used to eliminate two
+variables).
+Test whether the matrix of equations is of full rank.
+%
+The multivariate resultant \cite{} can be used to solve the system of equations (1)-(5).
+Unfortunately, with this method, the system of five quadratic equations in six 
+variables is reduced to a single equation in two variables of degree $2^{5} = 32$.
+We must show that `the solution set is one-dimensional, not two-dimensional'(?).
+An alternative is to retain the minimal conditions and express them using inequalities.
+The resulting system of equations and inequalities could be solved with the theory of
+reals \cite{}, although this requires double-exponential time [or is it single-exponential
+since Canny?].
+
+\section{Future directions}
+
+It is interesting to consider the extension of these ideas to several curves.
+One should not consider the locus of points equidistant from three or more plane algebraic 
+curves, since this is in general a set of points rather than a curve.
+The more interesting direction is the one leading to Voronoi diagrams, namely
+the locus of points equidistant from at least two curves.
+This involves the merging of the bisectors of pairs of curves.
+% We are investigating this problem.
+A related problem is the computation of the bisector of two segments of algebraic curves,
+rather than the bisector of entire curves.
+% since it is computed by refining the bisectors of all pairs from the sets IS THIS SO?
+A challenging extension is to three dimensions, such as the bisector of two space 
+curves or the bisector of two surfaces, since the bisector becomes a surface.
+
+Find medial axis (as opposed to bisector) of curve.
+Find medial axis of simple curvegon.
+
+\section{Conclusions}
+
+Originally, it looks as if you need to take min (which is very difficult).
+But this is only true if you insist on finding the bisector directly with
+necessary and sufficient conditions.
+One can also find necessary but not sufficient conditions 
+that generate a superset of the bisector, and then find ways of stripping away
+the chaff from this superset.
+
+In three dimensions, we also know that the bisector of two skew lines
+is a right hyperbolic paraboloid (Johnstone and Shene 1991).
+Notice that bisectors are related to distance representations.
+Bisectors are a special case: d1 = d2.
+Offset surfaces are another special case: d1 = k.
+The search for bisectors can be related to the search for 
+geometric representations, as follows.
+One way to find a geometric representation 
+of a complicated curve C is to look for two simple curves whose bisector is C: 
+that is, complex = bisector(simple,simple).
+The evidence (Yap's upperbounds on bisector degree) is that 
+this is a realistic approach, since the bisector of two curves 
+is more complex than the original curves.
+
+\section{Appendix}
+
+\begin{lemma}
+Point-curve bisectors and curve-curve bisectors are continuous curves
+(although they might be disconnected).
+[This is important to establish the legality of throwing out an entire segment even though
+only one representative point was tested.]
+\end{lemma}
+
+\begin{thebibliography}{The longest}
+
+\bibitem{PS85} 
+F. Preparata and M. Shamos,
+{\em Computational Geometry: An Introduction}, 
+Springer Verlag, New York, 1985.
+
+\bibitem{W50}
+R. J. Walker,
+{\em Algebraic Curves},
+Springer Verlag, New York, 1950.
+
+\bibitem{Y85}
+C. K. Yap, 
+{\em An O(n log n) algorithm for the Voronoi diagram of a set of simple curve segments},
+Technical Report No. 161, Courant Institute of Mathematical Sciences, New York University,
+NY, 1985.
+% May, 1985
+
+\end{thebibliography}
+
+\end{document}

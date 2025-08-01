@@ -1,0 +1,263 @@
+%   LOOKS LIKE GARBAGE
+\newif\ifFull
+\Fullfalse
+% \Fulltrue
+\documentstyle[11pt]{article} 
+%
+\input{macros}
+%\include{setup}
+%
+\newcommand{\px}{\mbox{$p_{x}$}}
+\newcommand{\py}{\mbox{$p_{y}$}}
+\newcommand{\pz}{\mbox{$p_{z}$}}
+\newcommand{\pxyz}{(\px,\py,\pz)}
+\newcommand{\projinvF}{\mbox{proj$^{-1}$(F)}}
+% Page format
+%
+\SingleSpace
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\topmargin}{0pt}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+%
+\begin{document}
+\label{tangplane}
+Let C be a space curve, ($x_{0},y_{0},z_{0}) \in C$,
+P a source of projection with \pz $\neq$ 0, $\pz \neq z_{0}$.
+Consider the plane containing P and the tangent line $T_{1}$ to the
+plane curve proj(C)
+at proj($x_{0},y_{0},z_{0}$).
+This plane is tangent to C at ($x_{0},y_{0},z_{0}$).
+\end{corollary}
+\begin{proof}\nopagebreak
+We must show that the plane contains the tangent line $T_{2}$ to 
+($x_{0},y_{0},z_{0}$).
+\begin{center}
+FIGURE 1
+\end{center}
+By the very nature of projection, any point of $T_{2}$ lies on the line 
+connecting its projection to P.
+But, by the previous lemma, its projection lies on $T_{1}$, and any line
+between a point of $T_{1}$ and P lies in our plane.
+Therefore, every point of $T_{2}$ lies on the plane.
+\end{proof}
+%
+{\bf Definition:}
+A plane curve [space curve] $C_{1}$ 
+{\em cuts through} another plane curve [a plane] $C_{2}$ if, when we
+consider $C_{2}$ as cutting the plane [3-space] into two regions
+(inside vs.\ outside, or left vs.\ right), $C_{1}$ lies in both
+regions in any $\epsilon$-nhood of the point of intersection.
+%
+\begin{lemma}
+\label{planarcutsthru}
+["Lemma 7" of cubic.tex: replace there]
+A line L cuts through a plane curve C at a nonsingular point P
+iff the multiplicity of intersection of L with C at P is odd.
+\end{lemma}
+\begin{proof}\nopagebreak
+Assume WLOG that L is the y-axis and P is the origin. (Rigid
+transformations---rotations and translations---do not affect the 
+multiplicity or singularity of the curve at an intersection.)
+Let $N_{\epsilon}(0)$ = {$c\in C |$dist$_{C}(c,(0,0)) < \epsilon$}
+where dist$_{C}(c_{1},c_{2})$ is the length of the curve C between
+two points $c_{1},\ c_{2}$ on it (already defined in cubic.tex).
+That is, $N_{\epsilon}(0)$ is a small part of the curve near the
+origin.  We claim that $\exists \epsilon > 0$ such that $N_{\epsilon}(0)$
+can be represented by a function y = g(x) (i.e., $\not\exists
+c_{1},\ c_{2} \in N_{\epsilon}(0)$ with the same abscissa).
+The directed tangent at the origin is ($\pm$1,0), depending upon
+the direction that you are travelling.  
+The tangent to an algebraic curve
+\marginpar{Prove! This proof is also needed in Lemma 10 of cubic.tex}
+changes continuously except at singularities (Lemma~\ref{tangcont} of
+lemma9.tex).
+Thus, it takes some positive distance from the nonsingular origin for
+the directed tangent vector of a point to reverse the sign of its
+abscissa from 1 to $-\delta$ (or -1 to $+\delta$).
+In other words, $\exists \epsilon > 0$ such that the curve does not
+change directions (or become constant) with respect to x for an
+$\epsilon$ distance along the curve.
+\hence $\exists \epsilon > 0$ such that $\not\exists c_{1},\ c_{2} \in
+N_{\epsilon}(0)$ with the same abscissa.
+Within this neighbourhood, 
+\marginpar{We should show that g(x) is a polynomial, since I think
+that you need this in order to take the Taylor series as we have.}
+the curve can be represented by a function,
+say y = g(x).\\ \\
+Expand g(x) into a Taylor series:
+\begin{equation}
+\label{eq:Taylor}
+g(x) = g(0) + g'(0)x + g''(0)x^2 + \ldots  
+\end{equation}
+Since $y-g(x) = 0$ represents the curve C near to the origin
+and $x=t,\ y=0$ is a parameterization of L, the intersections of L
+with C near to the origin are associated with the roots of $0-g(t)=0$
+(substituting the parameterization into the curve equation).
+In particular, using (\ref{eq:Taylor}) above, we can see that the
+multiplicity of the intersection of L with C at the origin is
+min ${i|g^{(i)}(0) \neq 0}$.
+Now, we know that g(x) changes sign as x changes sign $\Leftrightarrow$
+C cuts through L, the y-axis, at P, the origin.
+Also, as x $\rightarrow$ 0 the lowest order term in (\ref{eq:Taylor})
+dominates all other terms.
+Thus, g(x) changes sign as x changes sign $\Leftrightarrow$ the lowest
+order term in (\ref{eq:Taylor}) is odd.
+\hence C cuts through L at P $\Leftrightarrow$ the lowest order term
+in (\ref{eq:Taylor}) is odd.
+\hence C cuts through L at P $\Leftrightarrow$ the multiplicity
+of intersection of L with C at P is odd.
+\end{proof}
+\begin{conjecture}
+[A 3D version of Lemma~\ref{planarcutsthru}]
+\label{spacecutsthru}
+A plane T cuts through a space curve C at a nonsingular point P iff
+the multiplicity of intersection of T with C at P is odd.
+\end{conjecture}
+\begin{conjecture}
+[A simple inclusion lemma]
+\label{inclusion}
+Let L be a line in the plane P.
+Suppose that a curve C is tangent to L at q.
+Then the multiplicity of intersection of L with C at q is equal
+to the multiplicity of intersection of P with C at q.
+\end{conjecture}
+{\bf Proof}:\nopagebreak \\
+\begin{conjecture}
+The projection of the intersection of two quadric surfaces does not
+contain a finite flex (i.e., a flex at a point of infinity is still allowed).
+\end{conjecture}
+\begin{proof}\nopagebreak
+(Note:  By projection we mean central projection.)
+[We must prove that the point left out because the source of
+projection does not map
+anywhere is not a flex. This may well be a flex at infinity!]
+[Note that proj$^{-1}$(F) cannot be the source of projection since
+the projection of this point is not defined (or is a point at infinity).]
+Let the quadrics be Q and $Q'$, $C = Q \cap Q'$.
+Suppose, for the purposes of contradiction, that the projection of
+C does have a finite flex F. \\
+Using Corollary~\ref{tangplane}, let T be a plane tangent to the space
+curve C at proj$^{-1}$(F) such that T contains the tangent line to the 
+plane curve proj(C) at F.
+(proj$^{-1}$(F) is unique since F, as a flex, is nonsingular.)
+Note that, by definition, the tangent line to proj$^{-1}$(F) hits C
+at least twice at proj${^-1}$(F); and so, by Lemma~\ref{inclusion},
+C hits T at least twice at proj$^{-1}$(F). \\
+By Lemma~\ref{planarcutsthru}, proj(C) cuts through the tangent to F.
+Hence, C cuts through T at proj$^{-1}$(F).
+[We have almost proved this (see following).  We have a problem with
+showing that, for some nhood of proj$^{-1}$(F), a point either always
+flips to the opposite side or always stays on the same side of the plane
+T as you project.  I think that it hinges on looking at nhoods of
+proj$^{-1}$(F) that do not contain the source.  I think that
+these will satisfy this property.]
+(Proof:Case 1: Suppose that the source of projection lies in between
+F and proj$^{-1}$(F), recalling that these points are collinear on T.
+Then a point flips over to the other side of the plane T when it is projected???
+Also, an $\epsilon$-neighbourhood of proj$^{-1}$(F) is projected to a
+$\delta$-neighbourhood of F, since projection is a continuous map.
+Since points of any $\epsilon$-neighbourhood of F are on both sides of T,
+points of any $\epsilon$-neighbourhood of proj$^{-1}$(F) are on both sides.)
+\hence By Lemma~\ref{spacecutsthru}, C hits T an odd number of times at
+\projinvF.
+\hence C hits T at least three times at \projinvF.
+\hence By Lemma~\ref{inclusion}, the tangent line to C at \projinvF
+hits the curve at least three times there.
+\hence This tangent line hits each quadric at least three times, so,
+by an extension of Bezout's Theorem, it is a component of both quadrics.
+\hence The tangent line at \projinvF is part of the intersection curve. \\
+But we saw above that the intersection curve C cuts through the tangent plane,
+and thus the tangent line, at \projinvF.
+\hence \projinvF is a singular point of C.
+Moreover, the projection of this singular point is a singular point.
+(We know that the projection of the tangent line is in the tangent plane.
+The projection of the space curve is not.
+Hence, the two components that meet at \projinvF do not become the same
+component on the plane.
+Hence, F = proj(\projinvF) is a singular point too.)
+This is a contradiction, since a flex is a nonsingular point.
+\hence The projected curve does not contain a flex.
+\end{proof}
+\begin{corollary}
+The projection of the intersection of two quadrics can never be a cubic
+of the nonsingular ($y^{2}=x^{3}+ax^{2}+bx$) equivalence class, or a
+nodal or cuspidal cubic with a finite flex (like $y=x^3$).
+\end{corollary}
+\begin{proof}
+These cubics have finite flexes.
+\end{proof}
+We have ruled out flexes.  How about singularities?  The next lemma
+provides a necessary condition for their presence.
+\begin{lemma}
+[A characterization of intersection curves that yield singularities
+under projection]
+\label{lem-sings}
+Let C be the intersection of two quadrics, C nonplanar.
+If the projection of C contains a singularity, then C must be reducible
+into two components: a line and a cubic space curve.
+\end{lemma}
+\begin{proof}
+Let $P\in C$ be the source of projection.
+Suppose that proj(C) has a singularity S.
+Consider the line L from the source to the singularity.
+Since S is a singularity, at least two points map to it.
+Therefore, counting P, L must contain at least three points of C,
+and this makes it a component of C (by two applications of Bezout).
+By \cite{CS655}, since C is nonplanar and reducible, it must consist
+of a degree 1 and a degree 3 component (i.e., a line and a cubic curve).
+\end{proof}
+In light of the previous two lemmas, I claim that it is indeed
+possible to sort the projection of a quadric intersection curve by the
+convex segment method, even though we do not have the equation of this
+plane curve but only the equation of its parent, the intersection curve.
+First, consider projections that are cubics.
+Since there are no flexes to find, we can use the convex segment method
+as long as we can find the projection's singularities and the
+tangents at these singularities.  
+(The projection must be a singular cubic, since nonsingular 
+cubics contain flexes.)
+Consider finding a singularity.
+The projection can have at most one point of singularity, since 
+singularities correspond to line components of the space curve (see 
+the proof of Lemma~\ref{lem-sings})
+Therefore, you can find the singularity by finding the (unique) line 
+that the two quadrics have in common.  
+In turn, this can be done by solving the system:
+\[ V \cdot (grad\ f)(P+tV) = 0 \\
+   V \cdot (grad\ g)(P+tV) = 0 \]
+for P and V (6 eqns, 6 unknowns), these being the equations that
+define a ruled line of a surface.
+There will remain a degree of freedom for P (anywhere along $P+tV$).
+This will yield the line.  You must then find the point on this line
+where the cubic component hits it.
+This is the inverse image of the projection's singularity.
+
+The tangents of the singularity are even more easily found,
+since projection preserves tangents.
+Simply find the tangent vectors at the space curve's singularity
+and project these vectors to the projection plane.
+
+Next, consider projections that are quadratics.
+
+\begin{conjecture}
+For fixed m and n, the set of degree mn curves created by intersecting
+a degree m surface with a degree n surface is a limited subclass of the
+set of all degree mn curves.
+\end{conjecture}
+\begin{proof}
+"For example: the intersection of two quadrics does not include planar
+quartics"
+\end{proof}
+%
+\begin{conjecture}
+[I have no feelings either way on the truth of this conjecture. It is
+interesting if it is true and equally interesting if it is not.]
+The union over all ${m,n|m+n=k}$ of the intersection curves of a degree m
+and a degree n surface is equivalent to the set of all degree k curves.
+(So you can get any curve by intersecting some pair of surfaces.)
+\end{conjecture}
+\end{document}
+

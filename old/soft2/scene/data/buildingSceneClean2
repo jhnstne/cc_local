@@ -1,0 +1,16 @@
+[ FILE: buildingScene
+  A 2D test scene for object visibility.
+  Call: umbra -r 20 -S data/umbra/buildingScene
+  Created: 5/2/03
+]
+{
+../../interpolation/data/arch/lipstick.pts 1 0   6 5
+../../interpolation/data/arch/cornell1.pts 1 0	6 -7
+../../interpolation/data/arch/cornell2.pts 1 0   6 -7
+../../interpolation/data/arch/elmonte.pts  1 0   -7 6
+../../interpolation/data/arch/hudClean.pts .5 0   -1 -12
+../../interpolation/data/arch/lipstick.pts .6 45 -2 3
+}
+.08	0 0
+../../interpolation/data/arch/lipstick.pts 1 0   9 -8
+

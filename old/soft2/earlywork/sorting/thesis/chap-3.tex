@@ -1,0 +1,788 @@
+\chapter{Multisegment Cells}
+\label{chap-3}
+
+When a cell of a curve's cell partition 
+contains more than one convex segment (Figure~\ref{3.1}),
+two of the problems associated
+%
+\figg{3.1}{Some multisegment cells}{2.25in}
+%
+with curve sorting become nontrivial: determining the partners of a 
+\wallpoint\ and determining the convex segment that a sortpoint lies on.
+This chapter confronts these problems.
+Section~1 introduces the definitions and lemmas that are needed for 
+the treatment of multisegment cells,
+while Sections~2 and~3 actually solve the problems.
+
+\section{Foundations}
+\label{sec-3.1}
+
+%Two wallpoints \wo, \wt\ at an ordinary singularity are not equivalent,
+%although they do share the same coordinates.
+%In particular, the tangents of the singularity 
+%(or, equivalently, the cell walls)
+%associated with \wo\ and \wt\ are different.
+%We express this relationship as follows: $\wo \neq \wt$ but 
+%$\mbox{pt}(\wo)=\mbox{pt}(\wt)$.
+%Thus, pt(\wo) refers only to the coordinates of \wo.
+%A wallpoint \wo\ of an ordinary singularity
+%is implicitly associated with the arc of the curve that is tangent to
+%\wo's tangent as it passes through the singularity.
+%Moreover, \wo\ is not considered to be a 
+%wallpoint of all
+%of the cells that meet at the singularity: only the two cells $C_{1}, C_{2}$
+%such that $W_{1}$'s arc passes from $C_{1}$ to $C_{2}$ as it travels through
+%\wo.
+%
+%\begin{example}
+%\fig{2}{chap-3}
+%$W_{i}$ is associated with $T_{i}$.  
+%\wo\ is associated with the solid arc, \wt\ with the dotted arc.
+%\wo\ is only a wallpoint of cells 1 and 4.
+%\wt\ is only a wallpoint of cells 1 and 2.
+%\end{example}
+%INSERT C.4
+
+Throughout this section, C is a cell of the cell partition of 
+a curve F, and P and Q are points of F.
+%
+\figg{3.1.5}{The inside of P's tangent}{2.25in}
+%
+\begin{definition}
+\label{defn-inside}
+If P is not a singularity or a flox,
+then {\bf the inside of P's tangent} is the halfplane that contains 
+all of the curve in the neighbourhood of P (Figure~\ref{3.1.5}(a)).
+Otherwise, P's tangent is a wall of F's cell partition, and
+{\bf the inside of P's tangent with respect to the cell C} is the halfplane
+that contains C (Figure~\ref{3.1.5}(b)).
+The inside includes the tangent, while the {\bf strict inside} does not.
+
+Let P be a flox that lies on the boundary of the cell C.
+Let $P_{\epsilon}$ be a point of the curve inside cell C at distance
+$\epsilon > 0$ from P.
+($P_{\epsilon}$ may be found by crawling into C from P.)
+{\bf The outside endpoint of P's \cellsegment\ with respect to C} is the 
+endpoint that lies outside of $P_{\epsilon}$'s tangent, for $\epsilon$
+small (Figure~\ref{3.3}).
+%use the alternative method if JEH complains about crawling
+%
+\figg{3.3}{E is the outside endpoint of P's \cellsegment}{1.75in}
+%
+
+If P is not a flox, then P {\bf faces} 
+Q if Q lies on the inside of P's tangent (Figure~\ref{3.1.5}(a)).
+Otherwise, {\bf P faces Q with respect to the cell C} if
+(1) Q lies strictly inside P's tangent with respect to C,
+or (2) Q lies on P's tangent and Q lies on the opposite side of P from 
+the outside endpoint of P's \cellsegment\ with respect to C
+(Figure~\ref{3.2.5}).
+\end{definition}
+%
+\figg{3.2.5}{P faces both $Q_{1}$ and $Q_{2}$ with respect to C}{2in}
+%
+%
+\begin{notation}
+\#\{S\}\ is the number of elements in the set S.
+\seg{xy} is the line segment between x and y, 
+and it is assumed that \seg{xy} does not include 
+its \mbox{endpoints x and y}.
+Finally, we use `w.r.t.' as an abbreviation for `with respect to'.
+\end{notation}
+
+The following lemma establishes three important properties of the line
+segment that joins two points of a convex segment.
+(Recall from Section~\ref{sec-divide} what it means for a line and a curve
+to cross.)
+%
+\begin{lemma}
+\label{lem-sec31}
+Consider the cell partition of a curve F, and a cell C of this partition.
+Let \x\ and \y\ be two nonsingular points of a convex segment of the cell C.
+Then
+\begin{enumerate}
+\item the curve crosses \seg{\x\y} at an even number of points (ignoring
+singularities)
+\item $\#\{P \in \seg{\x\y} \cap F: P \mbox{ faces \x\ w.r.t.\ C}\} = $\\
+$\#\{P \in \seg{\x\y} \cap F: P \mbox{ faces \y\ w.r.t.\ C}\}$
+\item for all $\alpha \in \seg{\x\y}$,\ \ \nopagebreak
+$ \#\{P \in\seg{\x\alpha}\cap F: P \mbox{ faces \x\ w.r.t.\ C}\} \leq $\\
+$ \#\{P \in \seg{\x\alpha}\cap F: P \mbox{ faces \y\ w.r.t.\ C}\} $
+\end{enumerate}
+\end{lemma}
+%
+\figg{4}{An example of Lemma 3.1}{2.25in}
+%
+\begin{example}
+Figure~\ref{4} offers a hypothetical example for Lemma~\ref{lem-sec31}.
+The curve F crosses \seg{\x\y} an even number of times.
+\[ \{ P \in \seg{\x\y} \cap F:\mbox{ P faces \x\ \} = \{}P_{2},P_{5},P_{6}\}\]
+which is of the same size as
+\[ \{ P \in \seg{\x\y} \cap F:\mbox{ P faces \y } \} = \{P_{1},P_{3},P_{4}\}\]
+Moreover,
+\[ \{ P \in \seg{\x\alpha} \cap F: \mbox{ P faces \x } \} = \{P_{2}\} \]
+which is smaller than
+\[ \{ P \in \seg{\x\alpha} \cap F: \mbox{ P faces \y } \} = \{P_{1},P_{3},P_{4}\} \]
+\end{example}
+%
+\begin{proof}{\bf (of Lemma~\ref{lem-sec31})}\\
+(1) Consider the closed region $R_{\x\y}$ bounded by \seg{\x\y}\ and 
+%
+\figg{3.3.5}{The region $R_{\x\y}$}{1.5in}
+%
+\arc{\x\y} (Figure~\ref{3.3.5}).
+$R_{\x\y}$ lies in the cell C:\nopagebreak
+\begin{quote}\nopagebreak
+\arc{\x\y}\ lies in the cell $\Rightarrow$
+\seg{\x\y}\ lies in the cell (since the cell is a convex polygon)
+$\Rightarrow$ the region bounded
+by \arc{\x\y}\ and \seg{\x\y}\ lies in the cell (since the 
+cell is a convex polygon)
+\end{quote}
+\x\ and \y\ are nonsingular, and
+\arc{\x\y} does not contain a singularity, since it lies in the
+interior of the cell.
+Therefore, the curve can only cross into $R_{\x\y}$ through \seg{\x\y}.
+If the curve enters $R_{\x\y}$, then it must also leave $R_{\x\y}$, since 
+an infinite segment cannot remain within a 
+closed region (Lemma~\ref{nonbounded}) and an algebraic curve of finite
+length is closed (in particular, the curve cannot stop short in the middle of 
+$R_{\x\y}$).
+We claim that the 
+point of departure $D$ must be distinct from the point of entry $E$,
+unless all of the tangents 
+at $D=E$ are \lyne{XY}, as in Figure~\ref{3.except}.
+Otherwise, if $D=E$, then at least one of 
+the tangents of the singularity $D$ will cross into $R_{\x\y}$ and
+form a wall of the cell partition which will split $R_{\x\y}$ in two, 
+contradicting the fact that all of $R_{\x\y}$ lies in the same cell.
+Therefore, with the exception of the extraordinary singularities of
+Figure~\ref{3.except},
+the crossings of \seg{\x\y} by the curve
+occur in pairs, which we shall call {\bf couples}.
+This establishes condition (1) of the 
+%
+\figg{3.except}{The only type of singularity that can lie on \seg{\x\y} }{1.5in}
+%
+lemma.\\
+(2) Now consider condition (2) of the lemma.
+Note that the extraordinary singularities of
+Figure~\ref{3.except} can be ignored during the consideration of conditions
+(2) and (3), since they face both \x\ and \y\ and contribute the same
+amount to the left-hand side and right-hand side of the expressions
+of conditions (2) and (3).
+Therefore, we can concentrate on the remaining crossings of \seg{\x\y}:
+the distinct `couples'.
+Let $A,B\in \seg{\x\y}$ be a couple and 
+assume, without loss of generality, that A lies closer to \x\ than B does
+(Figure~\ref{3.4A}(a)).
+\arc{AB} is a convex segment since it lies within a cell of the cell
+partition.
+Therefore, A and B face each other (with respect to the cell C), by 
+Lemma~\ref{lem-face}.
+Since A faces B, A faces \y.
+Similarly, since B faces A, B faces \x.
+Therefore, one member of each couple faces \x\ and the other faces \y.
+This yields the desired result:
+\[ \#\{P \in \seg{\x\y}\ \cap\ F: P \mbox{ faces \x\ w.r.t.\ C}\} = 
+\#\{P \in \seg{\x\y}\ \cap\ F: P \mbox{ faces \y\ w.r.t.\ C}\} \]
+%
+\figg{3.4A}{(a) a couple (b) open cells and open convex segments}{2.75in}
+%
+\ \\
+(3) The point of a couple that faces \y\ (A)
+is closer to \x\ than the point that faces \x\ (B).
+Therefore, for all $\alpha \in \seg{\x\y}$,
+\[ \#\{P \in\seg{\x\alpha}\ \cap\ F: P \mbox{ faces \x}\} \leq
+\#\{P \in \seg{\x\alpha}\ \cap\ F: P \mbox{ faces \y}\} \]
+\end{proof}
+%
+%
+\section{Finding the Partners of a Curve Point}
+\label{sec-3.2}
+
+This section applies the theory of the previous section to the
+problem of determining the partners of a \wallpoint.
+A solution of the partner problem is needed in order to find 
+the next convex segment during a traversal of a curve by convex segments.
+(Recall that two \wallpoints\ $W_{1}$ and \wt\ of a cell partition
+are partners if \arc{\wo\wt} is a convex segment.)
+Since we identify a convex segment by its two endpoints,
+if the partners of all of the \wallpoints\ have been computed, then
+the two convex segments that leave a given \wallpoint\ can be 
+quickly identified.
+
+Let F be a plane curve that has been split
+into convex segments by a cell partition.
+Consider a multisegment cell C of this cell partition and a \wallpoint\
+\wo\ of this cell.
+Since singularities have been replaced by \pseudos\ 
+(Section~\ref{sec-resolve}), \wo\ is either a flox, an incidental curve
+point, or a \pseudo.
+Theorem~\ref{thm-partner} shows how to determine whether \wo\ has a partner
+in C (i.e., whether \wo\ is the endpoint of a closed convex segment in C)
+and, if \wo\ does have a partner in C, how to find this partner.
+In preparation for this theorem, we must make some preliminary comments.
+%
+\begin{definition}
+A cell is {\bf closed} (resp., {\bf open}) if it is (resp., is not)
+a closed polygon (Figure~\ref{3.4A}(b)).
+An open cell is unbounded.
+A convex segment of the curve in cell C is {\bf closed} if it is of 
+finite length and 
+{\bf open} if it proceeds to infinity within C.
+Open segments have only one endpoint and must lie in open cells.
+\end{definition}
+
+The computation of \wo's partner involves the computation of intersections
+of lines with the boundary of cell C and a traversal of the cell boundary.
+Therefore, it is necessary for the cell to be closed.
+If C is an open cell, then temporary cell segments must be placed across
+its opening in order to artificially make it a closed cell
+(Figure~\ref{3.leap}).
+The added \cellsegments\ are called the {\bf \artificial\ boundary} of C, and
+they must be chosen carefully.
+The resulting closed cell should be a convex polygon, it should be large 
+enough to contain all of the closed convex segments of the original open cell,
+and it should have only one intersection with each open convex segment in the
+cell.
+
+\figg{3.leap}{A \artificial\ boundary for an open cell}{2in}
+
+If C is an open cell that contains an open convex segment SEG,
+then we shall be interested in the intersection of this open segment with the
+\artificial\ boundary of C.
+If \wo\ is the endpoint of SEG, then the intersection of SEG with the boundary
+will behave like a partner of \wo.
+Indeed, we shall identify that \wo\ has no partner by noticing that the
+partner computed for \wo\ lies on the \artificial\ rather than the
+original boundary of the cell.
+A point of intersection of the curve with the \artificial\ boundary shall
+be called a {\bf \artificialcurvepoint}.
+
+There are now three families of \wallpoints:
+(1) \original\ \wallpoints, which include floxes and incidental 
+\wallpoints;
+(2) \pseudos, which are the points that replace the singularities 
+and guarantee a robust traversal of the curve; and
+(3) \artificialcurvepoints, which are points on the \artificial\ boundary
+of open cells.
+%
+\begin{figure}[htbp]\vspace{3.75in}\caption{The boundary points $W_{i}'$}\label{3.J}\end{figure}
+
+%
+The computation of \wo's partner involves the sorting of \wallpoints\ along
+the boundary of the cell C.
+However, a \pseudo\ does not lie on the boundary.
+Therefore, with each \pseudo\ $W_{i}$ in C, we must associate a point $W_{i}'$
+on the cell boundary.
+If $W_{i} \neq \wo$,  then $W_{i}'$ is chosen to be the intersection of
+the ray \ray{\wo W_{i}} with the cell boundary (Figure~\ref{3.J}(a)).
+(A link is maintained between $W_{i}$ and $W_{i}'$ so that it is simple
+to retrieve $W_{i}$ from $W_{i}'$.)
+If \wo\ is itself a \pseudo, then it has a special associated point.
+Let V be the singularity from which \wo\ is derived, let T be the tangent
+to the branch of V that contains \wo, and
+let $T_{1}$ be the ray of \wo's tangent that intersects 
+T (Figure~\ref{3.J}(b)).
+$\wo '$ is the intersection of $T_{1}$ with the cell boundary.
+For notational consistency, we let $W_{i}' = W_{i}$
+if $W_{i}$ is a \wallpoint\ that already lies on the cell boundary
+(i.e., a flox, incidental, or \artificial\ \wallpoint).
+
+Finally, we partition the boundary of the cell into two regions.
+Let $B_{1}$ be the boundary of C from $\wo '$ to X in one direction
+and $B_{2}$ the boundary from $\wo '$ to X in the other direction, where
+X is defined as follows.
+If \wo\ is a flox, let X be the outside endpoint of \wo's 
+\cellsegment\ with respect to C (Definition~\ref{defn-inside} and
+Figure~\ref{3.8A}(a)).
+Otherwise, let $X \neq \wo '$ be the other intersection of \wo's tangent with
+the cell boundary (Figure~\ref{3.8A}(b-c)).
+We are now ready for the statement of the theorem.
+%
+\begin{figure}[htb]\vspace{4.5in}\caption{Partitioning the boundary of a cell}\label{3.8A}\end{figure}
+%
+\begin{theorem}
+\label{thm-partner}
+Let $S(\wo)$ = \{(\original, \pseudoalone, and \artificial) \wallpoints\ 
+\mbox{W $\neq \wo$} of cell C of the cell partition of the curve F $\mid$\nopagebreak
+\begin{enumerate}
+\item W lies on the strict inside of \wo's tangent (with respect
+to C) \nopagebreak
+\item $\#\{P \in\seg{\wo W}\cap F: P \mbox{ faces \wo\ (w.r.t.\ C)}\}=$\\
+$\#\{P \in \seg{\wo W}\cap F: P \mbox{ faces W (w.r.t.\ C)\} }$\nopagebreak
+\item for all $\alpha \in \seg{\wo W}$, \\\nopagebreak
+$ \#\{P \in\seg{\wo\alpha}\cap F: P \mbox{ faces \wo\ (w.r.t.\ C)}\} \leq$\\
+$ \#\{P \in\seg{\wo\alpha}\cap F: P \mbox{ faces W (w.r.t.\ C)\} }  $
+\item W faces \wo\ (w.r.t.\ C) \}
+\end{enumerate}
+%
+\underline{{\bf Case 1}}: Suppose that $S(\wo) \neq \emptyset$.
+Let \mbox{$S'(\wo) = \{\ W':W \in S(\wo)\ \}$}.
+Let $B_{1}$ and $B_{2}$ be the appropriate sections of the boundary of C,
+as defined above.
+Either \mbox{$S'(\wo) \subset B_{1}$} or \mbox{$S'(\wo) \subset B_{2}$}.
+(Assume without loss of generality that \mbox{$S'(\wo) \subset B_{1}$}.)
+Sort the points of $S'(\wo)$ along $B_{1}$ from $\wo '$ to X.
+That is, sort the points of $S'(\wo)$ into $S_{1}',S_{2}',\ldots,S_{p}'$,
+where $S_{i}'$ is encountered before $S_{i+1}'$\ in a traversal of the
+cell boundary from $\wo '$ to X along $B_{1}$.
+If $S_{p}$ (the \wallpoint\ associated with $S_{p}'$) is a \artificial\
+\wallpoint, then \wo\ has no partner in C.
+Otherwise, $S_{p}$ is \wo's partner in C.\\
+%
+\underline{{\bf Case 2}}: Suppose that $S(\wo) = \emptyset$.
+Then \wo\ is not a \pseudo\ and
+\wo's partner lies on \wo's cell segment.
+Let T(\wo)~=~\{~\original~\wallpoints\footnote{That is, floxes and incidental 
+curve points.}~W~of~C~$\mid$
+\begin{quote}
+\begin{enumerate}
+   \item W lies on \wo's \cellsegment
+   \item \wo\ faces W and W faces \wo
+   \item \#\{$P \in \seg{\wo W} \cap F$: P faces \wo\ (w.r.t.\ C)\} = \\
+\#\{$P \in \seg{\wo W} \cap F$: P faces W (w.r.t.\ C)\} \}
+\end{enumerate}
+\end{quote}
+\wo's partner is the element of T(\wo) that is closest to \wo.
+\end{theorem}
+%
+\figg{3.4B}{Cell partition of a limacon}{2.25in}
+%
+\begin{example}
+Consider the cell partition of a limacon (Figure~\ref{3.4B})
+and the multisegment cell containing the convex segments \wwa\ and
+\arc{W_{3}W_{4}}.
+Suppose that we wish to find the partner of \wo.
+$W_{3}$ violates condition (4) of S(\wo) and $W_{4}$ violates condition (2),
+so $S(\wo) = \{\wt\}$ and it is clear that \wt\ is \wo's partner.
+
+Consider the multisegment cell of Figure~\ref{3.egg} and the computation
+of \wo's partner, where \wo\ is the endpoint of an open convex segment.\\
+\mbox{$S(\wo) = \{\wt,W_{3},W_{4}\}$} and
+\mbox{$S'(\wo) = \{\wt,W_{3},W_{4}'\}$}.
+The sorted order of $S'(\wo)$ along the boundary from $\wo '\ (=\wo)$ to X
+(the intersection of \wo's tangent with the boundary) is $W_{3},W_{4}',\wt$.
+The last element is \wt, which is a \artificialcurvepoint.
+Therefore, \wo\ has no partner.
+
+\figg{3.egg}{Computing the partner of the endpoint of an open convex segment}{2.5in}
+
+Finally, consider the computation of the partner of \wo\ in Figure~\ref{3.8},
+where $S(\wo) = \emptyset$.
+$V_{1}$, $V_{2}$ and $V_{4}$ are ruled out by condition (2) of T(\wo),
+while $V_{3}$ and $V_{6}$ are ruled out by condition (3).
+Therefore, $T(\wo) = \{V_{5},W_{2}\}$.
+\wt\ is the closest element of T(\wo) to \wo, so it is \wo's partner.
+\end{example}
+%
+\figg{3.8}{Partner computation when $S(\wo) = \emptyset$}{2.125in}
+%
+\begin{proof}{\bf (of Theorem~\ref{thm-partner})  }\\ \nopagebreak
+If \wo\ is the endpoint of an open convex segment SEG, 
+then let \wt\ be the intersection of SEG with the \artificial\ boundary
+of the cell.
+Otherwise, let \wt\ be \wo's partner.\\
+\underline{{\bf Case 1}}: Suppose that $S(\wo) \neq \emptyset$.
+Let \wwh\ be the boundary of the cell 
+from $W_{1}'$ to $W_{2}'$, such that $X \not\in \wwh$
+(Figure~\ref{6}(a)).
+\wwh\ is a subset of either $B_{1}$ or 
+%
+\figg{6}{(a) \wwh\ is dotted (b) s and t on \seg{\wo y}}{2.5in}
+%
+$B_{2}$.
+We will show that $S'(\wo) \subset \wwh$.
+Let $s \in S(\wo)$.\\
+\underline{{\bf Claim}}: \ray{\wo s} does not cross 
+$\wwa \setminus \{\wt\}$.\\
+\underline{{\bf Proof of claim}}:
+Suppose, for the sake of contradiction, that $\ray{\wo s}$ crosses \wwa\
+at $y \neq \wt$.
+This is impossible if $s = \wt$ (since \wwa\ is convex) so assume that
+%
+%
+$s \neq \wt$.\\
+\underline{{\bf Subcase 1}}: Suppose that $s \in \seg{\wo y}$.
+By the argument of the proof of Lemma~\ref{lem-sec31}, the
+points of intersection of the curve F with \seg{\wo y} pair up.
+Let t be the partner of s (Figure~\ref{6}(b)).
+The segment \arc{st} is convex, so s and t face each 
+other (Lemma~\ref{lem-face}).
+s faces \wo\ (condition (4) of S(\wo)) and t, so
+$t \in \seg{\wo s}$.
+Since \mbox{$s \in S(\wo)$}, 
+\[ \#\{P \in \seg{\wo s} \cap F: \mbox{ P faces \wo}\}
+= \#\{P \in \seg{\wo s} \cap F: \mbox{ P faces s}\} \]
+Since \seg{\wo s} does not include its endpoints,
+$\seg{\wo s} = \seg{\wo t}\ \cup\ \seg{ts}\ \cup\ \{t\}$.
+Also, t faces s.
+Therefore, the above equation becomes 
+\[ \#\{P \in \seg{\wo t} \cap F: \mbox{ P faces \wo}\} +
+\#\{P \in \seg{ts} \cap F: \mbox{ P faces \wo}\} + 0 =  \]
+\[ \#\{P \in \seg{\wo t} \cap F: \mbox{ P faces s}\} +
+\#\{P \in \seg{ts} \cap F: \mbox{ P faces s}\} + 1\ \ \  \]
+Moreover, by Lemma~\ref{lem-sec31} (\arc{st} is convex),\newpage
+\[ \#\{P \in \seg{ts} \cap F: \mbox{ P faces s}\} = \]
+\[ \#\{P \in \seg{ts} \cap F: \mbox{ P faces t}\} = \]
+\[ \#\{P \in \seg{ts} \cap F: \mbox{ P faces \wo} \} \]
+Upon the cancellation of terms in the above equation, we conclude that
+\[ \#\{P \in \seg{\wo t} \cap F: \mbox{ P faces \wo}\} > \]
+\[ \#\{P \in \seg{\wo t} \cap F: \mbox{ P faces s}\} =\  \]
+\[ \#\{P \in \seg{\wo t} \cap F: \mbox{ P faces y}\}\ \  \]
+This contradicts condition (3) of Lemma~\ref{lem-sec31} 
+($SEG = \wwa$, $\x = \wo$, $\y = y$).\\
+%
+\underline{{\bf Subcase 2}}: Suppose that $y \in \seg{\wo s}$.
+By Lemma~\ref{lem-sec31},
+\[ \#\{P \in \seg{\wo y} \cap F: \mbox{ P faces \wo}\} = 
+\#\{P \in \seg{\wo y} \cap F: \mbox{ P faces y}\} \]
+But y faces \wo, since \wo\ and y are on the same convex segment.
+Therefore, there exists $\alpha \in \seg{\wo s}$ such that
+\[ \#\{P \in \seg{\wo\alpha} \cap F: \mbox{ P faces \wo}\} 
+> \#\{P \in \seg{\wo\alpha} \cap F: \mbox{ P faces s}\} \]
+This is a contradiction of $s \in S(\wo)$ (condition (3)).\\
+\hspace*{4in}{\bf QED of Claim}\\
+We conclude that \ray{\wo s} does not cross $\wwa \setminus \{\wt\}$.
+In particular, \seg{\wo s'} does not cross $\wwa \setminus \{\wt\}$.
+Therefore, $s'$ must either lie on \wwa, outside of \wo's tangent, or on \wwh.
+However, since $s$ lies on the strict inside of \wo's tangent (by 
+condition~(1) of $S(\wo)$), so does $s'$.
+Moreover, the only curve points on \wwa\ are \wo\ and \wt,\footnote{Recall
+the conditions that were placed on the closing boundary.}
+both of which lie on \wwh.
+Therefore, $s'$ must lie on \wwh, and we have successfully shown that
+$S'(\wo) \subset \wwh$.
+
+We now show that $\wt \in S(\wo)$.
+\begin{quote}
+\begin{description}
+   \item[(1)] Suppose, for the sake of contradiction, that \wt\ lies on \wo's tangent.
+By Lemma~\ref{lem-lies.on}, \wt\ must lie on \wo's wall.
+Thus, \mbox{\wwh\ = \seg{\wo\wt}}, a subsegment of \wo's wall.
+Again by Lemma~\ref{lem-lies.on}, \wo\ must be a flox whose tangent is a wall
+of the cell partition, so \seg{\wo\wt} is a subsegment of \wo's tangent.
+By condition (1) of $S(\wo)$,
+\mbox{$S(\wo) \cap \seg{\wo\wt} = \emptyset$}.
+Therefore, \mbox{$S'(\wo) \cap \seg{\wo\wt} = \emptyset$}.
+But $S'(\wo) \subset \wwh = \seg{\wo\wt}$.
+Thus, $S'(\wo) = \emptyset$, which is a contradiction.
+We conclude that \wt\ does not lie on \wo's tangent.
+\wt\ certainly lies on the inside of \wo's tangent, since
+\wwa\ is a convex segment.
+   \item[(2-3)] Lemma~\ref{lem-sec31}\ (SEG = \wwa, \x\ = \wo, \y\ = $W_{2}$)
+   \item[(4)] Lemma~\ref{lem-face}
+\end{description}
+\end{quote}
+
+We are now prepared to show that $\wt = S_{p}$.
+Since $X$ is not on \wwh\ (by definition),
+all of \wwh\ is met in traversing the cell boundary from $\wo '$ to X through
+\wwh.
+Therefore, 
+since $\wt '$ is an endpoint of \wwh\ and all of $S'(\wo)$ is contained
+in \wwh, $\wt '$ is the last element
+of $S'(\wo)$ that is met in traversing from $\wo '$ to X through \wwh.
+In other words, $W_{2}' = S_{p}'$, and $W_{2} = S_{p}$.
+
+We must show that $S_{i}' \neq S_{j}'$ whenever $i \neq j$,
+so that there is no ambiguity in choosing the last member of $S'(\wo)$.
+Suppose that $i \neq j$ but $S_{i}' = S_{j}'$.
+Then $S_{i},S_{j} \in \seg{\wo S_{i}'}$\ and we can assume without loss of
+generality that $S_{i} \in \seg{\wo S_{j}}$.
+\mbox{$S_{i} \in S(\wo)$} implies that \mbox{$\#\{P \in \seg{\wo S_{i}} \cap F : P 
+\mbox{ faces \wo} \}$} 
+\mbox{$= \#\{P \in \seg{\wo S_{i}} \cap F : P \mbox{ faces } S_{i}\}$}
+\mbox{$=\#\{P \in \seg{\wo S_{i}} \cap F : P \mbox{ faces } S_{j}\}$}.
+Moreover, \mbox{$S_{i} \in S(\wo)$} implies that $S_{i}$ faces \wo.
+Therefore, there exists \mbox{$\alpha \in \seg{\wo S_{j}}$} such that
+\mbox{$\#\{P \in \seg{\wo\alpha} \cap F : P \mbox{ faces \wo} \} $} 
+\mbox{$> \#\{P \in \seg{\wo\alpha} \cap F : P \mbox{ faces } S_{j} \}$},
+which is a contradiction of $S_{j} \in S(\wo)$.
+Therefore, $S_{i}' \neq S_{j}'$ if $i \neq j$, and
+the sort of $S'(\wo)$ is well-defined.\\
+%
+\underline{{\bf Case 2}}: Suppose that $S(\wo) = \emptyset$.
+%
+%\begin{description}
+%   \item[\underline{Case 1}] [\wo\ is an ordinary singularity]
+%\begin{quote}
+%Suppose, for the sake of contradiction, that \mbox{pt(\wo) $\neq$ pt(\wt)}.
+%Since \wo\ lies at the end of a cell wall and \wt\ lies on \wo's wall,
+%\wt\ must lie strictly outside of the curve's tangent as the curve enters
+%the cell from \wo.
+%By Lemma~\ref{lem-forthmsamewalls}, either \mbox{\wwa $\setminus$ \{\wo,\wt\}}
+%contains a flox or a singularity, or the line \lyne{\wt\wo}\ hits \wwa\ at
+%a third point.
+%Each of these is a contradiction of the convexity of \wwa.
+%\hence pt(\wo) = pt(\wt): \wo\ and \wt\ are wallpoints of the same
+%singularity.
+%Clearly, \wt's arc must enter C, since \wwa\ lies in this cell.
+%\end{quote}
+%   \item[\underline{Case 2}] [\wo\ and \wt\ are not ordinary singularities]
+%\begin{quote}
+We claim that if \wo\ is a \pseudo, then \wt\ is an element of S(\wo), 
+which contradicts $S(\wo) = \emptyset$:
+\begin{quote}
+\begin{description}
+\item[(1) of S(\wo)] Since \wo\ is a \pseudo, \wt\ does not lie on \wo's tangent 
+(Lemma~\ref{lem-lies.on}). \wt\ lies inside \wo's tangent because \wwa\
+is convex.
+\item[(2-3) of S(\wo)] Lemma~\ref{lem-sec31} (\x = \wo, \y = \wt)
+\item[(4) of S(\wo)] Lemma~\ref{lem-face}
+\end{description}
+\end{quote}
+Therefore, \wo\ is not a \pseudo\ and it is 
+well-defined to speak of \wo's \cellsegment.
+We show that $\wt \in T(\wo)$:\nopagebreak
+\begin{description}
+   \item[(1) of T(\wo)] Suppose 
+that \wt\ lies strictly inside \wo's wall (w.r.t.\ C).
+Then $\wt \in S(\wo)$, a contradiction of $S(\wo) = \emptyset$:\nopagebreak
+\begin{quote}
+\begin{description}
+\item[(1) of S(\wo)] The segment \wwa\ is convex, so \wt\ lies on the inside of \wo's 
+tangent.
+Since \wt\ lies strictly inside \wo's wall, it cannot lie
+on \wo's tangent (Lemma~\ref{lem-lies.on}).
+\item[(2-3) of S(\wo)] Lemma~\ref{lem-sec31}
+\item[(4) of S(\wo)] Lemma~\ref{lem-face}
+\end{description}
+\end{quote}
+Therefore, \wt\ lies on \wo's wall.
+   \item[(2) of T(\wo)] Lemma~\ref{lem-face}
+   \item[(3) of T(\wo)] Lemma~\ref{lem-sec31}
+\end{description}
+Therefore, $\wt \in T(\wo)$.
+
+Suppose that \wt\ is not the closest
+member of $T(\wo)$ to \wo.
+Let \mbox{$U \neq \wt$} be the closest.
+Since \wo\ faces U, U must lie on $\seg{\wo\wt}$.
+By the proof used in Lemma~\ref{lem-sec31}, the nonsingular points of 
+intersection of the curve with \seg{\wo\wt} must pair up into couples,
+since \wwa\ is a nonsingular, convex segment.
+In particular, the original \wallpoints\ on 
+$\seg{\wo U} \subset \seg{\wo\wt}$ that face \wo\ must pair
+with the equal number of original \wallpoints\ on \seg{\wo U} that face U.
+But U must also pair with a \wallpoint\ on \seg{\wo U} that faces U,
+and there are no such \wallpoints\ remaining without a partner.
+This contradiction leads us to conclude that
+\wo's partner \wt\ must be the closest element of T(\wo) to \wo.
+%\end{quote}
+\end{proof}
+%
+
+Since the pairing of the \wallpoints\ of
+a curve does not depend upon the sortpoints, it can be done in a 
+preprocessing phase.
+In particular, the creation of the cell partition and the computation
+of partners can be done at any time  between the definition of the curve
+and the sorting of points along the curve.
+
+%There is one disadvantage to moving the pairing of wallpoints to a 
+%preprocessor: one ends up pairing all of the wallpoints even if the sort
+%segment of the sorting problem only contains a small subset of the wallpoints.
+%If the partners were computed as they were needed, then only those wallpoints
+%on the sort segment would be paired.
+%One could argue that this is not an important weakness because even if some
+%wallpoints are not involved in one sort, they will probably eventually enter
+%into a future one.
+%At any rate, the advantages of preprocessing outweigh this disadvantage.
+%
+\section{Finding the Convex Segment that a Sortpoint Lies On}
+\label{sec3-chap3}
+
+In this section, we present a solution to the second of our problems:
+determining the convex segment that a sortpoint lies on.
+This is a key step in the sorting of a set of points by the convex-segment
+method, since it offers a method of determining which points lie on a
+given convex segment during a traversal of the curve.
+
+As in the previous section, let F be a plane curve that has been split
+into convex segments by a cell partition.
+Consider a multisegment cell C of this cell partition and a sortpoint $x$
+of the curve in the interior of C.
+(If $x$ lies on the boundary of the cell, then Theorem~\ref{thm-partner} 
+can be used to determine its partner and thus its convex segment.)
+The following theorem shows how to determine the convex segment of
+C that contains $x$.
+Since a convex segment is identified by its endpoints, determining the
+convex segment that $x$ lies on is equivalent to finding the
+\wallpoints\ that bound this convex segment.
+Therefore, Theorem~\ref{thm-parents} is very similar to 
+Theorem~\ref{thm-partner}, since they both
+involve finding the endpoints of a given point's convex segment.
+
+As with Theorem~\ref{thm-partner}, an open cell must be artificially closed,
+and a \wallpoint\ $W_{i}$ must have an associated boundary point $W_{i}''$.
+We choose $W_{i}''$ to be the intersection of \ray{xW_{i}} with the cell boundary.
+We also need to partition the cell boundary into two regions again.
+Let $B_{1}$ be the boundary of the cell from \xo\ to \xt\ in one direction, 
+and let $B_{2}$ be the boundary in the other direction, where
+\xo\ and \xt\ are the two points of intersection of 
+$x$'s tangent with the cell boundary.
+%
+\begin{theorem}
+\label{thm-parents}
+\mbox{Let $S(x)$ = \{(\original, \pseudoalone, \artificial) \wallpoints\ W of C $\mid$}
+\begin{quote}
+\begin{enumerate}
+\item W lies on the strict inside of x's tangent
+\item \mbox{$\#\{P \in\seg{xW}\cap F: P \mbox{ faces x}\} =
+\#\{P \in \seg{xW}\cap F: P \mbox{ faces W} \}$}
+\item $\forall\ \alpha \in \seg{xW}$,
+\[ \#\{P \in\seg{x\alpha}\cap F: P \mbox{ faces x}\} \leq
+\#\{P \in \seg{x\alpha}\cap F: P \mbox{ faces W}\} \]
+\item W faces x \}
+\end{enumerate}
+\end{quote}
+Let $S''(x) = \{\ W'' : W \in S(x)\ \}$.
+Either $S''(x) \subset B_{1}$ or $S''(x) \subset B_{2}$.
+(Assume without loss of generality that $S''(x) \subset B_{1}$.)
+Sort the points of $S''(x)$ into $S_{1}'',S_{2}'',\ldots,S_{p}''$,
+where $S_{i}''$ is encountered before $S_{i+1}''$\ in a traversal of the
+cell boundary from $x_{1}$ to $x_{2}$ along $B_{1}$.
+Then either (i) $S_{1}$ and $S_{p}$ are partners and $x$ lies on the convex segment
+\arc{S_{1}S_{p}}, or (ii)
+x lies on an open convex segment SEG, one of $S_{1},S_{p}$ is a
+\artificialcurvepoint, and the other is the endpoint of SEG.
+\end{theorem}
+%
+\begin{example}
+Consider the cell partition of the limacon (Figure~\ref{3.4B})
+and the multisegment cell containing the convex segments
+\wwa\ and \arc{W_{3}W_{4}}.
+Suppose that we wish to know the convex segment that x lies on.
+We compute $S(x)$.
+\wo\ does not satisfy condition~(1), and \wt\ does not satisfy condition~(3).
+Thus, $S(x) = \{W_{3},W_{4}\}$ and x must lie on \arc{W_{3}W_{4}}.
+
+Consider the cell partition of the Cassinian oval (Figure~\ref{2.12a}).
+Suppose that we wish to know the convex segment that $P_{1}$ lies on.
+Since $S(P_{1}) =$\\
+$\{W_{1},W_{2},W_{3},W_{4}\}$, it does not resolve the
+question.
+Let \xo\ and \xt\ be the two points of intersection of $P_{1}$'s tangent 
+with the cell walls.
+The sort of $S''(P_{1})$
+from \xo\ to \xt\ is \wo, $W_{3},\ W_{4}$, \wt, so $P_{1}$ must lie on \wwa.
+\end{example}
+%
+\begin{proof}{\bf (of Theorem~\ref{thm-parents})  }\\
+The proof is entirely analogous to the proof of Theorem~\ref{thm-partner}.
+Let SEG be the convex segment that contains $x$.
+Let \wo\ and \wt\ be the endpoints of SEG or,
+if SEG is an open convex segment, let \wo\ be its one endpoint and
+let \wt\ be the intersection of SEG with the closing boundary of the cell.
+We first show that $W_{1},W_{2} \in S(x)$:\nopagebreak
+\begin{quote}
+\begin{description}
+   \item[(1)] Since $x \in \wwa$, \wwa\ is convex, and $x \neq \wo,\wt$,
+both \wo\ and \wt\ must lie on the strict inside of $x$'s tangent.
+    \item[(2-3)] Lemma~\ref{lem-sec31}\ (SEG = \wwa, \x = $x$, \y = \wo\ or \wt)
+    \item[(4)] Lemma~\ref{lem-face}
+\end{description}
+\end{quote}
+Let \wwh\ be the boundary of the cell
+from $\wo ''$ to $W_{2}''$, 
+such that \mbox{$x_{1},x_{2} \not\in \wwh$}.
+\wwh\ is a subset of either $B_{1}$ or $B_{2}$.
+By the argument used in Theorem~\ref{thm-partner}, $S''(x) \subset \wwh$.
+\mbox{$x_{1},x_{2} \not\in \wwh$}
+(by definition), so $W_{1}''$ and $W_{2}''$ are the first and last points of
+$S''(x) \subset \wwh$ that 
+are met in a traversal of the cell boundary 
+from $x_{1}$ to $x_{2}$ through \wwh.
+Therefore, $\{W_{1}'',W_{2}'' \} = \{ S_{1}'',S_{p}'' \}$, and
+$\{W_{1},W_{2} \} = \{ S_{1},S_{p} \}$.
+\end{proof}
+%
+
+It can be expensive to create the set S($x$).
+In particular, conditions (2) and (3) require the points of intersection
+of the curve with a line segment,
+which involves the solution of an equation of degree $n$, where $n$
+is the order of the curve.
+This is an expensive operation that we would like to avoid.
+Fortunately, it is usually possible to do so.\footnote{The expensive 
+conditions cannot be avoided in Theorem~\ref{thm-partner}.
+However, partner computation is a one-time preprocessing step.
+Moreover, conditions (1) and (4) will often rule out all of the
+\wallpoints\ except the partner.}
+%Here is an algorithm for computing these intersections:
+%\begin{quote}
+%\begin{description}
+%   \item[(i)] let $f(x,y) = 0$ be the implicit equation of the curve (of
+%degree n) and let \seg{xy}\ be the line segment;
+%compute a parametric representation $(x(t),y(t))$ of the line
+%   \item[(ii)] substitute the parameterization of the line 
+%into the curve equation, yielding $g(t) = f(x(t),y(t))$
+%   \item[(iii)] solve for the roots of the degree n equation g(t)
+%\end{description}
+%\end{quote}
+%Step (iii) is an expensive operation.
+
+Before the more expensive conditions (2) and (3) of S($x$) are tested,
+we would like to eliminate as many \wallpoints\ as possible from contention.
+Therefore, we would like to find a collection of inexpensive conditions
+that must be satisfied by the endpoints of a sortpoint's
+convex segment.
+The inexpensive conditions that we choose 
+are motivated by conditions (1) and (4)
+of S($x$) and the following observations.
+First, as soon as the \wallpoint\ W is eliminated,
+W's partner can also be eliminated, since 
+the endpoints of a sortpoint's convex segment are partners.
+Second, all of the curve segment between a \wallpoint\ $W_{1}$ and its
+partner $W_{2}$ lies on one side of $\seg{W_{1}W_{2}}$,
+since $\arc{W_{1}W_{2}}$ is a convex segment.
+Thus, if the sortpoint does not lie on the appropriate side of 
+$\seg{W_{1}W_{2}}$ (viz., the inside of the chord \seg{\wo\wt}, a term that
+is defined at the end of Appendix~A),
+then both $W_{1}$ and $W_{2}$ can be eliminated.
+
+We can now present a more efficient algorithm for
+finding the endpoints of a sortpoint x's convex segment.
+Let R($x$) = \{\wallpoints\ W of cell C $\mid$\nopagebreak
+\begin{quote}
+\begin{enumerate}
+    \item W and its partner in C lie on the strict inside of x's tangent
+    \item $x$ lies on the strict inside of W's tangent and the strict inside
+of W's partner's tangent
+    \item \mbox{$x$ lies on the inside of the chord of W's convex segment 
+in C\}}
+\end{enumerate}
+\end{quote}
+R($x$) contains the desired endpoints of $x$'s convex segment.
+Therefore, we are finished if $R(x) = \{\wo,\wt\}$ and \wo\ and 
+\wt\ are partners, or if $R(x) = \{\wo\}$.
+However, if R($x$) contains more than two \wallpoints\ or
+if $R(x) = \{ W_{1},W_{2} \}$ and both \wo\ and \wt\ are endpoints of 
+open convex segments, then
+we must revert to an application of Theorem~\ref{thm-parents}.
+Since we already know R($x$), it should be used to compute S($x$) more 
+efficiently:
+S($x$) = \{ $W \in R(x)$ $\mid$\nopagebreak
+\begin{enumerate}
+\item \mbox{$\#\{P \in\seg{xW}\cap F: P \mbox{ faces $x$ }\} =
+\#\{P \in \seg{xW}\cap F: P \mbox{ faces W \} }$}
+\item
+for all $\alpha \in \seg{xW}$, 
+\[ \#\{P \in\seg{x\alpha}\cap F: P \mbox{ faces $x$ }\} \leq
+\#\{P \in \seg{x\alpha}\cap F: P \mbox{ faces W \}\ \}} \]
+\end{enumerate}
+
+%There is strong evidence to suggest that the conditions of R($x$) are almost
+%always enough to find the endpoints, and that it is therefore very rare that the more
+%expensive conditions of S($x$) must be tested.
+%For example, 
+%only two of the curves in Lawrence's catalog of curves \cite{lawrence}
+%even have multisegment cells, and R($x$) is always sufficient to 
+%isolate the endpoints of the convex segment of any point of these curves.
+
+The problems associated with multisegment cells have now been solved.
+This completes our discussion of the theory of the convex-segment
+method of sorting points along an algebraic curve.
+In the next chapter, we turn to an analysis of its behaviour.

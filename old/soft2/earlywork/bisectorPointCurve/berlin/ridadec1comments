@@ -1,0 +1,137 @@
+(Message inbox:3084)
+Return-Path: farouki@watson.ibm.com
+Return-Path: <farouki@watson.ibm.com>
+Received: from mail-client (bad-boy.cs.jhu.edu)
+           by blaze.cs.jhu.edu; Sun, 1 Dec 91 10:40:05 EST
+Received: by server.cs.jhu.edu; Sun, 1 Dec 91 10:40:06 -0500
+Sender: farouki@watson.ibm.com
+Received: from yktvmz.watson.ibm.com by watson.ibm.com (IBM VM SMTP V2R2)
+   with BSMTP id 4484; Sun, 01 Dec 91 10:39:51 EST
+Date: Sun, 1 Dec 91 10:39:50 EST
+From: farouki@watson.ibm.com
+To: jj@bad-boy.cs.jhu.edu
+Subject: acm abstract
+
+John,
+     I read through the abstract and had a couple
+of comments/corrections. It's probably too late to
+incorporate them in the submitted version, but you
+may want to update the file anyway.
+
+1) Section 1, middle of paragraph beginning "The
+paper is structured ...". Replace "at the end of
+Section 3.2" by "in Section 3.3".
+
+2) Section 2, first paragraph after Definition 2.1
+Given reference to [5] and [6] after "offset".
+
+3) Footnote 2 on page 2: extraneous parenthesis at
+end of sentence.
+
+4) Section 2, paragraph beginning "Note that if ..."
+Move this entire paragraph to Section 1, before para
+beginning "The reader is ...". This is because the
+unit normal n(u) is used in Eq. (2) but has not yet
+been defined.
+
+5) Section 2, end of para beginning "The offset of
+...". Change "will remain" to "is actually".
+
+6) Eq. (4) needs period at end.
+
+7) Section 2, below Eq. (5) change "Given any point
+${\bf p}$ ..." to "Given any point ${\bf p}=(\alpha,
+\beta)$ ...". We use alpha and beta below but haven't
+yet defined them to be the coordinates of p.
+
+8) Eq. (7): delete period.
+
+9) Section 2, para above Proposition 2.1: change
+"Table 2" to "Table 1".
+
+10) End of Section 2.2: change "Table 2.1" to
+"Table 2"
+
+11) Definition 3.1: peculiar linebreak
+
+12) Para below Theorem 3.1: change "(Sections 2
+and 2.1)" to "(Section 2.1)".
+
+13) Figure 6 caption, change to "Self-intersections
+of the point/ellipse bisector"
+
+14) Theorem 3.3 & its proof:
+
+   (a) given the interests of this audience, we
+   may want to quote this result in the abstract
+
+   (b) it would be a good idea to pick a Greek
+   letter other than beta for the "oracle" function,
+   since we use (alpha,beta) as coordinates of p
+
+   (c) in the proof, I did not understand why,
+   after solving for the roots of eqn. (19), we
+   have O( (2n-1)/2 ) point-point distance comp-
+   utations. Why isn't it just O(2n-1), since the
+   polynomial (19) can have 2n-1 odd-multiplicity
+   roots (if all roots are simple)?
+
+   (d) In the expression O( (8n-10)*beta(2n-1)
+   + (8n-10)*n ), the second term presumably comes
+   from the point/point distance computations.
+   What is the assumption here concerning the cost
+   of a single point/point calculation?
+
+   (e) need bold "b" in b(u) after "untrimmed
+   bisector"
+
+   (f) I'm not sure of how you get from the sum
+   of O( (8n-10)*beta(2n-1) + (8n-10)*n ) and
+   O( (3n-2)*(3n-3)*beta(2n-1) + (3n-2)*(3n-3)*n )
+   to the expression quoted in Theorem 3.3 - in
+   particular where the term beta( O(9*n**2) )
+   comes from. Perhaps I am missing something very
+   elementary; my ignorance on these matters is
+   rather profound.
+
+   (g) the result concerning the degree of the
+   self-intersection polynomial, deduced from the
+   fact that the untrimmed bisector is rational,
+   is quite nice and we might want to highlight
+   it as a separate lemma. This would also make
+   the proof of Theorem 3.3 more readable.
+
+15) Remark 3.3: another reason that the degree
+of P_i(u) is less than (3n-2)*(3n-3) is that we
+must count cusps of b(u) among its "double points"
+although these are not self-intersections. We
+already know the degree of the cusp polynomial
+P_c(u); it is 4n-4, and if all cusps are simple
+we could subtract this from (3n-2)*(3n-3). This
+does not change your complexity result, since
+the number of cusps is only O(n), while the
+number of self-intersections is O(n**2).
+
+16) Section 4 cite ref. [4] after "a priori".
+
+17) Eq. (17): change comma to period.
+
+18) Section 5.2, end of para beginning "In order
+for ...". References to "Table 5.2" (twice) don't
+agree with the relevant equation numbers
+
+19) Eqs. (25) and (26): make these a single equation
+using \begin{eqnarray}, since Proposition 5.2 refers
+only to Eq. (25)
+
+If possible I would like to have a shot at editing
+the file when we get comments back from the referees
+(assuming they are favorable).
+
+The full paper has been printed up as IBM Research
+Report RC17381. I have sent you some copies in the
+mail; could you also send me a few copies of the JHU
+report?
+
+                               Rida
+

@@ -1,0 +1,58 @@
+(Message inbox:761)
+Return-Path: bajaj@cs.purdue.edu
+Received: from localhost by arthur.cs.purdue.edu (5.61/PURDUE_CS-1.2)
+	id <AA15888@arthur.cs.purdue.edu>; Wed, 18 Oct 89 18:41:56 -0500
+Message-Id: <8910182341.AA15888@arthur.cs.purdue.edu>
+To: jj@crabcake.cs.jhu.edu
+Subject: Modificationsa -- in latex
+Date: Wed, 18 Oct 89 18:41:54 EST
+From: Chanderjit Bajaj <bajaj@cs.purdue.edu>
+
+\documentstyle[12pt]{article}
+\parskip=4pt
+
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proof}{Proof}
+
+\begin{document}
+
+\newcommand{\rp}{{\bf r}^{\prime}}
+\newcommand{\rpp}{{\bf r}^{\prime\prime}}
+\newcommand{\rppp}{{\bf r}^{\prime\prime\prime}}
+
+
+\title{Modifications to Sorting Paper}
+\author{{\it Chanderjit L. Bajaj}}
+\date{}
+\maketitle
+
+\section{\bf Introduction}
+
+\begin{enumerate}
+
+\item[Page1:] Change the ack for me to read ``Supported in part by NSF Grant MIP 88-16286, 
+ARO Contract DAAG29-85-C0018 under Cornell MSI and ONR contract N00014-88-K-0402.''
+
+\item[Page 26:] Before sentence "The restriction of points of inflection" include the
+following: These systems of polynomial equations can be efficiently solved
+for all their point solutions by using $U$-resultant schemes [page74,8]. Further,
+using bounds on the minimum gap between roots of a polynomial, and bounds on the
+size of the coefficients and degree of the original curve, one can straightforwardly
+estimate the bits of accuracy required in computing the solution to ensure that
+that the error in the value of the curve's derivatives is within the gap. This in turn,
+ensures the correctness of the quadratic transformations applied on the curve, and centered at
+the singularity.
+
+\item[page 14, 28]: I'd put in a sentence indicating that the refined endpoints are
+used only to keep information about branch connectivity and hence their exact location
+was not fundamentally important.
+\item[page 52]: Please add to reference [1] CAGD, 5, 1988, 309-321
+\item[page 52]: Please add reference before [6]: "C.Bajaj, "Geometric Modeling with Algebraic
+Surfaces", Mathematics of Surfaces III, Oxford University Press to appear. 
+\item[page 53]: Please add to reference [6] CAGD, 5, 1988, 285-307
+\item[page 53]: Change title of refernce to " GANITH: An Algebraic Geometry Package", 
+CSD-TR- 914.
+
+\end{enumerate}
+\end{document}

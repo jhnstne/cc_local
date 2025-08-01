@@ -1,0 +1,6 @@
+convexhull -p -d 10 data/ob1b.pts
+convexhull -p -d 10 data/ob3a.pts
+convexhull -p -d 10 data/complexKernel.pts
+
+convexhull -p data/ob3b.pts
+convexhull -p data/ob1a.pts

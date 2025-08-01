@@ -1,0 +1,135 @@
+/* Written  3:18 pm  May  2, 1990 by edu%ate.watson.i@VM1.NoDak.EDU in crabcake:theory */
+/* ---------- "NEW Computational Geometry JOURNAL" ---------- */
+From THEORY-A@VM1.NoDak.EDU  Wed May  2 15:15:51 1990
+From: edu%ate.watson.ibm.com@VM1.NoDak.EDU
+Subject:      NEW Computational Geometry JOURNAL
+
+
+
+        A N N O U N C I N G     A     N E W     J O U R N A L     I N
+
+            C O M P U T A T I O N A L      G E O M E T R Y
+
+
+                        C a l l  f o r   P a p e r s
+
+
+               COMPUTATIONAL GEOMETRY: Theory and Applications
+
+
+EDITORS-IN-CHIEF:
+                  Joerg-R. Sack                 Jorge Urrutia
+                  School of Computer Science    Dept of Computer Science
+                  Carleton University           University of Ottawa
+                  Ottawa, Ont.                  Ottawa, Ont.
+                  Canada K1S 5B6                Canda K1N 6N5
+                  1-613-788-4361                1-613-564-5447
+                  1-613-788-4334 (fax)          1-613-564-9486 (fax)
+                  JOURNAL@CARLETON.CA (e-mail)  SCCCG@uotcsi2.bitnet(e-mail)
+
+
+
+HONORARY EDITOR:    Paul Erdos, Franco Preparata
+
+
+EDITORIAL BOARD:
+
+Akl, Selim                    (Queen's University)
+Atallah, Mikhail              (Purdue University)
+Avis, David                   (McGill University)
+Boissonnat, J.D.              (INRIA)
+Chazelle, Bernard             (Princeton University)
+Clarkson, Kenneth             (AT&T Bell Laboratories)
+Devroye, Luc                  (McGill University)
+Dobkin, David                 (Princeton University)
+Edelsbrunner, Herbert         (University of Illinois)
+Goodman, Jacob                (City College, CUNY)
+Graham, Ronald                (AT&T Bell Laboratories)
+Guibas, Leonidas              (Digital Syst. Research Ctr.)
+Imai, H.                      (Tokyo University)
+Kirkpatrick, D.G.             (University of British Columbia)
+Lee, D.T.                     (Northwestern Univ)
+Magnenat Thalmann, Nadia      (Universite' de Montre'al/Gen`eve)
+Mehlhorn, Kurt                (Universitaet des Saarlandes)
+Overmars, Mark                (Utrecht University)
+Pach, Janos                   (Hungarian Academy of Sciences)
+Pollack, Richard              (Courant Institute, NYU)
+Seidel, Raimund               (University of California at Berkeley)
+Sharir, Micha                 (Tel Aviv)
+Spirakis, Paul G.             (Computer Technology Institute, Patras)
+Suri, Subhash                 (Bell Communications Research)
+Toussaint, Godfried           (McGill University)
+Welzl, Emo                    (Freie Universitaet Berlin)
+Yao, Frances                  (Xerox Corporation)
+Yap, Chee                     (Courant Institute, NYU)
+Zaks, Joseph                  (University of Haifa)
+
+
+Introduction
+------------
+Throughout history, geometry has been a central discipline in
+mathematics. Its development over the centuries has been fueled
+by its interaction with areas such as physics, engineering,
+architecture and art. Computers have offered new perspectives,
+directions and demands on research in geometry. This created a
+new discipline in computer science: computational geometry which
+assumed a definite shape in the mid-1970s. It is concerned with
+the design and analysis of algorithms for solving geometric problems.
+Like geometry, computational geometry is influenced by the traditional
+areas of science, as well as by new areas of research such as
+pattern recognition, robotics, computer graphics, computer vision,
+CAD-CAM, VLSI-design, etc. The success of computational geometry has
+resulted in the need for a new forum where novel ideas and results
+can be presented. The new journal COMPUTATIONAL GEOMETRY provides this.
+
+Aims and Scope
+--------------
+COMPUTATIONAL GEOMETRY is a forum for research in theoretical
+and applied aspects of computational geometry. The journal publishes
+fundamental research in all areas of the subject, as well as disseminating
+information on the applications, techniques, and use of computational
+geometry.
+
+The journal publishes articles on:
+(1) Design and analysis of geometric algorithms
+(2) All aspects of computational geometry including
+        * numerical
+        * graph theoretical
+        * combinatorial
+(3) Computational geometry solutions to fundamental problems arising in
+        * computer graphics
+        * pattern recognition
+        * robotics
+        * image processing
+        * CAD-CAM, VLSI design
+        * geographic information systems
+
+COMPUTATIONAL GEOMETRY also contains a special section containing
+open problems and concise reports on implementations of computational
+geometry tools.
+
+If you wish to submit your paper to COMPUTATIONAL GEOMETRY, please
+send your paper (five copies) to one of the Editors-In-Chief.
+
+The first issue is planned for February 1991.Initially, the journal will be
+published in six issues of about 60 pages each.
+
+The Guide for Authors' from the Publishers gives full details regarding
+the submission of papers. Copies of the Guide are available from
+this address:
+      Elsevier Science Publishers
+      -North Holland-
+      Mathematics and Computer Science Section
+      atn.: Petra van der Meer
+      P.O.Box 103
+      1000 AC Amsterdam
+      The Netherdam
+      Telephone (020) 5862 602
+      Fax (020) 5862 618
+
+***
+Please note that the hard-copy advertisement from Elsevier Science Publishers
+which you may have received earlier did not include those members of the
+editorial board which were reached after the printing deadline.
+***
+/* End of text from crabcake:theory */

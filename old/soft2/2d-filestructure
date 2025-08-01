@@ -1,0 +1,193 @@
+bitang
+	src
+		bitang.cpp				**
+		selfbitang.cpp				**
+		dynamicBitang.cpp
+	paper
+		bitangents.txt
+bitangOnS3
+	src
+		dualS2.c++
+		script
+	paper
+		paper.tex
+		img
+chaikin
+	src
+		chai.cpp
+		bichai.cpp
+		dualchai.cpp
+		chaiScript
+	paper
+		bichai.tex
+		img
+	data
+		bichai1.pts
+		chai1.pts
+		...
+convexhull
+	src
+		convexhull.cpp
+		convexhullScript
+	paper
+		hullAndKernel.tex
+		hull.tex
+demo
+directory (logical order of software)
+earlywork
+	bisectorPointCurve
+		...
+	coordCrawl
+		...
+	postPhDwork
+		...
+	sorting
+		...
+	sturm
+		...
+ideas							**
+imgLibrary (image sources for various problems)
+interpolation						**
+	src
+		interpolate.cpp
+		createCircle.cpp
+		envelope.cpp
+		animateEnvelope.cpp
+		script
+		tablet.cpp
+	data
+		curve9a.pts
+		ob1.pts
+		whiteoak.pts
+		leafImg
+		...
+kernel
+	src
+		kernel.cpp
+		kernelseed.cpp
+	paper
+		curveKernel.tex
+pac
+	src
+		drawPAC.cpp
+	paper
+		ChangeOfPACbasis.tex
+	data
+		fullcircle.pac
+		loop.pac
+		parabola.pac
+		tangentialSurf
+			a2-7y=2top.pac
+			...
+			handle20Aug02
+		...
+scene
+	src
+		scene2d.cpp
+		script
+	data
+		buildingScene
+		buildingSceneCornell1
+		...
+		lightSceneCornell1
+		...
+		scene9a
+		img
+tangcurve
+	src
+		tangentialCurve.cpp
+		script
+	paper
+		dualcurve.tex
+		dual.tex
+		negIntersection.tex
+		journal
+			tangCurve.tex
+			img
+		software
+			dual
+			oldsoft
+				dual-00Aug21.c++
+				...
+				tang.c++			
+			data
+				ob1.rawctr
+				ob2.rawctr
+				ob3.rawctr
+tangthrupt
+	src
+		poletang.cpp
+	paper
+		pole.tex
+		ptvis.pdf
+		img
+umbra
+	src
+		umbra.cpp
+		dmesh.cpp
+		dynamicLocalBackUmbra.cpp
+		start
+		startd
+		umbraScript
+		umbraimg
+	data
+		cornell
+			cornell1sceneB.pts
+			...
+		2circ.pts
+		3circ.pts
+		dveIntersecting.pts
+		globalumb
+			globalumb0.pts
+			...
+		img
+		maxumbra.pts
+		outPiercingSweep.pts
+		surroundingSpiral
+		umbra1.pts
+		...
+		woak.pts
+		vg
+			vg10new.pts
+			vg900.pts
+			vg900newest.pts
+			...
+	paper
+		umbra.tex				**
+		umbra3d.tex
+		taxonomy.tex
+		curve.bib	(also in Cbin)		**
+		eg04
+		img
+		img2
+		imgDynamic
+			spiralBitangBearly.jpg
+			spiralVisualEvent2.jpg
+			tsintVisualEvent.jpg
+			...
+		misc
+			parallelUmbra.tex
+			NSFbody01.tex
+			NSFReferencesCited01.pdf
+			durandsurv.pdf
+			surveytvcg.pdf
+vgraph
+	src
+		dual.c++
+		dualS2.c++
+		svgraph.c++
+		tang.c++
+		visgraph.cpp				**
+		visibility.c++
+		script
+	paper
+		smoothvgraph.tex			*
+		img
+		92vgraphIdeas
+	data
+		data5-1
+		ob1.rawctr
+		ob1reverse.rawctr
+		ob2.vgraph				*
+		vg1.rawctr
+		...	

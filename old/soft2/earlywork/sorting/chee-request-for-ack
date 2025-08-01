@@ -1,0 +1,105 @@
+(Message inbox:442)
+Return-Path: bajaj@cs.purdue.edu
+Received: from localhost by arthur.cs.purdue.edu (5.61/PURDUE_CS-1.1)
+	id <AA16447@arthur.cs.purdue.edu>; Thu, 29 Jun 89 07:48:35 -0500
+Message-Id: <8906291248.AA16447@arthur.cs.purdue.edu>
+To: jj@crabcake.cs.jhu.edu
+Subject: Message from Chee
+Date: Thu, 29 Jun 89 07:47:49 EST
+From: Chanderjit Bajaj <bajaj@cs.purdue.edu>
+
+
+------- Forwarded Message
+
+Replied: Thu, 29 Jun 89 07:47:23 EST
+Replied: unido!fubinf!fubmat!yap@uunet.uu.net
+Return-Path: unido!fubinf!fubmat!yap@uunet.UU.NET
+Return-Path: <unido!fubinf!fubmat!yap@uunet.UU.NET>
+Received: from uunet.uu.net by arthur.cs.purdue.edu (5.61/PURDUE_CS-1.1)
+	id <AA13359@arthur.cs.purdue.edu>; Thu, 29 Jun 89 01:33:23 -0500
+From: unido!fubinf!fubmat!yap@uunet.UU.NET
+Received: from unido.UUCP by uunet.uu.net (5.61/1.14) with UUCP 
+	id AA00820; Thu, 29 Jun 89 02:33:42 -0400
+Received: from fubinf.uucp 
+	by unido.irb.informatik.uni-dortmund.de with uucp via EUnet
+	for uunet
+	id AH21214; Thu, 29 Jun 89 07:08:11 +0100
+Received: by fubinf.uucp (3.2/SMI-3.0DEV3)
+	id AA18997; Thu, 29 Jun 89 02:04:38 +0200
+Date: Thu, 29 Jun 89 02:04:38 +0200
+Message-Id: <8906290004.AA18997@fubinf.uucp>
+To: bajaj
+Subject: resending this...please ack.
+
+	From yap Mon Jun 26 14:33 MET 1989
+	To: unido!fubinf!cs.purdue.edu!bajaj
+	Subject: please forward this to Johnstone
+	Cc: yap
+	Status: O
+	
+	To: bajaj@arthur.cs.purdue.EDU
+	Subject: SIAM  report
+	Cc: yap
+	
+	dear Bajaj, can you please forward this
+	message to your co-author?  Your paper with
+	Johnstone has been accepted for SIComp subject
+	to some changes -- the report was sent to him
+	some weeks back and I would like to know that he
+	has received it.  If possible, please
+	send me his email address as well.
+	
+	Thanks, chee
+	
+	************************************
+	
+		From uucp Thu Jun 15 20:12 MET 1989
+		>From unido!uunet!MAILER-DAEMON  Thu Jun 15 20:13:48 1989 remote from fubinf
+		Received: by fubinf.uucp (3.2/SMI-3.0DEV3)
+			id AA17403; Thu, 15 Jun 89 20:13:48 +0200
+		Received: from uunet.uucp 
+			by unido.irb.informatik.uni-dortmund.de with uucp via EUnet
+			for fubinf
+			id AQ02167; Thu, 15 Jun 89 16:44:15 +0100
+		Received: from unido.UUCP by uunet.uu.net (5.61/1.14) with UUCP 
+			id AA08733; Thu, 15 Jun 89 10:25:29 -0400
+		Date: Thu, 15 Jun 89 10:25:29 -0400
+		From: fubinf!unido!uunet!MAILER-DAEMON (Mail Delivery Subsystem)
+		Subject: Returned mail: User unknown
+		Message-Id: <8906151425.AA08733@uunet.uu.net>
+		To: unido!fubinf!fubmat!yap
+		Status: O
+		
+		   ----- Transcript of session follows -----
+		>>> RCPT To:<johnstone@crabcake.cs.jhu.edu>
+		<<< 550 <johnstone@crabcake.cs.jhu.edu>... User unknown
+		550 cs.jhu.edu!johnstone... User unknown: Inappropriate ioctl for device
+		
+		   ----- Unsent message follows -----
+		Received: from unido.UUCP by uunet.uu.net (5.61/1.14) with UUCP 
+			id AA08654; Thu, 15 Jun 89 10:25:29 -0400
+		From: <unido!fubinf!fubmat!yap>
+		Received: from fubinf.uucp 
+			by unido.irb.informatik.uni-dortmund.de with uucp via EUnet
+			for uunet
+			id AN07087; Thu, 15 Jun 89 13:16:36 +0100
+		Received: by fubinf.uucp (3.2/SMI-3.0DEV3)
+			id AA11836; Thu, 15 Jun 89 14:04:31 +0200
+		Date: Thu, 15 Jun 89 14:04:31 +0200
+		Message-Id: <8906151204.AA11836@fubinf.uucp>
+		To: johnstone@cs.jhu.edu
+		Subject: SIAM report
+		Cc: bajaj@cs.purdue.edu
+		
+		dear John, please let me know if you have
+		received the SIAM JComp report on your
+		submission with Bajaj.  Thanks, chee
+		
+		
+	 .
+	
+	
+
+
+------- End of Forwarded Message
+

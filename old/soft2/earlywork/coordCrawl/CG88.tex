@@ -1,0 +1,1265 @@
+%
+% coor.tex		M. Goodrich and J. Johnstone
+%
+\newif\ifFull
+\Fullfalse		% This disables some proofs, etc.
+% \Fulltrue		
+%
+% Define document style
+%
+\ifFull
+  \documentstyle[12pt,titlepage]{article}
+\else
+  \documentstyle[11pt]{article} 
+\fi
+%
+\input{macros}
+%
+% Page format
+%
+\DoubleSpace
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\topmargin}{0pt}
+\setlength{\textheight}{8.75in}
+\setlength{\textwidth}{6.5in}
+%
+\title{Coordinated Crawling: A Method for Intersecting Algebraic Curve Segments}
+\author{Michael T.\ Goodrich and John K.\ Johnstone \\[5pt]
+	Dept.\ of Computer Science, The Johns Hopkins Univ., Baltimore,
+	MD 21218}
+%
+\begin{document}
+%
+\maketitle
+%
+\begin{summary}{Summary of Results}
+In this paper, we present a novel alternative to the 
+conventional method of computing the intersections of planar algebraic curve segments.
+Our method differs from the conventional method
+in that it relies upon geometric locality, and hence can take advantage of
+situations in which one is dealing with curve segments rather than entire curves.
+The method is based upon an extension of methods for tracing along a curve.
+We develop the tools to intersect simple, monotone segments, and then
+address the problem of computing all intersection points determined by
+a given collection of algebraic curve segments in the plane.
+\end{summary}
+
+\section{Introduction} 
+The boolean operations of union, intersection, and 
+difference are axiomatic to geometric modeling.
+A constructive solid geometry representation of an object is no more than
+a (regularized) Boolean combination of basic elements.
+Intersection is particularly important, being necessary in applications from
+interference detection to hidden-surface elimination.
+In this paper we present a novel alternative to the 
+conventional method of computing the intersections of planar algebraic curve segments.
+
+A planar algebraic curve is the solution set of a (bivariate) polynomial
+equation $f(x,y) = 0$.
+Taking this view, the intersection of two curves 
+(and indeed of any collection of algebraic varieties) is simply the
+solution set of a simultaneous system of polynomial equations.
+Therefore, classical techniques from the theory of elimination can be applied,
+as follows.
+The system of equations is reduced to a single univariate equation by
+eliminating variables, using resultants \cite{walker,canny}.
+The univariate equation is then solved, say by Newton's method, yielding
+one coordinate of each solution of the original system.
+Finally, the full solutions are built up from these partial solutions,
+by solving more univariate equations.
+\ifFull\footnote{For example, the 
+	resultant \cite{walker} of f(x,y) and g(x,y) (w.r.t. y) 
+	is a univariate equation h(x) that encodes the common roots of f and g:
+	$h(x_{0})=0$ iff $(x_{0},y_{0})$ is a common root of f and g, for 
+	some $y_{0}$.  The potential $y_{0}$ are found by solving the
+	univariate equation $f(x_{0},y)=0$, and then $y_{0}$ such that
+	$g(x_{0},y_{0}) \neq 0$ are eliminated.}\fi
+\ This mathematical approach is the conventional way of 
+intersecting algebraic varieties.
+
+An artifact of the system-of-equations approach to intersection 
+is that all of the intersections between the two curves are found.
+If one only wants the intersections between two segments of the curves,
+one must first compute all of the intersections and then decide which
+of these intersections actually lie on the segments in question.
+The restriction of such a set $S$ of intersection
+points to a segment \arc{AB} of a curve $C$ 
+involves sorting $S \cup \{A,B\}$ along $C$,
+an operation which is challenging in its own right~\cite{johnstone87}.
+In other words, with the elimination method, the intersection of two
+curve segments is actually more expensive than the intersection of the entire 
+curves.
+This is even true for the intersection of very simple segments of very
+complex curves.
+
+We present a new method that allows the localization of intersection: 
+that is, a method for the intersection of planar algebraic curve {\em segments}.
+The method is sensitive to the input: the simpler and shorter the segment, 
+the more efficient the intersection computation.
+The motivation for this work comes from geometric modeling, where
+the intersection of (often simple) curve segments, as opposed to curves, is
+important.
+
+The main result of this paper is a method for solving the following problem:
+compute all intersection points of 
+a given collection of planar algebraic curve segments.
+Our method consists of two phases: a decomposition phase and a 
+sweeping phase.
+In the decomposition phase, we partition each curve segment into
+{\it xy-monotone} curve segments, that is, segments which are monotone with
+respect to both coordinate axes.
+(Note that the decomposition phase is a preprocessing step that only needs
+to be done once for each curve. Future intersections do not bear the
+expense of decomposition.)
+Then, in the sweeping phase, we apply a variant of the familiar plane
+sweeping method of Bentley and Ottmann~\cite{BeO79} to compute all the
+intersection points.
+This sweeping phase is non-trivial, however, in that it relies on the
+primitive operation of intersecting two xy-monotone curve segments
+(which may intersect many times).
+We accomplish the intersection of two xy-monotone segments by an extension
+of crawling along a curve.
+Crawling is a method for moving along a curve that has received
+much attention of late~\cite{dtw,hl,or,bhh,h}.
+We introduce two new methods of crawling in a coordinated fashion
+along two curves at the same time:
+a {\it staircase} crawl 
+and a {\it simultaneous} crawl.
+We show that
+these coordinated crawls always converge to an intersection, if there is
+one, and output ``no intersection,'' otherwise.
+After presenting the basic method, we offer two optimizations:
+recognizing when two segments cannot intersect (i.e., when early exit is
+possible)
+\ifFull first for general xy-monotone segments (Section~\ref{sec-endconds}) 
+and then an even better method for convex xy-monotone 
+segments (Section~\ref{sec-convabort}).\fi
+% more end conditions
+and using line-curve intersections to isolate a small region for a
+segment-segment intersection before coordinated crawling is 
+applied.
+\ifFull(Section~\ref{sec-linecurve}),\footnote{This tactic 
+	is used in root-finding of univariate polynomials:
+	binary search is used to isolate a region for the root
+	before Newton's method is applied.}\fi
+
+The presentation of this paper is as follows.
+In the section which follows we describe our methods for coordinated
+crawling, including the staircase crawl and the simultaneous crawl.
+In section~\ref{sec-intersect} we show how to apply these crawling
+techniques to the problem of computing all intersections of a collection
+of planar algebraic curve segments.
+
+\section{Coordinated Crawling}
+
+\Comment{		% Comment out this subsection:
+\subsection{Definitions}
+\begin{definition}
+A segment \arc{AB}\ of a curve is {\em x-monotone (y-monotone)} if the 
+value of x (y) is monotonic on \arc{AB}.  
+\arc{AB}\ is {\em xy-monotone} if it is both x-monotone and y-monotone.
+An xy-monotone segment \arc{AB} is {\em y-increasing} if 
+$x(A) < x(B)$ and $y(A) < y(B)$.  
+Otherwise, it is {\em y-decreasing}.
+\end{definition}
+
+Note that there are only four flavours of convex, xy-monotone 
+segment (Figure~\ref{fourflavours}).
+
+\figg{fourflavours}{(i) a segment falling from left to right 
+			(concavely and convexly)
+(ii) a segment rising from left to right (concavely and convexly)}{1.5in}
+
+\begin{definition}
+\[ x(A) = \left\{ \begin{array}{ll}
+		a_{x} & \mbox{if $A = (a_{x},a_{y})$} \\
+	\{a_{1,x},\ldots,a_{n,x}\} & 
+		\mbox{if $A = \{(a_{1,x},a_{1,y}),\ldots,(a_{n,x},a_{n,y})\}$}
+		\end{array}
+	  \right.  \]
+x() extracts the abscissa of a point or the abscissae of a set of points. 
+\end{definition}
+}	% comment
+
+Crawling is a method of traversing a curve.  Progress is made by
+repeatedly making short steps away from the curve and
+then relaxing back onto the curve.
+There are various ways of stepping away from the curve (such as
+along the tangent or in a direction parallel to the axes), while the relaxation
+back onto the curve can be achieved with Newton's method.
+The size of each step can be refined near singularities, where confusion
+is more likely.
+One of the useful properties of crawling 
+is its locality: it only relies on the behavior of the curve in a
+restricted neighborhood of the current position.
+The reader is referred to \cite{bhh,h,hl,or} for the details of this method.
+
+In this section, we show that crawling can be used to discover
+the intersections between two curve segments.
+For this purpose, we introduce a technique
+which we call {\it coordinated crawling}.
+Let \arc{AB} and \arc{CD} be two xy-monotone curve segments.
+The idea of the coordinated crawling technique, which will
+find the first intersection of \arc{AB} and \arc{CD} (if it exists),
+is to crawl
+along the two segments in tandem, starting at the beginning of each segment.
+The crawl along \arc{AB} alternates with the crawl along \arc{CD} so that,
+at any given time, progress is being made along only one of the 
+segments (Figure~\ref{fig.stair}).
+A particular crawl on one segment
+continues until a switching condition becomes true, at which
+time it is interrupted and the crawl along the other segment is resumed.
+The alternation between segments continues until an end condition becomes
+true, signalling that an intersection has been found or that the two segments
+do not intersect.
+
+For any point $A$, we let $x(A)$ and $y(A)$ denote the $x$- and
+$y$-coordinates of $A$ respectively.
+In the remainder of this paper
+we assume that all curves are non-linear, planar, algebraic curves;
+and the name 
+\arc{AB} of a curve segment is always chosen so that the abscissa of
+$A$ is less than or equal to the abscissa of $B$, i.e., $x(A) \leq x(B)$.
+Coordinated crawling has the following general algorithm.
+
+\begin{enumerate}
+\item 
+	If the projections of \arc{AB} and \arc{CD} onto the x-axis (resp.,
+	y-axis) are disjoint, then output `no intersection', otherwise
+	continue.
+\item
+	Flag one of the segments as active and the other as dormant.
+\item
+	Repeat the following until the end condition is satisfied
+	(e.g., an intersection is discovered or we ``run off the end''
+	of one of the segments):
+\begin{itemize}
+\item
+	Crawl along the active segment until the switching condition 
+	is satisfied.
+\item
+	Exchange the active and dormant segments.
+\end{itemize}
+\end{enumerate}
+%
+%
+\ifFull
+\begin{example}
+\label{eg1}
+Consider the coordinated crawl of Figure~\ref{fig.stair}(a).
+Horizontal and vertical lines have been added to the picture 
+to reveal the structure of the crawls.
+Each individual (dashed) subcrawl continues until both of the coordinates of the
+point on the active segment exceed the coordinates of the current point on the 
+dormant segment.
+This series of subcrawls follows a staircase pattern (Figure~\ref{fig.stair}(b))
+which converges to the first intersection of the segments.
+If no intersection exists, then the coordinated crawl reaches the end of one 
+of the segments (Figure~\ref{fig.stair}(c)).
+
+A different switching condition is needed for the coordinated crawl of 
+Figure~\ref{fig.simul}(a).... FINISH
+\end{example}
+\fi
+%
+
+The coordinated crawl as we have presented it will only find the first 
+intersection (say, $x \in \arc{AB} \cap \arc{CD}$).
+The second intersection can be found by starting another coordinated crawl
+along \arc{xB} and \arc{xD}.
+In general, a new coordinated crawl should be begun from each intersection,
+until it is
+determined by the end condition that the segments do not intersect any further.
+
+\Comment{
+Note that crawling along an xy-monotone segment should be
+simpler than crawling along a generic segment, since the crawl,
+knowing that it should travel up and right (say), is not so easily confused
+(e.g., as it passes through a singularity).?
+}
+
+In the following subsections, we describe the two variants of coordinated
+crawling that are needed for determining the intersection points of
+xy-monotone segments: the staircase crawl and the simultaneous crawl.
+We first introduce some notation.
+Let \arc{AB} and \arc{CD} be the two curve segments.
+Let $A'$ ($C'$) be the point on \arc{AB} (\arc{CD}) to which we have crawled, 
+and let
+$P_{\mbox{\footnotesize{active}}}$ ($P_{\mbox{\footnotesize{dormant}}}$)
+be the point to which we have crawled on the active (dormant) segment.
+
+\subsection{The Staircase Crawl}
+\label{sec-stair}
+We distinguish two types of xy-monotone segments:
+an xy-monotone segment is {\it rising} if it increases in $y$ as 
+it increases in $x$, otherwise it is {\it falling}.
+This section describes a coordinated crawl that is appropriate when
+both segments are rising or both segments are falling: 
+the staircase crawl (Figure~\ref{fig.stair}).
+(The next subsection describes a markedly different coordinated 
+crawl for the case when one segment is rising and the other is falling.)
+
+\Comment{
+This section gives a full description and justification of the coordinated 
+crawl method for the case when both segments are rising 
+(an xy-monotone segment is rising if it increases in y as it increases in x),
+which we call the staircase crawl (see Figure~\ref{fig.stair}).
+The next section describes a markedly different method for the case when one
+segment is rising and the other is falling
+(an xy-monotone segment is falling if it decreases in y as it increases in x).
+In light of the general algorithm that we have given for a coordinated crawl,
+the staircase crawl can be described by specifying the
+end conditions and switching conditions that define it,
+and then showing that the coordinated crawl so defined converges to an 
+intersection if one exists.
+} % comment
+
+In light of the general algorithm that we have given for a coordinated crawl,
+the staircase crawl can be described by specifying the
+switching condition and end condition that define it.
+We begin with 
+the switching condition of a coordinated crawl along 
+two rising segments.
+A crawl along the active segment will continue until both coordinates of 
+$P_{\mbox{\footnotesize{active}}}$ exceed the coordinates of 
+$P_{\mbox{\footnotesize{dormant}}}$.
+Then, before beginning to crawl along the other segment, 
+the crawl will back up one step, which ensures that the granularity of the crawl
+does not cause an intersection to be overlooked (Figure~\ref{fig-skip}).
+We also add a universal end condition to the switching condition:
+to ensure that a crawl stops if it reaches the end of a segment.
+\Comment{
+Therefore, after adding a condition to ensure that a crawl stops if it 
+reaches the end of a segment, 
+the switching condition of the coordinated crawl for rising
+segments becomes the following:
+\begin{eqnarray*}
+	[x(P_{\mbox{\footnotesize{active}}} + \mbox{1 crawl step}) \  > \ 
+	x(P_{\mbox{\footnotesize{dormant}}}) \ \ \wedge \ \ 
+	y(P_{\mbox{\footnotesize{active}}} + \mbox{1 crawl step}) \ > \ 
+	y(P_{\mbox{\footnotesize{dormant}}})] \ \ \vee
+\end{eqnarray*}
+\vspace*{-.125in}
+\begin{eqnarray*}
+	x(P_{active}) \ \ > \ \ \{x(A), x(B), x(C), x(D)\}
+\end{eqnarray*}
+where $r > S$ means that $r > s, \forall s \in S$.}
+Notice that at the end of each crawl along \arc{AB},
+$x(A') \approx x(C')$ and $y(A') > y(C')$;
+while at the end of each crawl along \arc{CD},
+$x(A')  <  x(C')$ and $y(A') \approx y(C')$ (Figure~\ref{fig.stair}).
+That is, the coordinated crawl between rising segments defined by this
+switching condition follows a staircase between the segments,
+for which reason it is dubbed a {\it staircase crawl}.
+
+Next, we define the end condition of the staircase crawl.
+The staircase crawl will stop when an intersection is found or 
+when it is determined that the two segments cannot intersect
+(e.g., the end of one of the segments is reached).
+We assume without loss of realism that an intersection has been found if
+the distance between the two segments becomes very small 
+(i.e., less than a predetermined $\epsilon$).
+This is legitimate because, for the purposes of applications such as graphics
+and geometric modeling, two segments may as well intersect 
+if they get very close together (e.g., closer than a pixel).
+%Moreover, the system-of-equations approach does not find intersections exactly either.
+(We shall see in Lemma~\ref{lem-9} that the size 
+of $\epsilon$ does not affect the efficiency of the crawl, 
+so $\epsilon$ can be chosen as small as desired.)
+Therefore, an end condition is $\mbox{dist}(A',C') < \epsilon$.
+\ifFull
+((Another possibility: if $\epsilon$ is very small or the crawl is very coarse,
+the coordinated crawl may not be able to make any progress on either segment
+near an intersection
+(because the length of the stair becomes shorter than a crawl step),
+even though the segments are not yet within $\epsilon$ of each other.
+Therefore, it is probably necessary to add an end condition reflecting this
+no-progress situation: 
+$x(A') \leq x(\mbox{previous }A') \ \wedge\  x(C') \leq x(\mbox{previous } C')$
+CLEAN UP \fi
+The end condition associated with reaching the end of one 
+of the segments is simple, since the segments are x-monotone:
+$x(A') > x(B) \ \vee \  x(C') > x(D)$.
+%
+%The following 'gap theorem' reveals that two segments must intersect if they 
+%get too close together, which allows the coordinated crawl to 
+%confidently decide that an intersection has been found as soon as the 
+%crawl points on the two segments become closer than some fixed 
+%positive $\epsilon$.
+%
+%\begin{lemma}[Canny{ \cite[p.54]{canny} }]
+%Let $\cal{p}$(d,c) be the class of polynomials of degree d and 
+%coefficient magnitude c.
+%Let $f_{1}(x_{1},\ldots,x_{n}),\ldots,f_{n}(x_{1},\ldots,x_{n}) \in 
+%\cal{p}(d,c)$
+%be a collection of n polynomials in n variables which has only 
+%finitely-many solutions when projectivized.
+%Then if $(\alpha_{1},\ldots,\alpha_{n})$ is a solution of the system,
+%then for any j either
+%\begin{eqnarray*}
+%\alpha_{j} = 0 \mbox{or} \mid \alpha_{j} \mid > (3dc)^{-nd^{n}}
+%\end{eqnarray*}
+%\end{lemma}
+%
+
+%We must show that the staircase crawl converges to an intersection 
+%if one exists.
+%
+%
+\begin{lemma}
+Let \arc{AB} and \arc{CD} be two rising segments.
+The staircase crawl along \arc{AB} and \arc{CD} will converge
+to the first intersection of \arc{AB} and \arc{CD}, if such an 
+intersection exists.
+Otherwise, it will reach the endpoint (B or D) of one of the segments.
+\ifFull 
+\end{lemma}
+ONLY IN TECH REPT.
+\Heading{Proof:}
+Don't jump over an intersection: since the crawl follows a staircase (and does not
+jump past staircase even though crawl makes discrete jumps), this is clear.
+[A complex proof would not help anyone.)
+
+Progress is made with each subcrawl (i.e., you get closer to the end of the active
+segment with each subcrawl) unless we have found an intersection:
+	(a) can assume that the switching condition for one of the segments is false,
+since otherwise the crawl has stopped making progress and we should 
+recognize an intersection
+	(b) show that if the switching condition for one of the segments is false,
+then progress is made along that segment in the next subcrawl [easy]
+
+Write an explanation of why the discreteness of the crawl, and the resulting approx
+nature of equality and solutions, does not compromise our results.
+END OF 'ONLY IN TECH REPT'
+\QED
+\else
+\end{lemma}
+\Heading{Proof:} Omitted. \QED
+\fi
+
+The staircase crawl along two falling segments is entirely analogous to the
+staircase crawl along two rising segments.
+	\Comment{
+	\footnote{Indeed, 
+	the only change is in the second switching condition, which becomes
+	$y(P_{\mbox{\footnotesize{active}}} + \mbox{1 crawl step}) \  < \ 
+	y(P_{\mbox{\footnotesize{dormant}}})$.}
+	} % comment
+We next describe the method for performing coordinated crawling when one
+segment is rising and the other is falling.
+
+\subsection{The Simultaneous Crawl}
+\label{sec-simul}
+
+Consider a coordinated crawl along a rising segment \arc{AB} and a falling
+segment \arc{CD} (Figure~\ref{fig.simul}).
+The staircase crawl cannot be used to find the intersection of these
+segments.
+\ifFull(Figure~\ref{countereg}).\fi
+Thus, we derive an entirely different coordinated crawl for this case.
+As before, we begin with the switching condition.
+A crawl along the active segment will continue until the abscissa of
+$P_{\mbox{\footnotesize{active}}}$ exceeds the abscissa of 
+$P_{\mbox{\footnotesize{dormant}}}$, yielding the following switching 
+condition:
+$x(P_{\mbox{\footnotesize{active}}})\ >\ x(P_{\mbox{\footnotesize{dormant}}})$.
+(Since each crawl--except possibly the first one--is short,
+there is no need to include an end condition in the switching condition,
+as we did with the staircase crawl.)
+Thus, as with the staircase crawl, each crawl continues until it catches
+up with the dormant segment.
+However, for this coordinated crawl, only the abscissa has to catch up,
+whereas, with the staircase crawl, both coordinates had to catch up.
+This coordinated crawl is dubbed a {\it simultaneous crawl},
+since its behaviour is very similar to
+crawling along both segments at the same time (while maintaining 
+the same velocity with respect to x).
+
+The end condition for a simultaneous crawl consists of three parts:
+\begin{itemize}
+\item 
+	Since \arc{AB} is rising and \arc{CD} is falling,
+	the two segments cannot intersect if $y(A) > y(C)$.
+	This condition need only be tested at the beginning of the crawl.
+\item
+ A switch in the relative order of $y(A')$ and $y(C')$ 
+ alerts the simultaneous crawl that an intersection has been encountered during
+ the last crawl.
+ Moreover, since each crawl is stopped as close to $x(A') = x(C')$ as the
+ granularity of the crawls allows, the present $A'$ (when the relative order 
+ switches) is the best approximation to the intersection.
+\item
+ Finally, the crawl should stop when the end of one of the segments is reached, 
+ which is recognized by the condition 
+ $x(A') \geq x(B)\ \vee \  x(C') \geq x(D)$.
+\end{itemize}
+Written as a boolean formula, the end condition is the following:
+\begin{eqnarray*}
+	y(A) > y(C)\ \ \ \vee \ \ \ y(A') > y(C')\ \ \ \vee \ \ \ 
+	x(A') \geq x(B)\ \ \ \vee \ \ \ x(C') \geq x(D).
+\end{eqnarray*}
+
+The switch condition, as described above
+(``change to the other segment {\em as soon as} 
+the relative order of $x(A')$ and $x(C')$ changes''),
+can make for very short crawls and very many switches.
+In order to avoid this, we may also ask that each crawl 
+be at least $i$ steps long.
+In this case, finding the intersection is a bit more difficult.
+The intersection is not necessarily $A'$ 
+when $y(A') > y(C')$ first becomes true:
+the intersection is somewhere during the last crawl.
+That is, since this
+crawl did not necessarily stop near $x(A') = x(C')$, it did not necessarily
+stop near the intersection.
+Therefore, backtracking is necessary: the last crawl must be repeated, but 
+with no lowerbound on the number of steps per crawl, continuing until 
+$y(A') > y(C')$ as before.
+Note that the 
+last crawl may become several crawls when the lowerbound is removed.
+Also note that a rising and falling segment can intersect at most once so,
+unlike the staircase crawl,
+there is no need to continue a simultaneous crawl from the first intersection.
+
+\ifFull
+TECH REPT ONLY
+Two asides.
+First, a monotonically rising segment (of a non-linear algebraic curve) must
+be strictly monotonically rising, by Bezout's Theorem \cite{walker}.
+Second, it is easy to see that a strictly monotonically rising segment can
+intersect a strictly monotonically falling segment in at most one point.
+(Therefore, the simultaneous crawl need only look for one intersection.)
+END OF 'TECH REPT ONLY'
+\fi
+
+\Comment{
+\begin{lemma}
+\label{lem-incdec}
+Let \arc{AB} be a rising segment and \arc{CD} a falling segment. 
+Then \arc{AB} intersects \arc{CD} at most one time.
+\end{lemma}
+
+\Heading{Proof:}
+OBVIOUS WITHOUT PROOF
+Suppose that \arc{AB} has more than one intersection with \arc{CD}.
+Let $p \neq q \in \arc{AB} \cap \arc{CD}$.
+Assume w.l.o.g. that $x(p) < x(q)$ (using Lemma~\ref{strict}).
+By x-monotonicity, $q \in \arc{pB} \cap \arc{pD}$.
+Since $y(A) < y(B)$ and \arc{AB} is strictly y-monotone,
+$q \in \arc{pB}$ implies $y(q) > y(p)$.
+But, since $y(C) > y(D)$ and \arc{CD} is strictly y-monotone,
+$q \in \arc{pD}$ implies that $y(q) < y(p)$.
+This contradiction establishes that \arc{AB} can have at most one
+intersection with \arc{CD}.
+\QED
+}  % comment
+
+
+\begin{lemma}
+The simultaneous crawl is an effective method of finding the intersection
+between a rising and falling segment, or of diagnosing that no such
+intersection exists.
+\end{lemma}
+\Heading{Proof}: Omitted. \QED
+
+\Comment{
+\begin{lemma}
+Let $\alpha$ be the unique intersection of \arc{AB}\ and \arc{CD}.
+Then, $\arc{A\alpha}$ lies strictly below $\arc{C\alpha}$ (i.e., 
+$y(\arc{A\alpha} \setminus \{\alpha\}) < y(\arc{C\alpha} 
+\setminus \{\alpha\}))$.
+Thus, $\alpha$ can be found by simultaneously crawling along \arc{AB} 
+and \arc{CD} until the ordinate on \arc{AB} becomes equal
+to the ordinate on \arc{CD}.
+\end{lemma}
+
+\Heading{Proof:}
+Obvious.
+\arc{AB} is strictly y-increasing  and \arc{CD} is strictly y-decreasing
+(Lemma~\ref{strict}).
+Therefore, $y(\arc{A\alpha} \setminus \{\alpha\}) < y(\alpha)$, and
+$y(\alpha) < y(\arc{C\alpha} \setminus \{\alpha\}))$.
+\QED
+} % comment
+
+We end our description of the simultaneous crawl by noting that it 
+cannot be used to find the intersection of two rising segments,
+because it is possible to skip over intersections.
+Thus, we must indeed have both the staircase crawl and the simultaneous crawl.
+
+\subsection{Improvements}
+\label{sec.improve}
+\ifFull In this subsection, we outline some methods for improving the efficiency of a 
+coordinated crawl.
+%
+% THIS SUBSECTION DONE
+\subsection{Recognition of non-intersection}
+\label{sec-endconds}
+%
+A coordinated crawl can be aborted as soon as
+it becomes apparent that the two segments cannot intersect.
+The following lemma outlines some conditions that guarantee non-intersection.
+These conditions should be added to the end conditions, and perhaps
+the switch condition as well.
+(However, since the purpose of these conditions is merely to 
+avoid unnecessary crawling, they need not and probably should not be 
+tested after each step: only intermittently, so as not to add a computational
+burden to each step.)
+%
+\begin{lemma}
+\label{lem-badconds}
+Let \arc{A'B}\ and \arc{C'D}\ be xy-monotone segments (during a coordinated 
+crawl).
+If any of the following conditions is true, then \arc{AB}\ and \arc{CD}\ do not
+intersect:
+\begin{enumerate}
+	\item $x(B) < x(C)$
+	\item $x(D) < x(A)$
+	\item $\{y(A),y(B)\} < \{y(C),y(D)\}$
+	\item $\{y(C),y(D)\} < \{y(A),y(B)\}$
+\end{enumerate}
+(Recall that we have assumed that $x(A') \leq x(B)$ and $x(C') \leq x(D)$.)
+\end{lemma}
+%
+ONLY IN TECH REPORT
+{\bf Proof} 
+\begin{enumerate}
+	\item $x(B) < x(C)$\\
+      	      $\Rightarrow x(A) \leq x(B) < x(C) \leq x(D)$, by our naming
+convention (*)\\
+	      $\Rightarrow x(\arc{AB}) < x(\arc{CD})$, since \arc{AB}\ and \arc{CD}\ 
+are x-monotone
+	      $\Rightarrow$ \arc{AB} and \arc{CD}\ cannot intersect, since they do not
+share any x-values
+	\item Symmetric to 1.
+	\item Since both segments are y-monotone,
+		$\{y(A),y(B)\} < \{y(C),y(D)\} \Rightarrow y(\arc{AB}) < y(\arc{CD})
+\Rightarrow$ \arc{AB} and \arc{CD} cannot intersect
+	\item Symmetric to 3.
+\end{enumerate}
+\hspace{3in}QED\\
+END ``only in tech report''\\
+%
+% THIS SUBSECTION DONE
+\subsection{More recognition of non-intersection, for convex segments}
+\label{sec-convabort}
+%
+If the two segments are convex as well as xy-monotone, 
+then there are still more ways to recognize when they do not intersect.
+(A segment is {\it convex} if no line hits it in more than two points.)
+The necessary tool is the {\it tangent triangle} 
+$\Delta AB$ of a convex segment
+\arc{AB}, which is the triangle whose sides are the tangent at A, the tangent
+at B, and \seg{AB}.\footnote{If A or B is singular, 
+	then we must crawl a short distance from it before considering 
+	the tangent triangle, since the tangent is not well defined at 
+	a singularity.}
+%
+\begin{lemma}
+If \arc{AB}\ and \arc{CD} are convex segments and
+$\Delta AB \cap \Delta CD = \emptyset$,
+then $\seg{AB} \cap \seg{CD} = \emptyset$.
+\end{lemma}
+\Heading{Proof:}
+Since \arc{AB} is convex, $\Delta AB$ contains \arc{AB}.
+Similarly, $\Delta CD$ contains \arc{CD}.
+The result follows immediately.
+\QED
+%
+Therefore, a coordinated crawl along convex segments can be aborted as soon as 
+$\Delta A'B \cap \Delta C'D = \emptyset$.
+%
+%
+\subsection{Using line-curve intersections}
+\label{sec-linecurve}
+%
+Further optimization is possible using line-curve intersections (viz., 
+intersections of horizontal and vertical lines with the curve segments).
+These can be used to avoid long crawls (in staircase crawls)
+and to get closer to the intersection before beginning the coordinated crawl
+(for simultaneous crawls).
+%
+\subsubsection{Staircase crawl}
+%
+% there is another way of finding the endpoints of the stairs:
+% by intersecting horizontal and vertical lines with the curves
+%
+The essential purpose of a staircase crawl is to find the series of 
+endpoints of the stairs.
+For example, the staircase crawl of Figure --- is characterized by the list
+of stair endpoints:   .
+The stair $C_{0}A_{1}$ that follows $A_{0}C_{0}$ in the series can be 
+found by crawling from $A_{0}$ until the coordinates of $A'$ exceed those
+of $C_{0}$.
+However, it can also be found by finding the intersection
+of the horizontal line through $C_{0}$ with \arc{AB}.
+Similarly, the next stair $A_{1}C_{1}$ can be found by finding the 
+intersection of the vertical line through $A_{1}$ with \arc{CD}.
+
+%
+% create some of the stairs by line-curve intersection rather than crawling,
+% until the length of the stair gets small (i.e., until crawling becomes 
+% faster)
+%
+% also, have an upperbound on the time that you will allow a crawl to the next
+% stair to continue before you abort the crawl and use a line-curve intersection
+% to find the next point
+%
+Therefore, any of the crawls of a staircase crawl can be replaced by a 
+line-curve intersection.
+The time to crawl between stair endpoints E,F depends upon the length of the
+curve \arc{EF}; but the time for a line-curve intersection is essentially
+constant (for a given curve).
+Therefore, only long crawls should be replaced by line-curve intersections.
+An upperbound U\footnote{Of the same order of magnitude as the time for a 
+	line-curve intersection.}
+can be introduced, such that a single crawl will be aborted if it takes
+more time than U and the next stair endpoint will instead be found by a 
+line-curve intersection.
+%
+\subsubsection{Simultaneous crawl}
+%
+Line-curve intersections can be used in a simultaneous crawl 
+to perform a preliminary binary search for the intersection
+(Figure~\ref{fig.binary}).
+%
+% After a binary search, the intersection will be isolated between
+%  two horizontal lines. Begin the crawl from the left intersections
+%  of these lines.
+%
+The binary search will isolate the intersection between two lines and,
+in general, will allow the simultaneous crawl to begin closer to the
+intersection.
+%
+Both horizontal and vertical binary searches are possible.
+The binary search does not continue to completion.
+As above, there is a tradeoff between the number of line-curve intersections
+that are computed and the amount of crawling that is saved.
+As a general rule, the binary search continues longer when the degree
+of the curves is low (so that line-curve intersection is cheap)
+and when the endpoints of the curve segments are far apart  
+(so that one can anticipate a lot of crawling, making it more likely
+that a binary search will indeed reduce the crawling substantially).
+%
+Note that it is not possible to binary search for an intersection when
+both segments are rising, because it is possible to skip over intersections 
+without noticing it.
+In particular, any even number of intersections between two 
+stabs of the binary search are invisible (Figure~\ref{fig.counter2}).
+This could not happen with the simultaneous crawl, because there is 
+only one intersection.
+%
+%
+%
+
+ONLY IN TECH REPT.
+\subsubsection{Computation of line-curve intersections}
+%
+-reduces to solution of a univariate equation of the same degree as the curve 
+	(parameterize the line and substitute this parameterization 
+	into the curve's equation)\\
+ plus restriction of these roots to the segment in question 
+	desired root must have abscissa in the correct range (eg. (x(A),x(B)))
+	if more than one root lies in this range, then sorting must be used
+		to disambiguate (certainly at most one root lies on \arc{AB}
+		since the lines are horizontal or vertical)\\
+-fact(?): one can solve an exponential number of line-curve intersections
+	in the same time as one curve-curve intersection\\
+-especially easy if a low-degree parameterization is known for the curve
+	(reduces to solving a univariate equation of the curve param's degree)
+END OF 'TECH REPT ONLY'
+
+\else % (end of a long \ifFull, starting with previous \subsection)
+In the full version of this paper, we discuss conditions for
+establishing that two segments cannot intersect, which allows
+early termination of the coordinated crawl.
+If the segments are also convex, then additional conditions for early termination
+are available.
+Optimization is also possible using line-curve intersections (viz., 
+intersections of horizontal and vertical lines with the curve segments).
+These can be used to avoid long crawls (in staircase crawls)
+and to get closer to the intersection before beginning the coordinated crawl
+(for simultaneous crawls).
+The details are omitted here.
+\fi
+%
+\subsection{Efficiency}
+%
+% SECTION DONE (FOR NOW)
+%
+%WE STOP WHEN SEGMENTS GET WITHIN $\epsilon$ OF EACH OTHER.
+%IS THIS NECESSARILY CLOSE TO THE ACTUAL INTERSECTION?
+%
+%We have seen that two segments cannot get too close together (i.e., closer
+%to $\epsilon$) without intersecting.
+%
+The efficiency of a coordinated crawl depends almost entirely 
+upon the distance that must be crawled along the two segments before 
+an intersection is found (or it is determined that none exists).
+In particular, the efficiency of a coordinated crawl is affected little by
+the number of subcrawls that it is broken into 
+(e.g., the number of stairs in the staircase).
+It might seem that if the segments remain very close
+for a long time, then a staircase crawl will be slow because
+the staircase is very fine with very short stairs. 
+The following lemma shows that this is not the case.
+%
+%\begin{lemma}
+%Each subcrawl is of length $l \geq \epsilon$, where $\epsilon$
+%is the closest that two nonintersecting segments can get.
+%\end{lemma}
+%
+\begin{lemma}
+\label{lem-9}
+Let \arc{AB} and \arc{CD} be xy-monotone segments of algebraic 
+curves of degree $m$ and $n$, respectively.
+The complexity of finding all of the intersections of \arc{AB} and \arc{CD} 
+with a coordinated crawl is the complexity of crawling a distance
+$O(\mbox{min}(dist(A,B), dist(C,D)))$ along a curve of degree max\{m,n\},
+where $dist(\cdot,\cdot)$ is Euclidean distance.
+\end{lemma}
+
+\Heading{Proof:}
+By a straightforward application of the triangle inequality,
+the length of an xy-monotone segment \arc{AB} is bounded by $\sqrt{2}\,dist(A,B)$.
+Thus, the length of a crawl along \arc{AB} is $O(dist(A,B))$.
+In order to show that the number of stairs doesn't matter,
+we must show that stopping and starting a crawl takes essentially no time.
+This can be seen as follows.
+We can keep two separate regions in memory, one set up for crawling
+along \arc{AB}, the other for crawling along \arc{CD}.
+Switching crawls merely involves jumping to the other part of memory,
+i.e., a context switch.
+\QED
+\Comment{
+Let \arc{AB} be an xy-monotone segment.
+It is easy to see that the length of \arc{AB} is bounded by
+$\mid x(B) - x(A) \mid + \mid y(B) - y(A) \mid$.
+The triangle of Figure~\ref{fig.triangle} shows that 
+$\mid x(B) - x(A) \mid + \mid y(B) - y(A) \mid = (\mbox{cos}\theta 
++ \mbox{sin}\theta) \mbox{ dist(A,B)}$.
+I claim that $\mbox{max}_{\theta} (\mbox{cos}\theta + \mbox{sin}\theta) = \sqrt{2}$ (at $\theta = \frac{\pi}{4}$).
+Therefore, $\mid x(B) - x(A) \mid + \mid y(B) - y(A) \mid \leq
+(\sqrt{2}) \mbox{ dist(A,B)}$.
+} % comment
+
+\section{Intersecting Many Planar Algebraic Curve Segments}
+\label{sec-intersect}
+
+In this section we show how to use the coordinated crawling technique as
+a basic operation in a plane-sweep algorithm to enumerate all
+intersection points of a collection of planar algebraic curve segments.
+As outlined above, we begin our method by first partitioning each curve
+segment into xy-monotone curve segments.
+We describe this decomposition step next.
+
+\subsection{xy-Monotone Decomposition}
+\label{sec-decomp}
+
+We begin by observing that
+a curve segment is xy-monotone if and only if it contains no local extrema
+(no changes in direction with respect to the x-axis or y-axis).
+Therefore, the local extrema of a curve form a natural partition
+of the curve into xy-monotone segments.
+An xy-monotone decomposition will involve finding
+and sorting the curve's local extrema.
+The local extrema of a curve $f(x,y)=0$ are the solutions of
+$\{f_{x}=0,f=0\}$ and $\{f_{y}=0,f=0\}$,
+sorting the extrema along the curve (in order to pair them 
+into segment endpoints) can be accomplished in various 
+ways (see \cite{johnstone87} for details).
+
+It might seem that the computation of extrema, which itself involves a curve-curve
+intersection, leads to a circularity in our method.
+This is not the case, however.
+First of all, computing the singularities of an algebraic curve is 
+so fundamental that
+it is 
+needed in many geometric modeling algorithms (e.g., \cite{abba,johnstone87}).
+It is trivial to determine the extrema of a curve as part of the singularity 
+computation (since the singularities are the solutions of $\{f_{x}=0,f_{y}=0,f=0\}$).
+Therefore, it is reasonable to assume that when it comes time to intersect two
+curves from a geometric model, their extrema will already be available.
+But let us suppose that the extrema are not known.
+Second, we are trying to find the intersections of $n$ segments, and 
+if we do this in the straightforward manner, then we shall perform $O(n^{2})$
+curve-curve intersections.
+But finding the extrema of the $n$ curves only requires
+$2n$ curve-curve intersections.
+A final reason that it is not unreasonable to ask for a curve-curve
+intersection at this juncture is that curves in a geometric model are relatively
+permanent, and intersection is a common operation.
+Therefore, we are willing to incur an expense for preprocessing a curve if this
+will allow us to speed up all future intersections with this curve.
+
+\Comment{
+The decomposition of a curve into convex 
+segments (for Section~\ref{sec-convabort}) is described in \cite{johnstone87}.
+(It would precede a decomposition into xy-monotone segments.)
+A curve of degree $n$ has $O(n)$ xy-monotone segments, since there are
+$O(n)$ local extrema.
+}  % comment
+
+\ifFull
+TECH REPORT ONLY
+(a) if you need convex decomposition to be able to sort, 
+then xy-monotone-and-convex decomposition is no harder than xy-monotone
+decomposition
+
+(b) if sorting can be done without convex decomposition,
+then xy-monotone decomposition should be quite a bit easier
+than xy-monotone+convex decomposition, since
+finding extrema is roughly equivalent to finding singularities rather 
+than (i) finding flexes and singularities (ii) finding their tangents
+(iii) intersecting these tangents with the curve, and
+(iv) pairing up the endpoints of the convex segments.
+END OF ``TECH REPT ONLY''
+\fi
+
+For the remainder of this section we assume that we are given a
+collection of xy-monotone curve segments and wish to find all of the
+intersection points that they determine.
+
+\subsection{A Plane Sweep Algorithm for xy-Monotone Curve Segments}
+
+Now that we have developed the necessary primitives, we can describe the
+plane-sweep procedure to identify all intersection points.
+We begin by inserting all of the xy-monotone segment endpoints into a priority
+queue E.
+We will be sweeping a vertical line L through the plane from left to right.
+As we sweep we will maintain a data base D, which consists of all curve
+segments that intersect L, stored in sorted order by their intersections with L.
+We represent D as a (2,3)-tree \cite{ahu74} (or some equivalent efficient dynamic
+search structure).
+Note that since the segments are xy-monotone, each segment will intersect L at most
+once.  As we sweep L to the right we need to stop at various {\em event} points to 
+maintain the consistency of the data base D.
+
+The priority queue E determines the events.
+An event is either an endpoint or an intersection point.
+With each curve C we also keep a priority queue E(C) which stores the names of 
+all the curves which we have compared with C already.
+These lists will prevent us from performing any redundant intersection tests.
+A generic step in the plane-sweep algorithm is as follows.
+Remove the point in E with minimum $x$-coordinate.
+Let $p$ be this point.
+Intuitively, this corresponds to moving L to the right until it ``hits'' $p$.
+We must then update D depending on the identity of $p$.
+We identify each of the possible cases below.
+
+{\bf Case 1}. The point $p$ is the left endpoint of a curve segment $C$.
+In order to maintain the consistency of our data base, we must insert $C$ in $D$.
+To do this we must find the curve segment $C_{1}$ in $D$ such that $C_{1}$
+intersects $L$ in the lowest point above $p$, i.e., $C_{1}$ is directly above $p$.
+We can do this by making $O(\mbox{log n})$ curve-segment comparisons to find
+a path in the tree $D$ to the place where $C$ belongs.
+Each such curve comparison is to determine if a curve $C'$ intersects $L$ above
+or below $p$, and can be implemented by a procedure similar to the coordinated
+crawl (actually simpler than that, since one of the curves is the vertical line $L$).
+After we have located where $C$ belongs in $D$, we must then determine all of the
+intersections of $C$ with its predecessor curve $C_{1}$ and successor curve $C_{2}$
+in $D$. These can all be determined by the coordinated crawl procedure described
+in the previous section.
+We add all discovered intersection points $p$ to the priority queue $E$ as long 
+as the two curves cross at $p$ (as opposed to simply ``touching'').
+We also add $C$ to $E(C_{1})$ and $E(C_{2})$ and add $C_{1}$ and $C_{2}$ to $E(C)$.
+
+{\bf Case 2}. The point $p$ is an intersection point.
+If $C_{1}$ and $C_{2}$ are the two curves which intersect at $p$, then we swap them
+in $D$.  Without loss of generality, assume $C_{2}$ now occurs before $C_{1}$ in the
+list  $D$.  Let $C_{0}$ be the new predecessor of $C_{2}$ and let $C_{3}$ be the 
+new successor of $C_{1}$.
+Provided $C_{0}$ is not in $E(C_{2})$, we then test $C_{0}$ and $C_{2}$ for
+intersections.  Similarly, we test $C_{1}$ and $C_{3}$ for intersections, provided
+$C_{3}$ is not in $E(C_{1})$. 
+We then update $E(C_{0})$, $E(C_{1})$, $E(C_{2})$, and $E(C_{3})$ as necessary.
+
+{\bf Case 3}.  The point $p$ is a right endpoint of a curve $C$.
+In this case we delete $C$ from $D$.
+We then need to test the two neighbors $C_{1}$ and $C_{2}$ of $C$ at $p$
+(which are now adjacent) for their respective intersection points, if any.
+We first check if $C_{1}$ is in $E(C_{2})$, and if not, then perform the intersection
+test between $C_{1}$ and $C_{2}$ as outlined above.
+Of course, we then update $E(C_{1})$ and  $E(C_{2})$ as necessary.
+
+Since these are all the possible cases, this completes the algorithm.
+We summarize with the following theorem:
+\begin{theorem}
+Given n xy-monotone curve segments in the plane, one can compute all of 
+the intersection points determined by these curves in 
+$O((n+k)\log n + (n \log n) \alpha + (n+k) \beta)$ time and
+$O(n+k)$ space, where $k$ is the number of intersection points, 
+$\alpha$ is the time needed to perform an ``above curve'' test, 
+and $\beta$ is the time needed to perform an intersection test
+(that is, a coordinated crawl). \QED
+\end{theorem}
+
+The benefits of this algorithm will be most strongly felt when the segments S are of 
+a different order of complexity than the curves $C \supset S$, because
+of the associated benefits of coordinated crawling in this case.
+
+\Comment{
+\section{The intersection of entire algebraic curves}
+TECH REPT ONLY
+
+The method 
+may be impractical for entire algebraic curves, since there are O($n^3$) 
+convex segments and $O(n)$ xy-monotone segments per curve.
+Certainly each segment-pair intersection had better be very fast
+(this is where an implementation would be lovely).
+
+END OF 'TECH REPT ONLY'
+} % comment
+
+%\section{Implementation Results}
+%
+% (1) get crawling software from Purdue/Cornell by asking Bajaj or Hopcroft,
+%     to use both in the present coordinated crawling work and 
+%     in comparing crawling more rigorously with sorting methods
+%
+%			!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+%
+% (2) get an account on VMS for MACSYMA access so that we can time the
+%     elimination method of curve intersection
+%
+
+\section{Extensions}
+
+It is possible to extend the coordinated crawl technique to
+segments that are monotone in any two linearly independent directions.
+However, it is not clear whether it is possible to extend to non-monotone
+segments.
+A coordinated crawl needs a simple switching condition, since this condition
+must be tested repeatedly during a subcrawl (viz., after each crawl step).
+With monotone segments, switching only depends upon the relative size of the
+x and y coordinates, which is particularly easy to check.
+
+\section{Conclusions}
+
+We have proposed a method for intersecting curve segments that takes advantage
+of the locality and simplicity of the segments.
+The complexity of the intersection depends upon the complexity of the segments
+rather than the complexity of the curves that contain the segments.
+With the system-of-equations approach to curve intersection,
+the intersection of simple segments of complex curves is still complex,
+since the method must essentially find all of the intersections.
+This seems unnatural, or at least undesirable.
+The intersection of simple segments becomes simple with 
+coordinated crawling.
+%
+\ifFull Another advantage of coordinated crawling is that
+the system-of-equations approach requires the *solution* of univariate 
+equations of *high* degree (the product of the degrees of the original curves);
+whereas coordinated crawling involves only the *evaluation* of equations 
+of *relatively low* degree (the degree of the original curves). \fi
+%
+
+We have also presented two extensions of the crawling technique,
+the staircase and the simultaneous crawls.
+
+Finally, using the coordinated crawl as a primitive step,
+we have extended the well-known plane-sweep algorithm for the intersection
+of line segments to an algorithm for the intersection of algebraic curve segments,
+which not only reduces (when $k \ll \frac{n^2}{\mbox{log }n}$) 
+the number of intersections from $O(n^2)$ to $O((n+k) \mbox{log }n)$, but also
+makes the primitive step in the plane sweep a simple intersection of relatively
+short
+segments rather than a (potentially) complex intersection of entire curves.
+%
+\ifFull
+\section{Appendix}
+%
+TECH REPT ONLY
+
+\begin{lemma}
+Let \arc{AB}\ and \arc{CD}\ be xy-monotone segments such that \arc{AB} is 
+rising and \arc{CD} is falling,
+and \arc{AB} and \arc{CD}  do not satisfy any of the
+conditions of Lemma~\ref{lem-badconds}.
+Let $\arc{A_{0}B_{0}} \subseteq \arc{AB}$ and
+$\arc{C_{0}D_{0}} \subseteq \arc{CD}$  be subsegments such that 
+  $x(A_{0}) = x(C_{0})$ and 
+  $x(B_{0}) = x(D_{0})$.
+(These subsegments always exist.)
+Then \arc{AB} and \arc{CD} intersect if and only if
+$\arc{A_{0}B_{0}}$ and $\arc{C_{0}D_{0}}$ do not satisfy any of the conditions
+of Lemma~\ref{lem-badconds}.
+\end{lemma}
+\Heading{Proof:}
+Since \arc{AB} and \arc{CD} do not satisfy any of the conditions of 
+Lemma~\ref{lem-badconds}, $x(A) \leq x(D)$ and $x(C) \leq x(B)$.
+Hence, by our naming assumption (*), $\{x(A),x(C)\} \leq \{x(B),x(D)\}$.
+In particular, 
+\begin{eqnarray*}
+x(A) \leq \mbox{max} \{x(A),x(C)\} \leq \mbox{min} \{x(B),x(D)\} \leq x(B)
+\end{eqnarray*}
+Let $A_{0}$ (resp., $B_{0}$) be the point of \arc{AB} with abscissa
+\mbox{max \{x(A),x(C)\}} (resp., \mbox{min \{x(B),x(D)\}}).
+Thus, $\arc{A_{0}B_{0}} \subseteq \arc{AB}$.
+(See Figure~\ref{fig1onsheet}.)
+Similarly,
+\begin{eqnarray*}
+x(C) \leq \mbox{max} \{x(A),x(C)\} \leq \mbox{min} \{x(B),x(D)\} \leq x(D)
+\end{eqnarray*}
+Let $C_{0}$ (resp., $D_{0}$) be the point of \arc{CD} with abscissa
+\mbox{max \{x(A),x(C)\}} (resp., \mbox{min \{x(B),x(D)\}}).
+$\arc{C_{0}D_{0}} \subseteq \arc{CD}$.
+Note that $x(A_{0}) = x(C_{0})$ and $x(B_{0}) = x(D_{0})$.
+
+Suppose that $\arc{A_{0}B_{0}}$ and $\arc{C_{0}D_{0}}$ do not satisfy any of the 
+conditions of Lemma~\ref{lem-badconds}.
+Then it is clear that $\arc{A_{0}B_{0}}$ must intersect
+$\arc{C_{0}D_{0}}$ (Figure).
+%
+%We shall show that $\arc{A_{0}B_{0}}$ intersects $\arc{C_{0}D_{0}}$.
+%Assume w.l.o.g. that $A_{0} \neq C_{0}$ and $B_{0} \neq D_{0}$.
+%Consider the curve
+%\begin{eqnarray*}
+%\alpha := \arc{A_{0}B_{0}} \cup \{(t,y(A_{0})) : -\infty < t \leq x(a_{0})\}
+%			   \cup \{(t,y(B_{0})) :  x(B_{0}) \leq t < \infty \}
+%\end{eqnarray*}
+%\figg{2}{The curve $\alpha$}{1.5in}
+%$\alpha$ partitions the plane into two regions.\footnote{After all,
+%	it is continuous, non-self-intersecting, and it goes off to infinity
+%	at both ends.}
+%
+%I claim that $C_{0}$ and $D_{0}$ lie on opposite sides of $\alpha$.
+%Consider $C_{0}$.
+%If $y(C_{0}) < y(A_{0})$, then 
+%$y(D_{0}) \leq y(C_{0}) < y(A_{0}) \leq y(B_{0})$,
+%satisfying condition (3) of Lemma~\ref{lem-badconds}, which is a contradiction.
+%Moreover, we have assumed $A_{0} \neq C_{0}$.
+%Therefore, $y(C_{0}) > y(A_{0})$.
+%Since $x(C_{0}) = x(A_{0})$, this establishes that $C_{0}$ lies in the
+%upper region, above $\alpha$.
+%A similar argument establishes that $y(D_{0}) < y(B_{0})$ and that $D_{0}$
+%lies in the lower region, below $\alpha$.
+%Therefore, $C_{0}$ and $D_{0}$ lie on opposite sides of the extended curve
+%$\alpha$, and the continuous curve segment $\arc{C_{0}D_{0}}$ must cross
+%$\alpha$.
+%Since $x(\arc{C_{0}D_{0}}) = x(\arc{A_{0}B_{0}})$, 
+%$\arc{C_{0}D_{0}}$ must cross $\alpha$ through $\arc{A_{0}B_{0}}$.
+%This establishes that \arc{AB} has at least one intersection with \arc{CD}.\\
+
+Suppose that $\arc{A_{0}B_{0}}$ and $\arc{C_{0}D_{0}}$ satisfy one or more of the 
+conditions of Lemma~\ref{lem-badconds}.
+Then $\arc{A_{0}B_{0}} \cap \arc{C_{0}D_{0}} = \emptyset$.
+I claim that the other parts of \arc{AB} and \arc{CD} also do not intersect.
+SHOW!
+\QED
+%
+$\arc{A_{0}B_{0}}$ and $\arc{C_{0}D_{0}}$ are found by crawling from the
+beginning and then backwards from the end of the segments (Figure~\ref{fig.A0B0}).
+They might allow you to recognize non-intersection more quickly, 
+but it is not clear that it would be wise to invest the effort.
+The crawl from A to A0 (or B to B0) is  done anyway to satisfy 
+the initial condition of the coordinated crawl.
+Perhaps  the effort to crawl backwards from D to d0 (or B to B0)
+should be invested iff x(B) - x(D) is small (at least relative to
+x(B) - x(A0)).
+
+END OF 'TECH REPT ONLY'
+%
+%\begin{lemma}
+%\label{strict}
+%An x-monotone segment of a non-linear, algebraic curve is strictly x-monotone.
+%Likewise for y-monotone segments.
+%\end{lemma}
+%\Heading{Proof:}
+%Use Bezout.
+%\QED
+%
+\fi
+
+\SingleSpace
+\subsection*{Acknowledgements}
+We would like to thank C. Bajaj and M. S. Kim for helpful conversations.
+%
+\begin{thebibliography}{88}
+
+\bibitem{ahu74} Aho, A., Hopcroft, J., and Ullman, J.,
+{\it The Design and Analysis of Computer Algorithms},
+Addison-Wesley (Reading, MA: 1974).
+
+\bibitem{abba} Abhyankar, S., and Bajaj, C., 
+``Automatic Parameterization of Rational Curves and Surfaces III:
+Algebraic Plane Curves,''
+Tech. Rep. CSD-TR-619, Dept. of Computer Science, Purdue Univ.,
+August 1986.
+
+\bibitem{bhh} Bajaj, C., Hoffmann, C., and Hopcroft, J.,
+``Tracing Planar Algebraic Curves,''
+Tech. Rep. CSD-TR-637, Dept. of Computer Science, Purdue Univ.,
+September 1987.
+
+\bibitem{BeO79} Bentley, J. L., and Ottmann, T. A., 
+``Algorithms for Reporting and Counting Geometric Intersections,''
+{\it IEEE Trans.\ on Computers}, Vol.~C-28, No.~9, September 1979,
+643--647.
+
+\bibitem{canny} Canny, J. F.,
+``The Complexity of Robot Motion Planning,''
+Ph.D. Thesis, Dept. of Computer Science, MIT, 1987.
+
+\bibitem{dtw} Dobkin, D. P., Thurston, W. P., and Wilks, A. R.,
+``Robust Contour Tracing,''
+Tech. Rep. CS-TR-054-86, Dept. of Computer Science, Princeton Univ.,
+(September 1986).
+
+\bibitem{h} Hoffmann, C. M., 
+``Algebraic Curves,''
+Tech. Rep. CSD-TR-675, Dept. of Computer Science, Purdue Univ.,
+May 1987.
+
+\bibitem{hl} Hoffmann, C. M., and Lynch, R. E., 
+``Following Space Curves Numerically,''
+Tech. Rep. CSD-TR-684, Dept. of Computer Science, Purdue Univ.,
+May 1987.
+
+\bibitem{johnstone87} Johnstone, J. K.,
+``The Sorting of Points Along an Algebraic Curve,''
+Tech. Rep. 87-841, Ph.D. Thesis, Dept.\ of Computer Science, 
+Cornell Univ., June 1987.
+
+%\bibitem{johnstone87b} J. K. Johnstone.
+%{\em Journal Article on Sorting}.
+%\bibitem{johnstone87c} J. K. Johnstone.
+%{\em Journal article on Convex Decomp}.
+%for convex decomposition and sorting
+
+\bibitem{or} Owen, J. C., and Rockwood, A. P.,
+``Intersection of General Implicit Surfaces,''
+In {\it Geometric Modeling: Algorithms and New Trends}, G. Farin (ed.),
+SIAM, 335-345 (1987).
+
+\bibitem{walker} Walker, R. J.,
+{\it Algebraic Curves,}
+Springer-Verlag (New York: 1950).
+
+\end{thebibliography}
+\clearpage
+\section*{Figures}
+									% 1st
+\figg{fig.stair}{A staircase crawl.}{3.5in}
+%(a) a series of coordinated subcrawls
+%		 (b) a compact representation of a staircase crawl}{.1in}
+%		 (c????) a coordinated crawl to the end of a segment}{.1in}
+%
+									% 2nd
+\figg{fig-skip}{An intersection may be overlooked unless each subcrawl
+		ends by backing up a step.}{1.5in}
+									% 3rd
+\figg{fig.simul}{A simultaneous crawl.}{2in}
+%		 (b) a grid of vertical lines}{.1in}
+									% 4th
+							% picture is in countereg.pic
+%\figg{countereg}{The staircase crawl cannot be used for rising/falling segments: it will
+%skip over intersections}{.1in}
+									% 5th
+						        % picture is in skipover.pic
+%\figg{skip}{The simultaneous crawl cannot replace the staircase crawl either}{.1in}
+%\figg{fig1onsheet}{old Figure 1 on sheet}{.1in}
+%
+\end{document}

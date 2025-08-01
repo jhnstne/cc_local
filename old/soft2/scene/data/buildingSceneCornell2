@@ -1,0 +1,10 @@
+[ FILE: buildingSceneCornell2
+  A 2D test scene for object visibility.
+  Call: umbra -r 20 -S data/umbra/buildingSceneCornell2
+  Created: 5/1/03
+]
+{
+../../interpolation/data/arch/cornell1.pts 1 0  -6  1
+../../interpolation/data/arch/cornell1.pts 1 0  12 -10
+}
+.08     0 0

@@ -1,0 +1,551 @@
+\chapter{A Comparison of the Sorting Methods}
+\label{chap-results}
+%COMMENT: we use our own root-finder in the implementation of the 
+%parameterization method.
+
+This chapter examines the efficiency of the convex-segment method
+of sorting.
+Section~1 analyzes its theoretical complexity, while
+Section~2 presents some empirical results for the sorting methods.
+Section~3 discusses the advantages of the 
+convex-segment method.
+
+\section{Complexity Analysis}
+
+This section presents an analysis of the worst case complexity of 
+the convex-segment method.
+We include this analysis for the insight that it offers into the algorithm.
+However, we must emphasize that it is often unwise to compare
+geometric modeling algorithms by their worst case performance,
+because worst cases can be misleadingly pessimistic and
+a geometric modeler is concerned about the 
+treatment of cases that arise in practice rather than the behaviour of the
+algorithm on a worst case that occurs very rarely.
+For example, in the worst case, Theorem~\ref{thm-parents} will have to be 
+applied in order to determine the convex segment that a given sortpoint $x$
+lies on, which could involve the solution of several equations of degree $n$.
+Yet, the worst case arises only in those rare cases when the sortpoint $x$ 
+lies in a multisegment cell and requires the expensive conditions of S($x$)
+to determine its convex segment.
+(The use of R($x$), as described in Section~\ref{sec3-chap3}, makes this
+worst case even more unlikely.)
+In all other cases, $x$'s convex segment can be found in $O(1)$ time.
+An expected case analysis would be preferable, however it is difficult to
+formalize the notion of an expected case for sorting with the convex-segment
+method.
+
+The complexity of sorting $m$ points along a rational curve 
+with the parameterization method is O($m\alpha[p]$), where $\alpha[d]$ is 
+the time required to find the real roots of a polynomial equation of degree
+$d$ and $p$ is the degree of the curve's rational parameterization.
+The complexity of finding a parameterization depends upon the algorithm used.
+However, it should be of the same order of complexity as finding the 
+singularities and flexes of the curve, since singularities are 
+used in the algorithm for parameterizing rational curves.
+
+The complexity of sorting $m$ points along a sort segment
+of a curve with the crawling method is O($\frac{NL}{\e}$), where $N$ 
+is the time required to apply Newton's method
+(which will vary from application to application), $L$ is the length
+of the sort segment, and $\e$ is the size of each jump.
+%
+\begin{theorem}
+$m$ points on a plane algebraic curve of order $n$
+can be sorted by the convex-segment
+method in O($mn^{3}\alpha[n]$) worst case time after \\
+O($\alpha[n^{2}] + n^6\alpha[n] + n^{2}\alpha[2^{MAX}n] + 
+n^{4}2^{2*MAX}$) preprocessing,
+where $\alpha[n]$ is the time
+required to find the real roots\footnote{The
+procedure of Jenkins and Traub \cite{jen} for computing real roots
+is a good choice.}
+of a univariate polynomial equation of degree $n$
+and {\em MAX} is the maximum number of quadratic transformations that are 
+necessary to decompose any singularity of the curve into simple 
+points.\footnote{{\em MAX} will usually be 1 or 2.  For
+example, {\em MAX} is 1 if all of the singularities are ordinary.}
+\end{theorem}
+\begin{proof}
+The singularities of a curve are found by solving the simultaneous system
+of equations
+\mbox{$\{f_{x} = 0, f_{y}=0, f_{z} = 0\}$} (Lemma~\ref{lem-singflex}),
+which can be done effectively by using resultants.
+Let $X$ be the real roots of the resultant of $f_{x}$ and $f_{y}$ with 
+respect to y,
+which is a univariate\footnote{We can remove the
+homogeneous z-variable by setting it to $1$, since we are only concerned
+with finite singularities.}
+polynomial in $x$ of degree O($n^{2}$).
+Similarly, let $Y$ be the real roots of the resultant of $f_{x}$ and $f_{y}$ with 
+respect to x.
+Then the singularities of the curve in the real, affine plane are
+\mbox{$\{\ (x,y)\ :\ x\in X,\ y \in Y \mbox{ and } f_{z}(x,y) = 0\ \}$.}
+A resultant of a pair of polynomials of degree at most $d$ in $v$ variables 
+can be computed in O($d^{2v+1}\ log\ d$) time \cite{col}.
+Therefore, X (and Y) can be computed in O($n^{5}\ log\ n + \alpha[n^{2}]$).
+Since X and Y are of size O($n^{2}$) and  
+O($n^{2}$) time suffices 
+to evaluate  an equation of degree $n$, the singularities
+can be computed in O($n^{5}\ log\ n + \alpha[n^{2}] + n^{6}$) time.
+The flexes, which are the intersections of the curve with its
+Hessian (Lemma~\ref{lem-singflex}),
+can also be computed in  O($\alpha[n^{2}] + n^{6}$) time.
+
+A curve of order $n$ has O($n^{2}$) flexes and 
+singularities (Lemma~\ref{lem-maxsing}).
+Therefore, it has O($n^{2}$) \wallpoints\ at its flexes.
+The bound on the number of singularities is expressed in terms
+of the maximum number of double points: a curve of order $n$ can
+have at most $\frac{(n-1)(n-2)}{2}$ double points, and
+a singularity of multiplicity $t$ counts as $\frac{t(t-1)}{2}$ 
+double points.
+Since O($2t$) \pseudos\ are created at a singularity of multiplicity $t$,
+$\frac{2t}{\frac{t(t-1)}{2}} = \frac{4}{t-1} \leq 4$ \pseudos\ are created
+per double point.
+Therefore, there are no more than $4*\frac{(n-1)(n-2)}{2} =$ O($n^{2}$) 
+\pseudos.
+
+Consider the time required to compute the \pseudos.
+It takes O($d^{2}$) time to apply a quadratic transformation or a 
+translation to an equation of degree $d$.
+It takes $\alpha[d]$ time to compute the intersections of a curve
+of order $d$ with the y-axis.
+During the reduction of a singularity to simple points, each quadratic
+transformation can double the degree of the curve's equation, since
+$y^{i}$ becomes $(xy)^{i}$.
+Therefore, the equation can become of degree $2^{MAX}n$ during the
+reduction of a singularity.
+Finally, O($n^{2}$) quadratic transformations are sufficient to reduce
+all of 
+the singularities (which account for O($n^{2}$) double points) to simple
+points \cite{abba3}.
+We conclude that a (very pessimistic) bound on the time for computing 
+the \pseudos\ is O($n^{2}(2^{MAX}n)^{2}\alpha[2^{MAX}n]$).
+%A quadratic transformation reduces the multiplicity of a singularity by
+%at least one???, and there are O($n^{2}$) double points.
+%O($n^{2}$) quadratic transformations are sufficient to reduce the O($n^{2}$)
+%singularities to simple points \cite{abba3}.
+%Each quadratic transformation takes O($n^2$) time???
+%(there are O($n^2$) terms in $f$ and each of its quadratic transformations??),
+%and the translation of the singularity 
+%to the origin (a linear substitution $x_{t} = x - a ,\ y_{t} = y - a$) 
+%takes O($[n2^{\mbox{max}}]^2$) time, where {\em max} is the maximum number of
+%quadratic transformations required to isolate 
+%one of the curve's singularities.  
+%({\em max} will usually be 1 or 2: for example, {\em max} is 1 whenever a 
+%singularity is ordinary.)
+%Computing the intersections of the curve with the y-axis after each
+%quadratic transformation takes an additional $\alpha[n2^{max}]$ time.
+%Thus, the overall bound on the  computation of the \pseudos\
+%is O($n^2([n2^{max}]^2 + \alpha[n2^{max}])$).
+
+Finally, consider the incidental \wallpoints.
+Since a line intersects a curve of order $n$ at most $n$ 
+times (Theorem~\ref{bezout}), 
+each of the O($n^{2}$) tangents at singularities and flexes 
+can intersect the curve in 
+at most $n$ points.
+Thus, there are O($n^{3}$) incidental \wallpoints, and they 
+can be computed in O($n^{2}\alpha[n]$) time.
+We conclude that the cell partition has O($n^{3}$) \wallpoints\ and
+O($n^{3}$) convex segments.
+
+Consider the time required to compute the partners of all of the \wallpoints.
+The dominating expense is the computation of the set S(\wo)
+of Theorem~\ref{thm-partner} for each \wallpoint\ \wo.
+It takes O($k\alpha[n]$) time to compute S(\wo) for a \wallpoint\ in a cell
+with $k$ \wallpoints, O($k^{2}\alpha[n]$) time to compute S(\wo) for every 
+\wallpoint\ in a cell with $k$ \wallpoints, and O($\sum k_{i}^{2}\alpha[n]$)
+time 
+to compute S(\wo) for every \wallpoint\ in every cell, where $k_{i}$ is the
+number of \wallpoints\ in cell $C_{i}$, and the sum is over all cells $C_{i}$.
+Since $\sum k_{i} = O(n^{3})$, 
+$O(\sum k_{i}^{2}\alpha[n]) = O(n^{6}\alpha[n])$.
+Therefore, partner computation takes $O(n^{6}\alpha[n])$ time.
+(This is another example of an unrealistically pessimistic worst case: 
+a typical
+\wallpoint\ will not lie on the boundary of a multisegment cell and its 
+partner will be computed in constant time.)
+We conclude that preprocessing takes 
+$O(\alpha[n^{2}] + n^{6} + n^{2}\alpha[2^{MAX}n] + 
+n^{4}2^{2\ MAX} + n^{6}\alpha[n])$ time.
+
+The dominating expense of the actual sorting is the determination of the
+convex segment that each sortpoint lies on.
+In the worst case, it requires $O(k\alpha[n]) = O(n^{3}\alpha[n])$ time to 
+compute the set S($x)$ of Theorem~\ref{thm-parents} for a sortpoint in a cell with $k$ \wallpoints, and thus $O(mn^{3}\alpha[n])$ time for all
+sortpoints.
+The sorting of $p$ points on a convex segment
+takes O($p$) time (Theorem~\ref{thm-2.1}).
+Therefore, in the worst case, the convex-segment method requires 
+O($mn^{3}\alpha[n]$) time to traverse $O(n^{3})$ convex segments
+and sort the points on these convex segments.
+\end{proof}
+
+\begin{corollary}
+Let C be a plane curve of order $n$. 
+If C has no extraordinary singularities and its
+cell partition contains no multisegment 
+cells, then $m$ points of C can be sorted
+in O($m+n^{3}$) time, with  O($n^6 + n^2\alpha[n] + \alpha[n^{2}]$)
+preprocessing.
+\end{corollary}
+
+\begin{corollary}
+$m$ points on a convex segment of a plane curve of order $n$ can be sorted 
+in O($m$) time, without preprocessing.
+\end{corollary}
+%
+%        - it is hard to analyze the complexity of the parameterization
+%	  method: is there a bound to the complexity of a parameterization
+%	  in terms of the order of the curve? if so, what is it?
+%	  what is the complexity of the algorithms for finding a param
+%	  (for example, the rational parameterization algorithm)\\
+%
+\section{Empirical Results}
+
+This section presents execution times for the sorting of some representative
+curves by the convex-segment and parameterization methods.
+These empirical results are a good complement to the complexity analysis 
+of Section~1, since they capture the expected case, rather than the worst 
+case, behaviour of the methods.
+
+We do not consider the time required to find a parameterization of the
+curve or to find the flexes and singularities of the curve.
+The computation of a curve's parameterization is of approximately the same
+complexity as the computation of a curve's singularities and flexes,
+so our comparison of sorting methods should not be biased.
+Moreover, each of these computations
+is a preprocessing step that is entirely independent of sorting,
+and the parameterization, singularities, and flexes of a curve will
+(or should) often be computed already.
+%We believe that the computation of a parameterization is of the same order of
+%complexity as the computation of the flexes and singularities.
+%Recall that the most promising method of parameterization already 
+%required the singularities of the curve.
+%Therefore, 
+%the benefit that the first assumption delivers to the parameterization 
+%method should balance the benefit that the second assumption delivers to the
+%convex-segment method.
+
+Our results are execution times in seconds on a Symbolics Lisp Machine, 
+and the time spent in disk faults and garbage collection is not included.
+The source code is written in Common Lisp.
+The preprocessing time for the convex-segment method 
+is the time required to create the cell partition and find the partners of all
+of the \wallpoints.
+The preprocessing and sort times for the convex-segment
+method are the average of twelve trials, while the 
+sort times for the parameterization method are the average of three
+trials.
+
+%I DOUBT THAT I WILL KEEP THIS PART UNTIL THE LINE LABELLED `FINISH'\\
+%For many curves, one of the sorting methods is clearly superior.
+%(The remainder of this paragraph is questionable.)
+%?Curves with very simple parameterizations should be sorted with the
+%parameterization method.  
+%The complexity of a parameterization (x(t),y(t)) is dictated
+%by the complexity of the less complex of x(t),y(t).
+%This can be seen by considering the algorithm that finds the parameter
+%value of a point ($x_{0}$,$y_{0}$):
+%\begin{quote}
+%\begin{enumerate}
+%\item solve $x(t) = x_{0}$ ({\em or} $y(t) = y_{0}$) for t
+%\item substitute the values of t found in (1) into y(t) (or x(t), whichever
+%was not used in (1)) and choose the value that yields $y_{0}$ (or $x_{0}$)
+%\end{enumerate}
+%\end{quote}
+%It is step (1) that can be expensive, so if either x(t) or y(t) is simple,
+%then the entire parameterization is considered simple.
+%%
+%\begin{example}
+%\label{ex-eight}
+%Consider the curve $x^{4}-x^{2}+y^{2}=0$ (the eight curve).
+%A parameterization for this curve is (cos(t) , sin(t)cos(t))$_{-\pi \leq t \leq \pi}$.
+%It is trivial to determine the parameter of a curve point.
+%The new method cannot compete in this situation.
+%Indeed, in order to sort a set of points on a convex segment, one of the
+%steps is to find the angle that each point makes with a central point,
+%which involves computing the arccos of a value.
+%Thus, the convex-segment method will certainly take longer.
+%\end{example}
+%We stress the fact that the parameterization must be very simple
+%before the parameterization method is automatically chosen.
+%We shall soon see an example of a curve with a rational parameterization
+%of degree two that is sorted more quickly by the convex-segment method.
+%The class of very simple parameterizations should include all
+%parameterizations of the form 
+%(cos(t),\underline{\ \ \ }),
+%(sin(t),\underline{\ \ \ }),
+%(\underline{\ \ \ },cos(t)),
+%(\underline{\ \ \ },sin(t)).
+%It is not clear that any other parameterizations should be considered very
+%simple.
+%
+%Just as there are curves with parameterizations so simple that they
+%demand the parameterization method, there are curves with parameterizations
+%so complicated that it is clear that the parameterization method will
+%not be competitive.
+%%
+%\begin{example}
+%An example of a complicated parameterization is offered by the hippopede:
+%$(x^{2}+y^{2})^{2} + 24(x^{2}+y^{2}) - 36x^{2} = 0$.
+%Its parameterization is \mbox{$(2 cos(t) \sqrt{3-9sin^{2}(t)},
+%2 sin(t)\sqrt{3-9sin^{2}(t)} )_{-\pi \leq t \leq \pi}$}.
+%Ironically, the hippopede looks very similar to the eight curve (of
+%Example~\ref{ex-eight}), which had a very simple parameterization.
+%\end{example}
+%
+%FINISH
+
+%If a \param cannot be found by any known method, then the
+%convex-segment method is a clear victor.
+
+
+%OMIT THIS PARAGRAPH.  WE HAVE ALREADY DISCUSSED THIS.
+%In Section~\ref{sec3-chap3}, we explained that the new method might
+%be slow if the cell partition contains a cell with many convex segments
+%such that the expensive conditions (4)-(6) of $S^{x}$ must be tested
+%in order to decide the wallpoints that bound a sortpoint's convex segment.
+%Due to the screening conditions that we introduced in 
+%Section~\ref{sec3-chap3}, we are confident that this situation will occur
+%only very rarely.
+%Nevertheless, one should be aware that there is a slight danger of the
+%convex-segment 
+%method sorting less efficiently when the cell partition contains
+%a cell with many convex segments.
+
+%Let us now consider the sorting of the remaining 
+%curves, whose parameterizations are
+%neither particularly simple nor particularly complicated.
+
+%The choice of the best method for the remaining 
+%curves usually depends upon the particular application.\\
+%PRESENT EXAMPLES BEFORE DISCUSSING WHAT THEY REVEAL\\
+%The convex-segment 
+%method will always(???) perform the actual sort much more quickly,
+%but there is an overhead to the new sort: the preprocessing required
+%to create the cell partition and pair the wallpoints.
+%The investment in preprocessing will not always be warranted, in which
+%case the parameterization method is a viable alternative.
+
+We consider five examples: two rational cubic curves and three non-rational
+quartic curves.
+Our first example illustrates the superiority of the convex-segment method.
+Even when the preprocessing time is added to the sort time, the 
+convex-segment method solves this problem more efficiently 
+than the \param method.
+The convex-segment method's rate of growth is also much smaller.
+The inferiority of the crawling method is obvious from this example, and we do
+not consider it further.
+%
+\begin{example}
+A semi-cubical parabola\\
+Equation of the curve: $27 y^{2} - 2x^{3} = 0$\\
+Preprocessing time: 0.27 seconds\\
+Parameterization: \{$x(t) = 6t^{2}$,\vspace{.5in} $y(t) = 4t^{3}\ :\ 
+-\infty\ <\ t\ <\ +\infty \}$\\
+%
+\begin{tabular}{|l|c|c|c|}  \hline
+number of sortpoints & 1 & 2 & 6 \\ \hline \hline
+convex-segment &           .01 & .03 & .03 \\ \hline
+%\footnote{The results should 
+%only be compared vertically, not horizontally.
+%The reason that sorting times sometimes decrease as more points are sorted
+%is that completely different sets of points may be used in each column
+%(e.g., the five points of column 3
+%are not a subset of the six points of column 4)
+%or different start and end points may be used.
+%Thus, for example, sorting many points that are close together on a short
+%sort segment may be faster than sorting a few points that are spread out
+%on a long sort segment.} 
+convex-segment + preprocessing & .28 & .30 & .30 \\ \hline
+parameterization & .47 & .63 & 1.04 \\ \hline
+crawling         & 3.14 & 2.89 & 4.77 \\ \hline
+\end{tabular}
+\end{example}
+
+\figg{"A picture of the semi-cubical parabola"}{Semi-cubical Parabola}{3in}
+
+The second example illustrates that there is sometimes a 
+tradeoff between the convex-segment method
+(a very fast sort that requires preprocessing) and the parameterization 
+method (a moderately fast sort that does not require preprocessing).
+%
+\begin{example}
+\label{eg-folium}
+Folium of Descartes\\
+Equation of the curve: $x^{3} + y^{3} - 15xy = 0$\\
+Preprocessing time: 2.81 seconds\\
+Parameterization: \{$x(t) = \frac{15t}{1+t^{3}}$, \vspace{.5in}$y(t) = 
+\frac{15t^{2}}{1+t^{3}}\ :\ -\infty\ <\ t\ <\ +\infty \}$ \\
+%
+\begin{tabular}{|l|c|c|c|c|} \hline
+number of sortpoints & 1 & 2 & 5 & 9 \\ \hline \hline
+convex-segment &           0.01 & 0.01 & 0.05 & 0.04 \\ \hline
+convex-segment + preprocessing & 2.82 & 2.82 & 2.85 & 2.85 \\ \hline
+parameterization & 1.01 & 1.07 & 1.76 & 3.17 \\ \hline
+\end{tabular}
+%
+\end{example}
+\figg{"A picture of the folium"}{Folium of Descartes}{2in}
+%
+The remaining three curves are non-rational, so they are only 
+sorted with the convex-segment method.
+%
+\begin{example}
+\label{eg-devil}
+Devil's Curve (with several connected components)\\
+Equation of the curve: $y^{4} - 4y^{2} - x^{4} + 9x^{2} = 0$\\
+Preprocessing time: 2.20 \vspace{.5in}seconds\\
+%
+\begin{tabular}{|l|c|c|c|} \hline
+number of sortpoints & 1 & 4 & 7 \\ \hline \hline
+convex-segment & 0.09 & 0.09 & 0.10 \\ \hline
+convex-segment + preprocessing & 2.29 & 2.29 & 2.30 \\ \hline
+\end{tabular}
+%
+\end{example}
+\figg{"A picture of the devil"}{Devil's curve}{2in}
+%
+%\begin{example}
+%\label{eg-hippopede2}
+%Hippopede\\
+%Equation of the curve: $x^{4} + y^{4} + 2x^{2}y^{2} - 32x^{2} + 32y^{2}$\\
+%Preprocessing time: 2.56\vspace{.5in} seconds\\
+%%
+%\begin{tabular}{|l|c|c|} \hline
+%number of sortpoints & 3 & 6 \\ \hline \hline
+%convex-segment &           0.086 & 0.091 \\ \hline
+%convex-segment + preprocessing & 2.646 & 2.651 \\ \hline
+%\end{tabular}
+%\end{example}
+%\figg{"A picture of the hippopede"}{Hippopede}
+\begin{example}
+\label{eg-limacon}
+Limacon\\
+Equation of the curve: $x^{4} + y^{4} + 2x^{2}y^{2} - 12x^{3} - 12xy^{2} + 27x^{2} - 9y^{2} = 0$\\
+Preprocessing time: 4.62\vspace{.5in} seconds\\
+%
+\begin{tabular}{|l|c|c|c|} \hline
+number of sortpoints & 2 & 5 & 8 \\ \hline \hline
+convex-segment & .09 & .30 & .55 \\ \hline
+convex-segment + preprocessing & 4.70 & 4.92 & 5.17 \\ \hline
+\end{tabular}
+\end{example}
+\figg{"A picture of the limacon"}{Limacon}{1.75in}
+%
+\begin{example}
+\label{eg-Cassinian}
+Cassinian oval\\
+Equation of the curve: $x^{4} + y^{4} + 2x^{2}y^{2} + 50y^{2} - 50x^{2}-671 = 0$\\
+Preprocessing time: 5.36\vspace{.5in} seconds\\
+%
+\begin{tabular}{|l|c|c|c|} \hline
+number of sortpoints & 2 & 4 & 6 \\ \hline \hline
+convex-segment & .14 & .17 & .19 \\ \hline
+convex-segment + preprocessing & 5.50 & 5.53 & 5.55 \\ \hline
+\end{tabular}
+\end{example}
+\figg{"A picture of the Cassinian oval"}{Cassinian oval}{2.25in}
+%
+\section{The Superiority of the Convex-Segment Method}
+
+Section~\ref{sec-param} established that certain curves cannot, or should
+not, be sorted by the parameterization method: curves that 
+do not possess a rational parameterization and curves for which
+a rational parameterization cannot be efficiently obtained.
+Therefore, the convex-segment method is often 
+the only viable way to sort points along a curve.
+
+For those curves that can be sorted in either way, 
+the convex-segment method is generally far more
+efficient than the parameterization method at the actual sorting of the 
+points.
+However, the parameterization method does not have the expense of 
+preprocessing that the convex-segment method does.
+Therefore, when only a few points need to be sorted 
+(over the entire lifetime of the curve) and the sorting of these points
+must be done soon after the definition of the (rational) curve,
+the parameterization method will usually be the method of choice.
+The expense of preprocessing will be warranted when
+sorting time is a valuable resource, as in a real-time application,
+or when the number of points that will be sorted is large.
+The convex-segment method will also be preferable 
+when the curve is defined long before it is ever sorted
+(as with a complex solid model that requires several days, weeks, or even
+months to 
+develop), since the preprocessing can be done at any time
+that processing time becomes available  before the sort.
+
+We conclude that the convex-segment method is an effective new method for
+sorting points along an algebraic curve, and that in many situations it is 
+either the only or the best method.
+
+%OMIT THE NEXT SECTION?
+
+%\section{An indication of the Time Required to Find Flexes and Singularities}
+%
+%\tab Section~\ref{sec-flexsing}\ describes how to find the flexes and 
+%singularities of a curve, by solving a system of equations.
+%We solve these systems with a straightforward application of MACSYMA's
+%ALGSYS command.
+%More efficient techniques can undoubtedly be found, so the times that we
+%present below should be viewed as conservative upperbounds on the time
+%required to find flexes and singularities.\\
+%%
+%\begin{tabular}{l|c|c|c} \hline
+%Curve & Equation & \# of sings. & Time to find sings. with ALGSYS (seconds) \\ \hline
+%Folium of Descartes & $(x+1)^{3} + (y-2)^{3} - 4(x+1)(y-2)$ & & 1.88,1.53 \\ \hline
+%Right strophoid & $x^{3} - 2x^{2} + x-2y^{2}+xy^{2}$ & & 0.83 (incorrect answer) \\ \hline
+%Lemniscate of Bernoulli & $(x^{2}+y^{2})^{2}-4(x^{2}-y^{2})$ & & 1.47 \\ \hline
+%Deltoid & $(x^{2}+y^{2})^{2} - 8x(x^{2}-3y^{2})+18(x^{2}+y^{2})-27$ & & 2.25 (incorrect answer) \\ \hline
+%\end{tabular}\\
+%%
+%\begin{tabular}{l|c|c|c} \hline
+%curve & equation & \# of flexes & time to find flexes \\ \hline
+%Witch of Agnesi & $x^{2}y+4y-8$ & & 0.88 \\ \hline
+%Kampyle of Eudoxus & $x^{4}-1.21(x^{2}+y^{2})$ & & 60,73 \\ \hline
+%Cassinian oval & & & about 5 seconds \\ \hline
+%\end{tabular}\\
+
+
+%We conclude that finding flexes and singularities requires on the order of
+%a few seconds for low degree curves, and many seconds for high degree curves.
+%Indeed, in order to find these special points for high degree curves,
+%an alternative technique may be necessary.
+%%
+
+%OMIT THE NEXT SECTION? (There is more reason to omit it than the previous section.)
+%
+%\section{Projections of Space Curves}
+%
+%\tab The following results indicate the complexity of finding the equation
+%of the projection of a space curve, 
+%a computation that must be carried out before a space curve can be sorted
+%by the convex-segment method.
+%Lemma~\ref{lem-sec5-planeeqn}\ contains the relevant theory.
+%The resultant of this theorem is computed using the RESULTANT command
+%of MACSYMA.\\
+%%
+%\begin{tabular}{l|l|c} \\ \hline
+%surface 1 & surface 2 & time to find projection (seconds) \\ \hline
+%$x^{2} + y^{2} + z^{2}-1$ (sphere) & $(x-.5)^{2}+y^{2}+z^{2}-1$ (sphere) & 1.45 \\ \hline
+%$x^{2}+y^{2}-1$ (cylinder)& $y^{2}+z^{2}-1$ (cylinder) & 2.78 \\ \hline
+%$x^{2}+y^{2}+\frac{z^{2}}{4}-1$ (oblate spheroid)& $x^{2}+y^{2}+4z^{2}-1$ (prolate spheroid) & 1.28 \\ \hline
+%$(x-3)^{2}+(y+4)^{2}-8z$ (paraboloid of revolution)& $(x+1)^{2}+(y-.25)^{2}+z^{2}-1$ (sphere) & 2.50 \\ \hline
+%$2x^{2}-y^{2}-3z$ (saddle) & $(x-2)^{2}+(y-1)^{2}-4z$ (paraboloid) & 1.9 \\ \hline
+%$x^{3}+y^{3}+6xy$ & $(x-1)^{2}+y^{2}-2$ (cylinder) & 1.28 \\ \hline
+%$x^{2}+xz^{2} + y^{2}z$ & $2(x-.4)^{2}-y-30.1-3z$ (saddle) & 3.13 \\ \hline
+%$x^{2}y^{2} + x^{2}z^{2} + y^{2}z^{2} -2xyz$ (Steiner surface) & $2x^{2}-y^{2}-3z$ (saddle) & 7.00 \\ \hline
+%\end{tabular}
+%
+%The time needed to compute the equation of the projection must be added on
+%to the preprocessing time.
+%Thus, the convex-segment method is less competitive for space curves.
+%Of course, only the compilation time is affected, not the actual sorting time.
+%Recall that the parameterization method may also opt to project the space 
+%curve to a plane curve if a parameterization of the space curve is difficult
+%to find.
+%In this case, both sorting methods suffer the same disadvantage from the
+%space curve.

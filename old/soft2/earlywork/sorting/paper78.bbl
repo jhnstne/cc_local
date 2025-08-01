@@ -1,0 +1,133 @@
+\begin{thebibliography}{10}
+
+\bibitem{abhy}
+{\sc S.~Abhyankar}, {\em Desingularization of Plane Curves}, American
+  Mathematical Society, Providence, RI, 1983, pp.~1--45.
+
+\bibitem{abba3}
+{\sc S.~Abhyankar and C.~Bajaj}, {\em Automatic parameterization of rational
+  curves and surfaces 3: Algebraic plane curves}, Comput. Aided Geom. Des., 5
+  (1988), pp.~309--321.
+
+\bibitem{ahu}
+{\sc A.~Aho, J.~Hopcroft, and J.~Ullman}, {\em The Design and Analysis of
+  Computer Algorithms}, Addison-Wesley, Reading, MA, 1974.
+
+\bibitem{arnon83}
+{\sc D.~S. Arnon}, {\em Topologically reliable display of algebraic curves}, J.
+  Comput. Graphics, 17 (1983), pp.~219--227.
+
+\bibitem{As}
+{\sc T.~Asano, T.~Asano, and H.~Imai}, {\em Partitioning a polygonal region
+  into trapezoids}, Tech. Report Res. Mem. RMI84-03, Department of Mathematics,
+  Engineering, and Instrumentation Physics, University of Tokyo, Tokyo, Japan,
+  1984.
+
+\bibitem{Av}
+{\sc D.~Avis and G.~T. Touissant}, {\em An efficient algorithm for decomposing
+  a polygon into star-shaped components}, Pattern Recognition, 13 (1981),
+  pp.~395--398.
+
+\bibitem{baj}
+{\sc C.~Bajaj}, {\em Geometric modeling with algebraic surfaces}, in
+  Mathematics of Surfaces III, Oxford University Press (to appear).
+
+\bibitem{bhhl}
+{\sc C.~Bajaj, C.~Hoffmann, J.~Hopcroft, and B.~Lynch}, {\em Tracing surface
+  intersections}, Comput. Aided Geom. Des., 5 (1988), pp.~285--307.
+
+\bibitem{bajj}
+{\sc C.~Bajaj and A.~Royappa}, {\em GANITH: An algebraic geometry package},
+  Tech. Report CSD-TR-914, Department of Computer Science, Purdue University,
+  West Lafayette, IN.
+
+\bibitem{Ca}
+{\sc J.~F. Canny}, {\em The Complexity of Robot Motion Planning}, MIT Press,
+  Cambridge, MA, 1987.
+
+\bibitem{cd}
+{\sc B.~Chazelle and D.~P. Dobkin}, {\em Optimal convex decompositions}, in
+  Computational Geometry, G.~T. Toussaint, ed., North-Holland, New York, 1985, 
+  pp.~63--133.
+
+\bibitem{CI}
+{\sc B.~Chazelle and J.~Incerpi}, {\em Triangulation and shape-complexity}, ACM
+  Trans. Graphics, 3 (1984), pp.~135--152.
+
+\bibitem{Co75}
+{\sc G.~E. Collins}, {\em Quantifier elimination for real closed fields by
+  cylindrical algebraic decomposition}, in Proc. 2nd GI Conference on Automata
+  Theory and Formal Languages, Lecture Notes in Computer Science Vol. 35, Springer-Verlag, 
+  Berlin, 1975, pp.~134--183.
+
+\bibitem{Do}
+{\sc M.~do~Carmo}, {\em Differential Geometry of Curves and Surfaces}, Prentice
+  Hall, Englewood Cliffs, NJ, 1976.
+
+\bibitem{G}
+{\sc M.~R. Garey, D.~S. Johnson, F.~P. Preparata, and R.~E. Tarjan}, {\em
+  Triangulating a simple polygon}, Inform. Process. Lett., 7 (1978),
+  pp.~175--179.
+
+\bibitem{H}
+{\sc S.~Hertel and K.~Mehlhorn}, {\em Fast triangulation of simple polygons},
+  in Proc. FCT'83, Borgholm, Lecture Notes in Computer Science, Springer-Verlag, 
+  Berlin, 1983,
+  pp.~207--218.
+
+\bibitem{hh87}
+{\sc C.~Hoffmann and J.~Hopcroft}, {\em The potential method for blending
+  surfaces and corners}, in Geometric Modeling: Algorithms and New Trends,
+  G.~Farin, ed., Society for Industrial and Applied
+  Mathematics, Philadelphia, PA, 1987, pp.~347--365.
+
+\bibitem{jj}
+{\sc J.~K. Johnstone}, {\em The sorting of points along an algebraic curve},
+  PhD thesis, Department of Computer Science, Cornell University, Ithaca, NY,
+  1987.
+
+\bibitem{keil}
+{\sc J.~M. Keil}, {\em Decomposing polygons into simpler components}, PhD
+  thesis, Department of Computer Science, University of Toronto, Toronto,
+  Ontario, Canada, 1983.
+
+\bibitem{kirk}
+{\sc D.~Kirkpatrick}, {\em Optimal search in planar subdivisions}, SIAM J.
+  Comput., 12 (1983), pp.~28--35.
+
+\bibitem{law}
+{\sc J.~D. Lawrence}, {\em A Catalog of Special Plane Curves}, Dover, New York,
+  1972.
+
+\bibitem{NS}
+{\sc W.~M. Newman and R.~F. Sproull}, {\em Principles of Interactive Computer
+  Graphics}, McGraw-Hill, New York, 1979.
+
+\bibitem{O}
+{\sc J.~O'Rourke}, {\em The complexity of computing minimum convex covers for
+  polygons}, in Proc. 20th Annual Allerton Conference on Communication, Control
+  and Computing, Monticello, Illinois, 1982, pp.~75--84.
+
+\bibitem{PS}
+{\sc F.~Preparata and M.~Shamos}, {\em Computational Geometry: An
+  Introduction}, Springer-Verlag, New York, 1985.
+
+\bibitem{S}
+{\sc J.~R. Sack}, {\em An $O(n \log n)$ algorithm for decomposing simple
+  rectilinear polygons into convex quadrilaterals}, in Proc. 20th Annual
+  Allerton Conference on Communication, Control and Computing, Monticello,
+  Illinois, 1982, pp.~64--74.
+
+\bibitem{T}
+{\sc R.~E. Tarjan and C.~J.~V. Wyk}, {\em An $O(n \log \log n)$-time algorithm
+  for triangulating a simple polygon}, SIAM J. Comput., 17 (1988),
+  pp.~143--178.
+
+\bibitem{tm}
+{\sc S.~B. Tor and A.~E. Middleditch}, {\em Convex decomposition of simple
+  polygons}, ACM Trans. Graphics, 3 (1984), pp.~244--265.
+
+\bibitem{walker}
+{\sc R.~J. Walker}, {\em Algebraic Curves}, Springer-Verlag, New York, 1950.
+
+\end{thebibliography}

@@ -1,0 +1,39 @@
+interpolating curves
+	interpolation/src/interpolate interpolation/data/whiteoak.pts
+	interpolation/src/interpolate interpolation/data/arch/ingalls.pts
+	hud.pts after lines have been incorporated
+	
+envelopes
+	interpolation/src/envelope interpolation/data/ob1.pts interpolation/src/ob1env.pts
+
+tangential curve
+	tangcurve/src/tangentialCurve interpolation/data/ob3.pts
+
+tangents through a point
+	
+
+bitangents
+	bitang/src/bitang interpolation/data/ob1.pts > fooBitang
+
+visibility graph
+
+Chaikin curves
+	chai/src/chai chai/data/chai1.pts
+
+Chaikin bitangents
+	chai/src/bichai chai/data/bichai1.pts
+
+dual Chaikin
+	chai/src/dualchai chai/data/chai1.pts
+
+smooth convex hull
+	convexhull/src/convexhull interpolation/data/ob1a.pts
+
+smooth kernel of a curve
+	kernel/src/kernel20dec03   interpolation/data/ob1a.pts
+	(uses c-dual curve, which is not included in modern library)
+
+shadow computation
+	umbra/src/umbra   umbra/data/vg900.pts 
+
+obstacle-avoiding interpolation

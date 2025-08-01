@@ -1,0 +1,94 @@
+From burgemar@mail.armstrong.edu  Thu Dec  5 16:58:54 2002
+From: ACMSE 2003 - CyberChair <burgemar@mail.armstrong.edu>
+To: jj@cis.uab.edu
+Cc: burgemar@mail.armstrong.edu, burgemar@mail.armstrong.edu
+Subject: ACMSE 2003 Abstract Submission Form Feedback
+Date: Thu Dec  5 18:56:55 2002 CDT
+
+Dear John K., 
+
+You have submitted the following data for the ACMSE 2003 Conference:
+
+-=-=-=-=-= Beginning of submission data (step 1)=-=-=-=-=-
+
+
+Contact Person: 
+	Name: John K. Johnstone
+	Address:
+		Dept of Computer and Information Sciences
+		UAB
+		University Station
+		Birmingham, AL 35294
+	Phone: 205-975-5633
+	Fax: 205-934-5473
+	Email: jj@cis.uab.edu
+
+Title: Kernels from hulls
+
+Author 1:
+	Name: John K.  Johnstone
+	Affiliation: UAB
+
+Author is PC Member: No
+
+Main Fields:
+	7. Computer Graphics and Visualization
+
+
+Abstract:
+The kernel of a plane curve $C$ is the locus of points that can see every
+point of $C$, a convex connected subset of the curves interior.
+Since a point of the kernel maximizes visibility of the object, the kernel 
+is a fundamental structure in visibility analysis.
+The kernel of a polygon has long been an object of study in computational
+geometry, especially in the context of art gallery theorems.
+In this paper, we consider a new algorithm for computing the kernel of a
+plane curve.
+This analysis also sheds new light on the structure of the kernel,
+by considering its relationship with the convex hull in dual space.
+
+The kernel of a curve can be studied in dual space, using the 
+geometric duality between lines and points.
+An interesting observation is that the kernel in primal space
+becomes the convex hull in dual space.
+The tangents of a curve dualize to points, and the entire tangent space
+of a curve dualizes to a curve.
+It is the convex hull of this curve that is related to the kernel.
+The tangent space is relevant to the study of kernels
+because a point lies in the kernel of a curve if and only if it is not hit 
+by any tangent.
+Using the dual relationship between kernel and convex hull, 
+any kernel computation can be reduced to a convex hull computation.
+The structure of the kernel can also be better understood from the structure 
+of the hull.
+
+The reduction of kernel to convex hull relies on the prior knowledge of a 
+single point of the kernel.
+This point is used to adjust the curve before dualization, ensuring the 
+finiteness of the curve in dual space.
+We discuss how to compute this seed point of the kernel.
+
+Keywords: kernel, convex hull, dual space, plane curve.
+
+Remarks:
+[None Given]
+
+-=-=-=-=-=-= End of abstract submission data =-=-=-=-=-=-
+
+
+IMPORTANT: To submit your paper you should revisit the
+submission site at http://vision.armstrong.edu/acmse/, go to
+step 2 and at the appropriate places fill in the following:
+
+Login: jj@cis.uab.edu
+Password: E00-1182831445
+
+You will then be able to upload your paper.
+
+
+If you have questions about this message, please contact Mark Burge
+(burgemar@mail.armstrong.edu).
+
+--- End of this message ---
+
+

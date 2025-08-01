@@ -1,0 +1,9 @@
+[ FILE: lightSceneHud
+  A 2D scene for umbra/penumbra of one building object, interesting front umbra.
+  Call: umbra -S data/scene/lightSceneHud
+  Created: 6/4/03
+]
+{
+../../interpolation/data/circleOne.pts  1 0   -14 -8
+../../interpolation/data/arch/hud.pts   1 0	0  0
+}

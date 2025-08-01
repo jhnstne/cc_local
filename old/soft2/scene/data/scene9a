@@ -1,0 +1,11 @@
+[ FILE: scene9a
+  A 2D test scene for umbral analysis.
+  Call: umbra -S -r 10 data/scene/scene9a > foobar &
+  Created: 5/1/03 from vg9.pts
+]
+{
+../../interpolation/data/circleOne.pts .5  0   1 -5
+../../interpolation/data/curve9.pts    1  0	 0  0
+}
+.18	0 0
+

@@ -1,0 +1,37 @@
+.PS
+scale=100
+define m0 |
+[ box invis ht 189 wid 184 with .sw at 0,0
+spline  from 0,162\
+to 63,141\
+to 90,47\
+to 184,27
+spline  from 7,32\
+to 39,68\
+to 142,119\
+to 161,163
+line  from 25,0 to 25,189 dashed
+line -> from 3,171 to 24,164 
+line -> from 10,21 to 24,37 
+] |
+
+define m1 |
+[ box invis ht 215 wid 184 with .sw at 0,0
+spline  from 0,177\
+to 63,156\
+to 90,62\
+to 184,42
+spline  from 7,47\
+to 39,83\
+to 142,134\
+to 161,178
+line  from 46,0 to 46,215 dashed
+line -> from 29,54 to 45,70 
+line -> from 31,177 to 46,171 
+line  from 30,0 to 30,211 dashed
+] |
+
+box invis ht 453 wid 189 with .sw at 0,0
+m1 with .nw at 0,215
+m0 with .nw at 5,453
+.PE

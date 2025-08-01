@@ -1,0 +1,13 @@
+[ FILE: buildingSceneCornellSondica1
+  A 2D test scene for object visibility.
+  Call: umbra -r 20 -S data/umbra/buildingSceneCornellSondica1
+  Created: 5/1/03
+]
+{
+../../interpolation/data/arch/sondica.pts  .4 0    -5  6
+../../interpolation/data/arch/cornell1.pts 1  0	    3 -12
+}
+.08	0 0
+
+IGNORED:
+../../interpolation/data/arcj/ingalls.pts   .3 0   -15  5

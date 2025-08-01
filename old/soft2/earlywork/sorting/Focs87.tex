@@ -1,0 +1,574 @@
+\documentstyle{article} \def\baselinestretch{1.75}
+\textwidth 421pt %default is 360?
+\oddsidemargin 25pt % default is 41.4?
+\evensidemargin 25pt
+\topmargin 5pt %23pt
+\textheight 598pt %580pt
+%
+\newcommand{\tab}{\hspace*{.2in}}
+\newcommand{\arc}[1]{\mbox{$\stackrel{\frown}{#1}$}}
+\newcommand{\prooof}{{\bf Proof}\quad}
+\newcommand{\blob}{\mbox{\rule[-1.5pt]{5pt}{10.5pt}}}
+\newcommand{\qed}{\quad\blob}
+\newcommand{\seg}[1]{\mbox{$\overline{#1}$}}
+\newcommand{\hence}{\\ \mbox{$.\raisebox{1.5ex}{.}.$}\ }
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+\newtheorem{corollary}{Corollary}
+\newenvironment{proof}{\prooof}{\qed}
+%
+\begin{document}
+\title{Sorting Along an Algebraic Curve}
+\author{$\begin{array}{lcl}
+\mbox{Chanderjit Bajaj\thanks{Supported in part by NSF Grant DCI 85-21356.}} & &
+\mbox{John K. Johnstone\thanks{Supported by an NSERC 1967 Graduate
+Fellowship and an Imperial Esso Graduate Fellowship.}} \\
+\mbox{Purdue University} & \mbox{ \ \ \ \ \ \ } & \mbox{Cornell University} \\
+\mbox{W. Lafayette, IN\ \  47907} & & \mbox{Ithaca, NY\ \ 14853} \end{array}$}
+\date{}
+\maketitle
+%
+\section{Introduction}
+%
+\subsection{The Problem}
+
+\tab The area of geometric modeling is concerned with the creation of 
+computationally-efficient models 
+of solid physical objects to facilitate their design, assembly, and analysis.
+Geometric models of physical objects are needed in many disciplines, including robotics,
+computer vision, computer-aided design/computer-aided 
+manufacturing, and graphics.
+In a geometric modeling system, a solid such as a robot hand or a coffee cup is modeled by a collection
+of points, curves, and surfaces.
+The sorting of points on a curve, as evidenced by its numerous applications, is a basic tool for the
+manipulation of geometric models.
+
+Curve sorting has a natural definition.
+Let C be an irreducible, algebraic, plane curve (i.e., 
+a plane curve described by an irreducible polynomial \mbox{$f(x,y)=0$}).
+If $S \subset C$ and \arc{AB}\ is a segment of C,
+then to sort the points of S from A to B along \arc{AB} means to put 
+them into the order that they would be encountered in travelling 
+continuously from A to B along \arc{AB}.
+Any of the points that do not lie on \arc{AB}\ are ignored.
+
+There is no loss of generality in only considering plane curves,
+since a sort along a space curve
+(i.e., a curve that does not lie in a plane)
+can be mapped into a sort along a plane curve (viz., 
+a well-chosen projection of the space curve) \cite{john}.
+%
+\subsection{Main Results}
+%
+\tab We present a new sorting method which can sort
+$m$ points of an arbitrary algebraic curve of degree $n$ in O($m\ S_{n}$) time,
+with O$(n^{6} +n^5\ log\ n\ S_{n}$) preprocessing, where $S_{n}$ is the time required to obtain the
+real roots of a 
+polynomial equation of degree $n$. For obtaining real roots, the fast procedure
+of Jenkins and Traub may be used \cite{jen}.
+For a nonsingular curve, the preprocessing can be reduced to 
+O($n^5\ log\ n\ S_{n}$).
+The sorting of $m$ points of a convex segment of a curve can be
+done in O($m$) time, without any preprocessing.
+%
+\subsection{Relevance to Past Research}
+\label{sec-1.3}
+
+\tab A natural way to sort points along an algebraic curve is to use a rational parameterization
+of the curve (i.e., a parameterization ( $x(t)$ , $y(t)$ ) such that both
+$x(t)$ and $y(t)$ can be expressed as the quotient of two polynomials in $t$).
+The parameter values $t_{i}$ of the points $(x_{i},y_{i})$ are computed and sorted by increasing $t_{i}$ values. For a curve segment sort, the points
+that occur before the start point or after the end point of the segment
+are discarded.
+There are general algorithms for the 
+automatic parameterization of rational curves (curves with a rational
+parameterization) \cite{abba3}.
+Various efficient methods have also been given to obtain rational
+parameterizations for special low degree algebraic curves \cite{abba1,abba2,levi,ock}.
+However, only a subset of algebraic curves are rational \cite{wa}.
+Even if the curve is rational, the parameterization method will be slow
+if the degree of the parameterization is high, since the computation
+of the parameter values of the points will be expensive.
+Hence, sorting along algebraic curves by conventional methods has been limited and slow.
+
+There is another sorting method which uses the brute-force technique of
+tracing along the curve with Newton's method \cite{bhh}.
+The implementation of this method, though robust, is inherently very slow,
+and it also has the undesirable property
+that its complexity depends upon the length of the segment that is being
+sorted rather than upon the number of points in the sort  \cite{john}.
+
+There is no serious study of sorting in the literature.
+This can be explained by the fact that,
+until recently, almost all of the curves in solid models were
+linear or quadratic.
+Nontrivial sorting problems arise only with curves of degree 
+three and more.
+
+Our sorting method is applicable to an arbitrary degree algebraic curve 
+with any possible point singularities.
+This new method of sorting is especially valuable for its efficient sorting 
+along 
+$(i)$ algebraic curves for which a rational parameterization cannot be efficiently obtained, 
+$(ii)$ algebraic curves with a rational parameterization of high degree, 
+and $(iii)$ algebraic curves which do not possess a rational
+parameterization.
+%
+\subsection{Applications}
+\tab Since geometric models consist of point vertices, algebraic-curve edge segments,
+and algebraic-surface patches, numerous applications of algebraic curve sorting
+arise from the various operations performed on the geometric model.
+We consider the following problems:
+$(1)$~given a set of points S on a curve C, determine which points of S lie on
+an edge of C
+$(2)$~compute the intersection of two edges
+$(3)$~compute the intersection of two space curve segments C and D on the same surface
+$(4)$~determine a bounding box for an edge
+$(5)$~determine whether a point lies within a plane piecewise algebraic patch
+$(6)$~determine whether a point lies within a convex algebraic surface patch, and
+$(7)$~compute the intersection of two solid models.
+Each of these operations makes essential use of sorting along an algebraic curve
+segment.
+%
+\section{Convex Segmentation}
+
+\tab One of the fundamental steps of our sorting method is a decomposition of the 
+curve into convex segments.
+This decomposition allows us to take advantage of the simplicity of sorting
+points on a convex segment (Theorem~\ref{thm-1}).
+%
+A segment \arc{PQ}\ of a plane curve is {\bf convex} iff
+no line has more than 
+two intersections with \arc{PQ}.
+%
+\begin{theorem}[{\cite{john}}]
+\label{thm-1}
+Let $p_{1},\ldots,p_{n}$ be points of a convex segment \arc{AB}, 
+and let H be the convex hull of A, B, $p_{1},\ldots,p_{n}$.
+Then the vertices of H are A, B, $p_{1},\ldots,p_{n}$.
+Moreover, the order of the vertices on the boundary of H is equivalent
+to the order of the points on \arc{AB}.
+\end{theorem}
+%
+
+The decomposition of a curve into convex segments is achieved by
+the tangents at certain special points of the curve: the 
+singularities and flexes.
+A {\bf singularity} of the curve $f(x,y)=0$ is a point P of the curve
+such that $f_{x}(P) = f_{y}(P) = 0$.
+It is a point where the curve crosses itself or changes direction sharply.
+A {\bf flex} (or point of inflection) is a nonsingular point P 
+whose tangent has three or more intersections with the curve at P.
+Equivalently, it is a point of zero curvature.
+The tangents at the singularities and flexes of a curve 
+subdivide the plane of the curve into several cells and split the curve 
+into several segments.  
+Theorem~\ref{thm-2}\ establishes that each of these segments is convex.
+%
+\begin{theorem}[{\cite{john}}]
+\label{thm-2}
+Let T be the set of tangents of the singularities and floxes of a curve F,
+and let \arc{PQ}\ be a nonconvex segment of F.
+Then some tangent of T crosses \arc{PQ}. 
+\end{theorem}
+\begin{proof}
+(A sketch.) Assume w.l.o.g. that \arc{PQ}\ does
+\marginpar{(*)}
+not contain a singularity or flex.
+Since \arc{PQ}\ is not convex, we can find a line that crosses it at
+three distinct points: $x_{1}, x_{2}, x_{3}$.
+By (*), \arc{x_{1}x_{3}}\ must be a spiral.
+Consider the region R bounded by \arc{x_{1}x_{3}}\ and \seg{x_{1}x_{3}}.
+It is sufficient to show that R contains a flex or singularity S,
+since S's tangent must cross the \arc{x_{1}x_{3}}\ boundary of R.
+It can be shown that the curve must enter R as it leaves $x_{1}$ and
+must eventually leave R via \seg{x_{1}x_{3}}.
+However, in order to do this, the curve must cross itself or change its
+curvature inside of R.
+\end{proof}
+
+The decomposition of the curve into convex segments is a preprocessing step.
+It is necessary to compute the singularities and flexes of the curve, 
+as well as their tangents.
+The singularities of a curve $f(x,y)=0$ are the solution set of the system
+$\{f_{x}=0,f_{y}=0,f=0\}$,
+while the flexes of a curve are the intersections of the
+Hessian of the curve (the determinant of the matrix of double derivatives of 
+the curve's equation) with the curve \cite{wa}.
+The tangents of a singularity of the curve $f=0$ 
+can be found by translating the curve to
+the origin and finding the components of the order form (the polynomial
+consisting of the terms of lowest degree in the translated f) \cite{wa}.
+Finally,  after the curve has been translated to projective space (normal affine
+space with an added line at infinity) by homogenizing its equation to
+$f(x,y,z)=0$ (where $z$ is the homogenizing variable),
+the tangent of a flex P
+is $f_{x}(P) + f_{y}(P) + f_{z}(P) = 0$ \cite{wa}.
+
+The tangents of the singularities and flexes subdivide the plane into cells,
+some open and some closed.
+This cellular decomposition is called a {\bf cell partition}, 
+while the tangents
+are called {\bf walls} 
+and the intersections of the curve with a wall are called
+{\bf wallpoints}.
+The wallpoints are the endpoints of the convex segments.
+%
+\section{Sorting}
+
+\tab After the curve has been decomposed into convex segments,
+points can be sorted from A to B by traversing the curve from A to B
+by convex segments, stepping from wallpoint to wallpoint.
+As each convex segment of \arc{AB}\ is encountered, 
+the points which lie on it are found and sorted, and this subsort is appended
+to the end of a global sort that is being accumulated.
+
+The traversal of the curve by convex segments is especially challenging in 
+the neighbourhood of a singularity.
+In particular, it can be ambiguous which branch of the curve should be
+followed from a singular wallpoint.
+This problem is resolved by finding,
+for each branch that passes through a singularity, a pair of points,
+one on either side of the singularity.
+These two points serve to guide the sort through the singularity along
+the proper branch.
+Section~\ref{ambiguity} discusses this problem.
+
+A crucial step in the traversal of the curve by convex segments is the
+determination of the next convex segment.
+If \arc{VW} is a convex segment of the curve, then we say that V and W
+are {\bf partners}.
+A wallpoint is the endpoint of two convex segments, and so it usually has
+two partners. 
+Our problem reduces to finding the partners of a wallpoint.
+That is, given a convex segment \arc{PQ}, the convex segment that follows
+\arc{PQ} is \arc{QR}, where R is the other partner of Q.
+
+The other main step in the traversal of the curve is the computation of the 
+points that lie on a given convex segment.
+It turns out that this problem can be solved with the theory that must
+be developed for the partner problem, so we only consider the latter.
+
+Suppose that Q lies on the boundary of cells C and D.
+We wish to find the wallpoint R in cell D that is Q's partner.
+Cell D will usually contain only one convex segment, in which case it is 
+obvious what R is.
+We give an indication of the theory necessary to deal with cells which
+have many convex segments by solving a special case of the partner
+problem. 
+(See  \cite[Chapter 3]{john} for the entire theory.)
+
+\begin{definition}
+If P is not a singularity or a flex, 
+then {\bf the inside of P's tangent} is the halfplane that contains 
+all of the curve in the neighbourhood of x.
+The inside includes the tangent, while the {\bf strict inside} does not.
+P {\bf faces} Q iff Q lies on the inside of P's tangent.  
+Finally, \#\{S\}\ is the number of elements in the set S.
+\end{definition}
+
+\begin{theorem}[{\cite{john}}]
+\label{thm-assocwpts}
+Let F be a plane curve that has been split into convex segments.
+Let \arc{QR}\ be a convex segment of the cell C such that 
+Q is not a singularity or a flex and R does not lie on the same wall as Q.\\
+Let $S^{Q}$ = \{ wallpoints X of C $\mid$
+\begin{quote}
+\begin{enumerate}
+\item X lies on the strict inside of Q's tangent with respect to C; and
+\item \mbox{$\forall\ z \in $ \seg{QX}, $\#\{P \in$ \seg{Qz}
+$\cap$ F: P faces Q \} $\leq \#\{P \in $ \seg{Qz}\ $\cap$ F: P faces X \}  \}}
+\end{enumerate}
+\end{quote}
+Let $Q_{2}$ be the other intersection of Q's 
+tangent with the boundary of C.\footnote{If 
+C is an open cell, then a cell wall must be placed across its opening to close it up.}
+Sort the points of $S^{Q}$ along the boundary of the cell
+from Q to $Q_{2}$.
+Then $R = S_{p}$.
+Thus, $S^{Q}$ can be used to find the partner of Q.
+\end{theorem}
+%
+\section{Sorting Around Singularities}
+\label{ambiguity}
+%.PP
+%.PP
+
+\tab An algebraic curve may possess a variety of different complicated singularities.
+At singular points, the curve may have an abrupt change of normal direction (cusps),
+multiple self-intersecting branches (nodes), or self-tangent branches (tacnodes).
+For singular algebraic curves, we need to ensure that 
+correct branch connectivity is considered at the singular points while sorting
+points through the singularity.
+This information can be achieved by a local analysis of each singularity of the curve. Analysis
+of a singularity may be achieved by use of
+the affine quadratic transformations of Noether (1870) or the projective
+quadratic transformations of Cremona (1860) \cite{wa}.
+We use the affine quadratic transformations,
+for then the transformation of the curve $f$ is local, and 
+each singularity can be treated in isolation.
+Using this analysis of the singularity, we give a procedure to obtain a pair
+of points on either side of the singularity, for each branch of the curve passing through the singularity.
+But we must first introduce the theory of quadratic transformations.
+
+Let $f(x,y)=0$ be a planar algebraic curve and let $R$ be a singularity of 
+the curve.
+Without restriction, we can assume that $R$ is the origin, since any point on the curve 
+can be translated to the origin by a linear transformation.
+The {\bf affine quadratic transformation} $q_{1}$ from the x-y plane 
+to the $x_{1}$-$y_{1}$ plane is given by $x_{1} =x$ and $y_{1} = \frac{y}{x}$.
+The inverse transformation is $x = x_{1}$ and $y = x_{1}y_{1}$. 
+The quadratic transformation
+maps the origin to the entire line $x_{1} = 0$, but it is
+one-to-one for all points $(x,y)$ with $x \neq 0$. 
+The line $y = mx$ is mapped to the horizontal line $y_{1}= m$.
+Thus, a quadratic transformation maps distinct tangent directions of the
+various branches of $f$ at the singular origin to different
+points on the {\bf exceptional line} $x_{1} =0$.
+The intersections of the transformed branches with the exceptional
+line correspond to the transformed points of the singularity at the origin.
+If an intersection point on the exceptional line is singular, 
+then the procedure is applied recursively.
+Hence, under quadratic transformations, the various branches of the 
+curve in the neighborhood of the singularity get transformed to separate
+branches.
+Once a branch is isolated, it is simple to find two points of it
+on either side of the singularity, since there are no other branches
+present to cause confusion. 
+
+To summarize, for each singular point of the curve, we translate 
+the singularity to the origin
+and apply a series of quadratic transformations until the singularity is 
+transformed into a set of nonsingular points.
+A branch of the transformed curve intersects the exceptional line
+in a simple (nonsingular) point.
+We compute two points on the branch of the curve on either side of 
+the exceptional line $x_{1} ~=~ 0$, and
+apply the inverse transformations to these points
+to yield the two points on the corresponding branch of the original curve. 
+This process is repeated for each branch of the curve.
+The pair of points on each branch clarify the branch connectivity at the 
+singularity  and allow a robust traversal of the curve by convex segments.
+%
+%        - blow up the curve at the singularity\\
+%	- use the desingularized curve to guide you
+%	  safely through the singularity\\
+%	- see the new (and incomplete) section 2.5 
+%	  of my thesis\\
+%	- we essentially slice the singularities out
+%	  of the curve by creating two points on
+%	  either side of the singularity, for each branch
+%	  that passes through the singularity
+%	  (these pts are found by crawling on the 
+%	   desingularized curve)\\
+%	- when you are jumping to the singularity during
+%          a sort, you actually jump to the point on one
+%	  side of the singularity and then continue jumping
+%	  from the point on the other side\\
+%        - this section will be hard to present 
+%	  clearly and *concisely*
+%
+\section{Complexity}
+   
+\begin{theorem}[{\cite{john}}]
+m points on an arbitrary algebraic curve of degree n can be sorted by the convex-segment
+method in O($m\ S_{n}$) time with O($n^6 + n^5\ log\ n\ S_{n}$) preprocessing, where $S_{n}$ is the time
+required to find the real roots of a polynomial equation of degree n.
+\end{theorem}
+\begin{proof}
+(A sketch.)
+The computation of the flexes and singularities of a curve takes 
+O($n^5\ log\ n\ S_{n}$) time, using the fact that resultants 
+can be computed by the method of Collins \cite{col} in O($n^5\ log\ n$) time.
+(Resultants are an effective way of solving systems of equations.)
+
+A curve of degree n has O($n^{2}$) flexes and singularities
+\cite{wa}.
+There are also O($n^{2}$) wallpoints at the 
+singularities and flexes.
+
+Consider the time that is required to compute the wallpoints
+at the singularities by the procedure of section~\ref{ambiguity}.
+The resolution of a singularity requires from 1 to 
+O($n^2$) quadratic transformations.
+Each quadratic transformation entails an algebraic simplification, which 
+with O($n^2$) possible monomials in $f$ will take O($n^2$) time.
+There is also the time spent in translating the singularity 
+to the origin (a linear substitution $x_{t} = x - a , y_{t} = y - a$), which 
+again entails an algebraic simplification with an overall cost of O($n^4$).
+Counting the time for intersections with the 
+exceptional line, which requires an additional $S_{n}$ time,
+the overall time bound for computing all O($n^2$) wallpoints of O($n^2$)
+singularities is O($n^6 +n^2 S_{n}$).
+
+It can be shown that there are O($n^{3}$) wallpoints that are not singularities
+or flexes.
+Therefore, the convex decomposition has O($n^{3}$) wallpoints and
+O($n^{3}$) convex segments.
+
+For each point that is being sorted, we must determine which convex
+segment it lies on.
+In the worst case, this takes O($S_{n}$) time per 
+point (Theorem~\ref{thm-assocwpts}).
+(However, for most points, this will take O(1) time.)
+Finally, the sorting of p points by a variant of Theorem~\ref{thm-1} 
+takes O($p$) time.
+(The variant does not actually create the convex hull: it simply sorts
+the angles that the points make with a central point.)
+\hence In the worst case, the convex-segment method requires 
+O($m\ S_{n}$) time, with O($n^6 +n^5\ log\ n\ S_{n}$) preprocessing, to step over O($n^{3}$) convex segments
+and sort the points on these convex segments.
+\end{proof}
+
+\begin{corollary}
+m points on a segment of a nonsingular curve of degree n can be sorted 
+in O($m\ S_{n}$) time with O($n^5\ log\ n\ S_{n}$) preprocessing.
+\end{corollary}
+
+\begin{corollary}
+m points on a convex curve segment of degree n can be sorted 
+in O($m$) time without preprocessing.
+\end{corollary}
+%
+\section{Applications}
+
+\tab We offer a number of applications of curve sorting.
+Let edge E be a segment of an algebraic curve C. 
+E is defined by the implicit equation $f(x,y) = 0$ of C and
+two endpoints $V_{a}$ and $V_{b}$.
+
+(1) Given a set of points S on C, determine the points of S
+which lie on E.\\
+%
+This is a fundamental problem in geometric modeling which arises
+from the implicit representation of the edge E.
+One solution is to trace the edge E from $V_{a}$ to $V_{b}$,
+marking the points of $S$ which are encountered in the trace \cite{bhh}.
+However, this method is slow and has other 
+disadvantages (Section~\ref{sec-1.3}).
+A more efficient solution is to sort $\{V_a,V_b\} \cup S$
+along C. The points between $V_a$ and $V_b$ in the sorted sequence lie on E.
+
+(2) Compute the intersection of two edges C and D.
+	  
+(3) Compute the intersection of two space curve segments C and D
+    on the same surface F.
+
+(4)  Determine a bounding box for an edge $E$.\\
+The solutions of (2), (3)  and (4) reduce to applications of the 
+method of problem (1), and thus require sorting.
+%
+%The extreme points of an edge are either local maxima/minima of the curve
+%or the endpoints of the edge. The solution of problem (1) is applied to
+%Therefore, a bounding box can be created by (i) finding all of the local
+%maxima/minima of the curve (ii) finding the subset of these points that lie
+%on the edge, using the solution of problem (1), and
+%(iii) choosing the points with the 
+%
+%
+%          use df/dx, df/dy, and endpoints of edge to determine
+%	  local maxima/minima\\
+%	  sort to determine which of these lie on edge\\
+%         create bounding box for edge\\
+
+(5) Determine whether a point lies within a planar piecewise algebraic patch\\
+%
+A planar piecewise algebraic patch is given by a closed boundary 
+consisting of a simply connected loop of algebraic curve segments.
+The problem of determining whether a point $Q$ lies within the closed boundary
+reduces to the problem of sorting by the following mapping.
+Consider the straight line $L$ defined by a vertex $V$ on the boundary and the
+point $Q$. Its intersection with the algebraic curve segments of the patch boundary yields a set of points $S$, which are determined by applications of
+the method of problem (2) and hence algebraic curve sorting.
+The points of $S$, the point $Q$, and the point $V$ are now sorted on the
+line $L$. By applying the Jordan curve theorem, the points on the line
+can be grouped into pairs 
+and inside and outside intervals can be determined.
+$Q$ lies within the patch iff it lies on an inside interval.
+
+(6) Determine whether a point lies within a convex algebraic surface patch\\
+%
+The solution is a generalization of the method of (5), with repeated 
+applications of (3).
+
+(6) Compute the intersection of two solid models.\\
+%
+An important step of the algorithm for computing the intersection of two
+solid models is to find the segments of an edge of one model which lie in
+the intersection.
+This is done by finding and sorting the intersections of this edge with a 
+face of the other model. 
+The segments of the edge between the $i^{th}$ and $i+1^{st}$ intersections,
+for $i$ odd, are contained in the intersection of the models.
+	  
+%	  
+\section{Conclusions}
+
+\tab We have developed a new method of sorting points on a curve
+which is superior to the conventional methods of sorting.
+In the process, we have illustrated how an algebraic curve can 
+be decomposed into convex segments, and how to resolve the
+ambiguity of sorting through a singularity.
+We have also established the importance of curve sorting
+to geometric modeling by outlining many of its applications.
+
+Our treatment of algebraic curve sorting has highlighted the need for 
+efficient computational geometry algorithms for the increased
+geometric coverage of curves and surfaces.
+
+\begin{thebibliography}{The longest is long}
+%
+\bibitem{abba1} Abhyankar, S., and Bajaj, C. (1987):
+{\em Automatic Rational Parameterization of Curves and Surfaces I:
+Conics and Conicoids}, Computer Aided Design
+19:1, 11-14.
+% Jan. 1987
+%
+\bibitem{abba2} Abhyankar, S., and Bajaj, C. (1986):
+{\em Automatic Rational Parameterization of Curves and Surfaces II:
+Cubics and Cubicoids},
+Technical Report 592, Dept. of Computer Science, 
+Purdue University.
+% (April 1986).
+To appear in Computer Aided Design.
+% 
+\bibitem{abba3} Abhyankar, S., and Bajaj, C. (1986):
+{\em Automatic Parameterization of Rational Curves and Surfaces III: 
+Algebraic Plane Curves},
+Technical Report 619, Dept. of Computer Science, 
+Purdue University.
+% (August 1986).
+%
+\bibitem{bhh} Bajaj, C., Hoffmann, C., and Hopcroft, J. (1987):
+{\em Tracing Algebraic Curves I: Planar Curves}, Manuscript.
+%
+\bibitem{col} Collins, G. (1971):
+{\em The Calculation of Multivariate Polynomial Resultants},
+Journal of the ACM, 18:4, 515-532.
+%
+\bibitem{jen} Jenkins, M., and Traub, J. (1975):
+{\em Algorithm 493}, ACM Transactions of Mathematical Software, 1:2.
+%
+\bibitem{john} Johnstone, J. (1987):
+{\em The Sorting of Points Along an Algebraic Curve},
+Ph.D. thesis, Dept. of Computer Science, Cornell University,
+Ithaca, NY. In preparation.  
+%
+\bibitem{levi} Levin, J. (1979):
+{\em Mathematical Models for Determining the Intersections of Quadric Surfaces},
+Computer Graphics and Image Processing, 11, 73-87.
+%
+\bibitem{mo} Mortenson, M. (1985):
+{\em Geometric Modeling},
+New York: John Wiley.
+%
+\bibitem{ock} Ocken, S., Schwartz, S., and Sharir, M. (1986):
+{\em Precise Implementation of CAD Primitives Using Rational Parameterization 
+of Standard Surfaces}, in {\em Planning, Geometry, and Complexity of Robot
+Motion}, Schwartz, Sharir, and Hopcroft, eds., 245-266.
+%
+\bibitem{wa} Walker, Robert J. (1978):
+{\em Algebraic Curves},
+New York: Springer Verlag.
+\end{thebibliography}
+\end{document}

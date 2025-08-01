@@ -1,0 +1,3 @@
+scene2d ../data/buildingSceneCornell1
+	- real model; artificial collections like buildingScene are too unnatural
+	- need to collect more real world smooth examples
