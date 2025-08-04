@@ -1,0 +1,20 @@
+\section{Points/analogies for talk}
+
+\begin{itemize}
+\item
+Another example of duality is the duality between the vertices and faces of
+a graph, which has been productively used in computational geometry
+to relate the computation of the Voronoi diagram and Delaunay triangulation.
+\item
+The tangential a-curves and b-curves cooperate to represent all of the tangents,
+Each individually has a blind spot, but together they see everything.
+much like the three Fates that share an eyeball.
+\item
+If a representation of the tangent space of a {\em space} curve (a nonplanar curve in 3-space)
+was wanted, the \plucker tangential curve would become useful.
+\item 
+the increase in degree of the tangential curve relates to the class of the related curve
+\item
+What about cusps? points with undefined tangents or zero tangents? for the tangential curve representation
+Not a problem: these are zero measure, so tangential curve is still defined
+\end{itemize}

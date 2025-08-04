@@ -1,0 +1,1175 @@
+\documentclass[12pt]{article}
+\usepackage{latex8}
+\usepackage{times}
+\usepackage{epsfig}
+
+\makeatletter
+\def\@maketitle{\newpage
+ \null
+ \vskip 2em                   % Vertical space above title.
+ \begin{center}
+       {\Large\bf \@title \par}  % Title set in \Large size. 
+       \vskip .5em               % Vertical space after title.
+       {\lineskip .5em           %  each author set in a tabular environment
+        \begin{tabular}[t]{c}\@author 
+        \end{tabular}\par}                   
+  \end{center}
+ \par
+ \vskip .5em}                 % Vertical space after author
+\makeatother
+
+\newcommand{\SingleSpace}{\edef\baselinestretch{0.9}\Large\normalsize}
+\newcommand{\DoubleSpace}{\edef\baselinestretch{1.4}\Large\normalsize}
+\newcommand{\QED}{\vrule height 1.4ex width 1.0ex depth -.1ex\ \vspace{.3in}} % square box
+\newcommand{\prf}{\noindent{{\bf Proof}:\ \ \ }}
+\newcommand{\choice}[2]{\mbox{\footnotesize{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}      
+\newcommand{\scriptchoice}[2]{\mbox{\scriptsize{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}
+\newcommand{\tinychoice}[2]{\mbox{\tiny{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{example}[theorem]{Example}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{defn2}[theorem]{Definition}
+
+\newcommand{\plucker}{Pl\"{u}cker\ }
+\newcommand{\atang}{tangential a-curve\ }
+\newcommand{\btang}{tangential b-curve\ }
+
+\SingleSpace
+\setlength{\headsep}{.5in}
+\setlength{\textheight}{8.5in}
+
+% -----------------------------------------------------------------------------
+
+\title{The tangential curve}
+\author{John K. Johnstone\\
+	Geometric Modeling Lab\\
+	Computer and Information Sciences\\
+	The University of Alabama at Birmingham\\
+	University Station, Birmingham, AL 35294}
+
+\begin{document}
+\maketitle
+
+% -----------------------------------------------------------------------------
+
+\begin{abstract}
+Many questions about lines are best referred to dual space, 
+and this includes analyses of the tangent space of a curve.
+We study the tangential curve, a dual image of the tangent space of
+a plane curve, and the tangential curve system, a robust model of the entire tangent
+space of a plane curve split across two dual spaces.
+The modeling of a tangent space by a tangential curve system
+is a useful tool for analyzing the interrelationships of a scene of curves, 
+such as in visibility analysis or motion planning.
+The tangential curve system is a pair of clipped curves in dual space, which is
+often simpler to work with than a line family.
+
+We develop our specific choice of duality and representation for dual space,
+guided by behaviour at infinity and the need to dualize smooth
+line families rather than finite line arrangements.
+We give an algebraic specification of the tangential curve for 
+rational curves, and explain the clipping process.
+As an illustration of the theory, 
+we develop the computational framework of Bezier tangential curves.
+We exhibit the power of tangential curves by solving the bitangency problem,
+which reduces to intersection in dual space.
+We analyze the advantages of the tangential curve system over other 
+related structures, including the hodograph, the dual Bezier curve, and a
+\plucker coordinate solution.
+Finally, we study the mapping of a tangential curve back to
+primal space, through the reapplication of duality.
+\end{abstract}
+
+\noindent Keywords: tangent space of a plane curve, geometric duality,
+		    tangential curve.
+
+\clearpage
+
+% -----------------------------------------------------------------------------
+
+\section{Introduction}
+
+Our interest in this paper is in the development of 
+a different representation for the
+tangent space of a plane curve, the tangential curve system.
+This is a dual representation, using the geometric duality between lines in 2-space and points.
+This duality allows a line family in primal space, such as the tangent space of a curve,
+to be interpreted as a point family in dual space.
+That is, we can map the tangent space to a curve in dual space, which
+we call the tangential curve.
+This paper strives to understand how best to map the tangent space of a plane curve 
+to a curve in dual space, and explores what it looks like once we get there.
+
+Why do we want a different representation for the tangent space?
+The present representations 
+are sufficient for the local analysis of a curve,
+where we only need to compute individual tangents on individual curves,
+such as for the analysis of continuity between segments or motion along a curve.
+However, for the global analysis of a scene of curves,
+where we need to study the interrelationships between curves and understand the
+tangent space of a curve globally,
+such as in visibility analysis, motion planning, and lighting,
+a different representation for the tangent space of a curve is needed,
+one that captures the whole tangent space in a compact form 
+and encodes tangent lines rather than tangent vectors.
+The tangential curve system is such a representation.
+
+To map a tangent space to a curve, we must first be able to map a line to a point.
+In Section~\ref{sec:duality}, we discuss the geometric duality between hyperplanes and points.
+Our particular choice of duality and representation of dual space is explained through
+a contrast with other possible choices.
+In order to robustly encode all lines, we impose a dichotomy of the space of lines into two families,
+and use two dualities to represent all lines.
+The need for two dualities is motivated by a duality's behaviour at infinity,
+which we analyze.
+Our Cartesian representation of dual space, which preserves the rationality 
+and 2-dimensionality of the tangential curve, 
+is contrasted with other representations in dealing with points at infinity.
+
+In Section~\ref{sec:tangcurve}, we lift this dualization of lines to the dualization of tangent spaces.
+Using our two dualities, we develop a representation
+for the tangent space spread across two dual spaces, as two clipped curves.
+We provide an algebraic specification of the tangential curves of a rational curve.
+The tangential curve can be computed for any curve format.
+Section~\ref{sec:bez} considers a special case, the tangential curve of a Bezier curve,
+and expresses it as a rational Bezier curve.
+We show that the problematic negative weights of this rational Bezier curve
+are removed by the clipping defined by a tangential curve system.
+
+In Section~\ref{sec:bitang},
+as an example of the utility of our new representation, 
+we show how easily the bitangents of two curves can be computed
+using the tangential curve system.
+In Section~\ref{sec:comparison}, the tangential curve is compared to 
+the related structures of the hodograph and the dual Bezier curve.
+We also establish the basic equivalence
+of our solution with a \plucker coordinate solution.
+Section~\ref{sec:back} shows how a tangential curve maps back to primal space,
+and Section~\ref{sec:conclude} provides some conclusions.
+
+This paper builds upon the introduction of the tangential curve in \cite{jj01a}.
+We look at the tangential curve in a more general context,
+allowing it to stand alone as a theoretical development,
+and expand its theory considerably.
+
+Since we work in projective space throughout the paper,
+we dispense with a definition of projective space
+before we enter the body of the paper.
+
+\begin{defn2}
+\label{defn:proj}
+{\bf Projective 2-space ${\bf P^2}$} is the space 
+$\{(x_1,x_2,x_3) : x_i \in \Re, \mbox{ not all zero}\}$
+under the equivalence relation $(x_1,x_2,x_3) = k(x_1,x_2,x_3),\ k \neq 0 \in \Re$.
+The point $(x_1,x_2,x_3)$ in projective 2-space
+is equivalent to the point $(\frac{x_1}{x_3},\frac{x_2}{x_3})$
+in Cartesian 2-space.
+The point $(x_1,x_2,0)$ is the {\bf point at infinity} in the direction $(x_1,x_2)$.
+The 3 coordinates in projective 2-space are called {\bf homogeneous coordinates}.
+We distinguish the third homogeneous coordinate by calling it the 
+{\bf projective coordinate}.
+\end{defn2}
+
+% -----------------------------------------------------------------------------
+
+\section{Line-point duality}
+\label{sec:duality}
+
+Dualities are valuable in many disciplines.
+For example, in physics it is impossible to fully understand light without
+an appreciation of its dual nature as particle and wave.
+% photoelectric effect: acts as particle
+% 2-slit experiment:    acts as wave
+In this paper, 
+we work with the classical geometric duality between hyperplanes and points.
+This duality is often used to replace hyperplanes (which are viewed as difficult)
+by points (which are viewed as simple).
+We use this same powerful idea, but in the context of a smooth family,
+to replace smooth one-dimensional line families by smooth one-dimensional
+point families (or curves).
+This can clarify the analysis of tangent spaces,
+since the tangent space of a plane curve is a continuous one-dimensional
+family of lines (Figure~\ref{fig:linefamily}).
+
+\begin{figure}[h]
+\centerline{\epsfig{figure=jjdufamily.ps,height=1.485in,width=1.590in}}
+% 36% reduction
+\caption{A tangent space is a family of lines}
+\label{fig:linefamily}
+% dual ob2.rawctr, line field/one-obstacle only
+% jjdufamily.gif
+\end{figure}
+
+A geometric duality establishes a relationship between the hyperplanes 
+of an $n$-space and the points of this $n$-space.
+This relationship is mutual:\footnote{We shall use the notation $P^*$ for the dual of P.} 
+if $P^* = Q$, then $Q^* = P$ (or equivalently, $(P^*)^* = P$).
+Another fundamental property of a duality,
+sometimes called the {\bf principle of duality} \cite{pedoe70}, % Pedoe, p. 277
+is its preservation of incidence between linear manifolds:
+\[
+P \subseteq Q \Rightarrow Q^* \subseteq P^*
+\]
+where $P$ and $Q$ are linear manifolds (points, lines, planes, $\ldots$, hyperplanes).  % varieties
+Notice that containment is reversed.
+A corollary of the principle of duality is the dualization of join to intersection, and vice versa.
+For example, if the join of $n$ points $P_1, \ldots, P_n$ defines the hyperplane $Q$,
+then the hyperplanes $P_1^*, \ldots, P_n^*$ will intersect in the point $Q^*$.
+
+Consider the duality  in 2-space between lines and points,
+the duality of primary interest in this paper.
+There are many choices for the specific point that is dual to a line.
+We choose the elegant duality that maps
+the line $ax+by+c=0$ to the point $(a,b,c)$ in projective 2-space \cite{hartshorne77}.
+The dual point must live in projective space,
+since the line $ax + by + c = 0$ is equivalent to the line
+$kax + kby + kc = 0$, $k \neq 0$.
+
+\begin{defn2}
+\label{defn:dual}
+The line $ax+by+c=0$ in 2-space is 
+\begin{itemize}
+\item	{\bf c-dual} to the point $(a,b,c) \in P^2$.
+\item   {\bf a-dual} to the point $(c,b,a) \in P^2$.
+\item   {\bf b-dual} to the point $(a,c,b) \in P^2$.
+\end{itemize}
+\end{defn2}
+
+For example, under c-duality, $(ax+by+c=0)^* = (a,b,c)$
+and $(a,b,c)^* = (ax+by+c=0)$.
+We illustrate the dual nature of the maps of Definition~\ref{defn:dual} by showing
+that they satisfy the principle of duality.
+
+\begin{lemma}
+The maps of Definition~\ref{defn:dual} 
+satisfy the principle of duality.
+\end{lemma}
+\prf
+Consider a-duality.\footnote{I thank Alan Sprague for pointing out 
+	the asymmetry of our original choice for the a-duality in the 
+	conference paper \cite{jj01a}, 	where the point dual to $ax+by+c=0$ was $(b,c,a)$.
+	This asymmetry prevents it from satisfying the principle of duality.
+	Interestingly, this 'duality' still works
+	well for finding bitangents, its main purpose in that paper.}
+Since the only linear manifolds in 2-space are points and lines,
+it suffices to show that 
+\[	P \in L \Rightarrow L^* \in P^*
+\]
+where $P$ is a point in 2-space, $L$ is a line in 2-space, 
+and $P^*$ and $L^*$ are their a-duals.
+Let $P=(A,B,C)$ and $L$ be the line $ax+by+c=0$.
+$P^*$ is the line $Cx+By+A=0$ and $L^*$ is the point $(c,b,a)$.
+If $P \in L$, then $aA+bB+cC=0$,
+so $L^*$ also lies on $P^*$.
+The proofs for b-duality and c-duality are analogous.
+\QED
+
+The dualities of Definition~\ref{defn:dual} 
+differ only in their assignment of the third homogeneous coordinate,
+which affects their behaviour at infinity.\footnote{The
+	name of the duality (a-, b-, or c-) is based on this assignment.}
+Lines through the origin ($ax+by=0$) are mapped to infinity by the c-duality;
+horizontal lines ($by+c=0$) are mapped to infinity by the a-duality;
+and vertical lines ($ax+c=0$) are mapped to infinity by the b-duality.
+
+Behaviour at infinity would not be a concern if we modeled
+the entire projective space $P^2$, including points at infinity.
+A point in projective 2-space can be modeled as a line through the
+origin in 3-space \cite{foley96}, which can be uniquely identified with its
+point of intersection with a hemisphere of the unit sphere $S^2$ in 3-space,
+so all of projective 2-space $P^2$ can be modeled by $S^2$ \cite{zorin00}.
+However, we do not want to use this representation of $P^2$,
+since it would force us to project 
+the dual images of tangent spaces (which are curves)
+to $S^2$, a nonrational operation that would destroy the rationality
+of these curves (Section~\ref{sec:tangcurve}).
+Instead, we shall use a Cartesian representation of dual space, 
+representing $(a,b,c) \in P^2$ by the Cartesian point $(\frac{a}{c},\frac{b}{c})$
+and points at infinity are indeed lost.
+
+Since this issue is central to our later representation
+of the tangent space, we restate it in a different way.
+Our Cartesian representation of dual space $P^2$ has two advantages:
+(1) it preserves the rationality of a tangent space under dualization and
+(2) it sends the tangent space to a plane curve in 2-space.
+An inherent penalty of this
+stuffing of the 3 dimensions of the family of lines $ax+by+c=0$
+into the 2 dimensions of the Cartesian representation
+is the mapping of some lines to infinity.
+One of the three coordinates of a tangent line must be considered the 
+projective coordinate, and
+when this coordinate goes to 0, we have a point at infinity.\footnote{We
+	will later develop a \plucker version of the 
+	tangential curve that has the same inherent problems with points at infinity 
+	(Section~\ref{sec:plucker}).}
+Therefore, our development must deal with points at infinity.
+
+We now turn to a graceful solution of this loss of information at infinity.
+In theory, lines through the origin map to infinity under c-duality.
+In practice, none of the lines 'nearly' through the origin 
+are robustly encoded by the c-duality.
+Similarly, near-horizontal and near-vertical lines 
+are badly represented by the a- and b-dualities, respectively.
+However, each of the latter dualities represents half of the lines well:
+the a-duality those lines far from horizontal and
+the b-duality those lines far from vertical.
+
+\begin{defn2}
+\label{defn:steep}
+A line $ax+by+c=0$ is {\bf steep} if $|a| \geq |b|$
+and {\bf shallow} if $|a| < |b|$.
+\end{defn2}
+
+\begin{lemma}
+\label{lem:steep}
+The a-duality robustly dualizes steep lines to the strip $y \in [-1,1]$.
+The b-duality robustly dualizes shallow lines to the strip $x \in (-1,1)$.
+\end{lemma}
+\prf
+The line $ax+by+c=0$ a-dualizes to the Cartesian point $(\frac{c}{a}, \frac{b}{a})$.
+If $|a| \geq |b|$, this is a point of the strip $y \in [-1,1]$.
+The line $ax+by+c=0$ b-dualizes to the Cartesian point $(\frac{a}{b}, \frac{c}{b})$.
+If $|a| < |b|$, this is a point of the strip $x \in (-1,1)$.
+\QED
+
+\vspace{-.2in}
+
+\begin{corollary}
+The space of all lines in 2-space can be robustly represented by
+the strip $y \in [-1,1]$ in a-dual space, representing steep lines,
+and the strip $x \in (-1,1)$ in b-dual space, representing shallow lines.
+\end{corollary}
+
+We shall apply this principle when modeling the tangent space in the 
+next section.
+Notice that it is not useful to use the c-dual space in combination
+with one of the other dual spaces for the representation of lines, 
+since a line through the origin can also be horizontal or vertical.
+
+Before we leave this section, we observe that there are many other line-point dualities 
+that we could have chosen from.
+Three other choices, popular in computational geometry,
+relate the line $ax+by+1=0$ with the point $(a,b)$ \cite{chazelle85}, % also O'Rourke, p. 214, called the polar duality
+	% it relates points and lines via the unit circle, analogously to inversion in a circle
+the line $y = -ax + b$ with the point $(a,b)$ \cite{welzl85}, % Lemma 2, p. 170
+and the line $y=2ax-b$ with the point $(a,b)$ \cite{orourke94}.	% O'Rourke, p. 214
+	% another polar duality: $(r,\theta)$ \cite{ghali} % http://www.cs.ualberta.ca/~ghali/thesis/node4.html
+These dualities have special geometric properties, 
+which are leveraged by the algorithms that use them.\footnote{For example, 
+	the second duality allows the simple analysis of lines by increasing slope
+	and the third duality relates points and tangents of the parabola $y=x^2$.}
+However, all of these dualities require some normalization of the
+implicit equation $ax+by+c=0$ of a line before its dualization.
+This normalization is not a problem when working with a finite set of lines,
+as in their application to finite line arrangements in computational geometry
+\cite{chazelle85,edels87,orourke94,welzl85},
+but would cause trouble when working with infinite line families
+such as in Lemma~\ref{lem:rattangacurve} below
+(for reasons analogous to the normalization problems discussed above in the context
+of a representation of dual space by $S^2$).
+Fortunately, we do not need the special properties of the above dualities, 
+so we can use our simpler duality that requires no normalization of the line.
+
+Richard Patterson \cite{patterson01} and Wenping Wang \cite{wenping01}
+have also explored the use of duality in geometric modeling,
+for finding the cusps and inflection points of a Bezier curve and its implicitization,
+and for collision detection, respectively.
+
+We shall now turn to the representation of the tangent space of a plane curve,
+using the ideas developed in this section.
+
+% -----------------------------------------------------------------------------
+
+\section{The tangential curve system}
+\label{sec:tangcurve}
+
+In the previous section, we explored the representation of a line
+by a point in dual space, with the eventual representation of a smooth line family
+always in mind.
+In this section, we move on to the representation of a smooth line family,
+in particular the tangent space of a curve, by a curve or set of curves in dual space.
+Because of the issues surrounding the robust treatment of points at infinity,
+the tangent space will be represented by two clipped curves.
+
+\begin{defn2}
+\label{defn:tangentialcurve}
+Let $C(t)$ be a plane curve.
+The {\bf tangential curve} of $C(t)$ is the curve $C^*(t) \subset P^2$,
+where $C^*(t)$ is the dual of the tangent at $C(t)$.
+The {\bf tangential a-curve} $C^*_a$ (resp., {\bf tangential b-curve} $C^*_b$)
+is the tangential curve where the a-duality (resp., b-duality) of 
+Definition~\ref{defn:dual} is used.
+\end{defn2}
+
+Notice that a tangential curve is a standard curve with a primal
+structure.
+Its only idiosyncrasy is that it lives in dual space.
+However, the tangential curve is not yet a robust representation
+of a curve's tangent space.
+For this, we need a pair of tangential curves.
+
+\begin{defn2}
+\label{defn:tangentialsystem}
+The {\bf tangential curve system} of $C(t)$ is a combination of
+the tangential a-curve clipped to the strip $y \in [-1,1]$ and 
+the tangential b-curve clipped to the strip $x \in (-1,1)$
+(Figure~\ref{fig:tangcurve1}).
+\end{defn2}
+
+\begin{lemma}
+The tangential curve system of $C(t)$ represents the entire tangent space of $C$.
+\end{lemma}
+\prf
+By Lemma~\ref{lem:steep}, 
+steep tangents of $C$ are represented by the clipped tangential a-curve and
+shallow tangents of $C$ by the clipped tangential b-curve.
+Since every tangent is either steep or shallow, the two clipped curves
+cooperate to represent the entire tangent space of $C$.
+\QED
+
+% -----------------------------------------------------------------------------
+
+Figures~\ref{fig:tangcurve1}-\ref{fig:tangcurve3} illustrate various 
+tangential curve systems.
+Notice how the tangential curve system yields new insight into the complexity of a curve's
+tangent space (compare Figures~\ref{fig:tangcurve1} and \ref{fig:tangcurve3}).
+
+	% tangentialCurve -p -d 5 data/circleOne.pts
+\begin{figure}
+\centerline{\epsfig{figure=jjduta1.ps,height=3.494in,width=6.509in}}
+% 65% reduction
+\caption{A circle and its tangential curve system (left: $C$; top right: clipped $C^*_a$; bottom right: clipped $C^*_b$)}
+\label{fig:tangcurve1}
+\end{figure}
+
+	% tangentialCurve -p data/ob1b.pts
+\begin{figure}
+\centerline{\epsfig{figure=jjduta2.ps,height=3.494in,width=6.509in}}
+% 65% reduction
+\caption{A second tangential curve system, with one tangent shown}
+\label{fig:tangcurve2}
+\end{figure}
+
+	% tangentialCurve -p data/ob3a.pts
+\begin{figure}
+\centerline{\epsfig{figure=jjduta3.ps,height=3.494in,width=6.509in}}
+% 65% reduction
+\caption{A third tangential curve system, with one tangent shown}
+\label{fig:tangcurve3}
+\end{figure}
+
+% -----------------------------------------------------------------------------
+
+The tangential curves of a tangential curve system must be clipped,
+either to the strip $y \in [-1,1]$ or the strip $x \in (-1,1)$.
+There are two ways to clip a tangential curve, in primal or dual space.
+In primal space, we can find the parameter values of the diagonal 
+(45- and 135-degree) tangents and clip the tangential curve at these parameter values.
+The parameter values on $C$ of these diagonal tangents can be found by intersecting
+the tangent hodograph of $C$ with the diagonal lines $x = \pm y$.
+In dual space, we can find the intersections of the lines $y=\pm 1$ (or $x=\pm 1$)
+with the tangential curve and clip at these points.
+Both methods involve two line intersections.
+We recommend clipping in primal space when dealing with Bezier tangential curves,
+because their negative weights complicate clipping in dual space
+(see the end of Section~\ref{sec:bez}).
+
+Although we clip the tangential curves to prevent the coverage of the a-curve
+(steep tangents) from overlapping the coverage of the b-curve (shallow tangents),
+this clipping has another serendipitous effect: it leads to smaller curves
+and a more efficient representation.
+This is desirable, especially when these curves are intersected
+as in the computation of bitangents of Section~\ref{sec:bitang}.
+The shorter a curve is, the faster is intersection with that curve
+when using a subdivision style of intersection.
+
+% ----------------------------------------------------------------------------
+
+We end this section with a more precise description of the tangential a-curve
+and b-curve.
+
+\begin{lemma}
+\label{lem:rattangacurve}
+Let $C(t) = (\frac{c_0(t)}{c_2(t)}, \frac{c_1(t)}{c_2(t)})$ be a rational curve.
+The tangential a-curve of $C(t)$ is the rational curve
+\begin{equation}
+\label{eq:rattangacurve}
+	(\frac{c_0 c'_1 - c'_0 c_1}{c_1 c'_2 - c'_1 c_2},
+	 \frac{c'_0 c_2 - c_0 c'_2}{c_1 c'_2 - c'_1 c_2}).
+\end{equation}
+The tangential b-curve is
+\begin{equation}
+\label{eq:rattangbcurve}
+	(\frac{c_1 c'_2 - c'_1 c_2}{c'_0 c_2 - c_0 c'_2},
+	 \frac{c_0 c'_1 - c'_0 c_1}{c'_0 c_2 - c_0 c'_2}).
+\end{equation}
+
+\end{lemma}
+\prf
+The tangent vector of $C(t)$ is 
+$C'(t) = \frac{1}{c_2^2} (c'_0 c_2 - c_0 c'_2, c'_1 c_2 - c_1 c'_2)$,
+so its normal vector is 
+\[
+	(\frac{c_1 c'_2 - c'_1 c_2}{c_2^2}, 
+	 \frac{c'_0 c_2 - c_0 c'_2}{c_2^2}).
+\]
+Since the implicit equation of the line through $P$ with normal $N$ is 
+$(X-P) \cdot N = 0$,
+the implicit equation of the tangent line of $C(t)$ is:
+\[
+	(x - \frac{c_0}{c_2}, y - \frac{c_1}{c_2}) \cdot
+	(\frac{c_1 c'_2 - c'_1 c_2}{c_2^2},
+	 \frac{c'_0 c_2 - c_0 c'_2}{c_2^2}) = 0
+\]
+or, multiplying by $c_2^2$, which is nonzero except at points at infinity,\footnote{So
+	this formula will not be valid at points at infinity,
+	but these will be clipped away anyway.}
+\[
+	(c_1 c'_2 - c'_1 c_2) x +
+	(c'_0 c_2 - c_0 c'_2) y -
+	\frac{c_0c_1c'_2 - c_0c'_1c_2 + c'_0c_1c_2 - c_0c_1c'_2}{c_2} = 0.
+\]
+This shows that the tangential a-curve of $C(t)$ is 
+\[
+	(c_0c'_1 - c'_0c_1, c'_0 c_2 - c_0 c'_2, c_1 c'_2 - c'_1 c_2)
+\]
+and the tangential b-curve is 
+\[
+	(c_1 c'_2 - c'_1 c_2, c_0c'_1 - c'_0c_1, c'_0 c_2 - c_0 c'_2).
+\]
+These are polynomial curves in projective 2-space or, equivalently, the rational
+curves (\ref{eq:rattangacurve}) and (\ref{eq:rattangbcurve}) in Cartesian 2-space.
+\QED
+
+% ----------------------------------------------------------------------------
+
+\section{Bezier tangential curves}
+\label{sec:bez}
+
+We now work out the details of the tangential curve system for a Bezier curve.
+We have found this special case of a tangential curve system particularly useful,
+largely because it allows the tangential curve to be integrated immediately
+into existing modelers, including our research modeler.
+
+\begin{theorem}
+\label{thm:Bezier}
+Let $C(t)$ be a plane Bezier curve of degree $n$
+with control points $\{ b_i = (b_{i,0}, b_{i,1}) \}_{i=0}^n$ 
+over the parameter interval $[t_0,t_1]$.
+The \atang $C_a^*(t)$ is a rational Bezier curve
+of degree $2n-1$ over $[t_0,t_1]$ with weights $\{w_k\}_{k=0}^{2n-1}$ where: 
+\begin{equation}
+\label{eq:wt}
+w_k = 	\alpha 
+\displaystyle{\sum_{i=\mbox{\tiny{max}}(0,k-n)}^{\mbox{\tiny{min}}(n-1,k)}}
+	\tinychoice{n-1}{i} \tinychoice{n}{k-i} (b_{i,1} - b_{i+1,1})
+\end{equation}
+%
+and control points $\{c_k\}_{k=0}^{2n-1}$ where:
+\begin{displaymath}
+\tiny{
+c_k = \frac{\alpha}{w_k} 
+\left(
+\begin{array}{l}
+	\displaystyle{\sum_{\begin{array}{c} \mbox{\tiny{$0 \leq i \leq n-1$}} \\ 
+		       \mbox{\tiny{$0 \leq j \leq n$}} \\ 
+		       \mbox{\tiny{$i+j=k$}} \end{array}}}
+	\tinychoice{n-1}{i} \tinychoice{n}{j} \beta_{i,j} \\
+%	
+	\displaystyle{\sum_{i=\mbox{\tiny{max}}(0,k-n)}^{\mbox{\tiny{min}}(n-1,k)}}
+	\tinychoice{n-1}{i} \tinychoice{n}{k-i} (b_{i+1,0} - b_{i,0})
+\end{array}
+\right)
+}
+\end{displaymath}
+where $\alpha = \tiny{\frac{n}{(t_1 - t_0) \tinychoice{2n-1}{k}}}$
+and $\beta_{i,j} = (b_{i+1,1} - b_{i,1}) b_{j,0} - (b_{i+1,0} - b_{i,0}) b_{j,1}$.
+\end{theorem}
+%
+% -------------------------------------------------------------------
+%
+\prf
+We will translate the \atang (in projective space) to a Bezier curve representation,
+interpret this Bezier curve in projective space
+as a rational Bezier curve in Cartesian space,
+and finally extract control points and weights.
+Applying Lemma~\ref{lem:rattangacurve} to a polynomial curve,
+the tangential a-curve of $C(t) = (c_0(t), c_1(t))$ is, in projective space,
+\begin{equation}
+\label{eq:dual2}
+	(c_1'c_0 - c_0' c_1, \ \ c_0', \ \ -c_1')
+\end{equation}
+We want to translate to a Bezier curve representation.
+Since $C$ is a Bezier curve,
+\[
+(c_0(t), c_1(t)) = (\sum_{i=0}^n b_{i,0} B_i^n(t), \sum_{i=0}^n b_{i,1} B_i^n(t)).
+\]
+and
+\[
+(c_0'(t), c_1'(t)) = (\frac{1}{t_1-t_0} \sum_{i=0}^{n-1}  n \Delta b_{i,0} B_i^{n-1}(t),\ \ 
+		      \frac{1}{t_1-t_0} \sum_{i=0}^{n-1}  n \Delta b_{i,1} B_i^{n-1}(t)
+\]
+where $\Delta b_{i,j} = b_{i+1,j} - b_{i,j}$ and
+$B_i^n(t) = \tinychoice{n}{i} (1-t)^{n-i} t^i$ is the $i^{th}$ Bernstein
+polynomial of degree $n$.
+Consider the first coordinate of the \atang (\ref{eq:dual2}), in Bezier form:
+\[
+\scriptstyle{\frac{n}{t_1-t_0}}
+\displaystyle{\sum_{i=0}^{n-1}} \scriptstyle{\Delta b_{i,1} B_i^{n-1}(t)}
+\displaystyle{\sum_{j=0}^n}     \scriptstyle{       b_{j,0} B_j^n(t)}
+\ \  - \ \ 
+\scriptstyle{\frac{n}{t_1-t_0}}
+\displaystyle{\sum_{i=0}^{n-1}} \scriptstyle{\Delta b_{i,0} B_i^{n-1}(t)}
+\displaystyle{\sum_{j=0}^n}	\scriptstyle{       b_{j,1} B_j^n(t)}
+\]
+We can use the product formula\footnote{$B_i^m(t) B_j^n(t) = \frac{ \tinychoice{m}{i} \tinychoice{n}{j} }{ \tinychoice{m+n}{i+j} } B_{i+j}^{m+n}(t)$.}
+for Bernstein polynomials \cite{farin97} to simplify this to
+\[
+\scriptstyle{\frac{n}{t_1-t_0}}
+\displaystyle{\sum_{i=0}^{n-1} \sum_{j=0}^n }
+\frac{\tinychoice{n-1}{i} \tinychoice{n}{j}}{ \tinychoice{2n-1}{i+j} } 
+\scriptstyle{ B_{i+j}^{2n-1}(t) [ \Delta b_{i,1} b_{j,0} - \Delta b_{i,0} b_{j,1} ]}.
+\]
+Letting $k=i+j$, this becomes
+\[
+\sum_{k=0}^{2n-1} B_k^{2n-1}(t) 
+\sum_{\begin{array}{c} \mbox{\footnotesize{$0 \leq i \leq n-1$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq n$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}}
+\frac{n}{t_1-t_0} \frac{ \tinychoice{n-1}{i} \tinychoice{n}{j} }{ \tinychoice{2n-1}{k} }
+\beta_{i,j}
+\]
+The first coordinate of the \atang is now expressed as a 1-dimensional Bezier curve of 
+degree $2n-1$ with control points $\{b^*_{k,0} \}_{k=0}^{2n-1}$ where:
+\begin{equation}
+\label{eq:dualw2}
+b^*_{k,0} = \alpha
+\sum_{\begin{array}{c} \mbox{\footnotesize{$0 \leq i \leq n-1$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq n$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}}
+\scriptchoice{n-1}{i} \scriptchoice{n}{j} \beta_{i,j}.
+\end{equation}
+
+The second and third coordinates $c_0'(t)$ and $-c_1'(t)$
+of the \atang (\ref{eq:dual2}) are 1-dimensional Bezier curves of degree $n-1$,
+which we need to degree-elevate to degree $2n-1$
+for compatibility with the first coordinate.
+A Bezier curve of degree $n$ with control points $\{ d_k \}_{k=0}^n$ 
+is degree elevated \cite{farin97} to a Bezier curve of degree $n+r$ with control points
+$\{ d_k^{(r)} \}_{k=0}^{n+r}$ where:
+\[
+d_k^{(r)} = \sum_{i=\mbox{\footnotesize{max}}(0,k-r)}^{\mbox{\footnotesize{min}}(n,k)} 
+		d_i \frac{\tinychoice{n}{i} \tinychoice{r}{k-i} }{ \tinychoice{n+r}{k} }.
+\]
+%
+Consequently, the 1-dimensional Bezier curve $c_0'(t)$ 
+of degree $n-1$ with control points $\frac{n}{t_1-t_0} \Delta b_{i,0}$ 
+can be degree elevated to a Bezier curve of degree $2n-1$ with control points 
+$\{b^*_{k,1} \}_{k=0}^{2n-1}$ where:
+\begin{equation}
+\label{eq:2ndcoord}
+b^*_{k,1} = 
+\sum_{i=\mbox{\footnotesize{max}}(0,k-n)}^{\mbox{\footnotesize{min}}(n-1,k)} 
+	\frac{n}{t_1-t_0} \Delta b_{i,0}
+	\frac{ \tinychoice{n-1}{i} \tinychoice{n}{k-i} }{ \tinychoice{2n-1}{k} }
+\end{equation}
+%
+Similarly, the Bezier curve $-c_1'(t)$
+of degree $n-1$ with control points $-\frac{n}{t_1-t_0} \Delta b_{i,1}$
+is degree elevated to a 1-dimensional Bezier curve of degree $2n-1$
+with control points $\{b^*_{k,2} \}_{k=0}^{2n-1}$ where:
+\begin{equation}
+\label{eq:3rdcoord}
+b^*_{k,2} = 
+\sum_{i=\mbox{\footnotesize{max}}(0,k-n)}^{\mbox{\footnotesize{min}}(n-1,k)} 
+	\frac{-n}{t_1-t_0} \Delta b_{i,1}
+	\frac{ \tinychoice{n-1}{i} \tinychoice{n}{k-i} }{ \tinychoice{2n-1}{k} }
+\end{equation}
+%
+Combining (\ref{eq:dualw2}), (\ref{eq:2ndcoord}) and (\ref{eq:3rdcoord}),
+we conclude that the \atang
+is a Bezier curve of degree $2n-1$ in projective space with control points 
+$\{b^*_k\}_{k=0}^{2n-1}$:
+\[
+\label{eq:dualcoord}
+\tiny{
+b^*_k = \alpha
+\left(
+\begin{array}{l}
+	\displaystyle{\sum_{\begin{array}{c} \mbox{\tiny{$0 \leq i \leq n-1$}} \\ 
+		       \mbox{\tiny{$0 \leq j \leq n$}} \\ 
+		       \mbox{\tiny{$i+j=k$}} \end{array}}}
+	\tinychoice{n-1}{i} \tinychoice{n}{j} \beta_{i,j} \\
+%	
+	\displaystyle{\sum_{i=\mbox{\tiny{max}}(0,k-n)}^{\mbox{\tiny{min}}(n-1,k)}}
+	\tinychoice{n-1}{i} \tinychoice{n}{k-i} (b_{i+1,0} - b_{i,0})\\
+%	
+	\displaystyle{\sum_{i=\mbox{\tiny{max}}(0,k-n)}^{\mbox{\tiny{min}}(n-1,k)}}
+	\tinychoice{n-1}{i} \tinychoice{n}{k-i} (b_{i,1} - b_{i+1,1})
+\end{array}
+\right)}
+\]
+%
+A Bezier curve in projective 2-space is equivalent to a 
+rational Bezier curve in 2-space.
+Weights of the rational Bezier curve correspond to the
+projective coordinate of the control points of the polynomial Bezier curve.
+This leads to the rational Bezier curve of the theorem.
+\QED
+
+\noindent The Bezier form of the \btang is equivalent, 
+simply reinterpreting the projective coordinate.
+%
+\begin{theorem}
+\label{thm:rationaldualb}
+Let $C(t)$ be a plane Bezier curve of degree $n$ 
+with control points $\{ b_i \}_{i=0}^n$ over $[t_0,t_1]$.
+The \btang $C_b^*(t)$ is a rational Bezier curve of degree $2n-1$ 
+over $[t_0,t_1]$ with weights $\{w_k\}_{k=0}^{2n-1}$ where: 
+\begin{displaymath}
+\scriptsize{
+w_k = \alpha
+\displaystyle{\sum_{i=\mbox{\tiny{max}}(0,k-n)}^{\mbox{\tiny{min}}(n-1,k)}}
+	\tinychoice{n-1}{i} \tinychoice{n}{k-i} (b_{i+1,0} - b_{i,0})
+}
+\end{displaymath}
+%
+and control points $\{c_k\}_{k=0}^{2n-1}$ where:
+\begin{displaymath}
+\tiny{
+c_k = \frac{\alpha}{w_k} 
+\left(
+\begin{array}{l}
+	\displaystyle{\sum_{i=\mbox{\tiny{max}}(0,k-n)}^{\mbox{\tiny{min}}(n-1,k)}}
+	\tinychoice{n-1}{i} \tinychoice{n}{k-i} (b_{i,1} - b_{i+1,1})\\
+%
+	\displaystyle{\sum_{\begin{array}{c} \mbox{\tiny{$0 \leq i \leq n-1$}} \\ 
+		       \mbox{\tiny{$0 \leq j \leq n$}} \\ 
+		       \mbox{\tiny{$i+j=k$}} \end{array}}}
+	\tinychoice{n-1}{i} \tinychoice{n}{j} \beta_{i,j}
+\end{array}
+\right)
+}
+\end{displaymath}
+where $\alpha$ and $\beta_{i,j}$ are as in Theorem~\ref{thm:Bezier}.
+\end{theorem}
+
+% ---------------------------------------------------------------------------
+
+The clipping of tangential curves in a tangential curve system
+has an added benefit in the context of Bezier tangential curves: 
+it removes the problem of negative weights.
+Looking at (\ref{eq:wt}),
+it is clear that some of the weights can be negative.
+Negative weights are undesirable, 
+since curve segments with negative weights
+lack the convex hull property that is so useful for divide and conquer
+techniques of intersection using subdivision.
+Goldman and DeRose \cite{goldman86} have shown how to intersect curves without
+the convex hull property, using an expanded convex hull,
+but the tangential curve system does not need this special treatment,
+thanks to clipping.
+
+\begin{lemma}
+Although the tangential curve of a Bezier curve may (and usually does) have
+negative weights,
+the tangential curve system of a Bezier curve does not.
+\end{lemma}
+\prf
+Since horizontal tangents are associated with points at infinity on the
+tangential a-curve, the clipping of shallow tangents from a \atang 
+is equivalent to the clipping 
+of a neighbourhood about all points at infinity (zero weights).
+This is equivalent to the clipping of all sign changes of the weight,
+so the weights of the remaining segments are purely positive or purely negative.  
+Since negative weights on a segment with purely negative weights can be easily
+removed by multiplying all of the weights by $-1$ (rational Bezier curves 
+are invariant under transformations $w_i = kw_i$ of the weights),
+the segments of a clipped \atang only have positive weights.
+The same argument can be applied to clipped tangential b-curves.
+\QED
+
+The removal of negative weights is another indication that the tangential curve
+system is the correct representation of tangent space.
+
+% -----------------------------------------------------------------------------
+
+\section{Bitangency as intersection}
+\label{sec:bitang}
+
+To illustrate the power of the new representation of tangent space,
+we can apply it to the problem of bitangency.
+Suppose that we want to find all of the bitangents of two curves.\footnote{A bitangent
+	of the curves $C$ and $D$ is a line that is tangent to 
+	both $C$ and $D$.}
+The bitangents of $C$ and $D$ in primal space can be naturally computed as
+the intersections of the tangential curve systems of $C$ and $D$ in dual space.
+A steep bitangent will be found as an
+intersection of the clipped tangential a-curves, while a shallow bitangent
+will be found as an intersection of the clipped tangential b-curves.
+Since the intersection of parametric curves is an efficient and well-studied problem
+(e.g., \cite{sederberg86}),
+this is an attractive reduction of the problem.
+This approach is illustrated by Figures~\ref{fig:biTang}-\ref{fig:eg1}.
+Duality's translation of bitangency to intersection
+is analogous to the Fourier transform's translation of convolution to multiplication.
+Both are simplifications in point of view.
+
+	% tangentialCurve -p data/circle.pts (with one tangent shown)
+\begin{figure}[h]
+\centerline{\epsfig{figure=jjdubi1.ps,height=3.494in,width=6.509in}}
+% 65% reduction
+\caption{Bitangency is intersection in dual space}
+\label{fig:biTang}
+\end{figure}
+
+	% bitang -p data/ob1.pts
+\begin{figure*}[h]
+\centerline{\epsfig{figure=jjdubi2.ps,height=3.494in,width=6.509in}}
+% 65% reduction
+\caption{Computing bitangents in dual space}
+\label{fig:eg1}
+\end{figure*}
+
+% -----------------------------------------------------------------------------
+
+\section{Related work}
+\label{sec:comparison}
+
+There are several structures that relate to our tangential curve.
+We now consider these relationships.
+
+% -----------------------------------------------------------------------------
+
+\subsection{The tangential variety}
+
+The abstract idea of dualizing tangent spaces into curves
+has been introduced in algebraic geometry \cite[p. 54]{hartshorne77}.
+It is called the tangential variety.
+The tangential curve system and this paper may be viewed as an elaboration
+and implementation of this idea of the tangential variety.
+
+% -----------------------------------------------------------------------------
+
+\subsection{The hodograph}
+\label{sec:hodo}
+
+The tangential curve system is a representation of the tangent space of a curve.
+What are its advantages over the hodograph, the standard representation of 
+the tangent space of a curve?
+A point $H(t)$ of the hodograph of a curve $C(t)$ represents the tangent 
+vector at $C(t)$.
+The problem with the hodograph is that it represents tangent vectors rather
+than tangent lines.
+The tangent line at $C(t)$ is only available indirectly, as $C(t) + sH(t)$,
+and is dependent on both the hodograph and the original curve.
+Moreover, many points of the hodograph can represent the same 
+tangent line (viz., all points of the hodograph along the same line through the origin).
+
+Consider how this affects the application of the hodograph to problems
+involving curve tangent spaces.
+We use bitangency as our example.
+Recall that the intersection of tangential curve systems yields bitangents.
+In contrast, the intersection of the hodographs of $A$ and $B$ does not yield the 
+bitangents of $A$ and $B$.
+An intersection does not imply a bitangent, just two parallel tangents.
+Conversely, a bitangent of the curves does not imply an intersection
+of the hodographs, unless the tangent vectors at either end of the bitangent
+are exactly the same length.
+Thus, hodographs are not useful for finding bitangents.
+
+More generally, this weakness of the hodograph (its representation of the tangent
+vector only) hobbles it
+for problems that work with scenes of many curves and their interactions.
+This is precisely the type of problem 
+that the tangential curve system is designed for:
+the global analysis of a scene of curves.
+This explains why the tangential curve is better suited to the solution of bitangency,
+which is a global property of a scene of curves.
+
+% -----------------------------------------------------------------------------
+
+\subsection{The dual Bezier curve}
+\label{sec:dualBezier}
+
+The tangential curve uses duality.
+How does it compare to the dual Bezier curve of Hoschek \cite{hoschek83}?
+The dual Bezier curve is the representation of a plane curve by control lines
+rather than control points (Figure~\ref{fig:Hoschekdual}).
+In particular, a plane curve is represented as the envelope of a line family
+and the line family is represented in terms of control lines.
+Thus, the dual Bezier curve is an alternative representation for a plane curve,
+using a dual control structure (control lines rather than control points).
+The differences between the dual Bezier curve
+and tangential curve may be captured most clearly as follows:
+the dual Bezier curve is the representation of a curve in primal space
+using a dual control structure,
+while the tangential curve is the representation of a curve's {\em tangent space}
+in dual space using a primal structure (such as the Bezier control structure
+of Theorem~\ref{thm:Bezier}).
+Note that the tangential curve of $C$ is a completely different curve from $C$
+(Figures~\ref{fig:tangcurve1}-\ref{fig:tangcurve3}).
+
+\begin{figure}
+\centerline{\epsfig{figure=jjdube.ps,height=3.35in,width=3.2in}}
+% ?% reduction
+\caption{A dual Bezier curve: defined by control lines rather than control points}
+\label{fig:Hoschekdual}
+\end{figure}
+
+% -----------------------------------------------------------------------------
+
+\subsection{\plucker coordinates}
+\label{sec:plucker}
+
+We have used geometric duality to map tangent lines to points.
+What would happen if we instead used \plucker coordinates,
+the classical representation for lines
+by points in projective 5-space \cite{bottemaRoth79}? 	% p. 26
+	% also Sommerville, Analytic Geometry of 3 Dimensions, Chapter 16,
+	% used in Teller, SIGGRAPH 92, Antipenumbra paper
+	% also Pottmann/Peternell/Ravani, CAD 1999, Intro to Line Geometry
+A representation of tangent space can indeed be developed using \plucker
+coordinates, but it turns out that this \plucker representation is almost 
+identical to our dual representation.
+
+\begin{defn2}
+The {\bf \plucker tangential curve} of $C(t)$ is the curve $\hat{C}(t) \subset P^5$,
+where $\hat{C}(t)$ is the \plucker coordinates of the tangent at $C(t)$.
+\end{defn2}
+
+\begin{lemma}
+The \plucker tangential curve is essentially equivalent to the tangential a-curve,
+but in a higher-dimensional space.
+\end{lemma}
+\prf
+The \plucker coordinates of the line $P+uV$ are $(V,P \times V)$.
+Since the tangent line at $C(t)$ is $C(t) + uC'(t)$,
+the \plucker tangential curve of $C(t)$
+is the curve $(C'(t), C(t) \times C'(t))$.
+If $C(t) = (c_0(t),c_1(t),0)$ is a plane polynomial curve,
+this \plucker tangential curve becomes
+\[
+	(c'_0, c'_1, 0, 0, 0, c_0c'_1 - c_1c'_0)
+\]
+in projective 5-space.
+Compare this to the tangential a-curve (\ref{eq:dual2}) in projective 2-space
+$(c_0c'_1 - c_1c'_0, c'_0, -c'_1)$.
+This establishes the essential equivalence of the \plucker representation.
+\QED
+
+We use the dual space representation since its development is more natural
+for lines in 2-space and leads to a slightly simpler implementation.
+\plucker coordinates are designed for the more general representation
+of lines in 3-space,
+and consequently \plucker space is a higher-dimensional version of our dual space:
+a 5-dimensional, rather than 2-dimensional, projective space.
+Our dual representation of a line (Definition~\ref{defn:dual})
+is explicitly designed for lines in 2-space.
+Thus, the dual representation of the tangent space of plane curves is simpler, more intuitive, and 
+more direct than the \plucker representation.
+
+% -----------------------------------------------------------------------------
+
+\section{Mapping the tangential curve back to primal space}
+\label{sec:back}
+
+Since a tangential curve $C^*(t)$ is a plane curve,
+it is natural to wonder what {\em its} tangential curve would look like.
+One is tempted to hope that this would be the original curve $C(t)$.
+And it is.
+It is not immediately clear that this must be the case: 
+although a point $C(t)$ must dualize to a line, 
+it is not clear that it necessarily needs to dualize to the tangent of $C^*(t)$ (Figure~\ref{fig:pt2tang}).
+That it does shows that duality respects tangency.
+We know that $(P^*)^* = P$ when $P$ is a point or a line and $^*$ is geometric duality.
+Now we know that this result lifts to tangent spaces: 
+$(C^*)^* = C$ when $C$ is a plane curve 
+and $^*$ is the dualization of a curve's tangent space from Definition~\ref{defn:tangentialcurve}.
+
+\begin{lemma}
+Let $C$ be a rational plane curve, and
+let $D$ be the tangential a-curve of $C$.
+The tangential a-curve of $D$ is $C$.
+\end{lemma}
+\prf
+Let $C$ be the rational curve $(\frac{c_0(t)}{c_2(t)},\frac{c_1(t)}{c_2(t)})$.
+Let $d_0 := c_0c'_1 - c'_0c_1$, $d_1 := c'_0c_2 - c_0c'_2$
+and $d_2 := c_1c'_2 - c'_1c_2$.
+From Lemma~\ref{lem:rattangacurve}, 
+the tangential a-curve $D$ is $(\frac{d_0}{d_2}, \frac{d_1}{d_2})$.
+Similarly, the tangential a-curve of $D$ is 
+\[
+	(\frac{d_0 d'_1 - d'_0 d_1}{d_1 d'_2 - d'_1 d_2},
+	 \frac{d'_0 d_2 - d_0 d'_2}{d_1 d'_2 - d'_1 d_2}).
+\]
+Let 
+\begin{equation}
+\label{eq:R}
+	R = c_0(c''_1c'_2 - c'_1c''_2) + c'_0(c_1c''_2 - c''_1c_2) + c''_0(c'_1c_2 - c_1c'_2).
+\end{equation}
+Then, after some simplification, we can show that 
+$d_0d'_1 - d'_0d_1 = c_0R$,
+$d'_0 d_2 - d_0 d'_2 = c_1R$, and
+$d_1 d'_2 - d'_1 d_2 = c_2R$.
+We conclude that the tangential a-curve of $D$ is $(\frac{c_0R}{c_2R},\frac{c_1R}{c_2R})$
+or $C$.
+\QED
+
+\begin{corollary}
+The point $C(t)$ a-dualizes to the tangent at $C_a^*(t)$ (Figure~\ref{fig:pt2tang}).
+\end{corollary}
+% We have confirmed this experimentally.
+
+% Of course, the same results hold for tangential b-curves too.
+
+The redundant factor (\ref{eq:R}) resolves another dilemma:
+how can $(C^*)^* = C$ when the degree of $C^*$ is higher than $C$
+(Lemma~\ref{lem:rattangacurve} and Theorem~\ref{thm:Bezier})?
+The introduction of the redundant factor (\ref{eq:R}) explains the 
+near-quadrupling of the degree of $(C^*)^*$.
+
+	% tangentialCurve -p data/circleOne.pts (with dual window showing 'tangent at active pt')
+\begin{figure}[h]
+\centerline{\epsfig{figure=jjdupt.ps,height=2.956in,width=5.508in}}
+% ?% reduction
+% \centerline{\epsfig{figure=jjdupt.ps,height=2.688in,width=5.007in}}
+% 50% reduction
+\caption{A point in primal space dualizes to a tangent of the tangential curve in dual space}
+% \caption{$C(t)$ dualizes to the tangent of $C^*(t)$}
+\label{fig:pt2tang}
+\end{figure}
+
+% -----------------------------------------------------------------------------
+
+\section{Conclusions}
+\label{sec:conclude}
+
+We have studied the tangential curve, a dual image of the tangent space of
+a plane curve, and the tangential curve system, a robust model of the entire tangent
+space of a plane curve decomposed into steep and shallow tangents.
+Some key choices in the implementation of the tangential curve system
+are the dualities,
+the use of a Cartesian representation of dual space to preserve the 
+rationality and 2-dimensionality of the tangential curve,
+and the dichotomy of line space into steep and shallow lines
+that imposes a clipping on the 
+tangential curves of a tangential curve system.
+This clipping serendipitously leads to short curves 
+and removes negative weights from the rational Bezier representation
+of the tangential curve.
+
+The modeling of a tangent space by a tangential curve system is
+a useful tool in the analysis of the interactions in a scene of curves, 
+as we illustrated in its application to bitangency 
+and its favourable comparison to the hodograph.
+We are studying the application of the tangential curve system 
+to the solution of problems in visibility analysis,
+lighting and motion planning amongst smooth obstacles.
+We are also working on the extension of the ideas of this paper to 
+a dual representation of the tangent space of a surface.
+
+% -----------------------------------------------------------------------------
+
+\section{Acknowledgements}
+
+I appreciate discussions with Gershon Elber, Helmut Pottmann, Alan Sprague
+and Wenping Wang that improved this paper.
+I also thank Xiao Hu for Figure~\ref{fig:Hoschekdual}.
+
+% -----------------------------------------------------------------------------
+
+\bibliographystyle{plain}
+\begin{thebibliography}{99}	% {Lozano-Perez 83}
+
+\bibitem{bottemaRoth79}
+Bottema, O. and B. Roth (1979)
+Theoretical Kinematics.
+Dover (New York).
+
+\bibitem{chazelle85}
+Chazelle, B., L. Guibas and D.T. Lee (1985)
+The power of geometric duality.
+BIT, 76--90.
+
+\bibitem{edels87}
+Edelsbrunner, H. (1987)
+Algorithms in Combinatorial Geometry.
+Springer Verlag (Heidelberg), Chapters 1 and 12.
+
+\bibitem{farin97}
+Farin, G. (2002)
+Curves and Surfaces for CAGD: A Practical Guide (5th edition).
+Morgan Kaufmann (New York).
+
+\bibitem{foley96}
+Foley, J., A. van Dam, S. Feiner and J. Hughes (1996)
+Computer Graphics: Principles and Practice.
+2nd edition, Addison-Wesley (Reading, MA).
+
+\bibitem{goldman86}
+Goldman, R. and T. DeRose (1986)
+Recursive subdivision without the convex hull property.
+Computer Aided Geometric Design 3, 247--265.
+
+\bibitem{hartshorne77}
+Hartshorne, R. (1977)
+Algebraic Geometry.
+Springer-Verlag (New York).
+
+\bibitem{zorin00}
+Hertzmann, A. and D. Zorin (2000)
+Illustrating smooth surfaces.
+SIGGRAPH 2000, 517--526.
+
+\bibitem{hoschek83}
+Hoschek, J. (1983)
+Dual Bezier curves and surfaces.
+In {\em Surfaces in Computer Aided Geometric Design},
+R. Barnhill and W. Boehm, eds.,
+North Holland (Amsterdam), 147--156.
+
+\bibitem{jj01a}
+Johnstone, J. (2001)
+A Parametric Solution to Common Tangents.
+International Conference on Shape Modelling and Applications (SMI 2001), Genoa, Italy,
+IEEE Computer Society, 240--249.
+
+\bibitem{orourke94}
+O'Rourke, J. (1994)
+Computational Geometry in C.
+Cambridge University Press (New York).
+
+\bibitem{patterson01}
+Patterson, R. (2001)
+Duality and Bezier Curves.
+Technical Report 01-06, Dept.\ of Mathematical Sciences,
+Indiana University Purdue University Indianapolis.
+
+\bibitem{pedoe70}
+Pedoe, D. (1970)
+Geometry: A Comprehensive Course.
+Dover Publications (New York).
+
+\bibitem{sederberg86}
+Sederberg, T. and S. Parry (1986)
+Comparison of three curve intersection algorithms.
+Computer Aided Design 18, 58--63.
+
+\bibitem{wenping01}
+Wenping Wang, personal communication.
+
+\bibitem{welzl85}
+Welzl, E. (1985)
+Constructing the visibility graph for $n$ line segments
+in $O(n^2)$ time.
+Information Processing Letters 20, 167--171.
+% see Lemma 2 for use of duality
+
+\end{thebibliography}
+
+\end{document}
