@@ -1,0 +1,141 @@
+#! /bin/csh -f
+# File: tangential curve/surface script
+# Author: John K. Johnstone
+# Created: 6 Feb 2002
+# Last modified: 7 Feb 2002
+# Purpose: organization of bitangency software/project.
+
+cd ~jj/modelTR/applet;
+echo This shows the beauty of tangential curves, or dualized tangent spaces.
+echo Observe the line field too.
+tangentialCurve data/circle.pts
+set Pause = ($<)
+
+echo Notice how tangential curves provide a beautiful solution to bitangency.
+bitang data/circle.pts
+set Pause = ($<)
+
+echo We should be able to compute the envelope of a sweeping line in dual space.
+set Pause = ($<)
+
+cd ~jj/modelTR/tangentSpace/12-chaikin/software
+echo We can also compute bitangents of subdivision curves in dual space,
+echo using lazy subdivision.
+echo The above example used Bezier curves and a Bezier curve representation
+echo of the tangential curve.
+echo We would love to find a BITANGENT MASK for a pair of subdivision curves,
+echo analogous to the tangent mask of a single subdivision curve.
+echo The problem is that we can apply a position or tangent mask at any point
+echo but we then only get a discrete set of valid points or tangents.
+echo We need to choose to discretize at exactly the right point to match
+echo a tangent on the other curve.
+echo That is, position/tangent masks are robust to arbitrary movements:
+echo we can still compute them.
+echo However, bitangent masks only apply at a measure 0 set, making them
+echo very fragile.
+echo Of course, they also must depend on both control nets, not just one.
+bichai data/bichai1.pts
+set Pause = ($<)
+
+cd ~jj/modelTR/applet
+echo A more complex example, with Bezier curves again, shows that bitangency is not a trivial computation.
+bitang data/ob1.pts
+set Pause = ($<)
+
+echo Bitangents across a single curve can be computed.
+selfbitang data/ob1.pts
+set Pause = ($<)
+
+echo Tangential curves can also be applied to the computation of tangents through a point.
+poletang data/circle.pts
+set Pause = ($<)
+
+echo Another example of bitangency.
+bitang data/globalumb1.pts
+set Pause = ($<)
+
+
+echo Combining the previous three algorithms, we can compute smooth visibility graphs.
+visgraph data/ob1.pts
+set Pause = ($<)
+
+cd ~jj/modelTR/visibility/9-vgraph/software
+echo Visibility graphs are the raw material of shortest paths and lighting: no demo yet.
+svgraph -s .5 -e .001 vg5.pts
+set Pause = ($<)
+
+cd ~jj/modelTR/applet
+echo Bitangents are the raw material of CONVEX HULLS, too.
+convexhull data/ob1b.pts
+set Pause = ($<)
+
+echo Test
+visgraph -s .5 -e .001 -S .1 -.5 -D 0 .4 data/vg5.pts
+set Pause = ($<)
+
+# START HERE
+
+cd ~jj/modelTR/applet
+echo Moving to surfaces and 3-space, we have beautiful tangential surfaces.
+echo Notice especially the c-surfaces.
+echo Also notice the visualization of the tangent space fields.
+echo Challenge: compute the tangential surface of the BEZIER TEAPOT.
+tangentialSurf data/2Top.pts3
+set Pause = ($<)
+
+
+
+
+
+
+echo Bitangent developables, the surface counterpart of bitangents,
+echo can be computed using tangential surfaces.
+echo Notice the compartmentalization of the envelope into 3 parts,
+echo one per dual space.
+echo This code requires some refinement, since splicing intersection curves
+echo together is tricky.
+echo We are finding intersection points, not INTERSECTION CURVES, now.
+bisilhouette data/2Top.pts3
+set Pause = ($<)
+
+cd ~jj/amenta
+echo We need more RAM for fancier examples, such as two pears or two Venus de Milos,
+echo or for environments of several objects.
+echo This may be most feasible if we port to the Linux environment.
+echo This porting may require removal of templates, 
+echo unless we can discover how to instantiate templates with gcc.
+echo We also need a better mechanism for inputting data surfaces such as Venus.
+echo At present, these must be rectangular contour data.
+echo This does not fit the format of Venus.
+echo SUBDIVISION SURFACES OF POLYHEDRA SUCH AS VENUS would be the next step.
+echo We would like to compute bitangent developables of subdivision surfaces.
+echo Challenge: dualize Catmull-Clark surfaces.
+dtWithDisplay venus.pts venus.dt
+set Pause = ($<)
+catmull ---
+set Pause = $<
+
+
+
+
+
+
+cd ~jj/modelTR/applet
+echo Tangential surfaces can be used for LIGHTING and robot motion.
+echo We are also interested in their use for stable placements,
+echo which involves triple points.
+set Pause = ($<)
+
+echo Bitangents of quaternion splines are important for motion planning of orientation.
+echo We wish to compute them too.
+echo Visibility graphs on S3 are the application.
+echo We also need good, natural examples of orientation obstacles for this application.
+set Pause = ($<)
+
+
+
+
+
+
+
+
