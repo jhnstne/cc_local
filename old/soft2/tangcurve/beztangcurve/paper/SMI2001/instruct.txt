@@ -1,0 +1,76 @@
+AUTHOR GUIDELINES FOR 8.5x11-INCH PROCEEDINGS MANUSCRIPTS
+
+Congratulations on the acceptance of your paper for publication. Please 
+follow the steps outlined below when submitting your Postscript file to the 
+IEEE Computer Society Press. Please read the following carefully.
+
+(1) ALL MANUSCRIPTS MUST BE IN ENGLISH.
+
+(2) FORMATTING YOUR PAPER. All text must be in a two-column format. The 
+total allowable width of the text area is 6-7/8 inches (17.5 cm) wide by 
+8-7/8 inches (22.54 cm) high. Columns are to be 3-1/4 inches (8.25 cm) 
+wide, with a 5/16 inch (0.8 cm) space between them. The main title (on 
+the first page) should begin 1-3/8 inches (3.49 cm) from the top edge of 
+the page. The second and following pages should begin 1.0 inch (2.54 cm) 
+from the top edge. On all pages, the bottom margin should be 1-1/8 
+inches (2.86 cm) from the bottom edge of the page for 8.5 x 11-inch 
+paper; for A4 paper, approximately 1-5/8 inches (4.13 cm) from the 
+bottom edge of the page.
+
+(3) TYPE-STYLE AND FONTS. Wherever Times is specified, Times Roman may 
+also be used. If neither is available on your word processor, please 
+use the font closest in appearance to Times that you have access to. PLEASE DO NOT USE ANY RYUMIN FONTS.
+
+MAIN TITLE. Center the title 1-3/8 inches (3.49 cm) from the top edge 
+of the first page. The title should be in Times 14-point, boldface type. 
+Capitalize the first letter of nouns, pronouns, verbs, adjectives, and adverbs; 
+do not capitalize articles, coordinate conjunctions, or prepositions (unless 
+the title begins with such a word). Leave two blank lines after the title.
+
+AUTHOR NAME(s) and AFFILIATION(s) are to be centered beneath the title 
+and printed in Times 12-point, non-boldface type. This information is to 
+be followed by two blank lines.
+
+The ABSTRACT and MAIN TEXT are to be in a two-column format. 
+
+The ABSTRACT is to be in fully-justified italicized text, at the top of 
+the left-hand column, below the author and affiliation information. Use 
+the word "Abstract" as the title, in 12-point Times, boldface type, 
+centered relative to the column, initially capitalized. The abstract is 
+to be in 10-point, single-spaced type. The abstract may be up to 3 in. 
+(7.62 cm) long. Leave two blank lines after the Abstract, then begin the 
+main text. 
+
+MAIN TEXT. Type main text in 10-point Times, single-spaced. Do NOT use 
+double-spacing. All paragraphs should be indented 1 pica (approximately 
+1/6 inch or 0.422 cm). Be sure your text is fully justified -- that is, 
+flush left and flush right. Please do not place any additional blank 
+lines between paragraphs. Figure and table captions should be 10-point 
+Helvetica (or a similar sans-serif font) boldface type; callouts should 
+be 9-point Helvetica, non-boldface. Initially capitalize only the first 
+word of section titles and first-, second-, and third-order headings.
+
+FIRST-ORDER HEADINGS. (For example, 1. Introduction) should be Times 
+12-point boldface, initially capitalized, flush left, with one blank 
+line before, and one blank line after.
+
+SECOND-ORDER HEADINGS. (For example, 1.1. Database elements) should be 
+Times 11-point boldface, initially capitalized, flush left, with one 
+blank line before, and one after. If you require a third-order heading 
+(we discourage it), use 10-point Times, boldface, initially capitalized, 
+flush left, preceded by one blank line, followed by a period and your 
+text on the same line.
+
+(4) FOOTNOTES. Use footnotes sparingly and place them 
+at the bottom of the column on the page on which they are referenced. 
+Use Times 8-point type, single-spaced. To help your readers, avoid using 
+footnotes altogether and include necessary peripheral observations in 
+
+the text (within parentheses, if you prefer, as in this sentence).
+
+(5) REFERENCES. List and number all bibliographical references in 9-point 
+Times, single-spaced, at the end of your paper. When referenced in the 
+text, enclose the citation number in square brackets, for example [1]. 
+Where appropriate, include the name(s) of editors of referenced books.
+
+(6) COLOR. DO NOT SUBMIT COLOR IMAGES IN YOUR FILE UNLESS SPECIFICALLY INSTRUCTED TO DO SO.

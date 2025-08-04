@@ -1,0 +1,62 @@
+\documentclass[10pt,twocolumn]{article}
+\usepackage{latex8}
+\usepackage{times}
+%------------------------------------------------------------------------- 
+% take the % away on next line to produce the final camera-ready version 
+\pagestyle{empty}
+%------------------------------------------------------------------------- 
+\newif\ifVideo
+\Videofalse
+\newif\ifTalk
+\Talkfalse
+\newif\ifJournal
+\Journalfalse
+\input{header}
+\newcommand{\plucker}{Pl\"{u}cker\ }
+\newcommand{\tang}{tangential curve\ }
+\newcommand{\tangs}{tangential curves\ }
+\newcommand{\Tang}{Tangential curve\ }
+\newcommand{\atang}{tangential $a$-curve\ }
+\newcommand{\btang}{tangential $b$-curve\ }
+\newcommand{\ctang}{tangential $c$-curve\ }
+\newcommand{\acurve}{$a$-curve\ }
+\newcommand{\bcurve}{$b$-curve\ }
+\newcommand{\ccurve}{$c$-curve\ }
+\newcommand{\atangs}{tangential $a$-curves\ }
+\newcommand{\btangs}{tangential $b$-curves\ }
+\newcommand{\ctangs}{tangential $c$-curves\ }
+% -----------------------------------------------------------------------------
+\begin{document}
+
+\title{A Parametric Solution to Common Tangents}
+
+\author{J.K. Johnstone\\
+	University of Alabama at Birmingham\\
+	Geometric Modeling Lab\\
+	Computer and Information Sciences\\
+	University Station, Birmingham, AL 35294\\
+	jj@cis.uab.edu\\
+}
+
+\maketitle
+
+\begin{abstract}
+We develop an efficient algorithm for the construction of common tangents
+between a set of Bezier curves.
+Common tangents are important in visibility, lighting, robot motion,
+and convex hulls.
+Common tangency is reduced to the intersection of parametric curves 
+in a dual space, rather than the traditional intersection of implicit curves.
+We show how to represent the tangent space of a plane Bezier curve as a 
+plane rational Bezier curve in the dual space,
+and compare this representation to the hodograph and the dual Bezier curve.
+The detection of common tangents that map to infinity
+is resolved by the use of two cooperating curves in dual space,
+clipped to avoid redundancy.
+We establish the equivalence of our solution in dual space to
+a solution in \plucker space, where all the same issues are encountered
+in a higher-dimensional context.
+\end{abstract}
+
+\end{document}
+
