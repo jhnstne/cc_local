@@ -1,0 +1,15 @@
+\newbox\jjdushbox
+\newdimen\jjdushwd
+\font\jjdusha=jjdusha at 72.27truept
+\setbox\jjdushbox=\vbox{\hbox{%
+\jjdusha\char0\char1}}
+\jjdushwd=\wd\jjdushbox
+\setbox\jjdushbox=\hbox{\vbox{\hsize=\jjdushwd
+\parskip=0pt\offinterlineskip\parindent0pt
+\hbox{\jjdusha\char0\char1}
+\hbox{\jjdusha\char2\char3}}}
+\ifx\parbox\undefined
+    \def\setjjdush{\box\jjdushbox}
+\else
+    \def\setjjdush{\parbox{\wd\jjdushbox}{\box\jjdushbox}}
+\fi

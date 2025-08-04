@@ -1,0 +1,15 @@
+\newbox\jjduligbox
+\newdimen\jjduligwd
+\font\jjduliga=jjduliga at 72.27truept
+\setbox\jjduligbox=\vbox{\hbox{%
+\jjduliga\char0\char1}}
+\jjduligwd=\wd\jjduligbox
+\setbox\jjduligbox=\hbox{\vbox{\hsize=\jjduligwd
+\parskip=0pt\offinterlineskip\parindent0pt
+\hbox{\jjduliga\char0\char1}
+\hbox{\jjduliga\char2\char3}}}
+\ifx\parbox\undefined
+    \def\setjjdulig{\box\jjduligbox}
+\else
+    \def\setjjdulig{\parbox{\wd\jjduligbox}{\box\jjduligbox}}
+\fi

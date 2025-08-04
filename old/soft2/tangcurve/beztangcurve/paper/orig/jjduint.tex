@@ -1,0 +1,15 @@
+\newbox\jjduintbox
+\newdimen\jjduintwd
+\font\jjduinta=jjduinta at 72.27truept
+\setbox\jjduintbox=\vbox{\hbox{%
+\jjduinta\char0\char1\char2}}
+\jjduintwd=\wd\jjduintbox
+\setbox\jjduintbox=\hbox{\vbox{\hsize=\jjduintwd
+\parskip=0pt\offinterlineskip\parindent0pt
+\hbox{\jjduinta\char0\char1\char2}
+\hbox{\jjduinta\char3\char4\char5}}}
+\ifx\parbox\undefined
+    \def\setjjduint{\box\jjduintbox}
+\else
+    \def\setjjduint{\parbox{\wd\jjduintbox}{\box\jjduintbox}}
+\fi

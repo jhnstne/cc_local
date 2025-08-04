@@ -1,0 +1,15 @@
+\newbox\jjdudefbox
+\newdimen\jjdudefwd
+\font\jjdudefa=jjdudefa at 72.27truept
+\setbox\jjdudefbox=\vbox{\hbox{%
+\jjdudefa\char0\char1\char2}}
+\jjdudefwd=\wd\jjdudefbox
+\setbox\jjdudefbox=\hbox{\vbox{\hsize=\jjdudefwd
+\parskip=0pt\offinterlineskip\parindent0pt
+\hbox{\jjdudefa\char0\char1\char2}
+\hbox{\jjdudefa\char3\char4\char5}}}
+\ifx\parbox\undefined
+    \def\setjjdudef{\box\jjdudefbox}
+\else
+    \def\setjjdudef{\parbox{\wd\jjdudefbox}{\box\jjdudefbox}}
+\fi

@@ -1,0 +1,67 @@
+From dual.tex.
+
+\title{Intersection of two rational curves with negative weights}
+
+{\bf Does Section~\ref{sec:negative} generalize to the translation of 
+all segments with negative weights?
+Does this generalize to all intersection of rational curves?
+This could be a general technique for the intersection of 
+two rational curves with negative weights without Goldman/deRose's convex hull
+expansion.
+But be careful about the clipped intersections.
+
+A possible solution: use different projective coordinates to map 
+rational curve from projective space to affine space,
+and retrieve the intersections near infinity (that may lie on a clipped
+segment) through another choice of projective coordinate.
+
+Another possible idea for intersection of rational curves with negative 
+weights, using line bundles in projective space, is as follows.
+This leads to 3 solutions: Goldman/DeRose, robust clipping about zero weights,
+and line-bundle intersection in projective space, which could be written
+up as a report, if not just for the interest of the problem
+of negative weights.
+
+The above ideas can be applied to the intersection of two line bundles
+through the same point,
+which gives another solution to the intersection of two plane rational
+curves with negative weights.
+The lines of the projective version of a rational curve 
+all pass through the origin,
+so the rational 'ruled surface' is actually a bundle \cite{pottmann99}.
+The intersection of two bundles with the same common point
+is quite different from the intersection of two ruled surfaces,
+and is amenable to a simpler solution.
+In particular, the intersection of two bundles with the same common point
+is a collection of lines, not a collection of points.
+{\bf This makes it feasible to compute the intersection in \plucker space.}
+(For general ruled surfaces and general bundles,
+although they have images in \plucker space,
+the intersection of these images is in general empty, since the 
+ruled surfaces or bundles intersect in points rather than lines.
+Since our bundle intersection does consist of lines, it is 
+expressible in \plucker space.)
+Intersection in \plucker space is simple, 
+since the lines of a bundle map to points of a plane in \plucker space. % Pottmann
+**This makes the intersection of two bundles with the same common point in Euclidean space 
+equivalent to the intersection of two curves in a plane in Plucker space.**
+
+Using this idea, common tangency could be computed as follows,
+although this is much too convoluted.
+\begin{itemize}
+\item	Compute dual curves.
+\item	Intersect associated bundles in Plucker space.
+\item 	Translate intersections back to lines in dual space.
+\item 	Translate intersection lines in dual space back to points of common
+	tangency on the original curves.
+\end{itemize}
+}
+
+This strategy dovetails beautifully 
+with the clipping of segments near infinity in Section~\ref{sec:negative}.
+The clipping of a segment near infinity on an $a$-tangential curve
+(motivated by the removal of negative weights from the tangential curve)
+may remove an intersection not only at infinity but near infinity,
+but the common tangent associated with this missed intersection
+will be found as an intersection of the $b$-tangential curves instead.
+

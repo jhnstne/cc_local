@@ -1,0 +1,17 @@
+\newbox\jjduegbbox
+\newdimen\jjduegbwd
+\font\jjduegba=jjduegba at 72.27truept
+\font\jjduegbb=jjduegbb at 72.27truept
+\setbox\jjduegbbox=\vbox{\hbox{%
+\jjduegba\char0\char1\char2\char3\char4\char5}}
+\jjduegbwd=\wd\jjduegbbox
+\setbox\jjduegbbox=\hbox{\vbox{\hsize=\jjduegbwd
+\parskip=0pt\offinterlineskip\parindent0pt
+\hbox{\jjduegba\char0\char1\char2\char3\char4\char5}
+\hbox{\jjduegba\char6\char7\jjduegbb\char0\char1\char2\char3}
+\hbox{\jjduegbb\char4\char5\char6\char7\char8\char9}}}
+\ifx\parbox\undefined
+    \def\setjjduegb{\box\jjduegbbox}
+\else
+    \def\setjjduegb{\parbox{\wd\jjduegbbox}{\box\jjduegbbox}}
+\fi

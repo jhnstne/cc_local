@@ -1,0 +1,15 @@
+\newbox\jjdufambox
+\newdimen\jjdufamwd
+\font\jjdufama=jjdufama at 72.27truept
+\setbox\jjdufambox=\vbox{\hbox{%
+\jjdufama\char0\char1\char2}}
+\jjdufamwd=\wd\jjdufambox
+\setbox\jjdufambox=\hbox{\vbox{\hsize=\jjdufamwd
+\parskip=0pt\offinterlineskip\parindent0pt
+\hbox{\jjdufama\char0\char1\char2}
+\hbox{\jjdufama\char3\char4\char5}}}
+\ifx\parbox\undefined
+    \def\setjjdufam{\box\jjdufambox}
+\else
+    \def\setjjdufam{\parbox{\wd\jjdufambox}{\box\jjdufambox}}
+\fi
