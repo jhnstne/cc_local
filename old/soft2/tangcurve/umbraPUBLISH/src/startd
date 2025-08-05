@@ -1,0 +1,3 @@
+emacs -geometry 91x72+0+0 dynamicLocalBackUmbra.cpp &
+dynamicLocalBackUmbra -P 3 -a ../data/surroundingSpiral.pts > foobar &
+dynamicLocalBackUmbra -P 3 ../data/umbra1.pts > foobar &

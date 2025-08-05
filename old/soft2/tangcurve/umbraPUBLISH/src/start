@@ -1,0 +1,4 @@
+emacs -geometry 91x72+0+0 umbra.cpp ../../imgLibrary &
+emacs -geometry 90x45+965+0 umbraScript &
+umbra -F .2 ../data/vg900new.pts > foobar &
+umbra -r 3 -c .03 -S ../../scene/data/buildingSceneClean > foobar &

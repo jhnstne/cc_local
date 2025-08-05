@@ -1,0 +1,161 @@
+\begin{array}
+frame      A     B#   P    entire scene   tangents    probes    concavities
+
+Soundtrack (ST)
+Consider a smooth object, call it A,
+           1                                                                introduce star
+nestled in a scene of many other smooth objects.
+	   1               1                                                introduce its context
+We want to study the visibility of A from a known viewpoint.
+	   1          1    1 [SWEEP FROM 0 TO PI]                           introduce viewpoint
+	              sweep a ray around the viewpoint (like a lighthouse beacon)
+
+ST: We are interested in finding a line of sight that sees A 
+           1                all but B4    piercing tangent of B2 (or any other line of sight)
+
+ST: or, in the absence of such a line of sight,
+    the chain of objects that blocks A from the viewpoint.
+
+           1               all scene (minus some added redundant objects behind)
+
+ST: Since visual events occur at tangents of the scene that pass through the viewpoint,
+
+           1               B1/B2          piercing tangent of B2            introduce visual event
+
+ST: these tangents are the focus of our analysis.
+    All probes of the scene will be at one of these tangents through the viewpoint.
+
+           1         1                    all tangents thru P
+
+ST: The first probe will be at an extreme tangent of A.
+    Each object has two extreme tangents, which define the extreme lines of sight to the object.
+
+           1    [SWEEP FROM ONE EXTREME TANGENT TO THE OTHER]      extreme tangents of A
+
+    We can start from either extreme tangent, say the right one.
+           1                              right extreme tangent of A
+
+    This probe is blocked by another object.
+           1     B1 (in red; show intersection pt of B1 and probe; and pt of tangency on A)
+
+    This object B does not completely block A, either behind B or within one of its concavities,
+    so we must continue looking for a visible line of sight.
+
+    Since the starting point of A does lie inside a concavity of B,
+           1     B1 (with probe, and pt of tangency)           concavity of B1
+
+    the next opportunity for A to become visible is at the opening of this concavity, which
+    is defined by a tangent through the viewpoint.
+    [i.e., next opportunity moving locally on A]
+           1     B1 (with piercing tangent of concavity) [SWEEP FROM 1ST PROBE TO 2ND PROBE]
+	   
+    This is the second probe.
+    This probe is blocked by another object B2:
+	   1     B1/B2 (with piercing tangent probe, and its intersection with B2; 
+	                first probe drawn as dotted line; range between 1st and 2nd probe in grey)
+
+    A very important point is that A could squeeze between B2 and B1 to become visible.
+
+           new-1;B1/B2
+	   (where new-1 squeezes between B1 and B2)
+
+    We must check for this possibility.
+    Therefore, every probe is followed by a backtracking step that checks whether A becomes
+    visible by sliding between two objects in the blocking chain in this fashion.
+    In this case, we backtrack to the extreme tangent of B2.
+
+           1 (old) B1/B2 (with extreme tangent of B2, the 3rd probe) [SWEEP FROM 2ND PROBE TO 3RD, BACKWARDS]
+
+    Since this probe hits B1 before it hits A, we have established that A does not squeeze out here
+
+	   1       B1 (blue) /B2 (red) /3rd probe (with first intersections with B1 and A)
+
+    Returning to the earlier probe, which is blocked by B2,
+
+           1      B2 (with 2nd probe)
+
+    we continue looking for the next opportunity for A to become visible from the viewpoint.
+    This again occurs at the tangent of B2 that seals its concavity,
+
+           1      B2 (with 4th probe, the piercing tangent of B2)
+
+    This probe hits another object before A (B4)
+
+           1      B4, 4th probe
+\end{array}
+
+
+ST: Two important classes of tangent are extreme tangents and piercing tangents.  
+    An extreme tangent of the object B is a tangent of B through the viewpoint
+    such that all of B lies on one side of the tangent.
+
+           1      extreme tangents of A   
+	      then
+	   B1     extreme tangents of B1
+
+    A piercing tangent of the object B is associated with a concavity that faces the viewpoint.
+    It is a tangent of B through the viewpoint that intersects B after its first point of tangency
+    with B, but not before.
+    The point of tangency should not be an inflection point {\bf [because ---].}
+    
+           B1     piercing tangent of B1
+	      then
+	   1      piercing tangents of 1
+
+ST: The case when the viewpoint lies inside the convex hull of an object must be treated
+    as a special case. Consider the extreme tangent.
+
+           1      viewpoint inside 1
+
+how do we cue all of these contexts?
+we need a mechanism for turning objects on/off (with a certain colour), turning tangents on/off 
+    (cued by object, type, and number), turning probes on/off (always including first 
+    intersection point), turning ranges on/off, timing the length between context switches,
+probes could be considered a special case of tangent (where intersection is also drawn),
+    and so use the same fields, but with negative integers
+
+array with column for every object (6), drawing style, every tangent!? (21), drawing style,
+    sweep interval (for sweeping a line centered at the viewpt),
+    range beg angle, range end angle, timing in seconds
+drawing style of object is normal colour, bold colour, light colour, concavities-bold
+drawing style of tangent is solid tangent, dotted tangent, and probe (with intersection pt)
+e.g., 1 3 / R B / 13 15 / S P / 0 0 / 3
+  which encodes object 1 and 3, colored red and blue, tangents 13 (solid tangent) and 15 (probe), 
+  no range since (0,0) interval, 3 seconds
+
+thus, input format is:
+{\bf 
+   objects / drawing style of each object / tangents / drawing style of each tangent /
+   sweep interval / range interval [timing is replaced by spacebar prompt]
+   { comment }
+}
+where object drawing style = R (red), G (green), B (blue), W (black), 
+                             C (black with bold red concavities)
+(convention is to draw star in blue, active object B in scene in red)
+and tangent drawing style = S (solid), D (dashed), P (probe)
+and sweep interval is defined by two tangent indices (-1 = 0 radians, -2 = PI)
+
+if timing has run to 0, display loop reads a row to determine what to display
+   (in debug mode, use space bar to cycle to next row)
+timing: want something proportional to time, not PC speed: perhaps pause after glutPostRedisplay)
+
+an input file for expository mode with eg19.pts
+
+0 / B / / / /                      { the star }
+0 1 2 3 4 5 / B W W W W W / / / /  { the scene }
+0 1 2 3 4 5 / B W W W W W / / / -1 -2 / { the viewpoint and the act of viewing }
+
+simplified dopesheet style:
+
+0               star
+0 1 2 3 4 5     scene
+0 / 2 22        star's extreme tangents
+0 / 2           starting probe (one of star's extreme tangents)
+0 5 / 2 (as probe) the blocking object
+skipping concavity, since this doesn't fit within this simple style
+0 5 / 6         piercing tangent, the next probe
+4 5 / 6         next blocking object
+0 4 5 / 3       sweep backwards to blocking object's extreme tangent
+0 4 / 6         return to the earlier probe (before backtracking)
+0 4 / 10        next probe is at the blocking object's piercing tangent
+                this is a visible line of sight (if we have removed object 2)

@@ -1,0 +1,1 @@
+objectvis -s 0 -v -.65 -1 -z 1.8 data/eg19.pts > foobar

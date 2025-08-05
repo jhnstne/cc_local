@@ -1,0 +1,1500 @@
+\documentclass[11pt]{article}
+\newif\ifVideo
+\Videofalse
+\newif\ifTalk
+\Talkfalse
+\input{header}
+\newcommand{\plucker}{Pl\"{u}cker\ }
+\newcommand{\tang}{tangential curve\ }
+\newcommand{\tangs}{tangential curves\ }
+\newcommand{\Tang}{Tangential curve\ }
+\DoubleSpace
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{-.2in}	% should be 0pt for 1in
+% \setlength{\headsep}{.5in}
+\setlength{\textheight}{8.5in}
+\setlength{\textwidth}{6.5in}
+\setlength{\columnsep}{5mm}	% width of gutter between columns
+\markright{The dual curve: \today \hfill}
+\pagestyle{myheadings}
+% -----------------------------------------------------------------------------
+
+\title{On the common tangents of plane curves}
+% Dual curves and common tangents
+% A tool for tangential analysis}
+% A Tangential Tool
+% 
+% Tangency as intersection: dual curves for tangential analysis, 
+%	with applications to motion planning}
+% Tangential computation with the dual curve} % for visibility and shadows
+% Computing tangents using the dual curve for shortest path 
+%	motion in a curved environment
+\author{J.K. Johnstone\thanks{Geometric Modeling Lab, 125 Campbell, 
+	Computer and Information Sciences, UAB, Birmingham, AL 35294.}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We present a tool for tangential analysis, the tang,
+and show how it can be used to improve the calculation
+of common tangents between two curves, between a single curve, or between 
+a point and a curve.
+The tangential information in a single curve is well captured by a hodograph
+\cite{farin97}, but hodographs do not handle 
+the analysis of common tangents between curves well.
+The tang also offers a superior solution to common tangents
+than the classical but expensive mathematical mechanism of pole/polar theory.
+
+The tang is a tool for studying the tangents of a curve.
+Unlike the hodograph, it allows the computation of common tangents, 
+and is more efficient than pole/polar theory.
+We show how to compute the tang for a plane Bezier curve,
+and how it can be used to compute common tangents of a single curve
+and between two curves.
+Common tangents are important in shortest path motion, visibility,
+hull computations, and lighting.
+
+A common tangent is a tangent of two curves, thus it is natural
+to identify a common tangent with an intersection in some dual space.
+We explore the creation of this dual space and translation to and from it.
+\end{abstract} 
+
+\clearpage
+
+\section{Introduction}
+
+A common tangent of two curves is a fundamental geometric primitive.
+Consider a collection of closed curves in the plane, interpreted as 
+obstacles for a point robot or as an area light source with occluders
+(Figure~\ref{FIGURE OF COMPLICATED ROBOT ENVIRONMENT AND LIGHT WITH OCCLUDERS}).
+% SHOW OFF THE POWER OF THE METHOD WITH A COMPLICATED EXAMPLE TO WOW EVERYONE
+The common tangents of these curves define the limits of visibility,
+and consequently the shortest paths that can be travelled by the robot 
+and the shadows (umbra/penumbra) that are cast by the light
+(Figure~\ref{FIGURE OF SEVERAL CURVES AND VISIBLE COMMON TANGENTS}).
+Common tangents are also needed for basic geometric computations with curves,
+such as the convex hull of a curve.
+
+This paper studies the common tangent and develops an algorithm for its
+computation.
+Consider the tangent space of a curve as a family of tangent lines
+(Figure~\ref{(a) FIGURE OF TANGENT BUNDLE: ALL TANGENTS OF A PLANE CURVE;
+(b) EXPLICITLY SHOW INTERSECTION LINE OF TWO BUNDLES}).
+A common tangent of two curves is an intersection of their line families.
+The interpretation of common tangency as intersection
+will be a central theme of this paper.
+Since the intersection of line families is awkward,
+we prefer to map to a dual space where intersection is more natural.
+By encoding a tangent line as a point in a dual space,
+a family of tangent lines becomes a curve in the dual space,
+and a common tangent becomes an intersection of two curves in dual space.
+This is preferable, since curve intersection is well understood.
+This paper explores the implementation of this simple idea,
+common tangency in primal space as intersection in dual space,
+and the resolution of the difficulties that are encountered during the
+implementation.
+
+The paper is organized as follows.
+Section~\ref{sec:dual} shows how to represent the tangent space of a plane curve
+by a plane curve in a dual space, called a \tang.
+We use a simpler alternative to the obvious \plucker solution,
+where the dual space is 2-dimensional.
+Section~\ref{sec:Bezier} expresses the \tang of a Bezier curve as another Bezier curve.
+Section~\ref{sec:negative} discusses how to deal with negative weights in the 
+tangential curve.
+Our algorithm for common tangent computation is detailed in Section~\ref{sec:alg}.
+Intersection in dual space and filtering of these intersections
+is dealt with in Section~\ref{sec:intersect}.
+Experimental results are given in Section~\ref{sec:results}.
+Section~\ref{sec:hodo} discusses the hodograph and its inadequacy
+for common tangents.
+Section~\ref{sec:plucker} compares our solution with a \plucker coordinate solution,
+[We may give an algorithm for pole/polar computation, common tangents
+where one of the curves degenerates to a point, in Section~\ref{sec:point}
+and compare to classical pole/polar theory in Section~\ref{sec:pole},
+although this would make a perfectly fine separate paper]
+and Section~\ref{sec:conclude} wraps up with ideas for future work.
+
+\begin{rmk}
+Notice that a common tangent is a global property of the curves,
+while a tangent is a local property,
+which explains why the computation of common tangents requires more 
+sophistication than the computation of tangents.
+\end{rmk}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Definitions}
+\label{sec:defn}
+
+\begin{defn2}
+A {\bf common tangent} of the curves C and D is a line that is tangent to both C and D.
+We do not distinguish whether the line is tangent at one or more points
+of each curve.
+A {\bf common tangent of a single curve} C is a line that is tangent to C at two or more
+distinct points.
+\end{defn2}
+
+\begin{defn2}
+{\bf Projective 2-space} $P^2$ is the space 
+$\{(x_1,x_2,x_3) : x_i \in \Re, \mbox{ not all zero}\}$
+under the equivalence relation $(x_1,x_2,x_3) = k(x_1,x_2,x_3),\ k \neq 0 \in \Re$.
+The point $(x_1,x_2,x_3),\ w \neq 0$ of $P^2$ is equivalent to the point
+$(\frac{x_1}{x_3}, \frac{x_2}{x_3})$ of $\Re^2$.
+\end{defn2}
+
+{\bf 
+Review of the theory of rational Bezier curves and their relationship
+to projective space.
+A rational Bezier curve can be interpreted as a polynomial Bezier in projective
+space.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\clearpage
+
+\section{A representation of tangent space}
+\label{sec:dual}
+
+We will represent the tangent space of a plane curve as another
+plane curve, called the tangential curve.
+Our first necessity is the ability to represent a line in 2-space as a point.
+Since the tangent space of a plane curve is a smooth one-dimensional family 
+of lines,
+if each tangent line can be uniquely encoded as a point, 
+a tangent space can be represented by a curve.
+
+\begin{defn2}
+\label{defn:dual}
+The line $ax+by+c=0$ in 2-space is {\bf dual} to the point $(a,b,c) \in P^2$
+in projective 2-space.
+\end{defn2}
+%
+% could interpret a or b as the projective coordinate, instead, if desired
+%
+It is appropriate to consider the dual point in projective space,
+since the dual $(a,b,c)$ should be equivalent to the dual $(ka,kb,kc)$,
+as the line $ax + by + c = 0$ is equivalent to the line
+$kax + kby + kc = 0$, $k \neq 0$.
+
+\begin{rmk}
+The duality of Definition~\ref{defn:dual}, 
+and its use for the dualization of tangent spaces as defined
+below, is mentioned in \cite[p. 54]{hartshorne}.
+Similar dualities between a point and a hyperplane 
+are often used in computational geometry
+(e.g., \cite[p. 214]{orourke94}, \cite{Edelsbrunner if we can get it}),
+usually for the treatment of finite arrangements of hyperplanes.
+
+Why don't we use the classical representation of a line by \plucker coordinates?
+Because we are working in 2-space.
+Our representation only works with lines in 2-space,
+but it is a bit simpler, more intuitive, and direct than \plucker coordinates 
+in this context.\footnote{Notice that our representation only works in 2 dimensions, 
+	since the line is a hyperplane in 2-space but not in 3-space.}
+%	A line in 3-space requires two implicit equations for its representation,
+% 	which moreover are not unique even in a projective sense,
+%	so it cannot be represented using this simple version of duality.
+We will later see, incidentally, that the computations of the \tang 
+for the representation of Definition~\ref{defn:dual} 
+and the \plucker representation are
+basically equivalent (Section~\ref{sec:plucker}).
+\end{rmk}
+
+\begin{defn2}
+Let $C(t)$ be a plane curve.
+The {\bf tangential curve} of $C(t)$ is the curve $C^*(t) \subset P^2$,
+where $C^*(t)$ is the dual of the tangent at $C(t)$ (Figure~\ref{fig:1dual}).
+\end{defn2}
+%
+\begin{figure}
+\vspace{2.5in}
+\special{psfile=/usr/people/jj/modelTR/6-dual/img/1duaL.ps 
+	 voffset=-300 hoffset=-50}
+\caption{A curve (left) and its \tang (right)}
+% tops 1dual.rgb -m 6.5 1.5 > 1dual.ps: no longer used
+% single curve and its dual, with single tangent and its dual marked
+\label{fig:1dual}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ifVideo
+  video: single curve and its dual (ob2.rawctr)
+       tangent moving on curve with associated point moving on dual
+\fi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+Figure~\ref{fig:commonTang} illustrates how the computation of 
+common tangents in primal space becomes the well understood problem
+of curve intersection in dual space.
+%
+\ifTalk
+This is analogous to the appeal
+of using the Fourier transform to shift to the frequency domain,
+where the difficult operation of convolution 
+becomes the simple operation of multiplication.
+\fi
+%
+\begin{figure}
+\vspace{2.5in}
+\special{psfile=/usr/people/jj/modelTR/6-dual/img/commontang.ps 
+	 voffset=-300 hoffset=-50}
+\caption{Common tangency as intersection in dual space}
+% xv commontang.rgb translated to .ps
+% no longer used: tops commonTang.rgb -m 6.5 1.5 > commonTang.ps
+% common tangents of two curves, intersections of the associated dual curves
+\label{fig:commonTang}
+\end{figure}
+%
+\Comment{
+video: two curves in left window, their duals in right window:
+       point moving on one of the dual curves with associated tangent
+       moving on original curve, illustrating that as point nears intersection
+       the tangent nears common tangency
+}
+
+\clearpage
+
+\section{Computing the \tang}
+\label{sec:Bezier}
+
+We now develop a formula for the dual of a Bezier curve.
+Since B-splines can be easily expressed as Bezier curves, 
+this formula will capture an important practical case for dual curves.
+We shall first express the dual curve as a Bezier curve in
+projective space, and then as a rational Bezier curve.
+
+\begin{theorem}
+The dual of a plane Bezier curve of degree $n$
+with control points $\{ b_i \}_{i=0}^n$ over the parameter interval
+$[a,b]$ is a Bezier curve
+of degree $2n-1$ in projective 2-space with control points 
+\begin{equation}
+\label{eq:dualcoord}
+b^*_k = 
+\frac{n}{\Delta \choice{2n-1}{k}} 
+\left(
+\begin{array}{l}
+	\sum_{j=\mbox{\footnotesize{max}}(0,k-n)}^{\mbox{\footnotesize{min}}(n-1,k)} 
+	\choice{n-1}{j} \choice{n}{k-j} (b_{j,2} - b_{j+1,2})\\
+	\sum_{j=\mbox{\footnotesize{max}}(0,k-n)}^{\mbox{\footnotesize{min}}(n-1,k)} 
+	\choice{n-1}{j} \choice{n}{k-j} (b_{j+1,1} - b_{j,1})\\
+\sum_{\begin{array}{c} \mbox{\footnotesize{$0 \leq i \leq n-1$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq n$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}}
+\choice{n-1}{i} \choice{n}{j}
+[ (b_{i+1,2} - b_{i,2}) b_{j,1} - (b_{i+1,1} - b_{i,1}) b_{j,2} ]
+\end{array}
+\right)
+\end{equation}
+$k=0,\ldots,2n-1$, $b^*_k \in P^2$, over the parameter interval $[a,b]$, where
+$\Delta = b-a$.
+\end{theorem}
+\prf
+Let $C(t) = (c_1(t), c_2(t))$ be a plane curve.
+The tangent and normal vectors of $C(t)$ are $(c'_1(t),c'_2(t))$
+and $(-c'_2(t), c'_1(t))$, respectively.
+	% since dot product encodes orthogonality.
+Since the implicit equation of the line through $P$ with normal $N$ is 
+$(X-P) \cdot N = 0$,
+the implicit equation of the tangent of $C(t)$ is:
+\[	
+	(x-c_1(t), y-c_2(t))\ \  \cdot \ \ (-c'_2(t), c'_1(t)) = 0
+\]
+or
+\[
+	-c_2'(t) x + c_1'(t) y + [c_2'(t) c_1(t) - c_1'(t)c_2(t)] = 0 
+\]
+and the dual curve of $C(t)$ is
+\begin{equation}
+\label{eq:dual1}
+  (-c_2'(t),\ \  c_1'(t),\ \ c_2'(t) c_1(t) - c_1'(t)c_2(t))
+\end{equation}
+%
+This is a polynomial curve in projective 2-space.
+% CORRECT SO FAR, HAVING TESTED IN drawTang of BezierCurve.c++
+% using drawImplicitLine
+
+Now suppose $C(t)$ is a Bezier curve over the parameter interval $[a,b]$ with control points $\{ b_i \}_{i=0}^n$.
+We want to express its dual curve also as a Bezier curve.
+Consider the third coordinate of the dual curve:
+\[
+c_2'(t) c_1(t) - c_1'(t) c_2(t) 
+=  \frac{1}{\Delta} \sum_{i=0}^{n-1} n \Delta b_{i,2} B_i^{n-1}(t) 
+   		    \sum_{j=0}^n              b_{j,1} B_j^n(t) 
+  - 
+   \frac{1}{\Delta} \sum_{i=0}^{n-1} n \Delta b_{i,1} B_i^{n-1}(t) 
+		    \sum_{j=0}^n	      b_{j,2} B_j^n(t) 
+\]
+where $\Delta = b-a$ is the length of the parameter interval.
+We can use the product 
+formula\footnote{$B_i^m(t) B_j^n(t) = \frac{ \choice{m}{i} \choice{n}{j} }{ \choice{m+n}{i+j} } B_{i+j}^{m+n}(t)$.}
+for Bernstein polynomials \cite{farin97} to simplify this to
+\[
+  \frac{n}{\Delta} \sum_{i=0}^{n-1} \sum_{j=0}^n 
+  \frac{\choice{n-1}{i} \choice{n}{j}}{ \choice{2n-1}{i+j} } B_{i+j}^{2n-1}(t)
+  [ \Delta b_{i,2} b_{j,1} - \Delta b_{i,1} b_{j,2} ].
+\]
+Letting $k=i+j$, this becomes
+\[
+% \label{eq:dualw1}
+\sum_{k=0}^{2n-1} B_k^{2n-1}(t) 
+\sum_{\begin{array}{c} \mbox{\footnotesize{$0 \leq i \leq n-1$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq n$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}}
+\frac{n}{\Delta} \frac{ \choice{n-1}{i} \choice{n}{j} }{ \choice{2n-1}{k} }
+[ \Delta b_{i,2} b_{j,1} - \Delta b_{i,1} b_{j,2} ]
+\]
+The third coordinate is now expressed as a 1-dimensional Bezier curve of 
+degree $2n-1$ with control points $\{b^*_{k,3} \}_{k=0}^{2n-1}$ where:
+\begin{equation}
+\label{eq:dualw2}
+b^*_{k,3} = \frac{n}{\Delta \choice{2n-1}{k}}
+\sum_{\begin{array}{c} \mbox{\footnotesize{$0 \leq i \leq n-1$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq n$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}}
+\choice{n-1}{i} \choice{n}{j}
+[ (b_{i+1,2} - b_{i,2}) b_{j,1} - (b_{i+1,1} - b_{i,1}) b_{j,2} ].
+\end{equation}
+
+Now consider the first two coordinates of the dual curve (\ref{eq:dual1}), 
+\begin{equation}
+\label{eq:dualx}
+-c_2'(t) = \frac{1}{\Delta} \sum_{k=0}^{n-1} -n \Delta b_{k,2} B_k^{n-1}(t)
+\end{equation}
+and
+\begin{equation}
+\label{eq:dualy}
+c_1'(t)  = \frac{1}{\Delta} \sum_{k=0}^{n-1}  n \Delta b_{k,1} B_k^{n-1}(t)
+\end{equation}
+These are 1-dimensional Bezier curves of degree $n-1$,
+which we need to degree-elevate to degree $2n-1$
+for compatibility with the third coordinate.
+% Any polynomial curve can clearly be expressed as a polynomial
+% curve of higher degree, simply by padding on zero terms.
+% The translation of a Bezier curve from degree $n$ to $n+r>n$ (degree elevation)
+% is more involved,
+% since the defining control points must move.
+% However, 
+%
+A Bezier curve of degree $n$ with control points $\{ d_k \}_{k=0}^n$ 
+is degree elevated \cite{farin97} to a Bezier curve of degree $n+r$ with control points
+$\{ d_k^{(r)} \}_{k=0}^{n+r}$ where:
+\[
+d_k^{(r)} = \sum_{j=\mbox{\footnotesize{max}}(0,k-r)}^{\mbox{\footnotesize{min}}(n,k)} 
+		d_j \frac{\choice{n}{j} \choice{r}{k-j} }{ \choice{n+r}{k} }.
+\]
+Consequently, the 1-dimensional Bezier curve (\ref{eq:dualx}) 
+of degree $n-1$ with control points $\frac{-n}{\Delta} \Delta b_{k,2}$
+is degree elevated to a 1-dimensional Bezier curve of degree $2n-1$
+with control points $\{b^*_{k,1} \}_{k=0}^{2n-1}$ where:
+\begin{equation}
+\label{eq:1stcoord}
+b^*_{k,1} = 
+\sum_{j=\mbox{\footnotesize{max}}(0,k-n)}^{\mbox{\footnotesize{min}}(n-1,k)} 
+	\frac{-n}{\Delta} \Delta b_{j,2}
+	\frac{ \choice{n-1}{j} \choice{n}{k-j} }{ \choice{2n-1}{k} }
+\end{equation}
+%
+\Comment{
+By expanding $\frac{ \choice{n-1}{j} \choice{n}{k-j} }{ \choice{2n-1}{k} }$
+and regrouping, we can reexpress it as 
+$\frac{ \choice{2n-1-k}{n-1-j} \choice{k}{j} }{ \choice{2n-1}{n} }$
+and (\ref{eq:1stcoord}) becomes
+\begin{equation}
+b^*_{k,1} = 
+- \frac{n}{\Delta \choice{2n-1}{n}} 
+\sum_{j=\mbox{\footnotesize{max}}(0,k-n)}^{\mbox{\footnotesize{min}}(n-1,k)} 
+	\choice{2n-1-k}{n-1-j} \choice{k}{j} (b_{j+1,2} - b_{j,2}).
+\end{equation}
+}
+%
+Similarly, the Bezier curve (\ref{eq:dualy})
+of degree $n-1$ with control points $\frac{n}{\Delta} \Delta b_{k,1}$ 
+can be degree elevated to a Bezier curve of degree $2n-1$ with control points 
+$\{b^*_{k,2} \}_{k=0}^{2n-1}$ where:
+\begin{equation}
+\label{eq:2ndcoord}
+b^*_{k,2} = 
+\sum_{j=\mbox{\footnotesize{max}}(0,k-n)}^{\mbox{\footnotesize{min}}(n-1,k)} 
+	\frac{n}{\Delta} \Delta b_{j,1}
+	\frac{ \choice{n-1}{j} \choice{n}{k-j} }{ \choice{2n-1}{k} }
+\end{equation}
+%
+Combining (\ref{eq:dualw2}), (\ref{eq:1stcoord}) and (\ref{eq:2ndcoord}),
+we conclude that the dual of the Bezier curve $C(t)$
+is a Bezier curve of degree $2n-1$ in projective space with control points 
+$\{b^*_k\}_{k=0}^{2n-1}$ as in (\ref{eq:dualcoord}).
+\QED
+
+A Bezier curve in projective 2-space is equivalent to a 
+rational Bezier curve in 2-space (Section~\ref{sec:defn}).
+Since the intersection of two curves in 2-space is simpler than the intersection
+of two curves in projective 2-space, 
+we will translate the dual curve to a rational Bezier curve.
+% In translating to a rational curve, the last projective coordinate of 
+% $C^*_p(t)$ is associated with the weight of the rational Bezier curve.  
+
+\begin{theorem}
+\label{thm:rationaldual}
+The dual of a Bezier curve of degree $n$ in 2-space
+with control points $\{ b_i \}_{i=0}^n$ over $[a,b]$ 
+is a rational Bezier curve of degree $2n-1$ over $[a,b]$
+with weights $\{w_k\}_{k=0}^{2n-1}$ where: 
+\begin{equation}
+\label{eq:wt}
+w_k = 
+\frac{n}{\Delta \choice{2n-1}{k}}
+\sum_{\begin{array}{c} \mbox{\footnotesize{$0 \leq i \leq n-1$}} \\ 
+			     \mbox{\footnotesize{$0 \leq j \leq n$}} \\ 
+			     \mbox{\footnotesize{$i+j=k$}}
+			     \end{array}}
+\choice{n-1}{i} \choice{n}{j}
+[ (b_{i+1,2} - b_{i,2}) b_{j,1} - (b_{i+1,1} - b_{i,1}) b_{j,2} ].
+\end{equation}
+%
+and control points $\{c_k\}_{k=0}^{2n-1}$ where:
+\[
+% \label{eq:coord}
+	c_k = \frac{1}{w_k} 
+	\frac{n}{\Delta \choice{2n-1}{k}} 
+	\sum_{j=\mbox{\footnotesize{max}}(0,k-n)}^{\mbox{\footnotesize{min}}(n-1,k)}
+	\choice{n-1}{j} \choice{n}{k-j} 
+	\left( \begin{array}{c} 
+	b_{j,2}   - b_{j+1,2} \\
+	b_{j+1,1} - b_{j,1}
+	\end{array} \right) 
+\]
+\end{theorem}
+
+\clearpage
+
+\section{Expunging negative weights}
+\label{sec:negative}
+
+Looking at (\ref{eq:wt}),
+it is likely that some of the weights of the \tang will be negative.
+But negative weights are undesirable, 
+since curve segments with negative weights
+lack the convex hull property that is so useful for divide and conquer
+techniques of intersection using subdivision.
+Goldman and DeRose \cite{goldman86} have shown how to intersect curves without
+the convex hull property, using an expanded convex hull.
+However, we choose a different solution
+that directly gets rid of the negative weights.
+
+It is actually the segments with both positive
+and negative weights that cause problems.
+A segment with purely negative weights can be easily
+corrected by multiplying all the weights by $-1$
+(since rational Bezier curves are invariant under 
+transformations $w_i = kw_i$, $k \neq 0$ of the weights).
+The weight function of a segment with both positive and negative weights
+must contain a zero between consecutive weights of opposite sign, by continuity.
+Since zero weights are associated with points at infinity,
+a change in sign of the weight on a curve segment 
+is associated with a point at infinity of the curve.\footnote{In the 
+	tangential curve of Theorem~\ref{thm:rationaldual},
+	zeroes of the weight function are associated with tangents $ax+by=0$
+	through the origin.}
+By subdividing at the zeroes of the weight function
+$w(t) = \sum w_i B_i^n(t)$,
+we can replace the undesirable segments
+by segments with purely positive or purely negative weights.
+We actually subdivide just before and after a zero,
+since we don't want zero weights at the endpoints of a segment either
+(which represent points at infinity), and since we cannot
+compute the zeroes exactly anyway.
+The segment that contains the zero weight in its interior (the zero-segment)
+is then discarded.
+This is valid since the zero-segment, if built correctly,
+will only contain segments close to infinity, uninvolved with the
+intersections. 
+{\bf [How do we guarantee this formally? I don't think
+we can identify when an intersection has been missed postpriori,
+so I believe we will need to prove that no intersections lie beyond
+a certain distance from the origin from first principles]}.
+
+{\bf [does this generalize to the translation of all segments with negative weights?
+does this generalize to all intersection of rational curves?
+This could be a general technique for the intersection of 
+two rational curves with negative weights without Goldman/deRose's convex hull
+expansion.]}
+
+Our algorithm for the removal of negative weights is as follows.
+Consider a curve segment C(t) of degree $n$ with weights $w_i$,
+some of which are positive and some negative.
+The weight function of this curve is $w(t) = \sum w_i B_i^n(t)$.
+%
+\begin{itemize}
+\item Find zeroes $t = t_{0,0},t_{0,1},\ldots,t_{0,k}$ of the weight function
+	$w(t) = \sum w_i B_i^n(t)$, $t \in [a,b]$.
+	We pose this as the intersection of the weight curve 
+	$(t,f(t)) = \sum (a + \frac{i}{n} (b-a), w_i) B_i^n(t)$
+	and the line $(t,0) = \sum (a + \frac{i}{n} (b-a), 0)B_i^n(t)$.
+	This takes advantage of the Bezier nature of the weight function.
+%
+% Although this solution does not appear to relate to classical methods for the 
+% solution of a univariate equation, it is actually very similar 
+% to the classical bisection solution of a univariate equation
+% because of the midpoint subdivision nature of Bezier curve intersection.
+% NOT REALLY.
+\item Subdivide C(t) at $t = t_{0,0} \pm \epsilon,\ldots,t_{0,k} \pm \epsilon$,
+	on either side of the zero weights.
+\item Discard the segments $C(t_{0,i}-\epsilon,t_{0,i}+\epsilon)$
+	surrounding a zero.
+\item The weights of the remaining segments are purely positive or
+	purely negative.  Flip the sign of the purely negative segments.
+\end{itemize}
+
+\begin{example}
+Example.
+Give weights of a bad segment, zeroes, and resulting segments.
+\end{example}
+
+\begin{rmk}
+Problems with zeroes of the weight function 
+(positive and negative weights) are unavoidable.
+(1) Any representation of a tangent space has three coordinates
+[tangent space has provably three degrees of freedom?].
+(2) We want the tangential curve to be a plane curve in 2 dimensions,
+since space curves don't intersect in general.
+Also, any dual space for tangents is inherently projective,
+since $ax+by+c=0$ is equivalent to $kax+kby+kc=0$.
+The only alternative to using projective 2-space (which allows
+several points represent the same line) is to normalize each line beforehand
+(to unit length) and then use affine 2-space.
+This normalization is too expensive.
+(3) So we must interpret one of the three coordinates as a projective coordinate.
+
+Any curve with three coordinates that is expressed as a rational plane curve,
+by interpreting one of the coordinates as a projective coordinate, will
+have a problem with zero weights (points at infinity).
+Whichever coordinate is chosen as the projective coordinate, 
+it can have zeroes, in general.
+For example, we will later see that there is a \plucker version of the 
+tangential curve that shares the problems with zero weights
+(Section~\ref{sec:plucker}).
+\end{rmk}
+ 
+\clearpage
+
+\section{Curve intersection}
+\label{sec:intersect}
+
+Once our problem has been translated to dual space by computing \tangs, 
+it is reduced to curve intersection, 
+a problem that has received much attention and is quite well understood.
+	% This is a major advantage of the tangential curve solution to common tangency.
+The standard solution to intersection is a divide-and-conquer approach using
+curve subdivision and the convex hull property of Bezier curves:
+if the bounding boxes\footnote{A bounding box can be a true convex hull
+	or, for efficiency, an axis-aligned bounding box defined by the
+	extremal coordinates of the control points.
+	It turns out that the axis-aligned box, although larger, yields a more
+	efficient intersection algorithm,
+	since the convex hull is difficult to compute.}
+of the two curves intersect, subdivide each curve
+and recursively intersect the four subsegments,
+halting when the bounding box is sufficiently small or the curve sufficiently
+straight to compute the intersection point directly.
+Sederberg reports that this is the most stable of the most popular
+intersection algorithms.
+This basic algorithm can be made more sophisticated in many ways.
+We recommend the approaches of 
+Sederberg \cite{sederberg86,sederberg89,sederberg90},
+Rockwood \cite{rockwood90} and Natarajan \cite{nat90}.
+Self-intersections of a Bezier curve can be computed using
+a method of Lasser \cite{lasser89}.
+Self-intersection requires some subtlety: for example, two neighbouring
+segments of a curve will necessarily have an 'intersection' at their
+common boundary but this should not be counted as a true intersection.
+However, the basic use of subdivision and the convex hull property is the same.
+
+\Comment{
+Elaboration on self-intersections: cannot have self-intersection
+within a Bezier curve segment unless its control polygon has a self-intersection
+(explain why using variation-diminishing property?)
+so self-intersections are computed entirely the same as intersection
+of two curves, where both curves are the same.
+For example, the self-intersections of the Bezier spline with segments
+$S_0,\ldots,S_k$ are the union of the intersections of $S_i$ and $S_j$ for $i \neq j$,
+just as the intersections of the Bezier spline $C$ with segments
+$C_0,\ldots,C_m$ with the Bezier spline $D$ with segments 
+$D_0,\ldots,D_n$ are the union of the intersections of $C_i$ and $D_j$ for $i \neq j$.
+}
+
+\Comment{
+We shall compute intersections of dual curves in 2-space, 
+rather than projective 2-space.
+Fortunately, the intersections in 2-space are equivalent to the
+intersections in projective 2-space.
+(This may be a well-known fact of projective space.)
+Consider an intersection in 2-space: $(\frac{a_1}{c_1}, \frac{b_1}{c_1})
+= (\frac{a_2}{c_2}, \frac{b_2}{c_2})$.
+Then, in projective space, $(a_1,b_1,c_1) = \frac{c_1}{c_2} (a_2,b_2,c_2)$,
+so the associated lines in projective space are also equivalent and 
+form an intersection.
+Conversely, if two 'points' (lines) in projective space are equivalent
+(an intersection) then the associated points in projective space
+are also equivalent: if $(a_1,b_1,c_1) = k(a_2,b_2,c_2)$ ($k \neq 0$),
+then $(\frac{a_1}{c_1}, \frac{b_1}{c_1}) = (\frac{ka_2}{kc_2}, \frac{kb_2}{kc_2})
+ = (\frac{a_2}{c_2}, \frac{b_2}{c_2})$.
+}
+
+\clearpage
+
+\section{Computing common tangents}
+\label{sec:alg}
+
+An algorithm for computing the common tangents between
+two plane polynomial Bezier curves $C$ and $D$ is as follows.
+See Figures~\ref{fig:alg1}-\ref{fig:alg5}.
+\begin{description}
+\item[(1)]	Compute the \tangs $C^*$ and $D^*$ (Section~\ref{sec:Bezier}).
+\item[(2)]	Intersect the \tangs (Section~\ref{sec:intersect}).
+\item[(3)]	Map intersections in dual space to common tangents in primal space.
+% \item[(4)]	Remove lines that are not common tangents (see explanation below).
+\item[(4)]	Remove common tangents whose endpoints
+		are not mutually visible,\footnote{Two points 
+			are mutually visible (see each other) 
+			if the line segment connecting them
+			has no interior intersections with any obstacles.}
+		if appropriate.
+		Visible common tangents are the only common tangents of interest
+		in applications such as motion planning and visibility.
+\end{description}
+
+The intersections are mapped to lines in an unorthodox fashion, 
+avoiding the use of duality.
+We choose to record each intersection as a parameter pair (s,t),
+the parameter values of the intersection point with respect to each curve.
+The two endpoints of the candidate tangent are then immediately available
+($C(s)$ and $D(t)$), which simplifies the filtering of step (5).
+	% the line $(s,t)$ is removed if it does not agree with the tangent $C'(s)$
+	% or the tangent $D'(t)$.
+
+Duality can be used to map the intersections back to primal space,
+if one takes care to work in projective space.
+If the intersection point is $C^*(t) = (x(t),y(t))$ and the weight function at
+this parameter value is $w(t)$, the projective coordinates of the intersection
+are $(w(t)x(t),w(t)y(t),w(t))$.
+Of course, the line associated with the point $(a,b,c)$ in dual space
+is $ax+by+c=0$.
+This line alone is not enough however if the filtering step (5) is necessary.
+It is expensive to compute these endpoints if only the line is known,
+which explains why we use the parameter pair representation.
+
+During the filtering of visible tangents in step (5),
+care must be taken to count only interior intersections
+with the common tangent segment.
+As the common tangent is by definition close to the obstacle as it
+approaches it, and intersection algorithms are necessarily approximate,
+it is easy to mistakenly find an apparent intersection of the 
+common tangent with an obstacle near the point of tangency.
+
+The common tangents of a single curve are computed in exactly the same way.
+The only difference is that $C$ and $D$ are the same curve,
+and the intersection of step (2) is self-intersection.
+
+\Comment{
+\begin{figure}[bh]
+\vspace{5in}
+\special{psfile=/usr/people/jj/modelTR/3-spline/img/---.ps}
+\caption{Common tangents of a single curve}
+% tops .rgb -m 6.5 2 > 1dual.ps
+\label{fig:selfalg}
+\end{figure}
+}
+
+\twocolumn
+
+\begin{figure}
+\vspace{2in}
+\special{psfile=/usr/people/jj/modelTR/6-dual/img/alg1.ps hoffset=-50}
+\caption{Two curves (left) and their duals (right)}
+% tops alg1.rgb -m 4 1.5 > alg1.ps
+% Step 1:  dual curves without reflection 
+\label{fig:alg1}
+\end{figure}
+
+\begin{figure}
+\vspace{2in}
+\special{psfile=/usr/people/jj/modelTR/6-dual/img/alg2.ps hoffset=-50}
+\caption{Intersections of dual curves}
+% tops alg2.rgb -m 4 1.5 > alg2.ps
+% step 2: dual curve intersections, including reflection
+\label{fig:alg2}
+\end{figure}
+
+\begin{figure}
+\vspace{2in}
+\special{psfile=/usr/people/jj/modelTR/6-dual/img/alg3.ps hoffset=-50}
+\caption{Associated tangents in original space}
+% tops alg3.rgb -m 4 1.5 > alg3.ps
+% step 3: associated tangent superset
+\label{fig:alg3}
+\end{figure}
+
+\begin{figure}
+\vspace{2in}
+\special{psfile=/usr/people/jj/modelTR/6-dual/img/alg4.ps hoffset=40}
+\caption{Common tangents}
+% tops alg4.rgb -m 4 1.5 > alg4.ps
+% step 4: filtered common tangents 
+\label{fig:alg4}
+\end{figure}
+
+\begin{figure}
+\vspace{2in}
+\special{psfile=/usr/people/jj/modelTR/6-dual/img/alg5.ps hoffset=40}
+\caption{Visible common tangents}
+% tops alg5.rgb -m 4 1.5 > alg5.ps
+% step 5: visible common tangents
+\label{fig:alg5}
+\end{figure}
+
+\clearpage
+\onecolumn
+
+\section{Results}
+\label{sec:results}
+
+
+
+\section{\Tang vs. Hodograph}
+\label{sec:hodo}
+
+Let $C(t)$ be a plane polynomial Bezier curve of degree $n$
+with control points $\{b_i\}_{i=0}^n$:
+\[
+C(t) = \sum_{i=0}^n b_i B_i^n(t)
+\hspace{1in} t \in [0,1]
+\]
+where $B_i^n(t) = \choice{n}{i} (1-t)^{n-i} t^i$ is the $i^{th}$ Bernstein
+polynomial of degree $n$.
+The {\bf hodograph} of $C(t)$ is another Bezier curve, representing
+the first derivative or tangent of $C(t)$:
+\[
+C'(t) = (c_1'(t), c_2'(t)) = \sum_{i=0}^{n-1} n\Delta b_i B_i^{n-1}(t)
+\]
+where $\Delta b_i = b_{i+1} - b_i$ \cite{farin97}.
+
+The standard representation of the tangent space of a curve
+is its hodograph, the locus traced by its tangent vectors moved to the origin
+(Figure~\ref{FIGURE OF HODOGRAPH}).
+However, this representation is not suited to the construction
+of common tangents.
+A different representation of the tangent space is needed, 
+which we provide.
+
+Why the hodograph is not appropriate:
+The hodograph is a clean, concise representation of the tangent space,
+since it represents a curve's tangent space as another curve
+(and, better yet, in the case of a Bezier curve of degree $n$, the hodograph 
+is another Bezier curve of degree $n-1$ easily derived from the original curve).
+However, the hodograph represents a tangent directly as a vector (from the origin to a point
+of the hodograph) and to make this into a tangent line, we need to
+add this vector to the associated point on the original curve.
+This indirect vector representation does not allow a common tangent to 
+be computed in the natural way as an intersection of tangent spaces,
+since two tangent vectors can be equivalent without the associated tangent
+lines being equivalent and, more importantly, all points along a line 
+through the origin represent the same tangent line (i.e, the hodograph
+representation of tangent lines is many-to-one) so a tangent {\em line}
+is actually not represented by a single point, but by a line,
+so an intersection of hodographs will not find all common tangents,
+since only one representative vector of each tangent line is represented
+in the hodograph.
+
+For this construction, we prefer a direct representation of the tangent lines,
+since a common tangent is a line located in 2-space
+(that happens to be tangent at two points),
+rather than a representation of a vector indirectly connected to an associated point.
+In the hodograph, a tangent is a vector, not a line, and its 
+
+A common tangent is naturally an 'intersection' of two tangents from 
+different parts of the curve, but the hodograph does not adapt well
+to this interpretation:
+
+\section{\Tang vs. Plucker}
+\label{sec:plucker}
+
+ALMOST EQUIVALENT, EXCEPT HIGHER DIMENSIONAL DUAL SPACE MAKES IT SLIGHTLY
+	MORE DIFFICULT AND TRANSLATION OF 
+	ARBITRARY LINE, NOT JUST LINES IN TWO DIMENSIONS, MAKES IT SLIGHT OVERKILL
+	SINCE THE BASIC COMPUTATIONS ARE THE SAME, IT IS TRIVIAL
+	TO TRANSLATE TO THE PLUCKER SOLUTION IF DESIRED.
+	FOR EXAMPLE IF A PLUCKER FRAMEWORK IS ALREADY EXTANT IN ONE'S SYSTEM,
+	FOR COMPATIBILITY.
+
+another alternative could have been Plucker space representation,
+	a more general representation of a line as a point
+	(working in higher dimensions, 
+	still reduces to intersection of two plane curves
+	since the image of a line field lies in a plane;
+	basically the same solution yielding the same problems encountered
+	in our solution;
+	our solution works since we are working in 2 dimensions
+	where the implicit equation of a line is one equation, not two)
+
+
+The obvious representation of a line by a point is by \plucker coordinates.
+[want to confront thoughts of Plucker immediately]
+The full power of \plucker coordinates, and the representation of a line
+as a point in projective 5-space, is not necessary however: a simpler
+representation of a line by a point works better.
+
+\subsection{A \plucker interpretation}
+
+We need a line representation that maps all lines well.
+The {\bf Plucker} representation of lines is such a representation.
+We can map the tangent space of a plane curve to Plucker space,
+using the Plucker coordinates of the tangent lines.
+Since the tangent space of a plane curve is a line field, 
+its image in Plucker space is a plane curve.\footnote{In general,
+	the image of a one-dimensional family of lines is a curve
+	on the Klein quadric in Plucker space.
+	Only in special cases like line fields and line bundles 
+	is this a plane curve.}
+Thus, just as with dual curves,
+the common tangents of two plane curves can
+be found through the intersection of two plane curves in image space,
+but now these plane curves are curves in Plucker space
+which enjoy added stability.
+
+{\bf After further thought:}
+Switching to Plucker space is not a panacea, and enjoys exactly the
+same problems as our tangential curves, but in a higher-dimensional context: 
+either lines through the origin or horizontal lines or vertical lines will still
+be a source of instability.
+One observes that any curve in projective space will have trouble with some 
+regions that go to infinity: those regions that send the projective coordinate 
+to zero.
+For example, the Plucker curve $(V,P \times V)$ is
+$(C'(t),C(t) \times C'(t)) = (c'_1,c'_2,0,0,0,c_1c'_2 - c'_1c_2)$
+({\bf as it turns out almost identical to the dual curve}).
+{\bf One of these coordinates must be considered the homogeneous coordinate},
+and once it goes to 0 we will have a point at infinity.
+Vertical lines, horizontal lines, or lines through the origin will
+correspond to points at infinity depending on whether the first, second,
+or sixth coordinate is chosen to be the projective coordinate, respectively.
+
+\subsection{Plucker method}
+
+Once we begin thinking of intersecting bundles in Plucker space, 
+another, more direct approach comes to mind.
+The lines in a certain plane are called a line field.
+The tangents of our original plane curves form two line fields.
+The lines of a line field map to a plane in Plucker space, just like
+the lines of a line bundle did (Pottmann, p. 6).
+And once again, the desired intersections of the line fields (the common tangents!)
+are themselves lines.
+Therefore, we can again intersect in Plucker space, but now using
+the line fields associated with the tangents rather than the line bundles
+associated with the duals of the tangents:
+
+\begin{itemize}
+\item	Intersect tangent line fields of the original curves in Plucker space.
+\item   Translate intersections back to common tangents in Euclidean space.
+\end{itemize}
+
+\subsection{Computing tangent line fields in Plucker space}
+
+Given a plane curve, we wish to express its tangent space
+(a line field) as a plane Bezier curve in Plucker space.
+
+The normalized Plucker coordinates of the line $P+tV$ ($\|V\|=1$) are
+$(V,P \times V)$.  Notice that this does not depend on the choice of
+point $P$.
+The homogeneous Plucker coordinates of the line through $A$ and $B$,
+where $A = (a_0,a) = (a_0,a_1,a_2,a_3)$, 
+      $B = (b_0,b) = (b_0,b_1,b_2,b_3)$ are points in projective 3-space,
+are $(a_0 b - b_0 a, a \times b)$.
+We prefer the latter homogenous Plucker coordinates, since they do 
+not require normalization.
+
+Consider the tangent space of a plane curve.
+Two points on the tangent line at C(t) are C(t) and C(t) + C'(t).\footnote{We
+	assume that $C'(t) \neq 0$.  That is, the curve
+	is regular.  A zero derivative is associated with a
+	singular cusp of the curve where the tangent is undefined.}
+Thus, the homogeneous Plucker tangent space of a plane curve C(t) is
+$(C'(t), C(t) \times C'(t))$.
+Here, $C(t)$ is interpreted as a curve in 3-space with $z=0$:
+$C(t) = (c_1(t),c_2(t),0)$.
+Simplifying, the Plucker tangent space is 
+$(c'_1, c'_2, 0, 0, 0, c_1c'_2 - c'_1c_2)$ in projective 5-space.
+See Dual curve paper derivation of Bezier form of $c_1c'_2 - c'_1c_2$
+If $C(t) = \sum b_i B_i^n(t)$ is a Bezier curve, ---
+
+\subsection{Rational curves with negative weights are bundles}
+
+{\bf This is a very convoluted approach that doesn't yield any advantages.}
+
+Dealing with bundles or line fields, negative weights don't seem to matter.
+(But they do if you insist on working with two-dimensional plane curves
+for easy intersection, in which case some coordinate must be treated
+as the projective one.)
+	
+The lines of the projective version of a rational curve 
+all pass through the origin,
+so the rational 'ruled surface' is actually a bundle (Pottmann, Intro to Line 
+Geometry, p. 6).
+The intersection of two bundles with the same common point
+is quite different from the intersection of two ruled surfaces,
+and is amenable to a simpler solution.
+In particular, the intersection of two bundles with the same common point
+is a collection of lines, not a collection of points.
+This makes it feasible to compute the intersection in Plucker space.
+For general ruled surfaces and general bundles,
+although they have images in Plucker space,
+the intersection of these images is in general empty, since the 
+ruled surfaces or bundles intersect in points rather than lines.
+Since our bundle intersection does consist of lines, it is 
+expressible in Plucker space.
+Intersection in Plucker space is simple, 
+since the lines of a bundle map to points of a plane in Plucker space
+(Pottmann, p. 6).
+This makes the intersection of two bundles with the same common point in Euclidean space 
+equivalent to the intersection of two curves in a plane in Plucker space.
+Curve intersection in the plane is well understood, even if this plane
+resides in projective 5-space (affine 6-space).
+We can ignore the presence of the higher dimensions by rotating the
+two-dimensional plane of the curves to the $\{z_3=0,z_4=0,z_5=0\}$
+plane and ignoring the 3rd, 4th, and 5th coordinates.
+After computing the intersection using classical 2-dimensional algorithms
+(Sederberg), the intersection points should be rotated back before
+translating their Plucker coordinates to lines.
+
+In short, common tangency can be computed as follows.
+\begin{itemize}
+\item	Compute dual curves.
+\item	Intersect associated bundles in Plucker space.
+\item 	Translate intersections back to lines in dual space.
+\item 	Translate intersection lines in dual space back to points of common
+	tangency on the original curves.
+\end{itemize}
+
+Common tangency in the original space now becomes ruled surface intersection
+in dual 3-space.
+{\bf This may motivate a return to our study of ruled surface intersection.}
+
+
+
+\section{Computing common tangents of a point and curve}
+\label{sec:point}
+
+The problem of finding the tangents 
+from a curve that meet a given point 
+is classically solved using pole/polar theory,
+but dual curves offer a better solution.
+Tangents of a curve that meet the point $P$ become points on the dual curve
+that lie on the dual line of $P$.
+Once again, a tangency relationship is translated to an intersection problem,
+this time an even simpler curve/line intersection.
+
+
+If one of the curves degenerates to a point, dual curves can still
+be used to compute common tangents.
+That is, dual curves can be used to compute the tangents from a curve
+that intersect a given point.
+Consider a curve $C$ and a point $P$.
+Moving to the dual space, the point $P$ becomes a line $P^*$
+and the tangents of $C$ become points.
+Consequently, tangents from $C$ through $P$ are associated
+with points of $C^*$ on the line $P^*$.
+The algorithm for the computation of the tangents from $C$ through $P$ is
+as follows:
+\begin{itemize}
+\item	Compute the the dual $P^*$ and the dual curve $C^*$.
+\item	Compute the intersections of the line $P^*$ and curve $C^*$.
+\item	Compute the duals of these intersections,
+	which are the desired tangents through $P$.
+\end{itemize}
+
+Note: the dual line must be represented as a Bezier curve in order to 
+apply Bezier curve intersection algorithms, so it actually needs to be 
+represented as a line segment, not an infinite line.
+We need to guarantee that the chosen line segment contains all of the 
+intersections with the dual curve.
+There are two approaches: we could compute the intersections and verify
+that there are the appropriate number of intersections, the class(?) of the 
+curve.  However, some points do not generate the maximum number of 
+tangents (think of a point inside a circle).
+A better approach is to compute a bounding box for the dual
+curves of the obstacles (ignoring the 'zero-weight' segments which would make
+the box infinitely large) and build the line segment as large as this box.
+
+Note: the point (a,b,1) in projective space and the line ax+by+cw=1 are duals.
+     In this model, the dual of the origin (0,0,1) is the line w=0 at infinity!
+     Thus, a pole at the origin will not be treated well in pole/polar 
+     computations.
+     We can avoid the origin, or translate the obstacles and pole together
+     away from the origin before computing.
+
+
+\Comment{
+\begin{figure}[bh]
+\vspace{3in}
+\special{psfile=/usr/people/jj/modelTR/3-spline/img/--.ps}
+\caption{Tangents through a fixed point}
+% tops pointTang.rgb -m 6.5 2 > pointTang.ps
+% a curve and a point, with tangents from curve that intersect point;
+%	dual curve and dual line, with intersections
+\label{fig:pointTang}
+\end{figure}
+}
+%
+\Comment{
+video:  curve and point in left window, dual curve and dual line in right window;
+	point moving on dual curve with associated tangent moving on curve,
+	illustrating that as the point approaches an intersection with the line
+	in dual space, the tangent meets the point in affine space
+}
+
+\section{Pole/polar theory}
+\label{sec:pole}
+
+Polar theory is the classical method for finding the tangents of a curve $C$
+through a point $P$.
+The {\bf first polar} of $P$ with respect to $C$ is a curve $D$ such that
+the intersections of $C$ and $D$ are the points of $C$ whose tangents meet $P$.
+If $C$ is the plane algebraic curve defined by the polynomial $f(x_1,x_2,x_3)=0$
+of degree $n$ and $P = (p_1,p_2,p_3)$, both $C$ and $P$ in projective 2-space,
+then the first polar of $P$ with respect to $C$ 
+is an algebraic curve of degree $n-1$ defined by
+\[
+	p_1 \frac{\partial f}{\partial x_1} +
+	p_2 \frac{\partial f}{\partial x_2} +
+	p_3 \frac{\partial f}{\partial x_3} = 0
+\]
+or $P \cdot \nabla f = 0$ \cite{semple85}.	% p. 10-11
+For example, in the simple case of the circle $C$, $x_1^2 + x_2^2 - x_3^2 = 0$,
+the first polar of $(5,0,1)$ with respect to $C$ is the line
+$5(2x_1) - 2x_3 = 0$ or $x_1 = \frac{1}{3}x_3$ (Figure~\ref{fig:polar}).
+
+\begin{figure}
+\vspace{2.5in}
+%\special{psfile=/usr/people/jj/modelTR/3-spline/img/polar.ps}
+\caption{The first polar of a point with respect to a circle}
+% file: ---.showcase
+% tops polarCircle.rgb -m 6.5 1.5 > polarCircle.ps
+% unit circle and (5,0) with tangents to circle and polar line x=1/3
+\label{fig:polar}
+\end{figure}
+
+An algorithm for the computation of the tangents from $C$ through $P$
+using polars would be as follows:
+\begin{itemize}
+\item	If necessary, implicitize $C$ to determine its implicit representation $f(X)=0$.
+\item	Compute the first polar of $P$ with respect to $C$, a curve $D$.
+\item	Compute the intersections of the algebraic curves $C$ and $D$.
+\item	Compute the tangents at these intersections, which are the desired
+	tangents through $P$.
+\end{itemize}
+
+This polar solution is inferior to the proposed dual curve solution of 
+Section~\ref{sec:dual}.
+The dominating costs of the polar solution
+are the implicitization and the algebraic curve intersection,
+while the dominating cost of the dual curve solution is
+the parametric line/curve intersection.
+The dual curve solution is more efficient, since 
+intersection of parametric Bezier curves is simpler than 
+the intersection of algebraic curves,
+and line/curve intersection is simpler than general curve/curve intersection.
+The dual curve solution also has the benefit of compatibility with
+the dual curve solution for common tangents.
+
+\section{Conclusions and future work}
+\label{sec:conclude}
+
+The \tang may be used for further analysis of a curve's tangent space.
+
+common tangents of *rational* Bezier plane curve
+
+\clearpage
+
+\bibliographystyle{plain}
+\begin{thebibliography}{Lozano-Perez 83}
+
+\bibitem[Farin 97]{farin97}
+Farin, G. (1997)
+Curves and Surfaces for CAGD: A Practical Guide (4th edition).
+Academic Press (New York).
+
+\bibitem[Goldman 86]{goldman86}
+Goldman, R. and T. DeRose (1986)
+Recursive subdivision without the convex hull property.
+Computer Aided Geometric Design 3, 247--265.
+
+\bibitem[Hartshorne 77]{hartshorne}
+Hartshorne, R. (1977)
+Algebraic Geometry.
+Springer-Verlag (New York).
+
+\bibitem[Hoschek 83]{hoschek83}
+Hoschek, J. (1983)
+Dual Bezier curves and surfaces.
+In {\em Surfaces in Computer Aided Geometric Design},
+R. Barnhill and W. Boehm, eds.,
+North Holland (---), 147--156.
+
+\bibitem[Johnstone 99]{jjjimbo99}
+Johnstone, J. and J. Williams (1999)
+A rational quaternion spline of arbitrary continuity.
+Manuscript.
+
+\bibitem[Lasser 89]{lasser89}
+Lasser, D. (1989)
+Calculating the self-intersections of Bezier curves.
+Computers in Industry 12, 259--268.
+
+\bibitem[Natarajan 90]{nat90}
+Natarajan, B. (1990)
+On computing the intersection of B-splines.
+6th Annual Symposium on Computational Geometry, 157--167.
+
+\bibitem[O'Rourke 94]{orourke94}
+O'Rourke, J. (1994)
+Computational Geometry in C.
+Cambridge University Press (New York).
+
+\bibitem[Rockwood 90]{rockwood90}
+Rockwood, A. (1990)
+Accurate display of tensor product isosurfaces.
+Visualization '90, 353--360.
+% comparison of curve intersection algorithms
+
+\bibitem[Saito 93]{saito93}
+Saito, T. and G. Wang and T. Sederberg (1993)
+Hodographs and normals of rational curves and surfaces.
+Manuscript.
+
+\bibitem[Sederberg 86]{sederberg86}
+Sederberg, T. and S. Parry (1986)
+Comparison of three curve intersection algorithms.
+Computer Aided Design 18, 58--63.
+
+\bibitem[Sederberg 89]{sederberg89}
+Sederberg, T., S. White, and A. Zundel (1989)
+Fat arcs: a bounding region with cubic convergence.
+Computer Aided Geometric Design 6, 205--218.
+
+\bibitem[Sederberg 90]{sederberg90}
+Sederberg, T. and T. Nishita (1990)
+Curve intersection using Bezier clipping.
+Computer Aided Design 22, 538--549.
+
+\bibitem[Semple 85]{semple85}
+Semple, J. and L. Roth (1985)
+Introduction to Algebraic Geometry.
+Oxford University Press (Oxford).
+
+\end{thebibliography}
+
+\section{Common tangents on surfaces}
+
+We have considered common tangents of curves in 2-space.
+It is also useful to compute common tangents of curves on surfaces.
+This is a more challenging computation 
+because tangents must be geodesics [define geodesic] and 
+geodesics on a surface are typically not straight lines, and are difficult
+to characterize and compute.
+To compute a tangent, we must be able to compute the geodesic
+from a given point in a given direction (the direction of the derivative
+of the curve at the point).
+[Discussion of computation of a geodesic: solution of differential equations]
+
+Although geodesics are difficult to compute on most surfaces,
+there are certain important surfaces with simpler geodesics.
+The design of curves on a sphere is a very important problem,
+yet the geodesics of a sphere are all great circles of the sphere.
+We now consider common tangents on \Sn{2}\ and \Sn{3}, the unit spheres 
+at the origin in 3-space and 4-space.
+
+Curves on \Sn{3}, called quaternion splines, are crucial for motion planning
+in computer animation and robotics.
+It is natural to introduce orientation obstacles (orientations disallowed for
+kinematic reasons or for their undesirability, such as an upside-down 
+orientation during the motion of a cup or camera), just as we have position
+obstacles.
+A classical tool for obstacle avoidance in the plane is the visibility graph,
+which involves the computation of common tangents of the planar obstacles.
+A visibility graph for avoidance of orientation obstacles on \Sn{3}\
+requires the computation of common tangents of curves on \Sn{3}.
+
+\section{Common tangents on \Sn{2}}
+
+A geodesic, and thus a tangent, on \Sn{2}\ is a great circle.
+In order to dualize the tangent space of a curve on \Sn{2},
+we need the implicit equation of a tangent.
+Although the implicit equation of a circle in 3-space involves 2 equations,
+a sphere and a plane, our sphere will always be \Sn{2}\ and so 
+a great circle is characterized by a plane, a single linear equation.
+Another serendipity is that the plane will always pass through the origin,
+so its constant term disappears and our plane is defined by 3 rather than
+4 coefficients.
+This allows the tangent space of a curve on \Sn{2}\ to be captured just 
+like the tangent space of a plane curve, by a plane rational Bezier curve 
+in dual space.
+
+\begin{defn2}
+On the surface \Sn{2}, 
+the great circle $\{x^2+y^2+z^2-1=0,\ ax+by+cz=0\}$ and
+the point $(a,b,c) \in P^2$ are {\bf duals}.
+\end{defn2}
+
+Notice that the dual $(a,b,c)$ is the normal of the plane $ax+by+cz=0$.
+
+\begin{defn2}
+The {\bf dual of a curve $C(t)$ on \Sn{2}} is the curve $C^*(t) \subset P^2$
+where the point $C^*(t)$ is the dual of the tangent circle at $C(t)$.
+\end{defn2}
+
+Let $C(t)$ be a curve on \Sn{2}.
+Since the plane of the tangent circle at $C(t)$ contains the vectors $C(t)$
+and $C'(t)$, it has the normal $C(t) \times C'(t)$.
+Thus, the dual of the tangent circle at $C(t)$ is $C(t) \times C'(t)$.
+Notice that this dual is the binormal vector at $C(t)$.\footnote{Thus, in
+	computing a dual curve, we are computing a binormal curve.
+	This is related to Saito/Sederberg's normal hodograph and 
+	Catmull's normal surface.
+	A major difference is that we compute the dual curve in projective
+	space and project to a rational curve in 2-space (to allow intersection), 
+	so the binormal vector cannot be read off directly.}
+	
+We now develop a formula for the dual of a Bezier curve on \Sn{2}.
+Let $C(t)$ be a rational Bezier curve on \Sn{2}:
+\[
+	C(t) = \frac{\sum_{k=0}^n w_k b_k B_k^n(t)}{\sum_{k=0}^n w_k B_k^n(t)}
+\]
+We must deal with rational Bezier curves, since curves on \Sn{2}\ (and \Sn{3})
+are not polynomial, in general \cite{jjjimbo99}.
+{\bf Try to generalize dual curves in 2-space using the same method.}
+The dual curve is $C(t) \times C'(t)$.
+Since the dual curve is originally expressed in projective space,
+we can compute $\alpha(t) C(t) \times C'(t)$, since vector length
+is immaterial in projective space.
+In particular, in computing the dual curve, 
+we are only interested in the direction of $C(t)$ and $C'(t)$, not
+their lengths.
+This allows a simplification: we can replace the rational curves
+$C(t)$ and $C'(t)$ by polynomial curves of the same direction.
+A polynomial expression for the direction of $C(t)$ is
+\[
+	\sum_{k=0}^n w_k b_k B_k^n(t)
+\]
+We use a result of Saito, Wang and Sederberg \cite{saito93}
+for a polynomial expression for the direction of $C'(t)$.
+
+\begin{lemma}
+Let $C(t) = \frac{\sum_{k=0}^n w_k b_k B_k^n(t)}{\sum_{k=0}^n w_k B_k^n(t)}$ 
+be a rational Bezier curve in 3-space.
+A vector in the direction $C'(t)$ is 
+\[
+	\sum_{k=0}^{2n-2} H_k B_k^{2n-2}(t)
+\]
+where
+\[
+	H_k = \frac{1}{\choice{2n-2}{k}}
+		\sum_{i=\mbox{max}(0,k-n+1)}^{\lfloor k/2 \rfloor}
+		(k-2i+1)\choice{n}{i} \choice{n}{k-i+1}
+		(w_i b_{k-i+1,0} - w_{k-i+1} b_{i,0},
+		 w_i b_{k-i+1,1} - w_{k-i+1} b_{i,1},
+		 w_i b_{k-i+1,2} - w_{k-i+1} b_{i,2}),\ \ 
+	b_i = (b_{i,0}, b_{i,1}, b_{i,2})
+\]
+\end{lemma}
+
+algorithm for common tangent computation (is filtering necessary?):
+
+\section{Common tangents on \Sn{3}}
+
+Discuss applications to orientation obstacles.
+
+\section{Common tangents on developable surfaces}
+
+A geodesic on a developable surface is also tractable:
+it is a rolled-up line.
+
+
+\section{Future work}
+
+Can we define a surface version of the dual curve?
+This might lead to a mechanism for finding the common tangent planes 
+of two surfaces.
+The extension of the polar to surfaces works for tangents from a surface
+to a point: the intersections of the first polar of the surface with the
+surface define the points of tangency (p. 211 of Snyder and Sisam as backup
+of same basic theory of Semple and Roth).
+
+Use the surface version to compute {\bf silhouettes}.
+(See Hart/Dutre/Greenberg 1999 Siggraph open problems for motivation.)
+
+\ \ \ \ \ 3D version.
+Ruled surface (or bipolar curve) that defines common tangents between two surfaces.
+
+Extension to a surface:
+tangents and common tangents *on* a surface.
+
+Geodesics on this ruled surface.
+
+other tangential relationships:
+are tangents of the dual curve = points of the original curve? (test empirically)
+proof: common tangents of dual curves must be intersections in original space, 
+	by symmetry, thus tangents of dual must be points of original curve
+a way to compute the envelope of a family of lines:
+	translate family of lines to dual space, where it becomes a curve;
+	compute the tangents of this dual curve (hodograph), 
+	whose duals become the envelope curve in the original space
+	not interesting in 2-space, but analogue in 3-space would be interesting:
+	computing envelope of planes
+
+(The following is a reasonable topic in the context of my work on 
+swept surfaces and envelopes, but unrelated to tangential computation
+and curves on surfaces.)
+Curved extension of Minkowski sum (see Bajaj and Kim, Generation of Configuration
+Space Obstacles: The Case of Moving Algebraic Curves
+and Compliant Motion Planning with Geometric Models).
+That is, for a non-point robot, the robot must first be shrunk to a point
+and the obstacles expanded by their Minkowski sum with the robot
+in order to apply the visibility graph algorithm.
+Typically the robot and obstacles have been polygonal.
+(A circular robot has also been dealt with by Yap.)
+We have shown how to deal with curved obstacles.
+Now we want to deal with a curved robot.
+
+\section{Dual surfaces}
+
+Relationship of dual surface with Catmull's normal surface and Gauss maps.
+
+Dualism allows the tangent space of a hypersurface to be reinterpreted
+as another hypersurface.
+
+A dual relationship can also be established in 3-space between planes and
+points, leading analogously to a useful tool in the analysis of tangential relationships
+between surfaces in 3-space.	
+In projective 3-space, the plane $p_1x + p_2y + p_3z + p_4w = 0$ 
+is dual to the point $(p_1,p_2,p_3,p_4)$.
+This dualism allows a two-parameter family of planes to be interpreted as a
+surface.
+In particular, the dual of the tangent space of a surface in 3-space is 
+another surface, called the {\bf dual surface}.
+Common tangency again provides an example of the use of the dual 
+surface for the analysis of tangential relationships.
+The common tangent planes of two surfaces are encoded by the intersection
+curve of the associated dual surfaces.
+
+Dual surfaces are the 3-dimensional analog to dual curves.
+A dual relationship can be established between points and planes in 3-space:
+the point $(p_1,p_2,p_3,p_4)$ of projective 3-space
+is dual to the plane $p_1x_1 + p_2x_2 + p_3x_3 + p_4x_4 = 0$.
+Given a parametric surface $S(u,v)$, its dual surface is the surface $S^*(u,v)$
+where the point $S^*(u,v)$ is the dual to the tangent plane at $S(u,v)$.
+The intersection of two dual surfaces represents the common tangent planes
+of the associated surfaces.
+Consequently, the common tangent planes between two surfaces $C$ and $D$ can be
+computed as follows:
+\begin{itemize}
+\item	Compute the dual surfaces $C^*$ and $D^*$.
+\item 	Compute the intersection curve of $C^*$ and $D^*$.
+	Let this curve be $\alpha(t)$ where $\alpha(t) = C^*(u_t,v_t)$.
+\item	$\alpha^*(t) = C(u_t,v_t)$ is the bipolar curve on the surface $C$,
+	with respect to $D$.
+\end{itemize}
+(Define bipolar curve.)
+
+\section{Dual curves of space curves}
+
+We have shown how to compute the dual of a plane curve and a surface.
+What about a space curve?
+Unfortunately, duals only exist for objects of codimension 1.
+(Define codimension.)
+The tangent of a space curve is a line in 3-space, which can no longer
+be expressed as a single linear equation since it is no longer a hyperplane.
+Consequently, the dual of a space curve tangent, and thus of a space curve,
+is undefined.
+
+\section{}
+
+A generalization of the definition of dualism:
+A hyperplane in $n$-space can be associated with a point in projective 
+$n$-space, since the implicit equation of the hyperplane has $n+1$ coefficients 
+and the point has $n+1$ coordinates.
+It is appropriate for the point to be in projective space,
+since any nonzero multiple of the hyperplane's equation represents the same plane.
+%
+\begin{defn2}
+A {\bf hypersurface} in $n$-space is an $(n-1)$-manifold (a surface of codimension 1).
+For example, curves in 2-space and surfaces in 3-space are hypersurfaces.
+A {\bf hyperplane} is a linear hypersurface.
+For example, lines in 2-space and planes in 3-space are hyperplanes.
+\end{defn2}
+%
+\begin{defn2}
+The hyperplane $a_1x_1+\cdots+a_nx_n+a_{n+1}=0$ % in $n$-space
+and the point $(a_1,\ldots,a_{n+1}) \in P^n$ are {\bf duals}.
+\end{defn2}
+%
+\begin{defn2}
+The {\bf dual of a hypersurface} $C(t_1,\ldots,t_{n-1})$ in $n$-space is the
+hypersurface \linebreak $C^*(t_1,\ldots,t_{n-1}) \subset P^n$ where the point 
+$C^*(t_1,\ldots,t_{n-1})$ is the dual 
+of the tangent hyperplane at $C(t_1,\ldots,t_{n-1})$ \cite{hartshorne}. % p. 54
+See Figure~\ref{fig:1dual}.
+\end{defn2}
+
+
+\end{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+SCRAPS:
+
+The tangent space of a curve is a smooth one-dimensional family of lines.
+A line can be represented by a point in \plucker space or a point in dual space,
+and a continuous one-dimensional line family becomes a curve 
+in the \plucker or dual space (henceforth, \plucker or dual curve).
+We are interested in the representation of curve tangent spaces as
+\plucker or dual curves.
+We are also interested in the computation of common tangents between
+plane curves through the intersection of \plucker or dual curves.
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+[To get around the instability of points at infinity,
+one may use two interpretations of the curve in projective space:
+the first with $x_i$ as the projective coordinate and the second
+with $x_j$ ($i \neq j$) as the projective coordinate.
+In this scheme, a one-dimensional family of lines would be represented
+by two curves in image space (e.g., dual space or Plucker space),
+which are theoretically redundant but, in practice, map different parts
+of the family to infinity and thus together allow robust treatment of all parts
+of the family, as long as wrong solutions arising due to instabilities
+near infinity can be detected.
+This detection of wrong solutions is possible with common tangents, 
+since it is simple to determine
+if a candidate tangent is actually a common tangent.
+
+This leads to the following algorithm:
+\begin{enumerate}
+\item Intersect dual curves using $x_3$ as projective coordinate.
+\item Intersect dual curves using $x_2$ as projective coordinate.
+\item Use all intersections as candidates.  Reject solutions that
+	do not yield common tangents.
+\end{enumerate}
+]
+
+[Luckily, we have a choice of which coordinate to choose as the projective one
+and not all of these choices can have a zero at the same point.
+Thus, for any given point, we can choose the projective coordinate to be
+a nonzero one.
+Or in practice, we can compute all three curves, using all choices of projective
+coordinate, and perform the computations with respect to all these curves.]
+

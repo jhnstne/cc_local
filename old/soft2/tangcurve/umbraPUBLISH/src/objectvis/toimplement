@@ -1,0 +1,22 @@
+probing at extreme and piercing tangents NEXT EASY
+angular range of an object					     DONE (angRange)
+local probe 							     DONE (firstPtHit)
+inside of a tangent (Defn 10)                                        DONE (inside)
+--> parameter interval of concavity (Definition 11)                  DONE (conRange)
+--> point in concavity test (appendix)				     DONE (ptInConcavity)
+	requires local probe and definition of concavity's parameter interval
+extreme tangents of concavity (Definition 12)			     DONE (extremeCon)
+--> angular range of concavity (Definition 13)			     DONE (angRangeCon)
+--> A lies in concavity test (Lemma 2)				     DONE (objInConcavity)
+	needs angular range of concavity, local probe, pt in concavity test
+A lies behind B test (Lemma 1)					     DONE (objLiesBehind)
+	needs angular range of A and B, local probe, pt in concavity test ALL DONE
+global probe	 						     DONE (firstObjectHit)
+--> object visibility algorithm					NEXT
+	global probe 				DONE
+	(single object blocking tests)	 	DONE
+	pt in concavity test			DONE
+	local probe				DONE
+	angular ranges				DONE
+
+	

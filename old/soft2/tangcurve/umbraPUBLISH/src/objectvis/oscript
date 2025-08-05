@@ -1,0 +1,2 @@
+objectvis -s 0 -v 0 -2 data/concavity.pts > foobar
+

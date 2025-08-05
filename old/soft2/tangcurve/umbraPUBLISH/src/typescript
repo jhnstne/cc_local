@@ -1,0 +1,48 @@
+Script started on Thu 22 Feb 2007 02:16:46 PM CST
+[jj@pc125 src]$ umbra ../data/vg900.pts > foobar
+[jj@pc125 src]$ umbra ../dat/[Ka/woka[K[Kak.pts > oo[K[Kfoobar
+[jj@pc125 src]$ ls
+[00m[00mcore.3850[00m  [00mdoiseea.cpp[00m                  [00mMakefile[00m       [00mtypescript[00m
+[00mcore.3854[00m  [00;32mdynamicLocalBackUmbra[00m        [00;34mobjectvis[00m      [00;32mumbra[00m
+[00mcore.3855[00m  [00m#dynamicLocalBackUmbra.cpp#[00m  [00mobjectvis.cpp[00m  [00;32mumbra17feb04[00m
+[00mcore.3948[00m  [00mdynamicLocalBackUmbra.cpp[00m    [00;34mold[00m            [00mumbra.cpp[00m
+[00;34mCVS[00m        [00mdynamicLocalBackUmbra.cpp~[00m   [00;32mscript[00m         [00;34mumbraimg[00m
+[00;32mdmesh[00m      [00mfobar[00m                        [00;32mstart[00m          [00mumbraScript[00m
+[00mdmesh.cpp[00m  [00mfoobar[00m                       [00;32mstartd[00m
+[m[jj@pc125 src]$ p[K[jj@pc125 src]$ pwd
+/home/jj/software/projectSmooth/2d/umbra/src
+[jj@pc125 src]$ cd[Kls ~/Cbin
+[00m[00;34mbasic[00m        [00;34mcurve[00m                     [00;34mold[00m             [00;31mrecon.tar[00m      [00;34mumbra[00m
+[00;34mbasic2[00m       [00;31mcurve.tar[00m                 [00;34mpac[00m             [00;34msurf[00m           [00;34mvgraph[00m
+[00;31mbasic2.tar[00m   [00;34mCVS[00m                       [00;34mquaternion[00m      [00;31msurf.tar[00m       [00;34mvision[00m
+[00;31mbasic.tar[00m    [00mdoxygen_manual-1.4.6.pdf[00m  [00;31mquaternion.tar[00m  [00;34mtangcurve[00m
+[00;34mcontour[00m      [00;34moctree[00m                    [00mREADME[00m          [00;31mtangcurve.tar[00m
+[00;31mcontour.tar[00m  [00;31moctree.tar[00m                [00;34mrecon[00m           [00;34mtangsurf[00m
+[m[jj@pc125 src]$ cd ..[5D[Kls
+[00m[00mcore.3850[00m  [00mdoiseea.cpp[00m                  [00mMakefile[00m       [00mtypescript[00m
+[00mcore.3854[00m  [00;32mdynamicLocalBackUmbra[00m        [00;34mobjectvis[00m      [00;32mumbra[00m
+[00mcore.3855[00m  [00m#dynamicLocalBackUmbra.cpp#[00m  [00mobjectvis.cpp[00m  [00;32mumbra17feb04[00m
+[00mcore.3948[00m  [00mdynamicLocalBackUmbra.cpp[00m    [00;34mold[00m            [00mumbra.cpp[00m
+[00;34mCVS[00m        [00mdynamicLocalBackUmbra.cpp~[00m   [00;32mscript[00m         [00;34mumbraimg[00m
+[00;32mdmesh[00m      [00mfobar[00m                        [00;32mstart[00m          [00mumbraScript[00m
+[00mdmesh.cpp[00m  [00mfoobar[00m                       [00;32mstartd[00m
+[m[jj@pc125 src]$ more start
+emacs -geometry 91x72+0+0 umbra.cpp ../../imgLibrary &
+emacs -geometry 90x45+965+0 umbraScript &
+umbra -F .2 ../data/vg900new.pts > foobar &
+umbra -r 3 -c .03 -S ../../scene/data/buildingSceneClean > foobar &
+[jj@pc125 src]$ more [5D[Kuem[K[Kmacs [K[K[K[Kls -al start
+[00m-rwxrwxr-x  1 jj jj 209 Sep 27  2005 [00;32mstart[00m
+[m[jj@pc125 src]$ umbra =[K-F .2 ../data/vg900new.pts > foobar
+[jj@pc125 src]$ cd[Kcd ../data
+[jj@pc125 data]$ ls
+[00m[00mcircleTouching.pts[00m            [00mglobalumb2c.pts[00m        [00mvg10.pts[00m
+[00mcircleUmbraProblem2.pts[00m       [00mglobalumb2.pts[00m         [00mvg6.pts[00m
+[00mcircleUmbraProblem.pts[00m        [00mglobalumb3.pts[00m         [00mvg7.pts[00m
+[00mcornell1sceneB.pts[00m            [00mglobalumb4.pts[00m         [00mvg8.pts[00m
+[00mcornell1sceneD.pts[00m            [00mglobalumb5.pts[00m         [00mvg9000.pts[00m
+[00mcornell1sceneF.pts[00m            [00mglobalumb6.pts[00m         [00mvg9001.pts[00m
+[00mcornell1sceneG.pts[00m            [00mglobalumb7.pts[00m         [00mvg900newest.pts[00m
+[00mcornell1scene.pts[00m             [00mglobalumbmax.pts[00m       [00mvg900new.pts[00m
+[00;34mCVS[00m                           [00mglobalumbouter.pts[00m     [00mvg900.pts[00m
+[00;34mdoiseea[00m                       [00mmaxumbra.pts[00m           [

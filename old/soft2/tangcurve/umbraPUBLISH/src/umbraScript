@@ -1,0 +1,151 @@
+fully working umbra examples:
+
+umbra                ../data/vg/vg900.pts                [F=.05,e=.001,c=.05,f=.3,r=2
+umbra -r 3 -c .03 -S ../../scene/data/buildingSceneClean [F=.05,e=.001,      f=.3,r=2; use unfilled option for global back umbra
+*umbra                ../data/cornell1sceneB.pts          [F=.05,e=.001,c=.05,f=.3,r=2]
+umbra                ../data/cornell1sceneK.pts          [F=.05,e=.001,c=.05,f=.3,r=2]
+*umbra -F .09 -f .5   ../data/cornell1sceneJ2.pts         [      e=.001,c=.05,     r=2]
+umbra -f .3 -c .07   ../data/cornell1sceneG.pts          [F=.05,e=.001,           r=2]
+umbra -f .7 -u 1     ../data/umbra1withB2.pts            [F=.05,e=.001,c=.05,     r=2] -f .7 for inner bitangents
+umbra -f .2 -c .02   ../data/cornell1sceneD.pts          [F=.05,e=.001,           r=2]
+umbra -F .2 ../data/vg900new.pts (and vg900newest.pts)
+	problem with outer bitangent of 0/2 bitangent 5: should be diagnosed outer
+		- related to flatness of light in certain regions, which leads to
+	          inaccurate bitangents
+	    	- attempted solution: remove flat patches; easier said than done
+		- solution: increase feature size beyond the error
+*umbra -F .1 ../data/umbra1.pts 
+	- bigger feature size for diagnosis of inner bitangents
+*umbra -F .1 ../data/umbra1withB4.pts
+*umbra -F .06 -P 13 -S ../../scene/data/lightSceneCornellLip2
+umbra -P 9 ../data/circleUmbraProblem.pts  (touching curves issue)
+umbra -P 9 ../data/circleUmbraProblem2.pts (used to be called in start)
+umbra -r 1.2 ../data/woak.pts
+
+also add some surrounding curves cases
+
+
+umbra -P 5 -e .0001 -f .7 -c .03 ../data/outPiercingSweep4.pts
+umbra -r 2 -S -c .02 -f .4 ../../scene/data/buildingSceneClean3 (not debugged yet)
+
+I SHOULD DEVELOP AND PUBLICIZE A TEST SUITE FOR THE VARIOUS CASES ENCOUNTERED IN SWEEPING
+
+not yet:
+  umbra -P 14 -f .5 -u 1  ../data/cornell1sceneL.pts  (using -c .05 default); global front umbra doesn't incorporate merging
+  umbra -P 14 -f .5 -u 1  ../data/cornell1sceneM.pts  (using -c .05 default): ditto
+	(good starting point example: augment w. objects B that affect front umbra)
+
+  vg9 series is not as elegant: let's stick with cornell1scene and umbra1 collection
+	for the paper
+  build an expanded version of umbra1.pts with an obstacle B
+	umbra1withB is a starting point
+
+--------------------------------------------------------------
+
+characterization of test data:
+
+  cornell1sceneB: inner piercing sweep stops at inner piercing bitang of A/B 
+	(category 1 of innerPiercingSweep)
+	    this new bitangent simply replaces the old umbral bitangent as a boundary
+	    of the front umbra
+	if/case-1 of defineGlobalFrontUmbra
+
+	- outer sweep doesn't look right because tangent is so fragile at beginning
+	of outer sweep that it is drawn incorrectly when light is evaluated at par value
+	- it isn't wrong, just fragile
+
+  cornell1sceneB: outer piercing bitangent of A and L is refined to
+                  inner piercing bitangent of A and B
+  cornell1sceneD: larger intervening object that has no piercing bitangents with A;
+                  outer piercing bitangent of A and L is refined to
+                  inner bitangent of A and B
+  cornell1sceneF: a smaller intervening object means that the light reappears
+                  on the other side of the intervening object;
+                  an outer piercing sweep is required to further refine the boundary
+  cornell1sceneG: a smaller light means that this first sweep generates no
+                  meaningful additions in the inner bitangent camp, but
+                  does have meaningful refinements using outer bitangents
+
+  cornell1sceneK: inner piercing sweep stops at inner piercing bitang of A/L
+	(category 3 of innerPiercingSweep)
+	    this new bitangent simply replaces the old umbral bitangent
+	    [need to explain why inner bitangent with L is considered extremity of umbra]
+	if/case-1 of defineGlobalFrontUmbra
+	
+  cornell1sceneJ2.pts: inner piercing sweep stops at inner bitang of A/L 
+	(category 4 of innerPiercingSweep)
+	(J2.pts has a more forgiving tangent space for L than J.pts)
+	elseif/case 1 of defineGlobalFrontUmbra
+
+  cornell1sceneG.pts: a simple 'no outer piercing sweep' example
+	(debug animation of outer piercing sweep)
+
+  cornell1sceneL.pts: inner piercing sweep stops at inner bitang of A/L
+	'outer piercing sweep does not stop at all'
+	front umbra merges with back umbra
+
+	In this case, the back umbra has already merged with the front umbra
+	before the front umbra is computed.
+	Will this always be the case? (Try another example.)
+	If so, we need to flag when the computation of the front umbra is moot.
+	    
+need testing
+
+	in any category, simply add the new bitangent as a new umbral boundary,
+	replacing old umbral boundary; 
+	diagnosis as to creation of front umbra (if it is piercing,
+	   or if a piercing bitangent clips it in outer piercing sweep)
+	   or creation of back umbra (if no piercing bitangent is involved)
+	   should be done during construction of global front umbra 
+	   in buildGlobalFrontUmbra
+
+**	umbra -P 12 -u 1 ../data/cornell1sceneE.pts > foobar &
+	- similar in spirit to cornell1sceneJ2.pts
+	- works on inner piercing sweep
+	often changing sameSideEps is the way to debug
+	- does not work in defining global front umbra
+
+	umbra ../data/cornell1sceneF.pts > foobar &
+	- outer piercing sweep sweeps too far
+
+need to explore a robust computation of the side of a bitang that a curve lies on locally
+
+umbra -f .3 -c .05      ../data/umbra1.pts          * for all local umbrae
+	-c .02 for outer bitangents
+	-f .3  for outer bitangents
+	-c .05 for outer piercing bitangents
+umbra       -c .01 -r 5 ../data/globalumb3.pts
+umbra                   ../data/cornell1sceneF.pts : should clip global front umbra
+umbra -f .5 -c .05 -P 11 ../data/cornell1sceneH.pts
+
+umbra 	   ../data/ovoid2.pts
+umbra 	   data/curve/ob1.pts
+umbra	   data/curve/ob3.pts
+umbra	   ../data/vg1.pts
+umbra 	   ../data/vg3.pts
+umbra	   ../data/vg4.pts
+umbra	   ../data/vg5.pts
+umbra	   ../data/vg7.pts
+umbra	   ../data/vg9.pts
+umbra	   ../data/vg900.pts
+umbra 	   ../data/vg10.pts
+umbra	   ../data/globalumb1.pts
+umbra 	   ../data/globalumb2.pts 
+umbra 	   ../data/globalumb2b.pts 
+umbra 	   ../data/globalumb2c.pts 
+umbra -r 5 ../data/globalumb3.pts 
+umbra	   ../data/globalumb4.pts
+umbra	   ../data/globalumb5.pts
+umbra	   ../data/globalumb6.pts
+umbra	   ../data/globalumb7.pts
+umbra	   ../data/maxumbra.pts	(also try bitang, which is pretty)
+umbra 	   ../data/vg9new.pts
+umbra 	   ../data/vg9New.pts
+umbra 	   ../data/vg900new.pts
+
+
+umbra	   data/circle.pts
+umbra	   ../data/circleTouching.pts
+umbra	   ../data/circleUmbraProblem.pts
+umbra	   ../data/circleUmbraProblem2.pts
+

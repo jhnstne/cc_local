@@ -1,0 +1,20 @@
+Figure 1: jjdush.gif		common tangents for shortest paths
+Figure 2: jjdulight.gif 	common tangents for lighting
+Figure 3: jjdufamily.gif	line family
+Figure 4: jjdudef.gif		definition of tangential curve
+Figure 5: jjduint.gif		intersection as common tangency
+Figure 6: jjduega.gif		3 examples
+Figure 7: jjduegb.gif
+Figure 8: jjduegc.gif
+Figure 9: jjdusingle.gif	tangents of a single curve
+
+- capture snapshot
+- xv to translate rgb to gif greyscale
+- bm2font *.gif
+- move foo.tfm foo.300pk to ~jj/teTeX/share/texmf/fonts/pk/ljfour/public/bm2fontpk
+- move foo.tex to same directory as LaTeX file
+- add \input{foo.tex} before figure and \setfoo inside figure
+- latex
+- dvips -D 300
+- print
+
