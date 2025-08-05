@@ -1,0 +1,4136 @@
+\documentclass[9pt,twocolumn]{article}
+\usepackage{times}
+\usepackage[pdftex]{graphicx}
+\input{header-consecutive}
+\newif\ifCompanion   % material for companion paper
+\Companionfalse
+\newif\ifSurrounding    % if covering 'A surrounding L' case
+\Surroundingfalse
+\newif\ifJournal
+\Journalfalse
+\newif\ifTalk
+\Talkfalse
+\newif\ifComment
+\Commentfalse
+\setlength{\headsep}{.5in}
+\markright{\today \hfill}
+\pagestyle{myheadings}
+
+% outer to supporting? not as suggestive a term, so no
+% inner to separating? 
+
+% \DoubleSpace
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{0in}	% should be 0pt for 1in
+\setlength{\textheight}{8.6in}
+\setlength{\textwidth}{6.875in}
+\setlength{\columnsep}{5mm}	% width of gutter between columns
+
+% -----------------------------------------------------------------------------
+
+\title{Invisibility in smooth flatland}
+% An analysis of invisibility for a smooth scene in flatland}
+% The invisibility of a smooth object in flatland}
+% Invisibility: an analysis of a smooth scene in flatland
+% Where is a smooth object invisible? An analysis in flatland
+% The visibility of a smooth object in flatland
+% On the visibility of a smooth object
+% \ifTalk
+% Taking umbrage. (Good conference title?)
+% \fi
+% what an object sees
+% Research paper: May 2003}
+% (Visibility analysis of a smooth curve I: 
+%       Local umbra and penumbra: 
+%       a single curved object lit by a curved area light)
+% The discontinuity mesh of a smooth scene of curves
+% Global illumination from a smooth area light:\\the discontinuity mesh 
+%        of a smooth scene in 2-space
+% The geometry of shadow:\\the umbra cast by a curved light source\\
+%        in a scene of curved obstacles
+% Visibility in flatland.
+% Shadows in flatland
+% Bitangency in a scene of smooth curves,\\with applications to visibility
+% Tangential curves for bitangency, with applications to smooth versions 
+%        of the convex hull and visibility graph, and anticipations of 
+%        shading from smooth lights in 3d	
+
+% \author{John K. Johnstone\thanks{This 
+%    work was partially supported by the National Science Foundation under grant CCR-0203586.}\\
+% Computer and Information Sciences\\
+% University of Alabama at Birmingham\\
+% University Station, Birmingham, AL, USA 35294}
+
+\begin{document}
+\maketitle
+
+\ifTalk
+\begin{quote}
+The lamp of the body is the eye.  (Matthew 6:22)
+\end{quote}
+
+\begin{quote}
+\ldots but everything exposed by the light becomes visible \ldots (Ephesians 5, 13)
+\end{quote}
+
+\begin{quote}
+\ldots I have heard\\
+The cock, that is the trumpet to the morn, \\
+Doth with his lofty and shrill-sounding throat\\
+Awake the god of day (Hamlet, I.I.154-157)
+\end{quote}
+
+\begin{quote}
+Over the land there lies a long shadow\\
+westward reaching wings of darkness\\
+(The Return of the King, J.R.R. Tolkien, p. 812, the words of Malbeth the Seer)
+\end{quote}
+
+\begin{quote}
+Harry Potter's invisibility cloak.
+\end{quote}
+
+\begin{quote}
+Perseus and the Nymph's helmet of invisibility in the Medusa tale.
+\end{quote}
+
+Structure of figures:
+
+front and back umbra: umbra1
+global back umbra:  cornell scene and globalumb3
+global front umbra: cornell scene
+
+\clearpage
+\fi
+
+\begin{abstract}
+Consider a distinguished object L in a scene of smooth objects in 2-space,
+where each object is bounded by a closed curve.
+This paper answers the following question: where is L invisible?
+% We analyze the invisibility of a smooth object L within a smooth 2d scene,
+% in which each object is bounded by a closed curve.
+\ifJournal
+  Space is decomposed into regions that see all of L, regions that see part of L,
+  and regions that see none of L.
+\else
+Space is decomposed into regions that see none of L and regions that see part or all of L,
+\fi
+yielding the global structure of L's invisibility.
+An analysis of object invisibility is useful in occlusion culling, shadow computation, 
+and motion planning.
+
+Visibility analysis among smooth objects has received little attention, 
+as most papers on visibility analysis have concentrated upon polygonal and polyhedral 
+scenes.
+The algorithmic construction in flatland of this paper 
+builds a foundation for practical smooth visibility analysis.
+% If L is interpreted as a smooth area light source, it computes the umbra cast by L.
+% It may be used to plan motions through the scene that remain completely hidden
+% from L, since the global structure of invisibility is known.
+\ifJournal
+If L is an object of focus, this decomposition can be used to plan movements
+% such as camera movements (mention in full paper)
+through the scene that maintain complete visibility of the object, since the
+global structure of visibility is known.
+If L is an object to be avoided, such as an enemy or radiation source,
+this decomposition may be used to plan movements through the scene that 
+remain completely hidden from L, since the global structure of invisibility is known.
+\fi
+
+% {\bf Avoid the use of 'bitangent' in the abstract.}
+The computation of object visibility depends on the structured filtering of 
+potential visual events down to true visual events.
+A taxonomy of bitangents that contribute to visual events is developed.
+The regions that do not see L are found by sweeping a tangent about
+certain objects in the scene.
+A divide and conquer approach, conducive to parallelization,
+is used to compute the effect of every object
+on the distinguished object's visibility.
+
+\ifJournal
+WE ARE IGNORING PENUMBRA IN CONFERENCE PAPER (CONCENTRATING ON INVISIBILITY RATHER
+THAN VISIBILITY)
+
+IGNORE SURROUNDING CASE TOO IN CONFERENCE PAPER.
+\fi
+
+\end{abstract}
+
+% Contributions:  This paper contributes to Eurographics' 
+% focus area of visibility and shadows,
+% by building a foundation for practical visibility analysis in curved environments.
+
+% Benefits:  
+% The analysis of a smooth scene broadens the scope of visibility analysis,
+% offering the potential of improved accuracy and the ability to deal directly
+% with a smooth scene rather than discretizing it.
+% A parallelizable method for filtering potential visual events down to actual visual events
+% is presented.
+
+% {\bf Old abstract:}
+% The umbra cast by a smooth area light source in a 2d scene of smooth
+% objects is studied.
+% A different approach is taken from previous work in lighting.
+% First, the umbra is decomposed into (possibly overlapping) subumbrae cast
+% by each object, and these regions are fully defined geometrically.
+% Second, the area light source and scene of objects are both smooth,
+% bounded by freeform parametric curves.
+% Since the geometric analysis of smooth environments is challenging,
+% the analysis is restricted to 2d and 2$\frac{1}{2}$d environments.
+
+
+% full definition of the region, not point-by-point query
+
+% \newpage
+
+\section{Introduction}
+\label{sec:intro}
+
+In this paper, we analyze the invisibility of a distinguished object L 
+in a scene of smooth objects.
+In particular, we compute the region of free space 
+from which the distinguished object L is not visible.
+\ifJournal
+  Space is decomposed into regions that see all of L, regions that see part of L,
+  and regions that see none of L.
+\else
+  % Space is decomposed into regions that see none of L and regions that see part 
+  % or all of L.
+\fi
+% --------------------------------------
+% APPLICATIONS
+This type of visibility analysis of a single object has many applications.
+% (1)
+It reveals camera locations from which L need not be rendered (occlusion culling).
+% (2)
+If L is interpreted as a smooth area light, it computes the umbra
+\ifJournal
+and penumbra
+\fi
+cast by L (shadow computation).
+% If the identified object is interpreted as a light, the analysis reveals
+% the umbra and penumbra cast by this light.
+% (2b): not immediate enough for conference; better to implement first too
+\ifJournal
+If L is interpreted as an area light and 
+the umbra is computed with respect to the permanent objects in the scene
+(e.g., furniture or buildings),
+other objects that move across the scene (e.g., people or cars) will move into
+and out of the precomputed umbra, indicating how they should be lit.
+  % This is another good application to illustrate the method since it differs from 
+  % traditional umbral computation.
+\fi
+% (3)
+  % It reveals locations from which the distinguished object is completely shielded.
+If L is interpreted as an undesirable object, 
+\ifJournal
+such as sound crew's equipment,
+\fi
+the analysis reveals camera locations that avoid seeing the undesirable object
+(camera placement).
+  % sound technician's boom
+\ifJournal
+  or safe locations that are blocked from a radiation source.
+\fi
+  % where to stand to avoid being seen
+% (4)
+\ifJournal
+  If L is an object of focus, this decomposition may be used to plan movements
+  % such as camera movements (mention in full paper)
+  through the scene that maintain complete visibility of the object, since the
+  global structure of visibility is known.
+\else
+  % If L is an object to be avoided,
+  % such as an enemy or radiation source,
+Moreover, the decomposition may be used to plan entire motions through the scene that 
+remain completely hidden from L, since the global structure of invisibility is known.
+\fi
+
+\ifComment
+  Good because it uses complete visibility, which is more subtle than partial visibility,
+  and it doesn't compete with the speed of rendering as does 1.
+  Planning a path as in the next application is a good generalization too.
+  Probably better than the umbral application since it emphasizes the general
+  visibility interpretation rather than the object as light specialization.}
+\fi
+
+\ifJournal
+[Only when penumbra is included]
+% where to stand to be seen
+It reveals locations from which the distinguished object is completely accessible, 
+with no intervening object blocking the view,
+such as seating locations that see the entire stage,
+camera locations that see the face of an actor,
+painter nozzle locations that see the object to be painted,
+or X-ray locations that see the tumor.
+\fi
+
+% There are two interpretations of the problem, matching the two problem definitions.
+% In one interpretation, the camera moves around the free part of the scene,
+% and it knows what amount of the specified object it sees.
+% In another interpretation, the camera is the object (akin to stereo eyes),
+% and it is known exactly which points in the scene are completely or partially
+% visible to the camera.
+% The first interpretation matches the object visibility problem,
+% while the second interpretation matches the shadow problem.
+
+% --------------------------------------
+% STUDY THE SMOOTH PROBLEM
+
+The vast majority of previous work in visibility analysis
+has been carried out in scenes of polygon meshes.
+There has been some work on smooth scenes but this has not been especially algorithmic.
+The purpose of this paper is to develop practical methods for the analysis
+of smooth nonlinear scenes.
+Since visibility analysis is expensive when applied to large scenes,
+we are sensitive to the construction of efficient algorithms that are inherently
+parallelizable.
+The consideration of smooth objects broadens the scope of the analysis and
+opens the way for new strategies.
+The visibility analysis of a smooth scene offers the potential of improved accuracy.
+It gives the ability to deal directly with a smooth scene rather than discretizing it
+into a mesh, which is more natural, more accurate and more efficient for scenes that
+are defined initially by smooth primitives such as NURBS.
+Smooth scenes have more complex primitives but less of them, which may
+actually improve the efficiency of visibility analysis.
+% Although the complexity of each primitive operation is increased, the
+% number of operations is reduced.
+
+% --------------------------------------
+% STUDY THE 2D PROBLEM
+
+This paper studies smooth object invisibility in the simplified context of flatland,
+which has notable precedents (e.g., \cite{heckbert92a}).
+We study the invisibility of a distinguished object L in a scene of smooth objects in
+2-space, where each object is bounded by a closed curve.
+This allows the development of a practical foundation for smooth visibility
+and facilitates the understanding of key issues, such as locality of influence and
+the influence of one object on another, in a clearer context.
+Recent visibility analysis also shows the
+application of 2d analysis to 3d analysis \cite{leyvand03}.
+%
+% For prototype purposes, this problem is posed in 2D.
+% each object is defined by a closed freeform curve.
+%
+A scene in flatland models a three-dimensional scene where
+the objects are infinite in one dimension,
+which realistically models some natural applications (such as a cityscape of buildings).
+It yields a solution from the perspective of a person or camera at groundlevel
+(Figure~\ref{fig:cityscape}).
+% extruded footprints
+% Imagine a person walking amongst tall extruded skyscrapers, looking straight forward:
+% a solution of the object visibility problem realistically models
+% the visibility of this scene from the person's perspective.
+
+In developing a theory for the invisibility of a smooth object L,
+we borrow the term 'umbra' from shadow computation:
+the umbra
+is the set of viewpoints in the scene from which L is completely invisible.
+% it is useful to interpret L as a light,
+% whether or not the application is shadow computation.
+This allows the familiar idea of an object casting a shadow to
+add intuitive insight to several constructs that must be developed.
+% Since the region of invisibility from the light is called the umbra,
+% we borrow this terminology for our problem (Definition~\ref{defn:umbra}).
+However, note that the theory works equally well in
+broader contexts of visibility analysis including
+occlusion culling and motion planning.
+% The following definition captures our problem.
+
+The visibility of a scene will be analyzed using a divide and conquer strategy,
+one object at a time.
+This may appear impossible, since visibility is defined by the 
+interaction of many objects.
+However, a divide and conquer strategy can still be used, in which one object at a time
+dominates, as follows.
+First, the umbra cast by each object in isolation (the local umbra) is computed.
+Next, each object's umbra is expanded and refined 
+by taking other objects into account (the global umbra).
+Finally, the umbra of the scene is the union of the global umbrae
+of each object in the scene.
+
+% We shall talk of the umbra cast by an object A,
+% referring to the points that are fully invisible from L 
+% because of the blocking action of A.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% P is in the local umbra of A if all rays from P to L are blocked by A.
+
+	% umbra -r 1.2 data/umbra/woak.pts > foobar &
+        % umbra -r 3 -P 14 -c .03 -S ../../scene/data/buildingSceneClean
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.25]{img2/vg900globalall.jpg}
+\includegraphics*[scale=.25]{img2/buildingSceneCleangbu.jpg}
+\end{center}
+\caption{Analyzing the invisibility of the object L in a scene.
+         The umbra of each object is drawn in 
+         a different color.  In the bottom figure, 
+	 local and global umbra are drawn in different shades.}
+% USE MORE CONCAVE LIGHTS IN EXAMPLES
+\label{fig:impressive}
+\end{figure}
+
+	% umbra -r 1.2 ../data/woak.pts > foobar & 
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/woakBitang.jpg}
+\includegraphics*[scale=.15]{img2/woaku.jpg}
+\includegraphics*[scale=.15]{img2/woakbu.jpg}
+\includegraphics*[scale=.15]{img2/woakfu.jpg}
+\end{center}
+\caption{(a) The bitangents of A and L. (b) The umbra of A. (c) The back umbra of A. (d) The front umbra of A.}
+\label{fig:woakeg}
+\end{figure}
+
+	% umbra -r 1.2 data/umbra/woak.pts > foobar &
+\begin{figure}
+\begin{center}
+% \includegraphics*[scale=.15]{img2/hud.jpg}
+\includegraphics*[scale=.2]{img2/hudbu.jpg}
+\includegraphics*[scale=.2]{img2/hudfu.jpg}
+\end{center}
+\caption{An architectural example: the footprint of a Marcel Breuer building. (a) The back umbra of A. (b) The front umbra of A.}
+\label{fig:hudeg}
+\end{figure}
+
+% The subject of this paper is a computation of the umbra of a smooth scene.
+\ifTalk
+  not the Alhambra, the Moorish palace in Granada, Spain.
+\fi
+
+\ifJournal
+  % Two points see each other if their line of sight is unblocked.
+  % A point sees an object if the point sees some point of the object.  % Mordor
+  % An object sees a point if some point of the object sees the point.
+  A point of the umbra sees no point of L.
+  A point of the penumbra sees some points of L and is blocked from other points of L
+  by an object $A \neq L$.
+  A point of the illumina sees all points of L except for those that are blocked by L itself
+  % The only points of L that are not seen by a point of the illumina are those that are blocked by L itself
+  % For a point of the illumina, the only points that it does not see are those that are blocked by L itself
+  (i.e., points on the other side of L).
+  % no points of L are blocked by another object $A \neq L$.
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{defn2}
+\label{defn:localglobal}
+Consider a scene of objects, with a distinguished object L.
+\ifJournal
+  \begin{itemize}
+  \item The {\bf L-umbra} is the locus of points from which L is completely invisible.
+  \item The {\bf L-penumbra} is the locus of points from which L is partially visible.
+  \item The {\bf L-illumina}\footnote{We are unaware of any term for this type of region, so
+    a new term is introduced, derived from the Latin for 'within the light'.}
+    % just as umbra is from the Latin for shadow and 'pen' is from the Latin for almost. 
+  is the locus of points from which L is completely visible
+  (i.e., no object blocks the view of L).
+  \end{itemize}
+  When L is clear from context, these terms 
+  will be shortened to umbra, penumbra and illumina.
+\fi
+
+\ifJournal
+  We begin with a definition of the three regions of object visibility.
+\fi
+
+\begin{itemize}
+\item
+The {\bf umbra} of the scene (with respect to L)
+is the set of viewpoints from which L is completely invisible (Figure~\ref{fig:impressive}).
+\item
+The {\bf local umbra of an object A} is 
+% the umbra that would be cast by A if it was the only object in the scene (besides L).
+the umbra 
+cast by A when A is imagined to be the only object in the scene, besides L (Figure~\ref{fig:woakeg}).
+\item
+The {\bf global umbra of A} is the umbra 
+cast by A when all objects in the scene are taken into account.
+\ifJournal
+The {\bf local and global penumbra of A} are defined analogously.
+\fi
+For P to be a point of the global umbra of A, 
+A must contribute in some way to the blocking of L from P,
+although this blocking is often achieved through the cooperation of A with other objects
+in the scene (Figure~\ref{fig:globalcornelllip}).
+% although perhaps in concert with other objects of the scene.
+% \item
+% The {\bf local umbra of a scene with respect to L} 
+% is the union of the local umbrae of the objects in the scene  (Figure~\ref{}).
+% \item
+% The {\bf global umbra of a scene with respect to L} 
+% is the union of the global umbrae of the objects in the scene (Figure~\ref{}).
+\end{itemize}
+\end{defn2}
+
+% Since we shall call the distinguished object L throughout the paper,
+% we refer to this region simply as the umbra of the scene.
+% The goal of this paper may be rephrased as the computation of the umbra of a smooth scene
+% with respect to one of the objects in this scene.
+
+The decomposition of the region where L is invisible
+into possibly overlapping subumbrae cast by each object has the advantage
+of simplicity, parallelizability, and incremental computation.
+The concentration on one object at a time is
+an important simplification to the structure of the computation,
+since it allows one object to temporarily dominate all of the other objects.
+In the computation of the umbra cast by an object A, 
+all objects are of interest only through their relationship
+to A or L, rather than their mutual interrelationships.
+% This dominance of one object yields important simplifications when reasoning about visibility. 
+Another benefit is parallelizability:
+the computation of the umbra of an object A may be performed at the same
+time as the computation of the umbra of an object B.
+This is an important factor in a large scene.
+% This keeps less balls up in the air at once.
+% Thus, we only need to consider n-to-1 relationships, not n-to-n relationships.
+A third benefit of computing invisibility object by object
+is that a point will know which object(s) is
+responsible for blocking it from L.
+This allows efficient incremental updates to the invisibility structure upon the addition
+or removal of an object.
+
+It is well known that visual events occur at bitangents,
+the lines that are tangent to at least two objects in the scene \cite{durand00a}.
+The computation of object visibility can be viewed as the structured computation
+of visual events, by filtering 
+potential visual events down to true visual events (Figure~\ref{fig:woakeg}).
+Which bitangents and which parts of these bitangents contribute to the umbra?
+A taxonomy of bitangents that contribute to visual events is developed in this paper.
+\ifJournal
+An {\bf umbral bitangent} is a bitangent that contributes to the boundary of the umbra.
+A {\bf penumbral bitangent} is a bitangent that contributes to the boundary of the penumbra.
+\fi
+% Only a few of the bitangents of a scene are important to visibility 
+An algorithmic strategy of our computation of object invisibility is sweeping.
+The local and global umbrae are found by sweeping a tangent about
+certain objects in the scene, always guided by the dominating object A
+and the distinguished object L.
+
+The rest of the paper is structured as follows.
+Section~\ref{sec:lit} reviews related literature.
+Section~\ref{sec:terms} introduces our taxonomy of bitangents that contribute
+to visual events. 
+This section is a general reference for terms used in the later algorithmic development.
+Section~\ref{sec:single} covers the foundational case of computing 
+invisibility in a scene of two objects.
+Sections~\ref{sec:scene}-\ref{sec:globalfront} generalize to arbitrary scenes.
+Section~\ref{sec:divide} explores the advantages of our divide-and-conquer approach.
+Finally, Section~\ref{sec:conclusions} offers some thoughts about the invisibility problem
+and directions for future work.
+
+\ifSurrounding
+\else
+% Say that A surrounds B if B lies entirely inside the convex hull of A.
+For conciseness and clarity, we assume in the rest of the paper that 
+L does not lie entirely inside the convex hull of any object of the scene
+and no object lies entirely inside the convex hull of L.
+That is, no object surrounds another, which is the typical case.
+The generalization of the theory to cover surrounding objects is straightforward,
+mostly involving generalizations of the definition of different
+categories of bitangent, and is covered in a technical report.
+\fi
+
+% For simplicity in drawing the regions of visibility,
+% we enclose the scene of objects in a room.
+% None of the theory depends upon this enclosing room.
+
+% \clearpage
+
+% ----------------------------------------------------------------------------------------
+
+\section{Related work}
+\label{sec:lit}
+
+% NSF review of literature and discussion in its text (Visibility Analysis subsection).
+% Do we want to stress the sophisticated aspect graph literature (as we do below)?
+
+The vast literature on visibility analysis is well reviewed in \cite{durand00a}.
+We can only highlight a few issues here.
+Recently, there has been considerable work on pushing visibility analysis,
+and shadow computation in particular,
+to interactive speeds on polygon meshes \cite{assarsson03,bala03,sen03},
+including huge polygon meshes \cite{unc03}.
+An orthogonal direction to improve visibility and shadow computation is to higher
+fidelity smooth models, which is the approach taken in this paper.
+We are particularly 
+motivated by the call in \cite{hart99} to consider visibility for non-polygonal surfaces.
+
+Another direction to push visibility analysis is towards incremental, parallelizable
+computation, motivated by the expense of visibility analysis
+and its need for interactivity.
+The algorithm developed in this paper lends itself to parallelization and efficient
+incremental computation through its divide-and-conquer approach, treating the influence
+of one object at a time.
+This issue is discussed more fully in Section~\ref{sec:divide}.
+% The divide-and-conquer approach taken by this paper lends itself to incremental
+% computation and parallelization (Section~\ref{sec:divide}).
+
+Object visibility for polyhedral meshes 
+has been widely studied in the context of general visibility analysis,
+global illumination, shadow computation, and radiosity.
+Constructs that have been developed include the 
+aspect graph \cite{gigus90}, 
+discontinuity mesh \cite{drettakis94,heckbert92a,lischinski92,stewart94}, and
+visibility skeleton and complex \cite{durand96,durand97a,pocchiola96}.
+% This theory is again developed for polygons and polyhedra.
+% introduced by Heckbert for radiosity, used by Lischinski
+% downplay discontinuity mesh: Durand quote: 'prone to robustness problems and 
+% irregular meshes induced are hard to handle'
+% Fiume \cite{} and Stewart \cite{} have developed discontinuity meshes
+% that analyze visibility amongst polyhedra.
+% Durand \cite{} has developed a visibility skeleton for polygons and polyhedra.
+
+% such as Teller \cite{soda hall SIGGRAPH paper}.
+The analysis of visibility in smooth scenes %, and especially its global structure,
+  % theory for scenes of smooth objects
+has begun, with a considerable vision literature on aspect graphs 
+of smooth surfaces (e.g., \cite{chen91,eggert93,koenderink76,petitjean92,ponce90},
+including solids of revolution, algebraic surfaces, quadrics and parametric surfaces).
+However, most of this work is qualitative
+and at an abstract, topological, or nonalgorithmic level.
+The algorithm of this paper has been implemented and works well.
+There has also been some work on
+visibility complexes of smooth convex objects \cite{durand97b} and
+the introduction of Bezier curves into visibility complexes \cite{baciu00}.
+	% koenderink76, koenderink79: definition of aspect graph
+	% gigus90,gigus91: polyhedra
+	% sri89: curved objects
+	% eggert89,eggert93: solids of revolution
+	% kriegman89,kriegman90: solids of revolution
+	% ponce90: parametric surfaces
+	% chen91: quadrics
+	% rieger93: algebraic surfaces
+	% petitjean92, etc.: algebraic surfaces
+% Bitangency structures are not actually computed
+% and most methods are not implemented.
+
+The literature on shadows is well reviewed in \cite{wooReview}.
+The entire motivation for shadow maps \cite{williams78}
+was the computation of shadows of smooth objects,
+but this is done at the expense of an image space algorithm prone to aliasing,
+and a point light.
+Most work on area light sources has concentrated on convex lights (and again polyhedral
+environments), while this paper allows the area light to have an arbitrary shape.
+
+Most shadow algorithms only compute the intersection of the umbra with the receivers 
+(the objects and the walls).
+We analyze the entire area of umbra, since our goal is not just to render the scene,
+but to understand all points
+that are invisible to L for applications such as occlusion culling and motion planning.
+% discontinuity mesh also does the following:
+% Our point of view takes a more global and eager (in the technical sense) 
+% perspective, analyzing the entire scene at once, 
+% rather than lazily (in the technical sense) evaluating visibility only from the active point.
+
+Work on potentially visible sets and conservative visibility
+has been applied to occlusion culling \cite{durand00b,leyvand03,teller91,teller93},
+again for polyhedral environments.
+% The occlusion culling problem in a smooth scene defined by implicit surfaces 
+% has been studied using polars by -- and Sederberg \cite{sederberg}.
+
+% Application 1 ({\bf occlusion culling}: camera locations where object need not be rendered) is illustrated
+% by Sederberg's SIGGRAPH paper on rendering, using polars.
+
+% One major issue is that most attention has focussed on scenes of polygons and polyhedra.
+% A novelty of this paper is the visibility analysis of a smooth object in a smooth scene.
+
+
+% Since the literature on visibility analysis is vast 
+% (and well reviewed in \cite{durand00a}),
+% Durand {\bf review} of visibility.
+% we can only discuss a few issues 
+% and highlight some differences with the existing literature.
+
+% We are not aware of any work on a geometric (region-based) definition
+% of the shadow cast by a {\bf smooth} area light source
+% in a scene of smooth objects.
+
+
+\Comment{
+Drettakis and Fiume \cite{drettakis94}
+build a discontinuity mesh for a polygonal light and polyhedral scene.
+
+Define the {\bf discontinuity mesh}, referring to 94 SIGGRAPH papers.
+Since we concentrate on invisibility in this paper,
+we have not yet built the complete discontinuity mesh 
+for a smooth scene of curves in 2-space.
+However, the theory developed in this paper paves the way for the complete
+discontinuity mesh.
+This discontinuity mesh is a fundamental tool for visibility analysis in a smooth scene.
+For example, it can be used to compute soft shadows in a scene of 
+smooth objects and smooth area lights.
+And it can be used for occlusion culling in a scene of smooth objects.
+The curve discontinuity mesh is similar to the aspect graph
+of a smooth scene in 2-space.
+
+Work on {\bf discontinuity meshes} also analyzes visibility from a global perspective
+rather than the present position of the camera.
+
+Note: Drettakis/Fiume-style {\bf discontinuity mesh}
+in 3D only meshes the {\bf receivers} (object boundaries),
+not the entire space.  This is motivated by radiosity applications.
+However, for full visibility information, we want a meshing of the entire space, which
+is the approach we take in this paper.
+This is more analogous to Teller-style visibility analysis for walkthroughs.
+For example, we want to be able to move an object through the scene and determine that it 
+is in shadow as it enters a region of umbra.  Or determine that the viewer is in umbra as it
+moves through a cell.
+
+{\bf Fiume and Stewart in SIGGRAPH 94} address application 5 (umbra/penumbra) 
+in a polyhedral scene.
+The light is restricted to an area light source.
+As always with lighting analysis, the problem is to define
+the boundary of the umbra/penumbra on the receivers.
+This is weaker than computing the boundary of the regions in 3-space 
+(not just on the receivers) that define the umbra/penumbra.
+{\bf (Give an example that shows the difference.)}
+}
+
+% Work on shadows from an area light source.
+\ifTalk
+The {\bf area light} problem is a generalization of the point light problem.
+As the light shrinks to a point, the area light becomes a point light
+and inner/outer bitangents become tangents through the point.
+\fi
+
+\ifJournal
+Although it is well understood that bitangents define visual events,
+an algorithm to systematically and actively filter these bitangents to the boundaries
+of visibility regions has not been developed.
+\fi
+
+% {\bf Pointwise} definition of umbra and penumbra is simple (see appendix).
+
+% How does antipenumbra paper relate? it doesn't as it computes visibility through a portal
+
+% Artistic literature on shadow and lighting.
+
+\ifJournal
+Bitangents are required throughout the paper, since they define umbral boundaries.
+We have developed efficient algorithms for computing bitangents
+using intersection in dual space \cite{jj01}.
+\fi
+
+% \clearpage
+
+% -------------------------------------------------------------------------------------
+
+\section{A taxonomy of visual events}
+\label{sec:terms}
+
+% Visibility analysis in smooth flatland involves bitangents.
+In this section, we develop a taxonomy of bitangents and parts of bitangents
+that contribute to visual events.
+These bitangents will be used in the subsequent algorithmic development.
+
+\begin{defn2}
+\label{defn:outerbitang}
+Consider two smooth objects A and B.
+T is an extremal bitangent of A and B if
+\begin{itemize}
+\item T is a bitangent of A and B, and
+\item T does not intersect A or B.
+\end{itemize} 
+T is an {\bf outer (or supporting) bitangent} of A and B (Figure~\ref{fig:outer}) if it is extremal and 
+\begin{itemize}
+\item A and B lie on the same side of T.
+\end{itemize}
+T is an {\bf inner (or separating) bitangent} of A and B (Figure~\ref{fig:innersweep}b-c) if it is extremal and
+\begin{itemize}
+\item A and B lie on different sides of T.
+\end{itemize}
+\end{defn2}
+
+	% umbra data/umbra/umbra1.pts > foobar &
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/umbra1outer.jpg}
+\includegraphics*[scale=.15]{img2/umbra1late.jpg}
+\end{center}
+\caption{(a) The two outer bitangents of A and L. (b) The late segment of a bitangent.}
+\label{fig:outer}
+\end{figure}
+
+\begin{defn2}
+\label{defn:piercing1}
+T is a {\bf piercing bitangent} of A and B if 
+T pierces A after its point of tangency with A (Figure~\ref{fig:piercing}).
+In particular, T is piercing if
+\begin{enumerate}
+\item T is a bitangent of A and B with points of tangency $P_A \in A$ and $P_B \in B$,
+\item T does not intersect B, 
+\item \ray{P_B P_A} intersects A but \seg{P_B P_A} does not, and
+\item $P_A$ is not an inflection point.
+\end{enumerate}
+A piercing bitangent T of A and B is {\bf outer} if 
+\begin{description}
+\item[\ \ \ \ \ {\rm 5.}] A and B lie on the same side of T in the neighbourhood of $P_A$.
+\end{description}
+
+\noindent A piercing bitangent T of A and B is {\bf inner} if
+% (or separating)
+\begin{description}
+\item[\ \ \ \ \ {\rm 6.}] A and B lie on opposite sides of T in the neighbourhood of $P_A$.
+\end{description}
+\end{defn2}
+
+\noindent 
+% The asymmetry between A and L in conditions 2-6 is resolvable by the distinguished
+% nature of L.
+Condition (2) makes T extremal with respect to L so that it can be a visibility boundary,
+while (3) makes T piercing.
+\ifSurrounding
+Due to the care taken with conditions 3 and 5, 
+no adjustment needs to be made for surrounding objects.
+\fi
+
+\begin{defn2}
+\label{defn:seg}
+The {\bf early segment} of a bitangent of A and B is the segment between its point
+of tangency with A and its point of tangency with B.
+The {\bf intermediate segment} of a piercing bitangent of A and B
+is the segment between its point of tangency with A and 
+its first intersection with A (Figure~\ref{fig:piercing}c).
+The {\bf late segment} of a bitangent of A and L is the infinite ray starting at the
+point of bitangency with A and moving away from L (Figure~\ref{fig:outer}b).
+\end{defn2}
+
+	% umbra data/umbra/umbra1.pts > foobar &
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/umbra1piercing.jpg}
+\includegraphics*[scale=.15]{img2/umbra1outerpiercing.jpg}
+\includegraphics*[scale=.15]{img2/umbra1interm.jpg}
+\end{center}
+\caption{(a) The piercing bitangents of A and L.
+         (b) The outer piercing bitangents. 
+         (c) The intermediate segment of a piercing bitangent.}
+\label{fig:piercing}
+\end{figure}
+
+% ----------------------------------------------------------------------------------------
+
+\section{A scene of two objects}
+% The local umbra
+% The umbra/penumbra cast by a single object}  
+% Object visibility in a scene of two objects
+\label{sec:single}
+
+\ifComment
+  The computation of visibility is better, or more constructively,
+  approached as the computation of blocking.
+  When L is alone in the scene, everything is visible and nothing is blocked.
+  As objects are added to the scene, how much more of L
+  becomes blocked and therefore invisible?
+  Seen from this perspective, the base case for object visibility is
+  the scene composed of two objects, the object of interest L and a single blocking object A
+  This section considers this base case.
+\fi
+
+Our analysis of invisibility begins by
+computing where L is invisible in a scene of only two smooth objects A and L.
+The general problem is solved by refining this base case.
+% This section deals with the base case of a scene of two objects, L and A.
+The region of invisibility in a scene of two objects comes in two flavors:
+the {\bf back umbra} cast behind A and 
+the {\bf front umbra} cast by A onto itself, which lies between L and A
+(Figure~\ref{fig:woakeg}).
+% P lies in the back umbra (resp., front umbra) of A if a line from P to L 
+% hits A in only one direction (resp., in both directions) from P.
+\ifJournal
+The penumbra comes in two analogous flavors.
+\fi
+The back umbra is associated with outer bitangents and the front umbra
+with outer piercing bitangents.
+
+% In a practice that shall become familiar in the definition of other visibility zones,
+% the definition of the back umbra depends on the definition of a special
+% type of bitangent that bounds this visibility zone.
+
+% ---------------------------------------------------------------------------------------
+
+% \clearpage
+
+The back umbra is familiar and well understood.
+A and L have two outer bitangents,
+each of which defines a halfspace containing A and L (Figure~\ref{fig:outer}a).
+The back umbra of A is bounded by the late segments of these two outer bitangents,
+as well as the relevant curve segment of A between them
+(Figure~\ref{fig:backumbra}).
+It is the region inside both outer bitangents.
+
+	% umbra data/umbra/umbra1.pts > foobar &
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/umbra1back.jpg}
+\end{center}
+\caption{The back umbra of A.}
+\label{fig:backumbra}
+\end{figure}
+
+% ---------------------------------------------------------------------------------------
+
+\ifSurrounding
+  We first deal with the typical case when L does not lie entirely inside the 
+  convex hull of A.
+  It is less confusing to understand this case before developing the extra machinery 
+  necessary for the general case.
+
+% Consider the back umbra cast by A.
+% The back umbra of A in a scene of two objects is bounded by two bitangents.
+% It has been observed that the definition of a visibility zone is tantamount
+% to the definition of a special bitangent.
+% For simplicity, the bitangent that bounds the back umbra is first defined
+% for the typical case when L does not lie entirely inside the convex hull of A.
+% The theory is much clearer when seen first for this case.
+% This simpler case is presented first to clarify the theory before considering the general case.
+
+A and L typically have two outer bitangents.\footnote{That is, if neither object
+  surrounds the other, as defined below.}
+ If A surrounds L, the back umbra is the region inside either outer bitangent.
+ If A does not surround L, the back umbra is the region inside both outer bitangents.
+
+\begin{defn2}
+A {\bf surrounds} B if B lies entirely inside the convex hull of A.
+\end{defn2}
+
+If L surrounds A,
+they will have no outer bitangents and the back umbra is empty (NEED AN EXAMPLE).
+% For simplicity, this discussion has ignored the unusual case when 
+% A surrounds L.
+If A surrounds L (Figure~\ref{fig:backsurrounding}),
+the definition of outer bitangent must be generalized, 
+since every bitangent of A and L will intersect A,
+violating the second condition of Definition~\ref{defn:outerbitang}.
+The appropriate generalization is to allow intersections on the 'other' side of L.
+
+\begin{defn2}
+T is an {\bf extremal bitangent} of A and L if 
+\begin{itemize}
+\item T is a bitangent of A and L with points of tangency $P_A \in A$ and $P_L \in L$,
+\item T does not intersect L, and
+\item the ray \ray{P_L P_A} does not intersect A.
+\end{itemize}
+An extremal bitangent is {\bf outer} if 
+\begin{itemize}
+\item A and L lie on the same side of T in the neighbourhood of $P_A$.
+\end{itemize}
+\end{defn2}
+
+Figure~\ref{fig:backsurrounding}b illustrates this new definition.
+The new definition is equivalent to the old definition when A does not surround L.
+The construction of the back umbra is the same:
+the back umbra is again bounded by the late segments of the outer bitangents
+and the appropriate curve segment of A.
+However, the back umbra is now the region inside {\em either} of the outer bitangents, 
+rather than inside both.
+The effect is a much larger umbra (Figure~\ref{fig:backsurrounding}c).
+\fi
+
+% ---------------------------------------------------------------------------------------
+
+% Lemma~\ref{lem:localbackumbra} reviews the construction of the back umbra
+% for a scene of two objects.
+
+% \begin{lemma}
+% \label{lem:localbackumbra}
+% In a scene of two smooth objects A and L,
+% the back umbra of A is bounded by the late segments of the two outer bitangents 
+% of A and L,
+% and the relevant curve segment of A between these outer bitangents.
+% \ifSurrounding
+% If A surrounds L, the back umbra is the region inside either outer bitangent.
+% If A does not surround L, the back umbra is the region inside both outer bitangents.
+% \else
+% It is the region inside both outer bitangents.
+% \fi
+% \end{lemma}
+
+%\begin{defn2}
+%Let A and B be closed curves, where A surrounds B.
+%Let $T$ be a bitangent of A and B with points of tangency $P_A \in A$ and 
+%$P_B \in B$.
+%\begin{itemize}
+%\item $T$ is {\bf extremal} if $T$ does not intersect B
+%       and the ray \ray{P_B P_A} does not intersect A.\footnote{$T$ 
+%	is allowed to intersect A before $P_B$, as in Figure~\ref{fig:G2}c.}
+%\begin{itemize}
+%\item $T$ is {\bf outer} if it is extremal and, in the neighbourhood of $P_A$,  
+%A and B lie on the same side of $T$.
+%\item $T$ is {\bf inner} if it is extremal and, in the neighbourhood of $P_A$,
+%A and B lie on opposite sides of $T$.
+%\end{itemize}
+%\end{itemize}
+%\end{defn2}
+
+\ifJournal
+\begin{lemma}
+Let A and L be smooth closed curves, where neither A nor L surrounds the
+other.\footnote{This lemma extends to the surrounding cases with an
+	appropriate definition of inner and outer bitangent, as shown in
+	Section~\ref{sec:surround}.}
+$A$ and $L$ have exactly 2 outer bitangents and 2 inner bitangents.
+\end{lemma}
+\prf
+This lemma relies on the fact that the inner and outer tangents are extremal.
+There is an alternative definition of inner and outer bitangents
+that has a more intuitive appeal: the inner and outer bitangents of A and B
+are the only bitangents of the convex hull of A and the convex hull of B.
+That is, compute the convex hull of A and the convex hull of B, then take
+bitangents: there are only 4 bitangents (proof?) and these are the inner and
+outer bitangents of A and B.
+\QED
+\fi
+
+% -------------------------------------------------------------------------------------
+
+% \clearpage
+
+The front umbra of A is composed of zero or more components (Figures~\ref{fig:woakeg}d and \ref{fig:frontumbra}).
+Each outer piercing bitangent of A 
+defines an overhang that blocks L from more of the scene.
+Each component of the front umbra is bounded by the intermediate segment of
+an outer piercing bitangent of A and L and
+the relevant curve segment of A.
+
+	% umbra data/umbra/umbra1.pts > foobar &
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/umbra1front.jpg}
+\end{center}
+\caption{The front umbra of A}
+\label{fig:frontumbra}
+\end{figure}
+
+\ifSurrounding
+Figure~\ref{fig:frontsurrounding} illustrates the case when A surrounds L, which follows
+the same construction.
+\fi
+
+% -------------------------------------------------------------------------------------
+
+\ifJournal
+To review, the visibility of a single object in a scene of two objects
+can be decomposed into five zones (Figure~\ref{fig:umbra2}):
+(1) the back umbra, defined by the late segments of outer bitangents;
+(2) the back penumbra, defined by the late segments of inner bitangents;
+(3) the front umbra, defined by the intermediate segments of outer piercing bitangents; 
+(4) the front penumbra, defined by the intermediate segments of inner piercing bitangents; and
+(5) the illumina, defined by the rest of the scene's free space.
+
+	% umbra data/umbra/umbra1.pts > foobar &
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/umbra1umbra.jpg}
+\end{center}
+\caption{The zones of visibility of the light}
+\label{fig:umbra2}
+\end{figure}
+\fi
+
+% \clearpage
+
+% -------------------------------------------------------------------------------------
+
+\section{A scene of many objects}
+% The influence of other objects}
+\label{sec:scene}
+
+Now that object invisibility is understood for a scene of two objects,
+we can consider general scenes of many objects,
+and transition from the local umbra to the global umbra
+(Definition~\ref{defn:localglobal}).
+Recall that we are still computing only the umbra cast by a single object in the scene, 
+using a divide-and-conquer approach.
+When there are many objects in a scene, 
+the umbra cast by a single object may be influenced by other objects in the scene,
+which conspire with A to hide more regions from L
+% making the global umbra of A larger than the local umbra of A
+(Figure~\ref{fig:globalcornelllip}).
+
+        % umbra -S -r 1.5 data/scene/lightSceneCornellLip2Minus > foobar &
+        % umbra -S -r 1.5 data/scene/lightSceneCornellLip2 > foobar &
+\begin{figure}[h]
+\begin{center}
+\includegraphics*[scale=.15]{img2/cornelllip2local.jpg}
+\includegraphics*[scale=.15]{img2/cornelllip2global.jpg}
+\includegraphics*[scale=.15]{img2/cornelllip2globalall.jpg}
+\end{center}
+\caption{Other objects may influence the umbra cast by A.
+  (a) The back umbra cast by A in a scene of two objects. 
+  (b) The back umbra cast by A in a scene of three objects. 
+  (c) The entire back umbra of this scene.}
+\label{fig:globalcornelllip}
+\end{figure}
+
+% a simple example of how another object B in the
+% scene may expand the back umbra cast by A, by conspiring with A to block more of L.
+  % When is the global back umbra of A larger than the local back umbra of A?
+  % Figure~\ref{fig:localvsglobalpure} is a pure expression of 
+  % the expansion from the local umbra to the global umbra due to the presence of 
+  % other objects.
+% The local umbra may be computed by the methods of Section~\ref{sec:single}.
+% The next section begins our study of the global umbra.
+
+% \clearpage
+
+% -------------------------------------------------------------------------------------
+
+\subsection{The global back umbra}
+
+First consider the global back umbra.
+%
+% We begin our treatment of the global umbra with a computation of the global back umbra.
+% It is necessary to continue using a decomposition of the umbra into two flavors, 
+% front and back, which are computed differently.
+%
+Recall that the local back umbra of A is defined by the outer bitangents of A and L.
+% The global back umbra of A is larger than the local back umbra of A in only one case:
+An object B will not affect the umbra cast by A if it lies to the left, behind, or to the right of A.
+Even an object that lies entirely between the outer bitangents of A and L
+does not affect A's back umbra all by itself, although
+it may do so by teaming up with other objects
+(Figure~\ref{fig:innersweep}).
+The global back umbra becomes larger than the local back umbra
+only when an object B intersects the early segment of an outer bitangent of A and L 
+(Figure~\ref{fig:crossingouter}).
+% Another object B in the scene can expand A's back umbra in only one way:
+% by interacting with the bitangents that define the umbra, before they reach A.
+
+\ifJournal
+\begin{lemma}
+The global back umbra of A is larger than the local back umbra of A if and only if
+another object B intersects the early segment of an outer bitangent of A and L.
+\end{lemma}
+
+We shall assume in the sequel that some object B intersects the early segment of an outer bitangent of A and L
+(otherwise the global back umbra is equivalent to the local back umbra).
+\fi
+
+	% umbra data/umbra/globalumb1.pts > foobar &
+	% umbra data/umbra/globalumb2.pts > foobar &
+\begin{figure}[h]
+\begin{center}
+\includegraphics*[scale=.15]{img2/gu1outer.jpg}
+\includegraphics*[scale=.15]{img2/gu2outer.jpg}
+\end{center}
+\caption{The back umbra of A expands when an object intersects the early segment of an outer bitangent of A and L}
+\label{fig:crossingouter}
+\end{figure}
+
+The global back umbra of an object A is computed by refining its local back umbra,
+using two sweeps.
+% The local umbra is refined to incorporate the context of neighbouring objects using two sweeps.
+The first sweep potentially expands the umbra and is computed by sweeping a tangent of A.
+The second sweep potentially shrinks the umbra and is computed by sweeping a tangent of L.
+The next section discusses the first sweep, called the inner sweep.
+
+% During the computation of the global umbra, it will again become clear
+% that the computation of object visibility
+% in a smooth environment is largely a search for the relevant bitangents 
+% in the massive collection of bitangents between scene objects.
+% These relevant bitangents will be called umbral and penumbral bitangents.
+
+% \clearpage
+
+% -------------------------------------------------------------------------------------
+
+\subsection{The inner sweep}
+\label{sec:innersweep}
+
+% In this section, we begin to show how to compute the global back umbra from the 
+% local back umbra.
+% The next section finishes this computation.
+% Recall that the local back umbra of A is bounded by the outer bitangents of A and L
+% (Lemma~\ref{lem:localbackumbra}).
+
+A boundary of invisibility must itself see L.
+When there are no other objects in the scene, an outer bitangent of A and L sees L.
+However, as other objects are added to the scene, this property is destroyed
+(Figure~\ref{fig:innersweep}a).
+The purpose of the first sweep is to move the outer bitangent until its sight of L 
+is restored,
+by sweeping it past interfering objects (Figure~\ref{fig:innersweep}).
+This sweep is performed in the tangent space of A, towards the inside of L.
+% The bitangents that define the global back umbra may be found by refining
+% the bitangents that define the local back umbra, until they see L.
+
+The continuous sweep is replaced by a discrete sweep, as follows.
+The sweep will always stop at a bitangent, since bitangents define visual events.
+In this particular case, the sweeping tangent must stop at an inner bitangent
+of A and the interfering object B (Figure~\ref{fig:innersweep}b-c).
+We jump directly to the next bitangent candidate and test for completion.
+The sweep is complete if the new bitangent sees L:
+i.e., its segment between A and L has no intersections with other objects
+(Figure~\ref{fig:innersweep}c but not Figure~\ref{fig:innersweep}b).
+If the new bitangent still does not see L, because of the blocking of a new object C,
+the sweep continues recursively.
+The sweep can also be stopped if it has swept past L, marked by
+sweeping past an inner bitangent of A and L.
+Notice that the umbra of A will never extend past the inner bitangent of A and L,
+since beyond this bitangent A can have no possible effect on the visibility of L.
+
+% {\bf At first time that we stop at light:
+% explain that we stop at light because maximal umbra of A 
+% is defined by inner bitangents with L.}
+
+\ifJournal
+  In this case, the global umbra of A is set to the penumbra of A,
+  which is declared to be the maximal size of the global umbra.\footnote{The only
+    points that can be blocked from L by A are the points inside the
+    penumbra of A.  The responsibility for blocking L is rightly passed
+    to another object when the point leaves A's penumbra.}
+\fi
+
+Since the sweep is towards the interior of L and repeatedly 
+replaces the present bitangent by an inner bitangent,
+it is called an {\bf inner sweep}.
+
+	% umbra data/umbra/globalumb3.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img/globalumb3innersweep1.jpg}
+\includegraphics*[scale=.15]{img/globalumb3innersweep2.jpg}
+\includegraphics*[scale=.15]{img/globalumb3innersweep3.jpg}
+\end{center}
+\caption{Three stages of an inner sweep
+	 (a) T = outer bitangent of A and L
+	 (b) T = inner bitangent of A and B
+	 (c) T = inner bitangent of A and C}
+\label{fig:innersweep}
+\end{figure}
+
+An algorithm for the inner sweep of a bitangent T is as follows.
+This algorithm is applied to each outer bitangent of A and L in turn.
+
+\vspace{.1in}
+
+\centerline{innersweep(T,A)}
+
+\begin{enumerate}
+\item while an object B interferes with T on the segment between A and L
+\begin{enumerate}
+% \item CANDIDATE = \{inner bitangents of A/B and A/L\}
+% \item T = closest bitangent of CANDIDATE, in sweeping on A towards L
+\item T = closest inner bitangent of A and B, in sweeping on A towards L
+\item if T has swept past L (i.e., past an inner bitangent of A and L), return (T)
+
+% \item T = inner bitangent of A and B (the closest from the present T 
+%         in sweeping towards L)
+% \item if T has swept past L (i.e., past an inner bitangent of A and L)
+% \begin{enumerate}
+% \item  T = this inner bitangent of A and L
+% \item  return
+% done = true
+% \end{enumerate}
+\end{enumerate}
+\item return (T)
+\end{enumerate}
+
+\ifJournal
+Figure~\ref{fig:localvsglobalpure}b illustrates a global back umbra computed 
+using inner sweeps to refine the local back umbra.
+(GET A MORE ELABORATE EXAMPLE, PERHAPS ONE THAT DOES NOT REQUIRE AN OUTER SWEEP.)
+\fi
+
+% \clearpage
+
+% -------------------------------------------------------------------------------------
+
+\subsection{The outer sweep}
+
+Inner sweeps begin the refinement from local to global back umbra,
+and outer sweeps complete the job.
+Each inner sweep defines a visibility boundary on one side of a collection of
+blocking objects between A and L (Figure~\ref{fig:innersweep}), % ~\ref{fig:globalcornelllip}
+while each outer sweep defines a visibility boundary on the other side (Figure~\ref{fig:outersweep}). % \ref{fig:globalcornelllip}
+
+% Although G marks a boundary of the umbra,
+% L will often become visible again at some point of G,
+% on the other side of the blocking objects.
+% The purpose of the second sweep is to find this point of reappearance
+% of L and clip G there.
+
+% by moving some umbral bitangents of A.
+% A second phase of refinement is required to add umbral bitangents 
+% that clip the umbral bitangents generated by the inner sweep.
+
+% This section describes this second sweep.
+
+Consider an outer bitangent T of A and L.
+The inner sweep moves T so that it sees L past any interfering objects B,
+yielding the bitangent G (Figure~\ref{fig:needoutersweep}a).
+% = innersweep(T,A).
+% The inner sweep finds a bitangent T at which L becomes visible again after an interfering object B.
+Although G is a visibility boundary of L near A,
+as we leave A on G, 
+L may eventually become visible again from the other side of blocking object B
+(Figure~\ref{fig:needoutersweep}b).  % Figure~\ref{fig:globalcornelllip}, 
+\ifTalk
+A sunrise to match the sunset.
+\fi
+% However, there is another visibility boundary of L on the other side of B
+A second sweep must find this other visibility boundary and use it to clip G
+(Figure~\ref{fig:needoutersweep}c).
+
+While the inner sweep moves in the tangent space of A searching for L,
+the outer sweep moves in the tangent space of L, searching for G
+(Figure~\ref{fig:outersweep}).
+% A tangent of L is swept across all objects that block it from G.
+As with the inner sweep, the tangent is initialized to an outer bitangent of A and L,
+% (i.e., a boundary of the local umbra),
+but we now sweep in the opposite direction, towards the outside of A.
+% When L's tangent sees G, 
+% it is used to clip G, becoming another boundary of the global umbra.
+The sweep can be stopped as soon as the tangent passes G,
+in which case G need not be refined.
+We again leverage the fact that changes of visibility
+must occur at discrete bitangent events to convert the continuous sweep into a discrete sweep.
+Since the sweep is towards the outside of A and repeatedly
+replaces the present bitangent by an outer bitangent,
+it is called an {\bf outer sweep}.
+
+% Let T be an outer bitangent of A and L such that an object B intersects the early segment 
+% of T.\footnote{If no such bitangent exists, 
+%   the global umbra is the same as the local umbra,
+%   and neither inner nor outer sweep is necessary.}
+% T is repeatedly replaced by the outer bitangent of B and L,
+% until the early segment of this outer bitangent is free of objects B (Figure~\ref{fig:outersweep}).
+
+% The inner sweep expands the umbra and the outer sweep shrinks it.
+% This potentially clips each umbral bitangent generated by the inner sweep.
+
+	% umbra data/umbra/globalumb7.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img/globalumb7outersweep1.jpg}
+\includegraphics*[scale=.15]{img/globalumb7outersweep2.jpg}
+\includegraphics*[scale=.15]{img/globalumb7outersweep3.jpg}
+\end{center}
+\caption{Three stages of an outer sweep of T 
+         (a) T = outer bitangent of L and A
+	 (b) T = outer bitangent of L and B
+	 (c) T = outer bitangent of L and C}
+\label{fig:outersweep}
+\end{figure}
+
+The algorithm for the outer sweep of a bitangent T is as follows.
+This algorithm is applied to each outer bitangent of A and L in turn.
+
+% \item[iii.]	If angle(H) 'exceeds' (in the direction of current travel) angle(G), return (NULL).
+
+\vspace{.2in}
+
+\centerline{outersweep (T,A)}
+
+\begin{enumerate}
+% \item T = outer bitangent of A and L
+\item G = innersweep(T,A)
+% \item sweep direction = away from A
+\item while an object B interferes with T on the segment between L and G
+\begin{enumerate}
+% \item S = \{outer bitangents of B and L\}
+\item T = closest outer bitangent of B and L, in sweeping on L away from A
+\item if T has swept past G (i.e., T does not intersect the late segment of G), 
+      return($\emptyset$)
+\end{enumerate}
+% \item clip G by T [LEAVE THIS TO POSTPROCESSING]
+\item return(T)
+\end{enumerate}
+
+	% umbra data/umbra/globalumbouter.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.1]{img2/guoInnertang.jpg}
+\includegraphics*[scale=.1]{img2/guoOutertang.jpg}
+\includegraphics*[scale=.1]{img2/guoglobal.jpg}
+\end{center}
+\caption{The necessity of the outer sweep.
+%  L may reappear on the other side of an interfering object B. 
+        (a) The visibility boundary G defined by an inner sweep. 
+        (b) The visibility boundary defined by an outer sweep
+        (c) The global umbra of A.
+            Note the clipping of G as L reappears to view.}
+\label{fig:needoutersweep}
+\end{figure}
+
+\ifJournal
+The output of the outer sweep algorithm outersweep(T,A)
+is a new boundary of the global umbra,
+which starts after its intersection with innersweep(T,A).
+See Figures~\ref{fig:needoutersweep}c and \ref{fig:globalcornelllip}c.
+\fi
+
+% \clearpage
+
+Finally, we have an algorithm to compute the boundary of the 
+global back umbra of an object A.
+The outer sweep is only necessary if the inner sweep is nontrivial.
+
+\begin{enumerate}
+\item boundary = $\emptyset$
+\item for each outer bitangent T of A and L
+\begin{enumerate}
+\item G = \{innersweep(T,A)\}
+\item if $\mbox{G} \neq \{\mbox{T}\}$, then H = \{outersweep(T,A)\}, else H = $\emptyset$
+\item boundary = boundary $\cup$ G $\cup$ H
+\end{enumerate}
+\end{enumerate}
+
+The boundary also contains the curve segment 
+of A that lies between the bitangents defined by inner sweeps and on the other side from L.
+
+% EMPHASIZE THIS PARAGRAPH.
+In short, 
+the global back umbra of an object 
+is bounded by (at most) four bitangents and a curve segment.
+Two of the bitangents are inner, generated by inner sweeps,
+and two of the bitangents are outer, generated by outer sweeps.
+One or both of the outer bitangents may be excluded, if they do not clip anything.
+All of the sweeps start from outer bitangents of A and L.
+
+Figure~\ref{fig:globalback} offers other examples of the global back umbra.
+
+	% umbra -f .7 -P 14 ../data/umbra1withB4.pts
+	% umbra data/umbra/vg900new.pts > foobar & : crashes
+	% umbra data/umbra/vg900.pts > foobar &
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/umbra1withBgbu.jpg}
+% \includegraphics*[scale=.15]{img2/vg900newumbra.jpg}
+\includegraphics*[scale=.15]{img2/vg900global.jpg}
+\end{center}
+\caption{More examples of the global back umbra}
+%         (a) ALSO SHOWS POTENTIAL MERGING OF FRONT AND BACK UMBRA;
+% Case 3 of the global front umbra of A: an outer piercing bitangent of A and L is replaced by an inner bitangent of A and L, and this component of the global front umbra is part of the global back umbra}
+\label{fig:globalback}
+\end{figure}
+
+% \clearpage
+
+% -------------------------------------------------------------------------------------
+
+\section{The global front umbra}
+\label{sec:globalfront} 
+
+The construction of the global front umbra of an object A
+has many structural similarities to the construction of its global back umbra.
+Both find the global umbra by refining a local umbra using two sweeps,
+% the first sweeping on A and the second not,
+the purpose of which is to restore visibility past blocking objects.
+However, there are some subtle differences between the front and back umbra.
+First, inner/outer bitangents are replaced by inner/outer piercing bitangents
+and the front umbra may have several components.
+The major change is in the second sweep, which begins by sweeping on L but later pivots
+and sweeps on a blocking object B.
+% We must also consider the possibility that the front umbra will grow into the back umbra.
+% No we can ignore this case and allow front and back umbrae to overlap if necessary: see below.
+
+Recall that each component of the local front umbra of A is defined by
+an outer piercing bitangent T of A and L (Section~\ref{sec:single}).
+The associated component of the global front umbra of A can be found as follows.
+The {\bf inner piercing sweep} refines T by skirting around objects that interfere 
+with its early segment, sweeping in the tangent space of A towards L
+(Figure~\ref{fig:cornell1sceneB}).
+% During this process, T is replaced by inner bitangents.
+The {\bf outer piercing sweep} refines T by skirting around interfering objects 
+in the opposite direction, beginning by sweeping in the tangent space of L away from A
+(Figure~\ref{fig:globalfrontumbra}c).
+% During this process, T is replaced by outer bitangents.
+An inner piercing sweep and an outer piercing sweep are applied to every outer 
+piercing bitangent T of A and L,
+generating the bitangents that form the boundary of the global front umbra of A.
+
+Figure~\ref{fig:cornell1sceneJ2} % (OR FIGURE~\ref{fig:cornell1sceneJ}c).
+illustrates the importance of computing the global front umbra.
+% this example also shows that we should add the inner bitangent of A and L as an
+% umbral bitangent
+The global back umbra of all objects in the scene is shown on the left,
+and the global front umbra of A on the right.
+Notice that the global front umbra defines some previously undiscovered regions
+of invisibility.
+% Notice that the area added by the inner piercing sweep is enough,
+% when added with the umbra of B, to fill in the entire inner region.
+% Alone it is not.
+
+        % umbra -f .5 ../data/cornell1sceneJ2.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/cornell1sceneJ2lfu2.jpg}
+\includegraphics*[scale=.15]{img2/cornell1sceneJ2gfu2.jpg}
+% \includegraphics*[scale=.25]{img2/cornell1sceneJ2gfu.jpg}
+% \includegraphics*[scale=.25]{img2/cornell1sceneJ2gfu3.jpg}
+\end{center}
+\caption{Necessity of piercing sweeps to refine the local front umbra.
+%         The global front umbra is necessary.
+         The local front and back umbra are not enough to define
+	 the regions of invisibility in the scene.
+         (a) The local front and back umbra of the scene.
+         (b) The global front umbra of A.
+         Note that the global front umbra finds regions of invisibility
+	 missed by the local front and back umbra.}
+\label{fig:cornell1sceneJ2}
+\end{figure}
+
+\ifJournal
+        % umbra ../data/cornell1sceneJ.pts
+        % umbra -f 1 ../data/cornell1sceneK.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/cornell1sceneJinner.jpg}
+% \includegraphics*[scale=.15]{img2/cornell1sceneKinner.jpg}
+% \includegraphics*[scale=.15]{img2/--.jpg}
+\includegraphics*[scale=.15]{img2/cornell1sceneJBumbra.jpg}
+\end{center}
+\caption{ALTERNATIVE EXAMPLE FOR NECESSITY OF GFU, WITH NO PROBLEMS RENDERING
+         BACK UMBRA OF B}
+%  Another example of the necessity of the global front umbra.
+%         (a) Need to stop sweep at inner bitangent with light
+%         (b) Need to stop sweep at inner piercing bitangent with light}
+%         (c) Just the global umbra of A does not cover the umbra of the scene.
+%         (d) Just the global umbra of B does not cover it.
+%         (e) But together they do.
+\label{fig:cornell1sceneJ}
+\end{figure}
+\fi
+
+% ADD SOME FIGURES OF GLOBAL FRONT UMBRA.
+
+% Figures: umbra -f .5 ../data/cornell1sceneJ2.pts (illustrates clipping by outer piercing sweep bitangent)
+
+
+\subsection{The inner piercing sweep}
+
+\ifJournal
+Consider Figure~\ref{fig:globalfrontumbra}.
+In the absence of B, A's front umbra is bounded by an outer piercing bitangent T.
+However, B blocks L further and enlarges the umbra of A.
+We can find where L reappears around B by moving in A's tangent space towards L,
+starting at the outer piercing bitangent T.
+The tangent will see past B at some inner bitangent,
+typically at an inner piercing bitangent of A and B (Figure~\ref{fig:cornell1sceneB}b).
+When we sweep to the end of B, L may still be blocked by another object C, 
+in which case the sweep must continue recursively (as did the inner and outer sweeps).
+
+Finally, L may never reappear during the inner piercing sweep, 
+in which case we stop the global front umbra's growth as we sweep past L,
+at an inner or inner piercing bitangent of A and L 
+(Figure~\ref{fig:cornell1sceneJ}).
+\fi
+
+The algorithm for the inner piercing sweep of a bitangent T is 
+identical to the inner sweep (Section~\ref{sec:innersweep}), 
+except that piercing bitangents must also be considered.
+\ifJournal
+Interference is tested with the early segment rather than the segment between A and L,
+which is subtly different than the inner sweep.
+\fi
+This algorithm is applied to each outer piercing bitangent of A and L in turn.
+
+\vspace{.1in}
+
+\centerline{innerPiercingSweep(T,A)}
+
+\begin{enumerate}
+% \item initialT = T
+\item while an object B interferes with T on the early segment between A and L
+\begin{enumerate}
+     % \item $S = \{\mbox{inner and inner piercing bitangents of A and B or A and L}\}$
+\item T = closest inner (or inner piercing) bitangent of A and B, 
+      in sweeping on A towards L 
+\item if T has swept past L (i.e., past an inner or inner piercing bitangent of A and L),
+      return (T) % which we want to become a part of the global front umbra boundary
+        % for example, consider cornell1sceneH if B was taller
+% \item if T is an inner bitangent of A and B (we have a merge of front and back umbra),
+%       return ($\emptyset$): BETTER SOLUTION THAN FOLLOWING OLD SOLUTION
+\end{enumerate}
+\item return (T)
+\end{enumerate}
+
+        % umbra -f .5 data/umbra/cornell1sceneJ2.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/cornell1sceneJ2lfu.jpg}
+\includegraphics*[scale=.15]{img2/cornell1sceneJ2ips.jpg}
+\includegraphics*[scale=.15]{img2/cornell1sceneJ2ops.jpg}
+\includegraphics*[scale=.15]{img2/cornell1sceneJ2gfu.jpg}
+\end{center}
+\caption{Computing the global front umbra.
+        (a) A component of the local front umbra of A.
+        (a) The refinement of this component by an inner piercing sweep.
+        (b) The refinement of this component by an outer piercing sweep.
+	(c) The global front umbra of A.
+%          PREFER TO USE cornell1sceneE.pts
+% NEED TO DEBUG SCENEE BEFORE WE CAN USE IT: NOT A HIGH PRIORITY
+% A good example for a typical outer piercing sweep
+% is cornell1sceneE.pts (see cornell1sceneEbitang.jpg).
+}
+\label{fig:globalfrontumbra}
+\end{figure}
+
+\ifJournal
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.25]{img2/cornell1sceneEbitang.jpg}
+\end{center}
+\caption{USE THIS EXAMPLE BUT EXPAND TO BE LIKE NEXT FIGURE.}
+%         Illustration of sweeping to an inner bitangent of A and B.
+%         Case 0 when outer piercing sweep saves the day and stops front umbra
+%         before it merges with back umbra.
+\end{figure}
+\fi
+
+% MORAL: ALWAYS SIMPLY RETURN THE BITANGENT YOU FIND IN THE INNER PIERCING SWEEP.
+% YOU CAN'T TELL IF THERE IS A MERGING WITH THE BACK UMBRA 
+% UNTIL THE OUTER PIERCING SWEEP,
+% SINCE THE OUTER PIERCING SWEEP MAY CUT IT OFF BEFORE IT MERGES (BY CUTTING
+% IT BY A PIERCING BITANGENT)
+
+% OLD VERSION:
+% \begin{enumerate}
+% \item if T is an inner bitangent of A and B (we have a merge of front and back umbra)
+% \begin{enumerate}
+% \item NO:
+%       if no inner sweep reached T during the creation of the global back umbra of A
+% \begin{enumerate}
+% \item U = closest outer bitangent of A and L 
+%       (in sweeping on L away from A starting from initialT)
+% \item V = innerSweep(U)
+% \item replace V by T as a boundary of the global back umbra of A
+% \end{enumerate}
+% \item return ($\emptyset$)
+% \end{enumerate}
+% \end{enumerate}
+
+The result of an inner piercing sweep becomes a boundary of the global front umbra
+(Figure~\ref{fig:globalfrontumbra}a-b).
+
+\ifJournal
+Typically, the outer piercing bitangent T is replaced
+by an inner piercing bitangent of A and B, which is the first
+opportunity to see past B to L (Figure~\ref{fig:case1}).
+% This is analogous to the inner sweep's move to an inner bitangent of A and B.
+% Unlike the inner sweep however, where an inner bitangent of A and B always exists, 
+However, A and B may have no inner piercing bitangents (Figure~\ref{fig:case2}).
+Therefore, the search for the next bitangent must be broadened to include 
+the inner piercing bitangents of A and L (the next best choice as shown in Figure~\ref{fig:case2},
+but possibly also nonexistent) and
+the inner bitangents of A and L (which are guaranteed to exist).
+% \footnote{One might think that 
+%  inner piercing bitangents of A and L should also be considered.
+%  But if A and B do not have an inner piercing bitangent,
+%  then any inner piercing bitangent of A and L must intersect B
+%  (if it did not, then Figure~\ref{fig:case2} shows you that an inner piercing bitangent
+%  of A and B would also exist).
+%  Therefore, we can ignore inner piercing bitangents of A and L.
+%  We only need to consider inner bitangents of A and L.}
+%  STILL WANT: choosing inner bitangent of A and L in Figure of case 2 makes too big an umbra.
+These bitangents also guarantee that the sweep does not continue past L.
+Reaching a bitangent of L during the sweep is a sign that the sweep has past L and may stop.
+% Reaching an inner bitangent of A and L is a sign that the front umbra has merged into the
+% back umbra (Figure~\ref{fig:case3}) (and can safely be ignored?)
+\fi
+
+% \clearpage
+
+        % umbra -c .02 data/umbra/cornell1sceneB.pts
+	% umbra data/umbra/vg900new.pts
+	% umbra data/umbra/vg900newest.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/cornell1sceneBlfu.jpg}
+\includegraphics*[scale=.15]{img2/cornell1sceneBgfu.jpg}\
+\includegraphics*[scale=.15]{img2/vg900newgfu.jpg}
+\includegraphics*[scale=.15]{img2/vg900newestgfu.jpg}
+\end{center}
+\caption{Inner piercing sweeps.}
+%         (a) A component of the local  front umbra of A.
+%         (b) The refinement of this component through an inner piercing sweep,
+%             moving in the tangent space of A, producing a component of the global
+%	    front umbra of A.}
+%         (c) Case 1 of the global front umbra of A: (a) a component of the local front umbra, bounded by an outer piercing bitangent of A and L; (b) an outer piercing bitangent of A and L is replaced by an inner piercing bitangent of A and B}
+%         (d) Case 2 of the global front umbra of A: an outer piercing bitangent of A and L is replaced by an inner piercing bitangent of A and L}
+\label{fig:cornell1sceneB}
+% \label{fig:case1} for (c)
+% \label{fig:case2} for (d)
+\end{figure}
+
+
+\subsection{The outer piercing sweep}
+
+% Note: we don't care if the front umbra merges with the back umbra or not,
+% since we will compute the front umbra independently from the back umbra,
+% allowing them to overlap if that is the way it happens (just like we allow
+% the umbra of A to overlap with the umbra of B without concern).
+
+Like the outer sweep, the outer piercing sweep 
+% The second refinement of T 
+calculates the reappearance of L on the other side of the interfering objects,
+which may trim the recently refined bitangent G that bounds the front umbra.
+\ifJournal
+We can find where L reappears around B on the other side by moving in L's tangent space away
+from A.
+The tangent will see past B at some outer bitangent,
+typically at an outer bitangent of B and L (Figure~\ref{fig:cornell1sceneB}).
+This bitangent may or may not (Figure~\ref{fig:cornell1sceneB}) 
+clip the expanded front umbra.
+\fi
+% If the tangent sweeps past G before it sweeps past the interfering objects,
+% the sweep is stopped.
+%
+% Change on 1/20/04:
+% After sweeping past first object B,
+% if an object C still intersects sweeping bitangent, then pivot this bitangent
+% around B.
+%
+However, unlike the outer sweep, it is
+possible for L to become visible through a hole in the blocking objects,
+even though from the perspective of the sweeping tangent on L the objects
+continuously block visibility (Figure~\ref{fig:pivotOutPiercingSweep}).
+For this reason, we sweep on L past the first interfering object, but
+if a second interfering object is found,
+we begin sweeping in the tangent space of the first blocking object rather than L.
+Also, if there is a choice, 
+we must choose the interfering object closest to A.
+% These two alterations distinguish the outer piercing sweep from the outer sweep.
+
+     % umbra -P 5 -e .0001 -f .7 -c .03 ../data/outPiercingSweep4.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/outPiercingSweep4.jpg}
+\end{center}
+\caption{It is possible to grow the umbra too large if the outer piercing sweep remains
+         in the tangent space of L throughout.
+	 In this example, the sweep would continue past A and include all of the
+	 region in front of A in the umbra, which is incorrect.
+         After sweeping past the first object in the tangent space of L,
+         the sweep must switch to the tangent space of the first interfering object.}
+\label{fig:pivotOutPiercingSweep}
+\end{figure}
+
+
+% The general algorithm for the outer piercing sweep of T is as follows:
+% while an object B interferes with T, sweep past B.
+% Let FIRSTB be the first interfering object.
+% The sweep should move in the tangent space of L the first time, and then
+% in the tangent space of FIRSTB in subsequent steps.
+
+The algorithm for the outer piercing sweep of a bitangent T is as follows.
+% again incorporating recursive applications of the sweep when other objects become involved.
+It is applied to each outer piercing bitangent of A and L in turn.
+
+\vspace{.2in}
+
+\centerline{outerPiercingSweep(T,A)}
+
+\begin{enumerate}
+\item G = innerPiercingSweep (T,A); firstTime = true
+%     if G = $\emptyset$, return [nothing to clip]?
+% \item OBJ = L
+\item while an object B interferes with T on the segment between L and G
+(if more than one object interferes, choose the one closest to A)
+\begin{itemize}
+\item if (firstTime)
+\begin{itemize}
+\item FIRSTB = B; firstTime = false
+\item T = closest outer bitangent of B and L, 
+      in sweeping on L away from A
+      % no need for outer piercing bitangent: it's still an outer bitangent if it hits A
+\end{itemize}
+\item else
+\begin{itemize}
+\item T = closest inner bitangent of B and FIRSTB, 
+      in sweeping on FIRSTB, continuing in the same direction as the first sweep
+\end{itemize}
+\item if T has swept past G, return ($\emptyset$)
+% \item if (firstTime) CANDIDATE = \{outer bitangents of A/L and B/L\}
+                      % to stop once you see past B and to stop sweeping past the light
+% \item else CANDIDATE = \{inner bitangents of B/OBJ\}
+% \item T = closest bitangent of CANDIDATE from the present T, sweeping in the tangent space
+%           of OBJ (starting in the direction away from A and continuing in this direction
+%	  in subsequent sweeps)
+%\item if (firstTime) FIRSTB = B
+\end{itemize}
+
+
+\Comment{
+% 1/25/04: it's easier not to worry about this merging case, and allow overlap of front and back umbra;
+% I think that there is merging iff both G and T do not intersect A, in which case
+% the front umbra can be ignored as it is encompassed by the back umbra, but I have no proof yet
+\item if G does not intersect A 
+% [i.e., G is an inner bitangent of A and B; inner piercing sweep swept past A]
+      and T does not intersect A,
+% [outer piercing sweep does not cut G off before it reaches the back umbra], 
+we may have a merging of front and back umbra, so we
+may want to ignore this front umbra component or add a boundary to the global back umbra.
+
+{\bf Comments about this merging step of the algorithm:}
+If the inner piercing sweep sweeps past A (i.e., G is an inner bitangent of A and B),
+then the front umbra may potentially merge into the back umbra.
+If the outer piercing sweep stops at a piercing bitangent (a bitangent that hits A),
+then it will cut off the front umbra before it can merge with the back umbra.
+However, if neither the bitangent generated by the inner piercing sweep
+nor the bitangent generated by the outer piercing sweep hits A,
+then the front umbra has grown into the back umbra.
+}
+
+\item return (T)
+\end{enumerate}
+
+Note that it is possible for the front umbra to grow into the back umbra
+(Figure~\ref{fig:globalback}a).
+It is simplest to allow overlap between the front and back umbra in this case,
+rather than computing the exact merging of the front and back umbra.
+% After all, we already have overlap of umbrae in our divide-and-conquer approach,
+
+
+% There is no need to worry about merging front and back umbra.
+% If we sweep to an inner bitangent of A and B (i.e., the inner piercing sweep
+% has swept past A), then mark this component of the front umbra as special
+% and one of two cases occurs:
+% \begin{itemize}
+% \item
+% 0) 
+% if the outer piercing sweep stops (completely) at a piercing bitangent, 
+% it will cut off the front umbra before it merges with the back umbra,
+% and we keep the umbra component like a normal umbra component**;
+% % if the global back umbra was not refined, then B must not intersect an outer
+% % bitangent of A and L and the outer piercing sweep must stop before it reaches the
+% % outer bitangent of A and L, and in particular, must stop at a piercing position,
+% % so it trims the front umbra component before it merges with the back umbra;
+%
+% \item
+% 1) if the outer piercing sweep stops at a non-piercing bitangent,
+% the front umbra merges with the back umbra and care must be taken.
+% (Perhaps this component should be ignored or a new boundary added.)
+% % In this case, an obstacle must block the outer bitangent of A and L
+% % (otherwise the outer piercing sweep would have stopped before it reached this
+% % outer bitangent, necessarily at a piercing bitangent).
+% % Thus, the back umbra will have been refined nontrivially from its local back umbra.
+
+% % If B intersects an outer bitangent of A and L,
+% % then the refinement of the global back umbra will have swept to merge with the front
+% % umbra and we can ignore the present front umbra component.
+% \end{itemize}
+
+\Comment{
+Unnecessary addition to inner piercing sweep:
+In some situations, L will reappear at an inner bitangent $\cal{I}$ of A and B 
+(Figures~\ref{fig:cornell1sceneD} and \ref{fig:cornell1sceneE}), 
+rather than an inner piercing bitangent.
+This signals that the global front umbra grows into the global back umbra.
+% In this case, the global front umbra merges with the global back umbra
+% and $\cal{I}$ becomes a boundary of the back umbra.
+% (instead of the front umbra),
+The global back umbra may have already absorbed the front umbra
+(Figure~\ref{fig:cornell1sceneD}) 
+if an inner sweep reached the same inner bitangent $\cal{I}$ during the creation of the
+global back umbra (Section~\ref{sec:innersweep}),
+and we are done.
+However, in other cases work is still necessary (Figure~\ref{fig:cornell1sceneE})
+and the bitangent $\cal{I}$ must replace a boundary of the present global back umbra.
+
+Since there is more than one boundary bitangent
+% 2, 3, or 4, depending on the success of inner and outer sweeps
+% bitangents bounding the back umbra, 
+we must be careful to replace the correct one.\footnote{The 
+    bitangent to be replaced can be of various flavors.
+    For example, in Figure~\ref{fig:cornell1sceneE}, it is an outer bitangent of A and L,
+    whereas in Figure~\ref{fig:cornell1sceneH}, it is an inner bitangent of A and C.}
+Each of the bitangents bounding the back umbra 
+was refined from an outer bitangent of A and L,
+so choosing the correct bitangent is equivalent 
+to choosing the correct outer bitangent from which it was refined.
+% so our replacement dilemma can be reduced to choosing the correct outer bitangent of 
+% A and L.
+This is done as follows.
+Let T be the outer piercing bitangent that initiated the inner piercing sweep,
+% The present inner piercing sweep began at an outer piercing bitangent T of A and L, 
+and suppose it is tangent to A at $P_A$.
+We choose the outer bitangent of A and L that is reached first when sweeping L's tangent,
+starting from T and locally moving away from A's inside at $P_A$.
+The bitangent refined from this outer bitangent {\bf in inner or outer sweep?}
+is the one that is replaced by $\cal{I}$ (Figure~\ref{fig:cornell1sceneH}.)
+After all, we want to adjust the umbra on the same side of A as $\cal{I}$.
+By sweeping a tangent of L from the starting point of the inner piercing sweep of 
+this side, we shall reach the starting point of the inner sweep on this side.
+The associated boundary is the one that should be replaced.
+}
+
+% \centerline{oldouterPiercingSweep(T,A)}
+%
+% \begin{enumerate}
+% \item G = innerPiercingSweep (T,A)
+% \item if G = $\emptyset$, return [nothing to clip]
+% % \item sweep direction = away from A
+% \item while an object B interferes with the segment of T between L and G
+% % recall that this means the segment between A and L
+% \begin{enumerate}
+% \item S = \{outer bitangents of B and L\} $\cup$ % to stop once you see past B
+%           \{outer bitangents of A and L\}        % to stop sweeping past the light
+% \item T = closest bitangent of S from the present T, in sweeping on L away from A
+% \item [new] 
+%       if T intersects A, ---
+% \item [new]
+%       if T does not intersect A (after it leaves B), may have merged with back umbra
+% \item if T is an outer bitangent of A and L, return ($\emptyset$) [we have swept past A: this condition implies the next one, but is easier to test; if we are willing to incur the more expensive intersection test,
+% we could remove outer bitangents of A and L from the candidate set]
+% \item if T has swept past G (i.e., T does not intersect the intermediate segment of G),
+%       return ($\emptyset$)
+% \end{enumerate}
+% \item return (T)
+% \end{enumerate}
+
+% ---------------------------------------------------------------------------------
+
+% \clearpage
+
+% \subsection{Defining the global front umbra}
+
+The global front umbra of A is defined by the bitangents returned by the inner 
+and outer piercing sweeps.
+Each outer piercing bitangent T of A and L generates a component
+of the global front umbra of A.
+% unless the inner piercing sweep swept this bitangent until it merged with the back umbra.
+The component is bounded by innerpiercingsweep(T,A),
+outerpiercingsweep(T,A), and the relevant curve segment of A.
+
+% \begin{lemma}
+% Let the local front umbra of A be bounded by the set S of outer piercing bitangents.
+% The global front umbra of A is the region bounded by the bitangents 
+% $\{\mbox{piercing-sweep}(T,A): T \in S\}$.
+% Once again, the intermediate segments of these bitangents are used.
+% \end{lemma}
+
+\Comment{
+Consider the point P in Figure~\ref{vg900newest, P in the seam between the back penumbra and the global front umbra},
+which is outside all of the shadow categories for A (global back umbra,
+global back penumbra, global front umbra, global front penumbra).
+It is clearly in the umbra of the scene.
+However, we do not consider it to be in the umbra of A, since A has no effect
+on the fact that shadow is cast upon P.
+It is classified only in the umbra of B.
+The umbra of the scene is the union of the umbra of the objects,
+and we want to keep track of which objects have caused each point in
+the umbra or penumbra.
+This will allow a quick recalculation of shadow if an object is removed.
+}
+
+% There is no need for a second sweep, because the umbra is now surrounded on the back side and
+% cannot be gotten at in any other way.
+
+% \clearpage
+
+\ifJournal
+\section{Incremental updates}
+
+See third advantage of object-by-object computation in section on Local-global umbrae.
+Discuss how to update the umbra when an object is removed.
+
+\section{A comparison with local analysis}
+
+We analyze visibility
+from a global perspective rather than from one local point 
+(the present position of the camera).
+Consider a solution using the latter strategy. ---
+
+\fi
+
+\Comment{
+\section{Examples}
+
+Consider some more elaborate examples of the umbra 
+\ifJournal
+and penumbra 
+\fi
+cast by a single object.
+In Figure~\ref{fig:whiteoak}, the object A is a white oak leaf.
+\ifSurrounding
+In Figure~\ref{fig:cornell2}, A is the footprint of a building on the Cornell campus designed by Richard
+Meier.
+Notice that A surrounds L.
+\fi
+In Figure~\ref{fig:cornell1and2}, L and A are the footprints of neighboring 
+buildings on the Cornell campus designed by Richard Meier. 
+This illustrates the use of this type of visibility analysis in walkthroughs of an urban landscape.
+
+A 2.5D cityscape is studied, where each object is defined by the extrusion of a smooth curve (each object
+is a building) and movement is at street level (as a pedestrian).
+This allows the examination of this challenging problem in a manageable yet practical environment
+% The study will be of a scene in 2-space where the objects are defined by smooth curves 
+(Figure~\ref{fig:fancyopeningexample}).
+
+Test data: 2d cityscape.
+% abstract closed curves standing in for actors and booms.
+An example application would be the planning of a path for a person 
+(moving in the street plane) amongst skyscrapers such that a certain building is
+always in full view.
+
+SHOW EXTRUDED VERSION OF FIGURE 1'S CITYSCAPE:
+scene ../data/scene/buildingSceneClean3d.
+}
+
+% --------------------------------------------------------------------------------------
+
+\section{The advantages of a divide-and-conquer approach}
+\label{sec:divide}
+
+The divide-and-conquer approach developed by this paper
+approaches visibility analysis from a different perspective,
+considering the objects in a scene one at a time
+% adding objects {\bf incrementally} 
+and determining how they block more and more of the distinguished object L.
+% This paper has developed a divide-and-conquer approach to visibility analysis,
+% for the computation of visibility in a smooth scene.
+%
+    % However, the problem again reduces to the computation of extremal visibility events,
+    % which in this smooth case are bitangents.
+This divide-and-conquer approach has several benefits, 
+including incremental computation, parallelizability,
+and global understanding of visibility,
+which we now consider.
+
+% We use a divide-and-conquer approach to compute the effect of
+% every object to the distinguished object's invisibility.
+
+% ---------------------------------------------------------------------------------
+% incremental
+
+The algorithm,
+in which each object defines the region of invisibility for which it is responsible,
+allows efficient incremental updates.
+Consider the addition of an object A to the scene.
+To recompute invisibility, the invisibility region defined by the new object A
+must be computed and A must be incorporated into other objects' invisibility regions.
+However, A can only affect the invisibility region of an object B if it lies 
+between B and L and within the outer bitangents of B and L,
+which greatly limits the number of candidates.
+For example, if A lies on the outskirts of the scene, no other object B's region 
+must be updated; or if A lies close to L in the interior of the scene, only objects B
+that lie in the swath behind A must be updated.
+The removal of an object has similar bounded effects.
+
+% SHOW how we can assign obstacles to regions (SEE SOFTWARE)?
+
+% ---------------------------------------------------------------------------------
+% parallelization
+The algorithm is inherently parallelizable.
+The local and global umbra of each object $A_i$ may be computed 
+in parallel on a different processor $P_i$.
+We can even parallelize the construction of the front and back umbra
+within this computation.
+The bitangents of each pair of objects in the scene of $n$ objects
+may be precomputed in parallel on $n^2$ processors.
+Given the complexity of visibility analysis,
+visibility algorithms that allow a parallel treatment are particularly attractive.
+The issues of parallel computation of visibility warrant a deeper study,
+which we are undertaking.
+
+% ---------------------------------------------------------------------------------
+% global understanding
+Finally, the divide-and-conquer algorithm yields a deeper understanding
+of the global structure of the invisibility,
+% The structure of invisibility is understood at a global level,
+even yielding information about which objects contribute to the blocking of each 
+invisible point, a form of quantitative invisibility.
+
+\section{Conclusions}
+\label{sec:conclusions}
+
+% Given a scene of smooth objects containing a distinguished smooth object L,
+This paper has addressed an important problem in visibility analysis:
+how to compute the region where L is invisible,
+where L is a smooth object embedded in a scene of smooth objects.
+    % Previous work has identified visibility computation with
+    % the computation of extremal visibility, usually extremal lines that see the light.
+Each object A is responsible for the definition of a region of invisibility,
+the local region that it impacts.
+The invisibility of the scene is simply the union of the invisibility cast by each object.
+The invisibility region cast by A is computed in two stages.
+First, it is computed as if A was the sole object in the scene.
+Next, it is refined to incorporate the context of neighbouring
+objects using four sweeps, two in front and two in back.
+The first sweep may expand the invisibility cast by A due to objects that
+lie between A and L, and is computed by sweeping a tangent of A.
+The second sweep may shrink the invisibility cast by A and is computed by
+sweeping a tangent of L or an interfering object.
+All sweeps are discretized by observing that visual events always occur at bitangents.
+
+
+% ---------------------------------------------------------------------------------
+% smoothness
+We have already studied the advantages of the divide-and-conquer approach
+introduced by this paper (Section~\ref{sec:divide}).
+The other contribution of this paper to visibility analysis is the
+algorithmic treatment of smooth scenes.
+The analysis of smooth scenes offers great promise, despite its challenges,
+because of the large number of existing smooth models, which can be handled directly,
+the reduction in cardinality of the primitives in the scene
+when compared with polyhedral meshes,
+and the new approaches that it opens up, such as sweeping.
+
+% ---------------------------------------------------------------------------------
+% future work
+There are several directions for future work.
+The extension of this work to partial visibility (penumbra) is being studied.
+The analysis of smooth 3D scenes has been a goal from the beginning.
+The structure of this analysis is now much clearer, learning from the divide-and-conquer
+approach and structured filtering of the 2d analysis.
+Moreover, the 2d analysis can be incorporated directly into the 3d analysis.
+We are interested in the application of the analysis to movement in cityscapes
+(Figure~\ref{fig:cityscape}).
+% Visual events become surfaces and sweeping is done in ---.
+% 3D (sweeping, bitangent developables).
+%
+% The robustness of computing the special bitangents that define visual events 
+% (inner and outer bitangents, inner and outer piercing bitangents) can be improved.
+%
+We are also interested in comparing smooth solutions to visibility analysis with 
+linear solutions,
+evaluating the tradeoff between the reduced number
+of primitives in smooth scenes and the added complexity of each operation on
+the primitive.
+A deeper analysis of the incremental behavior of the algorithm is also necessary.
+
+% Much promise.
+
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/cityscape2.jpg}
+\includegraphics*[scale=.15]{img2/cityscape4.jpg}
+\end{center}
+\caption{Visibility analysis in flatland can naturally be applied to visibility
+         analysis of a cityscape at sidewalk level}
+\label{fig:cityscape}
+\end{figure}
+
+% ---------------------------------------------------------------------------------
+% general algorithm
+
+\Comment{
+The region of invisibility carved out by each object is found by an active and organized
+search for visual events.
+Potential visual events (inner/outer bitangents and inner/outer piercing bitangents)
+are filtered and organized into invisibility regions by sweeping.
+
+The invisibility region defined by the object A is bounded by a collection of bitangents
+between A, L, and intervening objects of the scene.
+The definition of the umbra is a search for the bitangents that bound the umbra.
+}
+
+
+% \section{Computing bitangents}
+%
+% Bitangents are best computed in dual space by the intersection of line curves
+% \cite{farinProj99,pottmannLineBook}.
+% With a line curve, a curve is represented by its tangents.
+% By interpreting the control lines (which are vectors) of a line curve
+% as control points, another curve is generated dual to the original curve.
+% The Bezier representation of this dual representation of a Bezier curve 
+% is given in \cite{johnstoneShapeModeling}.
+% The intersection points of these curves in dual space correspond to the bitangents
+% of the original curves.
+%
+% \clearpage
+
+\ifJournal
+\section{Point location within a visibility zone}
+
+{\em For purposes of point location}, the back umbra of A can be defined 
+as a polygon as follows.
+Begin with the curve segment of A that lies between the two points of
+bitangency and lies on the other side from L.
+Walk from A's point of tangency with $T_1$ to the intersection
+of the ray defined by $T_1$ with the room, around the room to 
+the intersection of the ray defined by $T_2$ with the room, and back
+to the point of tangency with $T_2$,
+where $T_1$ and $T_2$ are the two outer bitangents of A and L.
+
+You can build the back umbra polygon by walking from the room
+point of an outer bitangent (umbraExtreme) to its point of tangency with A,
+around on a curve segment to the point of tangency of the other outer bitangent,
+to its room point (umbraExtreme) and around the room polygon until the polygon
+is closed.
+
+% Our original definition, which does not generalize to surrounding objects.
+% If A does not surround L, begin by intersecting the inner halfspaces
+% of the outer bitangents of A and L with the room polygon.
+% Then intersect this polygon with the halfspace bounded 
+% by the chord of A defined by the two points of tangency of
+% the outer bitangents, using the side away from L.
+% Finally, replace the chord segment by the curve segment between the two
+% points of tangency (the one that lies away from L).
+
+% \clearpage
+\fi
+
+% ------------------------------------------------------------------------------------
+
+\bibliographystyle{latex8}
+% \bibliographystyle{plain}
+\begin{thebibliography}{99}
+
+\bibitem{assarsson03}    % interactive shadows for meshes: one way to push shadows
+Assarsson, U. and T. Akenine-M\"{o}ller (2003)
+A Geometry-based Soft Shadow Volume Algorithm using Graphics Hardware.
+SIGGRAPH '03, 511--520.
+
+\bibitem{baciu00}
+Baciu, G. and C. Yu (2000)
+Visibility in the Presence of Occluders with Curved Boundaries.
+Pacific Graphics 2000, 105--114.
+
+\bibitem{bala03} % also looking for interactive shadow edges for meshes
+Bala, K., B. Walter and D. Greenberg (2003)
+Combining Edges and Points for Interactive High-Quality Rendering.
+SIGGRAPH '03, 631--640.
+
+\bibitem{chen91}
+Chen, S. and H. Freeman (1991)
+On the Characteristic Views of Quadric-Surfaced Solids.
+IEEE Workshop on Directions in Automated CAD-Based Vision, 34--43.
+
+\bibitem{drettakis94}  % with Fiume on discontinuity mesh
+Drettakis, G. and E. Fiume (1994)
+A Fast Shadow Algorithm for Area Light Sources Using Backprojection.
+SIGGRAPH '94, 223--230.
+
+\bibitem{durand96}
+Durand, F. and G. Drettakis and C. Puech (1996)
+The 3D visibility complex: a new approach to the problems of accurate
+visibility.
+7th Eurographics Workshop on Rendering, Portugal.
+
+\bibitem{durand97a}
+Durand, F. and G. Drettakis and C. Puech (1997)
+The Visibility Skeleton: A Powerful and Efficient Multi-Purpose Global
+Visibility Tool.
+SIGGRAPH '97, 89--100.
+
+\bibitem{durand97b}
+Durand, F. and G. Drettakis and C. Puech (1997)
+The 3D Visibility Complex: a unified data structure for global
+visibility of scenes of polygons and smooth objects.
+9th Canadian Conference on Computational Geometry.
+
+% \bibitem[Durand 97]{durand97}
+% Durand, F. and G. Drettakis and C. Puech (1997)
+% 3D Visibility made visibly simple: an introduction to the Visibility
+% Skeleton.
+% Video Proceedings of ACM Symposium on Computational Geometry, Nice.
+
+\bibitem{durand00a}
+Durand, F. (2000)
+A Multidisciplinary Survey of Visibility.
+SIGGRAPH 2000 Course Notes on Visibility: Problems, Techniques
+and Applications.
+Also available from http://graphics.lcs.mit.edu/~fredo/.
+
+\bibitem{durand00b}
+Durand, F. and G. Drettakis and J. Thollot and C. Puech (2000)
+Conservative Visibility Preprocessing using Extended Projections.
+SIGGRAPH '00, 239--248.
+
+% \bibitem[Orti 96]{orti96}
+% Orti, R. and F. Durand and S. Rivi$\grave{e}$re and C. Puech (1996)
+% Using the visibility complex for radiosity computation.
+% ACM Workshop on Applied Computational Geometry, Philadelphia.
+
+% another Orti paper: see cv.gb.pdf radiosity for dynamic scenes (bottom of page)
+
+% \bibitem[Rivi$\grave{e}$re 95]{riviere95}
+% Rivi$\grave{e}$re, S. (1995)
+% Topologically sweeping the visibility complex of polygonal scenes.
+% 11th ACM Symposium on Computational Geometry, Vancouver, C36--37.
+
+% \bibitem[Rivi$\grave{e}$re 97]{riviere97}
+% Rivi$\grave{e}$re, S. (1997)
+% Dynamic visibility in polygonal scenes with the visibility complex.
+% ACM Symposium on Computational Geometry, Nice, 421--423.
+
+% \bibitem[Teller 92]{teller92}
+% Teller, S. (1992)
+% Computing the Antipenumbra of an Area Light Source.
+% SIGGRAPH '92, 139--148.
+
+\bibitem{eggert93}
+Eggert, D. and K. Bowyer (1993)
+Computing the Perspective Projection Aspect Graph of Solids of Revolution.
+IEEE Transactions on Pattern Analysis and Machine Intelligence 15(2), 109--127.
+
+\bibitem{elber90}
+Elber, G. and E. Cohen (1990)
+Hidden Curve Removal for Free Form Surfaces.
+SIGGRAPH '90, 95--104.
+
+% \bibitem{ghali}
+% Ghali, S.
+% Computation and Maintenance of Visibility and Shadows in the Plane.
+% Technical Report.
+
+\bibitem{gigus90}
+Gigus, Z. and J. Malik (1990)
+Computing the Aspect Graph for Line Drawings of Polyhedral Objects.
+IEEE Transactions on Pattern Analysis and Machine Intelligence 12(2), 113--122.
+
+\bibitem{unc03}   % hard shadows for huge models: another way to push shadows
+Govindaraju, N. et. al. (2003)
+Interactive Shadow Generation in Complex Environments.
+SIGGRAPH '03, 501--510.
+
+\bibitem{hart99}   % see p. 153: call for work on visibility on nonpolygonal surfaces
+Hart, D., P. Dutr\'{e} and D. Greenberg (1999)
+Direct Illumination with Lazy Visibility Evaluation.
+SIGGRAPH '99, 147--154.
+
+\bibitem{heckbert92a}
+Heckbert, P. (1992)
+Radiosity in Flatland.
+Eurographics '92, Computer Graphics Forum 11(3), 181--192.
+
+% \bibitem{heckbert92b}
+% Heckbert, P. (1992)
+% Discontinuity Meshing for Radiosity.
+% Third Eurographics Workshop on Rendering, 203--216.
+
+\bibitem{koenderink76}
+Koenderink, J. and A. van Doorn (1976)
+The Singularities of the Visual Mapping.
+Biological Cybernetics 24, 51--59.
+
+% \bibitem[Koenderink 90]{koenderink}
+% Koenderink, J. (1990)
+% Solid Shape.
+% MIT Press (Cambridge, MA).
+
+\bibitem{leyvand03}
+Leyvand, T., O. Sorkine and D. Cohen-Or (2003)
+Ray Space Factorization for From-Region Visibility.
+SIGGRAPH '03, 595--604.
+
+\bibitem{lischinski92}
+Lischinski, D., F. Tampieri and D. Greenberg (1992)
+Discontinuity Meshing for Radiosity.
+IEEE Computer Graphics and Applications 12(6), 25--39.
+
+\bibitem{petitjean92}
+Petitjean, S. and J. Ponce and D. Kriegman (1992)
+Computing Exact Aspect Graphs of Curved Objects: Algebraic Surfaces.
+International Journal of Computer Vision 9(3), 231--255.
+
+% \bibitem{petitjean96}
+% Petitjean, S. (1996)
+% The Enumerative Geometry of Projective Algebraic Surfaces and
+% the Complexity of Aspect Graphs.
+% International Journal of Computer Vision 19(3), 1--28.
+
+\bibitem{pocchiola96}
+Pocchiola, M. and G. Vegter (1996)
+The Visibility Complex.
+International Journal of Computational Geometry and Application 6(3),
+279--308.
+
+\bibitem{ponce90}
+Ponce, J. and D. Kriegman (1990)
+Computing Exact Aspect Graphs of Curved Objects: Parametric Surfaces.
+Proc. of AAAI-90, 1074--1079.
+
+\bibitem{sen03}          % also looking for interactive speeds
+Sen, P., M. Cammarano and P. Hanrahan (2003)
+Shadow Silhouette Maps.
+SIGGRAPH '03, 521--526.
+
+% \bibitem[Sripradisvarakul 89]{sri89}
+% Sripradisvarakul, T. and R. Jain (1989)
+% Generating Aspect Graphs for Curved Objects.
+% Workshop on Interpretation of 3D Scenes, 109--115.
+
+\bibitem{stewart94}
+Stewart, A. J. and S. Ghali (1994)
+Fast Computation of Shadow Boundaries Using Spatial Coherence and Backprojections.
+SIGGRAPH '94, 231--238.
+
+\bibitem{teller91}
+Teller, S. and C. Sequin (1991)
+Visibility Preprocessing for Interactive Walkthroughs.
+SIGGRAPH '91, 61--67.
+
+\bibitem{teller93}
+Teller, S. and P. Hanrahan (1993)
+Global Visibility Algorithms for Illumination Computations.
+SIGGRAPH '93, 239--246.
+
+\bibitem{williams78}
+Williams, L. (1978)
+Casting Curved Shadows on Curved Surfaces.
+SIGGRAPH '78, 270--274.
+
+\bibitem{wooReview}
+Woo, A., P. Poulin and A. Fournier (1990)
+A Survey of Shadow Algorithms.
+IEEE Computer Graphics and Applications 10(6), 13--32.
+
+% \bibitem{jjFullJournalSmoothVisibilityInFlatland}
+% Johnstone, J. (2004)
+% Smooth visibility in flatland, in preparation.
+
+\end{thebibliography}
+
+% \clearpage
+
+\ifJournal
+	% umbra -r 1.2 data/umbra/woak.pts
+\begin{figure*}
+\begin{center}
+\includegraphics*[scale=.15]{img2/woak.jpg}
+\includegraphics*[scale=.15]{img2/woakfu.jpg}
+\includegraphics*[scale=.15]{img2/woakbu.jpg}
+\ifJournal
+   \includegraphics*[scale=.25]{img2/woakfp.jpg}
+   \includegraphics*[scale=.25]{img2/woakbp.jpg}
+\fi
+\end{center}
+\caption{Analyzing the visibility of L.
+        (a) The scene A and L.
+        (b) The front umbra of A.
+        (c) The back umbra of A.
+\ifJournal
+        (d) The front penumbra of A.
+        (e) The back penumbra of A.
+\fi
+         }
+\label{fig:whiteoak}
+\end{figure*}
+
+	% umbra -r 1.2 data/umbra/woak.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/woakVisibility.jpg}
+\end{center}
+\caption{Analyzing the visibility of an object (a) 2.5D version (b) 2D version.}
+\label{fig:fancyopeningexample}
+\end{figure}
+
+	% umbra -S -r 1.2 data/scene/lightSceneHud
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/hud.jpg}
+\includegraphics*[scale=.15]{img2/hudbu.jpg}
+\includegraphics*[scale=.15]{img2/hudfu.jpg}
+\includegraphics*[scale=.15]{img2/hudbp.jpg} 
+\includegraphics*[scale=.15]{img2/hudfp.jpg}
+\end{center}
+\caption{Analyzing the invisibility of L.
+         A is the footprint of Marcel Breuer's HUD building.
+        (a) The scene A and L 
+        (b) The back umbra of A.
+        (c) The front umbra of A.
+        (d) The back penumbra of A.
+        (e) The front penumbra of A.
+         }
+\label{fig:hud}
+\end{figure}
+\fi
+
+\ifSurrounding
+	% umbra -w data/umbra/vg10.pts > foobar &
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/vg10.jpg}
+\includegraphics*[scale=.15]{img2/vg10outer.jpg}
+\includegraphics*[scale=.15]{img2/vg10back.jpg}
+\end{center}
+\caption{Defining the back umbra of A when A surrounds L. (a) A surrounds L. (b) The two outer bitangents of A and L. (c) The back umbra of A.}
+\label{fig:backsurrounding}
+\end{figure}
+\fi
+
+\ifJournal
+\begin{figure}
+\begin{center}
+% \includegraphics*[scale=.15]{img2/--.jpg}
+\end{center}
+\caption{An inner piercing bitangent of A and B}
+\label{fig:innerpiercing}
+\end{figure}
+\fi
+
+\ifSurrounding
+	% umbra -w data/umbra/vg10new.pts > foobar &
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/vg10newpiercing.jpg}
+\includegraphics*[scale=.15]{img2/vg10newouterpiercing.jpg}
+\includegraphics*[scale=.15]{img2/vg10newfront.jpg}
+\end{center}
+\caption{Defining the front umbra of A when A surrounds L. 
+        (a) The piercing bitangents of A and L.
+        (b) The outer piercing bitangents. 
+        (c) The front umbra of A.}
+\label{fig:frontsurrounding}
+\end{figure}
+\fi
+
+\ifSurrounding
+	% umbra -S -w -r 1.5 data/scene/lightSceneCornell2
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/cornell2.jpg}
+\includegraphics*[scale=.15]{img2/cornell2fu.jpg}
+\includegraphics*[scale=.15]{img2/cornell2bu.jpg}
+   \includegraphics*[scale=.15]{img2/cornell2fp.jpg}
+   \includegraphics*[scale=.15]{img2/cornell2bp.jpg} 
+\end{center}
+\caption{Analyzing the visibility of L.
+        (a) The scene A and L.
+        (b) The front umbra of A.
+        (c) The back umbra of A.
+        (d) The front penumbra of A.
+        (e) The back penumbra of A.
+          }
+\label{fig:cornell2}
+\end{figure}
+\fi
+
+\ifJournal
+	% umbra -S -r 1.2 data/scene/buildingSceneCornell1
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/cornell1and2.jpg}
+\includegraphics*[scale=.15]{img2/cornell1and2bu.jpg}
+\ifJournal
+   \includegraphics*[scale=.15]{img2/cornell1and2fp.jpg}
+   \includegraphics*[scale=.15]{img2/cornell1and2bp.jpg} 
+\fi
+\end{center}
+\caption{Analyzing the visibility of L.
+        (a) The scene A and L.
+        (b) The back umbra of A.
+\ifJournal
+        (c) The front penumbra of A.
+        (d) The back penumbra of A.
+\fi
+         }
+\label{fig:cornell1and2}
+\end{figure}
+\fi
+
+\ifJournal
+	% umbra data/umbra/globalumb0.pts > foobar &
+	% umbra data/umbra/globalumb2.pts > foobar &
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/gu0global.jpg}
+\includegraphics*[scale=.15]{img2/gu2global.jpg}
+\includegraphics*[scale=.15]{img2/gu2globalall.jpg}
+\end{center}
+\caption{A simple example of the effect of another object on an object's umbra. (a) The local umbra of A. (b) The global umbra of A. (c) The global umbra of all objects in the scene.}
+\label{fig:localvsglobalpure}
+\end{figure}
+\fi
+
+\ifJournal
+	% umbra data/umbra/globalumbmax.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/gumax.jpg}
+\end{center}
+\caption{The maximal size of the global back umbra is the back penumbra}
+\label{fig:maxumbra}
+\end{figure}
+
+% GIVE AN EXAMPLE OF SWEEPING PAST G.
+\fi
+
+
+
+
+
+\ifJournal
+        % umbra -c .05 -f .3 ../data/cornell1sceneD.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/cornell1sceneDinner.jpg}
+\includegraphics*[scale=.15]{img2/cornell1sceneDgbu.jpg}
+\end{center}
+\caption{(a) The local front umbra of A, with inner bitangents of the scene.
+         (b) The global back umbra of A before the inner piercing sweep, already merged
+             with the front umbra.}
+\label{fig:cornell1sceneD}
+\end{figure}
+\fi
+
+\ifJournal
+        % umbra -c .05 -f .3 ../data/cornell1sceneE.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/cornell1sceneEinner.jpg}
+\includegraphics*[scale=.15]{img2/cornell1sceneElbu.jpg}
+\end{center}
+\caption{(a) The local front umbra of A, with inner bitangents of the scene.
+         (b) The global back umbra of A before the inner piercing sweep, not yet merged
+             with the front umbra.
+         (c) The global back umbra of A after the inner piercing sweep.
+             Notice the merging of the front and back umbra.
+             NOTICE THAT OUTER PIERCING SWEEP NECESSARILY CLIPS IT.}
+\label{fig:cornell1sceneE}
+\end{figure}
+
+        % umbra -P 11 -c .05 -f .5 ../data/cornell1sceneH.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/cornell1sceneHinner.jpg}
+\includegraphics*[scale=.15]{img2/cornell1sceneHlbu.jpg}
+\end{center}
+\caption{INTERESTING EXAMPLE.
+         (a) The local front umbra of A, with inner bitangents of the scene.
+         (b) The local back umbra of A.
+         (b) The global back umbra of A before the inner piercing sweep, not yet merged
+             with the front umbra.
+         (c) The global back umbra of A after the inner piercing sweep.
+             Notice the merging of the front and back umbra.}
+\label{fig:cornell1sceneH}
+\end{figure}
+\fi
+
+\ifJournal
+	% umbra data/umbra/globalumb2.pts > foobar &
+	% umbra data/umbra/vg900new.pts > foobar &
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/gu2umbra.jpg}
+\end{center}
+\caption{This companion paper develops the theory of this image}
+% \label{}
+\end{figure}
+
+        % umbra data/umbra/vg9.pts > foobar &
+	% umbra data/umbra/vg900.pts > foobar &
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/vg9global.jpg}
+\includegraphics*[scale=.15]{img2/vg900global.jpg}
+\includegraphics*[scale=.15]{img2/vg900globalall.jpg}
+\end{center}
+\caption{ANOTHER EXAMPLE (POSSIBLY USEFUL): The addition of objects can affect the global umbra: (a) The local umbra of A. (b) The global umbra of A. (c) The global umbra of all objects in the scene.}
+\label{fig:globalvg900}
+\end{figure}
+\fi
+
+\ifJournal
+\clearpage
+
+\subsection{The local penumbra}
+
+The computation of the penumbra cast by A---the region that sees some but not all of L---
+is similar to the computation of the umbra.
+The difference is that bitangents are chosen that separate A and L,
+instead of bitangents that define a halfspace containing A and L.
+Consider the back penumbra of A.
+
+\begin{defn2}
+An extremal bitangent of A and L is {\bf inner} if
+\begin{itemize}
+\item A and L lie on opposite sides of T in the neighbourhood of A's point of bitangency $P_A$.
+\end{itemize}
+That is, T defines a separating halfplane (Figure~\ref{fig:backpenumbra}a).
+\end{defn2}
+
+Unless A intersects the convex hull of L (in which case the back penumbra is empty),
+A and L will have two inner bitangents.
+Consider the region bounded by the late segments of the two
+inner bitangents of A and L (Figure~\ref{fig:backpenumbra}b).
+% too early to introduce this idea: This is the maximal extent of the back umbra of A when other obstacles are added to the scene.
+The back penumbra of A is this region minus the front and back umbra of A (Figure~\ref{fig:backpenumbra}c).
+This construction of the back penumbra works for surrounding objects as well 
+(Figure~\ref{fig:backpenumbrasurrounding}).
+
+	% umbra data/umbra/umbra1.pts > foobar &
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/umbra1inner.jpg}
+\includegraphics*[scale=.15]{img2/umbra1maxumbra.jpg}
+\includegraphics*[scale=.15]{img2/umbra1bp.jpg}
+\end{center}
+\caption{Defining the back penumbra. 
+  (a) The inner bitangents of A and L.
+  (b) The region between the inner bitangents.
+  (c) The back penumbra of A.}
+\label{fig:backpenumbra}
+\end{figure}
+
+	% umbra -w data/umbra/vg10new.pts > foobar &
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/vg10newinner.jpg}
+\includegraphics*[scale=.15]{img2/vg10newmaxumbra.jpg}
+\includegraphics*[scale=.15]{img2/vg10newbp.jpg}
+\end{center}
+\caption{Defining the back penumbra when A surrounds L.
+  (a) The inner bitangents of A and L.
+  (b) The region between the inner bitangents.
+  (c) The back penumbra of A.}
+\label{fig:backpenumbrasurrounding}
+\end{figure}
+
+Analogously, the front penumbra is defined by replacing the front umbra's outer piercing bitangent by
+an inner piercing bitangent that separates A and L.
+
+\begin{defn2}
+A piercing bitangent of A and L is {\bf inner} (Figure~\ref{fig:frontpenumbra}a) if
+\begin{itemize}
+\item A and L lie on opposite sides of T in the neighbourhood of A's point of bitangency $P_A$.
+\end{itemize}
+\end{defn2}
+
+Each inner piercing bitangent defines a component of the front penumbra:
+the closed area bounded by the intermediate segment of this bitangent,
+minus the associated component of the front umbra (Figure~\ref{fig:frontpenumbra}c and 
+\ref{fig:frontpenumbrasurrounding}c).
+
+	% umbra data/umbra/umbra1.pts > foobar &
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/umbra1innerpiercing.jpg}
+\includegraphics*[scale=.15]{img2/umbra1maxfront.jpg}
+\includegraphics*[scale=.15]{img2/umbra1fp.jpg}
+\end{center}
+\caption{Defining the front penumbra. 
+         (a) The inner piercing bitangents.
+         (b) The region bounded by the late inner bitangents.
+         (c) The front penumbra of A.}
+\label{fig:frontpenumbra}
+\end{figure}
+
+	% umbra -w data/umbra/vg10new.pts > foobar &
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img2/vg10newinnerpiercing.jpg}
+\includegraphics*[scale=.15]{img2/vg10newmaxfront.jpg}
+\includegraphics*[scale=.15]{img2/vg10newfp.jpg}
+\end{center}
+\caption{Defining the front penumbra when A surrounds L. 
+         (a) The inner piercing bitangents.
+         (b) The region bounded by the late inner bitangents.
+         (c) The front penumbra of A.}
+\label{fig:frontpenumbrasurrounding}
+\end{figure}
+
+\subsection{The global penumbra}
+
+\clearpage
+
+\section{Future work}
+
+Once 3d visibility analysis is analyzed, we can study practical problems
+such as tumor irradiation.
+
+{\bf X-ray application}
+X-ray interpretation of application 2:
+For example, if the identified object is a tumor and the other objects in the scene
+are surrounding organs and bones,
+the visible zone encodes ideal locations for an X-ray source to radiate the tumor.
+X-ray interpretation of application 3:
+For example, if the identified object is a healthy organ
+and the other objects in the scene are bones that block radiation,
+the invisible zone is an ideal location for an X-ray source (since the organ will
+be completely blocked from the harmful radiation of the X-ray).
+Once a potential location for the X-ray source is found that sees the tumor (using the
+tumor as identified object) and
+is shielded from a healthy organ (using the healthy organ as identified object), 
+the visibility of the X-ray source can be analyzed
+with respect to the entire body (using the X-ray as identified object)
+to verify that no important healthy structure is
+visible to radiation.
+
+{\bf Paint gun application}
+Replacing the X-ray source with a paint spray gun yields another application
+(e.g., for robotic spraying of a car).
+
+% -----------------------------------------------------------------------------
+
+\clearpage
+
+\section{Introduction}
+
+PRESENT THE MATERIAL INDEPENDENTLY FROM LIGHTING AT FIRST.
+
+We are interested in the following analytic lighting problem:
+the lighting by a smooth area light source 
+of a room full of smooth objects.
+Previous work on lighting has primarily concentrated on the simpler problem of
+polyhedral objects and point or polygonal light sources.
+{\bf The umbra cast by a smooth area light in a 2d scene
+of smooth objects, where smooth means bounded by $C^1$-continuous curves,
+is already a very interesting problem, and is the focus of this paper.}
+In this paper, we compute the umbra cast in 2-space 
+% or 2$\frac{1}{2}$-space: not really since angle looking up changes visibility
+when the light and the objects % $\{B_i\}_{i=1}^n$ 
+in the scene are bounded by smooth closed curves,
+already a challenging problem that paves the way for an attack 
+on the general lighting problem in 3-space.
+% This is a very challenging problem, too broad to consider immediately 
+% in its fullest generality.
+% Problem: computing the umbra cast by a smooth area light source in a smooth 
+% scene in 2-space or 2$\frac{1}{2}$-space.
+% This is already an interesting and challenging problem.
+The umbra of a scene is the area that does not see any of the light.
+% collection of regions in the scene
+Umbral computation can be interpreted
+more generally as the computation of regions that are entirely invisible
+to a distinguished object, an important visibility question.
+For example, if the light is reinterpreted as the camera,
+the umbra defines parts of the scene that do not need to be rendered.
+If the light is reinterpreted as a robot, the umbra defines parts of the
+scene that do not see the robot.
+Visibility in 2-space is particularly important in robotics, as the robot
+moves on a 2-dimensional floor.
+% The theory developed in this paper also paves the way for an attack on the 
+% general lighting problem in 3-space.
+
+{\bf See 02Dagstuhl/img/umbra (and Dagstuhl talk slides) for coherent series of images illustrating 
+the local vs. global umbra, in simple circle examples.}
+
+
+	\begin{defn2}
+	The {\bf umbra of a scene} is the collection of regions 
+	in the scene that do not see any of the light.
+	\end{defn2}
+
+The main characteristic of this paper that distinguishes it from much work on
+lighting is its concentration on a smooth light and smooth objects.
+Its other distinguishing characteristic is that we are interested in 
+defining the global structure of the umbra.
+(THIS ISN'T DISTINGUISHING: OTHER WORK ON DISCONTINUITY MESH DOES THIS.)
+That is, we are interested in defining the umbra region by region,
+rather than point by point.
+It is popular to define lighting point by point,
+answering the question 'is point P in the umbra?'.
+We are interested in a deeper understanding of the structure of the umbra,
+through a direct definition of the area that defines the umbra.
+This is more intellectually satisfying but certainly more challenging as well.
+
+\ifTalk
+This distinction between point and regional approaches is analogous to the 
+two ways for computing a tangent on a Bezier curve:
+computing the tangent at a point
+or computing the hodograph of the curve, representing all of the tangents.)
+\fi
+
+% ------------------------------------------------------------------------------
+
+\clearpage
+
+% ------------------------------------------------------------------------------
+
+\clearpage
+
+\section{Taking umbrage} % A divide and conquer strategy
+
+We will compute the umbra of a scene using a divide and conquer strategy,
+one object at a time.
+First, we compute the umbra cast by each object in isolation
+(the local umbra).
+We then refine and expand the umbra of each object
+by taking other objects into account (the global umbra of an object).
+Finally, the umbra of the scene is defined in terms of these object umbrae.
+
+The computation of the umbra one object at a time has the advantage
+of simplicity, parallelizability, and incremental computation.
+The concentration on one object at a time is
+an important simplification to the structure of the computation,
+since it allows one object to (temporarily) dominate all of the other objects.
+That is, in the computation of the umbra cast by an object A, 
+all objects are of interest only through their relationship
+to A or the light, rather than their mutual interrelationships.
+This dominance of one object yields important simplifications when
+reasoning about lighting.
+Another benefit is parallelizability:
+the computation of the umbra of an object A can be performed at the same
+time as the computation of the umbra of an object B.
+This can be an important factor in a large scene.
+% This keeps less balls up in the air at once.
+% Thus, we only need to consider n-to-1 relationships, not n-to-n relationships.
+A third benefit of computing the umbra object by object
+is that a point of the umbra will know which objects are
+responsible for its inclusion in the umbra.\footnote{The umbra cast by 
+	A and the umbra cast by B may certainly overlap.}
+This will allow efficient incremental updates to the umbra upon the addition
+or removal of an object.
+
+
+SECTION REVIEW:
+
+Section~\ref{sec:innersweep};
+Section~\ref{sec:outersweep};
+While the first sweep refines the local umbra bitangent,
+the second sweep refines the global umbra bitangent
+just computed in the first sweep.
+% ------------------------------------------------------------------------------
+
+\clearpage
+
+\section{Lighting}
+
+We will divide the umbra into two regions: the umbra behind the object
+and the umbra in front of the object.
+
+Consider a single object A.
+
+\begin{defn2}
+The {\bf umbra} of a scene is the region that sees none of the light.
+The {\bf penumbra} of a scene is the region that sees some, but not all,
+of the light.
+The umbra will be computed one object at a time.
+(The resulting regions may, and usually will, overlap.)
+The umbra of each object will be divided into two regions, the {\bf front} 
+and {\bf back umbra}, which will be computed separately.
+Intuitively, the front umbra lies in a series of pockets between the 
+object and the light, while the back umbra lies behind the object
+(on the opposite side of the light).
+More precisely, the front umbra is defined by piercing bitangents
+while the back umbra is defined by inner and outer bitangents.
+The exact definition of these areas is delayed.
+The computation of a front or back umbra is further refined
+by first computing it locally, then globally.
+The {\bf local front umbra} of an object A is the 
+front umbra of A if A was the only object in the scene.
+The {\bf global front umbra} of A is the front umbra of A when the effect
+of all objects in the scene is considered.
+It is computed by refining the local front umbra.
+Similarly for local and global back umbrae.
+\end{defn2}
+
+\begin{defn2}
+The {\bf discontinuity mesh} of a scene S of objects is ---.
+\end{defn2}
+
+The discontinuity mesh of a scene S is solved when S is composed of polyhedra (Fiume, Stewart).
+In this paper, we study the discontinuity mesh when S is composed of smooth curves.
+A related result is the visibility preprocessing of a polygonal environment of Teller and Sequin.
+
+% ----------------------------------------------------------------------------------
+
+\clearpage
+
+\section{A glossary of terms}
+
+\begin{defn2}
+\label{defn:surround}
+A {\bf surrounds} B if B lies entirely inside the convex hull of A.
+\end{defn2}
+
+Since there is no umbra if the light surrounds the object, 
+we can assume without loss of generality 
+that the light does not surround the object.
+If the object surrounds the light (Figure~\ref{fig:G2}c),
+the theory is more complicated.
+% As we develop the theory, we shall point out how it simplifies when
+% the object does not surround the light,
+% which is true in the vast majority of cases.
+Since the object does not surround the light in the vast majority
+of cases, we postpone this unusual case until Section~\ref{sec:surround}
+and assume that the object does not surround the light.
+
+\begin{defn2}
+\label{defn:outer}
+Let A and B be closed curves, where neither curve surrounds the other.
+Let $t$ be a tangent of A,
+and let $T$ be a bitangent of A and B with points of tangency $P_A \in A$ and 
+$P_B \in B$.
+
+\begin{itemize}
+\item $t$ is {\bf extremal} if $t$ does not intersect A
+	(i.e., A lies in one of the halfplanes defined by $t$).
+\item If $t$ is extremal, the {\bf inside} of $t$ is
+	the halfplane that contains A.
+% \item Case 1: A does not surround B and B does not surround A.
+% \begin{itemize}
+\item $T$ is {\bf extremal} if $T$ does not intersect A or B.
+\begin{itemize}
+\item $T$ is {\bf outer} if it is extremal and 
+A and B lie on the same side of $T$ ({\bf Figure G4}).
+\item $T$ is {\bf inner} if it is extremal and
+A and B lie on opposite sides of $T$.
+\end{itemize}
+% \end{itemize}
+\item
+The {\bf early segment} of T is the component of T between A and B.
+% It may be abbreviated early(T).
+\item 
+If B is the light,
+the {\bf late segment} of T is the infinite ray of T starting at
+the point of bitangency with A and moving away from the light 
+(Figure~\ref{fig:inout}d).
+\item
+If B is an object that lies between A and the light L\footnote{This 
+	restriction on B is necessary to distinguish A from B.}
+and T intersects L,\footnote{This restriction on T is necessary
+	to guarantee that the direction 'moving away from the light'
+	is well defined.}
+the {\bf late segment} of T is the infinite ray of T starting at the point
+of bitangency with A and moving away from the light.
+\end{itemize}
+\end{defn2}
+
+Notice that all of these definitions are local: they depend upon A and B
+but not on any other objects.
+Thus, if the scene changes, these properties only need to be recomputed
+for the objects that have changed.
+
+\begin{lemma}
+Let A and L be smooth closed curves, where neither A nor L surrounds the
+other.\footnote{This lemma extends to the surrounding case with an
+	appropriate definition of inner and outer bitangent, as shown in
+	Section~\ref{sec:surround}.}
+$A$ and $L$ have exactly 2 outer bitangents and 2 inner bitangents.
+\end{lemma}
+\prf
+This lemma relies on the fact that the inner and outer tangents are extremal.
+There is an alternative definition of inner and outer bitangents
+that has a more intuitive appeal: the inner and outer bitangents of A and B
+are the only bitangents of the convex hull of A and the convex hull of B.
+That is, compute the convex hull of A and the convex hull of B, then take
+bitangents: there are only 4 bitangents (proof?) and these are the inner and
+outer bitangents of A and B.
+\QED
+
+See Figure~\ref{fig:inout}.
+
+	% umbra data/umbra/vg9.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img/vg9bitang.jpg}
+\includegraphics*[scale=.15]{img/vg9inner.jpg}
+\includegraphics*[scale=.15]{img/vg9outer.jpg}
+\end{center}
+\caption{(a) The bitangents
+	 (b) The inner bitangents 
+	 (c) The outer bitangents
+	 (d) The late segment of an outer bitangent}
+\label{fig:inout}
+\end{figure}
+
+In all figures, the light is drawn in black and the objects in grey.
+In the following sections, A will be a distinguished object for which
+we are computing the umbra, B another object, and L the light.
+
+% ------------------------------------------------------------------------------
+
+\clearpage
+
+\section{The back umbra}
+% The local and global umbra of an object}
+\label{sec:localumbra}
+
+We will consider the back umbra first.
+
+\begin{defn2}
+The {\bf local umbra of an object} $A$ is the umbra that would be
+cast if $A$ were the only object in the scene.
+A {\bf local umbral bitangent} of A is a bitangent 
+that forms the boundary of the local umbra of A.
+\end{defn2}
+
+
+The local umbra cast by an object is a region bounded by the object
+and two of its bitangents to the light.
+Which bitangents, and which parts of these bitangents (Figure~\ref{fig:inout}a)?
+\ifTalk
+We are looking for bitangents that do not intersect the object or light.
+However, we must relax our constraints when the object surrounds the light.
+\fi
+Figure~\ref{fig:G2} illustrates the answer, which is captured by the following lemma.
+
+% ------------------------------------------------------------------------------
+
+% It is the outer bitangents of A and L that bound the local umbra of A
+% (Figure~\ref{fig:G2}).
+% We capture this fact in a theorem.
+
+\begin{theorem}
+\label{thm:localumbra}
+Let A be an object, L the light, and
+$T_1$ and $T_2$ the late segments of their outer bitangents.
+The local umbra of A is the region bounded by $T_1$, $T_2$, 
+and the relevant part of A.
+% and inside both $T_1$ and $T_2$ in the
+% neighbourhood of their points of tangency with $A$.
+\end{theorem}
+\prf
+Every other part of A sees some of L.
+Argue that the light becomes visible as you cross these bitangents.
+\QED
+
+% Put another way, 
+\begin{corollary}
+All local umbra bitangents of A are outer bitangents of A and L.
+\end{corollary}
+
+	% umbra data/umbra/vg9.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img/vg9localumbra.jpg}
+% \includegraphics*[scale=.15]{img/ob1-bitang.jpg}
+% \includegraphics*[scale=.15]{img/ob1.jpg}
+\end{center}
+% \centerline{\epsfig{figure=img/ob1-bitang.ps,height=1.542in,width=1.528in}}
+% 20% reduction
+% \centerline{\epsfig{figure=img/ob1.ps,height=1.567in,width=1.553in}}
+% 20% reduction
+\caption{The back umbra of an object}
+\label{fig:G2}
+\end{figure}
+
+\Comment{
+	If A does not surround L,
+	the local umbra is bounded if and only if the late segments intersect
+	(Figures~\ref{fig:G2} and \ref{fig:globalumb3}).
+	If A surrounds L,
+	the local umbra is unbounded.
+}
+
+\vspace{.1in}
+
+{\bf Algorithm:}
+\begin{enumerate}
+\item Find the bitangents of A and L.
+\item Find the two bitangents that are L-outer.
+\item Find the late segments of these outer bitangents and their insides.
+\end{enumerate}
+
+% \begin{rmk}
+% The case described in this section actually subsumes the case of 
+% Section~\ref{sec:notsurround}, since an outer bitangent is always
+% a pseudo-outer bitangent too.
+% That is, you can look for pseudo-outer bitangents
+% in all cases.
+% We have presented them separately
+% since the definition of pseudo-outer bitangents is less intuitive
+% without an earlier understanding of outer bitangents,
+% and the simpler outer bitangent is sufficient for the vast majority of cases.
+% \end{rmk}
+
+\begin{rmk}
+More computationally, the local umbra is defined as follows.
+Let the two outer bitangents be \lyne{P_L P_A} and \lyne{Q_L Q_A},
+where $P_L,Q_L \in L$ and $P_A,Q_A \in A$.
+If the rays \ray{P_L P_A} and \ray{Q_L Q_A} intersect,
+let $P=Q$ be this intersection;
+otherwise let $P$ and $Q$ be the points 
+at infinity on the rays \ray{P_L P_A} and \ray{Q_L Q_A}, respectively.
+
+The local umbra is the region bounded by the (potentially infinite)
+segments \seg{P_A P}, \seg{Q_A Q},
+and the curve segment \arc{P_A Q_A} of A.
+\end{rmk}
+
+\begin{implementation}
+In our implementation, we build all of the scene inside a predefined cube.
+% Equivalently, one can define the scene arbitrarily and then find a bounding box.
+In the test for bitangent extremality (Definition~\ref{defn:outer}),
+the intersection of an infinite line or ray
+with a curve then reduces to the intersection of a finite segment with a curve
+(the part of the ray/line inside the box).
+This is simpler and more robust.
+\end{implementation}
+
+% ------------------------------------------------------------------------------------
+
+% \clearpage
+
+% \section{The global umbra of an object}
+
+\begin{defn2}
+\label{defn:global}
+The {\bf global umbra of an object $A$} is the umbra cast by $A$
+when all other objects are taken into account.
+A {\bf global umbral bitangent} of A is a bitangent 
+that forms the boundary of the global umbra of A.
+\end{defn2}
+
+The local umbra captures the umbra of an object in isolation (Figure~\ref{fig:vg900}b).
+However, the umbra cast by a single object can be influenced by other objects.
+The global umbra expands the local umbra to consider these other objects in the scene
+(Figure~\ref{fig:vg900}c).
+In many cases, the global umbra is the same as the local umbra.
+We shall first determine when the global umbra differs from the local umbra.
+Then, we shall show how the expanded umbra is defined in the cases when
+the global umbra is larger than the local umbra.
+
+In Section~\ref{sec:localumbra}, we saw that
+the local umbra is defined by outer bitangents of A.
+If no object interferes with the early segments of these outer bitangents,
+the global umbra is identical to the local umbra.
+However, as an object B begins to interfere with these early segments,
+the umbra of A is stretched by B (Figure~\ref{fig:vg900}).
+
+\begin{lemma}
+\label{lem:differs}
+The global umbra of A differs from the local umbra of A
+if and only if an object B intersects the early segment
+of an outer bitangent of A and L.
+\end{lemma}
+\prf
+To affect the global umbra of A,
+an object must conspire with A to block more of the light.
+It cannot do so if it lies behind A or to its left or right.
+Even an object that lies strictly between the outer bitangents of A
+does not directly affect A's umbra, although it may do so by combining
+with other objects as we shall see in Section~\ref{sec:innersweep}, 
+one of which must satisfy the condition of this lemma.
+The discussion of the inner sweep in Section~\ref{sec:innersweep}
+will clarify how the object B expands the umbra.
+\QED
+
+	% umbra data/umbra/vg900.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img/vg900outer.jpg}
+\includegraphics*[scale=.15]{img/vg900localumbra.jpg}
+\includegraphics*[scale=.15]{img/vg900globalumbra.jpg}
+\end{center}
+\caption{The crossing of an outer bitangent of A and L 
+	     marks a difference between the local and global umbra
+	 (a) the outer bitangents of A and L
+% An object with other objects interfering with its early outer bitangent
+	 (b) the local back umbra of A
+ 	 (c) the global back umbra of A
+}
+\label{fig:vg900}
+\end{figure}
+
+The global umbra is bounded by bitangents, just like the local umbra.
+However, the set of bitangents that can form the 
+boundary of the global umbra is richer than the local umbra.
+In addition to the outer bitangents of A and L used by the
+local umbra, the global umbra may be bounded by inner bitangents of A and B
+(where B is an object intervening between A and L)
+and outer bitangents of B and L.
+
+% ------------------------------------------------------------------------------------
+
+\clearpage
+
+\section{The global back umbra, through a refinement of the local back umbra}
+
+We define the global back umbra of an object A by dynamically expanding its local back umbra,
+using two sweeps of a tangent across interfering objects.
+% There are two types of refinement of the umbra.
+Both sweeps start with an outer bitangent of the object A and the light L.
+% which can be interpreted either as a tangent of A or as a tangent of L.
+The first sweep moves this tangent smoothly within the tangent space of A.
+The second sweep moves this tangent smoothly within the tangent space of L,
+in the opposite direction.
+Both sweeps move the tangent across all objects intervening between A and L.
+The first sweep continues until the tangent sees the light (or has swept
+completely past it).
+The second sweep continues until the tangent sees the umbral boundary added
+in the first sweep (or has swept completely past it).
+
+These continuous tangent sweeps are transformed into discrete sweeps
+by observing that the sweep must always stop at a bitangent.
+This allows the sweep to jump directly to the next bitangent candidate
+and test for completion.
+The resulting sweep involves a finite set of jumps between bitangents,
+analogous to the line sweep of computational geometry \cite{preparataShamos}.
+In the first sweep,
+the inner bitangents of A with a blocking object B define the possible
+stopping positions of the sweeping tangent.
+In the second sweep, the outer bitangents of L with a blocking object B
+define the possible stopping positions.
+The next two sections elaborate on these two sweeps that refine
+the local umbra into the global umbra.
+
+% duplicate of fig:vg900
+	% ---
+	% umbra data/globalumb2.pts
+	% umbra data/globalumb2.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img/globalumb1outer.jpg}
+\includegraphics*[scale=.15]{img/globalumb1gu.jpg}
+\includegraphics*[scale=.15]{img/globalumb2gu.jpg}
+\includegraphics*[scale=.15]{img/globalumb2bgu.jpg}
+\includegraphics*[scale=.15]{img/globalumb2cgu.jpg}
+% \includegraphics*[scale=.15]{img/globalumb2localumbra.jpg}
+% \includegraphics*[scale=.15]{img/globalumb2gumbUnfill.jpg}
+% \includegraphics*[scale=.15]{img/globalumb2globalumbra.jpg}
+% \includegraphics*[scale=.15]{img/globalumb2-local.jpg}
+% \includegraphics*[scale=.15]{img/globalumb2.jpg}
+% \includegraphics*[scale=.15]{img/globalumb2-PO.jpg}
+\end{center}
+\caption{An object interfering with the outer bitangent expands the umbra}
+% (a) The crossing of an outer bitangent of A and L 
+% 	     marks a difference between the local and global umbra
+%	 (b) Local umbra 
+%	 (c-d) Global umbra}
+\label{fig:globalumb2}
+\end{figure}
+
+\clearpage
+
+\subsection{The inner sweep: looking for the light}
+\label{sec:innersweep}
+% expanding the local umbra while looking for the light}
+
+The first sweep moves in the tangent space of A,
+looking for the light L by sweeping across objects that block A from L
+(Figure~\ref{fig:innersweep2}).
+Its purpose is to refine a local umbra bitangent into a global umbra
+bitangent.
+Its effect is to expand the local umbra.
+We call this sweep an {\bf inner sweep},
+because the local umbra bitangent will be repeatedly replaced by 
+inner bitangents, and because the sweep is towards the interior of the light.
+
+	% umbra data/umbra/globalumb3.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img/globalumb3innersweep1.jpg}
+\includegraphics*[scale=.15]{img/globalumb3innersweep2.jpg}
+\includegraphics*[scale=.15]{img/globalumb3innersweep3.jpg}
+\end{center}
+\caption{An inner sweep
+	 (a) T = outer bitangent of A and L
+	 (b) T = inner bitangent of A and B1
+	 (c) T = inner bitangent of A and B2}
+\label{fig:innersweep2}
+\end{figure}
+
+Consider a local umbra bitangent T, 
+which is necessarily an outer bitangent of A and L (Theorem~\ref{thm:localumbra}).
+Suppose that an object B intersects T's early segment,
+% the early segment of an outer bitangent T of A and L,
+implying that the global umbra is different from the local umbra
+(Lemma~\ref{lem:differs}).
+See Figure~\ref{fig:innersweep2}a.
+T will be swept in the tangent space of A, 
+towards the inside of the light, until it sees the light.
+This continuous sweep can be realized discretely by
+repeatedly replacing T by an inner bitangent of A and B,
+until there is no object B that hits this inner bitangent
+between A and the light, or the sweep passes the light.
+Since the inner sweep is looking for the light,
+it will stop if it sweeps past the light.
+% (without ever seeing it).
+This is marked by sweeping past an inner bitangent of A and L (Figure~\ref{fig:maximalumbra}).
+The global umbra is never larger than 
+the region bounded by the late inner bitangents of A and L (but often smaller).
+% This implies that the maximal size of the global umbra is the region 
+% bounded by the late inner bitangents of A and L 
+% Recall that the minimal size of the global umbra is the region
+% bounded by the late {\em outer} bitangents of A and L.
+
+Here is the algorithm for an inner sweep from the local umbra bitangent T of object A.
+
+% Put another way, the global umbra of A is no larger than the region
+% bounded by the late inner bitangents of A and L,
+% so the expansion of the inner sweep must stop there.
+
+\vspace{.2in}
+
+\centerline{innersweep(T,A)}
+
+\begin{enumerate}
+\item T = outer bitangent of A and L
+\item while an object B interferes with T on the segment between A and L
+\begin{enumerate}
+\item T = inner bitangent of A and B (the closest from the present T 
+	in the sweep direction)
+\item if T has swept past the light (i.e., past an inner bitangent of A and L)
+\begin{enumerate}
+\item  T = this inner bitangent of A and L
+\item  return
+% done = true
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+
+If more than one object B interferes in step 2,
+an arbitrary choice of B is made.
+
+This inner sweep replaces a local umbra bitangent by a global umbra bitangent.
+Once both local umbra bitangents of A have been refined
+to global umbra bitangents, their late segments define new boundaries
+of the global umbra.
+% just as with the local umbra.
+However, the second sweep may further refine this boundary.
+
+\Comment{
+\centerline{innerSweep (T, A, L)}
+\begin{enumerate}
+\item 
+	G = T;\ \ \ done = false;\ \ \ first = true;
+	% \item While the umbral bitangent T moves (has been freshly updated on previous step):
+\item 	
+	sweep direction = direction towards inside of light from T
+\item 
+	while (!done)
+\begin{enumerate}
+\item   if (first)
+\begin{enumerate}
+\item	SEG = early segment of G;\ \ \ first = false;
+\end{enumerate}
+\item	else
+\begin{enumerate}
+\item	$G_A = $ G's point of bitangency with A
+\item	$G_I = G \cap L$
+\item	SEG = segment between $G_A$ and $G_I$
+\end{enumerate}
+\item 
+	$\mbox{HIT} := \{B_i \neq A : B_i \mbox{ is an object that intersects
+	SEG} \}$
+\item 
+	if $\mbox{HIT} = \emptyset$, done = true
+\item   
+	else
+\begin{enumerate}
+\item
+	choose an arbitrary $B'$ from HIT.
+\item 
+	\ [search for the light, around the blocker] 
+	G = first A-inner bitangent of A and $B'$ that is found
+	in the sweep direction.
+\end{enumerate}
+\end{enumerate}
+\item	return(G)
+\end{enumerate}
+}
+
+% (That is, any umbra outside this range is generated by a different object.)
+% Outside of this range, A has no impact: it doesn't block any of the light.
+% So A can be ignored outside this region.
+
+% The sweep of A's tangent can be stopped at an inner tangent of A and L.
+
+\ifTalk
+Animation of sweep.
+\fi
+
+	% umbra data/umbra/maxumbra.pts (with 'Maximal umbra' option)
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img/maxumbra.jpg}
+\end{center}
+\caption{The maximal size of the back umbra}
+%  (bounded by late inner bitangents of A and L)}
+% using one object B that blocks the entire light 
+% and big enough that its outer bitangents with the light 
+% also don't intersect the late inner of A and L
+\label{fig:maximalumbra}
+\end{figure}
+
+	% umbra data/umbra/globalumb3.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img/globalumb3luWithSweep.jpg}
+\includegraphics*[scale=.15]{img/globalumb3lu.jpg}
+\end{center}
+\caption{The umbra after refinement by the inner sweep}
+\label{fig:umbraafterinnersweep}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%
+
+\clearpage
+
+\subsection{The outer sweep: looking for the global umbra from the light}
+\label{sec:outersweep}
+
+While the first sweep expands the umbra, the second sweep shrinks it.
+Its purpose is to refine a global umbra bitangent just computed by an
+inner sweep, by clipping it as it reappears to the light.
+Rather than sweeping a tangent along the object,
+it sweeps a tangent along the light.
+
+	% umbra data/umbra/globalumb7.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img/globalumb7outersweep1.jpg}
+\includegraphics*[scale=.15]{img/globalumb7outersweep2.jpg}
+\includegraphics*[scale=.15]{img/globalumb7outersweep3.jpg}
+\includegraphics*[scale=.15]{img/globalumb7gu.jpg}
+\end{center}
+\caption{The outer sweep of T (a) T = outer bitangent of L and A
+	 (b) T = outer bitangent of L and B1
+	 (c) T = outer bitangent of L and B2
+	 (d) the resulting global umbra}
+\label{fig:severalstages}
+\end{figure}
+
+Consider a local umbra bitangent T and the global umbra bitangent G
+computed from T by the inner sweep.
+Although G marks a boundary of the shadow,
+the light will often become visible again at some point of G,
+on the other side of the blocking objects.
+The purpose of the second sweep is to find this point of reappearance
+into light and clip G there.
+To accomplish this, a tangent of the light L is swept across 
+all objects that block it from G.
+As with the inner sweep,
+the tangent is initialized to the local umbra bitangent T, 
+but we now sweep in the opposite direction (towards the outside of A).
+At the point when L's tangent sees G, 
+this tangent is added to the boundary of the global umbra, effectively clipping G.
+
+% While the inner sweep expands the umbra by looking for the light,
+% the second sweep shrinks the umbra by looking for the umbra from the light.
+% The job of 
+% We know that this bitangent defines a boundary of light
+% visibility at $P_A$ (its point of bitangency with A) as it leaves A
+% on the late segment.
+% But the light will often become visible once again as the bitangent
+% crosses out of darkness on the other side of the objects.
+% Therefore, this bitangent needs to be clipped.
+
+% The search for G's reentry into light must be done from the perspective of the 
+% light, using a sweep of the light's tangent looking for the newly
+% computed global umbra bitangent T.
+
+As with the inner sweep, we leverage the fact that changes of visibility
+must occur at discrete bitangent events
+to convert the continuous sweep into a discrete sweep.
+Recall that we can assume that an object B hits the early segment of 
+the local umbra bitangent T,
+otherwise the global umbra is the same as the local umbra
+(and neither inner nor outer sweep is necessary).
+T is repeatedly replaced by the outer bitangent of B and L,
+until the early segment of this outer bitangent is free of objects B (Figure~\ref{fig:severalstages}).
+The sweep can be stopped as soon as the sweeping tangent passes G,
+since it is then guaranteed to never see G.
+Since the tangent is repeatedly replaced by outer
+bitangents, and it sweeps towards the outside of A,
+the sweep is called an {\bf outer sweep}.
+Here is the algorithm for an outer sweep from the local umbra bitangent T of object A.
+
+% \item[iii.]	If angle(H) 'exceeds' (in the direction of current travel) angle(G), return (NULL).
+
+
+
+\vspace{.2in}
+
+\centerline{outersweep (T,A)}
+
+\begin{enumerate}
+\item T = outer bitangent of A and L
+\item G = innersweep(T,A)
+\item B = object that interferes with T on the segment between A and L
+\item do
+\begin{enumerate}
+\item T = outer bitangent of B and L (the closest from the present T in the
+	sweep direction)
+\item if T has swept past G, return since G does not need to be refined
+\end{enumerate}
+while a new object B interferes with T on the segment between the old B and L
+\item clip G by T 
+\item return(T)
+\end{enumerate}
+
+The outer sweep further refines the global umbra.
+The output of the outer sweep algorithm is a new boundary of the global
+umbra, which should start after its intersection with 
+innerSweep(T,A) (Figure~\ref{fig:severalstages}).
+The {\bf inside} of this new global umbra bitangent 
+is the side that contains the light L.
+Its {\bf late segment} is the segment after its intersection with 
+innerSweep(T,A).
+
+% {\bf outerSweep(T,A,L)}, the output of this second sweep from T is a tangent of L.
+
+% Notice that this may introduce a bend into the umbral boundary.
+% (two linked lines)
+
+\Comment{
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img/globalumb7gumbWithOuter.jpg}
+\includegraphics*[scale=.15]{img/globalumb7gumb.jpg}
+% \includegraphics*[scale=.15]{img/globalumb4umbra.jpg}
+% \includegraphics*[scale=.15]{img/globalumb7umbra.jpg}
+\end{center}
+\caption{The outer sweep further refines the global umbra (add a figure before these two
+	 showing the global umbra after the inner sweep but before the refinement
+	 of the outer sweep}
+\label{fig:outersweep}
+\end{figure}
+}
+
+% \clearpage
+
+\Comment{
+\centerline{outerSweep (T, A, L)}
+\begin{enumerate}
+\item	H = T;\ \ G = innerSweep (T,A,L);\ \ done = false;\ \ first = true;
+\item	sweep direction = direction towards outside of A from T
+\item   while (!done)
+\begin{enumerate}
+\item   if (first) 
+\begin{enumerate}
+\item	SEG = early segment of H; \ \ \ first = false;
+\end{enumerate}
+\item	else
+\begin{enumerate}
+\item	$H_L = $ H's point of bitangency with the light
+\item	$H_I = G \cap H$
+\item	SEG = segment between $H_L$ and $H_I$
+\end{enumerate}
+\item	HIT := $\{ B_i: B_i \mbox{ is an object that intersects SEG}\}$
+\item   if $\mbox{HIT} = \emptyset$, done = true;
+\item 	else
+\begin{enumerate}
+\item	choose an arbitrary $B'$ from HIT
+\item   \ [search for G, around the blocker] H = first L-outer bitangent of L and $B'$ that is found
+	in the sweep direction.
+\end{enumerate}			
+\end{enumerate}
+\item 	return(H)
+\end{enumerate}
+}
+
+% ----------------------------------------------------------------------------------
+
+\clearpage
+
+\section{The front umbra}
+% earlier called self-umbra
+
+The front umbra is the shadow cast by an object upon itself.
+
+\begin{defn2}
+Let A and B be closed curves, where neither curve surrounds the other.
+Let $t$ be a tangent of A,
+and let $T$ be a bitangent of A and B with points of tangency $P_A \in A$ and 
+$P_B \in B$.
+
+\begin{itemize}
+\item T is a {\bf piercing bitangent} of A with respect to B if:
+% self-shading was original term
+\begin{itemize}
+\item the line segment \seg{P_A P_B} is free (does not intersect A or B) 
+\item the line \lyne{P_A P_B} intersects A
+\item the line \lyne{P_A P_B} does not intersect B
+\item	A and B lie on the same side of T in the neighbourhood of 
+	the points of tangency (Figure~\ref{fig:piercing}a),
+	if B is the light.
+\item   A and B lie on different sides
+	of T in the neighbourhood of the points of tangency
+	(Figure~\ref{fig:piercing}b),
+	if B is an object that lies between A and the light L
+	and T intersects L.
+\item $P_A$ is not an inflection point.
+\end{itemize}
+b makes it piercing.
+c makes it extremal (otherwise it cannot be a boundary of the umbra, if B is the light, 
+or a boundary to the light, if B is another object).
+d and e make it a possible umbral boundary.
+\item	The {\bf intermediate segment} of a piercing tangent T
+	is the segment of T between its point of tangency with A and 
+	its first intersection with A.
+\end{itemize}
+\end{defn2}
+
+	% umbra data/umbra/vg9new.pts
+	% umbra data/umbra/vg900new.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img/vg9newshadinglight.jpg}
+\includegraphics*[scale=.15]{img/vg900newshadingob.jpg}
+\end{center}
+\caption{(a) A piercing bitangent of A with respect to the light
+	 (b) A piercing bitangent of A with respect to another object}
+\label{fig:piercing}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img/vg9newpiercing.jpg}
+\end{center}
+\caption{This is not a piercing bitangent}
+\end{figure}
+
+The computation of the front umbra is orthogonal to the computation of the
+back umbra.
+We begin with the local front umbra.
+
+\begin{lemma}
+Let A be an object, L the light, and $\{T_i\}$ the piercing bitangents
+of A and L.
+The local front umbra of the object A is a collection of regions,
+one per piercing bitangent,
+each bounded by the intermediate segment of a piercing bitangent
+and the associated boundary of A.
+\end{lemma}
+
+% umbra data/umbra/vg9New.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img/vg9NewFrontUmbra.jpg}
+\end{center}
+\caption{The front umbra}
+\end{figure}
+
+% umbra data/umbra/vg900new.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img/vg900newPiercing.jpg}
+\end{center}
+\caption{Sweeping to the next piercing bitangent}
+\end{figure}
+
+The global front umbra is again found by refining the local front umbra
+by a sweep.
+This sweep is based upon objects that interfere with the early segment
+of the piercing bitangent that defines the front umbra.
+
+Here is the algorithm for an -- sweep from the local front umbra bitangent T of object A.
+
+\vspace{.2in}
+
+\centerline{---sweep(T,A)}
+
+\begin{enumerate}
+\item T = piercing bitangent of A and L
+\item while an object B interferes with T on its early segment (between A and L)
+\begin{enumerate}
+\item T = piercing bitangent of A and B (the closest from the present T 
+	in the sweep direction), or if no piercing bitangents exist, then T
+	is the 
+\item if T has swept past the light (i.e., past --)
+\begin{enumerate}
+\item  T = -
+\item  return
+% done = true
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+
+I don't think there is a need for a second sweep (an analog of the back umbra's outer sweep).
+
+% ----------------------------------------------------------------------------------
+
+\clearpage
+
+\section{The global umbra of an object and a scene}
+
+% The boundary of the global umbra is defined by refining each bitangent
+% of the boundary of the local umbra, using an inner sweep,
+% followed by refining this new boundary, using an outer sweep.
+
+The global umbra of the object A is now defined by applying
+an inner and outer sweep to the two bitangents of its local umbra,
+generating up to four global umbra bitangents.
+Let $T_1$ and $T_2$ be the two outer bitangents of A and L.
+The global umbra of A is defined by A and the four bitangents
+innerSweep($T_1$,A), innerSweep($T_2$,A),
+outerSweep($T_1$,A), and outerSweep($T_2$,A),
+lying to the inside of their late segments (Figure~\ref{}).
+% In other words, the global umbra of A is the polygon defined by the intersection
+% of the inside halfspaces of innerSweep($T_1$,A), innerSweep($T_2$,A),
+% outerSweep($T_1$,A), and outerSweep($T_2$,A).
+% (See \cite{preparataShamos} for a discussion of the
+% intersection of halfspaces, including algorithms.)
+The global umbra of an object is pseudo-convex: convex except possibly
+for its curved boundary.
+If the umbra is restricted to a polygonal room,
+the room wall's halfspaces are also used to restrict the umbra.
+
+Notice that an object B may affect the global umbra of an object A
+without lying between A and the light (Figure~\ref{see drawn example}).
+Nevertheless, a space-partitioning scheme (e.g., octrees) can still 
+be used to constrain
+the objects that need to be considered in the computation of the global
+umbra of an object A.
+For example, objects on the opposite side of the light from A 
+do not have to be considered in the computation of the global umbra of A.
+Precisely, the objects inside the following region can affect the 
+global umbra of A: the region spanned by the tangents of L parallel to 
+the inner bitangents of A and L.
+In particular, the local umbra after the refinement of the inner sweeps
+is no larger than the region spanned by the inner bitangents I of A and L,
+and once an outer bitangent of B and L does not intersect
+(after it sweeps past parallel with I)
+it cannot affect this umbra by clipping (Figure~\ref{active region drawing}).
+
+\ifTalk
+We are computing dawns and sunsets, where the light (sun) appears or disappears
+over the horizon of an object.
+(just as, when flying around the Earth in an airplane, one may pass into night
+but then, as you continue travelling, pass back into day).
+\fi
+
+The {\bf umbra of a scene} is the union of the global umbrae of the
+objects in the scene (Figure~\ref{fig:scene1}).
+% An {\bf inner umbral bitangent} of A is
+% a global umbra bitangent of A generated by an inner sweep.
+% An {\bf outer umbral bitangent} of A is
+% a global umbra bitangent of A generated by an outer sweep.
+	% % from a local umbra bitangent of A 
+
+Figure~\ref{fig:scene2} illustrates the effect of adding an object to a scene.
+
+% \subsubsection{Penumbrae conspiring to create umbra}
+
+% \vspace{.5in}
+
+\begin{rmk}
+Care must be taken if objects touch.
+The proposed solution inherently assumes nontouching objects.
+Since the proposed solution is correct in the limit as the objects approach
+but do not yet touch, the touching solution should be realized as this
+limit rather than computed directly.
+
+% NOT A PROBLEM: in the limit (when objects approach but never touch) our solution is correct.
+MUST SIMPLY TREAT TOUCHING OBJECTS DIFFERENTLY.
+Consider a light surrounded by circular objects, which abut, allowing no
+light to pass their ring.
+This appears to be a vivid example of the insufficiency of local umbrae for computing
+the global umbra.
+Notice that the stretching of the umbra addressed in the previous section
+is not the cause of the larger global umbra, since no object intersects
+another object's PO bitangents.
+Instead, this is a case of the penumbrae of objects conspiring together
+to create umbra.
+This is a more subtle umbra to compute, using .3 + .7 = 1 ideas,
+rather than 1 + anything else = 1.
+\end{rmk}
+
+	% umbra data/umbra/vg9001.pts
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img/vg9001bitang.jpg}
+\includegraphics*[scale=.15]{img/vg9001localumbra.jpg}
+\includegraphics*[scale=.15]{img/vg9001globalumbra.jpg}
+\end{center}
+\caption{The global umbra of a scene: (a) its bitangents (b) its local umbrae (c) its global umbra}
+\label{fig:scene1}
+\end{figure}
+
+% \begin{figure}[hb]
+%\begin{center}
+% \includegraphics*[scale=.15]{img/--}
+%\end{center}
+% \caption{Sometimes the global umbra is the union of the local umbrae (umbra data/globalumb1.pts)}
+% \label{fig:globalumb1}
+% \end{figure}
+
+% \begin{figure}
+% \begin{center}
+% \includegraphics*[scale=.15]{img/globalumb3.jpg}
+% \end{center}
+% % \centerline{\epsfig{figure=img/globalumb3.ps,height=2.906in,width=2.911in}}
+% % 40% reduction
+% \caption{Pushing an umbral bitangent through several objects (game of tag)}
+% \label{fig:globalumb3}
+% \end{figure}
+
+	% umbra data/umbra/ovoid2.pts
+% \begin{figure}
+% \begin{center}
+% \includegraphics*[scale=.15]{img/ovoid2-local.jpg}
+% \end{center}
+% \caption{A simple local umbra: too simple?}
+% \label{fig:G1}
+% \end{figure}
+
+% -----------------------------------------------------------------------------
+
+\clearpage
+
+\clearpage
+
+\section{Penumbra}
+
+The back penumbra is the difference between the maximal umbra
+and the global umbra.
+There are several regions of the front penumbra.
+Consider the local front penumbra.
+Each region of the local front penumbra is a region bounded by the intermediate segments
+of an 'outer' piercing bitangent of A and L and its associated 'inner' piercing bitangent.
+[need to refine definition of piercing bitangent].
+
+\clearpage
+
+\section{The discontinuity mesh of a point light source}
+
+Consider the special case of a point light.
+(Only in journal version.)
+
+\section{Cell definition, point location in discontinuity mesh}
+
+Show partition of 2-space defined by the discontinuity mesh of a single object
+(showing the umbra/penumbra of every object would have overlaps, and so
+difficult to show; but try it too)
+
+Discuss point location in this discontinuity mesh.
+
+Discuss painting this mesh with shadow.
+
+% ------------------------------------------------------------------------------------
+
+\section{$2 \frac{1}{2}$-D visibility}
+
+Our umbral solution in 2-space also gives an approximate solution
+to lighting and visibility in a $2 \frac{1}{2}$-D environment.
+Consider flythroughs of a city defined by digital elevation maps.
+
+% ------------------------------------------------------------------------------------
+
+\section{Conclusions}
+
+Remind them that this theory is also applicable to general visibility
+analysis of smooth objects.
+
+We show how the analysis of an entire scene can be broken down into
+the analysis of a single object at a time.
+We also show how two quite far-removed objects can affect each other,
+even if their lines of sight to the light do not overlap.
+
+If the light is interpreted as the sun and the umbra as the night,
+the inner sweep may be interpreted as a search for the sunset,
+and the outer sweep a search for the dawn of the light.
+
+
+The inner umbral bitangents are tangent to A,
+while the outer umbral bitangents are tangent to L.
+
+Both sweeps define a global umbra bitangent G of A
+through refinement of a local umbra bitangent T of A.
+% (Recall that T is an outer bitangent of A and L.)
+
+The sweeping of a tangent (and the associated widening of the umbral boundary)
+can continue through several objects, like a game of tag.
+% The pushing will stop when no object intersects the early segment associated
+% with the umbral boundary (Figure~\ref{fig:globalumb3}).
+
+We don't want to try to compute the entire global umbra all at once:
+by breaking it up into the global umbra generated by each object,
+the problem becomes tractable.
+
+The obvious next step with this theory is the computation of the penumbra
+and the extension to 3-space.
+
+\begin{figure}
+\begin{center}
+\includegraphics*[scale=.15]{img/vg90umbra.jpg}
+\includegraphics*[scale=.15]{img/vg900umbra.jpg}
+\end{center}
+\caption{The effect of adding one object: (a) global umbra before (b) global umbra after}
+\label{fig:scene2}
+\end{figure}
+
+% \begin{figure}
+% \begin{center}
+% \includegraphics*[scale=.1]{img/globalumb2-PI.jpg}
+% \end{center}
+% \caption{Inner bitangents refine the local umbra into the global umbra}
+% \label{fig:innerbitang}
+% \end{figure}
+
+\section{Dagstuhl Talk}
+
+Sweeping a tangent to (i) compute the umbra and (ii) compute the convex hull.
+
+\section{Appendix}
+\label{sec:appendix}
+
+\subsection{Software}
+
+\begin{itemize}
+\item draw B/W umbral regions for a collection of objects
+\item draw B/W local penumbral regions for a collection of objects
+\item draw B/W global penumbral regions for a collection of objects 
+\item draw greyscale local penumbral region for one object
+\item draw greyscale global penumbral regions for a collection of objects
+\item find the extreme bitangents
+\end{itemize}
+
+\subsection{Defining the umbra point by point}
+\label{sec:local}
+
+It is simple to determine if a point P is in the umbral shadow cast by a 
+single object A (Figure I):
+P is in umbra of A iff all of the light's tangents through P (it is enough to test
+the extremal two) hit A.
+However, several objects can conspire to place P in umbra, although it is not
+in any one object's umbra (Figure III).
+Finding this type of umbral point requires more subtlety.
+For example, it is not enough to demand simply that all of the light's tangents through P
+hit some object (Figure II).
+In effect, we need to test that there are no cracks between objects through which
+the light becomes visible, by 'sweeping' a beam centered at P across the light.
+The following algorithm for testing if P lies in umbra achieves this virtual sweep.
+
+\begin{defn2}
+A tangent T of the curve C through a point P is {\bf extremal}
+if the entire curve C lies in the same halfplane defined by T
+(i.e., T does not intersect C).
+The {\bf inside halfplane} of an extremal tangent T of C through a point P is
+the halfplane defined by T that contains C.
+An extremal tangent is {\bf left-extremal} if its inside halfplane 
+contains the point at infinity (1,0,0) along the positive x-axis,
+otherwise it is {\bf right-extremal}.
+\end{defn2}
+
+Is the point P in the umbra?
+\begin{description}
+\item[] T $\leftarrow$ left-extremal tangent of the light through P
+\item[] while (T has not swept past light \&\& 
+       T hits some object A before it hits the light)
+\begin{description}
+\item[]	T = right-extremal tangent of A through P
+\end{description}
+\item P is in umbra iff T has swept past light
+\end{description}
+
+We are sweeping a line about P searching for a passageway to the light, 
+leaping past objects that block the light by jumping to their right-extremal tangents, 
+until we either find the light or sweep past it.
+Figure IV (Figure III with sweep annotations) illustrates this algorithm.
+
+What is the complexity of this algorithm?
+
+% ------------------------------------------------------------------------------------
+
+\centerline{{\bf What is new}}
+\begin{enumerate}
+\item implementation of algebraic geometry's dual curve that is
+\begin{enumerate}
+\item robust using 2 dual spaces, and
+\item details worked out for Bezier curves, and
+\item a primal structure in dual space, unlike dual Bezier curves
+\end{enumerate}
+\item dual Chaikin
+\begin{enumerate}
+\item 	don't even evaluate the parts of the curve unaffected by bitangents
+		(really be lazy!)  (change the demo to show this)
+\item 	analyze the improvement in accuracy as you move through subdivision stages
+\item 	when do bad mistakes disappear and refinement only sets in?
+\end{enumerate}
+\item lazy subdivision idea for subdivision curves
+\item application of bitangents to fundamental applications that are only known
+	for polygons, not smooth curves
+\begin{enumerate}
+\item to smooth convex hull, extending Graham scan
+\item to smooth visibility graph, improving quality of shortest paths
+			[might be able to extend Welzl's algorithm]
+\item to smooth lights in 2d, with penumbra and umbra calculation,
+	     	anticipating a lifting to smooth lights in 3d
+\begin{enumerate}
+\item   software to shade the umbra/penumbra
+\item 	to determine efficiently whether a curve is in umbra
+\item 	to determine efficiently which parts of a curve are in penumbra
+\item 	to determine their relative lighting (how much of the light they see)
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+	     
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			
+\section{Introduction}
+
+3 categories of lighting: umbra (fully shaded), penumbra (partially lit), 
+	and noon (fully lit)
+
+\section{Flawed approaches}
+
+Don't want to cast light from each point of the light: 
+	then every point of 2-space
+	has an infinite number of light points casting light on it,
+	for which it must sum the contributions
+	Notice that every light point casts across a halfspace minus the
+	areas blocked by objects or the neighbouring parts of the light (if
+	light is concave)
+	
+On the other hand, computing the light intensity at every pixel
+	in free space is also undesirable (?).
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			
+\section{General algorithm}
+
+\subsection{Part I: Definition of global penumbra}
+
+Instead, first decompose 2-space into global penumbra and global umbra using bitangents:
+	this allows us to ignore all but the global penumbral regions;
+	this is done for each object: a point is in the global penumbra
+	if it is in at least one local penumbral region and it is not in any
+	local umbral region, which would block it;
+	this is a form of point location in cells from a line arrangement
+			
+local umbra 
+	(from the bitangents of the light and an object A)
+	defn: region of space that is entirely blocked from the light by A
+	- elegant definition of umbral region: cell in a line/curve arrangement
+	- hacky but simple definition of umbra: intersection of halfspaces defined
+		by bitangents and objects
+	- the hacky definition is simple to implement and simple for point 
+		classification, although not optimal efficiency
+local penumbra 
+	(from the bitangents of the light and an object)
+	defn: region of space that is partially blocked from the light by A
+local noon
+	= 2-space - (local umbra and local penumbra)
+	defn: region of space that sees the entire light w.r.t. A
+		(i.e., region that is not blocked from the light at all by A)
+global umbra 
+	= union of local umbras
+	defn: region of space that is entirely blocked from the light 
+	      (by one or a combination of the objects)
+*global penumbra*	(the nontrivial one)
+	= (union of local penumbras) - global umbra
+	defn: region of space that is partially blocked from the light 
+	      (by one or a combination of the objects)
+global noon
+	= intersection of local noons
+	= 2-space - (global umbra and global penumbra)
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			
+\subsection{Part II: Definition of light intensity inside global penumbra}
+
+for each point P in a global penumbral region,
+  for each object A such that P is inside A's penumbral region,
+	intersect tangent of A through P with light, yielding $L_A$
+  choose L = $L_A$ that yields the smallest visible light segment
+	(the larger light segments are blocked by one of the other objects)
+  compute (read off) proportion of light visible from L on the
+	outside of tangent
+	   - this involves computing tangent PP' from light 
+	     through P; then measuring visible (from P) portion of 
+	     light from L to P', which is basically arc length
+	     of convex hull from L to P'
+  assign (paint) this intensity to every pixel (point) on 
+	     the tangent from L to P and past P to the next 
+	     intersection with an object
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			
+\subsection{Part III: Definition of light intensity inside global umbra and global noon}
+
+similarly paint pure black shadow or pure white light
+     from pixels (points) that are found in global umbra
+     or global noon, by continuing line --- (how?)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Examples}
+
+Test data.
+\begin{itemize}
+\item bitangency: circle, ob1, ob3, vg7.pts
+\item convex hull: vgraph: vg4.pts, vg1.pts (contour), vg3.pts (contour), vg4.pts (small natural)
+	vg5.pts (large natural)
+\item lighting: ob1, vg5.pts
+\end{itemize}
+
+% of \ifJournal at beginning of appendix
+\fi
+			
+\end{document}

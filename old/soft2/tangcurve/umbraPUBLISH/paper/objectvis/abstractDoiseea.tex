@@ -1,0 +1,112 @@
+\documentclass[10pt]{article}
+\usepackage{times}
+\usepackage[pdftex]{graphicx}
+% \input{header-consecutive}
+\makeatletter
+\def\@maketitle{\newpage
+ \null
+ \vskip 2em                   % Vertical space above title.
+ \begin{center}
+       {\Large\bf \@title \par}  % Title set in \Large size. 
+       \vskip .5em               % Vertical space after title.
+       {\lineskip .5em           %  each author set in a tabular environment
+        \begin{tabular}[t]{c}\@author 
+        \end{tabular}\par}                   
+  \end{center}
+ \par
+ \vskip .5em}                 % Vertical space after author
+\makeatother
+
+\newcommand{\SingleSpace}{\edef\baselinestretch{0.9}\Large\normalsize}
+\newcommand{\DoubleSpace}{\edef\baselinestretch{1.4}\Large\normalsize}
+\newcommand{\Comment}[1]{\relax}  % makes a "comment" (not expanded)
+\newcommand{\Heading}[1]{\par\noindent{\bf#1}\nobreak}
+\newcommand{\Tail}[1]{\nobreak\par\noindent{\bf#1}}
+\newcommand{\QED}{\vrule height 1.4ex width 1.0ex depth -.1ex\ \vspace{.3in}} % square box
+\newcommand{\arc}[1]{\mbox{$\stackrel{\frown}{#1}$}}
+\newcommand{\lyne}[1]{\mbox{$\stackrel{\leftrightarrow}{#1}$}}
+\newcommand{\ray}[1]{\mbox{$\vec{#1}$}}          
+\newcommand{\seg}[1]{\mbox{$\overline{#1}$}}
+\newcommand{\tab}{\hspace*{.2in}}
+\newcommand{\se}{\mbox{$_{\epsilon}$}}  % subscript epsilon
+\newcommand{\ie}{\mbox{i.e.}}
+\newcommand{\eg}{\mbox{e.\ g.\ }}
+\newcommand{\figg}[3]{\begin{figure}[htbp]\vspace{#3}\caption{#2}\label{#1}\end{figure}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\prf}{\noindent{{\bf Proof}:\ \ \ }}
+\newcommand{\choice}[2]{\mbox{\footnotesize{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}      
+\newcommand{\scriptchoice}[2]{\mbox{\scriptsize{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}
+\newcommand{\tinychoice}[2]{\mbox{\tiny{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}
+\newcommand{\ddt}{\frac{\partial}{\partial t}}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{rmk}{Remark}
+\newtheorem{example}{Example}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{claim}{Claim}
+\newtheorem{notation}{Notation}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{defn2}{Definition}
+
+\newif\ifJournal
+\Journalfalse
+\newif\ifVerbose
+\Verbosetrue
+\newif\ifComment                % large-scale comments
+\Commentfalse
+
+\newcommand{\hero}{star}
+
+\setlength{\headsep}{.5in}
+\markright{\today \hfill}
+\pagestyle{myheadings}
+
+% \DoubleSpace
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{0in}	% should be 0pt for 1in
+\setlength{\textheight}{8.6in}
+\setlength{\textwidth}{6.875in}
+\setlength{\columnsep}{5mm}	% width of gutter between columns
+
+% -----------------------------------------------------------------------------
+
+\title{Can you see it?\\Object visibility in a smooth flat scene}
+% Do you see it?
+% Part 1
+\author{J.K. Johnstone\thanks{Department of Computer and 
+    Information Sciences, UAB, Birmingham, AL 35294-1170.  This work
+    was partially supported by the National Science Foundation under grant CCR-0203586.}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Given a smooth object A nestled in a scene of smooth objects, and
+% a certain vantage point P
+a viewpoint, we are interested in analyzing whether A is visible.
+If A is visible, we want to provide a probe that realizes this visibility.
+If A is not visible, we want to understand exactly which objects block it.
+This is a smooth version of a classical problem in visibility analysis,
+and represents part of a research program that endeavours to promote
+our understanding of visibility analysis, which is quite thorough for linear structures,
+to smooth environments bounded by curves and surfaces.
+In this paper, we begin an exploration of this subject 
+in 2-space, where a smooth object is an arbitrary closed curve.
+There are no constraints on the objects other than their smoothness and disjointness,
+and no constraints on the number of objects in the scene.
+Interesting cases arise when the objects intermingle densely and when objects
+lie in concavities of other objects.
+Since curves have no vertices, certain special tangents replace vertices
+as the focus of analysis and the source for visual events.
+
+A certain number of probes are necessary to determine object visibility,
+and the challenge is to reduce this number as much as possible.
+We develop three granularities of probes, progressively smaller but
+also progressively more complicated to compute.
+\end{abstract}
+
+\end{document}
+

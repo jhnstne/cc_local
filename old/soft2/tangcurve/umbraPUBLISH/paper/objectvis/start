@@ -1,0 +1,3 @@
+emacs -geometry 91x72+0+0 umbra.tex &
+xpdf -geometry 870x1080+965+0 umbra.pdf &
+../src/umbra -P 9 ../data/circleUmbraProblem2.pts > foobar &

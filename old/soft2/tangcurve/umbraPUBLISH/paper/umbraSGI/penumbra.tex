@@ -1,0 +1,109 @@
+\title{The smooth penumbra}
+% Accumuluting energy during a sweep across an object
+% Sweeping an object, accumulating energy
+% Energy accumulation during an object sweep
+% Painting light along a light's ruled surface to define penumbra
+%	- lines colored by intensity
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			
+\section{Introduction}
+
+3 categories of lighting: umbra (fully shaded), penumbra (partially lit), 
+	and noon (fully lit)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			
+\section{Flawed approaches}
+
+Don't want to cast light from each point of the light: 
+	then every point of 2-space
+	has an infinite number of light points casting light on it,
+	for which it must sum the contributions
+	Notice that every light point casts across a halfspace minus the
+	areas blocked by obstacles or the neighbouring parts of the light (if
+	light is concave)
+	
+On the other hand, computing the light intensity at every pixel
+	in free space is also undesirable (?).
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			
+\section{General algorithm}
+
+\subsection{Part I: Definition of global penumbra}
+
+Instead, first decompose 2-space into global penumbra and global umbra using bitangents:
+	this allows us to ignore all but the global penumbral regions;
+	this is done for each obstacle: a point is in the global penumbra
+	if it is in at least one local penumbral region and it is not in any
+	local umbral region, which would block it;
+	this is a form of point location in cells from a line arrangement
+			
+local umbra 
+	(from the bitangents of the light and an obstacle A)
+	defn: region of space that is entirely blocked from the light by A
+	- elegant definition of umbral region: cell in a line/curve arrangement
+	- hacky but simple definition of umbra: intersection of halfspaces defined
+		by bitangents and obstacles
+	- the hacky definition is simple to implement and simple for point 
+		classification, although not optimal efficiency
+local penumbra 
+	(from the bitangents of the light and an obstacle)
+	defn: region of space that is partially blocked from the light by A
+local noon
+	= 2-space - (local umbra and local penumbra)
+	defn: region of space that sees the entire light w.r.t. A
+		(i.e., region that is not blocked from the light at all by A)
+global umbra 
+	= union of local umbras
+	defn: region of space that is entirely blocked from the light 
+	      (by one or a combination of the obstacles)
+*global penumbra*	(the nontrivial one)
+	= (union of local penumbras) - global umbra
+	defn: region of space that is partially blocked from the light 
+	      (by one or a combination of the obstacles)
+global noon
+	= intersection of local noons
+	= 2-space - (global umbra and global penumbra)
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			
+\subsection{Part II: Definition of light intensity inside global penumbra}
+
+for each point P in a global penumbral region,
+  for each obstacle A such that P is inside A's penumbral region,
+	intersect tangent of A through P with light, yielding L_A
+  choose L = L_A that yields the smallest visible light segment
+	(the larger light segments are blocked by one of the other obstacles)
+  compute (read off) proportion of light visible from L on the
+	outside of tangent
+	   - this involves computing tangent PP' from light 
+	     through P; then measuring visible (from P) portion of 
+	     light from L to P', which is basically arc length
+	     of convex hull from L to P'
+  assign (paint) this intensity to every pixel (point) on 
+	     the tangent from L to P and past P to the next 
+	     intersection with an obstacle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			
+\subsection{Part III: Definition of light intensity inside global umbra and global noon}
+
+similarly paint pure black shadow or pure white light
+     from pixels (points) that are found in global umbra
+     or global noon, by continuing line --- (how?)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			
+\section{Software}
+
+	1) draw B/W umbral regions for a collection of obstacles
+	2) draw B/W local penumbral regions for a collection of obstacles
+	3) draw B/W global penumbral regions for a collection of obstacles 
+	4) draw greyscale local penumbral region for one obstacle
+	5) draw greyscale global penumbral regions for a collection of obstacles
+
+
+	Find the bitangents
+	Find the extreme bitangents		

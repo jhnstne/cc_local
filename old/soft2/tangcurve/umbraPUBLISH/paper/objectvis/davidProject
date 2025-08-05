@@ -1,0 +1,26 @@
+ruled surfaces:
+
+	2 parametric curves --> ruled
+	1 curve  --> tangent developable
+	*implicit equation, point --> generator
+	*implicit equation --> directrix
+	*implicit equation --> display using directrix and generators 
+	       (don't need parametric rep of surface)
+	visualize generators
+	animate the generators
+	set of generators (line segments, actually) --> ruled surface display
+
+	classical ruled surfaces: ruled quadrics, doubly ruled surfaces
+
+	intersection with line
+	(intersection with another ruled surface)
+	
+	(unrolling a developable into a plane)
+	(shortest path on a developable; ruled)
+	
+	(related to bitangent developables)
+
+	(explore connections to visibility)
+
+
+	

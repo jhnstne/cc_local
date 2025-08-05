@@ -1,0 +1,2 @@
+emacs -geometry 91x72+0+0 doiseea.tex &
+xpdf -geometry 870x1080+965+0 doiseea.pdf &

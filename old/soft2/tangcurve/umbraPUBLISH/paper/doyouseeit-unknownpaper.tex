@@ -1,0 +1,1264 @@
+\documentclass[12pt]{article}
+\usepackage{times}
+\usepackage[pdftex]{graphicx}
+\input{header-consecutive}
+
+\newif\ifJournal
+\Journalfalse
+\newif\ifComment                % large-scale comments
+\Commentfalse
+
+\newcommand{\hero}{star}
+
+\setlength{\headsep}{.5in}
+\markright{\today \hfill}
+\pagestyle{myheadings}
+
+\DoubleSpace
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{0in}	% should be 0pt for 1in
+\setlength{\textheight}{8.6in}
+\setlength{\textwidth}{6.875in}
+\setlength{\columnsep}{5mm}	% width of gutter between columns
+
+% -----------------------------------------------------------------------------
+
+\title{Do you see it?\\Object visibility in a smooth flat scene}
+% Part 1
+\author{J.K. Johnstone\thanks{Department of Computer and 
+    Information Sciences, UAB, Birmingham, AL 35294-1170.  This work
+    was partially supported by the National Science Foundation under grant CCR-0203586.}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Given a smooth object A nestled in a scene of smooth objects, and
+a certain vantage point P, we are interested in analyzing whether A is visible.
+If A is not visible, then we want to understand exactly which objects block it;
+while if A is visible, we want to provide a probe from the viewpoint P that realizes
+this visibility.
+This is a smooth version of a classical problem in visibility analysis,
+and represents part of a research program that endeavours to promote
+our understanding of visibility analysis, which is quite exhaustive for linear structures,
+to smooth environments bounded by curves and surfaces.
+In this paper, we begin an exploration of this subject 
+in 2-space, where a smooth object is an arbitrary closed curve.
+
+Only a few probes are necessary to determine visibility.
+We present three granularities of probes, each set smaller than the previous set but
+also more complicated to compute.
+We first observe that tangents that pass through the viewpoint are sufficient.
+We then observe that certain special tangents through the viewpoint are sufficient:
+extreme and piercing tangents.
+Finally, we refine these probes even further, finding a subset of extreme
+and piercing tangents that are sufficient.
+We also prove the sufficiency.
+
+paper structure: (1) introduction where necessity for virtual vertices is established
+(for polygons, we would probe at the vertices);
+(2) establish structure of smooth curves beneficial to visibility (concavity, 
+extreme tangents); (3) establish the optimal probes.
+
+APPARENTLY NASTY OBSERVATION, WHICH ACTUALLY INCREASES OUR UNDERSTANDING OF THE
+ADVANTAGE OF THE METHOD: we have to (locally) probe at every tangent just in order to diagnose
+which tangents are extreme and piercing. But this probe is only intersecting with that
+one object (it is local): 
+i.e., it is a property of the isolated object, independent of the scene.
+If the object and viewpoint are static, then this cost can be considered one-time
+preprocessing.
+Even if the viewpoint is moving, the cost of a local probe is much less than the
+cost of a global probe, so we have a win.
+In contrast, the probes for visibility are against the entire scene, that is, they are 
+global probes.
+We can analyze the complexity in terms of number of local probes and number of global
+probes.
+Note that the complexity is particularly attractive if the viewpoint and object 
+is static (so no local probes to recalculate extreme/piercing tangents),
+but a few objects are dynamic (perhaps the star) so that there is a lot of computation
+somewhere that swamps the precomputation of extreme/piercing tangents.
+{\em In conclusion, argue for the minimization of global probes, even at the expense
+of several local probes.  Then argue for the minimization of global probes in a dynamic
+scene, where the cost of the local probes is reduced relatively still further.
+This suggests test data of detecting visibility of a moving object.}
+
+It is still worthwhile to avoid probes against the entire scene.
+
+{\em We have a crude conference writeup of tangential curves in SMI01.
+We should revisit the journal writeup, incorporating bitangents, tangents through a 
+point, visibility graphs, shortest paths, and convex hull.
+We need a journal version, both for the record and for its expansion and cleanup.
+For example, this journal version would be the appropriate one to reference
+in this paper as we compute special tangents through a point, and later when
+we need bitangents for analyzing visual events.}
+\end{abstract}
+
+% probable second paper: 'Do I see you? Part 2: Visual events in a smooth flat scene'
+
+\clearpage
+
+% ----------------------------
+
+\section{Introduction}
+
+IT WOULD BE WORTHWHILE TO PRESENT THE SIMPLIFIED ALGORITHM FIRST
+(JUST PROBE AT EXTREME AND PIERCING TANGENTS).
+THEN ADD SOPHISTICATION OF HOW TO CHOOSE A SUBSET.
+THE SIMPLIFIED ALGORITHM ALREADY HAS POWER.
+
+This paragraph later, after initial introduction of high-level ideas:
+A point is visible if the line of sight to the point is free of collision with the scene,
+and an object is visible if any point of the object is visible.
+Therefore, an object is invisible if every line of sight to the object is blocked.
+A line of sight to the object will be called a {\bf probe}.
+The implementation of a probe is the intersection of a ray from the viewpoint
+with the scene of objects, from the viewpoint to the first point of intersection.
+This paper shows how to test the invisibility of an object without using an infinite
+number of probes, but rather a well chosen optimal subset.
+({\em Review the test of invisibility for a polygon: only need to test all vertices of the
+scene whose angle lies in the angular range of the object.
+We need a counterpart to this algorithm for a smooth scene, where objects do not
+have vertices.
+In other words, we must determine a valid set of virtual vertices on the objects.})
+
+Each probe is either additional evidence of invisibility or a witness of visibility.
+
+We aim for a better understanding of object visibility through an
+examination of smooth scenes.
+If the visibility of an object in a scene is well understood, many important questions
+may be answered:
+  % An understanding of visibility analysis is central to computer graphics:
+occlusion culling, shadow computation, and global illumination are
+applications typically cited.
+Applications in other disciplines are easy
+to find as well, such as camera positioning for surveillance.
+  % camera positioning for filming (with dynamic visibility analysis)
+  % guard positioning for art gallery theorems (cite O'Rourke)
+  % radiation therapy
+Given a scene of objects, an important question to answer is
+when each object is completely invisible.
+This establishes when the object can be culled from the graphics pipeline,
+and is useful in general visibility analysis, such as the computation
+of visual events (see \cite{jj05}).
+  % such as the computation of visual events (at a valid visual event for A,
+  % A is completely invisible).
+This paper solves the following instance of this problem:
+given a smooth object A in a scene of smooth objects in 2-space, and a viewpoint P,
+is A completely invisible from P?
+  % this is a static or local version of a more general question that we will ask later:
+  % what are *all* of the viewpoints from which A is completely invisible?
+Visibility analysis has received little attention for scenes of smooth objects.
+We consider a solution for an arbitrary scene of smooth curves in 2-space.
+The only constraint on the curves is that they define closed, disjoint objects.
+The curves may also be interpreted as footprints of 2.5-dimensional surfaces
+in 3-space.
+Arbitrary curves demand a new level of sophistication in the algorithmic development.
+
+The object A is invisible if every line of sight to a point of A is blocked, but this 
+does not lead to a practical algorithm.
+We will show that testing the blockage of a small number of lines of sight is sufficient.
+This requires a deeper understanding of how an object can block another object.
+% Testing a line of sight will be done with a probe.
+% We want to reduce to testing one or at most a few lines of sight.
+
+{\em an obvious solution would be to check all visual events in a radial sweep about 
+the viewpoint: we do more than this, right?
+Would it work to simply probe at every extreme tangent and every piercing tangent
+in the range of A?
+Yes, if we first do steps 1-3 of the algorithm {\em objectvisibility}, 
+since we probe at a subset of these.
+The strength of the proposed method is that we skip probes at many of the
+tangents through the viewpoint in A's range.
+First, we reduce from all tangents through the viewpoint to
+extreme and piercing tangents, and then we skip many of the extreme and piercing tangents
+by analyzing how one object blocks another.
+It is also valuable that this paper establishes that only probes at the extreme 
+and piercing tangents are necessary, 
+so that the above simplified algorithm is indeed possible.
+CAN TRY IMPLEMENTING SIMPLIFIED ALGORITHM FIRST.
+GIVE AN EXAMPLE WHERE MANY PROBES ARE SKIPPED.}
+
+There are many ways for A to be blocked from the viewpoint (Figure * illustrates
+some of them), 
+but there are only two fundamental ways for an object to block a region of space:
+behind itself and behind a concavity (Figure **).
+We discuss how to calculate the region blocked by an entire object
+and the region blocked by a concavity (Section~\ref{}).
+% Then A is blocked if it lies in these areas.
+% We develop a simple test that involves angular ranges and a small number of probes
+% (our term for testing a line of sight for blockage).
+This development may be summarized as follows.
+A blocked region associated with the object B (or by a concavity of B)
+is bounded by certain tangents of B that pass through the viewpoint,
+which define the angular range of the region.
+That is, adopting a polar coordinate system centered at the viewpoint,
+the blocked regions may be characterized by angular ranges.
+A comparison of the angular range spanned by A with the blocked angular ranges
+is enough to determine the visibility of A,
+along with some probes of A to determine if A lies in front of or behind 
+each blocking object.
+
+FIGURE * OF A BLOCKED IN VARIOUS WAYS BY THE SCENE: ONE OBJECT BEHIND (EG6), ONE OBJECT'S
+CONCAVITY (EG7), SEVERAL OBJECTS BEHIND (EG15, A1), SEVERAL OBJECTS CONCAVITY (EG16, A1)
+AND A NOT BLOCKED (EG11).
+
+FIGURE ** OF REGIONS (EG4B and EG5B).
+
+% For the object A to be invisible, it must be blocked by some object or by some
+% collection of objects.  
+
+The rest of the paper is organized as follows:
+related work;
+(definitions); 
+definition of concavity;
+definition of region behind object;
+algorithm (possibly earlier);
+angular ranges;
+probes to answer various different types of question;
+fundamental operations to implement the algorithm;
+future work and conclusions.
+
+
+
+
+
+
+
+
+
+% Every object blocks a certain amount of space from the viewpoint.
+% This blockage comes in two varieties: an area behind the entire object
+% and an area behind a concavity at the front of the object.
+% TOO MUCH INFORMATION TOO SOON (NOT RELEVANT NOW):
+% The invisible area behind the object is bounded by two tangents (called extreme)
+% and a segment of the curve,
+% while each invisible area in front of the object is bounded by a single tangent
+% (called piercing) and a segment of the curve.
+
+% FIGURE TO ILLUSTRATE INVISIBLE REGIONS
+
+% The approach of the paper is as follows.
+% Let P be the viewpoint and A be the distinguished object.
+% Each object B of the scene blocks the viewpoint from a region behind itself,
+% and each concavity of B that is visible from the viewpoint blocks
+% another region behind the concavity (but in front of the rest of the object).
+
+% ----------------------------
+
+\section{Related work}
+
+START HERE: read or reference the associated literature on occlusion culling, visibility
+            skeletons, aspect graphs, shadow computation, surveillance
+
+visibility graph 
+
+Related literature: occlusion culling (FIND IT), discontinuity mesh (FIND IT),
+aspect graph (FIND IT)
+
+Get a huge bibliography (one double-sided page).
+
+% ----------------------------
+
+\section{Definitions} 
+
+The viewpoint P is an arbitrary point in free space.
+
+\begin{defn2}
+$x$ is {\bf visible} from $P$ if the open line segment \seg{Px} 
+has no intersections or points of tangency with the scene.
+\end{defn2}
+
+% moved from STAR1
+\begin{defn2}
+Consider a closed interval $[b_0,b_1]$ (often interpreted as the parameter interval
+of a closed curve) and a subinterval $[t_i,t_j]$.
+If $t_i > t_j$, $[t_i,t_j]$ represents $[t_i,b_1] \cup [b_0,t_j]$.
+Equivalently, the segment {\bf $B[t_i,t_j]$} 
+on the closed curve $B(t), t \in [b_0,b_1]$ represents the segment
+$B[t_i,b_1] \cup B[b_0,t_j]$ if $t_i > t_j$.
+\end{defn2}
+
+[Should tangents be directed, since cameras have a view direction along a line?
+This would also resolve the problem of two equidistant points of tangency, one
+on either side of viewpoint P (in definition of T').]
+
+Extremes of visibility and invisibility are defined by tangents through the
+viewpoint P.  
+In this paper, we only consider tangents through the viewpoint P,
+and all of these tangents have an implicit direction, from P to the point of tangency,
+reflecting the act of viewing from P.
+That is, all tangents can be interpreted as rays emanating from P.
+As an illustration of this principle, in the 
+degenerate case where there are points of tangency in both directions from P
+as in Figure EG14
+(i.e., if the tangent is a bitangent of B, and P lies between the points of tangency),
+the tangent needs to be treated as two directed rays, one in each direction from P.
+Another result of this principle is that it is well defined to talk about
+the first point of tangency: this is the first point
+of tangency encountered in leaving P in the view direction.
+
+FIGURE SHOWING NEED FOR DIRECTED RAYS (EG14)
+
+Technically, A is blocked by B if all probes to A are blocked by B
+(i.e., the probe hits B before A).\footnote{A probe to A is the casting of a ray
+  from the viewpoint to a point of A, recording intersections along the way.}
+
+\begin{defn2}
+\label{defn:inside}
+The {\bf inside} of the tangent T of B
+is the halfplane that contains the curve B
+in the neighbourhood of T's first point of tangency with B.
+% STAR1
+\end{defn2}
+
+\begin{defn2}
+A {\bf probe} of the scene is the shooting of a ray at the scene from the viewpoint $P$,
+analyzing the order in which objects are met.
+\end{defn2}
+
+% ----------------------------
+
+\section{Concavities}
+
+  % A subtle issue in object visibility is the blocking of the viewpoint by a concavity.
+Concavities complicate the analysis of object visibility.
+Often one probe to A is sufficient to determine the visibility of A relative to B,
+but this is not the case if part of A lies in a concavity of B (EG11).
+Some of the probes may indicate that A is blocked and others that A is not.
+Without a better understanding of concavities, 
+a single probe to A does not necessarily provide any information about the position of A
+relative to B.
+% We can only have confidence in the blocked probes if we better understand the 
+% concavity
+
+FIGURE OF A PEEKING BETWEEN TWO CONCAVITIES (EG11)
+% In general, if a probe to A hits B before A, we can usually conclude that A is blocked
+% by B 
+
+Let us begin with a definition of a concavity.
+WE ARE ONLY INTERESTED IN CONCAVITIES IN FRONT OF THE OBJECT WRT THE VIEWPOINT.
+Concavities are defined in terms of piercing tangents, which bound the 
+concavity,\footnote{This is a boundary with respect to visibility, 
+  not the typical boundary in terms of the object's convex hull.}
+so we start with a definition of the piercing tangent, a certain
+tangent through the viewpoint.
+
+\begin{defn2}
+Let $T$ be a tangent of the object $B$ through the viewpoint $P$.
+  % ray(T,T') is the infinite ray of T emanating from T' that does not include P.
+$T$ is a {\bf piercing} tangent of $B$ % in the direction T' from P
+if
+  % $PT' \cap B = \emptyset$
+  % the segment of T between P and T' = pot(T) is free of intersections with B
+  % [the early segment is free]
+  %
+  % and $ray(T,T') \cap B \neq \emptyset$.\footnote{A point of tangency of ray(T,T') 
+  % with B would be enough.}
+  % T intersects B past pot(T) = T' 
+  % [the late segment is not free]
+it intersects $B$ after its first point of tangency $T'$ with $B$, but not before.
+% Equivalently, $\seg{PT'}$ is free of intersection or tangency and T hits B.
+A degenerate case of the piercing tangent is possible,
+in which the point of intersection after $T'$ is replaced by a point of tangency,
+as follows.
+% But B must lie on the correct side of the tangent.
+$T$ is a {\bf (degenerate) piercing} tangent of $B$ if it does not intersect $B$ 
+before its first point of tangency $T'$ but it is tangent to $B$ again after $T'$, 
+say at $T''$,
+such that $B$ lies on the same side of $T$ at both points of tangency $T'$ and $T''$
+(and $T'T''$ is free of intersections).
+\end{defn2}
+
+EXAMPLE OF PIERCING (EG2 and EG8), INCLUDE NOT PIERCING (WHERE IT HITS B BEFORE PT OF TANGENCY)
+EXAMPLE OF DEGENERATE PIERCING (EG9)
+
+\begin{defn2} 
+Let $T$ be a piercing tangent of the object $B$ (standard or degenerate),
+where $B$ is represented by the closed parametric curve $B(t), t \in I$.
+The {\bf concavity} associated with $T$ is
+% T {\bf defines the concavity} 
+\begin{eqnarray}
+   B[t_1,t_2]  & \mbox{if } B(t_2 + \epsilon) 
+   \mbox{ lies outside\footnote{See Definition~\ref{defn:inside}.} T} \\
+   B[t_2,t_1]  & \mbox{if } B(t_2 + \epsilon) \mbox{ lies inside T}
+\end{eqnarray}
+where $t_1 \in I$ is the parameter value of the first point of tangency $T'$
+and $t_2 \in I$ is the parameter value of the first point of intersection of T after $T'$.
+
+The region bounded by a concavity and its piercing tangent is also
+called an {\bf invisible zone of type 2}.
+\end{defn2}
+
+FIGURE OF CONCAVITY (EG10)
+
+The concavity associated with a piercing tangent defines a region blocked from the
+viewpoint.
+Notice that concavities behind and on the side of an object are not covered
+by this definition, since they are not seen from the viewpoint.
+These concavities are included in the region behind the object, and do
+not need special attention.
+
+\subsection{Does a point lie inside the concavity?}
+\label{sec:ptinconcavity}
+
+A fundamental operation in the algorithmic development below
+is testing whether a point lies inside a concavity.
+Let $B$ be an object, $T$ a piercing tangent of $B$, $C$ the associated concavity as a region
+of space, and $c(t)$, $t \in I$ the boundary curve of the concavity.
+Consider a point $Q$ in free space.  Does it lie inside the concavity $C$? (FIGURE EG18)
+Consider the line segment \seg{PQ} between the viewpoint and $Q$,
+and let $P_B$ be the first intersection with $B$ of \seg{PQ} (moving from $P$ to $Q$).
+$Q$ lies in the concavity $C$ if $P_B$ exists and 
+all intersections with $B$ of \seg{P_B Q} lie on the concavity's boundary curve $c(t)$.
+That is, once it hits the concavity, it only hits the concavity from then on.
+% After all, once the line segment enters the concavity, the only part of the curve
+% that it can hit is the concavity's boundary, unless it passes right through the
+% concavity and enters the region behind the curve or in another concavity.
+The argument is as follows.
+If the point lies behind the curve or in a different concavity,
+then the last intersection with the curve will be outside the present concavity.
+If the point lies in front of the curve, then there will be no intersections with
+the concavity.
+On the other hand, if the point lies inside the concavity,
+then it cannot hit other parts of the curve once it enters the concavity,
+which can be seen as follows.
+A part of the curve that does not bound the concavity cannot enter the concavity
+and cause an intersection with the line segment, since it would need to enter
+the concavity through its mouth and would therefore define a new first intersection
+of the piercing tangent with the curve (see the definition of concavity).
+We conclude that one probe is sufficient to determine whether a point lies in a concavity.
+
+% ----------------------------
+
+\section{The region blocked behind an object}
+
+Not every object has a concavity, but every object has a blocked region behind the object.
+We now define this other type of blocked region.
+Like the concavity,
+the blocked region behind an object is defined by certain 
+special tangents through the viewpoint.
+% The region behind an object needs to be defined, just like we defined a concavity.
+
+\begin{defn2}
+Let $T$ be a tangent of the object $B$ through the viewpoint $P$.
+$T$ is an {\bf extreme} tangent of $B$ if all of $B$ lies on one side of $T$.
+\end{defn2}
+
+EXAMPLE OF EXTREME (EG1) 
+
+\begin{defn2}
+The {\bf region blocked behind an object} $B$ is the region bounded by 
+the two extreme tangents of $B$ and the back-facing curve segment of $B$ between them.
+This is also called an {\bf invisible zone of type 1}.
+\end{defn2}
+
+EXAMPLE OF REGION BLOCKED BEHIND AN OBJECT (JUST CONNECTING THE PTS OF TANGENCY
+BY A STRAIGHT SEGMENT RATHER THAN A CURVE SEGMENT, IF DESIRED)
+
+% This region is part of a cone, which may occasionally be called an {\bf invisibility cone}.
+% or even invisible zone 1?
+
+An exact computation of this region is not necessary for our method
+(only its angular range is necessary), but for completeness we describe
+how it can be computed.
+% We don't need to compute the exact boundary of the invisible region to answer
+% our question of the visibility of A; however, since other applications may be interested,
+% we explore this issue.
+The region behind $B$ lies inside the extreme tangents of $B$
+(the inside of the extreme tangent is the side that contains $B$).
+% and the invisible region lies inside both extreme tangents.
+The only question is the definition of the back-facing curve segment of $B$.
+Let $T_1$ and $T_2$ be the two extreme tangents of B, and
+$B(t_i)$ be the first point of tangency of $T_i$ with $B$.
+The extreme tangents define two curve segments: 
+$B[t_1,t_2]$ and $B[t_2,t_1]$.
+One probe is sufficient to determine which is the desired back-facing segment:
+cast a ray from $P$ towards $B$ 
+% (any ray that is not extreme will do: 
+(the ray midway between the extreme tangent rays of $A$ is a robust choice)
+and find its first intersection with $B$.  
+The front-facing segment of $B$ is the segment that contains the parameter value
+of this intersection.
+
+FIGURE OF EXACT INVISIBLE ZONE 
+
+% ----------------------------
+
+\section{Angular ranges}
+
+We have seen two types of invisible zone: type 1 invisible zones lie completely
+behind an object and type 2 invisible zones lie behind concavities.
+However, for the analysis of object visibility,
+we do not need to compute each invisible zone exactly:
+we only need to know its angular range.
+% steradians in 3D
+This angular range is measured about the viewpoint,
+effectively defining the invisible zone in polar coordinates, 
+with the viewpoint as origin.
+The angular range is defined here and the depth in the next section.
+
+% Every object B blocks a region of space behind it,
+% and every concavity associated with a piercing tangent of B blocks a region of space
+% behind it (but in front of other parts of B).
+% These define regions of invisibility.
+% The next definition captures the angular range (about the viewpoint) of 
+% these regions of invisibility.
+
+% definition of angular range for zone 1 invisibility (definition 9, first part)
+
+\begin{defn2}
+Consider the space of rays emanating from the viewpoint, identifying
+a ray with its angle (say from the x-axis) so that $[0,2\pi]$ encodes
+all of the rays.
+{\bf ray($\theta$)} represent the ray at angle $\theta$.
+\end{defn2}
+\begin{defn2} 
+Let $T_1$ and $T_2$ be the extreme tangents of the object $B$
+with angles $\theta_1 < \theta_2$,
+where we measure this angle using the ray from the viewpoint.
+The {\bf angular range of B}, range(B), is the range
+spanned by these extreme tangents:
+\begin{eqnarray*}
+\mbox{range}(B) & :=[\theta_1,\theta_2] & \mbox{if ray} 
+(\frac{\theta_1 + \theta_2}{2})
+\mbox{ intersects } B \\
+              & := [\theta_2, \theta_1] & otherwise
+\end{eqnarray*}
+% The cone spanned by range(B) is called the {\bf cone of B}.
+\end{defn2}
+
+FIGURE OF range(B) (EG4)
+
+We want an analogous definition of the angular range for a concavity,
+but this requires two tangents through the viewpoint that span the concavity.
+These tangents are defined from the concavity's piercing tangent.
+
+% We have seen that extreme tangents define a region of invisibility behind an object.
+% Piercing tangents and their associated concavities also define regions of invisibility.
+% But to define this region of invisibility,
+% we need to define the partners of a piercing tangent, 
+% which are tangents through the viewpoint bounding the concavity.
+
+\begin{defn2}
+Let $B$ be an object represented by the closed parametric curve $B(t), t \in I$.
+Let $T$ be a piercing tangent of $B$
+such that $T$ defines the concavity $B(t), t \in J \subset I$.
+The {\bf extreme tangents of the concavity} associated with $T$ 
+are the two tangents of the concavity 
+through the viewpoint P ($B'(t_0), t_0 \in J$ such that $P \in B'(t_0)$)
+that minimize and maximize angle.\footnote{Another characterization of these tangents
+  is that they are the two tangents of the concavity through the viewpoint
+  that lie closest to the extreme tangents of the entire object.}
+\end{defn2}
+
+% The practical way to identify the extreme tangents of a concavity
+% is to consider the finite number of tangents
+% of the concavity that pass through the viewpoint, 
+% as well as the two extreme tangents of the object B,
+% sort the angles of these tangents between the two extreme tangents, and choose
+% the two tangents whose angles lie closest to the angles of the two extreme tangents.
+% (We could also characterize the extreme tangents of the concavity as the only tangents
+% in the candidate set such that all of the concavity lies on one side of T,
+% which is consistent with the definition of extreme tangents of an object.
+% However, finding the extreme tangents of the concavity using this characterization
+% would require counting the number of intersections of each tangent with B,
+% a more expensive test than sorting angles.)
+%% The {\bf partner of T} is a tangent of the concavity $B'(t_0), t_0 \in J$ that passes
+%% through the viewpoint P and maximizes the angle from T.
+
+FIGURE OF EXTREME TANGENTS OF CONCAVITY (EG10)
+% FIGURE OF PARTNER OF T (EG3).
+
+The entire concavity lies in the cone between the two extreme tangents
+of the concavity.
+
+% The entire concavity lies between the piercing tangent T and its partner.
+% The entire object lies between its two extreme tangents.
+
+% angular range of invisible zone 2 (definition 9, second part)
+
+\begin{defn2}
+Let $T$ be a piercing tangent of the object $B$,
+and let $T_1$ and $T_2$ be the extreme tangents of the associated concavity
+with angles $\theta_1 < \theta_2$,
+where we measure this angle using the ray from the viewpoint.
+The {\bf angular range of $T$'s concavity}, range($B$,$T$), 
+is the range spanned by these extreme tangents:
+\begin{eqnarray*}
+\mbox{range}(B,T) & := [\theta_1,\theta_2] & \mbox{if ray } 
+(\frac{\theta_1 + \theta_2}{2}) \mbox{ intersects the concavity} \\
+              & := [\theta_2, \theta_1] & otherwise
+\end{eqnarray*}
+\end{defn2}
+
+% FIGURE OF range(B,T) (EG5)
+FIGURE OF range(B,T) (EG10 with shaded cone)
+
+% ----------------------------
+
+\section{Object visibility}
+\label{sec:ov}
+
+% regions of invisibility, rather than invisiblity zones?
+
+We now turn our attention away from invisibility zones
+to the main question of object visibility.
+To measure object visibility, we must measure an object's depth with respect
+to the viewpoint as well as its angular range.\footnote{This is the radial component of the polar coordinates $(r,\theta)$.}
+In order for an object A to be completely blocked by another object B 
+or by a concavity of B, it must lie in the angular range of B or the concavity.
+But this is not sufficient, of course,
+since the space in front of an object is not blocked from the viewpoint
+even though it lies in the correct angular range.
+%  to determine the invisibility of A, of course,
+% since A may lie in front of the object.
+We now study the conditions on depth that must be satisfied for A to be blocked
+by B or one of its concavities.
+We shall see that only a few probes are required.
+These few probes are sufficient to locate A with respect to B.
+DEFINE PROBE.
+
+We first consider the invisibility zone behind an object and then the invisibility zone
+inside a concavity.
+
+\begin{lemma}
+Let $A$ and $B$ be two objects, and
+let $R$ be a ray from the viewpoint to any point of $A$, say $a$.
+% Let $R$ be a ray from P with angle in $\mbox{range}(B) - \cup_i \mbox{range}(B,T_i)$
+% (that is, a ray to B that avoids all of the concavities).
+  % Let $R_1$ be the ray from P midway between the extreme tangent rays of A.\footnote{We
+  %   could test intersection of the extreme tangents with B, but this is less robust
+  %   than testing intersection with $R_1$
+  %   for boundary conditions when an extreme tangent of A is also tangent to B.}
+  % The average of the extreme tangents (which are already known)
+  % works well as the line of sight to A, since it is as far as possible from a
+  % fragile boundary condition.
+$A$ is {\bf blocked by $B$} (and lies behind $B$)
+if the following conditions are satisfied:
+\begin{itemize}
+\item $\mbox{range}(A) \subset \mbox{range}(B)$
+\item R intersects $B$ before $A$
+\item $a$ does not lie in any concavity of $B$ \footnote{That is, any concavity associated
+      with a piercing tangent of $B$.}
+      (see Section~\ref{sec:ptinconcavity})\footnote{These tests 
+       only involve a total of two line intersections with B, combined.}
+% \item the ray $R$ intersects B before A (BUT RAY MAY NOT INTERSECT A AT ALL!)
+\end{itemize}
+\end{lemma}
+\prf
+We need to guarantee that one point of $A$ lies behind $B$.
+Then the first condition will guarantee that {\em all of $A$} lies behind $B$:
+if one point of $A$ is behind $B$, then the entire curve is behind $B$
+since its angular range is contained within $B$'s
+and it cannot overlap $B$ (the curves are disjoint).
+
+The second and third conditions guarantee that the point $a$ lies behind $B$.
+Its line of sight is blocked by $B$ and it does not lie in any concavity.
+
+INCOMPLETE
+\QED
+
+\begin{lemma}
+Let $A$, represented by the curve $A(t)$, and $B$ be two objects, and
+let $A(t_1)$ and $A(t_2)$ be the first points of tangency of the extreme
+tangents of $A$.
+$A$ {\bf lies inside the concavity} associated with the piercing tangent $T$ of $B$ 
+% is blocked by the concavity
+if the following conditions are satisfied:
+\begin{itemize}
+\item $\mbox{range}(A) \subset \mbox{range}(B,T)$
+\item the points $A(t_1)$ and $A(t_2)$ both lie inside the concavity
+\end{itemize}
+\end{lemma}
+\prf
+If both extremities of A lie in the concavity, then all of A does.
+It is not enough for one extremity to lie in the concavity, even though
+the range of A lies in the concavity range, because the concavity cone
+is a bit generous, encompassing regions that are not invisible (EG13).
+INCOMPLETE
+\QED
+
+FIGURE OF A BLOCKED BY B (EG6)
+FIGURE OF A BLOCKED BY CONCAVITY (EG7 and EG13)
+
+% no longer necessary
+% \begin{lemma}
+% R of the previous lemma must exist.
+% That is, the range of the concavities of B cannot cover the range of B.
+% \end{lemma}
+
+% FIGURE SHOWING RANGE OF B IS STRICTLY GREATER THAN RANGE OF CONCAVITIES (EG12)
+
+% ----------------------------
+
+\section{Blocked by many cooperating objects}
+
+In general, an object $A$ is invisible because it is blocked by 
+a collection of objects, cooperating to block $A$.
+This section considers this issue.
+What probes are necessary to test invisibility?
+We need to probe at the boundaries between objects, where the responsibility
+for blocking is handed off from one object to another.
+One of the purposes of these probes is to reveal the next object in the chain;
+the other is to ensure that $A$ does not slip between two objects in the chain.
+Since the overlap between two objects is a vulnerable location for visibility,
+two probes will sometimes be necessary at an overlap.
+
+[The probes of the boundary between two objects are at extreme and piercing tangents.
+If the present object in the chain is using a concavity to block $A$, 
+the next probe is at a piercing tangent.
+Otherwise, the next probe is at an extreme tangent.]
+% Ones associated with overlapping objects that cover the range of $A$.
+% We sweep across the objects to find these objects minimally (or could 
+% we consider all unions of covering objects and pick optimal one directly?).
+% HOW CAN WE FIND THE BEST COVERING?
+
+Probes serve as witnesses to potentially large areas of invisibility.
+For example, if a probe determines that $A$ lies inside a concavity of $B$,
+then we know that the next opportunity for $A$ to become visible is as it leaves
+the concavity, at a piercing tangent: 
+other probes are not (immediately) necessary in the intervening range.
+(They may become necessary later depending on the probe at the concavity's mouth.) 
+As another example, if a probe determines that $A$ lies completely behind $B$,
+then we know that the next opportunity for $A$ to become visible is on the other side
+of $B$, at an extreme tangent of $B$, since $A$ cannot escape 
+from behind $B$ before then to become visible.
+
+With each probe, we are interested in the objects encountered before the probe hits $A$.
+These are the candidates for the next object in the chain.
+Care must be taken in handing off responsibility for blocking from $B$ to $C$.
+Suppose that the present object in the chain of blocking objects is $B$,
+and the next probe (at a tangent of $B$)
+reveals that the next object in the chain is $C$.
+% Suppose that we have established that $B$ blocks $A$ until a certain probe
+% (which will be a tangent to $B$),
+% and at this probe $C$ is hit before $A$.
+Suppose also that this probe hits $A$ before the point of tangency with $B$.
+This implies that $A$ is beginning to squeeze between $B$ and $C$,
+and we must check if it continues far enough to peek out on the other side of $C$
+and become visible.
+Therefore, we must backtrack and probe $C$ at its extremity that overlaps $B$:
+if this probe hits $A$ first, then we have a witness to visibility;
+if it does not hit $A$ or it hits $A$ after it hits $B$, 
+then all is fine and we can continue forwards again;
+if it hits $A$ before $B$ but hits another object $D$ first,
+then $A$ has peeked out past $C$ but is blocked by $D$, 
+and we must continue backtracking to see if $A$ peeks out the other side of $D$.
+In theory, this backtracking may continue indefinitely.
+
+Trace through an example, based on EG18.
+
+Trace through another example, based on EG19 (apparently in concavities, but test does
+not need to change).
+
+Probes identify certain objects and certain points of A.
+The next definition gives handles for these objects and points.
+\begin{defn2}
+Let R be a ray in the angular range of A (i.e., a valid probe direction).
+Recall that probes are always from the viewpoint.
+{\bf probe(R)} is the first object that is hit by R.
+{\bf A-probe(R)} is the first point of A hit by R.
+\end{defn2}
+
+The complete algorithm to determine the visibility of the smooth object $A$
+from a viewpoint $P$ in a scene of smooth objects, 
+in all its glory and all its gory detail, is as follows.
+The function {\em objectVisibility} returns true if A is visible, and false
+if A is invisible.
+If A is visible, {\em witness} is a ray that testifies to the visibility of A.
+If A is invisible, {\em chain}  is a list of the blocking objects.
+RAY is the next probe, B is the next object in the chain, {\em range} is the present
+angular range of A that is known to be covered, and {\em chain} is the present list of the
+blocking objects.
+% setting RANGE is also a useful comment on the progress made so far
+% note: by the time we get down to the test of the a-probe lying in a concavity,
+%       it is crucial that we know that B does not block A alone, otherwise the next 
+%       probe would not necessarily be the associated piercing tangent: this might be
+%       sweeping in the wrong direction.
+
+\vspace{.2in}
+
+bool {\em objectVisibility} (A, {\em witness}, {\em chain})
+
+\begin{enumerate}
+\item RAY = an extreme tangent of A; B = probe(RAY); {\em range} = $\emptyset$; 
+      {\em chain} = \{B\};
+\item if (probe(RAY) == A) \{ {\em witness} = RAY; return 1; \}
+\item if (A is blocked by B alone) return 0;
+\item if (A-probe(RAY) lies in a concavity of B) RAY = associated piercing tangent of B;
+\item else RAY = the extreme tangent of B that lies in the angular range of A;
+\item {\em range}    = (extreme tangent of A, RAY);
+
+\item while (RAY lies in A's angular range)
+  \begin{enumerate}
+  \item oldB = B;  B = probe(RAY); {\em chain} = {\em chain} $\cup$ B;
+  \item if (probe(RAY) == A) \{ {\em witness} = RAY; return 1; \}
+  % note: a-probe cannot lie in concavity, or at least it doesn't matter: we always use extreme tangent of object
+  \item if (backtrack (RAY, A, B, oldB, {\em witness}, {\em chain}, {\em range})) return 1;
+  \item RAY = the extreme tangent of B that does not lie in {\em range};
+  \item {\em range} = (extreme tangent of A, RAY);
+  \end{enumerate}
+\item return 0;
+\end{enumerate}
+
+The function {\em backtrack} checks if A 
+squeezes out between the most recent two objects in the chain,
+by probing backwards.
+It returns true if a witness to A's visibility is found
+during this backtrack (and this witness is returned in {\em witness}).
+Notice that there is no extension of the chain in the original call of {\em backtrack}
+from {\em objectVisibility}, but recursive calls may add to the chain.
+
+\vspace{.2in}
+
+bool backtrack(RAY, A, newB, oldB, \&{\em witness}, \&{\em chain}, {\em range})
+
+\begin{enumerate}
+\item 
+if (RAY hits A before oldB)
+\begin{enumerate}
+\item {\em chain} = {\em chain} $\cup$ newB;
+\item RAY = extreme tangent of newB in {\em range};  (i.e., going backward)
+\item if (probe(RAY) == A) \{ {\em witness} = RAY; return 1; \}
+\item return backtrack(RAY, A, probe(RAY), oldB, {\em witness}, {\em chain}, {\em range});
+\end{enumerate}
+\item else return 0;
+\end{enumerate}
+
+(COULD JUST INCLUDE IN JOURNAL PAPER)
+% \ifJournal
+A proof that this algorithm detects visibility follows.
+
+\begin{theorem}
+Algorithm {\em objectVisibility} correctly computes the visibility of the object A.
+\end{theorem}
+\prf  
+Suppose that the virtual sweep across A is from left to right, 
+starting at the leftmost extreme tangent of A.
+(Here a left to right sweep is equivalent to a clockwise sweep.)
+Suppose that none of the probes reveal visibility.
+We must show that the entire object is invisible, not just these finite points.
+The first probe, to the left extreme tangent of A, establishes that some object B
+blocks A at this probe.
+If B blocks A alone, then we are done, relying on the arguments from the single object
+case of Section~\ref{sec:ov}; so we can assume that B does not block A alone.
+If the point of A associated with the first probe lies inside a concavity of B, 
+then A must depart this concavity (otherwise B would block A alone) 
+and so must cross the piercing tangent.
+This is the next opportunity for A to become visible, and defines the next probe in this
+case.
+If the point of A associated with the first probe does not lie in a concavity of B,
+then it must lie completely behind B.
+Since we are at the left boundary of A, A can only slip past B to become visible
+towards the right and, since the objects are disjoint, 
+A cannot move past B until it passes the right extreme tangent of A,
+which defines the next probe in this case.
+We have established that the range between the first two probes is blocked,
+and can consider the algorithm's while loop.
+
+When the next probe is chosen,
+we will always have established that the angular range from the left side of A
+to that probe is blocked.
+Therefore, if a probe does not lie in A's angular range, we know that
+the probes have swept across A and can conclude that A is invisible.
+The next probe will test the visibility of A as it appears out of the shadow of B.
+If this probe does not see A, it must be blocked by some new object newB.
+Consider the region between B (which we shall now call oldB) and newB.
+It is possible for A to slip between oldB and newB and become visible in the 
+backwards (leftwards) direction (see Figure SOMEFIGURE): 
+we must verify that this does not occur.
+(We are now in the call to {\em backtrack}.)
+If A begins to slip between oldB and newB, then the present probe will hit newB,
+then A, then oldB: that is, it will hit A before oldB.
+The earliest chance for A to slip past newB and become visible is at the leftmost
+end of newB (again because two objects are disjoint and A is known to be strictly behind
+newB at present).
+Therefore, the next probe is at the left extreme tangent of newB.
+% (or equivalently,
+% the extreme tangent of newB that lies in the range already considered).
+If a new object is found that blocks A at this new probe, but A still lies between
+this new object and oldB, then we must continue looking backwards (and add the new
+object to the list of blockers).
+The backtracking continues until we either establish that A becomes visible
+or we find a probe that only sees A after oldB, not before, which establishes
+that A has stopped squeezing backwards in front of oldB (and has remained blocked
+throughout), so it remains invisible and the forward search can continue.
+This concludes the call to {\em backtrack}.
+The forward search continues with a probe at the other extreme tangent of newB
+(the right one), which is the next opportunity for A to become visible past newB
+in the forward direction.
+The search continues in the same way from this new probe, until 
+either a witness to A's visibility is found, or the known range
+of invisibility matches A's range (meaning A is completely invisible).
+\QED
+% \fi 
+
+\ifJournal
+ % [after the proof, we can improve the algorithm by choosing the object that extends
+ % the range best, rather than always the first object; but this overly complicates the
+ % original presentation and the proof]
+We can improve the algorithm for {\em objectvisibility} by reinterpreting
+probe(RAY).
+Rather than choosing the first object hit by the probe, we could technically
+choose any object that is hit before A: we are just looking for an object that blocks 
+the probe.
+The optimal choice is the object before A that extends the covered range the most.
+We prefer to use this version of the algorithm, where probe(RAY) is the object
+hit by the probe RAY before A that most extends the covered range (i.e., whose clockwise
+extreme tangent is furthest clockwise).
+\fi
+
+\subsection{Complexity}
+
+How many probes could this algorithm use to diagnose visibility?
+We observe that invisibility takes longer to diagnose than visibility, 
+since the algorithm does not end early with a positive witness to visibility.
+We are probing at one of the extreme rays of $A$ and 
+one or both of the extreme rays of each of the objects in a chain of objects 
+that block $A$.
+The worst case number of probes is therefore $2n-1$ where there are $n$ objects
+in the angular range of $A$.
+
+{\bf complexity analysis}
+Consider the number of probes needed to compute an object's visibility.
+Consider the complexity of certain operations used by the object visibility algorithm.
+Determining whether A lies behind an individual object 
+requires one probe per object (but only for those objects whose angular range
+contains A's angular range).
+Determining whether A lies inside an individual concavity
+requires two probes per concavity (but only for those concavities whose angular range
+contains A's angular range).
+Determining that A is blocked by a collection of objects 
+requires two probes per object in the collection 
+(but only for minimal collections of objects that together contain A's angular range).
+% Determining that A is blocked by a collection of overlapping concavities
+% requires one probe per concavity in the collection and an additional pair of probes 
+% (but only for minimal collections of concavities that together contain A's angular range).
+% Steps (7-8) may seem to subsume steps (5-6), but notice that the algorithm stops
+% once it is established that A is blocked.
+% Therefore, we make the simpler tests (5-6) in anticipation of sometimes avoiding 
+% the more expensive tests (7-8).
+
+The complexity of the total algorithm depends on the angular range of A relative
+to the angular range of the other objects and concavities.
+Obviously, the complexity increases in more complex scenes with more objects and more 
+concavities, and when A spans a larger angle with respect to the viewpoint.
+The complexity can be analyzed more precisely as follows.
+Let $o$ be the number of objects whose angular range contains A,
+$c$ the number of concavities whose angular range contains A,
+$O$ the number of objects that participate in overlapping collections of minimal size
+whose angular ranges combine to contain $A$ (where an object is counted once for each
+collection that includes it)
+let $C$ be the number of concavities that participate in overlapping collections
+of minimal size whose angular ranges combine to contain $A$,
+and let $P$ be the cost of a single probe.
+Then the complexity of this algorithm is $O((o+2c+2O+C)P)$.
+Typically, the angular range of A only overlaps a few objects and concavities
+in the scene and a small number of probes are necessary.
+ESTABLISH SOME EXPERIMENTAL RESULTS ON NUMBERS OF PROBES.
+
+
+START AN IMPLEMENTATION:
+
+\ifJournal
+Implementation improvement:
+lazily compute concavities, angular ranges, etc. on demand: only a few objects are
+probed and then need more information computed.
+\fi
+
+% ----------------------------
+
+% \begin{enumerate}
+% \item Define certain concavities of each object.
+%      [the visible ones that lie towards the viewpoint]
+%      unnecessary for most concavities: only need for the first blocking object B
+% \item Find the angular range of A, the region blocked behind each object,
+%       and the region blocked by each visible concavity.
+%       unnecessary for most objects, only need for A and the first blocking object B
+% \item (Determine whether A is blocked behind an individual object.
+%        Unnecessary)
+% \item (Determine whether A is blocked by a concavity.  Unnecessary: will
+%        test for blockage by the first B as part of the algorithm)
+% \item Determine whether A is blocked behind a collection of overlapping objects.
+% \end{enumerate}
+
+\section{Computing special tangents}
+
+The tangents of a curve that pass through a point can be found 
+using intersection in dual space.
+Since a line dualizes to a point, the tangent space of a curve can be dualized to a curve.
+In \cite{jj01}, we show how to represent the tangent space of a Bezier curve robustly by
+two Bezier curves in two different dual spaces.
+Since a point P dualizes to a line dual(P), the tangents of the curve C that pass
+through P dualize to the intersections of the curve dual(C) with dual(P).
+This is a line-curve intersection, or a simplified version of a curve-curve intersection,
+which can be solved using Bezier subdivision \cite{}.
+The details are reviewed in \cite{jj02}.
+
+\section{Examples}
+
+START HERE.
+REAL LIVE NON-TOY TEST CASES? BUILDING FOOTPRINTS IN A REAL CITY OR REAL BLOCK?
+SEE VIENNA DATA
+
+\section{Conclusions}
+
+The analysis of object visibility involves the appropriate choice of probes,
+which occur at certain special tangents of the scene.
+These include piercing tangents, extreme tangents of an object, and extreme
+tangents of a concavity.
+Concavities are computed from piercing tangents,
+the angular range of an object from extreme tangents of the object,
+the region blocked by an object from extreme tangents of the object,
+and the region blocked by a concavity from extreme tangents of the concavity. 
+
+\bibliographystyle{latex8}
+% \bibliographystyle{plain}
+\begin{thebibliography}{99}
+
+\end{thebibliography}
+
+\clearpage
+
+\ifJournal
+\section{Robust computation}
+
+In computing the inside of a tangent or the concavity defined by a piercing tangent,
+we test where $B(t + \epsilon)$ lies relative to a line through $B(t)$.
+This is a potentially fragile computation: we must choose $\epsilon$ small enough
+to guarantee that $B[t,t+\epsilon]$ is all on the same side of the line and hasn't
+yet crossed the line again, otherwise the test is meaningless.
+The size of $\epsilon$ can be determined using arguments developed in the exact
+curve work of SoCG 2004.
+EXPLORE.
+
+[For robustness, we may want to choose more central probes in general object visibility:
+all of the probes are at tangents, but that's inherent to the method isn't it?.]
+
+computation of fundamental operations (tangents through a point; and some trivial
+   ones: line/curve intersection, inside/outside of tangent);
+robust computation of fundamental operations (optional)
+\fi
+
+% ----------------------------
+
+\clearpage
+
+\section{To do, and structure}
+
+For complete paper:
+\begin{itemize}
+\item
+datasets for example curves and viewpoints (tablet),
+\item
+implementation (tangents through a point, extreme and piercing tangents,
+  line/curve intersection, inside/outside of tangent to define the concavity)
+\item
+implementation with David?
+\item
+optimally, complicated test example for illustration [journal]
+\item
+explorable issues: robust versions of line intersection and sideness;
+  how far do we want to explore degenerate cases in this paper?
+  proofs; [journal]
+\end{itemize}
+
+DO I NEED TO IMPLEMENT BEFORE PUBLISHING? (yes, to get figures)
+
+COLLECT FIGURES
+
+\begin{itemize}
+\item invisible area behind an object
+\item special tangents through the viewpoint that bound this area (extreme)
+\item invisible area behind a concavity
+\item special tangent through the viewpoint that closes this area (piercing)
+\item concavity defined by a piercing tangent
+\item special tangents through the viewpoint that bound a concavity (extreme) 
+\item angle range of an object and concavity
+\item criteria dictating that A is blocked by an object
+\item criteria dictating that A is blocked behind a concavity
+\item criteria dictating that A is blocked behind a combination of objects
+\item subproblem: when does a point lie in a concavity
+\item application to computation of a direct visual event
+\end{itemize}
+
+% ----------------------------
+
+\section{Future work, and application of this paper: Direct visual event}
+
+A direct visual event for A is defined by a free bitangent between A and B if:
+A and B lie on the same side and the point of tangency, and
+the point of tangency with B does not see A (elsewhere).
+
+\clearpage
+
+% ----------------------------
+
+\section{Table scraps}
+
+Look in early stages of early papers on object visibility for discussion of 
+point visibility.
+
+\subsection{Introductory paragraph 1}
+
+Given a scene of objects, an important question
+is to determine when each object is completely invisible.
+This establishes when the object can be culled from the graphics pipeline,
+and is an important question to answer for general visibility analysis,
+such as the computation of visual events (a potential visual event may be culled
+if any part of the object of interest is already visible).
+This leads to the following related question: given a viewpoint P and a certain
+object A from the scene, is A completely invisible from P?
+  % this is a static or local version of a more general question that we will ask later:
+  % what are *all* of the viewpoints from which A is completely invisible?
+This question has received little attention for scenes of smooth objects.
+We consider a solution for an arbitrary scene of smooth curves in 2-space.
+The only constraint on the curves is that they define closed, disjoint objects.
+The curves may also be interpreted as footprints of 2.5-dimensional surfaces
+in 3-space.
+
+% Given a viewpoint in a scene of smooth objects in 2-space, what objects
+% are visible?
+
+\subsection{Introductory paragraph 2}
+
+Given a viewpoint P, a scene of smooth objects in 2-space, and a distinguished object A
+called the \hero, we want to answer two questions about visibility:
+(1) what region of 2-space is invisible from P, and 
+(2) is A invisible from P?
+The first question is a smooth variant of the hard shadow problem,
+and could be rephrased in this framework as a computation of the hard shadow
+of a smooth scene from a point light source P.
+The major new issue is the adaptation of the algorithm to a smooth scene, where
+objects are bounded by smooth closed curves.
+Another new issue is the reinterpretation of the problem from shadows to visibility,
+since visibility is not 360 degrees but is limited by field of view.
+The second question could also be interpreted as a shadow problem: if A is the area
+light source, is P in the umbra?
+However, since we do not need to compute the entire umbra of A to answer this question,
+the question is more accurately a localized variant of the umbra problem.
+(2) might also be interpreted as follows: does all of A lie in the region computed by (1)?
+This reveals the connection between the two problems.
+
+\subsection{Invisible patches in front of an object (invisible zone II)}
+
+This area can also be captured by a cone (although it is a subset of this cone).
+The cone is bounded by the free tangent at one boundary and the extreme
+intersecting tangent at the other side of the patch.
+Call this an invisible patch cone of the object B.
+
+\subsection{Is A visible from P?}
+
+If A lies entirely in an invisible front patch of B, 
+then the extreme tangents of A intersect B between P and A as well as
+after A (i.e., after the point of tangency with A).
+
+\subsection{Table scraps from 'chain of blocking objects' section}
+
+Suppose that we have begun to build a chain of objects that block $A$,
+and we are looking to add the next object in this chain, using a new probe.
+Let probe(R) be a function that, given a ray direction R in the angular range of $A$,
+returns the object (if any) that is hit by R before $A$
+and best extends the angular range of the blocking objects.
+(That is, the union of the new object's angular range with the chain's range 
+is maximized.)
+This probe function will be used to find the next object in the blocking chain.
+For example, probe(--) would return -- in EG18.
+
+If we ignore the issue of backtracking and concavities, the basic algorithm
+for object visibility probing is as simple as the following.
+Let $T_1$ and $T_2$ be the two extreme tangents of $A$.
+
+\begin{verbatim}
+B = A
+while (probe has not swept past A)
+  B = probe(extreme tangent of B)
+\end{verbatim}
+
+or, more precisely:
+
+\begin{verbatim}
+B = A
+probe R = $T_1$
+while (probe has not swept past $T_2$)
+  B = probe(R)
+  R = extreme tangent of B in the sweep direction
+\end{verbatim}
+
+The assumption is that any probe that returns A will abort this routine and
+return the probe as a witness to visibility.
+
+Adding the issue of backtracking:
+\begin{verbatim}
+B = A
+while (not swept past A)
+  returnB = B = probe(positive extreme tangent of oldB = B)
+  while (probe hits A before oldB)
+    B = probe (negative extreme tangent of B)
+  B = returnB
+\end{verbatim}
+
+Here, the positive extreme tangent of B is the extreme tangent of B that lies
+in the direction of sweep, or alternatively the one that does not lie in the range
+that has already been swept over.
+
+This algorithm neglects the following detail: if the probed point of A lies in
+a concavity of B, then the extreme tangent of B is replaced by a piercing tangent of B.
+
+-----
+
+FIGURE
+
+A concavity blocks a region from the object's extreme tangent to the piercing tangent
+while an object blocks a region behind it between its two extreme tangents.
+
+We want to find a collection of objects (perhaps of size one) that blocks $A$,
+if one exists.
+First look for the first object in the chain, which blocks one side of $A$.
+Choose an extreme tangent of $A$.
+Consider the objects $B_i$ whose range contains the angle of this extreme tangent of $A$
+(so that it potentially acts as a bookend of the blockers of $A$)
+such that the probe at this angle hits $B_i$ before it hits $A$
+(so that it lies in front of $A$ and can block),
+and the probe point of $A$ (an extreme point) does not lie in a concavity of $B_i$
+($A$ lies strictly behind $B_i$, not sort of behind at a concavity where it can 
+squirm out).
+We start with the object in this collection with the largest range overlap with $A$.
+[Witness analysis: if there are no objects whose range contains the angle of the
+extreme tangent of $A$, then the probe to the associated extreme point is a witness
+to visibility.
+If the probe at this angle hits $A$ first, it is a witness.]
+Now consider the probe at the angle of the other extreme tangent of $A$.
+If this angle lies in the range of $B_i$ and the probe at this angle hits $B_i$ before $A$
+then we are done ($B_i$ blocks $A$ alone).
+[We don't need to test the concavity issue at the other side, since we already have
+a witness to $A$ lying strictly behind $B_i$.]
+Otherwise, probe at the extremity of $B_i$ that lies in the range of $A$.
+If this probe hits $A$ first, we have a witness to visibility.
+If it does not hit $A$ first, it must hit some other objects before $A$.
+Restrict to objects such that the probed point of $A$ does not lie in a concavity?
+From these objects, choose the object $B_j$ whose range extends the present blocked
+range the most.
+
+
+% Suppose that we have computed the angle ranges blocked by each object $B_i$ in the scene
+% and the angle range blocked by each concavity.
+% A is invisible from P if the range of A is contained in the union of the ranges of $B_i$
+% and the typical ray from P to A (but not a point of a concavity) intersects B before A;
+% or if the range of A is contained in the union of the ranges of the concavities
+% and the points of tangency of the extreme tangents of A both lie in the associated
+% concavity (that contains the range of A).
+
+% NEED MORE THAN ONE PROBE: PROBABLY ONE PER OBJECT.
+
+% \begin{lemma}
+% Let $R$ be a viewpoint ray to any point of $A$, say $a$.
+% A is blocked by a collection of objects $\{B_i\}$ if 
+% $range(A) \subset \cup_i range(B_i)$ and
+% $R$ intersects 
+% \end{lemma}
+
+\end{document}
+
+% using a southern colloquialism, it's time to piss on the fire and call the dogs

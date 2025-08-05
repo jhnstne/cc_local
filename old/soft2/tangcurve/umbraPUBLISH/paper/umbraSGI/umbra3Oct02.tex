@@ -1,0 +1,980 @@
+\documentclass[12pt]{article}
+\usepackage{latex8}
+\usepackage{times}
+\usepackage{epsfig}
+\input{header}
+\newif\ifTalk
+\Talkfalse
+\setlength{\headsep}{.5in}
+\markright{Umbra: \today \hfill}
+\pagestyle{myheadings}
+
+\title{Shadows in flatland}
+% Bitangency in a scene of smooth curves,\\with applications to visibility}	
+% Tangential curves for bitangency, with applications to smooth versions of the convex hull and visibility graph, and anticipations of shading from smooth lights in 3d	
+\author{J.K. Johnstone}
+
+\begin{document}
+\maketitle
+
+% -----------------------------------------------------------------------------
+
+\begin{abstract}
+Bitangency is a fundamental relationship that underlies the study
+of scenes of smooth objects in graphics and robotics.
+Moving from the independent study of one object to the 
+integrated study of several objects in a scene often requires bitangency.
+
+We illustrate how the bitangent is used in 
+lighting (building the umbra cast by a smooth light).
+\end{abstract}
+
+% -----------------------------------------------------------------------------
+
+\section{Taking umbrage}
+
+\begin{quote}
+\ldots but everything exposed by the light becomes visible \ldots (Ephesians 5, 13)
+\end{quote}
+
+We are interested in the following analytic lighting problem:
+lighting a room full of smooth obstacles by a smooth non-point light source.
+This is a very challenging problem, too broad to consider in its fullest 
+generality at first blush.
+Consequently, in this paper, we prepare the way for an attack on the general problem
+by focussing our attention on a more modest problem,
+which is already challenging:
+computing the umbra cast by a smooth non-point light source in a smooth 
+scene in 2-space.
+Both the light $L$ and the obstacles that define the scene $\{B_i\}$ 
+shall be bounded by smooth closed curves.
+
+\begin{defn2}
+The {\bf umbra of a scene} is the locus of points in the scene that do not
+see any of the light.
+\end{defn2}
+
+A computation of the umbra can be interpreted
+more generally as the computation of regions that are entirely invisible
+to a distinguished object (in our case, the light),
+an important visibility question.
+For example, if the light is reinterpreted as the camera,
+the 'umbra' defines parts of the scene that do not need to be rendered,
+being completely invisible.
+
+We are interested in defining the global structure of the umbra.
+That is, we are interested in defining the umbra region by region,
+rather than point by point.
+It is possible, and popular, to define lighting point by point,
+which in our case would reduce to developing the test
+'is point P in the umbra?'.
+However, we are interested in a deeper understanding of the structure of the umbra,
+through the direct definition of the regions that define the umbra.
+This is both more efficient and more intellectually satisfying,
+but certainly more challenging as well.
+Under this approach, most of our attention shall be on the definition of the
+boundaries between umbra and non-umbra.
+
+\ifTalk
+This distinction between point and regional approaches is analogous to the 
+two ways for computing a tangent on a Bezier curve:
+computing the tangent at a point
+or computing the hodograph of the curve, representing all of the tangents.)
+\fi
+
+% ------------------------------------------------------------------------------
+
+{\tiny
+\subsection{Earlier work}
+
+Polygonal lighting articles (I believe all of these are point-based).
+
+Tony Woo's work on reachability analysis (using Gaussian sphere).
+
+Artistic literature on shadow and lighting.
+
+How does antipenumbra paper relate?
+}	% end of \small
+
+\clearpage
+
+% ------------------------------------------------------------------------------
+
+\subsection{A divide and conquer strategy}
+
+We will compute the umbra of a scene using a divide and conquer strategy,
+one obstacle at a time.
+First, we compute the umbra cast by each obstacle in isolation
+(the local umbra).
+We then refine and expand the umbra of each obstacle
+by taking other obstacles into account (the global umbra of an obstacle).
+Finally, the umbra of the scene is defined in terms of these obstacle umbrae.
+
+The computation of the umbra one obstacle at a time has the advantage
+of simplicity and parallelizability.
+The computation of the umbra of an obstacle A can be performed at the same
+time as the computation of the umbra of an obstacle B, since they are
+independent, so our strategy is naturally parallelizable.
+This can be an important factor in a large scene.
+The concentration on one obstacle at a time is
+also an important simplification to the structure of the computation,
+since it allows one obstacle to (temporarily) dominate all of the other obstacles.
+That is, in the computation of the umbra cast by an obstacle A, 
+all obstacles are of interest only through their relationship
+to A or the light (such as their bitangents to A or the light)
+rather than their mutual interrelationships.
+This dominance of one obstacle yields important simplifications when
+reasoning about lighting.
+% This keeps less balls up in the air at once.
+% Thus, we only need to consider n-to-1 relationships, not n-to-n relationships.
+
+There is another serendipitous benefit to a divide and conquer strategy.
+Since the umbra is computed obstacle by obstacle,
+a point of the umbra will know which obstacle(s) is primarily 
+responsible for its inclusion in the umbra.
+This will allow efficient incremental updates to the umbra upon the addition
+or removal of an obstacle.
+
+Notice that the global umbra of A may certainly overlap the global umbra of B.
+That is, the cells of the global umbra of a scene defined by the global umbrae
+of obstacles are not necessarily disjoint (they do not form a perfect cover).
+
+% ------------------------------------------------------------------------------
+
+\subsection{A glossary of terms}
+
+\begin{defn2}
+\label{defn:outer}
+Let A and B be smooth obstacles.
+Let $t$ be the tangent through a point $P \in A$,
+and let $T$ be a bitangent of A and B, with points of tangency $P_A \in A$ and 
+$P_B \in B$.
+
+\begin{itemize}
+\item $t$ is {\bf extremal} if $t$ does not intersect A.
+	% (i.e., A lies in one of the halfplanes defined by $t$).
+\item $T$ is {\bf extremal} if $T$ does not intersect A or B.
+\item $T$ is {\bf B-extremal} if $T$ does not intersect B
+	and \ray{P_B P_A} does not intersect A
+	(i.e., $T$ is allowed to intersect A before $P_B$, as in Figure~\ref{fig:G3}).
+\item $T$ is {\bf outer} if it is extremal and 
+A and B lie on the same side of $T$ (Figure G4).
+\item $T$ is {\bf B-outer} if it is B-extremal and, in the neighbourhood of $P_A$,  
+A and B lie on the same side of $T$.
+\item $T$ is {\bf inner} if it is extremal and
+A and B lie on opposite sides of $T$.
+\item $T$ is {\bf B-inner} if it is B-extremal and, in the neighbourhood of $P_A$,
+A and B lie on opposite sides of $T$.
+\item
+The {\bf early segment} of T is the component of T between A and B.
+It may be abbreviated early(T).
+\item 
+If B is the light,
+the {\bf late segment} of T is the infinite ray of T starting at
+the point of bitangency with A and moving away from the light.
+\item
+If B is an obstacle that lies between A and the light\footnote{This 
+	restriction on B is necessary to distinguish A from B.}
+and T intersects L,\footnote{This restriction on T is necessary
+	to guarantee that the direction 'moving away from the light'
+	is well defined.}
+the {\bf late segment} of T is the infinite ray of T starting at the point
+of bitangency with A and moving away from the light.
+\item
+The {\bf inside} of an extremal tangent $t$ of A is
+the halfplane defined by $t$ that contains A.
+\end{itemize}
+\end{defn2}
+
+% ------------------------------------------------------------------------------
+
+\subsection{The local umbra of an obstacle}
+
+\begin{defn2}
+The {\bf local umbra of an obstacle} $A$ is the umbra that {\bf would} be
+cast if $A$ were the only obstacle in the scene.
+The {\bf local umbra of a scene} is the union of the local umbrae of the
+obstacles in the scene.
+\end{defn2}
+
+The local umbra cast by an obstacle is a region bounded by the obstacle
+and two of its bitangents to the light (Figures~\ref{fig:G2} and \ref{fig:G3}).
+Which bitangents, and which parts of these bitangents (Figure~\ref{fig:G2a})?
+
+If the light surrounds the obstacle, there is no umbra.
+Thus, we assume without loss of generality that the light does not
+surround the obstacle.
+However, the obstacle could surround the light (Figure~\ref{fig:G3}).
+This case complicates the theory.
+As we develop the theory, we shall point out how it simplifies when
+the obstacle does not surround the light,
+which is true in the vast majority of cases.
+
+\begin{defn2}
+\label{defn:surround}
+A {\bf surrounds} B if B lies entirely inside the convex hull of A (Figure~\ref{fig:G3}).
+\end{defn2}
+
+% ------------------------------------------------------------------------------
+
+We are basically looking for bitangents that do not intersect the obstacle
+or light.
+However, we must relax our constraints
+when the obstacle surrounds the light (Figure~\ref{fig:G3}).
+In this case, the desired umbral bitangents will intersect the obstacle,
+but we only allow these intersections on the 'other' side
+of the light.
+	% (from the point of bitangency with A).
+	% Between the light and obstacle, the umbral bitangent will act 
+	% the same as our earlier outer bitangent.
+
+\begin{lemma}
+Let A and B be smooth closed curves, where B does not surround A.
+\begin{itemize}
+\item	A and B have exactly 2 B-outer bitangents and 2 B-inner bitangents.
+\item   If A does not surround B,
+they have exactly 2 outer bitangents and 2 inner bitangents.\footnote{That is,
+	the B-outer bitangents become outer bitangents, and the B-inner 
+	become inner.}
+\end{itemize}
+\end{lemma}
+\prf
+There is an alternative definition of inner and outer bitangents
+that has a more intuitive appeal: the inner and outer bitangents of A and B
+are the only bitangents of the convex hull of A and the convex hull of B.
+That is, compute the convex hull of A and the convex hull of B, then take
+bitangents: there are only 4 bitangents (proof?) and these are the inner and
+outer bitangents of A and B.
+\QED
+
+The outer bitangents of A and L bound the local umbra of A.
+
+\begin{theorem}
+\label{thm:localumbra}
+Let $T_1$ and $T_2$ be the late segments of the L-outer bitangents
+of an obstacle A and the light L.
+The local umbra of A is the region bounded by $T_1$, $T_2$, and 
+the relevant part of A.
+Of the two regions so defined, the local umbra is inside $T_1$ in the
+neighbourhood of $T_1$ and inside $T_2$ in the neighbourhood of $T_2$.
+(If the obstacle does not surround the light, we can simplify
+this statement:
+the local umbra is the region inside both $T_1$ and $T_2$.)
+\end{theorem}
+\prf
+Argue that the light becomes visible as you cross these bitangents.
+\QED
+
+If A does not surround L,
+the local umbra is bounded if and only if the late segments intersect
+(Figures~\ref{fig:G2} and \ref{fig:globalumb3}).
+If A surrounds L,
+the local umbra is unbounded.
+
+\vspace{.1in}
+
+{\bf Algorithm:}
+\begin{enumerate}
+\item Find the bitangents of A and L.
+\item Find the two bitangents that are L-outer.
+\item Find the late segments of these outer bitangents and their insides.
+\end{enumerate}
+
+In short, in the general case when the obstacle A does not surround the light L,
+the local umbra of A is computed by finding the late segments of
+the outer bitangents of A and L.
+
+% \begin{rmk}
+% The case described in this section actually subsumes the case of 
+% Section~\ref{sec:notsurround}, since an outer bitangent is always
+% a pseudo-outer bitangent too.
+% That is, you can look for pseudo-outer bitangents
+% in all cases.
+% We have presented them separately
+% since the definition of pseudo-outer bitangents is less intuitive
+% without an earlier understanding of outer bitangents,
+% and the simpler outer bitangent is sufficient for the vast majority of cases.
+% \end{rmk}
+
+\begin{rmk}
+More computationally, the local umbra is defined as follows.
+Let the two L-outer bitangents be \lyne{P_L P_A} and \lyne{Q_L Q_A},
+where $P_L,Q_L \in L$ and $P_A,Q_A \in A$.
+If the rays \ray{P_L P_A} and \ray{Q_L Q_A} intersect,
+let $P=Q$ be this intersection;
+otherwise let $P$ and $Q$ be the points 
+at infinity on the rays \ray{P_L P_A} and \ray{Q_L Q_A}, respectively.
+
+The local umbra is the region bounded by the (potentially infinite)
+segments \seg{P_A P}, \seg{Q_A Q},
+and the curve segment \arc{P_A Q_A} of A.
+\end{rmk}
+
+\begin{implementation}
+In our implementation, we build all of the scene inside
+a predefined cube.\footnote{Equivalently, one can define the scene
+	arbitrarily and then find a bounding box.}
+In the test for bitangent extremality (Definition~\ref{defn:outer}),
+the intersection of an infinite line or ray
+with a curve then reduces to the intersection of a finite segment with a curve
+(the part of the ray/line inside the box).
+This is simpler and more robust.
+\end{implementation}
+
+% \begin{figure}
+% \caption{A simple local umbra (G1: umbra data/ovoid2.pts)}
+% \label{fig:G1}
+% \end{figure}
+
+	% umbra data/ob1.pts	[could also try vg9.pts]
+\begin{figure}[hb]
+\centerline{\epsfig{figure=img/ob1.ps,height=1.567in,width=1.553in}}
+% 20% reduction
+\caption{Local umbra}
+\label{fig:G2}
+\end{figure}
+
+	% umbra data/vg10.pts
+\begin{figure}[hb]
+\centerline{\epsfig{figure=img/vg10.ps,height=1.567in,width=1.553in}}
+% 20% reduction
+\caption{Local umbra II: obstacle surrounding the light}
+\label{fig:G3}
+\end{figure}
+
+	% umbra data/ob1.pts	
+\begin{figure}[hb]
+\centerline{\epsfig{figure=img/ob1-bitang.ps,height=1.542in,width=1.528in}}
+% 20% reduction
+\caption{There are many bitangents to choose from}
+\label{fig:G2a}
+\end{figure}
+
+% ------------------------------------------------------------------------------------
+
+\subsection{The global umbra of an obstacle}
+
+\begin{defn2}
+\label{defn:global}
+\ \ 
+\begin{itemize}
+\item
+The {\bf global umbra of an obstacle $A$} is the umbra cast by $A$,
+taking all other obstacles into account.
+\item
+An {\bf umbral bitangent} of A is a bitangent 
+that forms the boundary of the global umbra of A.
+\end{itemize}
+\end{defn2}
+
+The local umbra captures the umbra of an obstacle in isolation.
+However, as shown in Figure~\ref{fig:globalumb2}, 
+the umbra cast by a single obstacle can be influenced by other obstacles.
+The global umbra expands the local umbra to consider these other obstacles
+in the scene.
+In many cases, the global umbra is the same as the local umbra.
+We shall first determine when the global umbra differs from the local umbra.
+Then, we shall show how the expanded umbra is defined in the cases when
+the global umbra is larger than the local umbra.
+
+In Theorem~\ref{thm:localumbra}, we saw that
+the local umbra is defined by L-outer bitangents of A.
+If no obstacle interferes with the early segments of these L-outer bitangents,
+then the global umbra is identical to the local umbra.
+However, as an obstacle B begins to interfere with these early segments,
+the umbra of A is stretched by B (Figure~\ref{fig:globalumb2}).
+
+\begin{lemma}
+The global umbra of A differs from the local umbra of A
+if and only if an obstacle B intersects the early segment of an L-outer bitangent of 
+A and L (Figure~\ref{fig:globalumb2PO}).
+\end{lemma}
+\prf
+\ \ 
+\QED
+
+% ------------------------------------------------------------------------------------
+
+\subsubsection{Refining the local umbra}
+
+We define the global umbra by dynamically expanding the local umbra,
+through the sweep of a tangent across interfering obstacles.
+% There are two types of refinement of the umbra.
+The boundary of the global umbra is determined by two sweeps.
+Both sweeps start with an L-outer bitangent of the obstacle A and the light L.
+This bitangent can be interpreted either as a tangent of A
+or as a tangent of L.
+The first sweep will move this bitangent smoothly within the tangent space
+of A.
+The second sweep will move this bitangent smoothly, in the opposite direction,
+within the tangent space of L.
+Both sweeps move the tangent across all obstacles intervening between A and L.
+The first sweep continues until the tangent 'sees' the light (or has swept
+completely past the light).
+The second sweep continues until the tangent 'sees' the --- (or has swept
+completely past it).
+
+We can turn the continuous tangent sweeps into discrete sweeps,
+by observing that the tangent must always stop at a bitangent.
+In particular, in the first sweep,
+the inner bitangents of A with the blocking obstacles define 
+the discrete possibilities for stopping position of the sweeping tangent.
+In the second sweep, the outer bitangents of L and the blocking obstacles
+define the possible stopping positions.
+This allows us to avoid a continuous tangent sweep:
+we can jump directly to the next bitangent candidate,
+(which is easily found, see below), and test for completion.
+The resulting 'sweep' involves a finite set of jumps between bitangents.
+This is analogous to the line sweep of computational geometry.
+
+In short, the global umbra will be bounded by bitangents,
+just like the local umbra.
+However, the bitangents that can form the 
+boundary of the global umbra is richer than the local umbra:
+in addition to the outer bitangents of A and L used by the
+local umbra, the global umbra may be bounded by inner bitangents of A and B
+(where B is an obstacle intervening between A and L)
+or outer bitangents of B and L.
+
+% The pushing of the umbral boundary can continue through several obstacles,
+% like a game of tag.
+% The pushing will stop when no obstacle intersects the early segment associated
+% with the umbral boundary (Figure~\ref{fig:globalumb3}).
+
+\subsubsection{The inner sweep: looking for the light}
+
+Both sweeps define a global umbra bitangent G of A
+through refinement of a local umbra bitangent T of A.
+(Recall that T is an L-outer bitangent of A and L.)
+The first one sweeps in the tangent space of A, as follows.
+The tangent is looking for the light, sweeping across obstacles 
+that block it from L.
+
+\begin{defn2}
+A global umbra bitangent of A generated by an inner sweep from a local umbra 
+bitangent of A will be called an {\bf inner umbral bitangent of A}.
+\end{defn2}
+
+\begin{defn2}
+A global umbra bitangent of A generated by an outer sweep from a local umbra 
+bitangent of A will be called an {\bf outer umbral bitangent of A}.
+\end{defn2}
+
+The inner umbral bitangents are tangent to A,
+while the outer umbral bitangents are not.
+
+\begin{defn2}
+This first sweep will also be called an {\bf inner sweep}.
+The sweep is inner because the tangent is repeatedly replaced by inner bitangents,
+and also because the sweep refines a local umbra bitangent T
+by sweeping into its interior side.
+\end{defn2}
+
+%
+\centerline{innerSweep (T, A, L)}
+\begin{enumerate}
+\item 
+	G = T;\ \ \ done = false;\ \ \ first = true;
+	% \item While the umbral bitangent T moves (has been freshly updated on previous step):
+\item 	
+	sweep direction = direction towards inside of light from T
+\item 
+	while (!done)
+\begin{enumerate}
+\item   if (first)
+\begin{enumerate}
+\item	SEG = early segment of G;\ \ \ first = false;
+\end{enumerate}
+\item	else
+\begin{enumerate}
+\item	$G_A = $ G's point of bitangency with A
+\item	$G_I = G \cap L$
+\item	SEG = segment between $G_A$ and $G_I$
+\end{enumerate}
+\item 
+	$\mbox{HIT} := \{B_i \neq A : B_i \mbox{ is an obstacle that intersects
+	SEG} \}$
+\item 
+	if $\mbox{HIT} = \emptyset$, done = true
+\item   
+	else
+\begin{enumerate}
+\item
+	choose an arbitrary $B'$ from HIT.
+\item 
+	\ [search for the light, around the blocker] 
+	G = first A-inner bitangent of A and $B'$ that is found
+	in the sweep direction.
+\end{enumerate}
+\end{enumerate}
+\item	return(G)
+\end{enumerate}
+
+\begin{rmk}
+We need a generalization of the inner bitangent, the A-inner bitangent,
+to cover the case of an obstacle B that surrounds another obstacle A (Figure H1).
+\end{rmk}
+
+Since the first sweep is looking for the light,
+it will not only stop when it sees the light,
+but also when it sweeps past the light (without yet seeing it).
+The latter condition occurs at the 
+limit position of an inner bitangent of A and L.
+
+\begin{lemma}
+\label{lem:umbraupperbd}
+The global umbra of A is {\bf no larger} than the region
+bounded by the inner bitangents of A and L.
+% (That is, any umbra outside this range is generated by a different obstacle.)
+\end{lemma}
+\prf
+Outside of this range, A has no impact: it doesn't block any of the light.
+So A can be ignored outside this region.
+\QED
+
+\vspace{-.1in}
+
+\begin{corollary}
+The sweep of A's tangent can be stopped at an inner tangent of A and L.
+\end{corollary}
+
+This leads to the following addition to the algorithm.
+
+\begin{description}
+\item[iii.] If G, the sweeping tangent of A, has jumped past the light
+ 	(i.e., past an inner bitangent of A and L),
+	return (this inner bitangent of A and L).
+%      then set it back to the inner bitangent of A and L
+%     and done = true.
+\end{description}
+
+\begin{example}
+Animation of sweep.
+\end{example}
+
+Once we find the two global umbra bitangents defined by the first sweep,
+we only use their late segments,
+just as with the local umbra.
+
+\begin{defn2}
+innerSweep(T,A,L), the output of this first sweep from T, is a tangent of A.
+It is part of the boundary of the global umbra of A.
+The {\bf inside of innerSweep(T,A,L)} is the side that contains A.
+\end{defn2}
+
+%%%%%%%%%%%%%%%%%%
+
+\subsubsection{The outer sweep: looking for the global umbra bitangent}
+
+The job of the first sweep is to refine the local umbra bitangent.
+The job of the second sweep is to refine the global umbra bitangent
+just computed in the first sweep.
+In particular, we know that this bitangent defines a boundary of light
+visibility at $P_A$ (its point of bitangency with A) and as it leaves A.
+But as this bitangent continues away from A (on the late segment of the
+bitangent), the light will often become visible once again as the bitangent
+crosses out of darkness on the other side of the obstacles
+(just as, when flying around the Earth in an airplane, one may pass into night
+but then, as you continue travelling, pass back into day).
+
+The search for this reentry into light is done from the perspective of the 
+light, using a sweep of the light's tangent, looking for the newly
+computed global umbra bitangent G.
+When we 'see' G, the present location of L's tangent H in the sweep is used
+to refine the boundary of the global umbra.
+Namely, the late segment of H (its segment after the intersection with G)
+becomes an umbral boundary.
+
+The second sweep moves in the tangent space of L, as follows.
+Let T be a local umbra bitangent, and let G be the global umbra bitangent
+found by refining T with the first sweep.
+As with the first sweep, we leverage the fact that changes of visibility
+must occur at the discrete bitangent events.
+
+\begin{defn2}
+This second sweep will also be called an {\bf outer sweep}.
+The sweep is outer because the tangent is repeatedly replaced by outer
+bitangents, and because the sweep refines a local umbra bitangent T
+by sweeping into its outside.
+\end{defn2}
+
+\centerline{outerSweep (T, A, L)}
+\begin{enumerate}
+\item	H = T;\ \ G = innerSweep (T,A,L);\ \ done = false;\ \ first = true;
+\item	sweep direction = direction towards outside of A from T
+\item   while (!done)
+\begin{enumerate}
+\item   if (first) 
+\begin{enumerate}
+\item	SEG = early segment of H; \ \ \ first = false;
+\end{enumerate}
+\item	else
+\begin{enumerate}
+\item	$H_L = $ H's point of bitangency with the light
+\item	$H_I = G \cap H$
+\item	SEG = segment between $H_L$ and $H_I$
+\end{enumerate}
+\item	HIT := $\{ B_i: B_i \mbox{ is an obstacle that intersects SEG}\}$
+\item   if $\mbox{HIT} = \emptyset$, done = true;
+\item 	else
+\begin{enumerate}
+\item	choose an arbitrary $B'$ from HIT
+\item   \ [search for G, around the blocker] H = first L-outer bitangent of L and $B'$ that is found
+	in the sweep direction.
+\end{enumerate}			
+\end{enumerate}
+\item 	return(H)
+\end{enumerate}
+
+Note that H is always a tangent of the light L.
+Note that SEG is always a finite segment of H, the segment between the light
+and G (the bitangent computed in the inner sweep that we are 'looking for').
+
+In the second sweep, a tangent of L is swept across the light, skipping across
+obstacles that block it from G.
+The tangent is initialized to a local umbra bitangent T, just as with the
+first sweep, but we now sweep in the opposite direction.
+
+\begin{defn2}
+{\bf outerSweep(T,A,L)}, the output of this second sweep from T.
+is a tangent of L.
+The {\bf late segment of outerSweep(T,A,L)} is its segment after the intersection with 
+innerSweep(T,A,L).
+The {\bf inside} of outerSweep(T,A,L) is the side that contains L.
+\end{defn2}
+
+The outer sweep can be stopped as soon as the angle of the sweeping tangent H
+passes the angle of the inner sweep boundary G,
+since one is then guaranteed to never see G.
+This adds the following step to the algorithm:
+
+\begin{description}
+\item[iii.]	If angle(H) 'exceeds' (in the direction of current travel) angle(G), return (NULL).
+\end{description}
+
+% Notice that this may introduce a bend into the umbral boundary.
+% (two linked lines)
+
+\begin{theorem}
+Let A be an obstacle, L the light, and $\{T_1,T_2\}$ the two L-outer bitangents
+of A and L (which define the boundaries of the local umbra).
+The global umbra of A is defined by  
+the four bitangents:
+innerSweep($T_1$,A,L), innerSweep($T_2$,A,L),
+outerSweep($T_1$,A,L), and outerSweep($T_2$,A,L).
+It lies to the inside of their late segments.
+
+In other words, the global umbra of A is the polygon defined by the intersection
+of the inside halfspaces of innerSweep($T_1$,A,L), innerSweep($T_2$,A,L),
+outerSweep($T_1$,A,L), and outerSweep($T_2$,A,L).
+(See \cite{preparataShamos} for a discussion of the
+intersection of halfspaces, including algorithms.)
+\end{theorem}
+
+\begin{rmk}
+The global umbra of A restricted to a closed polygonal room P is 
+the intersection of the 4 inner and outer umbral bitangent halfspaces
+and the halfspaces of the room walls.
+This is a closed polygon, which simplifies the intermediate and final
+computation of the halfspace intersection.
+\end{rmk}
+
+\begin{rmk}
+We are computing dawns and sunsets, where the light (sun) appears or disappears
+over the horizon of an obstacle.
+\end{rmk}
+
+\begin{rmk}
+The global umbra of an obstacle is 'pseudo-convex' (convex except for boundary of curve),
+another simplifying advantage.
+\end{rmk}
+
+\begin{rmk}
+Since only obstacles that lie between $A$ and the light can influence A's umbra,
+we could use a space-partitioning scheme (e.g., octrees) to constrain
+the obstacles that need to be considered in the computation of the global
+umbra of an obstacle A.
+\end{rmk}
+
+% \subsubsection{Penumbrae conspiring to create umbra}
+
+\begin{rmk}
+NOT A PROBLEM: in the limit (when obstacles approach but never touch) our solution is correct.
+MUST SIMPLY TREAT TOUCHING OBSTACLES DIFFERENTLY.
+Consider a light surrounded by circular obstacles, which abut, allowing no
+light to pass their ring.
+This appears to be a vivid example of the insufficiency of local umbrae for computing
+the global umbra.
+Notice that the stretching of the umbra addressed in the previous section
+is not the cause of the larger global umbra, since no obstacle intersects
+another obstacle's PO bitangents.
+Instead, this is a case of the penumbrae of obstacles conspiring together
+to create umbra.
+This is a more subtle umbra to compute, using .3 + .7 = 1 ideas,
+rather than 1 + anything else = 1.
+\end{rmk}
+
+\begin{lemma}
+The umbra of a scene of obstacles $\{B_i\}$ is the union of the 
+global umbrae of the obstacles $\cup_i \mbox{globalUmbra}(B_i)$.
+\end{lemma}
+
+\begin{figure}[hb]
+\caption{Sometimes the global umbra is the union of the local umbrae (umbra data/globalumb1.pts)}
+\label{fig:globalumb1}
+\end{figure}
+
+	% umbra data/globalumb2.pts
+\begin{figure}
+\centerline{\epsfig{figure=img/globalumb2.ps,height=2.267in,width=2.279in}}
+% 30% reduction
+\caption{Global umbrae}
+\label{fig:globalumb2}
+\end{figure}
+
+	% umbra data/globalumb2.pts
+\begin{figure}
+\centerline{\epsfig{figure=img/globalumb2-PO.ps,height=2.267in,width=2.279in}}
+% 30% reduction
+\caption{The crossing of an L-outer bitangent of A and L expands the global umbra}
+\label{fig:globalumb2PO}
+\end{figure}
+
+\begin{figure}
+\caption{Cutting off a new umbral bitangent (umbra data/globalumb4.pts)}
+\label{fig:globalumb4}
+\end{figure}
+
+\begin{figure}
+\centerline{\epsfig{figure=img/globalumb3.ps,height=2.906in,width=2.911in}}
+% 40% reduction
+\caption{Pushing an umbral bitangent through several obstacles (game of tag)}
+\label{fig:globalumb3}
+\end{figure}
+
+\section{Dagstuhl Talk}
+
+Sweeping a tangent to (i) compute the umbra and (ii) compute the convex hull.
+
+% ------------------------------------------------------------------------------------
+
+\section{$2 \frac{1}{2}$-D visibility}
+
+Our umbral solution in 2-spae also solves questions of visibility of 2-1/2-D objects in 3-space.
+
+\section{Software}
+
+\begin{itemize}
+\item draw B/W umbral regions for a collection of obstacles
+\item draw B/W local penumbral regions for a collection of obstacles
+\item draw B/W global penumbral regions for a collection of obstacles 
+\item draw greyscale local penumbral region for one obstacle
+\item draw greyscale global penumbral regions for a collection of obstacles
+\item find the extreme bitangents
+\end{itemize}
+
+\section{Examples}
+
+Test data.
+\begin{itemize}
+\item bitangency: circle, ob1, ob3, vg7.pts
+\item convex hull: vgraph: vg4.pts, vg1.pts (contour), vg3.pts (contour), vg4.pts (small natural)
+	vg5.pts (large natural)
+\item lighting: ob1, vg5.pts
+\end{itemize}
+
+% ------------------------------------------------------------------------------------
+
+\section{Conclusions}
+
+We don't want to try to compute the entire global umbra all at once:
+by breaking it up into the global umbra generated by each obstacle,
+the problem becomes tractable.
+
+% ------------------------------------------------------------------------------------
+
+\bibliographystyle{latex8}
+% \bibliographystyle{plain}
+\begin{thebibliography}{99}
+
+\bibitem{farin97}
+Farin, G. (1997)
+Curves and Surfaces for CAGD: A Practical Guide (4th edition).
+Academic Press (New York).
+
+\end{thebibliography}
+
+\section{Appendix}
+\label{sec:appendix}
+
+\subsection{Defining the umbra point by point}
+\label{sec:local}
+
+It is simple to determine if a point P is in the umbral shadow cast by a 
+single obstacle A (Figure I):
+P is in umbra of A iff all of the light's tangents through P (it is enough to test
+the extremal two) hit A.
+However, several obstacles can conspire to place P in umbra, although it is not
+in any one obstacle's umbra (Figure III).
+Finding this type of umbral point requires more subtlety.
+For example, it is not enough to demand simply that all of the light's tangents through P
+hit some obstacle (Figure II).
+In effect, we need to test that there are no cracks between obstacles through which
+the light becomes visible, by 'sweeping' a beam centered at P across the light.
+The following algorithm for testing if P lies in umbra achieves this virtual sweep.
+
+\begin{defn2}
+A tangent T of the curve C through a point P is {\bf extremal}
+if the entire curve C lies in the same halfplane defined by T
+(i.e., T does not intersect C).
+The {\bf inside halfplane} of an extremal tangent T of C through a point P is
+the halfplane defined by T that contains C.
+An extremal tangent is {\bf left-extremal} if its inside halfplane 
+contains the point at infinity (1,0,0) along the positive x-axis,
+otherwise it is {\bf right-extremal}.
+\end{defn2}
+
+Is the point P in the umbra?
+\begin{description}
+\item[] T $\leftarrow$ left-extremal tangent of the light through P
+\item[] while (T has not swept past light \&\& 
+       T hits some obstacle A before it hits the light)
+\begin{description}
+\item[]	T = right-extremal tangent of A through P
+\end{description}
+\item P is in umbra iff T has swept past light
+\end{description}
+
+We are sweeping a line about P searching for a passageway to the light, 
+leaping past obstacles that block the light by jumping to their right-extremal tangents, 
+until we either find the light or sweep past it.
+Figure IV (Figure III with sweep annotations) illustrates this algorithm.
+
+What is the complexity of this algorithm?
+
+% ------------------------------------------------------------------------------------
+
+\centerline{{\bf What is new}}
+\begin{enumerate}
+\item implementation of algebraic geometry's dual curve that is
+\begin{enumerate}
+\item robust using 2 dual spaces, and
+\item details worked out for Bezier curves, and
+\item a primal structure in dual space, unlike dual Bezier curves
+\end{enumerate}
+\item dual Chaikin
+\begin{enumerate}
+\item 	don't even evaluate the parts of the curve unaffected by bitangents
+		(really be lazy!)  (change the demo to show this)
+\item 	analyze the improvement in accuracy as you move through subdivision stages
+\item 	when do bad mistakes disappear and refinement only sets in?
+\end{enumerate}
+\item lazy subdivision idea for subdivision curves
+\item application of bitangents to fundamental applications that are only known
+	for polygons, not smooth curves
+\begin{enumerate}
+\item to smooth convex hull, extending Graham scan
+\item to smooth visibility graph, improving quality of shortest paths
+			[might be able to extend Welzl's algorithm]
+\item to smooth lights in 2d, with penumbra and umbra calculation,
+	     	anticipating a lifting to smooth lights in 3d
+\begin{enumerate}
+\item   software to shade the umbra/penumbra
+\item 	to determine efficiently whether a curve is in umbra
+\item 	to determine efficiently which parts of a curve are in penumbra
+\item 	to determine their relative lighting (how much of the light they see)
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+	     
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			
+\section{Introduction}
+
+3 categories of lighting: umbra (fully shaded), penumbra (partially lit), 
+	and noon (fully lit)
+
+\section{Flawed approaches}
+
+Don't want to cast light from each point of the light: 
+	then every point of 2-space
+	has an infinite number of light points casting light on it,
+	for which it must sum the contributions
+	Notice that every light point casts across a halfspace minus the
+	areas blocked by obstacles or the neighbouring parts of the light (if
+	light is concave)
+	
+On the other hand, computing the light intensity at every pixel
+	in free space is also undesirable (?).
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			
+\section{General algorithm}
+
+\subsection{Part I: Definition of global penumbra}
+
+Instead, first decompose 2-space into global penumbra and global umbra using bitangents:
+	this allows us to ignore all but the global penumbral regions;
+	this is done for each obstacle: a point is in the global penumbra
+	if it is in at least one local penumbral region and it is not in any
+	local umbral region, which would block it;
+	this is a form of point location in cells from a line arrangement
+			
+local umbra 
+	(from the bitangents of the light and an obstacle A)
+	defn: region of space that is entirely blocked from the light by A
+	- elegant definition of umbral region: cell in a line/curve arrangement
+	- hacky but simple definition of umbra: intersection of halfspaces defined
+		by bitangents and obstacles
+	- the hacky definition is simple to implement and simple for point 
+		classification, although not optimal efficiency
+local penumbra 
+	(from the bitangents of the light and an obstacle)
+	defn: region of space that is partially blocked from the light by A
+local noon
+	= 2-space - (local umbra and local penumbra)
+	defn: region of space that sees the entire light w.r.t. A
+		(i.e., region that is not blocked from the light at all by A)
+global umbra 
+	= union of local umbras
+	defn: region of space that is entirely blocked from the light 
+	      (by one or a combination of the obstacles)
+*global penumbra*	(the nontrivial one)
+	= (union of local penumbras) - global umbra
+	defn: region of space that is partially blocked from the light 
+	      (by one or a combination of the obstacles)
+global noon
+	= intersection of local noons
+	= 2-space - (global umbra and global penumbra)
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			
+\subsection{Part II: Definition of light intensity inside global penumbra}
+
+for each point P in a global penumbral region,
+  for each obstacle A such that P is inside A's penumbral region,
+	intersect tangent of A through P with light, yielding $L_A$
+  choose L = $L_A$ that yields the smallest visible light segment
+	(the larger light segments are blocked by one of the other obstacles)
+  compute (read off) proportion of light visible from L on the
+	outside of tangent
+	   - this involves computing tangent PP' from light 
+	     through P; then measuring visible (from P) portion of 
+	     light from L to P', which is basically arc length
+	     of convex hull from L to P'
+  assign (paint) this intensity to every pixel (point) on 
+	     the tangent from L to P and past P to the next 
+	     intersection with an obstacle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			
+\subsection{Part III: Definition of light intensity inside global umbra and global noon}
+
+similarly paint pure black shadow or pure white light
+     from pixels (points) that are found in global umbra
+     or global noon, by continuing line --- (how?)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			
+\end{document}
