@@ -1,0 +1,10 @@
+echo "Orientation obstacles on S2"
+dualS2 obs2
+echo "Moving tangent, reflecting common tangents as intersections"
+dual ob2.rawctr
+echo "Common tangents and intersections"
+dual ob1.rawctr
+echo "Tangent circles sweeping"
+dualS2 obs2
+echo "Intersections yield common tangents"
+dualS2 obs2

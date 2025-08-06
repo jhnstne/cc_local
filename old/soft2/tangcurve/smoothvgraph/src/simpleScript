@@ -1,0 +1,1 @@
+svgraph -s .5 -e .001 -S -0.5 .7 -D 1.1 -.4 ../data/vg1.pts > foobar

@@ -1,0 +1,4 @@
+svgraph -s .5 -e .001 vg1.pts
+svgraph -s .5 -e .001 vg3.pts
+svgraph -s .5 -e .001 vg4.pts
+svgraph -s .5 -e .001 vg5.pts
