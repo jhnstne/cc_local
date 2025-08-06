@@ -1,0 +1,26 @@
+# File: bitang Makefile
+# Author: J.K. Johnstone
+# Last Modified: 2/28/06
+
+ARCH	   = LINUX
+SHELL      = /bin/csh
+CC         = g++
+HOME	   = /home/jj
+CBIN	   = ${HOME}/Cbin
+CLAPACK    = $(HOME)/software/CLAPACK
+CLAPACKARC = $(CLAPACK)/lapack_LINUX.a \
+             $(CLAPACK)/blas_LINUX.a \
+	     $(CLAPACK)/F2CLIBS/libF77.a
+LIBRARIES  = -lglut -lGLU -lGL -lm
+LDFLAGS    = -I${CBIN} -I${CLAPACK} $(CLAPACKARC) -funroll-all-loops -O3
+
+all: bitang
+.cpp: 
+	${CC} -Wno-deprecated -g -o $@ $< ${LIBRARIES} ${LDFLAGS}
+clean :
+	rm -f *.o *~ a.out core
+	ls -l
+
+touch :
+	touch bitang.cpp
+

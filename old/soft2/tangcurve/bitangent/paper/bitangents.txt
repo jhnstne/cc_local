@@ -1,0 +1,172 @@
+A proposal for the study of bitangents
+
+Light travels in a straight line.   (More precisely, ignoring relativistic effects or restricting oneself to
+the surface of the earth, light travels in a straight line.)   The shortest path between two points is a straight line.  
+Hence, lines are important to the study of lighting, visibility and shortest path motion.
+Among the 4-dimensional manifold of lines in 3-space, there is a select subset of lines that define changes in lighting,
+visibility or shortest path for a given scene of obstacles.  These lines are the tangents and bitangents of the scene,
+as illustrated in Figure X for a 2d scene.  Thus, the tangents and bitangents of a scene effectively define the lighting, 
+visibility and motion structure of the scene.  This has been recognized and well studied for polyhedral scenes, with
+work on visibility skeletons and complexes for visibility, --- for lighting, and --- [Sharir cell decomposition] for motion. 
+Likewise, for smooth scenes, tangents and their cousin, the silhouette,  have been fully studied and are now well understood. 
+However, the bitangent and its related structures are not yet fully understood, especially computationally.  
+We propose to develop a computational framework for bitangents and related structures, 
+and fully tie these structures into the computation of visibility, lighting and motion for a smooth scene.
+
+We shall allow various representations of the underlying smooth scene, such as Bezier curves, Bezier surfaces and NURBS;
+subdivision curves and surfaces; and algebraic curves and surfaces.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The humble tangent
+
+Since the tangents of a smooth curve, and the tangent planes (or normals) of a smooth surface,
+are absolutely fundamental to geometric modeling and graphics, from the imposition of C^i and G^i continuity to shading, 
+their computation is very well understood.
+Since an understanding of tangents is necessary to a study of bitangents, we begin by reviewing
+the computation of tangents of a Bezier curve, algebraic curve and subdivision curve.
+The tangent vector of a Bezier curve at $C(t) = \sum_{i=0}^n b_i B_i^n(t)$ 
+is $C'(t) = \sum_{i=0}^{n-1} n(b_{i+1}-b_i) B_i^{n-1}(t)$.
+We introduce the concept of the {\bf tangent hodograph}: the curve swept out by the tangent vector translated to the origin.
+The tangent vector at $C(t)$ can be interpreted as a point on the tangent hodograph $C'(t)$.
+The hodograph of a Bezier curve is itself a Bezier curve.
+Thus, the computation of a tangent vector of a Bezier curve of degree $n$ 
+is equivalent to the evaluation of a Bezier curve of degree $n-1$.
+The tangent vector of a Bezier curve can also be interpreted in terms of the de Casteljau triangle at $C(t)$ (Figure Y):
+it is the difference vector of the two elements in the penultimate column.
+
+The tangent of a nonsingular point $P$ of the algebraic curve $F(x)=0$ is the line $\sum_i F_i(P) x_i=0$,
+where $x = (x_0,x_1,x_2)$, $F_i = \partial F(x) / \partial x_i$, $P$ and $x$ are projective coordinates, 
+and $F(x)$ is a homogeneous polynomial.
+% Walker, p. 55
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The tangent of a subdivision curve is computed using a tangent mask, as follows.
+Consider a subdivision curve defined by the local subdivision matrix S.
+Let $e_i$ be the eigenvectors of S with eigenvalues $\lambda_i$ ($\lambda_0 \geq \lambda_1 \geq \lambda_2 \ldots$).
+For a valid subdivision matrix S, the eigenvectors will define a basis and the eigenvalues will satisfy $\lambda_0 = 1$, 
+$\lambda_1 < 1$, and $\lambda_2<\lambda_1$.
+Consider the control point $p$ of the subdivision curve
+and its expression in the eigenvector basis: $p = \sum a_i e_i$.
+The limit point associated with $p$ is simply $a_0$, the 'coefficient' associated with the dominant eigenvector
+(since the influence of all other eigenvectors disappears in the limit, as they are multiplied by increasing powers
+of eigenvalues less than 1).
+This $a_0$ is itself computed using the dominant left eigenvector $E_0$ of S: $a_0 = E_0 p$ (see Stollnitz appendix).
+In short, the limit point of a control point $p$ is $E_0 p$, where $E_0$ is the {\bf left} eigenvector of the local
+subdivision matrix associated with the dominant eigenvalue $\lambda_0$.
+Analogously (see Schroeder, p. 42 of SIGGRAPH notes), the tangent at the limit point associated with a control point $p$
+is $a_1 = E_1 p$, where $E_1$ is the left eigenvector of S associated with the eigenvalue $\lambda_1$.
+
+Using the refinement equation for general B-splines (an expression for the cubic B-spline in terms of dilated and translated
+copies of itself; see (2.1), p. 26 of Schroeder SIGGRAPH notes), we have the following refinement equation for cubic B-splines:
+\[
+B_3(t) = \frac{1}{8} [B_3(2t) + 4B_3(2t-1) + 6B_3(2t-2) + 4B_3(2t-3) + B_3(2t-4)]
+\
+or equivalently
+\[
+B_3(t-1) = \frac{1}{8} [B_3(2t-2) + 4B_3(2t-3) + 6B_3(2t-4) + 4B_3(2t-5) + B_3(2t-6)] 
+\]
+from which the following subdivision matrix for cubic B-splines can be derived:
+\[
+[ \ldots B(t) B(t-1) \ldots ] = 
+[ \ldots B(2t) B(2t-1) B(2t-2) B(2t-3) B(2t-4) \ldots] 
+\frac{1}{8} 
+\left( \begin{array}{llll}
+           & 1 \\
+           & 4 \\
+\ldots & 6 & 1 & \ldots \\
+           & 4 & 4 \\
+           & 1 & 6 \\
+           &    & 4 \\
+           &    & 1
+\end{array}
+\right)
+\]
+The associated local subdivision matrix for cubic B-spline curves is a 5x5 submatrix of the infinite subdivision matrix, 
+since the invariant neighbourhood for a point of a cubic B-spline curve is of size 5, as follows: % Schroeder, p. 37
+\[
+S_3 = 
+\left( \begin{array}{ccccc}
+1 & 6 & 1 & 0 & 0 \\
+0 & 4 & 4 & 0 & 0 \\
+0 & 1 & 6 & 1 & 0 \\
+0 & 0 & 4 & 4 & 0 \\
+0 & 0 & 1 & 6 & 1
+\right)
+\]
+The dominant left eigenvector of $S_3$ is $(0,1,4,1,0)$ with eigenvalue 1.
+The second dominant left eigenvector of $S_3$ is $(0,-1,0,1,0)$ with eigenvalue $\frac{1}{2}$.
+This leads to the evaluation mask: % Schroeder, p. 40
+\[
+p_i^{\infty} = \frac{1}{6}(p_{i-1} + 4p_i + p_{i+1})
+\]
+and tangent mask % Schroeder, p. 42
+\[
+t_i^{\infty} = p_{i+1} - p_{i-1}
+\]
+
+The local subdivision matrix for Chaikin curves is:
+The evaluation mask 
+The tangent mask
+The local subdivision matrix for Dyn-Gregory-Levin's 4-point interpolatory scheme is:
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Tangent spaces
+
+The tangent is a local phenomenon, depending only on the local behaviour of the curve,
+but the bitangent is a global phenomenon, depending on the global behaviour of the tangents
+on two curves.
+Consequently, in working with bitangents, we need to work with the entire tangent space of a curve.
+This section discusses the representation of tangent spaces of curves.
+
+Duality and dual varieties
+  - we desire a representation of tangent space
+  - point-line and point-plane duality
+  - existing Plucker duality
+  - line arrangement use of duality in computational geometry
+  - Hoschek's dual curves
+  - Levin's dual de Casteljau
+  - tangential curves
+  - horizontal or vertical lines not well represented: use two clipped tangential curves
+
+The bitangent of a Bezier curve (known)
+  - intersection of clipped tangential curves  
+  - Java applet
+
+The bitangent of an algebraic curve(?)
+
+The bitangent of a subdivision curve (proposed)
+  - dual Chaikin curves
+
+The visibility graph of a smooth scene
+  - tangents through a point
+  - Welzl's visual relation
+
+Umbra and penumbra
+
+The tangent plane of a Bezier surface, algebraic surface and subdivision surface (wait until bisilhouettes).
+The tangent envelope of a space curve (related to developable surfaces; wait until bisilhouettes).
+The Gauss map.
+Catmull's normal surface.
+Sederberg's polar surface (for silhouettes).
+
+The bisilhouette of a Bezier surface (proposed)
+  - bitangent developable
+  - tangent space of intersection curve in dual space
+
+The bisilhouette of a subdivision surface, algebraic surface
+
+Tritangents
+  - stable object placement
+
+Bitangents on S^3 
+  - orientation planning
+
+Qualitative work on the bitangent
+
+There has been work on aspect graphs 
+of smooth surfaces in the vision literature, which considers bitangents largely at a symbolic or topological 
+(i.e., noncomputational) level, and work of Durand and his colleagues on the qualitative analysis of visibility for 
+smooth surfaces. 
