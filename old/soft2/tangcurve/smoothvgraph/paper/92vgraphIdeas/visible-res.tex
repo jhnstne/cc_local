@@ -1,0 +1,123 @@
+\documentstyle[12pt]{article} 
+\begin{document}
+
+\underline{\bf Research work on visibility and shortest paths}
+
+\underline{\bf Visibility graph for polygons}
+
+Consider a collection of $h$ polygons with a total of $n$ vertices.
+The obvious algorithm to compute the visibility graph is $O(n^{3})$:
+for each vertex pair $v,w$, does $v$ see $w$?
+An $O(n^{2})$ algorithm is presented by Asano, Asano, Guibas, Hershberger,
+and Imai (1985: FOCS or STOC).
+Actually, they give an $O(n)$ algorithm for computing the visibility polygon
+from a point, with $O(n^{2})$ preprocessing.
+Welzl also has an $O(n^{2})$ algorithm for visibility graph (without 
+decomposing the problem into $n$ visibility polygons).
+We know that there exists a visibility graph with $O(n^{2})$ edges,
+so these algorithms are optimal.
+However, there are also visibility graphs with $O(n)$ edges 
+(see Asano et. al.).
+It is impossible to attain an $O(n)$ algorithm, because a lowerbound on
+the time to construct a visibility polygon from a point is 
+$\Omega(n + h \log h)$ (p. 162, Asano et. al.).
+This is because visibility from a point requires sorting the polygon 
+vertices about the point.
+An algorithm attaining this lowerbound for visibility polygon when all 
+polygons are {\em convex} is given in Asano et. al.
+This leaves the following open problem: does there exist an output-sensitive
+algorithm for visibility graph amongst arbitrary polygons that is
+sub-quadratic when the size of the graph is subquadratic?
+
+
+\underline{\bf Visibility graph for circles}
+
+There is an $O(n^{2} \log n)$ method using some of the ideas from 
+Asano et. al.:
+(1) compute all inner and outer tangents;  vertices = intersection of
+    circles and tangents
+(2) P1: for each vertex, sort other vertices radially using $O(n \log n)$ 
+	method (not the linear method using arrangements of lines)
+(3) P2: determine sorted order of visible segments using Asano's second 
+	method (lower envelope construction using sweep line)
+	without the optimization from $n \log n$ to $n$.
+
+\underline{\bf Shortest path for polygons}
+
+The idea is to apply Dijkstra on the visibility graph.
+The visibility graph has $O(n)$ vertices and $O(n^{2})$ edges.
+Therefore, Dijkstra on this graph takes $O(n^{2})$, building the graph
+takes $O(n^{2})$ time, and the entire shortest-path algorithm takes 
+$O(n^{2})$.
+
+\underline{\bf Statement of problem for shortest path amongst circles}
+
+Problem: Restriction of Piano Mover's Problem.
+	Given a circular body B (point B?) in a 2-dimensional open region
+	bounded by a collection of $n$ circles and an initial and final
+	position of B, we wish to determine the shortest continuous
+	obstacle-avoiding path of B between the two positions.
+
+We should probably allow intersecting circles: the natural motivation
+is a circular robot which would be reduced to a point by growing the 
+obstacles, which may then intersect.
+Secondly, if obstacles are being approximated by circles,
+these circles might intersect even though the original obstacles don't.
+Thirdly, obstacles might want a safety zone about them (to counterbalance
+errors in control of robot), again leading to intersecting circles.
+We should make sure that no assumptions of disjointedness are used in 
+development of the theory.
+
+
+\underline{\bf Shortest path for circles}
+
+The visibility graph has $O(n^{2})$ vertices and $O(n^{2})$ edges.
+(To see this, each circle receives at most 4 common tangents from every other
+circle, yielding $O(n^{2})$ edges and $O(n^{2})$ vertices.
+There are at most $O(n)$ more edges per circle to connect the vertices
+on that circle.)
+Therefore, Dijkstra takes $O(n^{2} \log n)$ time, the same amount of time
+as the construction of the visibility graph.
+
+We want to improve this algorithm.\footnote{Note:
+	$O(n^{2} \log n)$ does not seem great, since Rohnert probably 
+	has a similar result: $O(h^{2} + n \log n)$ for convex polygons
+	which translates to $O(n^{2} + n^{2} \log n)$ in our framework.
+	I have not read the Rohnert result, but Asano et. al. say that
+	it uses the common tangents of polygons.}
+There are two parts: (1) time to compute the visibility graph and
+(2) time to search this graph for the shortest path.
+
+In order to improve (1), we essentially need to be able to sort about
+each vertex in linear rather than $O(n \log n)$ time, after preprocessing.
+Asano et. al. do this for polygons by dualizing the vertices and
+computing the arrangement of lines.
+The sorted order about the vertex corresponds to the order of intersection
+of the dual lines with the dual of the vertex.
+Dualizing the vertices in the circle case is not possible, 
+since you will have $O(n^{2})$ lines and the arrangement will take
+$O(n^4)$ time to compute.
+Therefore, we are thinking about ways of dualizing the circles themselves.
+(It seems that the $n$ vertices on a circle should be considered as one.)
+
+In order to improve (2), we need to (a) speed up Dijkstra's algorithm
+by taking advantage of the underlying geometry of the graph
+or (b) decrease the size of the visibility graph.
+(a) could be characterized as finding the shortest path in a {\em visibility}
+graph in sub-quadratic (or actually sub-number-of-edges) time.
+
+Rao suggests using divide and conquer, the dual of circle, and taking
+advantage of the circle where there are not really $O(n^{2})$ vertices
+although that is the nominal amount (some are redundant?).
+He says to shoot for n polylog or $O(n^{1.5})$.
+
+
+
+\underline{\bf Dijkstra's algorithm}
+
+$O(e \log n)$ using heap.
+$O(e + n \log n)$ using more sophisticated data structures
+	(Hershberger and Guibas mention Fibonacci heaps).
+
+
+\end{document}

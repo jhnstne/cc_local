@@ -1,0 +1,13 @@
+Figure 1: jjvegap.gif		visibility graph
+Figure 2: jjvegas.gif		associated smooth visibility graph
+
+- capture snapshot
+- xv to translate rgb to gif
+- bm2font *.gif
+- move foo.tfm foo.300pk to ~jj/teTeX/share/texmf/fonts/pk/ljfour/public/cm
+- move foo.tex to same directory as LaTeX file
+- add \input{foo.tex} before figure and \setfoo inside figure
+- latex
+- dvips -D 300
+- print
+

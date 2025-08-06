@@ -1,0 +1,419 @@
+\documentclass[11pt,twocolumn]{article}
+\newif\ifVideo
+\Videofalse
+\newif\ifTalk
+\Talkfalse
+\newif\ifJournal
+\Journalfalse
+\input{header}
+\newcommand{\plucker}{Pl\"{u}cker\ }
+\newcommand{\vgraph}{visibility graph\ }
+\newcommand{\vgraphs}{visibility graphs\ }
+\SingleSpace
+
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{-.2in}	% should be 0pt for 1in
+% \setlength{\headsep}{.5in}
+\setlength{\textheight}{8.5in}
+\setlength{\textwidth}{6.5in}
+\setlength{\columnsep}{5mm}	% width of gutter between columns
+\markright{The smooth visibility graph: \today \hfill}
+\pagestyle{myheadings}
+% -----------------------------------------------------------------------------
+
+\title{On the smooth visibility graph}
+% The precision and simplicity of the smooth visibility graph
+% The precision and terseness of smooth visibility graphs
+% Smooth visibility graphs are smaller and more precise
+% Smooth visibility graphs are terse
+% Visibility graphs from smooth environments
+\author{J.K. Johnstone\thanks{Geometric Modeling Lab, 125 Campbell, 
+	Computer and Information Sciences, UAB, Birmingham, AL 35294.}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+% The visibility graph is an important structure for the analysis of visibility
+% in many applications such as lighting and motion.
+Visibility graphs are commonly built for a polygonal scene.
+This paper explores the visibility graph for a smooth scene.
+% with curved boundaries.
+This smooth visibility graph is built from common tangents of the smooth curves
+defining the scene.
+We compare the polygonal and smooth visibility graphs of the same scene
+(where the polygons are discrete samplings of the curves).
+The smooth visibility enjoys two significant improvements over the polygonal visibility graph:
+it has optimal accuracy and yet it is also very small (indeed, optimally small).
+Since accuracy of the polygonal visibility graph 
+improves by increasing the sampling rate,
+its size balloons as its accuracy improves.
+The smooth visibility graph captures the exact information required
+for visibility in the most efficient way.
+The visibility graph is important for much visibility analysis required
+in lighting, motion planning, and many
+other applications in graphics and robotics.
+
+The challenge of performing visibility computation in a smooth world
+is the refinement of visibility tools for smooth models.
+For example, visibility analysis in the plane requires common tangents
+of a pair of curves, a single curve, and a point and a curve.
+We have recently developed a new method for the computation of common tangents,
+which is fundamental to the construction of smooth visibility graphs.
+
+The sharp drop in size and complexity of the smooth visibility graph
+is more surprising.
+
+We argue that performing visibility computations with smooth models
+is more efficient than the comparable visibility computation with
+polygonal models.
+Even though the complexity of each individual operation is larger in a 
+smooth world, less operations need to be done.
+This is illustrated by the drop in complexity of a visibility graph
+of a curved environment over a visibility graph of a polygonal 
+environment (Figure).
+Moreover, the smooth world allows more accurate shadow computation 
+using smooth models and the introduction of smooth lights.
+\end{abstract}
+
+\section{Introduction}
+
+The visibility graph of a scene encodes information about the visibility 
+between the objects in the scene.
+The classical visibility graph is defined for a polygonal scene.
+
+\begin{defn2}
+The visibility graph of a collection of polygons is the graph $G=(V,E)$ 
+where $V$ is the set of vertices of the polygons
+and two vertices $v$ and $w$ are connected by an edge in E if 
+(a) the interior of the line segment $vw$ has no intersections with the polygons
+($v$ is visible to $w$), or (b) $vw$ is an edge of a polygon.
+The cost of an edge is the Euclidean distance between its vertices.
+In many applications, two of the polygons are degenerate, representing
+source and destination points.
+See Figure~\ref{fig:poly}.
+{\bf In fact, for visibility analysis, only edges that are tangent to two polygons
+need to be considered (Figure~\ref{---}).}
+This can greatly reduce the size of the visibility graph.
+A line is tangent to a polygon at $P$ if it does not lie in the interior 
+of the polygon in some neighbourhood of $P$.
+\end{defn2}
+
+One can also define a visibility graph for smooth curves,
+which we call the smooth visibility graph.
+
+\begin{defn2}
+The visibility graph of a collection of plane curves is the graph $G=(V,E)$
+where $V$ is the set of endpoints of the common tangents of the curves
+and $E$ is the set of common tangents between the curves
+(in analogy to edges between visible vertices in the discrete case)
+and curve segments between vertices $v$ and $w$ that lie on the same curve
+and are neighbouring (the arc between $v$ and $w$ does not contain any
+common tangent endpoints in its interior)
+(in analogy to the edges of the polygon in the discrete case).
+Note that common tangents between the same curve are valid common tangents.
+The cost of an edge is the Euclidean distance between its vertices
+for common tangent edges and the arc length of the curve segment for
+curve segment edges.
+Again, in many applications, two of the curves are degenerate source
+and destination 'curves' (points).
+\end{defn2}
+
+Figures~\ref{fig:poly} and \ref{fig:smooth} 
+are an illustration of the tangible difference between
+the polygonal and smooth visibility graphs of the same scene.
+Here the polygon is a discrete sampling of the curve.
+Consider a scene of curved objects.
+If we use a polygonal \vgraph to analyze the visibility of this scene,
+the curves must be sampled into polygons.
+To improve the precision of the analysis,
+the sampling must be made denser and denser.
+Unfortunately, this leads to a very large visibility graph.
+In other words, the goals of accuracy and complexity conflict in the
+polygonal visibility graph of a smooth scene:
+an accurate graph is very large,
+while a small graph is very inaccurate.
+Also notice that the error will never truly disappear except in the limit
+of infinitely dense sampling (which would generate infinite visibility graphs).
+In contrast, the smooth \vgraph captures visibility exactly in an optimally
+small graph.
+The error in a smooth \vgraph truly has disappeared (modulo machine precision),
+yet the size of the graph has not increased.
+In fact, the graph is as small as it can be: all edges are necessary,
+encoding a crucial extreme of visibility.
+In other words, the smooth \vgraph elegantly combines two virtues:
+it is as small as possible yet also as accurate as possible.
+
+% \input{jjvegap.tex}
+
+\begin{figure}
+% \setjjvegap
+\caption{A visibility graph}
+\label{fig:poly}
+% svgraph vg3.rawctr, polygonal visibility graph on
+\end{figure}
+
+% \input{jjvegas.tex}
+
+\begin{figure}
+% \setjjvegas
+\caption{A smooth visibility graph of the same scene}
+\label{fig:smooth}
+% svgraph vg3.rawctr, visible common tangents on
+\end{figure}
+
+In the rest of this paper, we will quantitatively examine the smooth \vgraph's
+size (Section~\ref{sec:size}) and accuracy (Section~\ref{sec:accuracy}), 
+in comparison to the polygonal \vgraph.
+We begin with a review of the literature on visibility graphs in Section~\ref{sec:lit}
+and a discussion of the construction of a smooth visibility graph
+in Section~\ref{sec:alg},
+and end in Section~\ref{sec:application} with a discussion of the application
+of the visibility graph to problems in motion and lighting.
+
+\section{Construction of the smooth visibility graph}
+\label{sec:alg}
+
+\begin{enumerate}
+\item 
+   The common tangents between two nondegenerate curves are 
+   computed using a method of \cite{jj00a}.
+   The common tangents between a curve and a point (that is, the tangents
+   of a curve that meet the point) are computed using a method of \cite{jj00b}.
+\item 
+   The arc length of a curve segment (for edge cost) is computed
+   using a method of \cite{png91}.
+   In particular, the arc length is computed using subdivision and
+   a sandwiching of the arc length of a segment
+   between the length of the straight line segment between the points 
+   and the perimeter of the control polygon.
+\item 
+   Removal of interior visible common tangents (ones inside an obstacle):
+  test midpoint by casting ray to infinity; if it is inside the obstacle
+  (odd number of intersections with obstacle), then discard the tangent.
+  See 'dual ob3.rawctr'.
+\end{enumerate}
+
+\Comment{
+Then apply the visibility graph:
+compute shortest path using Dijkstra's algorithm \cite{ahu83}
+on the visibility graph.
+(Edelsbrunner says that Fredman and Tarjan 1984 has an $O(n \log n + m)$
+time algorithm for Dijkstra (m = no. of edges).)
+}
+
+\section{Smooth \vgraphs are smaller}
+\label{sec:size}
+
+\subsection{Experiments}
+
+\begin{enumerate}
+\item Input polygon.
+\item Interpolate curve.
+\item Sample curve at $\epsilon$ rate ($\epsilon$ is input parameter).
+\item Build visibility graph of smooth curve and sampled polygon.
+\item Allow mouse to specify source/destination interactively (with new
+	results posted with each change).
+\item Compute shortest path in smooth and polygonal visibility graphs.
+\item Output size of visibility graphs.
+\item Compute length of several shortest paths, including length
+	of each edge between obstacles and length of each self-edge.
+	Randomly generate source/destination or use the mouse.
+\item Here we are using the length of the shortest path to encode the
+	accuracy of the visibility graph.
+	The direct computation, say of distance of polygonal points of
+	tangency from smooth points of tangency, is too expensive and verbose.
+	The shortest path captures all of this information in one package.
+\end{enumerate}
+
+Consider a curve and various samplings and the resulting error
+in the length of the shortest path, the maximal distance from the
+true shortest path and the size of the visibility graph.
+
+\subsection{}
+
+In the polygonal world, increased accuracy leads to an exponentially
+increasing search space.
+In a smooth world, the search space is of constant size.
+$n$ polygonal vertices lead to $O(n^2)$ edges in the visibility graph.
+To analyze this practically, we show the sizes of visibility graphs 
+for several examples.
+
+Consider the sampling necessary for $\epsilon$ accuracy on a curve
+(no point on edge more than $\epsilon$ distance from curve;
+or no edge more than $\epsilon$ different in length from associated
+curve segment).
+
+These huge V-graphs are inefficient to compute, and inefficient later to search.
+If one reacts to this inefficiency problem by using
+less densely sampled polygonal approximations,
+the error of the resulting motion is increased.
+Consider the simple case of motion planning amongst two circular obstacles again.
+(Compare the size of error in the path and the size of the V-graph.)
+
+\section{Smooth \vgraphs are more accurate}
+\label{sec:accuracy}
+
+\section{Literature}
+\label{sec:lit}
+
+\begin{itemize}
+\item
+	Lozano-Perez on visibility graph for shortest path motion amongst polygons.
+\item
+	Computational geometry optimal results.
+	Lee 1978 (visibility graph in $n^2 \log n$ time);
+	Nilsson?
+	Welzl 1985: $n^2$ visibility graph computation.
+\item
+	Visibility graph for 2D lighting, sound, and walkthroughs 
+	(see Durand thesis).
+\item
+	Visibility complex (lighting) work.
+\item
+	O'Rourke web page.
+	Other web pages (see Durand).
+\end{itemize}
+
+\section{Smooth motion and lighting}
+\label{sec:application}
+
+\section{Future work}
+
+Improvement of smooth version of Minkowski sum (see Bajaj),
+which is related to the convex hull of the smooth curves and may perhaps
+be aided by the improved common tangent computation.
+
+\section{}
+
+A classical application of the visibility graph is 
+to the shortest path motion problem,
+either of a point moving amongst polygons in the plane, or of a polygon
+amongst polygons (after some Minkowski sum reduction)
+%  if the moving polygon is reduced to a point
+% and the obstacle polygons are grown using Minkowski sums 
+\cite{lozanoperez1and2}.
+Shortest path motion in this geometric environment reduces to
+shortest paths in the discrete visibility graph.
+Visibility graphs are also heavily used in graphics, 
+for lighting \cite{durand}, sound? \cite{?}, and ?.
+All(?) of these applications use polygonal visibility graphs for polygonal scenes.
+The smooth visibility graph is superior to the polygonal visibility
+graph in many ways.
+
+An obstacle to the development of smooth visibility graphs is an efficient
+computation of common tangents of smooth curves.
+We have recently developed a new method for this computation that allows
+us to revisit the issue of smooth visibility graphs.
+
+Visibility graphs are important in visibility analysis amongst geometric
+models for motion, lighting, sound, etc.
+Previous work has been with polygonal visibility graphs.
+By moving to a curved world, the complexity of the visibility graph is markedly
+reduced (Figure~\ref{}), yet its accuracy is actually improved.
+At the heart of the computation of the visibility graph is the computation
+of common tangents between obstacles.
+We have developed a simple technique for the computation of common tangents
+between curves \cite{jjCommonTang, jjPole},
+so the computation of the reduced and more precise visibility graph 
+in a smooth world becomes feasible.
+We show how to build the visibility graph and analyze the improvement over
+polygonal visibility graphs.
+This includes an analysis of the tradeoff between precision and visibility
+graph size in the polygonal visibility graph, compared with the optimality of both
+precision and size with a smooth visibility graph.
+
+Motion planning amongst curved obstacles is more elegant
+than motion planning amongst the associated polygonal approximations
+of the obstacles.
+Densely sampled polygonal approximations are required for accurate motion
+planning, which leads to very large visibility graphs.
+Consider the V-graph of a pair of circular obstacles.
+(Compare V-graph size for various samplings of the circles.)
+
+
+
+Shortest paths amongst obstacles are built from common tangents
+between the obstacles.
+This is at the heart of the classical visibility graph algorithm for 
+shortest path motion in the plane.
+Typically, obstacles and robot have been polygonal, leading to simple
+computation of tangents and common tangents (line segments between polygon
+vertices).
+The dual curve allows the obstacles and robot to become curved.
+
+In the standard visibility 
+graph algorithm for shortest paths amongst polygons in 2-space \cite{lozano79},
+% ancient solution: see Wesley 1979 paper for reference of Nilsson c. 1969
+edges of the visibility graph consist of (i) edges between visible polygon vertices,
+(ii) edges between the source and visible polygon vertices,
+and (iii) edges between the destination and visible polygon vertices 
+(Figure~\ref{fig:shortest}a).
+In shifting to a curved environment still in 2D,
+the edges of the visibility graph become (1) common tangents between the curves,
+(2) common tangents of a curve with itself, 
+(3) visible tangents from the curves to the source, 
+(4) visible tangents from the curves to the destination,
+and (5) curve segments between the endpoints of (1)-(4), as shown in
+Figure~\ref{fig:shortest}b.
+
+\begin{defn2}
+Visibility graph. Use Edelsbrunner 12.2 for review of classical visibility graph.
+\end{defn2}
+
+We illustrate the utility of the new method for common tangents of curves in the
+computation of visibility graphs,
+and quantify its superiority in both speed and accuracy 
+over the associated use of visibility graphs of polygons,
+thus establishing the advantage of using curves with the new tools to compute
+visibility information for tasks such as lighting and motion.
+
+
+\section{The appeal of motion amongst curved obstacles}
+
+The smooth visibility graph is definitely a win for precision
+and for graph size.
+We should measure the added cost of computing the smooth visibility graph.
+
+The number of resulting edges in the V-graph will be massively reduced.
+For example, the $O(n^2)$ visible pairs of vertices of a circular polygon
+will be replaced by 2 common tangents on the curved circle.
+We must evaluate if this is an overall win.
+(Perhaps V-graph search is negligibly fast for any size V-graph?)
+
+\bibliographystyle{plain}
+\begin{thebibliography}{Lozano-Perez 83}
+
+\bibitem[AHU 83]{ahu83}
+Aho, A. and J. Hopcroft and J. Ullman (1983)
+Data Structures and Algorithms.
+Addison-Wesley (Reading, MA).
+
+\bibitem[Durand 00]{durand00}
+Durand, F. (2000)
+A Multidisciplinary Survey of Visibility.
+SIGGRAPH Course Notes on Visibility.
+
+\bibitem[Lee 78]{lee78}
+Lee, D. (1978)
+The all nearest-neighbor problem for convex polygons.
+Information Processing Letters 7, 189--192.
+% referenced in Edelsbrunner, Algs in Comb Geometry
+
+\bibitem[Lozano Perez]{lp}
+Lozano-Perez, T.
+
+\bibitem[Png 91]{png91}
+Png, T. (1991)
+Adaptive Bounding Algorithms for the Arclength and Surface Area.
+M.S. thesis, U. of Waterloo.
+
+\bibitem[Welzl 85]{welzl85}
+Welzl, E. (1985)
+Constructing the visibility graph for $n$ line segments in $O(n^2)$ time.
+Information Processing Letters 20, 167--171.
+
+\end{thebibliography}
+
+
+\end{document}

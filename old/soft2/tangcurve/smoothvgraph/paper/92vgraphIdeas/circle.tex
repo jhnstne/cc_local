@@ -1,0 +1,150 @@
+% Planning shortest path motion amongst circles and spheres
+\newif\ifFull
+\Fullfalse
+\documentstyle[12pt]{article} 
+\input{macros}
+% \input{ruledmacros}
+\input{pageformat-double}
+\newtheorem{defn2}{Definition}
+\begin{document}
+\bibliographystyle{plain}
+
+\title{}
+\author{John K. Johnstone\thanks{Department of Computer Science, The Johns 
+	Hopkins University, Baltimore, Maryland 21218.
+	This work was supported by National Science Foundation grant
+	IRI-8910366.}}
+\date{\today}
+
+\maketitle
+
+\SingleSpace
+
+% *****************************************************************
+
+\section{Common tangent of two circles}
+
+Inversion is also the key to computing common tangents of two circles,
+which are important in shortest path motion amongst circles.
+
+Length of common tangents.
+Position of centers of similitude.
+Can use methods described elsewhere, but also methods using inversion?
+
+\noindent Property (1.4) (on inversion and polars) shows 
+that a knowledge of $\mbox{inv}_{S}(p)$ 
+makes it easy to find the points of tangency from $p$: 
+the polar is the hyperplane perpendicular to $\lyne{pc}$ through 
+$\mbox{inv}_{S}(p)$.
+
+(This property is stated on p. 46 of Johnson, Modern Geometry.)
+
+% *****************************************************************
+
+Define: common tangent (outside and inside)
+	center of similitude (outside and inside)
+	pole and polar (of a point with respect to a circle)
+
+\begin{lemma}
+\label{lem-similitude}
+\cite[p. 105?]{SalmonConicSections}
+Let $C$ be a circle with center $(\alpha,\beta)$ 
+and radius $r$.
+Let $C'$ be a circle with center $(\alpha',\beta')$ 
+and radius $r'$.
+The outside(?) 
+% (NEED TO PROVE THAT THIS IS THE OUTSIDE ONE) 
+% (WE THINK SO BECAUSE IT IS FOR NORMALIZED CIRCLES IN THEOREM BELOW)
+center of similitude of $C$ and $C'$ is
+$(\frac{\alpha'r - \alpha r'}{r - r'},
+  \frac{\beta'r - \beta r'}{r - r'})$.
+The inside center of similitude of $C$ and $C'$ is
+$(\frac{\alpha'r + \alpha r'}{r + r'},
+  \frac{\beta'r + \beta r'}{r + r'})$.
+\end{lemma}
+\Heading{Proof:}
+\QED
+
+\begin{lemma}
+\label{lem-polar}
+\cite[p. 82?, also see p. 103]{SalmonConic}
+Polar of point $(x',y')$ with respect to circle 
+$(x+\alpha)^{2} + (y+\beta)^{2} = r^{2}$
+(tangent of point if point is on circle) 
+is $(x-\alpha)(x'-\alpha) + (y-\beta)(y'-\beta) = r^{2}$.
+(More suggestively, if the circle is centered at the origin,
+then the polar is $(x,y) \dot (x',y') = r^{2}$.)
+\end{lemma}
+
+METHOD: use centers of similitude and polars from these points
+to compute intersections of common tangents with both circles.
+
+\begin{theorem}
+Let $C_{1}$ and $C_{2}$ be two circles in the same plane,
+with centers $c_{1}$ and $c_{2}$, respectively, and
+radii $r_{1}$ and $r_{2}$, respectively.
+The length of the outside common tangent between these two circles is 
+$\sqrt{\|c_{1} - c_{2}\|^{2} - (r_{1} - r_{2})^{2}}$.
+The length of the inside common tangent between these two circles is
+$\sqrt{\|c_{1} - c_{2}\|^{2} + (r_{2} - r_{1})(r_{1} + 3r_{2})}$.
+\end{theorem}
+\Heading{Proof:}
+Without loss of generality, assume that $C_{1}$ is centered at the origin
+and $C_{2}$ is centered on the $x$-axis: $c_{2} = (\alpha,0)$.
+We wish to compute the points of intersection of the outside common tangent
+with the circles (Figure~\ref{fig-length}).
+The outside center of similitude of $C_{1}$ and $C_{2}$ is 
+$(\frac{\alpha r_{1}}{r_{1} - r_{2}}, 0)$ (Lemma~\ref{lem-similitude}).
+The polar of the outside center of similitude with respect to $C_{1}$ is 
+$x \frac{\alpha r_{1}}{r_{1} - r_{2}} = r_{1}^{2}$
+or $x = \frac{r_{1}(r_{1} - r_{2})}{\alpha}$.
+The intersections of this polar with $C_{1}$ are easily computed to be
+$(\frac{r_{1}(r_{1} - r_{2})}{\alpha}, 
+  \pm \frac{r_{1}}{\alpha} \sqrt{\alpha^{2} - (r_{1} - r_{2})^{2}})$,
+which are the points of intersection of the two outside common tangents 
+with $C_{1}$.
+Similarly, the polar of the outside center of similitude with respect 
+to $C_{2}$ is 
+$(x-\alpha)(\frac{\alpha r_{1}}{r_{1} - r_{2}} - \alpha) = r_{2}^{2}$
+or $x = \frac{r_{2}(r_{1} - r_{2})}{\alpha} + \alpha$.
+The intersections of this polar with $C_{2}$ are
+$(\frac{r_{2}(r_{1} - r_{2})}{\alpha} + \alpha, 
+  \pm \frac{r_{2}}{\alpha} \sqrt{\alpha^{2} - (r_{1} - r_{2})^{2}})$.
+It is clear that, of the four intersections of the outside common tangents
+with the two circles, 
+the two intersections with positive $y$-coordinates are on the same tangent.
+The distance between these two points is $\sqrt{\alpha^{2} - (r_{1} - r_{2})^{2}}$.
+
+% LENGTH OF INSIDE COMMON TANGENT
+The length of the common inside tangent is found in exactly the same way.
+Since the inside center of similitude of $C_{1}$ and $C_{2}$ is 
+$(\frac{\alpha r_{1}}{r_{1} + r_{2}}, 0)$, which is very similar to the
+outside center of similitude, many of the computations are very similar
+and we omit them.
+% (Therefore, the first computations are very similar to the outside 
+% tangent with $r_{1} - r_{2}$ replaced by $r_{1} + r_{2}$.)
+\Comment{
+Its polar with respect to $C_{1}$ is $x = \frac{r_{1}(r_{1} + r_{2})}{\alpha}$.
+The intersections of this polar with $C_{1}$ are 
+$(\frac{r_{1}(r_{1} + r_{2})}{\alpha}, 
+  \pm \frac{r_{1}}{\alpha} \sqrt{\alpha^{2} - (r_{1} + r_{2})^{2}})$.
+The polar of the inner center of similitude with respect 
+to $C_{2}$ is $x = \frac{r_{2}(r_{1} + r_{2})}{\alpha} + \alpha$.
+The intersections of this polar with $C_{2}$ are
+$(\frac{r_{2}(r_{1} + r_{2})}{\alpha} + \alpha, 
+  \pm \frac{r_{2}}{\alpha} \sqrt{\alpha^{2} - (r_{1} + r_{2})^{2}})$.}
+The length of the inside common tangent is 
+$\sqrt{\alpha^{2} + (r_{2} - r_{1})(r_{1} + 3r_{2})}$.
+\QED
+
+\figg{fig-length}{The length of the outside common tangent}{1in}
+% include both circles, outside center of similitude, outside common tangent
+% note that centers of sim are collinear with centers
+
+\section{}
+
+Common tangents can be found as follows.
+Let $P$ and $C$ be a point and a circle, respectively.
+Let 
+
+\end{document}
