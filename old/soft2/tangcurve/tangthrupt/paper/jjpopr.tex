@@ -1,0 +1,16 @@
+\newbox\jjpoprbox
+\newdimen\jjpoprwd
+\font\jjpopra=jjpopra at 72.27truept
+\setbox\jjpoprbox=\vbox{\hbox{%
+\jjpopra\char0\char1\char2}}
+\jjpoprwd=\wd\jjpoprbox
+\setbox\jjpoprbox=\hbox{\vbox{\hsize=\jjpoprwd
+\parskip=0pt\offinterlineskip\parindent0pt
+\hbox{\jjpopra\char0\char1\char2}
+\hbox{\jjpopra\char3\char4\char5}
+\hbox{\jjpopra\char6\char7\char8}}}
+\ifx\parbox\undefined
+    \def\setjjpopr{\box\jjpoprbox}
+\else
+    \def\setjjpopr{\parbox{\wd\jjpoprbox}{\box\jjpoprbox}}
+\fi

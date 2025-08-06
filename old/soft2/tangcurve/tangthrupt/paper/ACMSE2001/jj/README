@@ -1,0 +1,31 @@
+This directory contains a Latex file (jj.tex) and the associated 30
+fonts that encode the images of this paper.
+These fonts were created by 'bm2font' from the bitmap images.
+
+bm2font creates special fonts for each image (both .300pk and .tfm fonts).
+Before dealing with the Latex file, these fonts must be placed in a 
+directory reachable from the TEXFONTS path in .cshrc.
+Finally, when you convert the .dvi file to Postscript,
+you must use the '-d 300' option so that 300 dpi will be
+used, which is the resolution at which the image fonts have been created.
+
+Thus, to prepare a Postscript file from this material,
+please follow these steps:
+
+1) copy the font files into a directory reachable from your TEXFONTS path
+   (or create a new directory and add it to your TEXFONTS path)
+   
+2) latex jj.tex
+
+3) dvips -D 300 -o jj.ps jj.dvi  
+   (or the related translator from dvi to ps that you use).
+   
+So that you can tell if the above steps have worked successfully,
+I am also including a Postscript version of my paper
+to compare against.
+
+If you need help or clarification in any way, please let me know
+at (205) 975-5633 or jj@cis.uab.edu
+Thanks.
+
+J.K. Johnstone

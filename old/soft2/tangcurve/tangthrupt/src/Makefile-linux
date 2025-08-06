@@ -1,0 +1,25 @@
+# File: project Makefile
+# Author: J.K. Johnstone
+# Last Modified: 12/29/03
+# History: 3/31/03: ported from SGI Irix to Linux
+#          9/10/03: added Heckbert quad-edge library
+
+ARCH	   = LINUX
+SHELL      = /bin/csh
+CC         = gcc
+HOME	   = /home/jj
+CBIN       = ${HOME}/Cbin
+CLAPACK    = ${HOME}/software/CLAPACK
+CLAPACKARC = ${CLAPACK}/lapack_LINUX.a ${CLAPACK}/blas_LINUX.a ${CLAPACK}/F2CLIBS/libF77.a
+LIBRARIES  = -lglut -lGLU -lGL -lm -ltcl
+LDFLAGS    = -I${CBIN} -I${CLAPACK} $(CLAPACKARC)
+
+all: poletang
+.cpp: 
+	${CC} -Wno-deprecated -g -o $@ $< ${LIBRARIES} ${LDFLAGS}
+clean :
+	rm -f *.o *~ a.out core
+	ls -l
+touch :
+	touch poletang.cpp
+

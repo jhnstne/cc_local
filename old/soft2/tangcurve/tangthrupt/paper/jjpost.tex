@@ -1,0 +1,15 @@
+\newbox\jjpostbox
+\newdimen\jjpostwd
+\font\jjposta=jjposta at 72.27truept
+\setbox\jjpostbox=\vbox{\hbox{%
+\jjposta\char0\char1\char2}}
+\jjpostwd=\wd\jjpostbox
+\setbox\jjpostbox=\hbox{\vbox{\hsize=\jjpostwd
+\parskip=0pt\offinterlineskip\parindent0pt
+\hbox{\jjposta\char0\char1\char2}
+\hbox{\jjposta\char3\char4\char5}}}
+\ifx\parbox\undefined
+    \def\setjjpost{\box\jjpostbox}
+\else
+    \def\setjjpost{\parbox{\wd\jjpostbox}{\box\jjpostbox}}
+\fi

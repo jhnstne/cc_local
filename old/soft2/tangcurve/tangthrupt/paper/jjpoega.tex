@@ -1,0 +1,17 @@
+\newbox\jjpoegabox
+\newdimen\jjpoegawd
+\font\jjpoegaa=jjpoegaa at 72.27truept
+\font\jjpoegab=jjpoegab at 72.27truept
+\setbox\jjpoegabox=\vbox{\hbox{%
+\jjpoegaa\char0\char1\char2\char3\char4\char5}}
+\jjpoegawd=\wd\jjpoegabox
+\setbox\jjpoegabox=\hbox{\vbox{\hsize=\jjpoegawd
+\parskip=0pt\offinterlineskip\parindent0pt
+\hbox{\jjpoegaa\char0\char1\char2\char3\char4\char5}
+\hbox{\jjpoegaa\char6\char7\jjpoegab\char0\char1\char2\char3}
+\hbox{\jjpoegab\char4\char5\char6\char7\char8\char9}}}
+\ifx\parbox\undefined
+    \def\setjjpoega{\box\jjpoegabox}
+\else
+    \def\setjjpoega{\parbox{\wd\jjpoegabox}{\box\jjpoegabox}}
+\fi

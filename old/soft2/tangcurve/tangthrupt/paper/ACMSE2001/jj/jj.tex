@@ -1,0 +1,735 @@
+\documentclass[twocolumn,10pt]{article}
+\usepackage{epsfig}
+\pagestyle{empty}
+\textheight=9.0in
+\textwidth=7.0in
+\columnsep=0.25in
+% local printer adjustments:
+\topmargin=-0.5in
+\oddsidemargin=-0.25in
+\evensidemargin=-0.25in
+
+\newcommand{\prf}{\noindent{{\bf Proof}:\ \ \ }}
+\newcommand{\QED}{\vrule height 1.4ex width 1.0ex depth -.1ex\ \vspace{.2in}} % square box
+\newcommand{\choice}[2]{\mbox{\footnotesize{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}      
+\newcommand{\scriptchoice}[2]{\mbox{\scriptsize{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}
+\newcommand{\tinychoice}[2]{\mbox{\tiny{$\left( \begin{array}{c} #1 \\ #2 \end{array} \right)$}}}
+\newcommand{\plucker}{Pl\"{u}cker\ }
+\newcommand{\tang}{tangential curve\ }
+\newcommand{\tangs}{tangential curves\ }
+\newcommand{\Tang}{Tangential curve\ }
+\newcommand{\atang}{tangential $a$-curve\ }
+\newcommand{\btang}{tangential $b$-curve\ }
+\newcommand{\ctang}{tangential $c$-curve\ }
+\newcommand{\atangs}{tangential $a$-curves\ }
+\newcommand{\btangs}{tangential $b$-curves\ }
+\newcommand{\ctangs}{tangential $c$-curves\ }
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{rmk}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{defn2}[theorem]{Definition}
+
+% -----------------------------------------------------------------------------
+
+\begin{document}
+
+\title{Smooth Visibility from a Point}
+\author{J.K. Johnstone \\
+  	\quad\\
+	\\
+	Geometric Modeling Lab \\
+	Computer and Information Sciences \\
+	University of Alabama at Birmingham \\
+	University Station, Birmingham, AL 35294 \\
+	jj@cis.uab.edu
+}
+\date{\quad}
+\maketitle
+\thispagestyle{empty}
+{\small
+\parskip=12pt
+\parindent=0pt
+
+{\bf Abstract-} We propose a solution in dual space to the problem of
+computing the tangents of a plane Bezier curve that pass through a point,
+an important problem in the analysis of visibility.
+Our solution reduces to the intersection of a line with a Bezier curve
+in dual space.
+It is equivalent in complexity to the standard solution,
+but introduces an alternative, geometric interpretation of the problem.
+This new characterization has promise for the solution of more general problems in visibility.
+We also compare the dual solution to the solution using polar theory,
+which reduces to the intersection of two algebraic curves after implicitization.
+
+Keywords: visibility, tangents through a point, duality, polar.
+}
+
+
+\parindent=2em
+\section{Introduction}
+
+The tangents of a plane curve that meet a point $P$ (Figure~\ref{fig:problem})
+define important boundaries of visibility from $P$
+for robotics, graphics, and geometric analysis.
+A shortest path from $P$ will begin along one of these tangents 
+(Figure~\ref{fig:motion}).
+A point light at $P$ will cast shadows bounded by these tangents,
+when the curve is interpreted as an opaque obstacle (Figure~\ref{fig:shadow}).
+The 2-dimensional silhouette from the viewpoint $P$
+is defined by the visible points of tangency (Figure~\ref{fig:problem}).
+
+\newbox\jjpoprbox
+\newdimen\jjpoprwd
+\font\jjpopra=jjpopra at 72.27truept
+\setbox\jjpoprbox=\vbox{\hbox{%
+\jjpopra\char0\char1\char2}}
+\jjpoprwd=\wd\jjpoprbox
+\setbox\jjpoprbox=\hbox{\vbox{\hsize=\jjpoprwd
+\parskip=0pt\offinterlineskip\parindent0pt
+\hbox{\jjpopra\char0\char1\char2}
+\hbox{\jjpopra\char3\char4\char5}
+\hbox{\jjpopra\char6\char7\char8}}}
+\ifx\parbox\undefined
+    \def\setjjpopr{\box\jjpoprbox}
+\else
+    \def\setjjpopr{\parbox{\wd\jjpoprbox}{\box\jjpoprbox}}
+\fi
+
+\begin{figure}
+\hspace{.5in} \setjjpopr
+\caption{Tangents through a point}
+\label{fig:problem}
+\end{figure}
+
+\newbox\jjposhbox
+\newdimen\jjposhwd
+\font\jjposha=jjposha at 72.27truept
+\setbox\jjposhbox=\vbox{\hbox{%
+\jjposha\char0\char1}}
+\jjposhwd=\wd\jjposhbox
+\setbox\jjposhbox=\hbox{\vbox{\hsize=\jjposhwd
+\parskip=0pt\offinterlineskip\parindent0pt
+\hbox{\jjposha\char0\char1}
+\hbox{\jjposha\char2\char3}}}
+\ifx\parbox\undefined
+    \def\setjjposh{\box\jjposhbox}
+\else
+    \def\setjjposh{\parbox{\wd\jjposhbox}{\box\jjposhbox}}
+\fi
+
+\begin{figure}
+\hspace{1in} \setjjposh
+\caption{A shortest path}
+\label{fig:motion}
+\end{figure}
+
+The solution to the discrete polygonal version of this problem,
+where the curve is replaced by a polygon, is straightforward
+(Figure~\ref{fig:polygon}).
+For each vertex of the polygon, consider the outward-pointing normals
+of its two adjacent edges.
+Vertices such that one outward-pointing
+\clearpage
+\noindent normal points towards the point $P$
+and the other points away become the discrete analog of the points of 
+tangency on the curve.
+A smooth solution using curves is more involved, 
+yet preferable for its precision and, 
+if properly implemented, its improved efficiency over a densely sampled polygon.
+We are especially interested in the solution of our problem for Bezier
+curves, since they are the dominant modeling tool for curves.
+
+\newbox\jjpocabox
+\newdimen\jjpocawd
+\font\jjpocaa=jjpocaa at 72.27truept
+\setbox\jjpocabox=\vbox{\hbox{%
+\jjpocaa\char0\char1\char2}}
+\jjpocawd=\wd\jjpocabox
+\setbox\jjpocabox=\hbox{\vbox{\hsize=\jjpocawd
+\parskip=0pt\offinterlineskip\parindent0pt
+\hbox{\jjpocaa\char0\char1\char2}
+\hbox{\jjpocaa\char3\char4\char5}}}
+\ifx\parbox\undefined
+    \def\setjjpoca{\box\jjpocabox}
+\else
+    \def\setjjpoca{\parbox{\wd\jjpocabox}{\box\jjpocabox}}
+\fi
+
+\begin{figure}
+\hspace{.4in} \setjjpoca
+\caption{Casting a shadow}
+\label{fig:shadow}
+\end{figure}
+
+\newbox\jjpolybox
+\newdimen\jjpolywd
+\font\jjpolya=jjpolya at 72.27truept
+\setbox\jjpolybox=\vbox{\hbox{%
+\jjpolya\char0\char1\char2}}
+\jjpolywd=\wd\jjpolybox
+\setbox\jjpolybox=\hbox{\vbox{\hsize=\jjpolywd
+\parskip=0pt\offinterlineskip\parindent0pt
+\hbox{\jjpolya\char0\char1\char2}
+\hbox{\jjpolya\char3\char4\char5}}}
+\ifx\parbox\undefined
+    \def\setjjpoly{\box\jjpolybox}
+\else
+    \def\setjjpoly{\parbox{\wd\jjpolybox}{\box\jjpolybox}}
+\fi
+
+\begin{figure}
+\hspace{.25in} \setjjpoly
+\caption{The polygonal problem}
+\label{fig:polygon}
+\end{figure}
+
+The classical solution to the tangents of a curve $C$
+through a point $P$ uses polar theory \cite{semple85}.
+The points of the curve whose tangents intersect $P$ are 
+the intersections of two algebraic curves:
+the curve $C$ and the polar of $P$ with respect to $C$
+(Figure~\ref{fig:polar}).
+
+The standard parametric solution (e.g., \cite{kim88})
+solves for the points $C(t) = (x(t),y(t))$ of the curve whose normal $N(t)$
+is orthogonal to the line to $P = (p_1,p_2)$ (Figure~\ref{fig:standard}):
+\begin{equation}
+\label{eq:standard}
+ 	(C(t) - P) \cdot N(t) = 0
+\end{equation}
+or
+\[
+	f(t) = (x(t) - p_1, y(t) - p_2) \cdot (-y'(t), x'(t)) = 0
+\]
+This is a univariate equation of degree $2n-1$ in $t$,
+where $n$ is the degree of $C(t)$.
+
+\newbox\jjpostbox
+\newdimen\jjpostwd
+\font\jjposta=jjposta at 72.27truept
+\setbox\jjpostbox=\vbox{\hbox{%
+\jjposta\char0\char1\char2}}
+\jjpostwd=\wd\jjpostbox
+\setbox\jjpostbox=\hbox{\vbox{\hsize=\jjpostwd
+\parskip=0pt\offinterlineskip\parindent0pt
+\hbox{\jjposta\char0\char1\char2}
+\hbox{\jjposta\char3\char4\char5}}}
+\ifx\parbox\undefined
+    \def\setjjpost{\box\jjpostbox}
+\else
+    \def\setjjpost{\parbox{\wd\jjpostbox}{\box\jjpostbox}}
+\fi
+
+\begin{figure}
+\hspace{.3in} \setjjpost
+\caption{As normals orthogonal to the line to $P$}
+\label{fig:standard}
+\end{figure}
+
+In this paper, we propose a solution 
+that reduces to the intersection of a line and a Bezier curve 
+of degree $2n-1$ in dual space.
+This compares favourably with the polar solution.
+A curve-curve intersection is replaced by a simpler line-curve intersection.
+Also, the dual of a Bezier curve
+can be easily represented as a rational Bezier curve (Theorem~\ref{thm:rationalduala}),
+while the polar of a curve cannot.
+Consequently, the intersection of implicit algebraic curves in the polar solution
+is replaced by the more familiar intersection of parametric Bezier curves.
+
+The dual solution is similar in efficiency to the standard parametric
+solution (\ref{eq:standard}), since the intersection of a line and a parametric
+curve of degree $2n-1$ is comparable to the solution of a univariate equation
+of degree $2n-1$.
+The major difference is in point of view and generalizability.
+The dual method introduces a new paradigm with great potential for the
+solution of visibility problems in dual space,
+in which an algebraic solution is replaced by a geometric solution.
+In other work, we will show that it can lead to a better solution
+for the common tangents of two curves \cite{jj00}
+(and we shall appeal to some of the results from this paper).
+We are also presently working on a solution to the common tangent planes of two
+surfaces that has no comparable solution under the algebraic interpretation.
+By studying the dual solution for the simpler problem of 
+the tangents through a point,
+we establish a template for the dual space method
+and clearly distinguish the geometric and algebraic approaches.
+
+The basic argument of our solution in dual space is as follows.
+In dual space, points become lines and lines become points.
+In particular, the point $P$ dualizes to the line $P^*$ and 
+the tangent lines of a curve dualize to the points of a so-called 
+tangential curve (Figure~\ref{fig:duality}).
+In dual space, the intersections of the line $P^*$ with the tangential curve
+encode the tangent lines through $P$
+(Figures~\ref{fig:ob2}-\ref{fig:ob3}).
+In particular, an intersection point maps back to a line, which
+must be a tangent (since the intersection lies on the tangential curve)
+that contains $P$ (since the intersection also lies on $P^*$).
+
+\newbox\jjpolfbox
+\newdimen\jjpolfwd
+\font\jjpolfa=jjpolfa at 72.27truept
+\font\jjpolfb=jjpolfb at 72.27truept
+\font\jjpolfc=jjpolfc at 72.27truept
+\setbox\jjpolfbox=\vbox{\hbox{%
+\jjpolfa\char0\char1\char2\char3\char4\char5}}
+\jjpolfwd=\wd\jjpolfbox
+\setbox\jjpolfbox=\hbox{\vbox{\hsize=\jjpolfwd
+\parskip=0pt\offinterlineskip\parindent0pt
+\hbox{\jjpolfa\char0\char1\char2\char3\char4\char5}
+\hbox{\jjpolfa\char6\jjpolfb\char0\char1\char2\char3\char4}
+\hbox{\jjpolfb\char5\char6\jjpolfc\char0\char1\char2\char3}}}
+\ifx\parbox\undefined
+    \def\setjjpolf{\box\jjpolfbox}
+\else
+    \def\setjjpolf{\parbox{\wd\jjpolfbox}{\box\jjpolfbox}}
+\fi
+
+\begin{figure*}
+\hspace{.7in} \setjjpolf
+\caption{The tangent space of a curve, and its dual (clipped to $x \in [-1,1]$)}
+\label{fig:duality}
+\end{figure*}
+
+We review the polar solution in the next section,
+and present our algorithm, including several examples, 
+in Section~\ref{sec:point}.
+The paper ends with some conclusions and suggestions for future work.
+Throughout this paper, we shall work in projective 2-space.
+We recall some of the important properties of projective 2-space 
+in the following definition.
+
+\begin{defn2}
+\label{defn:proj}
+{\bf Projective 2-space} $P^2$ is the space 
+$\{(x_1,x_2,x_3) : x_i \in \Re, \mbox{ not all zero}\}$
+under the equivalence relation $(x_1,x_2,x_3) = k(x_1,x_2,x_3),\ k \neq 0 \in \Re$.
+The point $(x_1,x_2,x_3)$ in projective 2-space
+is equivalent to the point $(\frac{x_1}{x_3},\frac{x_2}{x_3})$
+in Cartesian 2-space.
+Points of $P^2$ with $x_3=0$ are associated with points at infinity.
+The 3 coordinates in projective 2-space are called {\bf homogeneous coordinates}.
+We distinguish the third homogeneous coordinate by calling it the 
+{\bf projective coordinate}.
+\end{defn2}
+
+The use of projective space is motivated by the fact that the equation 
+of a line is invariant under multiplication by a constant:
+the line $ax+by+c=0$ is equivalent to the line $kax+kby+kc=0$ 
+for $k \neq 0$.
+
+\section{Polar theory}
+\label{sec:polar}
+
+The classical mathematical method for finding the tangents of a curve $C$
+through a point $P$ involves polar theory.
+
+\begin{defn2}
+Let $C$ be a plane algebraic curve defined by the polynomial $f(x_1,x_2,x_3)=0$
+of degree $n$ and let $P = (p_1,p_2,p_3)$ be a point, where both $C$ and $P$ 
+are expressed in projective 2-space.
+The {\bf (first) polar of $P$ with respect to $C$} 
+is an algebraic curve of degree $n-1$ defined by
+\[
+	p_1 \frac{\partial f}{\partial x_1} +
+	p_2 \frac{\partial f}{\partial x_2} +
+	p_3 \frac{\partial f}{\partial x_3} = 0
+\]
+or $P \cdot \nabla f = 0$ \cite{semple85}.	% p. 10-11
+\end{defn2}
+
+\begin{example}
+The first polar of $P=(5,0,1)$ with respect to the circle 
+$x_1^2 + x_2^2 - x_3^2 = 0$ is the line
+$5(2x_1) - 2x_3 = 0$ or $x_1 = \frac{1}{5}$ in Cartesian space
+(Figure~\ref{fig:polar}).
+In this special case of a circle, the first polar can also be computed
+using inversion: it is the line through the inverse $P'$ of $P$ 
+and perpendicular to $PP'$.
+
+The first polar of $(1,1,1)$ with respect to the quartic trisectrix curve
+$(x^2 + y^2 - 2ax)^2 = a^2(x^2 + y^2)$ \cite{lawrence72} % p. 115
+is the cubic curve $p(x,y) = 
+(4-4a)(x^3 + xy^2) + 4(y^3 + x^2y) + (6a^2 - 12a)x^2 - (4a+2a^2)y^2 - 8axy + 6a^2x - 2a^2y = 0$.
+\end{example}
+
+\begin{theorem}
+The intersections of $C$ and the first polar of $P$ with respect to $C$ 
+define the locus of points of $C$ whose tangents intersect $P$ 
+(Figure~\ref{fig:polar}).
+\end{theorem}
+
+\newbox\jjpopobox
+\newdimen\jjpopowd
+\font\jjpopoa=jjpopoa at 72.27truept
+\setbox\jjpopobox=\vbox{\hbox{%
+\jjpopoa\char0\char1\char2\char3}}
+\jjpopowd=\wd\jjpopobox
+\setbox\jjpopobox=\hbox{\vbox{\hsize=\jjpopowd
+\parskip=0pt\offinterlineskip\parindent0pt
+\hbox{\jjpopoa\char0\char1\char2\char3}
+\hbox{\jjpopoa\char4\char5\char6\char7}
+\hbox{\jjpopoa\char8\char9\char10\char11}}}
+\ifx\parbox\undefined
+    \def\setjjpopo{\box\jjpopobox}
+\else
+    \def\setjjpopo{\parbox{\wd\jjpopobox}{\box\jjpopobox}}
+\fi
+
+\begin{figure}[h]
+\hspace{0in} \setjjpopo
+\caption{The polar of a point with respect to a circle}
+\label{fig:polar}
+\end{figure}
+
+Polar theory leads to the following algorithm for the computation of the 
+tangents from a Bezier curve $C$ through a point $P$:
+\begin{enumerate}
+\item	Implicitize $C$ (i.e., translate from the parametric to the implicit
+representation of $C$), yielding $f(x_1,x_2,x_3)=0$.
+\item	Compute the first polar of $P$ with respect to $C$, say $g(x_1,x_2,x_3)=0$.
+\item	Intersect the algebraic curves $f(x_1,x_2,x_3)=0$ and $g(x_1,x_2,x_3)=0$.
+\end{enumerate}
+
+The first step, implicitization,
+involves resultants \cite{sederberg84,sederberg95}.
+The implicitization of a Bezier spline is particularly challenging.
+For example, the Bezier spline of Figure~\ref{fig:problem} has 69 segments,
+yielding a set of algebraic curves.
+
+For steps (2) and (3),
+Sederberg \cite{sederberg89} has developed a robust and efficient algorithm
+for the computation of polars of piecewise algebraic curves, algebraic curves
+in the Bernstein basis, as well as the subsequent intersection of the 
+algebraic curve and its polar.
+
+In conclusion, the polar method is awkward for parametric Bezier curves, 
+since it is fundamentally a method for implicit curves.
+
+\section{A dual solution}
+\label{sec:point}
+
+In this section, we present our algorithm in dual space
+for computing the tangents through a point.
+This algorithm works directly with Bezier curves.
+Our basic algorithm for computing the tangents from a curve $C$ through
+a point $P$ is as follows:
+%
+\begin{description}
+\item[(1)]	Dualize $P$ and the tangent space of $C$, to the line $P^*$
+		and the tangential curve $C^*$.
+\item[(2)]	Intersect the line $P^*$ and curve $C^*$ in dual space.
+\item[(3)]	Map the intersections in dual space back to lines in primal space.
+		These are the tangents of $C$ through $P$.
+\end{description}
+%
+We shall now elaborate on the components of this algorithm
+and add refinements to handle points at infinity.
+
+We begin with a definition of our duality.
+Although the most natural point-line duality is between the line $ax+by+c=0$
+and the point $(a,b,c)$ in projective space \cite{fulton69}, % Fulton, p. 96
+we choose two subtly different dualities
+that map a different coefficient of the line equation to the projective coordinate.
+This choice is motivated by the fact that lines dualized 
+to points with zero projective coordinates
+will be mapped to infinity (Definition~\ref{defn:proj}) and effectively lost by the duality.
+%
+\begin{defn2}
+In the {\bf $a$-duality}, the line $ax+by+c=0$ is dual to the point $(b,c,a) \in P^2$.
+In the {\bf $b$-duality}, the line $ax+by+c=0$ is dual to the point $(a,c,b) \in P^2$.
+The {\bf \atang}  (resp., $b$-curve) of a plane curve $C(t)$
+is the curve $C^*(t) \subset P^2$ where $C^*(t)$ is the $a$-dual
+(resp., $b$-dual) of the tangent at $C(t)$.
+Properties of the tangential curve are discussed in \cite{jj00}.
+\end{defn2}
+
+The $a$-dual of the horizontal line $by+c=0$ is $(b,c,0)$.
+That is, horizontal lines are mapped to infinity
+and the tangential $a$-curve is not a robust representation of horizontal tangents.
+Consequently, we restrict the \atang to the representation of steep tangents, as follows.
+
+\begin{defn2}
+A curve's tangent space can be divided into shallow and steep tangents.
+A tangent $ax+by+c=0$ is {\bf steep} if $|a| \geq |b|$
+(its angle to the $x$-axis is greater than 45 degrees).
+A tangent is {\bf shallow} if $|a| < |b|$.
+\end{defn2}
+
+\begin{lemma}
+The \atang clipped by $x = \pm 1$,
+$C^* \cap \{(x,y) : x \in [-1,1] \}$,
+represents the steep tangents of the curve $C$.
+\end{lemma}
+\prf
+Diagonal lines $ax \pm ay+c=0$ form the boundary between steep and shallow lines.
+They dualize to $(\pm a,c,a) \in P^2$, or $x=\pm 1$ in Cartesian space,
+for both $a$-duality and $b$-duality.
+\QED
+
+The top right of Figures~\ref{fig:ob2}-\ref{fig:ob3} illustrates
+clipped \atangs (of the curves on the left of each figure).
+It is simple to clip a curve by $x \in [-1,1]$.
+
+The \btang is a perfect complement to the $a$-curve.
+Although $b$-duality maps vertical lines to infinity,
+the \btang clipped by $x = \pm 1$ is a robust representation of the 
+shallow tangent space.
+Thus, we compute the steep tangents through $P$ using the $a$-curves
+and the shallow tangents through $P$ using the $b$-curve, as follows.
+%
+\begin{description}
+\item[(1a)]	Dualize $P$ and the tangent space of $C$, using $a$-duality,
+		to $P_a^*$ and $C_a^*$.  Clip $C_a^*$ to $x \in [-1,1]$.
+\item[(1b)]	Dualize $P$ and the tangent space of $C$, using $b$-duality,
+		to $P_b^*$ and $C_b^*$.  Clip $C_b^*$ to $x \in [-1,1]$.
+\item[(2a)]	Intersect the line $P_a^*$ and the clipped curve $C_a^*$ 
+		in $a$-dual space.
+\item[(2b)]	Intersect the line $P_b^*$ and the clipped curve 
+		$C_b^*$ in $b$-dual space.
+\item[(3a)]	Dualize the intersections in $a$-dual space 
+		back to steep tangents through $P$ in primal space.
+\item[(3b)]	Dualize the intersections in $b$-dual space 
+		back to shallow tangents through $P$ in primal space.
+\end{description}
+
+In summary, the tangents through $P$ are calculated by two line-curve
+intersections, one in $a$-space and one in $b$-space.
+The two intersections mesh perfectly to generate all of the 
+tangents through $P$, in a mutually exclusive manner.
+The clipping of the curves to $x \in [-1,1]$ makes the intersection very efficient,
+since intersection with a Bezier curve involves subdivision,
+which is related to the length of the curve.
+
+Figures~\ref{fig:ob2}-\ref{fig:ob3} offer examples of the dual algorithm,
+varying from simple to complicated.
+In each case, primal space with the tangents of $C$ through $P$ is illustrated
+on the left, $a$-dual space with the \atangs and dual line $P_a^*$ is illustrated
+on the top right, and $b$-dual space with the \btangs and dual line $P_b^*$ 
+is illustrated on the bottom right.
+
+\newbox\jjpoegabox
+\newdimen\jjpoegawd
+\font\jjpoegaa=jjpoegaa at 72.27truept
+\font\jjpoegab=jjpoegab at 72.27truept
+\setbox\jjpoegabox=\vbox{\hbox{%
+\jjpoegaa\char0\char1\char2\char3\char4\char5}}
+\jjpoegawd=\wd\jjpoegabox
+\setbox\jjpoegabox=\hbox{\vbox{\hsize=\jjpoegawd
+\parskip=0pt\offinterlineskip\parindent0pt
+\hbox{\jjpoegaa\char0\char1\char2\char3\char4\char5}
+\hbox{\jjpoegaa\char6\char7\jjpoegab\char0\char1\char2\char3}
+\hbox{\jjpoegab\char4\char5\char6\char7\char8\char9}}}
+\ifx\parbox\undefined
+    \def\setjjpoega{\box\jjpoegabox}
+\else
+    \def\setjjpoega{\parbox{\wd\jjpoegabox}{\box\jjpoegabox}}
+\fi
+
+\begin{figure*}
+\hspace{.8in} \setjjpoega
+\caption{A simple example of our algorithm}
+\label{fig:ob2}
+\end{figure*}
+
+\newbox\jjpoegbbox
+\newdimen\jjpoegbwd
+\font\jjpoegba=jjpoegba at 72.27truept
+\font\jjpoegbb=jjpoegbb at 72.27truept
+\setbox\jjpoegbbox=\vbox{\hbox{%
+\jjpoegba\char0\char1\char2\char3\char4\char5}}
+\jjpoegbwd=\wd\jjpoegbbox
+\setbox\jjpoegbbox=\hbox{\vbox{\hsize=\jjpoegbwd
+\parskip=0pt\offinterlineskip\parindent0pt
+\hbox{\jjpoegba\char0\char1\char2\char3\char4\char5}
+\hbox{\jjpoegba\char6\char7\jjpoegbb\char0\char1\char2\char3}
+\hbox{\jjpoegbb\char4\char5\char6\char7\char8\char9}}}
+\ifx\parbox\undefined
+    \def\setjjpoegb{\box\jjpoegbbox}
+\else
+    \def\setjjpoegb{\parbox{\wd\jjpoegbbox}{\box\jjpoegbbox}}
+\fi
+
+\begin{figure*}
+\hspace{.8in} \setjjpoegb
+\caption{A second example}
+\label{fig:ob1}
+\end{figure*}
+
+\newbox\jjpoegcbox
+\newdimen\jjpoegcwd
+\font\jjpoegca=jjpoegca at 72.27truept
+\font\jjpoegcb=jjpoegcb at 72.27truept
+\setbox\jjpoegcbox=\vbox{\hbox{%
+\jjpoegca\char0\char1\char2\char3\char4\char5}}
+\jjpoegcwd=\wd\jjpoegcbox
+\setbox\jjpoegcbox=\hbox{\vbox{\hsize=\jjpoegcwd
+\parskip=0pt\offinterlineskip\parindent0pt
+\hbox{\jjpoegca\char0\char1\char2\char3\char4\char5}
+\hbox{\jjpoegca\char6\char7\jjpoegcb\char0\char1\char2\char3}
+\hbox{\jjpoegcb\char4\char5\char6\char7\char8\char9}}}
+\ifx\parbox\undefined
+    \def\setjjpoegc{\box\jjpoegcbox}
+\else
+    \def\setjjpoegc{\parbox{\wd\jjpoegcbox}{\box\jjpoegcbox}}
+\fi
+
+\begin{figure*}
+\hspace{.8in} \setjjpoegc
+\caption{A more complicated example}
+\label{fig:ob3}
+\end{figure*}
+
+The individual steps of the algorithm, dualization and intersection,
+require some elaboration.
+A crucial fact is that the tangential curve of a 
+Bezier curve can be expressed as a rational Bezier curve.
+This simplifies the intersection in dual space,
+since intersection of Bezier curves is well understood.
+
+\begin{theorem}
+\label{thm:rationalduala}
+Let $C(t)$ be a plane Bezier curve of degree $n$ 
+with control points $\{ (b_{i,1}, b_{i,2}) \}_{i=0}^n$ over the parameter interval $[t_1,t_2]$.
+The \atang $C_a^*(t)$ is a rational Bezier curve of degree $2n-1$ 
+over $[t_1,t_2]$ with weights $\{w_k\}_{k=0}^{2n-1}$ where: 
+\begin{displaymath}
+\scriptsize{
+w_k = \alpha
+\sum_{j=\mbox{max}(0,k-n)}^{\mbox{min}(n-1,k)} 
+\tinychoice{n-1}{j} \tinychoice{n}{k-j} (b_{j,2} - b_{j+1,2})
+}
+\end{displaymath}
+%
+and control points $\{c_k\}_{k=0}^{2n-1}$ where:
+\begin{displaymath}
+\tiny{
+c_k = \frac{\alpha}{w_k} 
+\left(
+\begin{array}{l}
+	\displaystyle{\sum_{j=\mbox{\tiny{max}}(0,k-n)}^{\mbox{\tiny{min}}(n-1,k)}}
+	\tinychoice{n-1}{j} \tinychoice{n}{k-j} (b_{j+1,1} - b_{j,1})\\
+	\displaystyle{\sum_{\begin{array}{c} \mbox{\tiny{$0 \leq i \leq n-1$}} \\ 
+			     \mbox{\tiny{$0 \leq j \leq n$}} \\ 
+			     \mbox{\tiny{$i+j=k$}}
+			     \end{array}}}
+\tinychoice{n-1}{i} \tinychoice{n}{j} \beta_{i,j}
+\end{array}
+\right)
+}
+\end{displaymath}
+where $\alpha = \tiny{\frac{n}{(t_2 - t_1) \tinychoice{2n-1}{k}}}$,
+and $\beta_{i,j} = (b_{i+1,2} - b_{i,2}) b_{j,1} - (b_{i+1,1} - b_{i,1}) b_{j,2}$.
+\end{theorem}
+\prf
+We omit the proof due to lack of space and its technical nature.
+The reader is referred to \cite{jj00} for a full proof.
+\QED
+
+The representation of the \btang as a rational Bezier curve is analogous.
+
+The line-curve intersection of steps (2a) and (2b) is the intersection
+of two Bezier curves.
+It is simple to represent a line as a Bezier curve of degree 1,
+and intersection with a line is a particularly simple case of Bezier
+curve intersection.
+The intersection of Bezier curves is well understood and efficient \cite{sederberg86}.
+We use the classical subdivision approach, where the two curves are recursively
+subdivided into shorter segments until their intersection can be adequately
+approximated by the intersection of two lines.
+
+We end this section by explaining why we did not use the duality 
+$ax+by+c=0 \rightarrow (a,b,c)$.
+It maps lines through the origin to infinity.
+Since a horizontal line can pass through the origin,
+as can a vertical line, this duality does not cooperate well with either of
+the other dualities.
+
+\section{Conclusions}
+\label{sec:comparison}
+
+In this paper, we have studied a new approach to computing the tangents
+through a point, a basic visibility operation.
+An algebraic method that reduces to the solution of a univariate equation of degree $2n-1$
+was replaced by a geometric method that reduces to the intersection
+of a line and Bezier curve of degree $2n-1$ in dual space.
+Although, in the context of this problem, the two approaches are similar,
+the dual method has the better capacity for generalization and
+other important visibility problems, especially for motion and lighting in 
+3-space, can be attacked anew using the dual approach.
+By studying the dual solution for the tangents through a point,
+we see the development of this new method as it mutates away from the
+algebraic solution.
+
+The simplicity of the dual method of this paper makes it feasible
+for many visibility computations from a point to be lifted from an approximate
+polygonal world to a more realistic curved world.
+The next step is the application of this smooth tangent operation 
+to the construction of smooth visibility graphs, shortest path motion
+amongst smooth obstacles, lighting of smooth environments,
+and other visibility analysis in a smooth curved world.
+
+\bibliographystyle{plain}
+\begin{thebibliography}{1}
+
+\bibitem{farin97}
+Farin, G. (1997)
+Curves and Surfaces for CAGD: A Practical Guide (4th edition).
+Academic Press (New York).
+
+\bibitem{fulton69}
+Fulton, W. (1969)
+Algebraic Curves.
+Benjamin/Cummings (Menlo Park).
+
+\bibitem{jj00}
+Johnstone, J.K. (2001)
+A Parametric Solution to Common Tangents.
+International Conference on Shape Modelling and Applications (SMI 2001),
+to appear.
+
+\bibitem{kim88}
+Kim, M.-S. (1988)
+Motion Planning with Geometric Models.
+Ph.D. Thesis, Purdue University, Dept. of Computer Science.
+
+\bibitem{lawrence72}
+Lawrence, J.D. (1972)
+A Catalog of Special Plane Curves.
+Dover (New York).
+
+\bibitem{sederberg84}
+Sederberg, T. and D. Anderson and R. Goldman (1984)
+Implicit Representation of Parametric Curves and Surfaces.
+Computer Vision, Graphics, and Image Processing 28, 72--84.
+
+\bibitem{sederberg86}
+Sederberg, T. and S. Parry (1986)
+Comparison of three curve intersection algorithms.
+Computer Aided Design 18, 58--63.
+
+\bibitem{sederberg89}
+Sederberg, T. (1989)
+Algorithm for algebraic curve intersection.
+Computer Aided Design 21(9), 547--554.
+
+\bibitem{sederberg95}
+Sederberg, T. and F. Chen (1995)
+Implicitization using Moving Curves and Surfaces.
+SIGGRAPH '95, 301--308.
+
+\bibitem{semple85}
+Semple, J. and L. Roth (1985)
+Introduction to Algebraic Geometry.
+Oxford University Press (Oxford).
+
+\end{thebibliography}
+
+\end{document}
+

@@ -1,0 +1,21 @@
+Figure 1: jjpopr.gif		example of problem	ob3light.rgb
+Figure 2: jjposh.gif		shortest path 		smoothpath.rgb / fig1.rgb
+Figure 3: jjpoca.gif		casting a shadow 	ob1light.rgb
+Figure 4: jjpoly.gif		polygonal problem	polygon.rgb
+Figure 5: jjpost.gif		standard solution	standard.rgb
+Figure 6: jjpolf.gif		line field (visual aid to duality) simplelinefield.rgb
+Figure 7: jjpopo.gif		first polar of circle   polar.rgb
+Figure 8: jjpoega.gif		example 1		ob2pole.rgb (complete example, including dual space)
+Figure 9: jjpoegb.gif		example 2		ob1pole.rgb
+Figure 10:jjpoegc.gif		example 3		ob3pole.rgb
+
+- capture snapshot
+- xv to translate rgb to gif (greyscale)
+- bm2font *.gif
+- move foo.tfm foo.300pk to ~jj/teTeX/share/texmf/fonts/pk/ljfour/public/cm
+- move foo.tex to same directory as LaTeX file
+- add \input{foo.tex} before figure and \setfoo inside figure
+- latex
+- dvips -D 300
+- print
+

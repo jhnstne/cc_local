@@ -1,0 +1,15 @@
+\newbox\jjposhbox
+\newdimen\jjposhwd
+\font\jjposha=jjposha at 72.27truept
+\setbox\jjposhbox=\vbox{\hbox{%
+\jjposha\char0\char1}}
+\jjposhwd=\wd\jjposhbox
+\setbox\jjposhbox=\hbox{\vbox{\hsize=\jjposhwd
+\parskip=0pt\offinterlineskip\parindent0pt
+\hbox{\jjposha\char0\char1}
+\hbox{\jjposha\char2\char3}}}
+\ifx\parbox\undefined
+    \def\setjjposh{\box\jjposhbox}
+\else
+    \def\setjjposh{\parbox{\wd\jjposhbox}{\box\jjposhbox}}
+\fi

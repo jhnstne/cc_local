@@ -1,0 +1,15 @@
+\newbox\jjpolybox
+\newdimen\jjpolywd
+\font\jjpolya=jjpolya at 72.27truept
+\setbox\jjpolybox=\vbox{\hbox{%
+\jjpolya\char0\char1\char2}}
+\jjpolywd=\wd\jjpolybox
+\setbox\jjpolybox=\hbox{\vbox{\hsize=\jjpolywd
+\parskip=0pt\offinterlineskip\parindent0pt
+\hbox{\jjpolya\char0\char1\char2}
+\hbox{\jjpolya\char3\char4\char5}}}
+\ifx\parbox\undefined
+    \def\setjjpoly{\box\jjpolybox}
+\else
+    \def\setjjpoly{\parbox{\wd\jjpolybox}{\box\jjpolybox}}
+\fi

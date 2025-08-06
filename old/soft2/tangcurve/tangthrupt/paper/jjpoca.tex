@@ -1,0 +1,15 @@
+\newbox\jjpocabox
+\newdimen\jjpocawd
+\font\jjpocaa=jjpocaa at 72.27truept
+\setbox\jjpocabox=\vbox{\hbox{%
+\jjpocaa\char0\char1\char2}}
+\jjpocawd=\wd\jjpocabox
+\setbox\jjpocabox=\hbox{\vbox{\hsize=\jjpocawd
+\parskip=0pt\offinterlineskip\parindent0pt
+\hbox{\jjpocaa\char0\char1\char2}
+\hbox{\jjpocaa\char3\char4\char5}}}
+\ifx\parbox\undefined
+    \def\setjjpoca{\box\jjpocabox}
+\else
+    \def\setjjpoca{\parbox{\wd\jjpocabox}{\box\jjpocabox}}
+\fi

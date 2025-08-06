@@ -1,0 +1,181 @@
+%
+% Latex instructions for ACM SE Conf. papers; ``two-point.eps'' is
+% a separate attachment.
+%
+\documentclass[twocolumn]{article}
+\usepackage{epsfig}
+\pagestyle{empty}
+\textheight=9.0in
+\textwidth=7.0in
+\columnsep=0.25in
+% local printer adjustments:
+\topmargin=0.25in
+\oddsidemargin=-0.25in
+\evensidemargin=-0.25in
+
+\begin{document}
+\bibliographystyle{plain}
+
+\thispagestyle{empty}
+
+\title{My Paper in Correct Format}
+\author{
+Robert Geist \\
+\quad\\
+\\
+Department of Computer Science \\
+Clemson University \\
+Clemson, South Carolina USA 29634-0974\\
+rmg@cs.clemson.edu
+}
+\date{\quad}
+\maketitle
+{\small
+\parskip=12pt
+\parindent=0pt
+
+{\bf Abstract-} This is a description of the desired camera-ready
+format for papers for the $38^{th}$ Annual ACM Southeast Conference,
+to be held in Clemson, South Carolina, April 7-8, 2000.  It also
+includes the all-important camera-ready deadline: March 1, 2000. The basic
+idea for formatting is to use the default LaTeX two-column article style.  
+Additional details follow below.
+}
+
+\parindent=2em
+\section{Introduction.}
+
+\thispagestyle{empty}
+
+Use plain, white, 8.5 x 11 paper.  Papers should be typeset in 
+two-column format, using 10pt Computer Modern or Times Roman font.  Titles
+should be in either 17pt font (LaTeX $\backslash$LARGE) or 16pt 
+font (MSWord), centered at the top of the first page across both columns.  
+Authors names and affiliations, including email addresses, should be in 
+12pt font (LaTeX $\backslash$large), also centered across both columns 
+below the title.
+
+An abstract of at most 200 words should begin the first column.
+It should begin with the word ``Abstract-'' in bold font, and
+should be 1 paragraph, without indentation.  Major section headings
+should be in 14pt font (LaTeX $\backslash$Large), bold, numbered, and 
+left-justified.  With the exception of the first paragraph in each section, 
+paragraphs should be indented 2em.  Text should be single-spaced, with no 
+additional spacing between paragraphs. 
+
+\section{Margins.}
+
+Side margins should be 0.75in, with a 0.25in column separation.
+This leaves 6.75in for two columns of text, so each
+column should be 3.375in wide.  Top and bottom 
+\quad\\
+\quad\\
+\quad\\
+\quad\\
+margins should be 1.0in each.  At the bottom of the first column, 
+leave 1.0in additional space for the ACM Copyright notice.
+
+\section{Pagination.}
+
+Do not number the pages within the text.  
+Authors of refereed papers will be allowed 10 pages in the Proceedings.
+Authors of work-in-progress reports will be allowed 2 pages.  These
+are strict limits, and include EVERYTHING, e.g. diagrams, figures,
+references, acknowledgements. These limits will be enforced by discarding 
+any extra pages, starting with the title page.
+
+\section{References.}
+
+The bibliography should appear at the end of the article, organized
+alphabetically by first author and numbered sequentially.  References
+within the text should use the numbers.  An example is shown here
+\cite{danforth}.
+
+Displayed equations should also be numbered and referenced by number
+within the text.  From \cite{cohen:progressive},
+for a given patch $i$, its radiosity $B_i$ is:
+\begin{equation}
+\label{eqn:radiosity}
+	B_i = E_i + \rho_i \sum_{j = 1}^{n} B_j \frac{A_j}{A_i} F_{ji}
+\end{equation}
+where \\
+$E_i$ =  emission of patch $i$, the extent to which patch $i$ acts as
+        a light source\\
+$F_{ji}$ =  form factor from j to i, the fraction of 
+energy leaving patch $j$ that arrives at patch $i$ \\
+$A_i$ = area of patch $i$ \\
+$\rho_i$ = reflectivity of patch $i$ \\
+$n$ = number of discrete patches.  
+Equation (\ref{eqn:radiosity}) describes patch irradiance.
+
+\section{Figures and Tables.}
+
+Figures and tables should appear within the text and within a single column, 
+if possible.  If too large, they may be centered across both columns.  A
+figure from \cite{danforth} can be seen in Figure 
+\ref{fig:hemisphere_proj}.
+
+% Suck in the postscript figure:
+\begin{figure}
+\centerline{\epsfig{figure=two-point.eps,height=2.5in,width=2.0in}}
+\caption{\label{fig:hemisphere_proj}Projecting patches provides form factors.}
+\end{figure}
+
+\section{Deadlines.}
+
+An electronic ACM Copyright form has been included as a separate attachment.  
+You must print a hard copy of this form, sign it, and return it to the 
+Conference Program Chair:\\
+\quad\\
+Robert Geist \\
+Department of Computer Science \\
+411 Edwards Hall \\
+Clemson University \\
+Clemson, SC 29634-0974\\
+\quad\\
+It must arrive in Clemson on or before March 1, 2000.  This is a
+hard deadline.
+
+An electronic copy of your camera-ready paper, correctly formatted in 
+either LaTeX (.tex) or MSWord (.doc), must be sent to the Program Chair at:\\
+\quad\\
+rmg@cs.clemson.edu
+
+It must also arrive on or before March 1, 2000.
+We need document source in order to paginate and add copyright notices.
+If you cannot supply either LaTeX (.tex) or MSWord (.doc) source, please
+contact the Program Chair immediately.
+
+\section{Presentations.}
+
+We will insist that at least one author registrar for the
+conference, attend the conference, and present the paper.  Final
+acceptance is conditional upon these terms.  Conference attendees
+pay registration fees in anticipation of an opportunity to discuss
+results with authors.  Failure to provide that opportunity would be
+unfair.  If you know that you will be unable to attend, please, in
+fairness, withdraw your paper now.
+
+Authors of refereed papers will be given 30 minute time slots to
+present their papers.  Authors of works-in-progress will be given
+15 minute time slots.  Students who are finalists in the student
+paper competition should practice presentations before the conference.
+A large component of the final evaluation is quality of presentation.
+
+Any questions may be directed to either Robert Geist, rmg@cs.clemson.edu, 
+864-656-2258.
+
+\begin{thebibliography}{1}
+
+\bibitem{cohen:progressive}
+M.~Cohen, S.~Chen, J.~Wallace, and D.~Greenberg.
+\newblock A Progressive Refinement Approach to Fast Radiosity Image Generation.
+\newblock {\em SIGGRAPH}, 22(4), 1988, pp. 75-84.
+
+\bibitem{danforth}
+R. Danforth and R. Geist,``A Spring-loaded Vertex Model for Automatic Surface
+Meshing'' {\it Proc. IASTED Int. Conf. on Computer Graphics and Imaging
+(CGIM'99)}, Palm Springs, CA, October, 1999, pp. 10 - 16.
+\end{thebibliography}
+\end{document}
+
