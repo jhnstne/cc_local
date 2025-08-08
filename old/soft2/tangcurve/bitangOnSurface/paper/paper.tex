@@ -1,0 +1,189 @@
+\section{Visibility graphs of curved environments and shortest paths}
+
+\section{Shading with curved area lights}
+
+\section{Curved Minkowski sums, for curved robots}
+
+(The following is a reasonable topic in the context of my work on 
+swept surfaces and envelopes, but unrelated to tangential computation
+and curves on surfaces.)
+Curved extension of Minkowski sum (see Bajaj and Kim, Generation of Configuration
+Space Obstacles: The Case of Moving Algebraic Curves
+and Compliant Motion Planning with Geometric Models).
+That is, for a non-point robot, the robot must first be shrunk to a point
+and the obstacles expanded by their Minkowski sum with the robot
+in order to apply the visibility graph algorithm.
+Typically the robot and obstacles have been polygonal.
+(A circular robot has also been dealt with by Yap.)
+We have shown how to deal with curved obstacles.
+Now we want to deal with a curved robot.
+
+\section{Other tangential relationships from \tangs}
+
+are tangents of the dual curve = points of the original curve? (test empirically)
+proof: common tangents of dual curves must be intersections in original space, 
+	by symmetry, thus tangents of dual must be points of original curve
+a way to compute the envelope of a family of lines:
+	translate family of lines to dual space, where it becomes a curve;
+	compute the tangents of this dual curve (hodograph), 
+	whose duals become the envelope curve in the original space
+	[is this the striction curve of the ruled surface?]
+	not interesting in 2-space, but analogue in 3-space would be interesting:
+	computing envelope of planes
+	
+Hypothesis: Consider a plane moving through 3-space.
+	Its image in dual space is a curve (in 3-space).
+	The tangents of this space curve are lines in dual space.
+	I believe that as points dualize to planes and planes to points,
+	lines dualize to lines.
+	If so, the tangent lines of the space curve in dual space
+	(which form a ruled surface, actually a tangent developable)
+	dualize to a ruled surface in the primal space.
+	Could this be the envelope of the moving planes?
+
+\section{Common tangents of curves on surfaces}
+
+We have considered common tangents of plane curves.
+It is also useful to compute common tangents of curves on surfaces.
+This is a more challenging computation 
+because tangents must be geodesics [define geodesic] and 
+geodesics on a surface are typically not straight lines, and are difficult
+to characterize and compute.
+To compute a tangent, we must be able to compute the geodesic
+from a given point in a given direction (the direction of the derivative
+of the curve at the point).
+[Discussion of computation of a geodesic: solution of differential equations]
+
+Although geodesics are difficult to compute on most surfaces,
+there are certain important surfaces with simpler geodesics.
+The design of curves on a sphere is a very important problem,
+yet the geodesics of a sphere are all great circles of the sphere.
+We now consider common tangents on \Sn{2}\ and \Sn{3}, the unit spheres 
+at the origin in 3-space and 4-space.
+
+Curves on \Sn{3}, called quaternion splines, are crucial for motion planning
+in computer animation and robotics.
+It is natural to introduce orientation obstacles (orientations disallowed for
+kinematic reasons or for their undesirability, such as an upside-down 
+orientation during the motion of a cup or camera), just as we have position
+obstacles.
+A classical tool for obstacle avoidance in the plane is the visibility graph,
+which involves the computation of common tangents of the planar obstacles.
+A visibility graph for avoidance of orientation obstacles on \Sn{3}\
+requires the computation of common tangents of curves on \Sn{3}.
+
+\section{Common tangents on \Sn{2}}
+
+Check out Tony Woo's work on curves on Gaussian sphere for
+visibility for cutting out an object or building an object with multiple
+hands.
+
+A geodesic, and thus a tangent, on \Sn{2}\ is a great circle.
+In order to dualize the tangent space of a curve on \Sn{2},
+we need the implicit equation of a tangent.
+Although the implicit equation of a circle in 3-space involves 2 equations,
+a sphere and a plane, our sphere will always be \Sn{2}\ and so 
+a great circle is characterized by a plane, a single linear equation.
+Another serendipity is that the plane will always pass through the origin,
+so its constant term disappears and our plane is defined by 3 rather than
+4 coefficients.
+This allows the tangent space of a curve on \Sn{2}\ to be captured just 
+like the tangent space of a plane curve, by a plane rational Bezier curve 
+in dual space.
+
+\begin{defn2}
+On the surface \Sn{2}, 
+the great circle $\{x^2+y^2+z^2-1=0,\ ax+by+cz=0\}$ and
+the point $(a,b,c) \in P^2$ are {\bf duals}.
+\end{defn2}
+
+Notice that the dual $(a,b,c)$ is the normal of the plane $ax+by+cz=0$.
+
+\begin{defn2}
+The {\bf dual of a curve $C(t)$ on \Sn{2}} is the curve $C^*(t) \subset P^2$
+where the point $C^*(t)$ is the dual of the tangent circle at $C(t)$.
+\end{defn2}
+
+Let $C(t)$ be a curve on \Sn{2}.
+Since the plane of the tangent circle at $C(t)$ contains the vectors $C(t)$
+and $C'(t)$, it has the normal $C(t) \times C'(t)$.
+Thus, the dual of the tangent circle at $C(t)$ is $C(t) \times C'(t)$.
+Notice that this dual is the binormal vector at $C(t)$.\footnote{Thus, in
+	computing a dual curve, we are computing a binormal curve.
+	This is related to Saito/Sederberg's normal hodograph and 
+	Catmull's normal surface.
+	A major difference is that we compute the dual curve in projective
+	space and project to a rational curve in 2-space (to allow intersection), 
+	so the binormal vector cannot be read off directly.}
+	
+We now develop a formula for the dual of a Bezier curve on \Sn{2}.
+Let $C(t)$ be a rational Bezier curve on \Sn{2}:
+\[
+	C(t) = \frac{\sum_{k=0}^n w_k b_k B_k^n(t)}{\sum_{k=0}^n w_k B_k^n(t)}
+\]
+We must deal with rational Bezier curves, since curves on \Sn{2}\ (and \Sn{3})
+are not polynomial, in general [Johnstone and Williams 99].
+{\bf Try to generalize dual curves in 2-space using the same method.}
+The dual curve is $C(t) \times C'(t)$.
+Since the dual curve is originally expressed in projective space,
+we can compute $\alpha(t) C(t) \times C'(t)$, since vector length
+is immaterial in projective space.
+In particular, in computing the dual curve, 
+we are only interested in the direction of $C(t)$ and $C'(t)$, not
+their lengths.
+This allows a simplification: we can replace the rational curves
+$C(t)$ and $C'(t)$ by polynomial curves of the same direction.
+A polynomial expression for the direction of $C(t)$ is
+\[
+	\sum_{k=0}^n w_k b_k B_k^n(t)
+\]
+We use a result of Saito, Wang and Sederberg (1993, 
+Hodographs and normals of rational curves and surfaces, manuscript)
+for a polynomial expression for the direction of $C'(t)$.
+
+\begin{lemma}
+Let $C(t) = \frac{\sum_{k=0}^n w_k b_k B_k^n(t)}{\sum_{k=0}^n w_k B_k^n(t)}$ 
+be a rational Bezier curve in 3-space.
+A vector in the direction $C'(t)$ is 
+\[
+	\sum_{k=0}^{2n-2} H_k B_k^{2n-2}(t)
+\]
+where
+\[
+	H_k = \frac{1}{\tinychoice{2n-2}{k}}
+		\sum_{i=\mbox{max}(0,k-n+1)}^{\lfloor k/2 \rfloor}
+		(k-2i+1)\tinychoice{n}{i} \tinychoice{n}{k-i+1}
+		(w_i b_{k-i+1,0} - w_{k-i+1} b_{i,0},
+		 w_i b_{k-i+1,1} - w_{k-i+1} b_{i,1},
+		 w_i b_{k-i+1,2} - w_{k-i+1} b_{i,2}),\ \ 
+	b_i = (b_{i,0}, b_{i,1}, b_{i,2})
+\]
+\end{lemma}
+
+algorithm for common tangent computation (is filtering necessary?):
+
+\section{Common tangents on \Sn{3}}
+
+Discuss applications to orientation obstacles.
+
+\section{Common tangents on developable surfaces}
+
+A geodesic on a developable surface is also tractable:
+it is a rolled-up line.
+
+
+\section{Dual curves of space curves}
+
+We have shown how to compute the dual of a plane curve and a surface.
+What about a space curve?
+Unfortunately, duals only exist for objects of codimension 1.
+(Define codimension.)
+The tangent of a space curve is a line in 3-space, which can no longer
+be expressed as a single linear equation since it is no longer a hyperplane.
+Consequently, the dual of a space curve tangent, and thus of a space curve,
+is undefined.
+
+\section{Common tangents of two subdivision curves}
+
+\end{document}
+

@@ -1,0 +1,6 @@
+echo "Orientation obstacles on S2"
+dualS2 obs2
+echo "Tangent circles sweeping"
+dualS2 obs2
+echo "Intersections yield common tangents"
+dualS2 obs2
