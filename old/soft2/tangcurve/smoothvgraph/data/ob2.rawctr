@@ -1,0 +1,18 @@
+{ ob2.rawctr }
+{ BODY B0
+  { SECTION S0
+      Z 0
+    { CONTOUR C0
+        COLOR 0
+	-.1 0
+	 .1 0 
+	 0 .1
+    }
+    { CONTOUR C1
+        COLOR 0
+	-.1 0.05
+	 .1 0.05
+	 0  0.15
+    }
+  }
+}
